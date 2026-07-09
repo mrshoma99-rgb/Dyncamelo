@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Dyncamelo.Navisworks</RootNamespace>
+    <AssemblyName>Dyncamelo.Navisworks</AssemblyName>
+    <Description>Navisworks 2024 node library for Dyncamelo (zero-touch nodes).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dyncamelo.Core\Dyncamelo.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile-time references only: the host (Navisworks Manage 2024) supplies these assemblies at runtime. -->
+    <PackageReference Include="Speckle.Navisworks.API" Version="2024.0.0" ExcludeAssets="runtime" />
+    <!--
+      TimeLiner: the 2024 Timeliner assembly is not published on NuGet. The 2023.0.7 package exposes the
+      same public surface and the DLL is not strong-named, so the host's 2024 copy binds at runtime.
+    -->
+    <PackageReference Include="Chuongmep.Navis.Api.Autodesk.Navisworks.Timeliner" Version="2023.0.7" ExcludeAssets="runtime" />
+    <!-- Lets net48 compile on non-Windows build agents. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- System.Drawing.Color support at the Appearance node boundary. -->
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+</Project>
