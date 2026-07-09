@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Dyncamelo.Core</RootNamespace>
+    <AssemblyName>Dyncamelo.Core</AssemblyName>
+    <Description>Dyncamelo graph model, dataflow execution engine, zero-touch node loader and .dyc serialization. No UI or host dependencies.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Dyncamelo.Core.Tests" />
+  </ItemGroup>
+
+</Project>
