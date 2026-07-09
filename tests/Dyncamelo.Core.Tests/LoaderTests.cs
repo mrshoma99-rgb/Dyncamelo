@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dyncamelo.Core.Loader;
@@ -67,6 +68,21 @@ public class LoaderTests
         Assert.True(step.HasDefault);
         Assert.Equal(1.0, step.DefaultValue);
         Assert.False(definition.Inputs.Single(p => p.Name == "x").HasDefault);
+    }
+
+    [Fact]
+    public void OptionalStructParameter_DeclaredDefault_GetsDefaultOfT()
+    {
+        // C# stores no compile-time constant for "= default" on non-nullable
+        // structs like DateTime/Guid (RawDefaultValue is null); the loader must
+        // synthesize default(T) so the defaulted port is usable.
+        var when = ZT.Definition("StampIt").Inputs.Single(p => p.Name == "when");
+        Assert.True(when.HasDefault);
+        Assert.Equal(default(DateTime), when.DefaultValue);
+
+        var id = ZT.Definition("GuidThing").Inputs.Single(p => p.Name == "id");
+        Assert.True(id.HasDefault);
+        Assert.Equal(Guid.Empty, id.DefaultValue);
     }
 
     [Fact]

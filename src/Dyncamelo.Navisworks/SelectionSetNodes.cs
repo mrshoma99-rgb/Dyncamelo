@@ -87,9 +87,11 @@ public static class SelectionSetNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var set = new SelectionSet(NavisValues.ToItemCollection(items)) { DisplayName = name };
 
-        // Re-running a graph should update the set, not pile up duplicates.
+        // Re-running a graph should update the set, not pile up duplicates. The
+        // lookup is type-aware so a same-named folder (or other saved item) is
+        // never silently replaced — only an existing top-level SET is.
         var sets = doc.SelectionSets;
-        var existingIndex = sets.Value.IndexOfDisplayName(name);
+        var existingIndex = NavisValues.FindTopLevelIndex<SelectionSet>(sets.Value, name);
         if (existingIndex >= 0)
         {
             sets.ReplaceWithCopy(existingIndex, set);
@@ -100,7 +102,7 @@ public static class SelectionSetNodes
         }
 
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
-        var storedIndex = sets.Value.IndexOfDisplayName(name);
+        var storedIndex = NavisValues.FindTopLevelIndex<SelectionSet>(sets.Value, name);
         return storedIndex >= 0 ? (SelectionSet)sets.Value[storedIndex] : set;
     }
 }

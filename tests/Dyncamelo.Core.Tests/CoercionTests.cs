@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dyncamelo.Core.Tests.Fixtures;
 using Dyncamelo.Core.Types;
 using Xunit;
@@ -142,5 +143,44 @@ public class CoercionTests
         Assert.True(TypeCoercion.CanConvert(typeof(string), typeof(Season)));
         Assert.True(TypeCoercion.CanConvert(typeof(List<double>), typeof(double))); // replication
         Assert.False(TypeCoercion.CanConvert(typeof(Guid), typeof(Uri)));
+    }
+
+    [Fact]
+    public void MaterializeLists_IsRecursive_ForNestedLazySequences()
+    {
+        var lazy = Enumerable.Range(0, 2).Select(i => Enumerable.Range(0, 3).Select(j => (double)(i * 10 + j)));
+
+        var outer = Assert.IsType<List<object?>>(TypeCoercion.MaterializeLists(lazy));
+
+        Assert.Equal(2, outer.Count);
+        var first = Assert.IsType<List<object?>>(outer[0]);
+        Assert.Equal(new object?[] { 0.0, 1.0, 2.0 }, first);
+        var second = Assert.IsType<List<object?>>(outer[1]);
+        Assert.Equal(new object?[] { 10.0, 11.0, 12.0 }, second);
+    }
+
+    [Fact]
+    public void MaterializeLists_ReplacesLazyElementsInsideExistingLists_WithoutMutatingSource()
+    {
+        var lazyElement = Enumerable.Range(0, 2).Select(i => (double)i);
+        var source = new List<object> { 1.0, lazyElement };
+
+        var materialized = TypeCoercion.MaterializeLists(source);
+
+        Assert.NotSame(source, materialized);
+        var outer = Assert.IsType<List<object?>>(materialized);
+        Assert.Equal(1.0, outer[0]);
+        Assert.Equal(new object?[] { 0.0, 1.0 }, Assert.IsType<List<object?>>(outer[1]));
+        Assert.Same(lazyElement, source[1]); // source untouched
+    }
+
+    [Fact]
+    public void MaterializeLists_ReturnsSameInstance_WhenNothingIsLazy()
+    {
+        var flat = new List<double> { 1.0, 2.0 };
+        Assert.Same(flat, TypeCoercion.MaterializeLists(flat));
+
+        var nested = new List<object?> { new List<double> { 1.0 }, "text", null };
+        Assert.Same(nested, TypeCoercion.MaterializeLists(nested));
     }
 }

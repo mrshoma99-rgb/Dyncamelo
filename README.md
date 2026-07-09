@@ -77,9 +77,18 @@ Or open `Dyncamelo.sln` in Visual Studio 2022 and build the `Release` configurat
 > dotnet build src/Dyncamelo.Core/Dyncamelo.Core.csproj
 > dotnet build src/Dyncamelo.Nodes/Dyncamelo.Nodes.csproj
 > dotnet build src/Dyncamelo.Navisworks/Dyncamelo.Navisworks.csproj
+> dotnet build src/Dyncamelo.Cli/Dyncamelo.Cli.csproj
 > dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj
 > dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj
+> dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj
 > ```
+>
+> You can also run headless graphs (no Navisworks needed) with the cross-platform CLI:
+>
+> ```bash
+> dotnet run --project src/Dyncamelo.Cli -- run samples/hello-math.dyc
+> ```
+> See [samples/README.md](samples/README.md) for the bundled example graphs.
 
 ### 2. Install into Navisworks 2024
 

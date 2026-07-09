@@ -132,6 +132,8 @@ internal static class NavisValues
     /// <summary>
     /// Recursively collects every <typeparamref name="T"/> in a saved-item tree
     /// (folders/groups are descended into, other item kinds are skipped).
+    /// Saved viewpoint animations are treated as leaves: their children are
+    /// keyframes/cuts, not standalone saved items.
     /// </summary>
     internal static List<T> FlattenSavedItems<T>(IEnumerable<SavedItem> items) where T : SavedItem
     {
@@ -152,14 +154,18 @@ internal static class NavisValues
             // Do not descend into the match itself when it is a group-shaped leaf
             // (e.g. a ClashTest whose children are results, or a TimelinerTask whose
             // children are subtasks handled by the caller's own recursion policy).
-            if (!(item is T) && item is GroupItem group)
+            if (!(item is T) && item is GroupItem group && !(item is SavedViewpointAnimation))
             {
                 CollectSavedItems(group.Children, results);
             }
         }
     }
 
-    /// <summary>Finds the first saved item of type <typeparamref name="T"/> with the given display name, or null.</summary>
+    /// <summary>
+    /// Finds the first saved item of type <typeparamref name="T"/> with the given
+    /// display name, or null. Saved viewpoint animations are not descended into
+    /// (their children are keyframes, not standalone saved items).
+    /// </summary>
     internal static T? FindSavedItemByName<T>(IEnumerable<SavedItem> items, string displayName) where T : SavedItem
     {
         foreach (var item in items)
@@ -169,7 +175,7 @@ internal static class NavisValues
                 return match;
             }
 
-            if (item is GroupItem group)
+            if (item is GroupItem group && !(item is SavedViewpointAnimation))
             {
                 var found = FindSavedItemByName<T>(group.Children, displayName);
                 if (found != null)
@@ -180,6 +186,29 @@ internal static class NavisValues
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Index of the first item of type <typeparamref name="T"/> with the given
+    /// display name in a saved-item collection (no descent), or -1. Unlike
+    /// <c>SavedItemCollection.IndexOfDisplayName</c> this never matches a
+    /// same-named item of another kind (e.g. a folder or an animation), so
+    /// replace-by-name operations cannot destroy an unrelated container.
+    /// </summary>
+    internal static int FindTopLevelIndex<T>(IEnumerable<SavedItem> items, string displayName) where T : SavedItem
+    {
+        int index = 0;
+        foreach (var item in items)
+        {
+            if (item is T && string.Equals(item.DisplayName, displayName, StringComparison.Ordinal))
+            {
+                return index;
+            }
+
+            index++;
+        }
+
+        return -1;
     }
 
     private static NwColor ParseHexColor(string text)

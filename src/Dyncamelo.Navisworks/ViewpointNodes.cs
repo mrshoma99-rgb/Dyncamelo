@@ -83,8 +83,10 @@ public static class ViewpointNodes
         var saved = new SavedViewpoint(doc.CurrentViewpoint.ToViewpoint()) { DisplayName = name };
 
         // Re-running a graph should update the viewpoint, not pile up duplicates.
+        // The lookup is type-aware so a same-named folder or animation is never
+        // silently replaced — only an existing top-level VIEWPOINT is.
         var viewpoints = doc.SavedViewpoints;
-        var existingIndex = viewpoints.Value.IndexOfDisplayName(name);
+        var existingIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(viewpoints.Value, name);
         if (existingIndex >= 0)
         {
             viewpoints.ReplaceWithCopy(existingIndex, saved);
@@ -95,7 +97,7 @@ public static class ViewpointNodes
         }
 
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
-        var storedIndex = viewpoints.Value.IndexOfDisplayName(name);
+        var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(viewpoints.Value, name);
         return storedIndex >= 0 ? (SavedViewpoint)viewpoints.Value[storedIndex] : saved;
     }
 }
