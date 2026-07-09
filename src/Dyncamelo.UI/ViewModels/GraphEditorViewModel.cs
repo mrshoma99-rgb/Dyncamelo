@@ -707,6 +707,16 @@ public class GraphEditorViewModel : ObservableObject
         {
             Dialogs.ShowError(ex.Message, "Open Graph");
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            Dialogs.ShowError(ex.Message, "Open Graph");
+        }
+        catch (Exception ex)
+        {
+            // Opening a graph must never take down the host application: anything
+            // unexpected (corrupt payloads, security exceptions, ...) becomes a dialog.
+            Dialogs.ShowError("The graph could not be opened: " + ex.Message, "Open Graph");
+        }
     }
 
     private void SaveGraph()

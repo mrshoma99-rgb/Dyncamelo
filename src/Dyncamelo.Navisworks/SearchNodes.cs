@@ -71,6 +71,64 @@ public static class SearchNodes
         return RunSearch(doc, condition);
     }
 
+    /// <summary>
+    /// Navisworks search equality only matches when the variant's data type equals
+    /// the stored property's data type, so one plain value is expanded into every
+    /// variant type it could plausibly be stored as: numbers as plain double plus
+    /// the measured types (length, area, volume, angle; integers additionally as
+    /// Int32), strings as display and identifier strings. The caller unions the
+    /// per-variant search results.
+    /// </summary>
+    private static List<VariantData> BuildEqualityVariants(object? value)
+    {
+        var variants = new List<VariantData>();
+        switch (value)
+        {
+            case null:
+                variants.Add(VariantData.FromNone());
+                break;
+            case string text:
+                variants.Add(VariantData.FromDisplayString(text));
+                variants.Add(VariantData.FromIdentifierString(text));
+                break;
+            case double d:
+                AddNumericVariants(variants, d);
+                break;
+            case float f:
+                AddNumericVariants(variants, f);
+                break;
+            case decimal m:
+                AddNumericVariants(variants, (double)m);
+                break;
+            case int i:
+                variants.Add(VariantData.FromInt32(i));
+                AddNumericVariants(variants, i);
+                break;
+            case long l:
+                if (l >= int.MinValue && l <= int.MaxValue)
+                {
+                    variants.Add(VariantData.FromInt32((int)l));
+                }
+
+                AddNumericVariants(variants, l);
+                break;
+            default:
+                variants.Add(NavisValues.ToVariant(value));
+                break;
+        }
+
+        return variants;
+    }
+
+    private static void AddNumericVariants(List<VariantData> variants, double value)
+    {
+        variants.Add(VariantData.FromDouble(value));
+        variants.Add(VariantData.FromDoubleLength(value));
+        variants.Add(VariantData.FromDoubleArea(value));
+        variants.Add(VariantData.FromDoubleVolume(value));
+        variants.Add(VariantData.FromDoubleAngle(value));
+    }
+
     private static SearchCondition BuildPropertyCondition(string categoryName, string propertyName)
     {
         if (string.IsNullOrEmpty(categoryName))
