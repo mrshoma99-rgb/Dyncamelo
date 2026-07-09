@@ -196,7 +196,7 @@ public static class TypeCoercion
     /// <param name="type">The declared type to classify.</param>
     public static bool IsListType(Type type)
     {
-        if (type == typeof(string) || typeof(IDictionary).IsAssignableFrom(type))
+        if (type == typeof(string) || IsDictionaryType(type))
         {
             return false;
         }
@@ -213,7 +213,7 @@ public static class TypeCoercion
     /// <param name="type">The declared type to inspect.</param>
     public static Type? GetListElementType(Type type)
     {
-        if (type == typeof(string) || typeof(IDictionary).IsAssignableFrom(type))
+        if (type == typeof(string) || IsDictionaryType(type))
         {
             return null;
         }
@@ -335,6 +335,33 @@ public static class TypeCoercion
 
         result = null;
         return false;
+    }
+
+    /// <summary>
+    /// True for dictionary-shaped types, which the engine treats as scalars.
+    /// Covers non-generic <see cref="IDictionary"/> implementers as well as the
+    /// generic <see cref="IDictionary{TKey,TValue}"/> / <see cref="IReadOnlyDictionary{TKey,TValue}"/>
+    /// interfaces (which do not inherit the non-generic one).
+    /// </summary>
+    private static bool IsDictionaryType(Type type)
+    {
+        if (typeof(IDictionary).IsAssignableFrom(type) || IsGenericDictionaryInterface(type))
+        {
+            return true;
+        }
+
+        return type.GetInterfaces().Any(IsGenericDictionaryInterface);
+    }
+
+    private static bool IsGenericDictionaryInterface(Type type)
+    {
+        if (!type.IsGenericType)
+        {
+            return false;
+        }
+
+        var definition = type.GetGenericTypeDefinition();
+        return definition == typeof(IDictionary<,>) || definition == typeof(IReadOnlyDictionary<,>);
     }
 
     private static bool IsConvertibleTarget(Type type)

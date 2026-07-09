@@ -10,7 +10,9 @@ namespace Dyncamelo.Core.Execution;
 /// Implements Dynamo-style replication ("lacing"): when an input port's declared
 /// type is scalar but the incoming value is a list, the node is mapped over the
 /// list. Replication happens only over <em>excess</em> rank (actual rank minus
-/// declared rank), recursively for nested lists. Multiple replicated inputs are
+/// declared rank), recursively for nested lists. The reverse deficit — a scalar
+/// wired into a list-typed input — is promoted by wrapping the value in
+/// single-element lists until the ranks match. Multiple replicated inputs are
 /// paired per the node's <see cref="LacingMode"/>; non-replicated inputs are
 /// broadcast unchanged to every invocation.
 /// </summary>
@@ -29,15 +31,17 @@ internal static class Replicator
     {
         int outCount = Math.Max(node.OutPorts.Count, 1);
         var declaredRanks = new int[node.InPorts.Count];
+        var minimumRanks = new int[node.InPorts.Count];
         var declaredTypes = new Type[node.InPorts.Count];
         for (int i = 0; i < node.InPorts.Count; i++)
         {
             declaredTypes[i] = node.InPorts[i].DeclaredType;
             declaredRanks[i] = GetEffectiveRank(node.InPorts[i]);
+            minimumRanks[i] = GetMinimumRank(declaredTypes[i]);
         }
 
         var lacing = node.Lacing == LacingMode.Auto ? LacingMode.Shortest : node.Lacing;
-        return Invoke(node, args, declaredTypes, declaredRanks, lacing, context, outCount);
+        return Invoke(node, args, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount);
     }
 
     /// <summary>
@@ -76,6 +80,26 @@ internal static class Replicator
     }
 
     /// <summary>
+    /// Structural list depth a value must have to satisfy a declared type:
+    /// scalar (including object) = 0, IList&lt;T&gt; = depth(T) + 1. Unlike
+    /// <see cref="GetDeclaredRank"/> an object element contributes 0 instead of
+    /// "accepts anything", so IList&lt;object&gt; still demands depth 1. Values of
+    /// lesser rank are promoted (wrapped in single-element lists) before coercion.
+    /// </summary>
+    /// <param name="type">The declared type.</param>
+    internal static int GetMinimumRank(Type type)
+    {
+        type = Nullable.GetUnderlyingType(type) ?? type;
+        if (!TypeCoercion.IsListType(type))
+        {
+            return 0;
+        }
+
+        var elementType = TypeCoercion.GetListElementType(type) ?? typeof(object);
+        return GetMinimumRank(elementType) + 1;
+    }
+
+    /// <summary>
     /// Rank of a runtime value: 0 for scalars (including strings and dictionaries),
     /// 1 + deepest element rank for lists. An empty list has rank 1.
     /// </summary>
@@ -105,6 +129,7 @@ internal static class Replicator
         object?[] args,
         Type[] declaredTypes,
         int[] declaredRanks,
+        int[] minimumRanks,
         LacingMode lacing,
         EvaluationContext context,
         int outCount)
@@ -123,7 +148,7 @@ internal static class Replicator
 
         if (replicated.Count == 0)
         {
-            return InvokeScalar(node, args, declaredTypes, context, outCount);
+            return InvokeScalar(node, args, declaredTypes, minimumRanks, context, outCount);
         }
 
         var accumulators = NewAccumulators(outCount);
@@ -137,7 +162,7 @@ internal static class Replicator
             {
                 var child = (object?[])args.Clone();
                 child[replicated[0]] = element;
-                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, lacing, context, outCount));
+                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount));
             }
         }
         else
@@ -167,7 +192,7 @@ internal static class Replicator
                     child[index] = list[elementIndex];
                 }
 
-                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, lacing, context, outCount));
+                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount));
             }
         }
 
@@ -184,6 +209,7 @@ internal static class Replicator
         NodeModel node,
         object?[] args,
         Type[] declaredTypes,
+        int[] minimumRanks,
         EvaluationContext context,
         int outCount)
     {
@@ -204,11 +230,20 @@ internal static class Replicator
                 continue;
             }
 
+            // Rank promotion: a value shallower than the port demands (e.g. a
+            // scalar wired into a list input) is wrapped in single-element lists
+            // until the depths match, mirroring Dynamo's replication semantics.
+            var reportedType = value.GetType();
+            for (int rank = GetValueRank(value); rank < minimumRanks[i]; rank++)
+            {
+                value = new List<object?> { value };
+            }
+
             if (!TypeCoercion.TryCoerce(value, declared, out var coerced))
             {
                 node.AddMessage(
                     MessageSeverity.Warning,
-                    "Cannot convert value of type '" + value.GetType().Name + "' to '" + declared.Name +
+                    "Cannot convert value of type '" + reportedType.Name + "' to '" + declared.Name +
                     "' for input '" + node.InPorts[i].Name + "'.");
                 return new object?[outCount];
             }

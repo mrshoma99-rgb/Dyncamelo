@@ -139,9 +139,21 @@ public class GraphEngine
         {
             var outputs = Replicator.Execute(node, inputs, context);
             SetOutputs(node, outputs);
-            node.State = node.Messages.Any(m => m.Severity >= MessageSeverity.Warning)
-                ? NodeState.Warning
-                : NodeState.Executed;
+
+            // A node may report its own failure via AddMessage(Error, ...) without
+            // throwing; that must surface as Error so downstream sees the failure.
+            if (node.Messages.Any(m => m.Severity >= MessageSeverity.Error))
+            {
+                node.State = NodeState.Error;
+            }
+            else if (node.Messages.Any(m => m.Severity >= MessageSeverity.Warning))
+            {
+                node.State = NodeState.Warning;
+            }
+            else
+            {
+                node.State = NodeState.Executed;
+            }
         }
         catch (Exception ex) when (!(ex is OutOfMemoryException) && !(ex is StackOverflowException))
         {
