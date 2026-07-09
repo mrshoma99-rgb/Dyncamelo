@@ -341,6 +341,72 @@ public class EngineTests
         Assert.Equal(NodeState.Executed, sqrt.State);
     }
 
+    [Fact]
+    public void NestedLazyEnumerableOutput_ReplicatesIntoScalarPort()
+    {
+        // LazyGrid returns IEnumerable<IEnumerable<double>> built from LINQ
+        // iterators; recursive materialization must let a scalar double port
+        // replicate over both levels.
+        var graph = new GraphModel();
+        var grid = ZT.Node("LazyGrid");
+        var addStep = ZT.Node("AddStep"); // double x, step = 1.0
+        graph.AddNode(grid);
+        graph.AddNode(addStep);
+        ZT.Wire(graph, grid, 0, addStep, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(NodeState.Executed, addStep.State);
+        Assert.DoesNotContain(addStep.Messages, m => m.Severity == MessageSeverity.Warning);
+        var outer = Assert.IsAssignableFrom<System.Collections.IList>(addStep.OutPorts[0].Value);
+        Assert.Equal(2, outer.Count);
+        Assert.Equal(
+            new object?[] { 1.0, 2.0, 3.0 },
+            ((System.Collections.IList)outer[0]!).Cast<object?>().ToArray());
+        Assert.Equal(
+            new object?[] { 11.0, 12.0, 13.0 },
+            ((System.Collections.IList)outer[1]!).Cast<object?>().ToArray());
+    }
+
+    [Fact]
+    public void NestedLazyEnumerableOutput_CoercesIntoListPort()
+    {
+        var graph = new GraphModel();
+        var grid = ZT.Node("LazyGrid");
+        var sum = ZT.Node("Sum"); // IList<double>
+        graph.AddNode(grid);
+        graph.AddNode(sum);
+        ZT.Wire(graph, grid, 0, sum, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(NodeState.Executed, sum.State);
+        Assert.DoesNotContain(sum.Messages, m => m.Severity == MessageSeverity.Warning);
+        var results = Assert.IsAssignableFrom<System.Collections.IList>(sum.OutPorts[0].Value);
+        Assert.Equal(new object?[] { 3.0, 33.0 }, results.Cast<object?>().ToArray());
+    }
+
+    [Fact]
+    public void OptionalStructParameter_DeclaredDefault_ExecutesWithDefaultOfT()
+    {
+        // "DateTime when = default" / "Guid id = default" store no compile-time
+        // constant; the loader must synthesize default(T) so the node can run.
+        var graph = new GraphModel();
+        var text = ZT.Value(graph, "hi");
+        var stamp = ZT.Node("StampIt");
+        var guid = ZT.Node("GuidThing");
+        graph.AddNode(stamp);
+        graph.AddNode(guid);
+        ZT.Wire(graph, text, 0, stamp, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(NodeState.Executed, stamp.State);
+        Assert.Equal("hi|0", stamp.OutPorts[0].Value); // default(DateTime).Ticks == 0
+        Assert.Equal(NodeState.Executed, guid.State);
+        Assert.Equal(Guid.Empty, guid.OutPorts[0].Value);
+    }
+
     private class ReentrantNode : NodeModel
     {
         private readonly GraphEngine _engine;

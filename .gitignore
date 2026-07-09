@@ -155,3 +155,5 @@ Desktop.ini
 # Local Navisworks deployment copies and scratch graphs
 *.dyc.bak
 /deploy/
+# Output of the samples/csv-roundtrip.dyc graph (written to the CLI's CWD)
+dyncamelo-sample-output.csv

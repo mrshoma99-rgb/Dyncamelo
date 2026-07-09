@@ -254,25 +254,53 @@ public static class TypeCoercion
     /// <summary>
     /// Materializes any enumerable into an <see cref="IList"/> so cached node
     /// outputs are stable and indexable (lazy sequences are enumerated once).
-    /// Scalars, strings and dictionaries pass through unchanged.
+    /// Materialization is recursive: lazy sequences nested inside lists (e.g. a
+    /// LINQ iterator returned as an element of another sequence) are converted
+    /// too, so replication and coercion always see proper lists at every depth.
+    /// Scalars, strings and dictionaries pass through unchanged, and lists whose
+    /// elements need no conversion are returned as-is (never copied or mutated).
     /// </summary>
     /// <param name="value">A node output value.</param>
     public static object? MaterializeLists(object? value)
     {
-        if (value == null || value is string || value is IDictionary || value is IList)
+        if (value == null || value is string || value is IDictionary)
         {
             return value;
         }
 
-        if (value is IEnumerable enumerable)
+        if (value is IList list)
         {
-            var list = new List<object?>();
-            foreach (var item in enumerable)
+            // Rebuild only when a nested lazy sequence is actually found, so
+            // already-materialized (including typed) lists pass through untouched.
+            List<object?>? rebuilt = null;
+            for (int i = 0; i < list.Count; i++)
             {
-                list.Add(item);
+                var element = list[i];
+                var materialized = MaterializeLists(element);
+                if (rebuilt == null && !ReferenceEquals(materialized, element))
+                {
+                    rebuilt = new List<object?>(list.Count);
+                    for (int j = 0; j < i; j++)
+                    {
+                        rebuilt.Add(list[j]);
+                    }
+                }
+
+                rebuilt?.Add(materialized);
             }
 
-            return list;
+            return rebuilt ?? value;
+        }
+
+        if (value is IEnumerable enumerable)
+        {
+            var result = new List<object?>();
+            foreach (var item in enumerable)
+            {
+                result.Add(MaterializeLists(item));
+            }
+
+            return result;
         }
 
         return value;

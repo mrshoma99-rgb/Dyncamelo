@@ -65,6 +65,17 @@ public static class MathFixtures
     {
         // side-effect placeholder; void methods pass their first input through
     }
+
+    /// <summary>Returns nested LAZY sequences (LINQ iterators), never materialized lists.</summary>
+    public static IEnumerable<IEnumerable<double>> LazyGrid() =>
+        Enumerable.Range(0, 2).Select(i => Enumerable.Range(0, 3).Select(j => (double)(i * 10 + j)));
+
+    /// <summary>Optional non-nullable struct parameter with no compile-time constant ("= default").</summary>
+    public static string StampIt(string text, DateTime when = default) =>
+        text + "|" + when.Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>Optional Guid parameter declared "= default".</summary>
+    public static Guid GuidThing(Guid id = default) => id;
 }
 
 /// <summary>Node that reports its own failure via an Error message without throwing.</summary>

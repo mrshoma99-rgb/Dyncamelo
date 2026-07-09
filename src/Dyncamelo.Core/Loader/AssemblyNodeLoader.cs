@@ -214,7 +214,36 @@ public static class AssemblyNodeLoader
         if (parameter.IsOptional)
         {
             descriptor.HasDefault = true;
-            descriptor.DefaultValue = parameter.RawDefaultValue == DBNull.Value ? null : parameter.RawDefaultValue;
+
+            object? defaultValue;
+            try
+            {
+                defaultValue = parameter.RawDefaultValue;
+            }
+            catch (Exception ex) when (ex is FormatException || ex is BadImageFormatException || ex is InvalidOperationException)
+            {
+                // Some runtimes fail to decode exotic default-value blobs; fall
+                // back to default(T) construction below.
+                defaultValue = DBNull.Value;
+            }
+
+            if (defaultValue == DBNull.Value)
+            {
+                defaultValue = null;
+            }
+
+            // Optional non-nullable struct parameters declared "= default"
+            // (DateTime, Guid, TimeSpan, custom structs, ...) carry no
+            // compile-time constant, so RawDefaultValue is null. The method
+            // signature still promises default(T); construct it so the port's
+            // default is actually usable at run time.
+            var parameterType = parameter.ParameterType;
+            if (defaultValue == null && parameterType.IsValueType && Nullable.GetUnderlyingType(parameterType) == null)
+            {
+                defaultValue = Activator.CreateInstance(parameterType);
+            }
+
+            descriptor.DefaultValue = defaultValue;
         }
 
         return descriptor;

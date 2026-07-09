@@ -22,6 +22,69 @@ internal static class DyncameloHost
     private static NodeRegistry? _registry;
     private static HostDocumentService? _documentService;
 
+    [ThreadStatic]
+    private static bool _resolvingHostAssembly;
+
+    static DyncameloHost()
+    {
+        // Dyncamelo.Navisworks compiles against the Chuongmep 2023.0.7 Timeliner
+        // reference assembly, which IS strong-named (Autodesk.Navisworks.Timeliner,
+        // Version=20.0.1399.50, PublicKeyToken=d85e58fa5af9b484). Navisworks
+        // Manage 2024 ships a 21.0.x copy, and .NET Framework fusion enforces an
+        // exact version match for strong-named references, so without help the
+        // reference fails with FileLoadException and every TimeLiner node silently
+        // disappears from the library. Redirect by simple name to the host's
+        // already-loaded 2024 assembly (the standard fix for Navisworks add-in
+        // version mismatches). Registered in the static constructor so it is in
+        // place before any node loading or graph deserialization reflects over
+        // Dyncamelo.Navisworks.
+        AppDomain.CurrentDomain.AssemblyResolve += ResolveHostAssembly;
+    }
+
+    /// <summary>
+    /// Redirects strong-named references to Navisworks host assemblies (currently
+    /// Autodesk.Navisworks.Timeliner) to whatever version the running host has
+    /// loaded, ignoring the version baked in at compile time.
+    /// </summary>
+    private static Assembly? ResolveHostAssembly(object? sender, ResolveEventArgs args)
+    {
+        var requested = new AssemblyName(args.Name);
+        if (!string.Equals(requested.Name, "Autodesk.Navisworks.Timeliner", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (string.Equals(assembly.GetName().Name, requested.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return assembly;
+            }
+        }
+
+        // Not loaded yet (e.g. the TimeLiner module has not spun up): ask fusion
+        // for the host's copy by simple name. Guard against re-entrancy — a
+        // failed simple-name load raises AssemblyResolve again on this thread.
+        if (_resolvingHostAssembly)
+        {
+            return null;
+        }
+
+        _resolvingHostAssembly = true;
+        try
+        {
+            return Assembly.Load(new AssemblyName(requested.Name));
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        finally
+        {
+            _resolvingHostAssembly = false;
+        }
+    }
+
     /// <summary>The document provider handed to node code.</summary>
     public static HostDocumentService DocumentService
     {

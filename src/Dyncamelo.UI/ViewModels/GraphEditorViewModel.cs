@@ -621,14 +621,12 @@ public class GraphEditorViewModel : ObservableObject
             _graph.AddNode(clone);
             clones[original] = clone;
 
-            // Preserve per-port default-value opt-outs.
-            for (int i = 0; i < original.InPorts.Count && i < clone.InPorts.Count; i++)
-            {
-                if (clone.InPorts[i].HasDefault)
-                {
-                    clone.InPorts[i].UsingDefaultValue = original.InPorts[i].UsingDefaultValue;
-                }
-            }
+            // Note: UsingDefaultValue is deliberately NOT copied from the
+            // original. It is pure connection state (Connect clears it,
+            // Disconnect restores it), so a fresh clone keeps its defaults
+            // usable; re-created internal wires below clear it via Connect.
+            // Copying it would break clones whose original was wired to a node
+            // outside the duplicated selection (default off, but no wire either).
         }
 
         // Re-create wires that ran between duplicated nodes.
@@ -763,6 +761,13 @@ public class GraphEditorViewModel : ObservableObject
         catch (UnauthorizedAccessException ex)
         {
             Dialogs.ShowError(ex.Message, "Save Graph");
+        }
+        catch (Exception ex)
+        {
+            // Saving must never take down the host application: a third-party
+            // node's SerializeData override can throw anything, and Ctrl+S
+            // otherwise propagates it into the Navisworks dispatcher.
+            Dialogs.ShowError("The graph could not be saved: " + ex.Message, "Save Graph");
         }
     }
 

@@ -1,8 +1,12 @@
 // NOTE: This file compiles against the Autodesk.Navisworks.Timeliner.dll from the
 // Chuongmep.Navis.Api.Autodesk.Navisworks.Timeliner 2023.0.7 package because no
 // 2024 Timeliner assembly is published on NuGet. The public API surface is the
-// same in 2024 and the DLL is not strong-named, so the host's 2024 copy binds at
-// runtime inside Navisworks Manage 2024.
+// same in 2024, but the reference assembly IS strong-named with Version
+// 20.0.1399.50 (PublicKeyToken d85e58fa5af9b484) while Navisworks Manage 2024
+// ships 21.0.x, so the host copy does NOT bind automatically: Dyncamelo.App
+// (DyncameloHost's static constructor) installs an AppDomain.AssemblyResolve
+// handler that redirects the reference to the host's loaded Timeliner assembly
+// by simple name. Any other host that loads this library must do the same.
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
