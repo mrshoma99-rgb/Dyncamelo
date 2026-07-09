@@ -1,0 +1,124 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Dyncamelo.App — the Autodesk Navisworks Manage 2024 add-in.
+
+    DEPLOYMENT
+    ==========
+    Navisworks discovers plugins in a subfolder whose name matches the assembly
+    base name, e.g.:
+
+        %APPDATA%\Autodesk Navisworks Manage 2024\Plugins\Dyncamelo.App\Dyncamelo.App.dll
+        %ProgramFiles%\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\Dyncamelo.App.dll
+
+    The subfolder name MUST equal the DLL base name ("Dyncamelo.App"); dependent
+    assemblies (Dyncamelo.Core/Nodes/Navisworks/UI, Nodify, Newtonsoft.Json) sit
+    beside the plugin DLL. Third-party Dyncamelo node packs go into a "Packages"
+    subfolder next to the DLL and are scanned at startup.
+
+    The LayoutNavisworksPlugin target below assembles exactly that folder under
+    bin\<Configuration>\net48\NavisworksPlugin\Dyncamelo.App\ after every build —
+    copy it into one of the Plugins folders above (or point CI at it).
+
+    The Autodesk assemblies are compile-time references only (ExcludeAssets="runtime"):
+    the running Navisworks host provides them.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Dyncamelo.App</RootNamespace>
+    <AssemblyName>Dyncamelo.App</AssemblyName>
+    <Description>Dyncamelo add-in for Autodesk Navisworks 2024 (ribbon button + dockable node editor pane).</Description>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dyncamelo.Core\Dyncamelo.Core.csproj" />
+    <ProjectReference Include="..\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
+    <ProjectReference Include="..\Dyncamelo.Navisworks\Dyncamelo.Navisworks.csproj" />
+    <ProjectReference Include="..\Dyncamelo.UI\Dyncamelo.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only: Navisworks Manage 2024 supplies these assemblies at runtime. -->
+    <PackageReference Include="Speckle.Navisworks.API" Version="2024.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!--
+    Dyncamelo.xaml is the Navisworks RIBBON layout (AdWindows markup), NOT a WPF
+    page. With UseWPF the SDK globs every *.xaml in as a WPF <Page>, which would
+    fail to compile — remove it from Page compilation and keep it as plain
+    content. At runtime it must sit in an en-US\ subfolder next to the DLL; the
+    layout/deploy targets below put it there.
+  -->
+  <ItemGroup>
+    <Page Remove="Dyncamelo.xaml" />
+    <None Remove="Dyncamelo.xaml" />
+    <Content Include="Dyncamelo.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!--
+    Assembles the Navisworks plugin folder layout after each build:
+      bin\<Configuration>\net48\NavisworksPlugin\Dyncamelo.App\
+        Dyncamelo.App.dll  + dependencies + empty Packages\ folder.
+  -->
+  <Target Name="LayoutNavisworksPlugin" AfterTargets="Build">
+    <PropertyGroup>
+      <PluginLayoutDir>$(TargetDir)NavisworksPlugin\Dyncamelo.App\</PluginLayoutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.App.dll;$(TargetDir)Dyncamelo.App.pdb" />
+      <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.Core.dll;$(TargetDir)Dyncamelo.Nodes.dll;$(TargetDir)Dyncamelo.Navisworks.dll;$(TargetDir)Dyncamelo.UI.dll" />
+      <PluginLayoutFiles Include="$(TargetDir)Nodify.dll;$(TargetDir)Newtonsoft.Json.dll" />
+      <RibbonIconFiles Include="$(ProjectDir)Resources\*.png" />
+    </ItemGroup>
+    <MakeDir Directories="$(PluginLayoutDir);$(PluginLayoutDir)Packages;$(PluginLayoutDir)en-US;$(PluginLayoutDir)Resources" />
+    <Copy SourceFiles="@(PluginLayoutFiles)"
+          DestinationFolder="$(PluginLayoutDir)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('%(PluginLayoutFiles.Identity)')" />
+    <Copy SourceFiles="$(ProjectDir)Dyncamelo.xaml"
+          DestinationFolder="$(PluginLayoutDir)en-US"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RibbonIconFiles)"
+          DestinationFolder="$(PluginLayoutDir)Resources"
+          SkipUnchangedFiles="true" />
+    <Message Importance="high"
+             Text="Dyncamelo plugin layout: $(PluginLayoutDir) — copy this folder into %25APPDATA%25\Autodesk Navisworks Manage 2024\Plugins\" />
+  </Target>
+
+  <!--
+    Dev convenience (mirrors the BIMCamel IFC exporter): Debug builds deploy the
+    complete application bundle — DLLs, ribbon layout, icons and manifest — to
+    the per-user ApplicationPlugins folder, so the "BIMCamel" ribbon tab shows
+    up on the next Navisworks 2024 start. Release builds skip this (they feed
+    the dist\Dyncamelo.bundle template instead).
+  -->
+  <Target Name="DeployToBundle" AfterTargets="LayoutNavisworksPlugin" Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">
+    <PropertyGroup>
+      <BundleRoot>$(APPDATA)\Autodesk\ApplicationPlugins\Dyncamelo.bundle</BundleRoot>
+      <BundleYearDir>$(BundleRoot)\2024</BundleYearDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(BundleYearDir);$(BundleYearDir)\en-US;$(BundleYearDir)\Resources" />
+    <Copy SourceFiles="@(PluginLayoutFiles)"
+          DestinationFolder="$(BundleYearDir)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('%(PluginLayoutFiles.Identity)')" />
+    <Copy SourceFiles="$(ProjectDir)Dyncamelo.xaml"
+          DestinationFolder="$(BundleYearDir)\en-US"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RibbonIconFiles)"
+          DestinationFolder="$(BundleYearDir)\Resources"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)..\..\dist\Dyncamelo.bundle\PackageContents.xml"
+          DestinationFolder="$(BundleRoot)"
+          SkipUnchangedFiles="true" />
+    <Message Importance="high"
+             Text="Dyncamelo bundle deployed to $(BundleRoot) — restart Navisworks 2024 to see the BIMCamel ribbon tab" />
+  </Target>
+
+</Project>

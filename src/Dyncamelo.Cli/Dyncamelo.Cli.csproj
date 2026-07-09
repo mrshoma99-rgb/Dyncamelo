@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Dyncamelo.Cli</RootNamespace>
+    <AssemblyName>dyncamelo</AssemblyName>
+    <Description>Headless Dyncamelo graph runner: executes, validates and inspects .dyc graphs from the command line without Navisworks or WPF.</Description>
+    <!-- Everything in the CLI is internal; nothing to document. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dyncamelo.Core\Dyncamelo.Core.csproj" />
+    <ProjectReference Include="..\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
+  </ItemGroup>
+
+</Project>

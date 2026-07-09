@@ -10,6 +10,24 @@ This guide takes you from a fresh Navisworks installation to your first working 
 
 ## 2. Install
 
+### Option A — application bundle (recommended: own ribbon tab)
+
+1. Close Navisworks.
+2. Take the `dist\Dyncamelo.bundle\` folder from this repository, drop the built
+   DLLs into its `2024\` subfolder (see `2024\PLACE_DYNCAMELO_DLLS_HERE.txt`;
+   a Debug build of the solution deploys the whole bundle for you), and copy
+   the folder to:
+
+   ```
+   %APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\
+   ```
+
+   (Per user, no admin rights needed. Use `C:\ProgramData\Autodesk\ApplicationPlugins\` for all users.)
+3. Start Navisworks 2024 — Dyncamelo appears on the **BIMCamel** ribbon tab,
+   in the *Visual Programming* panel.
+
+### Option B — classic Plugins folder (no ribbon tab)
+
 1. Close Navisworks.
 2. Copy the Dyncamelo files into a plugin folder **named exactly like the plugin DLL**:
 
@@ -22,15 +40,17 @@ This guide takes you from a fresh Navisworks installation to your first working 
        Dyncamelo.Core.dll
        Nodify.dll
        Newtonsoft.Json.dll
+       en-US\Dyncamelo.xaml
+       Resources\*.png
    ```
 
-   (For Navisworks Simulate, replace `Navisworks Manage 2024` accordingly. Creating the folder requires administrator rights.)
+   (For Navisworks Simulate, replace `Navisworks Manage 2024` accordingly. Creating the folder requires administrator rights. The `LayoutNavisworksPlugin` build target assembles this exact folder under `bin\<Configuration>\net48\NavisworksPlugin\`.)
 3. If Windows blocked the downloaded files, unblock them: right-click each DLL → Properties → check *Unblock* (or run `Unblock-File *` in PowerShell in that folder).
 4. Start Navisworks 2024.
 
 ## 3. Open the Dyncamelo pane
 
-Open a model first (Dyncamelo works against the active document), then go to the **Tool add-ins** ribbon tab and click **Dyncamelo**. The editor opens as a dockable pane — dock it, float it, or drop it on a second monitor; Navisworks remembers the placement.
+Open a model first (Dyncamelo works against the active document), then go to the **BIMCamel** ribbon tab and click **Dyncamelo** (with the classic Plugins-folder install the button also appears under **Tool add-ins**). The editor opens as a dockable pane — dock it, float it, or drop it on a second monitor; Navisworks remembers the placement.
 
 The pane has three areas:
 

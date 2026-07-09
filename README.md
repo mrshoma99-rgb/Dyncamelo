@@ -71,7 +71,24 @@ dotnet test Dyncamelo.sln -c Release
 
 Or open `Dyncamelo.sln` in Visual Studio 2022 and build the `Release` configuration.
 
-> **Linux/macOS note:** only `Dyncamelo.Core`, `Dyncamelo.Nodes`, and their test projects build off-Windows (they target netstandard2.0/net8.0). The WPF projects (`Dyncamelo.UI`, `Dyncamelo.App`) require Windows; CI builds them on `windows-latest`.
+> **Linux/macOS note:** `Dyncamelo.Core`, `Dyncamelo.Nodes`, `Dyncamelo.Navisworks`, and the test projects build off-Windows (netstandard2.0/net8.0; the Navisworks library compiles against reference assemblies). The WPF projects (`Dyncamelo.UI`, `Dyncamelo.App`) require Windows, so `dotnet build Dyncamelo.sln` only succeeds there; CI builds the full solution on `windows-latest` and the non-WPF projects on `ubuntu-latest`:
+>
+> ```bash
+> dotnet build src/Dyncamelo.Core/Dyncamelo.Core.csproj
+> dotnet build src/Dyncamelo.Nodes/Dyncamelo.Nodes.csproj
+> dotnet build src/Dyncamelo.Navisworks/Dyncamelo.Navisworks.csproj
+> dotnet build src/Dyncamelo.Cli/Dyncamelo.Cli.csproj
+> dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj
+> dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj
+> dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj
+> ```
+>
+> You can also run headless graphs (no Navisworks needed) with the cross-platform CLI:
+>
+> ```bash
+> dotnet run --project src/Dyncamelo.Cli -- run samples/hello-math.dyc
+> ```
+> See [samples/README.md](samples/README.md) for the bundled example graphs.
 
 ### 2. Install into Navisworks 2024
 
@@ -92,7 +109,7 @@ C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\
 
 ### 3. Open the editor
 
-Start Navisworks 2024, open a model, and launch **Dyncamelo** from the *Tool add-ins* ribbon tab. The editor opens as a dockable pane. Now follow the [Getting Started guide](docs/GETTING_STARTED.md) to build your first graph:
+Start Navisworks 2024, open a model, and launch **Dyncamelo** from the **BIMCamel** ribbon tab (application-bundle install — see [`dist/README.md`](dist/README.md)) or from the *Tool add-ins* tab (classic Plugins-folder install). The editor opens as a dockable pane. Now follow the [Getting Started guide](docs/GETTING_STARTED.md) to build your first graph:
 
 > *Find every item whose Material contains "Concrete", color it red, and save it as a selection set* — about six nodes, no code.
 

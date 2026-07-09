@@ -1,0 +1,81 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows:
+    name: Windows (full solution)
+    runs-on: windows-latest
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Dyncamelo.sln
+
+      - name: Build solution (Release)
+        run: dotnet build Dyncamelo.sln -c Release --no-restore
+
+      - name: Test Dyncamelo.Core.Tests
+        run: dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Test Dyncamelo.Nodes.Tests
+        run: dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Test Dyncamelo.Integration.Tests
+        run: dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj -c Release --no-build --verbosity normal
+
+  linux:
+    name: Linux (non-WPF projects)
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # WPF projects (Dyncamelo.UI, Dyncamelo.App) cannot build on Linux;
+      # they are covered by the windows job above.
+      - name: Build Dyncamelo.Core
+        run: dotnet build src/Dyncamelo.Core/Dyncamelo.Core.csproj -c Release
+
+      - name: Build Dyncamelo.Nodes
+        run: dotnet build src/Dyncamelo.Nodes/Dyncamelo.Nodes.csproj -c Release
+
+      - name: Build Dyncamelo.Navisworks
+        run: dotnet build src/Dyncamelo.Navisworks/Dyncamelo.Navisworks.csproj -c Release
+
+      - name: Build Dyncamelo.Cli
+        run: dotnet build src/Dyncamelo.Cli/Dyncamelo.Cli.csproj -c Release
+
+      - name: Test Dyncamelo.Core.Tests
+        run: dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj -c Release --verbosity normal
+
+      - name: Test Dyncamelo.Nodes.Tests
+        run: dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj -c Release --verbosity normal
+
+      - name: Test Dyncamelo.Integration.Tests
+        run: dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj -c Release --verbosity normal
+
+      - name: CLI smoke-run every sample graph
+        run: |
+          set -e
+          for sample in samples/*.dyc; do
+            echo "::group::dyncamelo run $sample"
+            dotnet run --project src/Dyncamelo.Cli -c Release --no-build -- run "$sample"
+            echo "::endgroup::"
+          done
