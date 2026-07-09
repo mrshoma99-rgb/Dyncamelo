@@ -1,0 +1,33 @@
+<Project>
+
+  <!-- Shared build settings for every project in the Dyncamelo solution. -->
+  <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <Version>0.1.0</Version>
+    <Authors>Dyncamelo Contributors</Authors>
+    <Company>Dyncamelo</Company>
+    <Product>Dyncamelo</Product>
+    <Copyright>Copyright (c) Dyncamelo Contributors</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/mrshoma99-rgb/dyncamelo</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Deterministic builds (reproducible binaries, CI friendly). -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!-- Test projects: no XML docs, relax nullable warnings for terse test code. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625</NoWarn>
+  </PropertyGroup>
+
+</Project>

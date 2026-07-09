@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="3.0" Version="0.1.0.0" Author="BIMCamel"
+    ProductCode="8916CF22-26BD-463C-ACFD-EFA4B2222610"
+    Name="Dyncamelo"
+    Description="Dyncamelo - open-source visual programming (node graphs) for Autodesk Navisworks">
+  <CompanyDetails Name="BIMCamel" Url="https://github.com/mrshoma99-rgb/Dyncamelo" />
+
+  <!-- One DLL PER RELEASE: a Navisworks plug-in must be compiled against the API of the release it
+       runs in (2024 = Api v21). A DLL built against one year loads in the others but its ribbon tab
+       silently fails to register, so each component points at its own year folder. Dyncamelo currently
+       ships 2024 only; add further year folders + components here as support lands. -->
+
+  <!-- Navisworks 2024 -->
+  <Components Description="2024 Manage">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw21" SeriesMax="Nw21" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2024\Dyncamelo.App.dll" />
+  </Components>
+  <Components Description="2024 Simulate">
+    <RuntimeRequirements OS="Win64" Platform="NAVSIM" SeriesMin="Nw21" SeriesMax="Nw21" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2024\Dyncamelo.App.dll" />
+  </Components>
+
+</ApplicationPackage>

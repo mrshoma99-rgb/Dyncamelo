@@ -1,0 +1,23 @@
+Drop the Navisworks-2024 build of Dyncamelo into this folder:
+
+  Dyncamelo.App.dll        (the plugin entry — must sit directly in .\2024\)
+  Dyncamelo.Core.dll
+  Dyncamelo.Nodes.dll
+  Dyncamelo.Navisworks.dll
+  Dyncamelo.UI.dll
+  Nodify.dll
+  Newtonsoft.Json.dll
+
+A Debug build does this automatically (see the DeployToBundle target in
+src/Dyncamelo.App/Dyncamelo.App.csproj — it deploys straight into
+%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle). For a manual install,
+build the solution on Windows and copy the files above from
+src/Dyncamelo.App/bin/<Configuration>/net48/ into this folder, then copy the
+whole Dyncamelo.bundle folder to:
+
+  %APPDATA%\Autodesk\ApplicationPlugins\        (per user)
+  or
+  C:\ProgramData\Autodesk\ApplicationPlugins\   (all users)
+
+The en-US\Dyncamelo.xaml ribbon layout and Resources\ icons beside this file
+are already in place — Navisworks shows Dyncamelo on the "BIMCamel" ribbon tab.
