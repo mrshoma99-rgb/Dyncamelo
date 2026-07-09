@@ -16,6 +16,14 @@ Dyncamelo.bundle/
 
 ## Install
 
+Easiest: double-click **`install-dyncamelo.bat`** (next to the bundle). It
+copies `Dyncamelo.bundle/` into `%APPDATA%\Autodesk\ApplicationPlugins\` for
+the current user. Run `install-dyncamelo.bat uninstall` to remove it again.
+The `2024/` folder in this repo already contains the compiled Release DLLs,
+so no build step is needed.
+
+Manual install / rebuilding from source:
+
 1. Build the solution on Windows (`dotnet build Dyncamelo.sln -c Release`).
 2. Copy the DLLs listed in `2024/PLACE_DYNCAMELO_DLLS_HERE.txt` into `2024/`
    (a Debug build deploys them for you — see `DeployToBundle` in
