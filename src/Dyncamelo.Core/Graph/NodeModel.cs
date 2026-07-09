@@ -10,7 +10,7 @@ namespace Dyncamelo.Core.Graph;
 
 /// <summary>
 /// Base class for every node on the canvas. Subclasses declare ports in their
-/// constructor (via <see cref="AddInput"/>/<see cref="AddOutput"/>) and implement
+/// constructor (via <see cref="AddInput(string, Type, string?)"/>/<see cref="AddOutput"/>) and implement
 /// <see cref="Evaluate"/>, which receives one already-coerced scalar argument per
 /// input port and returns one value per output port. List handling (replication)
 /// is performed by the engine around <see cref="Evaluate"/> based on the ports'
