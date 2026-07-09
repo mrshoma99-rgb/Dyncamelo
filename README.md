@@ -71,7 +71,15 @@ dotnet test Dyncamelo.sln -c Release
 
 Or open `Dyncamelo.sln` in Visual Studio 2022 and build the `Release` configuration.
 
-> **Linux/macOS note:** only `Dyncamelo.Core`, `Dyncamelo.Nodes`, and their test projects build off-Windows (they target netstandard2.0/net8.0). The WPF projects (`Dyncamelo.UI`, `Dyncamelo.App`) require Windows; CI builds them on `windows-latest`.
+> **Linux/macOS note:** `Dyncamelo.Core`, `Dyncamelo.Nodes`, `Dyncamelo.Navisworks`, and the test projects build off-Windows (netstandard2.0/net8.0; the Navisworks library compiles against reference assemblies). The WPF projects (`Dyncamelo.UI`, `Dyncamelo.App`) require Windows, so `dotnet build Dyncamelo.sln` only succeeds there; CI builds the full solution on `windows-latest` and the non-WPF projects on `ubuntu-latest`:
+>
+> ```bash
+> dotnet build src/Dyncamelo.Core/Dyncamelo.Core.csproj
+> dotnet build src/Dyncamelo.Nodes/Dyncamelo.Nodes.csproj
+> dotnet build src/Dyncamelo.Navisworks/Dyncamelo.Navisworks.csproj
+> dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj
+> dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj
+> ```
 
 ### 2. Install into Navisworks 2024
 
