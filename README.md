@@ -109,7 +109,7 @@ C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\
 
 ### 3. Open the editor
 
-Start Navisworks 2024, open a model, and launch **Dyncamelo** from the *Tool add-ins* ribbon tab. The editor opens as a dockable pane. Now follow the [Getting Started guide](docs/GETTING_STARTED.md) to build your first graph:
+Start Navisworks 2024, open a model, and launch **Dyncamelo** from the **BIMCamel** ribbon tab (application-bundle install — see [`dist/README.md`](dist/README.md)) or from the *Tool add-ins* tab (classic Plugins-folder install). The editor opens as a dockable pane. Now follow the [Getting Started guide](docs/GETTING_STARTED.md) to build your first graph:
 
 > *Find every item whose Material contains "Concrete", color it red, and save it as a selection set* — about six nodes, no code.
 
