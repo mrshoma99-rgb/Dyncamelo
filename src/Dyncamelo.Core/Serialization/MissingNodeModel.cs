@@ -38,7 +38,7 @@ public class MissingNodeModel : NodeModel
         AddMessage(MessageSeverity.Error, Reason);
     }
 
-    /// <summary>The complete original node JSON, re-emitted verbatim (plus updated position) on save.</summary>
+    /// <summary>The complete original node JSON, re-emitted verbatim (plus updated position, name, lacing and frozen flag) on save.</summary>
     public JObject RawJson { get; }
 
     /// <summary>Why the node could not be resolved.</summary>

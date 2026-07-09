@@ -27,7 +27,11 @@ public static class AssemblyNodeLoader
         return LoadFrom(Assembly.LoadFrom(assemblyPath));
     }
 
-    /// <summary>Loads node definitions from a loaded assembly.</summary>
+    /// <summary>
+    /// Loads node definitions from a loaded assembly. Broken types (e.g. a
+    /// node-pack type referencing a host assembly that is not present) are
+    /// skipped so one bad type never aborts the import of the whole pack.
+    /// </summary>
     /// <param name="assembly">The assembly to reflect over.</param>
     /// <returns>All importable definitions.</returns>
     public static List<NodeDefinition> LoadFrom(Assembly assembly)
@@ -37,15 +41,38 @@ public static class AssemblyNodeLoader
             throw new ArgumentNullException(nameof(assembly));
         }
 
-        var definitions = new List<NodeDefinition>();
-        foreach (var type in assembly.GetExportedTypes())
+        Type?[] types;
+        try
         {
-            if (!type.IsClass || type.IsGenericTypeDefinition || IsHidden(type))
-            {
-                continue;
-            }
+            types = assembly.GetExportedTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            // Keep whatever loaded; unresolvable entries are null.
+            types = ex.Types;
+        }
 
-            definitions.AddRange(LoadType(type));
+        var definitions = new List<NodeDefinition>();
+        foreach (var type in types)
+        {
+            try
+            {
+                if (type == null || !type.IsVisible || !type.IsClass || type.IsGenericTypeDefinition || IsHidden(type))
+                {
+                    continue;
+                }
+
+                definitions.AddRange(LoadType(type));
+            }
+            catch (Exception ex) when (
+                ex is TypeLoadException ||
+                ex is ReflectionTypeLoadException ||
+                ex is BadImageFormatException ||
+                ex is System.IO.FileNotFoundException ||
+                ex is System.IO.FileLoadException)
+            {
+                // Skip types whose members cannot be reflected over.
+            }
         }
 
         return definitions;

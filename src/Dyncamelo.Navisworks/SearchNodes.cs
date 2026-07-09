@@ -11,9 +11,9 @@ namespace Dyncamelo.Navisworks;
 public static class SearchNodes
 {
     /// <summary>Finds every model item whose property equals a value.</summary>
-    /// <param name="categoryName">Category display name (e.g. "Element"); internal names also match.</param>
-    /// <param name="propertyName">Property display name (e.g. "Category"); internal names also match.</param>
-    /// <param name="value">The value to match (string, number, boolean or date).</param>
+    /// <param name="categoryName">Category display name (e.g. "Element"). Internal names do not match.</param>
+    /// <param name="propertyName">Property display name (e.g. "Category"). Internal names do not match.</param>
+    /// <param name="value">The value to match (string, number, boolean or date). Numbers match plain, length, area, volume and angle properties; strings match display and identifier strings.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyValue")]
@@ -27,14 +27,26 @@ public static class SearchNodes
         Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
-        var condition = BuildPropertyCondition(categoryName, propertyName)
-            .EqualValue(NavisValues.ToVariant(value));
-        return RunSearch(doc, condition);
+        var results = new List<ModelItem>();
+        var seen = new HashSet<ModelItem>();
+        foreach (var variant in BuildEqualityVariants(value))
+        {
+            var condition = BuildPropertyCondition(categoryName, propertyName).EqualValue(variant);
+            foreach (var item in RunSearch(doc, condition))
+            {
+                if (seen.Add(item))
+                {
+                    results.Add(item);
+                }
+            }
+        }
+
+        return results;
     }
 
     /// <summary>Finds every model item whose property display string contains a substring.</summary>
-    /// <param name="categoryName">Category display name (e.g. "Item"); internal names also match.</param>
-    /// <param name="propertyName">Property display name (e.g. "Name"); internal names also match.</param>
+    /// <param name="categoryName">Category display name (e.g. "Item"). Internal names do not match.</param>
+    /// <param name="propertyName">Property display name (e.g. "Name"). Internal names do not match.</param>
     /// <param name="value">The substring to look for (case sensitive, like Find Items).</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>

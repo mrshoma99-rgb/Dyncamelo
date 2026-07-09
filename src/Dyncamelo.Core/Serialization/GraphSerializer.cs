@@ -177,13 +177,16 @@ public class GraphSerializer
     private static JObject SerializeNode(NodeModel node)
     {
         // Placeholders round-trip their original JSON so no data is ever lost;
-        // only mutable cosmetics (position, name) are refreshed.
+        // only mutable cosmetics (position, name, lacing, frozen flag) are refreshed.
         if (node is MissingNodeModel missing)
         {
             var preserved = (JObject)missing.RawJson.DeepClone();
             preserved["Id"] = node.Id.ToString("N");
+            preserved["Name"] = node.Name;
             preserved["X"] = node.X;
             preserved["Y"] = node.Y;
+            preserved["Lacing"] = node.Lacing.ToString();
+            preserved["IsFrozen"] = node.IsFrozen;
             return preserved;
         }
 
@@ -269,6 +272,21 @@ public class GraphSerializer
             }
         }
 
+        // Restore the node's private payload before anything else: DeserializeData
+        // may rebuild ports. A corrupt payload degrades the node to a placeholder
+        // (preserving its JSON) instead of aborting the whole graph open.
+        if (!(node is MissingNodeModel) && json["Data"] is JObject data)
+        {
+            try
+            {
+                node.DeserializeData(data);
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException) && !(ex is StackOverflowException))
+            {
+                node = new MissingNodeModel(json, "The node's saved data could not be read: " + ex.Message);
+            }
+        }
+
         if (TryParseGuid(json.Value<string>("Id"), out var id))
         {
             node.Id = id;
@@ -291,11 +309,6 @@ public class GraphSerializer
 
         if (!(node is MissingNodeModel))
         {
-            if (json["Data"] is JObject data)
-            {
-                node.DeserializeData(data);
-            }
-
             // Restore per-port persisted flags by port name.
             if (json["InputPorts"] is JArray inputPorts)
             {
