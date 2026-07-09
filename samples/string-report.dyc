@@ -1,0 +1,371 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.1.0"
+  },
+  "Uuid": "3c102208cbf7434c874afe438cbddd73",
+  "Name": "String Report",
+  "Description": "Splits a sentence into words, counts them and joins them back with a different separator.",
+  "Nodes": [
+    {
+      "Id": "2d454a006d5a4a95be204b8c18e3b602",
+      "NodeType": "StringInput",
+      "Name": "Text",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "dyncamelo makes navisworks programmable"
+      }
+    },
+    {
+      "Id": "dfbca1d937f844949f8fdcb94b8553db",
+      "NodeType": "StringInput",
+      "Name": "Separator",
+      "X": 0.0,
+      "Y": 160.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": " "
+      }
+    },
+    {
+      "Id": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.Split",
+      "X": 320.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "str",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "997e54fa04fd4b15b0105fb5ee26d801",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "List.Count",
+      "X": 620.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "40bf8abbaf804b68bc558e5d81456e23",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.FromObject@object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.FromObject",
+      "X": 880.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "obj",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "794d046a0c6a4e9fae2fb36d3b027169",
+      "NodeType": "StringInput",
+      "Name": "Prefix",
+      "X": 880.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Word count: "
+      }
+    },
+    {
+      "Id": "7314910963e64124adf0857eeaaddb7a",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Concat@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.Concat",
+      "X": 1140.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "c9cbf873ba7b416e82af7ae80b42499c",
+      "NodeType": "StringInput",
+      "Name": "Join separator",
+      "X": 320.0,
+      "Y": 340.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": ", "
+      }
+    },
+    {
+      "Id": "75f12f39d66546429f2ea1ea46988e27",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Join@string,System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.Join",
+      "X": 620.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "ccb69238f9d942e8bb57fb449d5b31f2",
+      "NodeType": "Watch",
+      "Name": "Count report",
+      "X": 1420.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9f7eb865a1ce44678b11711776688b74",
+      "NodeType": "Watch",
+      "Name": "Joined words",
+      "X": 920.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "e9cf05e94e1b4947abfd3eccda3822bb",
+      "FromNode": "2d454a006d5a4a95be204b8c18e3b602",
+      "FromPort": "value",
+      "ToNode": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
+      "ToPort": "str"
+    },
+    {
+      "Id": "8b4759e29d3444aba45af8b7b749a7db",
+      "FromNode": "dfbca1d937f844949f8fdcb94b8553db",
+      "FromPort": "value",
+      "ToNode": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
+      "ToPort": "separator"
+    },
+    {
+      "Id": "154b040114fe40d394918ff4dc7d307a",
+      "FromNode": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
+      "FromPort": "list",
+      "ToNode": "997e54fa04fd4b15b0105fb5ee26d801",
+      "ToPort": "list"
+    },
+    {
+      "Id": "d641551ad9b0497dbad6dcc8d2fa9534",
+      "FromNode": "997e54fa04fd4b15b0105fb5ee26d801",
+      "FromPort": "count",
+      "ToNode": "40bf8abbaf804b68bc558e5d81456e23",
+      "ToPort": "obj"
+    },
+    {
+      "Id": "fd43921e079e4e77a69faa115da7eb1d",
+      "FromNode": "794d046a0c6a4e9fae2fb36d3b027169",
+      "FromPort": "value",
+      "ToNode": "7314910963e64124adf0857eeaaddb7a",
+      "ToPort": "a"
+    },
+    {
+      "Id": "b3ccb94b14fc421593059b222e2d0cc9",
+      "FromNode": "40bf8abbaf804b68bc558e5d81456e23",
+      "FromPort": "result",
+      "ToNode": "7314910963e64124adf0857eeaaddb7a",
+      "ToPort": "b"
+    },
+    {
+      "Id": "a01c4fb0f0174014baae04aab61b27e7",
+      "FromNode": "7314910963e64124adf0857eeaaddb7a",
+      "FromPort": "result",
+      "ToNode": "ccb69238f9d942e8bb57fb449d5b31f2",
+      "ToPort": "value"
+    },
+    {
+      "Id": "59a73ba4412f4d9099c091bdc65ee3fe",
+      "FromNode": "c9cbf873ba7b416e82af7ae80b42499c",
+      "FromPort": "value",
+      "ToNode": "75f12f39d66546429f2ea1ea46988e27",
+      "ToPort": "separator"
+    },
+    {
+      "Id": "4fabb643951c405a94d836d19a4fa958",
+      "FromNode": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
+      "FromPort": "list",
+      "ToNode": "75f12f39d66546429f2ea1ea46988e27",
+      "ToPort": "list"
+    },
+    {
+      "Id": "fff7e2e56c8b4f4582794444efabe10a",
+      "FromNode": "75f12f39d66546429f2ea1ea46988e27",
+      "FromPort": "result",
+      "ToNode": "9f7eb865a1ce44678b11711776688b74",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "688c049afd4647558755862f50d07910",
+      "Text": "Expected: Count report = 'Word count: 4', Joined words = 'dyncamelo, makes, navisworks, programmable'.",
+      "X": 0.0,
+      "Y": -120.0
+    }
+  ],
+  "View": {
+    "RunType": "Automatic",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.1.0"
+  },
+  "Uuid": "da594f5f98e3496abfdcbf55b6f79b65",
+  "Name": "CSV Round-trip",
+  "Description": "Builds a 2x3 table, writes it to a CSV file next to the current directory and reads it back.",
+  "Nodes": [
+    {
+      "Id": "13b53dfcd72b44e5a34a228e7211b8bf",
+      "NodeType": "NumberInput",
+      "Name": "Row 1 start",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 1.0
+      }
+    },
+    {
+      "Id": "206eeebe701a41f5b5029c6b9baffd86",
+      "NodeType": "NumberInput",
+      "Name": "Row 1 end",
+      "X": 0.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 3.0
+      }
+    },
+    {
+      "Id": "559b1b1bd7f746c5b9bb9fc82fd43ed9",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Range@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Row 1",
+      "X": 280.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "start",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "end",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "step",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "3c47fa5445354fcd823ae3af8669db5e",
+      "NodeType": "NumberInput",
+      "Name": "Row 2 start",
+      "X": 0.0,
+      "Y": 280.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 4.0
+      }
+    },
+    {
+      "Id": "fbe528080f744315ad7271616a26277c",
+      "NodeType": "NumberInput",
+      "Name": "Row 2 end",
+      "X": 0.0,
+      "Y": 400.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 6.0
+      }
+    },
+    {
+      "Id": "f41a9459336548a593a246ac18ec7693",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Range@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Row 2",
+      "X": 280.0,
+      "Y": 320.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "start",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "end",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "step",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "228931e78a5b4adfac1f7f4b7a3abb09",
+      "NodeType": "ListCreate",
+      "Name": "Rows",
+      "X": 560.0,
+      "Y": 160.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item0",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item1",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ItemCount": 2
+      }
+    },
+    {
+      "Id": "4f25a1c513a1405591d17c2121182a68",
+      "NodeType": "FilePath",
+      "Name": "Output file",
+      "X": 560.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "dyncamelo-sample-output.csv"
+      }
+    },
+    {
+      "Id": "afb9694600d049d3a8b5eb39820a75ca",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FileNodes.WriteCsv@string,System.Collections.Generic.IList<object>,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "CSV.WriteToFile",
+      "X": 860.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "data",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "delimiter",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "c51dd9a9720d46968cc0c1f629290456",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FileNodes.ReadCsv@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "CSV.ReadFromFile",
+      "X": 1140.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "delimiter",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "data"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "4e77c7a3f33f4b1ebcb667764409fd9e",
+      "NodeType": "WatchList",
+      "Name": "Round-tripped rows",
+      "X": 1420.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "b7fe40738ce64dbdae831712308a4af5",
+      "FromNode": "13b53dfcd72b44e5a34a228e7211b8bf",
+      "FromPort": "value",
+      "ToNode": "559b1b1bd7f746c5b9bb9fc82fd43ed9",
+      "ToPort": "start"
+    },
+    {
+      "Id": "622a514c74b94f119a8e381570e93a34",
+      "FromNode": "206eeebe701a41f5b5029c6b9baffd86",
+      "FromPort": "value",
+      "ToNode": "559b1b1bd7f746c5b9bb9fc82fd43ed9",
+      "ToPort": "end"
+    },
+    {
+      "Id": "a49abd06eb4c4a14b7c2757eda8ec942",
+      "FromNode": "3c47fa5445354fcd823ae3af8669db5e",
+      "FromPort": "value",
+      "ToNode": "f41a9459336548a593a246ac18ec7693",
+      "ToPort": "start"
+    },
+    {
+      "Id": "0efe859e42c1412683c5ec5d0a5c00c2",
+      "FromNode": "fbe528080f744315ad7271616a26277c",
+      "FromPort": "value",
+      "ToNode": "f41a9459336548a593a246ac18ec7693",
+      "ToPort": "end"
+    },
+    {
+      "Id": "3f7157c68747429ab59c983f8a959537",
+      "FromNode": "559b1b1bd7f746c5b9bb9fc82fd43ed9",
+      "FromPort": "list",
+      "ToNode": "228931e78a5b4adfac1f7f4b7a3abb09",
+      "ToPort": "item0"
+    },
+    {
+      "Id": "f0aa4e80534a463c8c4502a0f4150200",
+      "FromNode": "f41a9459336548a593a246ac18ec7693",
+      "FromPort": "list",
+      "ToNode": "228931e78a5b4adfac1f7f4b7a3abb09",
+      "ToPort": "item1"
+    },
+    {
+      "Id": "a6260a293a05490793083b39236b26d9",
+      "FromNode": "4f25a1c513a1405591d17c2121182a68",
+      "FromPort": "path",
+      "ToNode": "afb9694600d049d3a8b5eb39820a75ca",
+      "ToPort": "path"
+    },
+    {
+      "Id": "80b2d69522d74ddfbd5fe7581b678d42",
+      "FromNode": "228931e78a5b4adfac1f7f4b7a3abb09",
+      "FromPort": "list",
+      "ToNode": "afb9694600d049d3a8b5eb39820a75ca",
+      "ToPort": "data"
+    },
+    {
+      "Id": "09fd2da667474292ac554ab689a611be",
+      "FromNode": "afb9694600d049d3a8b5eb39820a75ca",
+      "FromPort": "path",
+      "ToNode": "c51dd9a9720d46968cc0c1f629290456",
+      "ToPort": "path"
+    },
+    {
+      "Id": "c68202a815f44869821d364e199af7b6",
+      "FromNode": "c51dd9a9720d46968cc0c1f629290456",
+      "FromPort": "data",
+      "ToNode": "4e77c7a3f33f4b1ebcb667764409fd9e",
+      "ToPort": "list"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "b830643313b6462bb8bcc4cc27ec8fd7",
+      "Text": "Writes [[1,2,3],[4,5,6]] to 'dyncamelo-sample-output.csv' in the current working directory, then reads it back. Wiring the write node's path output into the read node sequences the read after the write.",
+      "X": 0.0,
+      "Y": -140.0
+    }
+  ],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
