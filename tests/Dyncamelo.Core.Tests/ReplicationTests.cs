@@ -261,6 +261,102 @@ public class ReplicationTests
     }
 
     [Fact]
+    public void ScalarIntoTypedListPort_IsPromotedToSingleElementList()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, 42.0);
+        var sum = ZT.Node("Sum"); // Sum(IList<double>)
+        graph.AddNode(sum);
+        ZT.Wire(graph, a, 0, sum, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(42.0, (double)sum.OutPorts[0].Value!);
+        Assert.Equal(NodeState.Executed, sum.State);
+    }
+
+    [Fact]
+    public void ScalarIntoObjectListPort_IsPromotedToSingleElementList()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, 42.0);
+        var count = ZT.Node("CountItems"); // CountItems(IList<object>)
+        graph.AddNode(count);
+        ZT.Wire(graph, a, 0, count, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(1, (int)count.OutPorts[0].Value!);
+        Assert.Equal(NodeState.Executed, count.State);
+    }
+
+    [Fact]
+    public void StringIntoObjectListPort_IsPromotedAsOneScalar_NotCharByChar()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, "hello");
+        var count = ZT.Node("CountItems");
+        graph.AddNode(count);
+        ZT.Wire(graph, a, 0, count, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(1, (int)count.OutPorts[0].Value!);
+    }
+
+    [Fact]
+    public void ListIntoObjectListPort_IsNotDoubleWrapped()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, new List<object?> { 1.0, 2.0, 3.0 });
+        var count = ZT.Node("CountItems");
+        graph.AddNode(count);
+        ZT.Wire(graph, a, 0, count, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal(3, (int)count.OutPorts[0].Value!);
+    }
+
+    [Fact]
+    public void NullIntoListPort_IsNotWrapped_NodeFailureIsIsolated()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, null);
+        var sum = ZT.Node("Sum");
+        graph.AddNode(sum);
+        ZT.Wire(graph, a, 0, sum, 0);
+
+        var result = _engine.Run(graph); // Sum(null) throws; the run must survive
+
+        Assert.False(result.Cancelled);
+        Assert.Null(sum.OutPorts[0].Value);
+        Assert.Equal(NodeState.Error, sum.State);
+    }
+
+    [Fact]
+    public void ListOfDictionaries_IntoGenericDictionaryInterfacePort_Replicates()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, new List<object?>
+        {
+            new Dictionary<string, object> { { "a", 1 } },
+            new Dictionary<string, object> { { "b", 2 }, { "c", 3 } },
+        });
+        var keys = ZT.Node("DictKeys"); // DictKeys(IDictionary<string, object>)
+        graph.AddNode(keys);
+        ZT.Wire(graph, a, 0, keys, 0);
+
+        _engine.Run(graph);
+
+        var outer = AsList(keys.OutPorts[0].Value);
+        Assert.Equal(2, outer.Count);
+        Assert.Equal(new List<string> { "a" }, Assert.IsType<List<string>>(outer[0]));
+        Assert.Equal(new List<string> { "b", "c" }, Assert.IsType<List<string>>(outer[1]));
+        Assert.Equal(NodeState.Executed, keys.State);
+    }
+
+    [Fact]
     public void ObjectPort_NeverReplicates()
     {
         var graph = new GraphModel();

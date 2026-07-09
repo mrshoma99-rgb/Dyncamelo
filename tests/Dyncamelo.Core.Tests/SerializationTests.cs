@@ -192,6 +192,48 @@ public class SerializationTests
     }
 
     [Fact]
+    public void CorruptNodeDataPayload_DegradesToMissingNode_InsteadOfFailingTheOpen()
+    {
+        var graph = BuildSampleGraph();
+        var serializer = new GraphSerializer(FullRegistry());
+        var json = JObject.Parse(serializer.Serialize(graph));
+
+        // Corrupt the slider's private payload: "Min" becomes an object token,
+        // which NumberSliderNode.DeserializeData cannot read as a number.
+        var sliderJson = (JObject)json["Nodes"]!
+            .Single(n => n.Value<string>("NodeType") == NumberSliderNode.TypeName);
+        sliderJson["Data"]!["Min"] = new JObject();
+
+        var loaded = serializer.Deserialize(json.ToString());
+
+        var missing = Assert.IsType<MissingNodeModel>(loaded.Nodes.Single(n => n is MissingNodeModel));
+        Assert.Contains("could not be read", missing.Reason);
+        Assert.Equal(4, loaded.Nodes.Count); // all other nodes loaded normally
+        Assert.Equal(3, loaded.Connections.Count); // wires survive via the placeholder's ports
+    }
+
+    [Fact]
+    public void MissingNode_UserEdits_SurviveResave()
+    {
+        var graph = BuildSampleGraph();
+        var json = new GraphSerializer(FullRegistry()).Serialize(graph);
+
+        // Load without the zero-touch definitions, edit the placeholder, re-save.
+        var limited = new GraphSerializer(NodeRegistry.CreateDefault());
+        var degraded = limited.Deserialize(json);
+        var missing = (MissingNodeModel)degraded.Nodes.Single(n => n is MissingNodeModel);
+        missing.Name = "renamed-by-user";
+        missing.IsFrozen = true;
+        var resaved = limited.Serialize(degraded);
+
+        // Reloading with the full registry restores a live node with the edits intact.
+        var restored = new GraphSerializer(FullRegistry()).Deserialize(resaved);
+        var add = Assert.IsType<ZeroTouchNodeModel>(restored.Nodes.Single(n => n is ZeroTouchNodeModel));
+        Assert.Equal("renamed-by-user", add.Name);
+        Assert.True(add.IsFrozen);
+    }
+
+    [Fact]
     public void UnknownTopLevelAndNodeFields_AreIgnoredNotFatal()
     {
         var graph = new GraphModel();

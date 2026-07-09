@@ -153,6 +153,27 @@ public class EngineTests
     }
 
     [Fact]
+    public void SelfReportedErrorMessage_SurfacesAsErrorState_AndDownstreamWarns()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, 1.0);
+        var failing = new SelfReportedErrorNode();
+        graph.AddNode(failing);
+        var downstream = ZT.Node("Sqrt");
+        graph.AddNode(downstream);
+        ZT.Wire(graph, a, 0, failing, 0);
+        ZT.Wire(graph, failing, 0, downstream, 0);
+
+        var result = _engine.Run(graph);
+
+        Assert.True(result.Success);
+        Assert.Equal(NodeState.Error, failing.State);
+        Assert.Contains("self-reported failure", failing.StateMessage);
+        Assert.Equal(NodeState.Warning, downstream.State);
+        Assert.Contains("Upstream failure", downstream.StateMessage);
+    }
+
+    [Fact]
     public void FrozenNode_AndDownstream_AreSkipped_AndStayDirty()
     {
         var graph = new GraphModel();

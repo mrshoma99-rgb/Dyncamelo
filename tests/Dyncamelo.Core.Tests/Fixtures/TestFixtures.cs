@@ -29,6 +29,10 @@ public static class MathFixtures
 
     public static double Sum(IList<double> values) => values.Sum();
 
+    public static int CountItems(IList<object> items) => items.Count;
+
+    public static List<string> DictKeys(IDictionary<string, object> dict) => dict.Keys.ToList();
+
     public static List<double> MakeList(double a, double b, double c) => new List<double> { a, b, c };
 
     [MultiReturn("quotient", "remainder")]
@@ -60,6 +64,25 @@ public static class MathFixtures
     public static void Consume(object item)
     {
         // side-effect placeholder; void methods pass their first input through
+    }
+}
+
+/// <summary>Node that reports its own failure via an Error message without throwing.</summary>
+public class SelfReportedErrorNode : NodeModel
+{
+    public SelfReportedErrorNode()
+    {
+        Name = "SelfError";
+        AddInput("value", typeof(object), defaultValue: null);
+        AddOutput("result", typeof(object));
+    }
+
+    public override string NodeType => "TestSelfError";
+
+    public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
+    {
+        AddMessage(MessageSeverity.Error, "self-reported failure");
+        return new object?[] { null };
     }
 }
 
