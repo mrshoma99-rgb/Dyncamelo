@@ -78,6 +78,8 @@ jobs:
             echo
             echo "Uninstall: \`install-dyncamelo.bat uninstall\`."
             echo
+            echo "**Troubleshooting** — if Navisworks reports \`PLUGIN_LOAD_02\` / \`0x80131515\`, Windows kept the browser's \"downloaded file\" mark on the DLLs. Re-run \`install-dyncamelo.bat\` (it unblocks automatically since v0.1.1), or run: \`Get-ChildItem \\\"\$env:APPDATA\\Autodesk\\ApplicationPlugins\\Dyncamelo.bundle\\\" -Recurse -File | Unblock-File\` in PowerShell."
+            echo
             echo "## Checksum"
             echo
             echo '```'

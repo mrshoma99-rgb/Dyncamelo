@@ -33,6 +33,21 @@ Manual install / rebuilding from source:
 4. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** tab appears with
    the Dyncamelo button; it toggles the node editor dock pane.
 
+## Troubleshooting
+
+**`PLUGIN_LOAD_02` / `FileLoadException 0x80131515` ("Operation is not
+supported") on Navisworks start** — Windows kept the browser's "downloaded
+file" mark (Zone.Identifier) on the DLLs; .NET Framework refuses to load
+web-marked assemblies. `install-dyncamelo.bat` strips the mark automatically;
+for a manual install run in PowerShell:
+
+```powershell
+Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File
+```
+
+(or unblock the downloaded zip *before* extracting: right-click → Properties →
+Unblock), then restart Navisworks.
+
 The classic `Plugins`-folder deployment (no ribbon tab, button under
 *Tool add-ins*) still works too — see `docs/GETTING_STARTED.md`.
 
