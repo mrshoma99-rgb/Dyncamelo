@@ -1,0 +1,305 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.3.2"
+  },
+  "Uuid": "f9532d7eed8c0346fbc266759e1d02f7",
+  "Name": "Getting Started - Math and Watch",
+  "Description": "Two sliders multiplied into an area, displayed with Watch and formatted into a text report. Runs without a Navisworks model - a safe first graph.",
+  "Nodes": [
+    {
+      "Id": "b6a13c9e55323b1762e207dc808039d7",
+      "NodeType": "NumberSlider",
+      "Name": "Length",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 8.0,
+        "Min": 0.0,
+        "Max": 20.0,
+        "Step": 0.5
+      }
+    },
+    {
+      "Id": "75a81fff99ca730120a5a770462c300f",
+      "NodeType": "NumberSlider",
+      "Name": "Width",
+      "X": 0.0,
+      "Y": 190.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 4.0,
+        "Min": 0.0,
+        "Max": 20.0,
+        "Step": 0.5
+      }
+    },
+    {
+      "Id": "4974637f162a685644907a68beff6aa4",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Multiply@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Multiply",
+      "X": 340.0,
+      "Y": 80.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "6aeed94fce3e66d111f12dd85f0a2c54",
+      "NodeType": "Watch",
+      "Name": "Area",
+      "X": 640.0,
+      "Y": 80.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "333d544756849175794602e43506e599",
+      "NodeType": "StringInput",
+      "Name": "Label",
+      "X": 340.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Area = "
+      }
+    },
+    {
+      "Id": "25ee994c4461ae1c9ea2ff1d5131ec76",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.FromObject@object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.FromObject",
+      "X": 640.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "obj",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "bd17962070a95b1e103642309bf0a2f3",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Concat@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.Concat",
+      "X": 940.0,
+      "Y": 170.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "737e29928dff35c2411250e97a903382",
+      "NodeType": "Watch",
+      "Name": "Report",
+      "X": 1220.0,
+      "Y": 170.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "b496e0bcf8861bc1a1c1b81eefea64b8",
+      "FromNode": "b6a13c9e55323b1762e207dc808039d7",
+      "FromPort": "value",
+      "ToNode": "4974637f162a685644907a68beff6aa4",
+      "ToPort": "a"
+    },
+    {
+      "Id": "fcbcd3e1a8de24b8073cb118bd8905a7",
+      "FromNode": "75a81fff99ca730120a5a770462c300f",
+      "FromPort": "value",
+      "ToNode": "4974637f162a685644907a68beff6aa4",
+      "ToPort": "b"
+    },
+    {
+      "Id": "657bc769fcf9ef0b38e9a74b7f4a1730",
+      "FromNode": "4974637f162a685644907a68beff6aa4",
+      "FromPort": "result",
+      "ToNode": "6aeed94fce3e66d111f12dd85f0a2c54",
+      "ToPort": "value"
+    },
+    {
+      "Id": "59b32236186e58f6cad04cee4e39e3db",
+      "FromNode": "6aeed94fce3e66d111f12dd85f0a2c54",
+      "FromPort": "value",
+      "ToNode": "25ee994c4461ae1c9ea2ff1d5131ec76",
+      "ToPort": "obj"
+    },
+    {
+      "Id": "6c08d35e35d7ceee49cba22cfb322d0a",
+      "FromNode": "333d544756849175794602e43506e599",
+      "FromPort": "value",
+      "ToNode": "bd17962070a95b1e103642309bf0a2f3",
+      "ToPort": "a"
+    },
+    {
+      "Id": "ddf42982bd807396cf36d5cc9660b7ad",
+      "FromNode": "25ee994c4461ae1c9ea2ff1d5131ec76",
+      "FromPort": "result",
+      "ToNode": "bd17962070a95b1e103642309bf0a2f3",
+      "ToPort": "b"
+    },
+    {
+      "Id": "1d84e48d49c7cb320b828e173d3ae834",
+      "FromNode": "bd17962070a95b1e103642309bf0a2f3",
+      "FromPort": "result",
+      "ToNode": "737e29928dff35c2411250e97a903382",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "1ff31318496a27c21d7316964d9c951d",
+      "Text": "WELCOME TO DYNCAMELO! This graph needs no model, so it is a safe playground. Drag the Length and Width sliders and watch every downstream node recompute (the run type is Automatic; use Run for Manual graphs).",
+      "X": 0.0,
+      "Y": -170.0
+    },
+    {
+      "Id": "c0bb2b738101b393946d72dc0533144e",
+      "Text": "Watch nodes display whatever flows into them and pass the value through. Wire one anywhere you want to inspect a value.",
+      "X": 960.0,
+      "Y": 320.0
+    }
+  ],
+  "Groups": [
+    {
+      "Id": "a07abe3da526d7614e2bf9b37c040828",
+      "Title": "1 \u00b7 Inputs",
+      "X": -40.0,
+      "Y": -60.0,
+      "Width": 280.0,
+      "Height": 480.0,
+      "Color": "#FF3D6A99"
+    },
+    {
+      "Id": "14171a7a39561340e8e24bf8537f8d4c",
+      "Title": "2 \u00b7 Compute and report",
+      "X": 300.0,
+      "Y": -60.0,
+      "Width": 1180.0,
+      "Height": 480.0,
+      "Color": "#FF3D8060"
+    }
+  ],
+  "View": {
+    "RunType": "Automatic",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
