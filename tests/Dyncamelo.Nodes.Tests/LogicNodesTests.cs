@@ -76,4 +76,20 @@ public class LogicNodesTests
         Assert.True(LogicNodes.LessThan(-1, 0));
         Assert.False(LogicNodes.LessThan(0, 0));
     }
+
+    [Fact]
+    public void GreaterThanOrEqual_IncludesEquality()
+    {
+        Assert.True(LogicNodes.GreaterThanOrEqual(3, 2));
+        Assert.True(LogicNodes.GreaterThanOrEqual(2, 2));
+        Assert.False(LogicNodes.GreaterThanOrEqual(1, 2));
+    }
+
+    [Fact]
+    public void LessThanOrEqual_IncludesEquality()
+    {
+        Assert.True(LogicNodes.LessThanOrEqual(-1, 0));
+        Assert.True(LogicNodes.LessThanOrEqual(0, 0));
+        Assert.False(LogicNodes.LessThanOrEqual(1, 0));
+    }
 }
