@@ -198,24 +198,33 @@ jobs:
           retention-days: 7
 
       # Optional full automation: if a fine-grained PAT with contents:write on
-      # mrshoma99-rgb/dyncamelo-releases is stored as the PUBLIC_RELEASES_TOKEN
-      # secret, every release is mirrored there automatically (public download
-      # for the website while this repo stays private).
-      - name: Mirror release to public dyncamelo-releases
+      # mrshoma99-rgb/bimcamel is stored as the SITE_REPO_TOKEN secret, every
+      # release updates the website's static download asset automatically
+      # (bimcamel.com/downloads/Dyncamelo-navisworks2024.zip). Without the
+      # secret this step is skipped and the site asset is updated manually
+      # from the relay artifact.
+      - name: Update website download asset (bimcamel repo)
         if: always() && env.VERSION != ''
         env:
-          PUBTOKEN: ${{ secrets.PUBLIC_RELEASES_TOKEN }}
+          SITETOKEN: ${{ secrets.SITE_REPO_TOKEN }}
         run: |
-          if (-not $env:PUBTOKEN) { Write-Host "PUBLIC_RELEASES_TOKEN not set - skipping public mirror (relay artifact available instead)"; exit 0 }
-          $env:GH_TOKEN = $env:PUBTOKEN
-          gh release view $env:VERSION --repo mrshoma99-rgb/dyncamelo-releases *> $null
-          if ($LASTEXITCODE -eq 0) { Write-Host "Public release $env:VERSION already exists"; exit 0 }
-          if (-not (Test-Path "relay/Dyncamelo-navisworks2024.zip")) {
-            $versioned = Get-ChildItem relay -Filter "Dyncamelo-v*-navisworks2024.zip" | Select-Object -First 1
-            if ($versioned) { Copy-Item $versioned.FullName "relay/Dyncamelo-navisworks2024.zip" }
-          }
-          gh release create $env:VERSION (Get-ChildItem relay/* | ForEach-Object FullName) `
-            --repo mrshoma99-rgb/dyncamelo-releases `
-            --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
-            --notes "Download Dyncamelo-navisworks2024.zip, extract, run install-dyncamelo.bat, start Navisworks 2024."
+          if (-not $env:SITETOKEN) { Write-Host "SITE_REPO_TOKEN not set - skipping site asset update (use the release-zip artifact to update manually)"; exit 0 }
+          $versioned = Get-ChildItem relay -Filter "Dyncamelo-v*-navisworks2024.zip" | Select-Object -First 1
+          if (-not $versioned) { Write-Host "::error::relay zip missing"; exit 1 }
+          git clone --depth 1 "https://x-access-token:$($env:SITETOKEN)@github.com/mrshoma99-rgb/bimcamel.git" sitework
+          $dl = "sitework/src/bimcamel-web/public/downloads"
+          New-Item -ItemType Directory -Force -Path $dl | Out-Null
+          Copy-Item $versioned.FullName "$dl/Dyncamelo-navisworks2024.zip" -Force
+          $hash = (Get-FileHash "$dl/Dyncamelo-navisworks2024.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "$dl/Dyncamelo-navisworks2024.zip.sha256" -Value "$hash  Dyncamelo-navisworks2024.zip" -NoNewline
+          Set-Content -Path "$dl/dyncamelo-latest.json" -Value ('{"version":"' + $env:VERSION + '","file":"Dyncamelo-navisworks2024.zip","sha256":"' + $hash + '"}') -NoNewline
+          Push-Location sitework
+          git config user.name "dyncamelo-release-bot"
+          git config user.email "noreply@bimcamel.com"
+          git add src/bimcamel-web/public/downloads
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { Write-Host "Site asset already current"; exit 0 }
+          git commit -m "chore: Dyncamelo $env:VERSION download asset"
+          git push origin HEAD:main
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          Pop-Location
