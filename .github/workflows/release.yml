@@ -1,0 +1,92 @@
+name: release
+
+# Publishes a GitHub Release with the installable Navisworks 2024 bundle.
+# Two ways to run it:
+#
+#   * commit a new tag name (e.g. v0.1.0) to dist/RELEASE_VERSION and push —
+#     the release is created at that commit and the tag is created
+#     server-side by gh, so no tag push or Actions UI access is needed.
+#   * manual dispatch (Actions → release → Run workflow) with the version
+#     input.
+#
+# A version that already has a release is skipped, so ordinary pushes that
+# happen to touch dist/RELEASE_VERSION never fail the workflow.
+#
+# The zip is assembled from dist/ at the released commit — dist/Dyncamelo.bundle
+# carries the compiled Release DLLs, ribbon layout, icons and manifest, and
+# install-dyncamelo.bat installs it for the current user.
+
+on:
+  push:
+    branches: ['**']
+    paths: ['dist/RELEASE_VERSION']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version tag (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${INPUT_VERSION:-$(tr -d '[:space:]' < dist/RELEASE_VERSION)}"
+          case "$VERSION" in
+            v[0-9]*) ;;
+            *) echo "::error::'$VERSION' is not a valid version tag (expected v<major>.<minor>.<patch>)"; exit 1 ;;
+          esac
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists — nothing to do."
+            echo "SKIP=true" >> "$GITHUB_ENV"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Package bundle zip
+        if: env.SKIP != 'true'
+        run: |
+          ZIP="Dyncamelo-${VERSION}-navisworks2024.zip"
+          cd dist
+          zip -r "../$ZIP" Dyncamelo.bundle install-dyncamelo.bat README.md \
+              -x "Dyncamelo.bundle/2024/PLACE_DYNCAMELO_DLLS_HERE.txt"
+          cd ..
+          sha256sum "$ZIP" > "$ZIP.sha256"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        if: env.SKIP != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks."
+            echo
+            echo "## Install"
+            echo
+            echo "1. Download and extract \`$ZIP\`."
+            echo "2. Double-click \`install-dyncamelo.bat\` (copies the bundle to \`%APPDATA%\\Autodesk\\ApplicationPlugins\` — no admin rights needed)."
+            echo "3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button."
+            echo
+            echo "Uninstall: \`install-dyncamelo.bat uninstall\`."
+            echo
+            echo "**Troubleshooting** — if Navisworks reports \`PLUGIN_LOAD_02\` / \`0x80131515\`, Windows kept the browser's \"downloaded file\" mark on the DLLs. Re-run \`install-dyncamelo.bat\` (it unblocks automatically since v0.1.1), or run: \`Get-ChildItem \\\"\$env:APPDATA\\Autodesk\\ApplicationPlugins\\Dyncamelo.bundle\\\" -Recurse -File | Unblock-File\` in PowerShell."
+            echo
+            echo "## Checksum"
+            echo
+            echo '```'
+            cat "$ZIP.sha256"
+            echo '```'
+          } > notes.md
+          gh release create "$VERSION" "$ZIP" "$ZIP.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "Dyncamelo $VERSION (Navisworks 2024)" \
+            --notes-file notes.md

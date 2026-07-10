@@ -16,6 +16,14 @@ Dyncamelo.bundle/
 
 ## Install
 
+Easiest: double-click **`install-dyncamelo.bat`** (next to the bundle). It
+copies `Dyncamelo.bundle/` into `%APPDATA%\Autodesk\ApplicationPlugins\` for
+the current user. Run `install-dyncamelo.bat uninstall` to remove it again.
+The `2024/` folder in this repo already contains the compiled Release DLLs,
+so no build step is needed.
+
+Manual install / rebuilding from source:
+
 1. Build the solution on Windows (`dotnet build Dyncamelo.sln -c Release`).
 2. Copy the DLLs listed in `2024/PLACE_DYNCAMELO_DLLS_HERE.txt` into `2024/`
    (a Debug build deploys them for you — see `DeployToBundle` in
@@ -24,6 +32,21 @@ Dyncamelo.bundle/
    (or `C:\ProgramData\Autodesk\ApplicationPlugins\` for all users).
 4. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** tab appears with
    the Dyncamelo button; it toggles the node editor dock pane.
+
+## Troubleshooting
+
+**`PLUGIN_LOAD_02` / `FileLoadException 0x80131515` ("Operation is not
+supported") on Navisworks start** — Windows kept the browser's "downloaded
+file" mark (Zone.Identifier) on the DLLs; .NET Framework refuses to load
+web-marked assemblies. `install-dyncamelo.bat` strips the mark automatically;
+for a manual install run in PowerShell:
+
+```powershell
+Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File
+```
+
+(or unblock the downloaded zip *before* extracting: right-click → Properties →
+Unblock), then restart Navisworks.
 
 The classic `Plugins`-folder deployment (no ribbon tab, button under
 *Tool add-ins*) still works too — see `docs/GETTING_STARTED.md`.
