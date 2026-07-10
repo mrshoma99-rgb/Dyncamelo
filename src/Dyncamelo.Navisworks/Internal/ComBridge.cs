@@ -422,7 +422,8 @@ internal static class ComBridge
     /// <summary>
     /// Converts a Dyncamelo port value to a COM-VARIANT-friendly value for
     /// <c>InwOaProperty.value</c>: string/double/int/bool/DateTime pass through,
-    /// other numerics widen, everything else becomes its invariant string.
+    /// other numerics widen losslessly (a long beyond Int32 range becomes a
+    /// double), everything else becomes its invariant string.
     /// </summary>
     internal static object ToComValue(object? value)
     {
@@ -432,7 +433,9 @@ internal static class ComBridge
             case string text: return text;
             case bool flag: return flag;
             case int i: return i;
-            case long l: return checked((int)l);
+            // A long that fits Int32 stays integral; anything bigger widens to
+            // double (never a raw OverflowException on e.g. timestamp ticks).
+            case long l: return l >= int.MinValue && l <= int.MaxValue ? (int)l : (object)(double)l;
             case short s: return (int)s;
             case byte b: return (int)b;
             case double d: return d;

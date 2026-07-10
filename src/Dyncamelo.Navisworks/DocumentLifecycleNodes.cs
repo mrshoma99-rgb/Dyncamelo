@@ -31,7 +31,9 @@ public static class DocumentLifecycleNodes
     public static Document Open(string filePath, Document? document = null)
     {
         RequireExistingFile(filePath);
-        var doc = NavisworksContext.ResolveDocument(document);
+        // allowClear: opening the first file into a fresh (empty) session is
+        // exactly this node's job — do not reject IsClear documents.
+        var doc = NavisworksContext.ResolveDocument(document, allowClear: true);
         if (!doc.TryOpenFile(filePath))
         {
             throw new InvalidOperationException(
@@ -53,7 +55,9 @@ public static class DocumentLifecycleNodes
     public static Dictionary<string, object?> AppendFiles(IEnumerable<string> filePaths, Document? document = null)
     {
         var paths = MaterializePaths(filePaths);
-        var doc = NavisworksContext.ResolveDocument(document);
+        // allowClear: appending the first files into a fresh (empty) session is
+        // the primary batch scenario (Directory.GetFiles → Document.AppendFiles).
+        var doc = NavisworksContext.ResolveDocument(document, allowClear: true);
 
         var countBefore = doc.Models.Count;
         var appended = 0;
@@ -107,7 +111,8 @@ public static class DocumentLifecycleNodes
     public static Document Merge(string filePath, Document? document = null)
     {
         RequireExistingFile(filePath);
-        var doc = NavisworksContext.ResolveDocument(document);
+        // allowClear: merging into an empty session behaves like an open.
+        var doc = NavisworksContext.ResolveDocument(document, allowClear: true);
         if (!doc.TryMergeFile(filePath))
         {
             throw new InvalidOperationException(

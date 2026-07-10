@@ -83,27 +83,36 @@ public static class TransformNodes
         return list;
     }
 
-    /// <summary>Removes transform overrides from model items (all items when the list is empty).</summary>
-    /// <param name="items">The model items to reset; leave unwired (or wire an empty list) to reset every override in the document.</param>
+    /// <summary>Removes transform overrides from model items (all items only with explicit opt-in).</summary>
+    /// <param name="items">The model items to reset.</param>
+    /// <param name="resetAll">True to reset EVERY transform override in the document (items may then be left unwired). Explicit opt-in — an unwired or empty items list alone never wipes the whole document.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The reset items (empty when every override was reset).</returns>
+    /// <returns>The reset items (empty when every override was reset via resetAll).</returns>
     [NodeName("ModelItem.ResetTransform")]
-    [NodeDescription("Removes permanent transform overrides, restoring items to their original position. With no items wired (or an empty list) every transform override in the document is reset.")]
+    [NodeDescription("Removes permanent transform overrides, restoring items to their original position. To reset every override in the whole document, set resetAll to true — an unwired or empty items input alone does nothing (and errors) so an empty upstream filter can never wipe all placement work.")]
     [NodeSearchTags("item", "transform", "reset", "restore", "original", "undo", "position")]
     [return: NodeName("items")]
-    public static List<ModelItem> ResetTransform(IEnumerable<ModelItem>? items = null, Document? document = null)
+    public static List<ModelItem> ResetTransform(
+        IEnumerable<ModelItem>? items = null,
+        bool resetAll = false,
+        Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var list = NavisValues.ToItemList(items);
-        if (list.Count == 0)
+        if (resetAll)
         {
             doc.Models.ResetAllPermanentTransforms();
-        }
-        else
-        {
-            doc.Models.ResetPermanentTransform(list);
+            return new List<ModelItem>();
         }
 
+        if (list.Count == 0)
+        {
+            throw new ArgumentException(
+                "No model items to reset. Wire the items to reset, or set resetAll to true to " +
+                "deliberately remove every transform override in the document.", nameof(items));
+        }
+
+        doc.Models.ResetPermanentTransform(list);
         return list;
     }
 

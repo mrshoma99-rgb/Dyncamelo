@@ -269,15 +269,15 @@ internal static class BcfFile
 
         writer.WriteStartElement("Topic");
         writer.WriteAttributeString("Guid", topic.Guid);
-        writer.WriteAttributeString("TopicType", topic.TopicType);
-        writer.WriteAttributeString("TopicStatus", topic.TopicStatus);
-        writer.WriteElementString("Title", topic.Title);
+        writer.WriteAttributeString("TopicType", SanitizeXmlText(topic.TopicType));
+        writer.WriteAttributeString("TopicStatus", SanitizeXmlText(topic.TopicStatus));
+        writer.WriteElementString("Title", SanitizeXmlText(topic.Title));
         writer.WriteElementString("CreationDate", FormatDate(topic.CreationDate));
         writer.WriteElementString("CreationAuthor",
-            string.IsNullOrEmpty(topic.CreationAuthor) ? "Dyncamelo" : topic.CreationAuthor);
+            string.IsNullOrEmpty(topic.CreationAuthor) ? "Dyncamelo" : SanitizeXmlText(topic.CreationAuthor));
         if (!string.IsNullOrEmpty(topic.Description))
         {
-            writer.WriteElementString("Description", topic.Description);
+            writer.WriteElementString("Description", SanitizeXmlText(topic.Description));
         }
 
         writer.WriteEndElement(); // Topic
@@ -289,8 +289,8 @@ internal static class BcfFile
                 string.IsNullOrEmpty(comment.Guid) ? System.Guid.NewGuid().ToString("D") : comment.Guid);
             writer.WriteElementString("Date", FormatDate(comment.Date));
             writer.WriteElementString("Author",
-                string.IsNullOrEmpty(comment.Author) ? "Dyncamelo" : comment.Author);
-            writer.WriteElementString("Comment", comment.Text);
+                string.IsNullOrEmpty(comment.Author) ? "Dyncamelo" : SanitizeXmlText(comment.Author));
+            writer.WriteElementString("Comment", SanitizeXmlText(comment.Text));
             writer.WriteEndElement();
         }
 
@@ -363,6 +363,38 @@ internal static class BcfFile
         writer.WriteElementString("Y", FormatDouble(xyz[1]));
         writer.WriteElementString("Z", FormatDouble(xyz[2]));
         writer.WriteEndElement();
+    }
+
+    /// <summary>
+    /// Drops characters that are illegal in XML 1.0 (control characters that can
+    /// arrive in user data — comment bodies, clash names pasted from Excel/CSV).
+    /// Without this XmlWriter throws a bare ArgumentException mid-export.
+    /// </summary>
+    private static string SanitizeXmlText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return text;
+        }
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (!XmlConvert.IsXmlChar(text[i]) && !char.IsHighSurrogate(text[i]) && !char.IsLowSurrogate(text[i]))
+            {
+                var builder = new StringBuilder(text.Length);
+                foreach (var ch in text)
+                {
+                    if (XmlConvert.IsXmlChar(ch) || char.IsHighSurrogate(ch) || char.IsLowSurrogate(ch))
+                    {
+                        builder.Append(ch);
+                    }
+                }
+
+                return builder.ToString();
+            }
+        }
+
+        return text;
     }
 
     private static string FormatDouble(double value)

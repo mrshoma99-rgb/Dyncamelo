@@ -22,6 +22,17 @@ namespace Dyncamelo.Navisworks.Internal;
 /// - The 2024 API has no temporary transform: overrides applied with
 ///   <c>Document.Models.OverridePermanentTransform</c> are permanent (undoable,
 ///   saved in NWF) — node docs must say so.
+///
+/// RUNTIME-CHECK (v0.3 Windows smoke item 11 — vector convention): everything
+/// here assumes Transform3D acts on COLUMN vectors (p' = M·p). If Navisworks
+/// turns out to be row-vector (p' = p·M — plausible: the COM layer stores
+/// translation at elements 12–14 and the API exposes Transform3D.TranslateRight),
+/// then RotationAboutAxis rotates about the NEGATED point, Compose applies in
+/// reversed order, and the matrix I/O rotation part is transposed. The fix in
+/// that case: swap the Multiply operand order in Compose / ComposeWithOverride /
+/// RotationAboutAxis and transpose the linear 3×3 in From/ToRowMajorMatrix
+/// (translation stays Transform3D.Translation). Verify by rotating a known item
+/// 90° about a non-origin point and round-tripping GetTransform→SetTransform.
 /// </summary>
 internal static class TransformHelpers
 {

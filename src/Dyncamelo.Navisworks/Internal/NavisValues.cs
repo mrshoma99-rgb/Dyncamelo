@@ -63,7 +63,12 @@ internal static class NavisValues
             case string text: return VariantData.FromDisplayString(text);
             case bool flag: return VariantData.FromBoolean(flag);
             case int i: return VariantData.FromInt32(i);
-            case long l: return VariantData.FromInt32(checked((int)l));
+            // A long that fits Int32 stays integral; anything bigger widens to
+            // double (never a raw OverflowException on e.g. large IDs).
+            case long l:
+                return l >= int.MinValue && l <= int.MaxValue
+                    ? VariantData.FromInt32((int)l)
+                    : VariantData.FromDouble(l);
             case double d: return VariantData.FromDouble(d);
             case float f: return VariantData.FromDouble(f);
             case decimal m: return VariantData.FromDouble((double)m);
