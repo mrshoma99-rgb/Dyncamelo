@@ -5,7 +5,7 @@
 <!-- Badges: enabled once CI workflows land in .github/workflows -->
 [![Build](https://img.shields.io/badge/build-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
 [![Tests](https://img.shields.io/badge/tests-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 [![Navisworks 2024](https://img.shields.io/badge/Navisworks-2024-blue)](#requirements)
 
 Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
@@ -37,7 +37,7 @@ Full changelog: [docs/WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md).
 - **Deep Navisworks node library** — properties/QTO extraction, Find-Items-grade search, selection sets, color/transparency/hide overrides, saved viewpoints, clash test read-out and triage, TimeLiner, CSV/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (200+ nodes implemented as of v0.2).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
-- **MIT licensed** — permissive dependencies only.
+- **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
 ## Architecture at a glance
 
@@ -153,6 +153,6 @@ Contributions are very welcome — nodes, engine work, docs, sample graphs, bug 
 
 ## License
 
-Dyncamelo is released under the [MIT License](LICENSE) — Copyright (c) 2026 Dyncamelo contributors.
+Dyncamelo is proprietary software — Copyright (c) 2026 BIMCamel, all rights reserved (see [LICENSE](LICENSE)). Releases up to v0.1.1 were MIT-licensed; that grant remains valid for copies obtained under it. Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit, and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at runtime the API is provided by your licensed Navisworks installation.
