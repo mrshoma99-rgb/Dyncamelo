@@ -26,6 +26,7 @@ public class GraphModel : INotifyPropertyChanged
     {
         Uuid = Guid.NewGuid();
         Notes = new ObservableCollection<NoteModel>();
+        Groups = new ObservableCollection<GroupModel>();
     }
 
     /// <summary>Stable identifier of the graph, persisted in .dyc files.</summary>
@@ -59,6 +60,9 @@ public class GraphModel : INotifyPropertyChanged
 
     /// <summary>Canvas notes (no execution semantics).</summary>
     public ObservableCollection<NoteModel> Notes { get; }
+
+    /// <summary>Canvas groups (annotation rectangles, no execution semantics).</summary>
+    public ObservableCollection<GroupModel> Groups { get; }
 
     /// <summary>Raised after a node is added.</summary>
     public event EventHandler<NodeEventArgs>? NodeAdded;

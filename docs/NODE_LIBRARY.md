@@ -66,13 +66,13 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Math.Round | Math | number: double, digits: int = 0 | result: double | Round to given decimal places (MidpointRounding.AwayFromZero). | System.Math.Round | MVP |
 | Math.Min | Math | a: double, b: double | min: double | Smaller of two values. | System.Math.Min | MVP |
 | Math.Max | Math | a: double, b: double | max: double | Larger of two values. | System.Math.Max | MVP |
-| Math.Abs | Math | number: double | result: double | Absolute value. | System.Math.Abs | Beta |
-| Math.Pow | Math | base: double, exponent: double | result: double | base ^ exponent. | System.Math.Pow | Beta |
-| Math.Sqrt | Math | number: double | result: double | Square root; warns on negative input. | System.Math.Sqrt | Beta |
-| Math.Floor | Math | number: double | result: double | Round down to integer. | System.Math.Floor | Beta |
-| Math.Ceiling | Math | number: double | result: double | Round up to integer. | System.Math.Ceiling | Beta |
-| Math.MapRange | Math | value: double, fromLow: double, fromHigh: double, toLow: double, toHigh: double | result: double | Linearly remap a value between ranges (drives color gradients). | pure C# | Beta |
-| Math.Random | Math | min: double = 0, max: double = 1, seed: int = -1 | result: double | Random double in range; seed ≥ 0 gives deterministic output. | System.Random | Beta |
+| Math.Abs | Math | number: double | result: double | Absolute value. | System.Math.Abs | Implemented (v0.2) |
+| Math.Pow | Math | base: double, exponent: double | result: double | base ^ exponent. | System.Math.Pow | Implemented (v0.2) |
+| Math.Sqrt | Math | number: double | result: double | Square root; warns on negative input. | System.Math.Sqrt | Implemented (v0.2) |
+| Math.Floor | Math | number: double | result: double | Round down to integer. | System.Math.Floor | Implemented (v0.2) |
+| Math.Ceiling | Math | number: double | result: double | Round up to integer. | System.Math.Ceiling | Implemented (v0.2) |
+| Math.MapRange | Math | value: double, fromLow: double, fromHigh: double, toLow: double, toHigh: double | result: double | Linearly remap a value between ranges (drives color gradients). | pure C# | Implemented (v0.2) |
+| Math.Random | Math | min: double = 0, max: double = 1, seed: int = -1 | result: double | Random double in range; seed ≥ 0 gives deterministic output. | System.Random | Implemented (v0.2) |
 
 ## Logic
 
@@ -85,8 +85,8 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Equals | Logic | a: object, b: object | equal: bool | Value equality with numeric/string coercion. | Object.Equals + coercion | MVP |
 | GreaterThan | Logic | a: double, b: double | result: bool | a &gt; b. | C# `>` | MVP |
 | LessThan | Logic | a: double, b: double | result: bool | a &lt; b. | C# `<` | MVP |
-| GreaterThanOrEqual | Logic | a: double, b: double | result: bool | a ≥ b. | C# `>=` | Beta |
-| LessThanOrEqual | Logic | a: double, b: double | result: bool | a ≤ b. | C# `<=` | Beta |
+| GreaterThanOrEqual | Logic | a: double, b: double | result: bool | a ≥ b. | C# `>=` | Implemented (v0.2) |
+| LessThanOrEqual | Logic | a: double, b: double | result: bool | a ≤ b. | C# `<=` | Implemented (v0.2) |
 
 ## String
 
@@ -99,13 +99,13 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | String.Length | String | text: string | length: int | Character count. | String.Length | MVP |
 | String.ToNumber | String | text: string | number: double | Parse a number (invariant + current culture fallback); warns and returns null on failure. | Double.TryParse | MVP |
 | String.FromObject | String | object: object | text: string | Convert any value to its display string (invariant). | Convert.ToString | MVP |
-| String.Join | String | list: List&lt;object&gt;, separator: string = ", " | text: string | Join list items into one string. | String.Join | Beta |
-| String.StartsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Prefix test. | String.StartsWith | Beta |
-| String.EndsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Suffix test. | String.EndsWith | Beta |
-| String.Substring | String | text: string, startIndex: int, length: int = -1 | text: string | Extract a substring (-1 length = to end). | String.Substring | Beta |
-| String.ToUpper | String | text: string | text: string | Uppercase. | String.ToUpperInvariant | Beta |
-| String.ToLower | String | text: string | text: string | Lowercase. | String.ToLowerInvariant | Beta |
-| String.Trim | String | text: string | text: string | Strip leading/trailing whitespace. | String.Trim | Beta |
+| String.Join | String | list: List&lt;object&gt;, separator: string = ", " | text: string | Join list items into one string. | String.Join | Implemented (v0.1) |
+| String.StartsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Prefix test. | String.StartsWith | Implemented (v0.2) |
+| String.EndsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Suffix test. | String.EndsWith | Implemented (v0.2) |
+| String.Substring | String | text: string, startIndex: int, length: int = -1 | text: string | Extract a substring (-1 length = to end). | String.Substring | Implemented (v0.2) |
+| String.ToUpper | String | text: string | text: string | Uppercase. | String.ToUpperInvariant | Implemented (v0.2) |
+| String.ToLower | String | text: string | text: string | Lowercase. | String.ToLowerInvariant | Implemented (v0.2) |
+| String.Trim | String | text: string | text: string | Strip leading/trailing whitespace. | String.Trim | Implemented (v0.2) |
 
 ## List
 
@@ -120,15 +120,15 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | List.Range | List | start: double, end: double, step: double = 1 | list: List&lt;double&gt; | Numeric range (inclusive start, ≤ end). | iterator C# | MVP |
 | List.Sort | List | list: List&lt;object&gt; | sorted: List&lt;object&gt; | Sort ascending (numeric or ordinal-string comparison). | List.Sort + Comparer | MVP |
 | List.UniqueItems | List | list: List&lt;object&gt; | unique: List&lt;object&gt; | Remove duplicates, keep first occurrence order. | LINQ Distinct | MVP |
-| List.LastItem | List | list: List&lt;object&gt; | item: object | Last item. | LINQ LastOrDefault | Beta |
-| List.Contains | List | list: List&lt;object&gt;, item: object | contains: bool | Membership test with coercing equality. | LINQ Any | Beta |
-| List.IndexOf | List | list: List&lt;object&gt;, item: object | index: int | First index of item, −1 if absent. | IList.IndexOf | Beta |
-| List.Reverse | List | list: List&lt;object&gt; | reversed: List&lt;object&gt; | Reverse order. | LINQ Reverse | Beta |
-| List.AddItemToEnd | List | list: List&lt;object&gt;, item: object | list: List&lt;object&gt; | Append (returns new list; inputs immutable). | copy + Add | Beta |
-| List.Join | List | listA: List&lt;object&gt;, listB: List&lt;object&gt; | list: List&lt;object&gt; | Concatenate two lists. | LINQ Concat | Beta |
-| List.RemoveItemAtIndex | List | list: List&lt;object&gt;, index: int | list: List&lt;object&gt; | Remove item(s) at index(es). | copy + RemoveAt | Beta |
-| List.GroupByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | groups: List&lt;List&lt;object&gt;&gt;, uniqueKeys: List&lt;object&gt; | Group items by parallel key list (QTO by-system grouping). | LINQ GroupBy / [MultiReturn] | Beta |
-| List.SortByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | sorted: List&lt;object&gt;, sortedKeys: List&lt;object&gt; | Sort items by parallel key list. | LINQ OrderBy / [MultiReturn] | Beta |
+| List.LastItem | List | list: List&lt;object&gt; | item: object | Last item. | LINQ LastOrDefault | Implemented (v0.2) |
+| List.Contains | List | list: List&lt;object&gt;, item: object | contains: bool | Membership test with coercing equality. | LINQ Any | Implemented (v0.2) |
+| List.IndexOf | List | list: List&lt;object&gt;, item: object | index: int | First index of item, −1 if absent. | IList.IndexOf | Implemented (v0.2) |
+| List.Reverse | List | list: List&lt;object&gt; | reversed: List&lt;object&gt; | Reverse order. | LINQ Reverse | Implemented (v0.2) |
+| List.AddItemToEnd | List | list: List&lt;object&gt;, item: object | list: List&lt;object&gt; | Append (returns new list; inputs immutable). | copy + Add | Implemented (v0.2) |
+| List.Join | List | listA: List&lt;object&gt;, listB: List&lt;object&gt; | list: List&lt;object&gt; | Concatenate two lists. | LINQ Concat | Implemented (v0.2) |
+| List.RemoveItemAtIndex | List | list: List&lt;object&gt;, index: int | list: List&lt;object&gt; | Remove item(s) at index(es). | copy + RemoveAt | Implemented (v0.2) |
+| List.GroupByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | groups: List&lt;List&lt;object&gt;&gt;, uniqueKeys: List&lt;object&gt; | Group items by parallel key list (QTO by-system grouping). | LINQ GroupBy / [MultiReturn] | Implemented (v0.2) |
+| List.SortByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | sorted: List&lt;object&gt;, sortedKeys: List&lt;object&gt; | Sort items by parallel key list. | LINQ OrderBy / [MultiReturn] | Implemented (v0.2) |
 
 ## Dictionary
 
@@ -136,9 +136,9 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 |---|---|---|---|---|---|---|
 | Dictionary.ByKeysValues | Dictionary | keys: List&lt;string&gt;, values: List&lt;object&gt; | dictionary: Dictionary&lt;string,object&gt; | Build a dictionary from parallel lists. | Dictionary ctor | MVP |
 | Dictionary.ValueAtKey | Dictionary | dictionary: Dictionary&lt;string,object&gt;, key: string | value: object | Value for key; warns + null if missing (unpacks [MultiReturn] outputs too). | TryGetValue | MVP |
-| Dictionary.Keys | Dictionary | dictionary: Dictionary&lt;string,object&gt; | keys: List&lt;string&gt; | All keys. | Dictionary.Keys | Beta |
-| Dictionary.Values | Dictionary | dictionary: Dictionary&lt;string,object&gt; | values: List&lt;object&gt; | All values. | Dictionary.Values | Beta |
-| Dictionary.SetValueAtKey | Dictionary | dictionary: Dictionary&lt;string,object&gt;, key: string, value: object | dictionary: Dictionary&lt;string,object&gt; | Returns a copy with key set/updated. | copy + indexer | Beta |
+| Dictionary.Keys | Dictionary | dictionary: Dictionary&lt;string,object&gt; | keys: List&lt;string&gt; | All keys. | Dictionary.Keys | Implemented (v0.2) |
+| Dictionary.Values | Dictionary | dictionary: Dictionary&lt;string,object&gt; | values: List&lt;object&gt; | All values. | Dictionary.Values | Implemented (v0.2) |
+| Dictionary.SetValueAtKey | Dictionary | dictionary: Dictionary&lt;string,object&gt;, key: string, value: object | dictionary: Dictionary&lt;string,object&gt; | Returns a copy with key set/updated. | copy + indexer | Implemented (v0.2) |
 
 ## Color
 
@@ -148,9 +148,9 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 |---|---|---|---|---|---|---|
 | Color Picker | Color | — (inline swatch + dialog) | color: Color | Visual color picker constant. | NodeModel (UI) | MVP |
 | Color.ByARGB | Color | red: int, green: int, blue: int, alpha: int = 255 | color: Color | Color from 0–255 channels. | Core Color ctor | MVP |
-| Color.FromHex | Color | hex: string | color: Color | Parse "#RRGGBB" / "#AARRGGBB". | pure C# parse | Beta |
-| Color.Components | Color | color: Color | red: int, green: int, blue: int, alpha: int | Deconstruct channels. | [MultiReturn] | Beta |
-| Color.Lerp | Color | start: Color, end: Color, t: double | color: Color | Interpolate between two colors (t 0–1); with Math.MapRange builds value-driven gradients. | pure C# | Beta |
+| Color.FromHex | Color | hex: string | color: Color | Parse "#RRGGBB" / "#AARRGGBB". | pure C# parse | Implemented (v0.2) |
+| Color.Components | Color | color: Color | red: int, green: int, blue: int, alpha: int | Deconstruct channels. | [MultiReturn] | Implemented (v0.2) |
+| Color.Lerp | Color | start: Color, end: Color, t: double | color: Color | Interpolate between two colors (t 0–1); with Math.MapRange builds value-driven gradients. | pure C# | Implemented (v0.2) |
 
 ## DateTime
 
@@ -158,10 +158,10 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 |---|---|---|---|---|---|---|
 | DateTime.Now | DateTime | — | now: DateTime | Current local date-time (re-evaluates each run; timestamping reports). | System.DateTime.Now | MVP |
 | DateTime.Format | DateTime | dateTime: DateTime, format: string = "yyyy-MM-dd HH:mm" | text: string | Format as string (invariant culture). | DateTime.ToString(fmt) | MVP |
-| DateTime.Parse | DateTime | text: string, format: string = "" | dateTime: DateTime | Parse from string (exact format optional). | DateTime.TryParse(Exact) | Beta |
-| DateTime.ByDate | DateTime | year: int, month: int, day: int | dateTime: DateTime | Construct a date. | DateTime ctor | Beta |
-| DateTime.AddDays | DateTime | dateTime: DateTime, days: double | dateTime: DateTime | Offset a date (4D schedule shifting). | DateTime.AddDays | Beta |
-| DateTime.DaysBetween | DateTime | start: DateTime, end: DateTime | days: double | Signed day difference. | TimeSpan.TotalDays | Beta |
+| DateTime.Parse | DateTime | text: string, format: string = "" | dateTime: DateTime | Parse from string (exact format optional). | DateTime.TryParse(Exact) | Implemented (v0.2) |
+| DateTime.ByDate | DateTime | year: int, month: int, day: int | dateTime: DateTime | Construct a date. | DateTime ctor | Implemented (v0.2) |
+| DateTime.AddDays | DateTime | dateTime: DateTime, days: double | dateTime: DateTime | Offset a date (4D schedule shifting). | DateTime.AddDays | Implemented (v0.2) |
+| DateTime.DaysBetween | DateTime | start: DateTime, end: DateTime | days: double | Signed day difference. | TimeSpan.TotalDays | Implemented (v0.2) |
 
 ## File
 
@@ -171,11 +171,11 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | CSV.WriteToFile | File | path: string, rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt; = null | path: string | Write rows (and optional header) to CSV with proper quoting — the QTO/clash-report sink. | StreamWriter | MVP |
 | Text.ReadFromFile | File | path: string | text: string, lines: List&lt;string&gt; | Read a whole text file. | File.ReadAllText/Lines / [MultiReturn] | MVP |
 | Text.WriteToFile | File | path: string, text: string, append: bool = false | path: string | Write or append text. | File.WriteAllText/AppendAllText | MVP |
-| JSON.Parse | File | json: string | value: object | Parse JSON into nested Dictionary/List/primitives. | Newtonsoft JToken → CLR | Beta |
-| JSON.Stringify | File | value: object, indented: bool = true | json: string | Serialize dictionaries/lists/primitives to JSON. | JsonConvert.SerializeObject | Beta |
-| File.Exists | File | path: string | exists: bool | Does the file exist. | System.IO.File.Exists | Beta |
-| Directory.GetFiles | File | path: string, pattern: string = "*.*" | files: List&lt;string&gt; | List files in a folder (batch processing driver). | Directory.GetFiles | Beta |
-| Path.Combine | File | directory: string, fileName: string | path: string | Join path segments safely. | System.IO.Path.Combine | Beta |
+| JSON.Parse | File | json: string | value: object | Parse JSON into nested Dictionary/List/primitives. | Newtonsoft JToken → CLR | Implemented (v0.2) |
+| JSON.Stringify | File | value: object, indented: bool = true | json: string | Serialize dictionaries/lists/primitives to JSON. | JsonConvert.SerializeObject | Implemented (v0.2) |
+| File.Exists | File | path: string | exists: bool | Does the file exist. | System.IO.File.Exists | Implemented (v0.2) |
+| Directory.GetFiles | File | path: string, pattern: string = "*.*" | files: List&lt;string&gt; | List files in a folder (batch processing driver). | Directory.GetFiles | Implemented (v0.2) |
+| Path.Combine | File | directory: string, fileName: string | path: string | Join path segments safely. | System.IO.Path.Combine | Implemented (v0.2) |
 
 ## Geometry
 
@@ -186,10 +186,10 @@ Lightweight geometry for measurements and camera math — no display; geometry p
 | Point.ByCoordinates | Geometry | x: double, y: double, z: double = 0 | point: Point | Construct a 3D point. | Core Point ctor (↔ Api.Point3D) | MVP |
 | Point.Components | Geometry | point: Point | x: double, y: double, z: double | Deconstruct a point. | [MultiReturn] | MVP |
 | BoundingBox.Center | Geometry | boundingBox: BoundingBox | center: Point | Box center point (clash/viewpoint targeting). | (↔ BoundingBox3D.Center) | MVP |
-| Point.DistanceTo | Geometry | point: Point, other: Point | distance: double | Euclidean distance (in model units). | vector math | Beta |
-| Vector.ByCoordinates | Geometry | x: double, y: double, z: double | vector: Vector | Construct a direction vector (camera up/forward). | Core Vector ctor (↔ Api.Vector3D) | Beta |
-| BoundingBox.Size | Geometry | boundingBox: BoundingBox | sizeX: double, sizeY: double, sizeZ: double, min: Point, max: Point | Extents and corner points (rough QTO dimensions). | (↔ BoundingBox3D.Min/Max) / [MultiReturn] | Beta |
-| BoundingBox.Intersects | Geometry | boundingBox: BoundingBox, other: BoundingBox | intersects: bool | Axis-aligned overlap test (cheap proximity checks). | interval math | Beta |
+| Point.DistanceTo | Geometry | point: Point, other: Point | distance: double | Euclidean distance (in model units). | vector math | Implemented (v0.2) |
+| Vector.ByCoordinates | Geometry | x: double, y: double, z: double | vector: Vector | Construct a direction vector (camera up/forward). | Core Vector ctor (↔ Api.Vector3D) | Implemented (v0.2) |
+| BoundingBox.Size | Geometry | boundingBox: BoundingBox | sizeX: double, sizeY: double, sizeZ: double, min: Point, max: Point | Extents and corner points (rough QTO dimensions). | (↔ BoundingBox3D.Min/Max) / [MultiReturn] | Implemented (v0.2) |
+| BoundingBox.Intersects | Geometry | boundingBox: BoundingBox, other: BoundingBox | intersects: bool | Axis-aligned overlap test (cheap proximity checks). | interval math | Implemented (v0.2) |
 
 ---
 

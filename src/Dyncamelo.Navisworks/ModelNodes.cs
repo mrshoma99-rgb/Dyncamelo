@@ -19,12 +19,36 @@ public static class ModelNodes
     [return: NodeName("rootItem")]
     public static ModelItem RootItem(Model model)
     {
-        if (model == null)
-        {
-            throw new ArgumentNullException(nameof(model), "No model provided.");
-        }
+        return RequireModel(model).RootItem;
+    }
 
-        return model.RootItem;
+    /// <summary>The file paths of a model.</summary>
+    /// <param name="model">The model.</param>
+    /// <returns>The cached (loaded) file path and the original source file path.</returns>
+    [NodeName("Model.FileName")]
+    [NodeDescription("The cached and original source file paths of a model (federated-file inventory).")]
+    [NodeSearchTags("model", "filename", "source", "path", "file")]
+    [MultiReturn("fileName", "sourceFileName")]
+    public static Dictionary<string, object?> FileName(Model model)
+    {
+        var resolved = RequireModel(model);
+        return new Dictionary<string, object?>
+        {
+            ["fileName"] = resolved.FileName,
+            ["sourceFileName"] = resolved.SourceFileName,
+        };
+    }
+
+    /// <summary>The native units of a model's source file.</summary>
+    /// <param name="model">The model.</param>
+    /// <returns>The unit name, e.g. "Meters" or "Millimeters".</returns>
+    [NodeName("Model.Units")]
+    [NodeDescription("The native units of a model's source file (unit-mismatch audits across appended files).")]
+    [NodeSearchTags("model", "units", "native", "meters", "feet")]
+    [return: NodeName("units")]
+    public static string Units(Model model)
+    {
+        return RequireModel(model).Units.ToString();
     }
 
     /// <summary>The root items of every model in a document.</summary>
@@ -38,5 +62,10 @@ public static class ModelNodes
     {
         var doc = NavisworksContext.ResolveDocument(document);
         return NavisValues.ToItemList(doc.Models.RootItems);
+    }
+
+    private static Model RequireModel(Model? model)
+    {
+        return model ?? throw new ArgumentNullException(nameof(model), "No model provided.");
     }
 }

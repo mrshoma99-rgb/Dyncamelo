@@ -1,12 +1,16 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Nodes;
+using Dyncamelo.Core.Types;
 using Dyncamelo.UI.Mvvm;
 
 namespace Dyncamelo.UI.ViewModels;
@@ -23,6 +27,14 @@ public class NodeViewModel : CanvasItemViewModel
     private readonly GraphEditorViewModel _owner;
     private readonly MethodInfo? _addPortMethod;
     private readonly MethodInfo? _removePortMethod;
+    private readonly PropertyInfo? _viewWidthProperty;
+    private readonly PropertyInfo? _viewHeightProperty;
+    private readonly HashSet<PortModel> _watchedOutputPorts = new HashSet<PortModel>();
+    private bool _showPreview = true;
+    private string _previewText = string.Empty;
+    private string _watchCountText = string.Empty;
+    private double _localWatchWidth;
+    private double _localWatchHeight;
 
     /// <summary>Creates the wrapper, builds connector view models and syncs the initial position.</summary>
     /// <param name="owner">The editor that owns this node.</param>
@@ -41,6 +53,12 @@ public class NodeViewModel : CanvasItemViewModel
         _addPortMethod = model.GetType().GetMethod("AddItemPort", Type.EmptyTypes);
         _removePortMethod = model.GetType().GetMethod("RemoveItemPort", Type.EmptyTypes);
 
+        // Resizable display nodes (Core's WatchNode, and any node pack that
+        // follows the same convention) persist a user-chosen view size through
+        // double ViewWidth/ViewHeight properties; discover them reflectively.
+        _viewWidthProperty = FindSizeProperty(model, "ViewWidth");
+        _viewHeightProperty = FindSizeProperty(model, "ViewHeight");
+
         AddPortCommand = new RelayCommand(AddPort, () => _addPortMethod != null);
         RemovePortCommand = new RelayCommand(RemovePort, () => _removePortMethod != null && Model.InPorts.Count > 1);
         SetLacingCommand = new RelayCommand<string>(SetLacing);
@@ -49,8 +67,12 @@ public class NodeViewModel : CanvasItemViewModel
         HeaderBrush = GetCategoryBrush(model.Category);
         SetLocationFromModel(new Point(model.X, model.Y));
         SyncPorts();
+        UpdateValueDisplay();
         model.PropertyChanged += OnModelPropertyChanged;
     }
+
+    /// <summary>The editor that owns this node.</summary>
+    internal GraphEditorViewModel Owner => _owner;
 
     /// <summary>The wrapped Core node. Inline editor templates bind directly to its properties.</summary>
     public NodeModel Model { get; }
@@ -93,6 +115,112 @@ public class NodeViewModel : CanvasItemViewModel
 
     /// <summary>Short lacing tag rendered on the node ("" for the Auto default).</summary>
     public string LacingLabel => Model.Lacing == LacingMode.Auto ? string.Empty : Model.Lacing.ToString();
+
+    /// <summary>
+    /// Per-node preview pin: when false the value bubble stays hidden even while
+    /// the global toggle is on. Defaults to true (previews are opt-out).
+    /// </summary>
+    public bool ShowPreview
+    {
+        get => _showPreview;
+        set
+        {
+            if (SetProperty(ref _showPreview, value))
+            {
+                OnPropertyChanged(nameof(IsPreviewVisible));
+            }
+        }
+    }
+
+    /// <summary>Compact summary of the node's output values, shown in the preview bubble.</summary>
+    public string PreviewText
+    {
+        get => _previewText;
+        private set
+        {
+            if (SetProperty(ref _previewText, value))
+            {
+                OnPropertyChanged(nameof(IsPreviewVisible));
+            }
+        }
+    }
+
+    /// <summary>
+    /// True when the preview bubble should render: the node ran (successfully or
+    /// with warnings), produced a summary, and neither the per-node pin nor the
+    /// global toggle hides it.
+    /// </summary>
+    public bool IsPreviewVisible =>
+        _owner.ShowNodePreviews &&
+        _showPreview &&
+        _previewText.Length > 0 &&
+        (Model.State == NodeState.Executed || Model.State == NodeState.Warning);
+
+    /// <summary>
+    /// Item-count line for watch displays ("List — 42 items"); empty for
+    /// non-list values.
+    /// </summary>
+    public string WatchCountText
+    {
+        get => _watchCountText;
+        private set
+        {
+            if (SetProperty(ref _watchCountText, value))
+            {
+                OnPropertyChanged(nameof(HasWatchCount));
+            }
+        }
+    }
+
+    /// <summary>True when <see cref="WatchCountText"/> has content.</summary>
+    public bool HasWatchCount => _watchCountText.Length > 0;
+
+    /// <summary>
+    /// User-chosen width of a watch display area; NaN sizes automatically.
+    /// Backed by the model's ViewWidth property when it exists (so it persists
+    /// in the .dyc payload), otherwise kept in-memory.
+    /// </summary>
+    public double WatchWidth
+    {
+        get => ToViewSize(_viewWidthProperty != null ? (double)_viewWidthProperty.GetValue(Model)! : _localWatchWidth);
+        set
+        {
+            var stored = double.IsNaN(value) ? 0d : Math.Max(0d, value);
+            if (_viewWidthProperty != null)
+            {
+                _viewWidthProperty.SetValue(Model, stored);
+            }
+            else
+            {
+                _localWatchWidth = stored;
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// User-chosen height of a watch display area; NaN sizes automatically.
+    /// Backed by the model's ViewHeight property when it exists.
+    /// </summary>
+    public double WatchHeight
+    {
+        get => ToViewSize(_viewHeightProperty != null ? (double)_viewHeightProperty.GetValue(Model)! : _localWatchHeight);
+        set
+        {
+            var stored = double.IsNaN(value) ? 0d : Math.Max(0d, value);
+            if (_viewHeightProperty != null)
+            {
+                _viewHeightProperty.SetValue(Model, stored);
+            }
+            else
+            {
+                _localWatchHeight = stored;
+            }
+
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>Input connectors, in port order.</summary>
     public ObservableCollection<ConnectorViewModel> Inputs { get; }
@@ -146,12 +274,25 @@ public class NodeViewModel : CanvasItemViewModel
     {
         SyncPortCollection(Inputs, Model.InPorts);
         SyncPortCollection(Outputs, Model.OutPorts);
+        SyncOutputSubscriptions();
+    }
+
+    /// <summary>Re-raises <see cref="IsPreviewVisible"/> (e.g. after the global preview toggle changed).</summary>
+    public void RefreshPreviewVisibility()
+    {
+        OnPropertyChanged(nameof(IsPreviewVisible));
     }
 
     /// <summary>Detaches model event handlers. Call when the node leaves the canvas.</summary>
     public void Detach()
     {
         Model.PropertyChanged -= OnModelPropertyChanged;
+        foreach (var port in _watchedOutputPorts)
+        {
+            port.PropertyChanged -= OnOutputPortPropertyChanged;
+        }
+
+        _watchedOutputPorts.Clear();
     }
 
     /// <inheritdoc />
@@ -260,6 +401,13 @@ public class NodeViewModel : CanvasItemViewModel
                 break;
             case nameof(NodeModel.State):
                 OnPropertyChanged(nameof(State));
+                OnPropertyChanged(nameof(IsPreviewVisible));
+                break;
+            case "ViewWidth":
+                OnPropertyChanged(nameof(WatchWidth));
+                break;
+            case "ViewHeight":
+                OnPropertyChanged(nameof(WatchHeight));
                 break;
             case nameof(NodeModel.StateMessage):
             case nameof(NodeModel.Messages):
@@ -274,6 +422,118 @@ public class NodeViewModel : CanvasItemViewModel
                 OnPropertyChanged(nameof(LacingLabel));
                 break;
         }
+    }
+
+    private void SyncOutputSubscriptions()
+    {
+        // Subscribe to output port value changes so the preview bubble and
+        // watch summaries refresh after every run.
+        var alive = new HashSet<PortModel>();
+        foreach (var port in Model.OutPorts)
+        {
+            alive.Add(port);
+            if (_watchedOutputPorts.Add(port))
+            {
+                port.PropertyChanged += OnOutputPortPropertyChanged;
+            }
+        }
+
+        _watchedOutputPorts.RemoveWhere(port =>
+        {
+            if (!alive.Contains(port))
+            {
+                port.PropertyChanged -= OnOutputPortPropertyChanged;
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private void OnOutputPortPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PortModel.Value))
+        {
+            UpdateValueDisplay();
+        }
+    }
+
+    private void UpdateValueDisplay()
+    {
+        var outputs = Model.OutPorts;
+        string preview;
+        if (outputs.Count == 0)
+        {
+            preview = string.Empty;
+        }
+        else if (outputs.Count == 1)
+        {
+            preview = SummarizeValue(outputs[0].Value);
+        }
+        else
+        {
+            var lines = new List<string>(outputs.Count);
+            foreach (var port in outputs)
+            {
+                lines.Add(port.Name + ": " + SummarizeValue(port.Value));
+            }
+
+            preview = string.Join(Environment.NewLine, lines);
+        }
+
+        PreviewText = preview;
+
+        var firstValue = outputs.Count > 0 ? outputs[0].Value : null;
+        WatchCountText = firstValue is IList list && !(firstValue is string)
+            ? "List — " + list.Count.ToString(CultureInfo.InvariantCulture) + (list.Count == 1 ? " item" : " items")
+            : string.Empty;
+    }
+
+    private static string SummarizeValue(object? value)
+    {
+        if (value is IList list && !(value is string))
+        {
+            int shown = Math.Min(list.Count, 3);
+            var parts = new List<string>(shown);
+            for (int i = 0; i < shown; i++)
+            {
+                parts.Add(Truncate(TypeCoercion.FormatValue(list[i]), 24));
+            }
+
+            var summary = "[" + string.Join(", ", parts);
+            if (list.Count > shown)
+            {
+                summary += ", … " + (list.Count - shown).ToString(CultureInfo.InvariantCulture) + " more";
+            }
+
+            return summary + "]";
+        }
+
+        return Truncate(TypeCoercion.FormatValue(value), 64);
+    }
+
+    private static string Truncate(string text, int maxLength)
+    {
+        // Keep the bubble compact: single line, bounded length.
+        text = text.Replace("\r", " ").Replace("\n", " ");
+        return text.Length <= maxLength ? text : text.Substring(0, maxLength - 1) + "…";
+    }
+
+    private static PropertyInfo? FindSizeProperty(NodeModel model, string name)
+    {
+        var property = model.GetType().GetProperty(name);
+        return property != null &&
+               property.PropertyType == typeof(double) &&
+               property.CanRead &&
+               property.CanWrite
+            ? property
+            : null;
+    }
+
+    private static double ToViewSize(double stored)
+    {
+        // 0 (or less) persists as "size automatically", which WPF spells NaN.
+        return stored > 0 ? stored : double.NaN;
     }
 
     private static Brush GetCategoryBrush(string category)

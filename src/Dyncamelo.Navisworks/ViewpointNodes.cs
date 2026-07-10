@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
 
@@ -99,5 +100,127 @@ public static class ViewpointNodes
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
         var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(viewpoints.Value, name);
         return storedIndex >= 0 ? (SavedViewpoint)viewpoints.Value[storedIndex] : saved;
+    }
+
+    /// <summary>The display name of a saved viewpoint.</summary>
+    /// <param name="viewpoint">The saved viewpoint.</param>
+    /// <returns>The viewpoint's display name.</returns>
+    [NodeName("SavedViewpoint.Name")]
+    [NodeDescription("The display name of a saved viewpoint.")]
+    [NodeSearchTags("viewpoint", "view", "name", "displayname")]
+    [return: NodeName("name")]
+    public static string Name(SavedViewpoint viewpoint)
+    {
+        if (viewpoint == null)
+        {
+            throw new ArgumentNullException(nameof(viewpoint), "No saved viewpoint provided.");
+        }
+
+        return viewpoint.DisplayName ?? string.Empty;
+    }
+
+    /// <summary>Deletes a saved viewpoint by display name.</summary>
+    /// <param name="name">The viewpoint's display name (folders are searched too).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>True when a viewpoint was deleted; false when no viewpoint has that name.</returns>
+    [NodeName("SavedViewpoint.Delete")]
+    [NodeDescription("Deletes a saved viewpoint by name (searches folders too). Returns false when absent — safe for clean re-runs of batch generation.")]
+    [NodeSearchTags("viewpoint", "view", "delete", "remove", "clean")]
+    [return: NodeName("deleted")]
+    public static bool Delete(string name, Document? document = null)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException("No viewpoint name provided.", nameof(name));
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+        var viewpoint = NavisValues.FindSavedItemByName<SavedViewpoint>(viewpoints.RootItem.Children, name);
+        if (viewpoint == null)
+        {
+            return false;
+        }
+
+        var parent = viewpoint.Parent;
+        return parent == null ? viewpoints.Remove(viewpoint) : viewpoints.Remove(parent, viewpoint);
+    }
+
+    /// <summary>Creates one saved viewpoint per clash result, aimed at the clash.</summary>
+    /// <param name="results">The clash results (e.g. from ClashTest.Results).</param>
+    /// <param name="folderName">Viewpoint folder to file them under (null/empty stores them at the top level).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The stored viewpoints, one per result, named after the result.</returns>
+    [NodeName("Viewpoints.FromClashResults")]
+    [NodeDescription("Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.")]
+    [NodeSearchTags("viewpoints", "clash", "results", "batch", "generate", "triage")]
+    [return: NodeName("viewpoints")]
+    public static List<SavedViewpoint> FromClashResults(
+        IEnumerable<ClashResult> results,
+        string? folderName = "Clash Views",
+        Document? document = null)
+    {
+        if (results == null)
+        {
+            throw new ArgumentNullException(nameof(results), "No clash results provided.");
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var clash = ClashHelpers.RequireClash(doc);
+        var viewpoints = doc.SavedViewpoints;
+
+        FolderItem? folder = null;
+        if (!string.IsNullOrEmpty(folderName))
+        {
+            var folderIndex = NavisValues.FindTopLevelIndex<FolderItem>(viewpoints.Value, folderName!);
+            if (folderIndex < 0)
+            {
+                viewpoints.AddCopy(new FolderItem { DisplayName = folderName });
+                folderIndex = NavisValues.FindTopLevelIndex<FolderItem>(viewpoints.Value, folderName!);
+            }
+
+            folder = folderIndex >= 0 ? (FolderItem)viewpoints.Value[folderIndex] : null;
+        }
+
+        var stored = new List<SavedViewpoint>();
+        foreach (var result in results)
+        {
+            if (result == null)
+            {
+                continue;
+            }
+
+            var camera = clash.TestsData.TestsViewpointForResult(result);
+            var name = string.IsNullOrEmpty(result.DisplayName) ? "Clash" : result.DisplayName;
+            var saved = new SavedViewpoint(camera) { DisplayName = name };
+
+            var children = folder != null ? folder.Children : viewpoints.Value;
+            var existingIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
+            if (existingIndex >= 0)
+            {
+                if (folder != null)
+                {
+                    viewpoints.ReplaceWithCopy(folder, existingIndex, saved);
+                }
+                else
+                {
+                    viewpoints.ReplaceWithCopy(existingIndex, saved);
+                }
+            }
+            else if (folder != null)
+            {
+                viewpoints.AddCopy(folder, saved);
+            }
+            else
+            {
+                viewpoints.AddCopy(saved);
+            }
+
+            // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
+            var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
+            stored.Add(storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved);
+        }
+
+        return stored;
     }
 }

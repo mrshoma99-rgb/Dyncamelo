@@ -20,6 +20,9 @@
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsCommand}" />
         <KeyBinding Key="D" Modifiers="Control" Command="{Binding DuplicateSelectionCommand}" />
+        <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopySelectionCommand}" />
+        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
+        <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
         <KeyBinding Key="F5" Command="{Binding RunCommand}" />
     </UserControl.InputBindings>
 
@@ -50,6 +53,10 @@
                                   Content="Auto"
                                   ToolTip="Re-run automatically after every change"
                                   IsChecked="{Binding IsAutoRun}" />
+                    <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
+                                  Content="Preview"
+                                  ToolTip="Show a value preview bubble under each node after a run"
+                                  IsChecked="{Binding ShowNodePreviews}" />
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
@@ -169,6 +176,7 @@
                                  ItemsSource="{Binding Items}"
                                  Connections="{Binding Connections}"
                                  SelectedItems="{Binding SelectedItems}"
+                                 SelectedConnections="{Binding SelectedConnections}"
                                  PendingConnection="{Binding PendingConnection}"
                                  PendingConnectionTemplate="{StaticResource Dyc.PendingConnectionTemplate}"
                                  ConnectionTemplate="{StaticResource Dyc.ConnectionTemplate}"
@@ -216,6 +224,19 @@
                         <MenuItem Header="Add Note Here"
                                   Command="{Binding PlacementTarget.DataContext.AddNoteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
                                   CommandParameter="{Binding PlacementTarget.MouseLocation, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <Separator />
+                        <MenuItem Header="Copy"
+                                  InputGestureText="Ctrl+C"
+                                  Command="{Binding PlacementTarget.DataContext.CopySelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Paste"
+                                  InputGestureText="Ctrl+V"
+                                  Command="{Binding PlacementTarget.DataContext.PasteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Duplicate"
+                                  InputGestureText="Ctrl+D"
+                                  Command="{Binding PlacementTarget.DataContext.DuplicateSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Group Selection"
+                                  InputGestureText="Ctrl+G"
+                                  Command="{Binding PlacementTarget.DataContext.GroupSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <Separator />
                         <MenuItem Header="Run"
                                   Command="{Binding PlacementTarget.DataContext.RunCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />

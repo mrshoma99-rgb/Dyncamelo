@@ -196,4 +196,116 @@ public class FileNodesTests : IDisposable
         var ex = Assert.Throws<FormatException>(() => FileNodes.ReadJson(path));
         Assert.Contains(path, ex.Message);
     }
+
+    // ---------------------------------------------------------- JSON (string)
+
+    [Fact]
+    public void JsonParse_BuildsDictionariesListsAndValues()
+    {
+        var value = FileNodes.ParseJson("{\"name\": \"Wall\", \"ids\": [1, 2], \"ok\": true, \"gone\": null}");
+        var dictionary = Assert.IsType<Dictionary<string, object?>>(value);
+        Assert.Equal("Wall", dictionary["name"]);
+        Assert.Equal(new object?[] { 1d, 2d }, Assert.IsType<List<object?>>(dictionary["ids"]));
+        Assert.True((bool)dictionary["ok"]!);
+        Assert.Null(dictionary["gone"]);
+    }
+
+    [Fact]
+    public void JsonParse_InvalidOrEmptyInput_ThrowsClearErrors()
+    {
+        Assert.Contains("not valid JSON", Assert.Throws<FormatException>(() => FileNodes.ParseJson("{ nope")).Message);
+        Assert.Contains("JSON.Parse", Assert.Throws<ArgumentException>(() => FileNodes.ParseJson(" ")).Message);
+    }
+
+    [Fact]
+    public void JsonStringify_RoundTripsThroughParse()
+    {
+        var data = new Dictionary<string, object?>
+        {
+            ["name"] = "Dyncamelo",
+            ["values"] = new List<object?> { 1d, 2.5, null },
+        };
+
+        var compact = FileNodes.StringifyJson(data, indented: false);
+        Assert.DoesNotContain("\n", compact);
+
+        var roundTripped = Assert.IsType<Dictionary<string, object?>>(FileNodes.ParseJson(compact));
+        Assert.Equal("Dyncamelo", roundTripped["name"]);
+        Assert.Equal(new object?[] { 1d, 2.5, null }, Assert.IsType<List<object?>>(roundTripped["values"]));
+    }
+
+    [Fact]
+    public void JsonStringify_IndentedByDefault_AndHandlesNull()
+    {
+        Assert.Contains("\n", FileNodes.StringifyJson(new Dictionary<string, object?> { ["a"] = 1 }));
+        Assert.Equal("null", FileNodes.StringifyJson(null));
+    }
+
+    // ----------------------------------------------------- File system helpers
+
+    [Fact]
+    public void FileExists_DistinguishesFilesFoldersAndMissingPaths()
+    {
+        var path = PathFor("present.txt");
+        File.WriteAllText(path, "x");
+
+        Assert.True(FileNodes.FileExists(path));
+        Assert.False(FileNodes.FileExists(PathFor("absent.txt")));
+        Assert.False(FileNodes.FileExists(_directory)); // a folder is not a file
+    }
+
+    [Fact]
+    public void FileExists_EmptyPath_ThrowsHelpfulMessage()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => FileNodes.FileExists(" "));
+        Assert.Contains("File Path", ex.Message);
+    }
+
+    [Fact]
+    public void GetFiles_ListsFilesSorted_IncludingExtensionless()
+    {
+        File.WriteAllText(PathFor("b.txt"), "");
+        File.WriteAllText(PathFor("a.txt"), "");
+        File.WriteAllText(PathFor("README"), "");
+        Directory.CreateDirectory(PathFor("subdir"));
+
+        var files = FileNodes.GetFiles(_directory);
+
+        Assert.Equal(
+            new[] { PathFor("README"), PathFor("a.txt"), PathFor("b.txt") },
+            files);
+    }
+
+    [Fact]
+    public void GetFiles_AppliesWildcardPattern()
+    {
+        File.WriteAllText(PathFor("model.nwd"), "");
+        File.WriteAllText(PathFor("notes.txt"), "");
+
+        var files = FileNodes.GetFiles(_directory, "*.nwd");
+
+        Assert.Equal(new[] { PathFor("model.nwd") }, files);
+    }
+
+    [Fact]
+    public void GetFiles_MissingFolder_ThrowsWithPathInMessage()
+    {
+        var missing = PathFor("no-such-dir");
+        var ex = Assert.Throws<DirectoryNotFoundException>(() => FileNodes.GetFiles(missing));
+        Assert.Contains(missing, ex.Message);
+    }
+
+    [Fact]
+    public void CombinePath_JoinsSegments()
+    {
+        Assert.Equal(Path.Combine("folder", "file.txt"), FileNodes.CombinePath("folder", "file.txt"));
+        Assert.Equal("file.txt", FileNodes.CombinePath("", "file.txt"));
+    }
+
+    [Fact]
+    public void CombinePath_NullInputs_ThrowHelpfulMessages()
+    {
+        Assert.Contains("directory", Assert.Throws<ArgumentNullException>(() => FileNodes.CombinePath(null!, "f")).Message);
+        Assert.Contains("fileName", Assert.Throws<ArgumentNullException>(() => FileNodes.CombinePath("d", null!)).Message);
+    }
 }

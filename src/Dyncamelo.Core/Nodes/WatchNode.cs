@@ -1,6 +1,7 @@
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Types;
+using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
 
@@ -15,6 +16,8 @@ public class WatchNode : NodeModel
     public const string TypeName = "Watch";
 
     private string _formattedValue = string.Empty;
+    private double _viewWidth;
+    private double _viewHeight;
 
     /// <summary>Creates the node with an object input and a pass-through output.</summary>
     public WatchNode()
@@ -33,6 +36,26 @@ public class WatchNode : NodeModel
         private set => SetField(ref _formattedValue, value);
     }
 
+    /// <summary>
+    /// User-chosen width of the display area (0 = automatic). Pure view state:
+    /// changing it never dirties the node. Persisted in the .dyc payload.
+    /// </summary>
+    public double ViewWidth
+    {
+        get => _viewWidth;
+        set => SetField(ref _viewWidth, value);
+    }
+
+    /// <summary>
+    /// User-chosen height of the display area (0 = automatic). Pure view state:
+    /// changing it never dirties the node. Persisted in the .dyc payload.
+    /// </summary>
+    public double ViewHeight
+    {
+        get => _viewHeight;
+        set => SetField(ref _viewHeight, value);
+    }
+
     /// <inheritdoc />
     public override string NodeType => TypeName;
 
@@ -42,5 +65,21 @@ public class WatchNode : NodeModel
         var value = inputs.Length > 0 ? inputs[0] : null;
         FormattedValue = TypeCoercion.FormatValue(value);
         return new object?[] { value };
+    }
+
+    /// <inheritdoc />
+    public override void SerializeData(JObject data)
+    {
+        // Additive, optional fields: absent (or zero) means "size automatically",
+        // so files written by older versions keep loading unchanged.
+        data["ViewWidth"] = ViewWidth;
+        data["ViewHeight"] = ViewHeight;
+    }
+
+    /// <inheritdoc />
+    public override void DeserializeData(JObject data)
+    {
+        ViewWidth = data.Value<double?>("ViewWidth") ?? 0d;
+        ViewHeight = data.Value<double?>("ViewHeight") ?? 0d;
     }
 }
