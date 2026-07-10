@@ -169,8 +169,53 @@ jobs:
           ``````
           "@
           Set-Content -Path notes.md -Value $notes
-          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" `
+          # Stable-named copy so releases/latest/download/<name> URLs never change.
+          Copy-Item $env:ZIP "Dyncamelo-navisworks2024.zip"
+          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" "Dyncamelo-navisworks2024.zip" `
             --target $env:GITHUB_SHA `
             --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
             --notes-file notes.md
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      # Always expose the latest release zip as a workflow artifact (even when
+      # the release already existed and packaging was skipped) so tooling can
+      # relay it to the public dyncamelo-releases repo without extra tokens.
+      - name: Expose latest release zip as artifact
+        if: always() && env.VERSION != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force -Path relay | Out-Null
+          gh release download $env:VERSION --repo $env:GITHUB_REPOSITORY --dir relay --pattern "*.zip" --pattern "*.sha256"
+          if ($LASTEXITCODE -ne 0) { Write-Host "No release to relay" }
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always() && env.VERSION != ''
+        continue-on-error: true
+        with:
+          name: release-zip
+          path: relay/
+          retention-days: 7
+
+      # Optional full automation: if a fine-grained PAT with contents:write on
+      # mrshoma99-rgb/dyncamelo-releases is stored as the PUBLIC_RELEASES_TOKEN
+      # secret, every release is mirrored there automatically (public download
+      # for the website while this repo stays private).
+      - name: Mirror release to public dyncamelo-releases
+        if: always() && env.VERSION != ''
+        env:
+          PUBTOKEN: ${{ secrets.PUBLIC_RELEASES_TOKEN }}
+        run: |
+          if (-not $env:PUBTOKEN) { Write-Host "PUBLIC_RELEASES_TOKEN not set - skipping public mirror (relay artifact available instead)"; exit 0 }
+          $env:GH_TOKEN = $env:PUBTOKEN
+          gh release view $env:VERSION --repo mrshoma99-rgb/dyncamelo-releases *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Host "Public release $env:VERSION already exists"; exit 0 }
+          if (-not (Test-Path "relay/Dyncamelo-navisworks2024.zip")) {
+            $versioned = Get-ChildItem relay -Filter "Dyncamelo-v*-navisworks2024.zip" | Select-Object -First 1
+            if ($versioned) { Copy-Item $versioned.FullName "relay/Dyncamelo-navisworks2024.zip" }
+          }
+          gh release create $env:VERSION (Get-ChildItem relay/* | ForEach-Object FullName) `
+            --repo mrshoma99-rgb/dyncamelo-releases `
+            --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
+            --notes "Download Dyncamelo-navisworks2024.zip, extract, run install-dyncamelo.bat, start Navisworks 2024."
           if ($LASTEXITCODE -ne 0) { exit 1 }
