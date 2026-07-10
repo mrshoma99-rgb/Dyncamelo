@@ -200,7 +200,7 @@ public static class ListNodes
     public static IList<object?> Sort(IList<object?> list)
     {
         RequireList(list, "List.Sort");
-        return list.OrderBy(item => item, NodeValueComparer.Instance).ToList();
+        return SortDescribingErrors(list, item => item, "List.Sort");
     }
 
     /// <summary>
@@ -436,9 +436,8 @@ public static class ListNodes
     {
         RequireParallelKeys(list, keys, "List.SortByKey");
 
-        var order = Enumerable.Range(0, list.Count)
-            .OrderBy(i => keys[i], NodeValueComparer.Instance)
-            .ToList();
+        var order = SortDescribingErrors(
+            Enumerable.Range(0, list.Count), i => keys[i], "List.SortByKey");
 
         return new Dictionary<string, object>
         {
@@ -497,6 +496,23 @@ public static class ListNodes
             {
                 output.Add(item);
             }
+        }
+    }
+
+    /// <summary>
+    /// Sorts with <see cref="NodeValueComparer"/>, unwrapping LINQ's generic
+    /// "Failed to compare two elements in the array." wrapper so the node error
+    /// carries <see cref="ValueComparison.Compare"/>'s descriptive message.
+    /// </summary>
+    private static List<T> SortDescribingErrors<T>(IEnumerable<T> source, Func<T, object?> keySelector, string nodeName)
+    {
+        try
+        {
+            return source.OrderBy(keySelector, NodeValueComparer.Instance).ToList();
+        }
+        catch (InvalidOperationException ex) when (ex.InnerException != null)
+        {
+            throw new InvalidOperationException(nodeName + ": " + ex.InnerException.Message, ex.InnerException);
         }
     }
 

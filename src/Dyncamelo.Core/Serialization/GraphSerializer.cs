@@ -23,6 +23,8 @@ public class GraphSerializer
     /// <summary>Highest .dyc format version this serializer writes and fully understands.</summary>
     public const int CurrentFormatVersion = 1;
 
+    private static readonly string AppVersion = ResolveAppVersion();
+
     private readonly NodeRegistry _registry;
 
     /// <summary>Creates a serializer bound to a node registry.</summary>
@@ -30,6 +32,29 @@ public class GraphSerializer
     public GraphSerializer(NodeRegistry registry)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+    }
+
+    /// <summary>
+    /// Version stamped into the envelope's <c>AppVersion</c> field: the
+    /// assembly's informational version (build metadata stripped), falling
+    /// back to the plain assembly version.
+    /// </summary>
+    private static string ResolveAppVersion()
+    {
+        var assembly = typeof(GraphSerializer).Assembly;
+        var informational = assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault();
+        var version = informational?.InformationalVersion;
+        if (!string.IsNullOrEmpty(version))
+        {
+            int metadata = version!.IndexOf('+');
+            return metadata >= 0 ? version.Substring(0, metadata) : version;
+        }
+
+        var name = assembly.GetName().Version;
+        return name != null ? name.ToString(3) : "0.0.0";
     }
 
     /// <summary>Serializes a graph to indented .dyc JSON.</summary>
@@ -47,7 +72,7 @@ public class GraphSerializer
             {
                 ["FormatVersion"] = CurrentFormatVersion,
                 ["MinReaderVersion"] = 1,
-                ["AppVersion"] = "0.1.0",
+                ["AppVersion"] = AppVersion,
             },
             ["Uuid"] = graph.Uuid.ToString("N"),
             ["Name"] = graph.Name,
