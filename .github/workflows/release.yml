@@ -102,11 +102,21 @@ jobs:
           Copy-Item "$layout/Resources/*.png"      -Destination "$year/Resources"
 
           # Bundle manifest from the dist template, stamped with the release
-          # version (ApplicationPackage Version, not SchemaVersion).
+          # version via XML DOM (a case-insensitive regex here once corrupted the
+          # <?xml version=...?> declaration, making Navisworks silently ignore
+          # the whole bundle — never string-edit this file).
           $numeric  = $env:VERSION.TrimStart('v')
-          $manifest = Get-Content "dist/Dyncamelo.bundle/PackageContents.xml" -Raw
-          $manifest = $manifest -replace '(?<!Schema)Version="[^"]*"', "Version=`"$numeric.0`""
-          Set-Content -Path "$staging/Dyncamelo.bundle/PackageContents.xml" -Value $manifest -NoNewline
+          [xml]$doc = Get-Content "dist/Dyncamelo.bundle/PackageContents.xml" -Raw
+          $doc.ApplicationPackage.Version = "$numeric.0"
+          $manifestPath = Join-Path (Get-Location) "$staging/Dyncamelo.bundle/PackageContents.xml"
+          $doc.Save($manifestPath)
+
+          # Validation gate: the staged manifest MUST parse and carry the version.
+          [xml]$check = Get-Content $manifestPath -Raw
+          if ($check.ApplicationPackage.Version -ne "$numeric.0") {
+            Write-Host "::error::Staged PackageContents.xml failed validation"
+            exit 1
+          }
 
           Copy-Item "dist/install-dyncamelo.bat" -Destination $staging
           Copy-Item "dist/README.md"             -Destination $staging
