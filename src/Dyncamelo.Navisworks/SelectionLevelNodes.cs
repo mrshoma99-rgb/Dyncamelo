@@ -22,7 +22,7 @@ public static class SelectionLevelNodes
     /// <item><description><c>Layer</c> — the layer containing the item (the file node when the model has no layers).</description></item>
     /// <item><description><c>FirstObject</c> — the highest object in the path below any files, layers and collections (the outermost composite/insert object).</description></item>
     /// <item><description><c>LastObject</c> — the last object in the path: the composite/insert object closest to the geometry, or the item itself when there is none. This is Navisworks' default resolution.</description></item>
-    /// <item><description><c>LastUnique</c> — the last item in the path whose name is unique among its siblings (the closest match to Navisworks' "last unique" resolution).</description></item>
+    /// <item><description><c>LastUnique</c> — the last (deepest) item in the path that is not multiply instanced, i.e. not shared by several inserts (Navisworks' "last unique" resolution).</description></item>
     /// <item><description><c>Geometry</c> — the geometry leaves themselves (an item above geometry expands to every geometry leaf beneath it).</description></item>
     /// <item><description><c>Self</c> — no resolution; the items pass through unchanged.</description></item>
     /// </list>
@@ -70,7 +70,7 @@ internal enum SelectionLevel
     /// <summary>The innermost composite/insert object (Navisworks' default).</summary>
     LastObject,
 
-    /// <summary>The innermost item whose name is unique among its siblings.</summary>
+    /// <summary>The innermost item that is not multiply instanced.</summary>
     LastUnique,
 
     /// <summary>The geometry leaves themselves.</summary>
@@ -224,18 +224,20 @@ internal static class SelectionLevels
                 return item;
 
             case SelectionLevel.LastUnique:
-                // The last item in the path with a non-empty name no sibling
-                // shares — the deepest unambiguously named ancestor.
+                // Navisworks' documented rule: the last object in the path that
+                // is NOT multiply instanced. An item shared by several inserts
+                // resolves upward to its first non-shared ancestor. When every
+                // item below the root is multiply instanced, fall back to the
+                // default (LastObject) resolution rather than the file node.
                 for (int i = path.Count - 1; i >= 1; i--)
                 {
-                    var candidate = path[i];
-                    if (!string.IsNullOrEmpty(candidate.DisplayName) && IsUniqueAmongSiblings(candidate))
+                    if (!IsMultiplyInstanced(path[i]))
                     {
-                        return candidate;
+                        return path[i];
                     }
                 }
 
-                return path[0];
+                return ResolveSingle(item, SelectionLevel.LastObject);
 
             default:
                 return item;
@@ -255,28 +257,22 @@ internal static class SelectionLevels
         return path;
     }
 
-    /// <summary>Whether no sibling under the same parent shares the item's display name.</summary>
-    private static bool IsUniqueAmongSiblings(ModelItem item)
+    /// <summary>
+    /// Whether the scene node is shared by more than one insert (multiply
+    /// instanced). <c>ModelItem.Instances</c> enumerates every occurrence of
+    /// the underlying node; a non-instanced item yields at most one.
+    /// </summary>
+    private static bool IsMultiplyInstanced(ModelItem item)
     {
-        var parent = item.Parent;
-        if (parent == null)
-        {
-            return true;
-        }
-
         int count = 0;
-        foreach (var sibling in parent.Children)
+        foreach (var instance in item.Instances)
         {
-            if (string.Equals(sibling.DisplayName, item.DisplayName, StringComparison.Ordinal))
+            if (++count > 1)
             {
-                count++;
-                if (count > 1)
-                {
-                    return false;
-                }
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 }

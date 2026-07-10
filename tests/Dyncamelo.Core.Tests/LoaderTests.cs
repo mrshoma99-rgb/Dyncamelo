@@ -155,4 +155,56 @@ public class LoaderTests
         Assert.Null(registry.CreateZeroTouchNode("No.Such.Method@double"));
         Assert.Null(registry.CreateNode("NoSuchType"));
     }
+
+    [Fact]
+    public void Aliases_AreHarvestedFromAttribute()
+    {
+        Assert.Equal(
+            new[] { "Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double" },
+            ZT.Definition("Doubler").Aliases);
+        Assert.Empty(ZT.Definition("Add").Aliases);
+    }
+
+    [Fact]
+    public void Registry_ResolvesLegacyAliasIds_ToTheCurrentDefinition()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterDefinitions(ZT.All);
+
+        // The legacy id resolves...
+        Assert.True(registry.TryGetDefinition(
+            "Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double", out var definition));
+
+        // ...to the CURRENT definition (new id, new ports).
+        Assert.Equal("Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double,double", definition!.Id);
+
+        var node = registry.CreateZeroTouchNode("Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double");
+        Assert.NotNull(node);
+        Assert.Equal(new[] { "x", "scale" }, node!.InPorts.Select(p => p.Name));
+        Assert.True(node.InPorts[1].UsingDefaultValue); // appended parameter keeps its default
+    }
+
+    [Fact]
+    public void Alias_NeverShadowsADefinitionThatOwnsTheIdExactly()
+    {
+        var current = ZT.Definition("Doubler");
+        // A (hypothetical) definition whose REAL id equals Doubler's alias.
+        var owner = new NodeDefinition(
+            "Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double",
+            current.AssemblyName,
+            ZT.Definition("Sqrt").Method);
+
+        // Exact ids win over aliases in either registration order.
+        var registry = new NodeRegistry();
+        registry.RegisterDefinition(current);
+        registry.RegisterDefinition(owner);
+        Assert.True(registry.TryGetDefinition(owner.Id, out var resolved));
+        Assert.Same(owner, resolved);
+
+        registry = new NodeRegistry();
+        registry.RegisterDefinition(owner);
+        registry.RegisterDefinition(current);
+        Assert.True(registry.TryGetDefinition(owner.Id, out resolved));
+        Assert.Same(owner, resolved);
+    }
 }

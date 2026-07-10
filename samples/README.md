@@ -6,9 +6,9 @@ Two families of `.dyc` graphs live here:
   exercise the headless pipeline end to end. None of them need Navisworks or
   WPF; they run anywhere the `dyncamelo` CLI runs, including Linux and CI.
 - **In-app example workflows** (Title Case file names) — six teaching graphs
-  that ship with the Navisworks plugin (the installer stages this directory
-  into a `Samples` folder next to the plugin DLL, where the UI's Samples menu
-  finds them). Except for *Getting Started - Math and Watch*, they use
+  that ship with the Navisworks plugin (the build stages exactly these six
+  files — the developer graphs are excluded — into a `Samples` folder next
+  to the plugin DLL, where the UI's Samples menu finds them). Except for *Getting Started - Math and Watch*, they use
   `Dyncamelo.Navisworks` nodes and need a running Navisworks with a model
   open — on other machines they load as placeholder nodes.
 

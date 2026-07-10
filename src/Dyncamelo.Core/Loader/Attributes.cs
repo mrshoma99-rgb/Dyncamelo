@@ -73,6 +73,28 @@ public sealed class NodeSearchTagsAttribute : Attribute
 }
 
 /// <summary>
+/// Legacy definition ids under which a zero-touch node was previously
+/// serialized. When a method's signature changes (e.g. a new optional
+/// parameter is appended), its mangled definition id changes with it and
+/// saved .dyc files stop resolving; listing the old id(s) here keeps those
+/// files loading. Aliases only resolve when no definition owns the id
+/// exactly, and re-saving writes the current id (files migrate on save).
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class NodeAliasesAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="aliases">Previous definition ids (full mangled signatures, e.g. "Ns.Class.Method@string,double").</param>
+    public NodeAliasesAttribute(params string[] aliases)
+    {
+        Aliases = aliases ?? Array.Empty<string>();
+    }
+
+    /// <summary>The legacy definition ids.</summary>
+    public string[] Aliases { get; }
+}
+
+/// <summary>
 /// Marks a method returning <c>Dictionary&lt;string, object&gt;</c> as multi-output:
 /// one output port per key, in the order given here. A key missing from the
 /// returned dictionary yields null on that port plus a node warning.

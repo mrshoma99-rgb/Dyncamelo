@@ -1103,7 +1103,15 @@ public class GraphEditorViewModel : ObservableObject
             return;
         }
 
-        OpenFromPath(sample.FilePath);
+        if (OpenFromPath(sample.FilePath))
+        {
+            // Samples are read-only templates: detach the file path so Ctrl+S
+            // becomes Save As instead of silently overwriting the shipped
+            // sample (which the Samples menu would then serve to every
+            // future open, and reinstalls would conflict with).
+            CurrentFilePath = null;
+            StatusMessage = "Opened sample '" + sample.Name + "' (save creates a copy).";
+        }
     }
 
     private void SaveGraph()

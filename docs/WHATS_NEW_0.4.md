@@ -16,13 +16,13 @@ v0.4 is built directly from field reports of the first production users: everyth
 - **`Selection.Resolve`** *(Navisworks.Selection)* — re-selects items at another level of the selection tree, exactly like changing *Options > Interface > Selection > Resolution* and re-picking. Levels: `Self` (pass-through), `File`, `Layer`, `FirstObject`, `LastObject` (Navisworks' default resolution), `LastUnique`, and `Geometry` (expands *down* to the geometry leaves). Level names are case-insensitive and forgiving about spaces/hyphens/underscores; unknown levels fail fast and list the valid names. Output is deduplicated with input order preserved.
 - **`resolveTo` input on the pickers** — the seven `Search.*` picker nodes (`ByPropertyValue`, `ByPropertyContains`, `ByPropertyWildcard`, `ByPropertyCompare`, `HasProperty`, `HasCategory`, `InItems`) and `Selection.Current` gained an optional `resolveTo: string = "Self"` input (just before `document`) that applies the same resolution to their results in one step — e.g. search on a Revit parameter but color/report the *whole objects* (`LastObject`) or the owning *files* (`File`) instead of the raw property-bearing leaves. The default `Self` keeps v0.3 behavior.
 
-> ### Breaking change: saved graphs that use the 8 modified pickers
+> ### Compatibility: saved graphs that use the 8 modified pickers
 >
-> Adding the `resolveTo` input changes the zero-touch definition id of `Search.ByPropertyValue`, `Search.ByPropertyContains`, `Search.ByPropertyWildcard`, `Search.ByPropertyCompare`, `Search.HasProperty`, `Search.HasCategory`, `Search.InItems` and `Selection.Current`. Graphs saved with **v0.3 or earlier** that contain one of these nodes will load in v0.4 with that node flagged **Missing** (an error placeholder) — the rest of the graph, including the placeholder's wires, is intact. Fix: drop the v0.4 node from the library next to the placeholder, move the wires over, delete the placeholder, and save; graphs saved with v0.4 are stable (ports match by name from then on). The shipped sample graphs are already updated. All other nodes are unaffected.
+> Adding the `resolveTo` input changes the zero-touch definition id of `Search.ByPropertyValue`, `Search.ByPropertyContains`, `Search.ByPropertyWildcard`, `Search.ByPropertyCompare`, `Search.HasProperty`, `Search.HasCategory`, `Search.InItems` and `Selection.Current`. Graphs saved with **v0.3 or earlier** still open unchanged: the old ids are registered as legacy aliases (a new `[NodeAliases]` mechanism in the loader), the node resolves to its v0.4 definition, and the absent `resolveTo` port simply keeps its `Self` default — i.e. exactly the v0.3 behavior. Re-saving the graph migrates it to the new id. A regression test pins every pre-0.4 id against the source so an alias can't silently disappear.
 
 ## Sample graphs
 
-- **Six new curated samples** ship with the plugin and appear in the new Sample Graphs menu, alongside the four original developer samples (10 total):
+- **Six new curated samples** ship with the plugin and appear in the new Sample Graphs menu (the four lower-case developer graphs stay in the repository for tests/CLI but are not deployed):
   - *Getting Started - Math and Watch* — sliders, math, Watch, notes and groups; runs anywhere, including the CLI.
   - *Color Elements by Property* — search by property text → color the hits.
   - *Bulk Selection Sets from Values* — one saved selection set per property value, via lacing.
@@ -30,10 +30,10 @@ v0.4 is built directly from field reports of the first production users: everyth
   - *QTO Rollup by Category* — quantity takeoff summed per group, exported.
   - *Clash Triage and BCF Export* — clash results grouped by status → BCF 2.1 issues + CSV report.
   Every sample opens with teaching notes on the canvas (what to edit, what to press). The Navisworks samples are set to Manual run so nothing fires on open.
-- **Deployment** — the build now stages `samples/*.dyc` into a `Samples` folder inside the plugin layout, the dev bundle deploy, and the release bundle zip (with a fail-the-release gate if the folder comes up empty), so the in-app menu is populated in every install layout.
+- **Deployment** — the build now stages the six curated `.dyc` files into a `Samples` folder inside the plugin layout, the dev bundle deploy, and the release bundle zip (with a fail-the-release gate if the folder comes up empty), so the in-app menu is populated in every install layout.
 - **Validated, not hand-checked** — a new static-validation test suite pins every shipped sample against the real node registry: definition ids, port names, defaults and connector endpoints (Navisworks node signatures are cross-checked against the C# source). Renaming a node or port now fails CI before it can break a sample.
 
 ## Under the hood
 
-- Version bumped to **0.4.0**; all suites green on Linux CI: Core **113**, Nodes **304**, Integration **29** (up from 18: +10 sample static-validation tests, +1 runnable sample), plus CLI smoke runs of every general-node sample and `validate` passes over the Navisworks samples.
+- Version bumped to **0.4.0**; all suites green on Linux CI: Core **117** (incl. 4 legacy-alias tests), Nodes **304**, Integration **31** (up from 18: +10 sample static-validation tests, +1 runnable sample, +2 legacy-id alias pins), plus CLI smoke runs of every general-node sample and `validate` passes over the Navisworks samples.
 - No new dependencies; the UI work is pure WPF/Nodify 7.3.0, the samples pipeline is pure MSBuild + workflow staging.
