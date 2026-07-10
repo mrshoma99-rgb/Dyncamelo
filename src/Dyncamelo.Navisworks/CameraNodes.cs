@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Autodesk.Navisworks.Api;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
@@ -42,6 +43,20 @@ public static class CameraNodes
     {
         var eyePoint = NavisValues.ToPoint3D(eye);
         var targetPoint = NavisValues.ToPoint3D(target);
+
+        double dx = targetPoint.X - eyePoint.X;
+        double dy = targetPoint.Y - eyePoint.Y;
+        double dz = targetPoint.Z - eyePoint.Z;
+        if (dx * dx + dy * dy + dz * dz < 1e-18)
+        {
+            throw new ArgumentException(
+                "Camera.LookAt requires 'eye' and 'target' to be different points; both are (" +
+                eyePoint.X.ToString(CultureInfo.InvariantCulture) + ", " +
+                eyePoint.Y.ToString(CultureInfo.InvariantCulture) + ", " +
+                eyePoint.Z.ToString(CultureInfo.InvariantCulture) +
+                ") so the view direction is undefined.", nameof(target));
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
 
         var viewpoint = doc.CurrentViewpoint.CreateCopy();

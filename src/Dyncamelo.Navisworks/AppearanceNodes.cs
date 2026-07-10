@@ -101,6 +101,20 @@ public static class AppearanceNodes
         return list;
     }
 
+    /// <summary>Shows (un-hides) every item in the model.</summary>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>True when the hidden flags were cleared.</returns>
+    [NodeName("Appearance.ShowAll")]
+    [NodeDescription("Shows (un-hides) every item in the model — undoes Appearance.Hide and Appearance.Isolate.")]
+    [NodeSearchTags("appearance", "show", "all", "unhide", "reveal", "isolate")]
+    [return: NodeName("done")]
+    public static bool ShowAll(Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        doc.Models.ResetAllHidden();
+        return true;
+    }
+
     /// <summary>Removes every appearance override in the model.</summary>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the overrides were cleared.</returns>
@@ -120,7 +134,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The isolated items (pass-through).</returns>
     [NodeName("Appearance.Isolate")]
-    [NodeDescription("Shows only these items and hides everything else (undo with Appearance.Show on Models.RootItems).")]
+    [NodeDescription("Shows only these items and hides everything else (undo with Appearance.ShowAll).")]
     [NodeSearchTags("appearance", "isolate", "only", "hide", "focus")]
     [return: NodeName("items")]
     public static List<ModelItem> Isolate(IEnumerable<ModelItem> items, Document? document = null)

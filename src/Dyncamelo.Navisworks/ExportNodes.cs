@@ -289,8 +289,22 @@ public static class ExportNodes
 
         var formatCode = ImageFormatCode(filePath);
 
-        // Ensure a document is open before driving the app-global COM exporter.
-        NavisworksContext.ResolveDocument(document);
+        // The COM exporter below is application-global and always renders the
+        // ACTIVE document's viewport. Ensure a document is open, and refuse an
+        // explicitly wired document that is not the active one — otherwise the
+        // node would silently write an image of the wrong document.
+        var doc = NavisworksContext.ResolveDocument(document);
+        if (document != null)
+        {
+            var active = NavisworksContext.ResolveDocument(null);
+            if (!ReferenceEquals(doc, active) && !doc.Equals(active))
+            {
+                throw new ArgumentException(
+                    "Export.ViewpointImage can only render the active document's viewport; " +
+                    "the wired 'document' is not the active document.", nameof(document));
+            }
+        }
+
         EnsureDirectory(filePath);
 
         var state = ComApiBridge.State;

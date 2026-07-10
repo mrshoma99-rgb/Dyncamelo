@@ -31,6 +31,28 @@ public partial class DyncameloEditorControl : UserControl
             MouseLeftButtonDownEvent,
             new MouseButtonEventHandler(OnEditorMouseLeftButtonDown),
             handledEventsToo: true);
+
+        PreviewKeyDown += OnControlPreviewKeyDown;
+    }
+
+    private void OnControlPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // Ctrl+D (duplicate), Ctrl+G (group) and F5 (run) are not consumed by
+        // TextBox editing (unlike Ctrl+C/Ctrl+V), so they would bubble up to
+        // the UserControl's KeyBindings while the user types in an inline
+        // TextBox (string/number/note/group-title/search) — and since clicking
+        // into a node's TextBox also selects that node, they would silently
+        // duplicate/group it mid-edit. Swallow them while a text box has focus.
+        if (!(Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase))
+        {
+            return;
+        }
+
+        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+        if ((ctrl && (e.Key == Key.D || e.Key == Key.G)) || e.Key == Key.F5)
+        {
+            e.Handled = true;
+        }
     }
 
     /// <summary>The editor view model (stored in the DataContext).</summary>

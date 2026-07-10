@@ -110,6 +110,8 @@ jobs:
 
           Copy-Item "dist/install-dyncamelo.bat" -Destination $staging
           Copy-Item "dist/README.md"             -Destination $staging
+          Copy-Item "THIRD-PARTY-NOTICES.md"     -Destination $staging
+          Copy-Item "LICENSE"                    -Destination $staging
 
       - name: Package bundle zip
         if: env.SKIP != 'true'
