@@ -92,6 +92,18 @@ public sealed class MultiReturnAttribute : Attribute
 }
 
 /// <summary>
+/// Marks a public static parameterless method that registers custom type
+/// converters (via <c>Dyncamelo.Core.Types.TypeCoercion.RegisterConverter</c>)
+/// for its node pack. The method is invoked once per process when the assembly
+/// is registered with a <see cref="NodeRegistry"/>; it is never imported as a
+/// node itself. Registration methods must be idempotent.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class TypeConverterRegistrationAttribute : Attribute
+{
+}
+
+/// <summary>
 /// Controls whether a method (or a whole class) is imported by the zero-touch
 /// loader. Use <c>[IsVisibleInLibrary(false)]</c> to hide helpers.
 /// </summary>

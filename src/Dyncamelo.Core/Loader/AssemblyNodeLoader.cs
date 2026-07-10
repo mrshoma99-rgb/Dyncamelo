@@ -14,6 +14,76 @@ namespace Dyncamelo.Core.Loader;
 /// </summary>
 public static class AssemblyNodeLoader
 {
+    /// <summary>Assemblies whose <see cref="TypeConverterRegistrationAttribute"/> methods have already run.</summary>
+    private static readonly HashSet<Assembly> ConverterRegistrationsCompleted = new HashSet<Assembly>();
+
+    /// <summary>
+    /// Invokes every public static parameterless method marked with
+    /// <see cref="TypeConverterRegistrationAttribute"/> in the assembly, exactly
+    /// once per process. Broken types or registrations that cannot run (e.g. a
+    /// node pack referencing a host assembly that is not present) are skipped so
+    /// they never abort the import of the pack.
+    /// </summary>
+    /// <param name="assembly">The node-pack assembly.</param>
+    public static void RunConverterRegistrations(Assembly assembly)
+    {
+        if (assembly == null)
+        {
+            throw new ArgumentNullException(nameof(assembly));
+        }
+
+        lock (ConverterRegistrationsCompleted)
+        {
+            if (!ConverterRegistrationsCompleted.Add(assembly))
+            {
+                return;
+            }
+
+            Type?[] types;
+            try
+            {
+                types = assembly.GetExportedTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                types = ex.Types;
+            }
+
+            foreach (var type in types)
+            {
+                try
+                {
+                    if (type == null || !type.IsVisible || !type.IsClass || type.IsGenericTypeDefinition)
+                    {
+                        continue;
+                    }
+
+                    foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                    {
+                        if (method.GetCustomAttribute<TypeConverterRegistrationAttribute>() == null ||
+                            method.IsGenericMethodDefinition ||
+                            method.GetParameters().Length != 0)
+                        {
+                            continue;
+                        }
+
+                        method.Invoke(null, null);
+                    }
+                }
+                catch (Exception ex) when (
+                    ex is TypeLoadException ||
+                    ex is ReflectionTypeLoadException ||
+                    ex is BadImageFormatException ||
+                    ex is TargetInvocationException ||
+                    ex is System.IO.FileNotFoundException ||
+                    ex is System.IO.FileLoadException)
+                {
+                    // Skip registrations that cannot be reflected over or executed.
+                }
+            }
+        }
+    }
+
     /// <summary>Loads node definitions from an assembly file.</summary>
     /// <param name="assemblyPath">Path to a managed assembly.</param>
     /// <returns>All importable definitions.</returns>
@@ -129,6 +199,12 @@ public static class AssemblyNodeLoader
     private static bool IsImportable(MethodInfo method)
     {
         if (method.IsGenericMethodDefinition || method.IsSpecialName || IsHidden(method))
+        {
+            return false;
+        }
+
+        // Converter-registration hooks are infrastructure, never nodes.
+        if (method.GetCustomAttribute<TypeConverterRegistrationAttribute>() != null)
         {
             return false;
         }

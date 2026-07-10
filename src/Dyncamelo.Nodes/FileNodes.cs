@@ -166,6 +166,126 @@ public static class FileNodes
         return path;
     }
 
+    /// <summary>
+    /// Parses a JSON string into graph-friendly values: objects become
+    /// dictionaries, arrays become lists, numbers become doubles. The
+    /// string-based twin of JSON.ReadFromFile (e.g. for JSON held in a
+    /// property value or built by other nodes).
+    /// </summary>
+    /// <param name="json">The JSON text to parse.</param>
+    /// <returns>The parsed value (dictionary, list, number, string, boolean or null).</returns>
+    [NodeName("JSON.Parse")]
+    [return: NodeName("value")]
+    [NodeDescription("Parses a JSON string into dictionaries, lists and values.")]
+    [NodeSearchTags("json", "deserialize", "decode")]
+    public static object? ParseJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            throw new ArgumentException("JSON.Parse requires a JSON string, e.g. \"{\\\"a\\\": 1}\".", nameof(json));
+        }
+
+        JToken token;
+        try
+        {
+            token = JToken.Parse(json);
+        }
+        catch (JsonException ex)
+        {
+            throw new FormatException("JSON.Parse: the input is not valid JSON. " + ex.Message, ex);
+        }
+
+        return ToGraphValue(token);
+    }
+
+    /// <summary>
+    /// Serializes any value (dictionaries, lists, numbers, strings, ...) to a
+    /// JSON string. The string-based twin of JSON.WriteToFile.
+    /// </summary>
+    /// <param name="value">The value to serialize.</param>
+    /// <param name="indented">True (default) for pretty-printed output.</param>
+    /// <returns>The JSON text.</returns>
+    [NodeName("JSON.Stringify")]
+    [return: NodeName("json")]
+    [NodeDescription("Serializes any value to a JSON string.")]
+    [NodeSearchTags("json", "serialize", "encode", "tostring")]
+    public static string StringifyJson(object? value, bool indented = true)
+    {
+        return JsonConvert.SerializeObject(value, indented ? Formatting.Indented : Formatting.None);
+    }
+
+    /// <summary>Tests whether a file exists at a path (false for folders and missing paths).</summary>
+    /// <param name="path">The file path to test.</param>
+    /// <returns>True when a file exists at the path.</returns>
+    [NodeName("File.Exists")]
+    [return: NodeName("exists")]
+    [NodeDescription("Tests whether a file exists at the given path.")]
+    [NodeSearchTags("file", "check", "found", "present")]
+    public static bool FileExists(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("File.Exists requires a file path. Wire a File Path node into the 'path' input.", nameof(path));
+        }
+
+        return File.Exists(path);
+    }
+
+    /// <summary>
+    /// Lists the files in a folder, optionally filtered by a wildcard pattern
+    /// (e.g. "*.nwd"). Returns full paths sorted alphabetically; subfolders
+    /// are not searched.
+    /// </summary>
+    /// <param name="path">The folder to list.</param>
+    /// <param name="pattern">Wildcard filter; the default matches every file.</param>
+    /// <returns>The full file paths, sorted.</returns>
+    [NodeName("Directory.GetFiles")]
+    [return: NodeName("files")]
+    [NodeDescription("Lists the files in a folder (optionally filtered by a wildcard such as \"*.nwd\").")]
+    [NodeSearchTags("folder", "list", "batch", "directory", "browse")]
+    public static IList<string> GetFiles(string path, string pattern = "*.*")
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("Directory.GetFiles requires a folder path. Wire a Directory Path node into the 'path' input.", nameof(path));
+        }
+
+        if (!Directory.Exists(path))
+        {
+            throw new DirectoryNotFoundException("Directory.GetFiles: the folder '" + path + "' does not exist.");
+        }
+
+        // "*.*" traditionally means "all files"; normalize it so files without
+        // an extension are included on every platform.
+        var effectivePattern = string.IsNullOrEmpty(pattern) || pattern == "*.*" ? "*" : pattern;
+        var files = Directory.GetFiles(path, effectivePattern);
+        Array.Sort(files, StringComparer.Ordinal);
+        return new List<string>(files);
+    }
+
+    /// <summary>Joins a folder path and a file name with the correct separator.</summary>
+    /// <param name="directory">The folder part.</param>
+    /// <param name="fileName">The file (or subpath) part.</param>
+    /// <returns>The combined path.</returns>
+    [NodeName("Path.Combine")]
+    [return: NodeName("path")]
+    [NodeDescription("Joins a folder path and a file name with the correct separator.")]
+    [NodeSearchTags("join", "folder", "filename", "concat")]
+    public static string CombinePath(string directory, string fileName)
+    {
+        if (directory == null)
+        {
+            throw new ArgumentNullException(nameof(directory), "Path.Combine requires a folder path in the 'directory' input.");
+        }
+
+        if (fileName == null)
+        {
+            throw new ArgumentNullException(nameof(fileName), "Path.Combine requires a file name in the 'fileName' input.");
+        }
+
+        return Path.Combine(directory, fileName);
+    }
+
     // ------------------------------------------------------------------
     // Helpers (not imported as nodes: non-public).
     // ------------------------------------------------------------------

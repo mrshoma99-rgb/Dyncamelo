@@ -86,4 +86,99 @@ public static class GeometryNodes
 
         return boundingBox.Center;
     }
+
+    /// <summary>Euclidean distance between two points (in model units).</summary>
+    /// <param name="point">The first point.</param>
+    /// <param name="other">The second point.</param>
+    /// <returns>The distance.</returns>
+    [NodeName("Point.DistanceTo")]
+    [return: NodeName("distance")]
+    [NodeDescription("Returns the straight-line distance between two points.")]
+    [NodeSearchTags("length", "measure", "euclidean", "between")]
+    public static double PointDistanceTo(DyncameloPoint point, DyncameloPoint other)
+    {
+        if (point == null)
+        {
+            throw new ArgumentNullException(nameof(point), "Point.DistanceTo requires two points.");
+        }
+
+        if (other == null)
+        {
+            throw new ArgumentNullException(nameof(other), "Point.DistanceTo requires two points.");
+        }
+
+        var dx = other.X - point.X;
+        var dy = other.Y - point.Y;
+        var dz = other.Z - point.Z;
+        return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    /// <summary>Creates a direction vector from X, Y and Z components.</summary>
+    /// <param name="x">X component.</param>
+    /// <param name="y">Y component.</param>
+    /// <param name="z">Z component.</param>
+    /// <returns>The vector.</returns>
+    [NodeName("Vector.ByCoordinates")]
+    [return: NodeName("vector")]
+    [NodeDescription("Creates a 3D direction vector from X, Y and Z components.")]
+    [NodeSearchTags("xyz", "direction", "axis")]
+    public static DyncameloVector VectorByCoordinates(double x = 0d, double y = 0d, double z = 0d)
+    {
+        return new DyncameloVector(x, y, z);
+    }
+
+    /// <summary>
+    /// Extents of a bounding box: the size along each axis plus the min and
+    /// max corner points.
+    /// </summary>
+    /// <param name="boundingBox">The bounding box.</param>
+    /// <returns>Dictionary with "sizeX", "sizeY", "sizeZ", "min" and "max".</returns>
+    [NodeName("BoundingBox.Size")]
+    [MultiReturn("sizeX", "sizeY", "sizeZ", "min", "max")]
+    [NodeDescription("Returns a bounding box's size along each axis and its min/max corner points.")]
+    [NodeSearchTags("extent", "dimensions", "width", "height", "depth")]
+    public static Dictionary<string, object> BoundingBoxSize(DyncameloBoundingBox boundingBox)
+    {
+        if (boundingBox == null)
+        {
+            throw new ArgumentNullException(nameof(boundingBox), "BoundingBox.Size requires a bounding box.");
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["sizeX"] = boundingBox.Max.X - boundingBox.Min.X,
+            ["sizeY"] = boundingBox.Max.Y - boundingBox.Min.Y,
+            ["sizeZ"] = boundingBox.Max.Z - boundingBox.Min.Z,
+            ["min"] = boundingBox.Min,
+            ["max"] = boundingBox.Max,
+        };
+    }
+
+    /// <summary>
+    /// Axis-aligned overlap test between two bounding boxes. Boxes that merely
+    /// touch (share a face, edge or corner) count as intersecting.
+    /// </summary>
+    /// <param name="boundingBox">The first box.</param>
+    /// <param name="other">The second box.</param>
+    /// <returns>True when the boxes overlap or touch.</returns>
+    [NodeName("BoundingBox.Intersects")]
+    [return: NodeName("intersects")]
+    [NodeDescription("Tests whether two bounding boxes overlap (touching counts as intersecting).")]
+    [NodeSearchTags("overlap", "collision", "touch", "clash")]
+    public static bool BoundingBoxIntersects(DyncameloBoundingBox boundingBox, DyncameloBoundingBox other)
+    {
+        if (boundingBox == null)
+        {
+            throw new ArgumentNullException(nameof(boundingBox), "BoundingBox.Intersects requires two bounding boxes.");
+        }
+
+        if (other == null)
+        {
+            throw new ArgumentNullException(nameof(other), "BoundingBox.Intersects requires two bounding boxes.");
+        }
+
+        return boundingBox.Min.X <= other.Max.X && other.Min.X <= boundingBox.Max.X &&
+               boundingBox.Min.Y <= other.Max.Y && other.Min.Y <= boundingBox.Max.Y &&
+               boundingBox.Min.Z <= other.Max.Z && other.Min.Z <= boundingBox.Max.Z;
+    }
 }

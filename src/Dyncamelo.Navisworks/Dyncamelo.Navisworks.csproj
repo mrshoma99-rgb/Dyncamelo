@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dyncamelo.Core\Dyncamelo.Core.csproj" />
+    <!-- For the DyncameloColor → Autodesk.Navisworks.Api.Color converter; both DLLs ship side by side in the plugin folder. -->
+    <ProjectReference Include="..\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
   </ItemGroup>
 
   <ItemGroup>
