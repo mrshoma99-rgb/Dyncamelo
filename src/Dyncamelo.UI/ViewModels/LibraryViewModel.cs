@@ -137,7 +137,9 @@ public class LibraryViewModel : ObservableObject
     private readonly NodeRegistry _registry;
     private readonly UiSettingsService? _settings;
     private readonly List<LibraryEntryViewModel> _allEntries = new List<LibraryEntryViewModel>();
+    private readonly HashSet<string> _expandedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private string _searchText = string.Empty;
+    private bool _treeShowsSearchResults;
 
     /// <summary>Creates the browser and builds the catalog from the registry.</summary>
     /// <param name="registry">Registry to browse.</param>
@@ -264,6 +266,23 @@ public class LibraryViewModel : ObservableObject
 
     private void RebuildTree()
     {
+        // Snapshot the user's expansion state so rebuilds (favourite toggles,
+        // registry refreshes, clearing a search) keep the folders they opened.
+        // Search results are always shown fully expanded, so a tree that is
+        // currently showing search hits must not overwrite the snapshot.
+        if (!_treeShowsSearchResults)
+        {
+            _expandedPaths.Clear();
+            foreach (var item in RootItems)
+            {
+                if (item is LibraryCategoryViewModel category &&
+                    !string.Equals(category.Name, FavoritesCategoryName, StringComparison.Ordinal))
+                {
+                    CollectExpandedPaths(category, category.Name);
+                }
+            }
+        }
+
         RootItems.Clear();
 
         var lowerSearch = _searchText.Trim().ToLowerInvariant();
@@ -301,25 +320,48 @@ public class LibraryViewModel : ObservableObject
         {
             RootItems.Add(root);
         }
+
+        _treeShowsSearchResults = searching;
     }
 
-    private static LibraryCategoryViewModel ResolveCategory(
+    private void CollectExpandedPaths(LibraryCategoryViewModel category, string path)
+    {
+        if (category.IsExpanded)
+        {
+            _expandedPaths.Add(path);
+        }
+
+        foreach (var child in category.Children)
+        {
+            if (child is LibraryCategoryViewModel sub)
+            {
+                CollectExpandedPaths(sub, path + "." + sub.Name);
+            }
+        }
+    }
+
+    private LibraryCategoryViewModel ResolveCategory(
         Dictionary<string, LibraryCategoryViewModel> roots,
         string categoryPath,
-        bool expand)
+        bool searching)
     {
         var segments = string.IsNullOrEmpty(categoryPath)
             ? new[] { "Other" }
             : categoryPath.Split('.');
 
+        var path = segments[0];
         if (!roots.TryGetValue(segments[0], out var current))
         {
-            current = new LibraryCategoryViewModel(segments[0]) { IsExpanded = expand };
+            current = new LibraryCategoryViewModel(segments[0])
+            {
+                IsExpanded = searching || _expandedPaths.Contains(path)
+            };
             roots[segments[0]] = current;
         }
 
         for (int i = 1; i < segments.Length; i++)
         {
+            path = path + "." + segments[i];
             LibraryCategoryViewModel? child = null;
             foreach (var existing in current.Children)
             {
@@ -333,7 +375,10 @@ public class LibraryViewModel : ObservableObject
 
             if (child == null)
             {
-                child = new LibraryCategoryViewModel(segments[i]) { IsExpanded = expand };
+                child = new LibraryCategoryViewModel(segments[i])
+                {
+                    IsExpanded = searching || _expandedPaths.Contains(path)
+                };
                 // Keep sub-categories ahead of entries.
                 int insertAt = 0;
                 while (insertAt < current.Children.Count && current.Children[insertAt] is LibraryCategoryViewModel)
