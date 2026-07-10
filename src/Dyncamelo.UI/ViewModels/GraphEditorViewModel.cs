@@ -17,6 +17,33 @@ using Dyncamelo.UI.Services;
 namespace Dyncamelo.UI.ViewModels;
 
 /// <summary>
+/// One sample graph offered by the "Sample graphs" menu: display name (file name
+/// without extension), full path and the command that opens it.
+/// </summary>
+public class SampleGraphViewModel
+{
+    /// <summary>Creates the menu item.</summary>
+    /// <param name="name">Display name (file name without extension).</param>
+    /// <param name="filePath">Full path of the .dyc file.</param>
+    /// <param name="openCommand">Command that opens the sample (parameter: this item).</param>
+    public SampleGraphViewModel(string name, string filePath, ICommand openCommand)
+    {
+        Name = name;
+        FilePath = filePath;
+        OpenCommand = openCommand;
+    }
+
+    /// <summary>Display name (file name without extension).</summary>
+    public string Name { get; }
+
+    /// <summary>Full path of the .dyc file (menu tooltip).</summary>
+    public string FilePath { get; }
+
+    /// <summary>Opens this sample (parameter: this item).</summary>
+    public ICommand OpenCommand { get; }
+}
+
+/// <summary>
 /// The whole editor: wraps a Core <see cref="GraphModel"/> behind observable
 /// collections for the Nodify canvas, drives the <see cref="GraphEngine"/>
 /// (manual runs and debounced automatic runs), and handles .dyc open/save.
@@ -53,6 +80,7 @@ public class GraphEditorViewModel : ObservableObject
         _settings = settings ?? new UiSettingsService();
         Library = new LibraryViewModel(registry, _settings);
         RecentFiles = new ObservableCollection<string>(_settings.RecentFiles);
+        SampleGraphs = new ObservableCollection<SampleGraphViewModel>();
 
         Items = new ObservableCollection<CanvasItemViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
@@ -79,8 +107,10 @@ public class GraphEditorViewModel : ObservableObject
         PasteCommand = new RelayCommand(Paste, () => _clipboardFragment != null);
         GroupSelectionCommand = new RelayCommand(GroupSelection);
         OpenRecentFileCommand = new RelayCommand<string>(OpenRecentFile);
+        OpenSampleCommand = new RelayCommand<SampleGraphViewModel>(OpenSample);
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
+        RefreshSampleGraphs();
 
         _autoRunTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _autoRunTimer.Tick += OnAutoRunTimerTick;
@@ -103,6 +133,14 @@ public class GraphEditorViewModel : ObservableObject
     /// ui-settings.json, files that no longer exist pruned).
     /// </summary>
     public ObservableCollection<string> RecentFiles { get; }
+
+    /// <summary>
+    /// Sample graphs offered by the "Sample graphs" menu, ordered by name.
+    /// Populated from a "Samples" folder next to the plugin assemblies (or the
+    /// repository's samples folder during development); refreshed by the view
+    /// each time the dropdown opens via <see cref="RefreshSampleGraphs"/>.
+    /// </summary>
+    public ObservableCollection<SampleGraphViewModel> SampleGraphs { get; }
 
     /// <summary>Canvas items (nodes and notes); bound to the editor's ItemsSource.</summary>
     public ObservableCollection<CanvasItemViewModel> Items { get; }
@@ -276,6 +314,9 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Opens a file from the recent list (parameter: the .dyc path).</summary>
     public ICommand OpenRecentFileCommand { get; }
 
+    /// <summary>Opens a sample graph (parameter: the <see cref="SampleGraphViewModel"/>).</summary>
+    public ICommand OpenSampleCommand { get; }
+
     /// <summary>Adds a node; parameter is a <see cref="LibraryEntryViewModel"/> (placed at origin).</summary>
     public ICommand AddNodeCommand { get; }
 
@@ -310,6 +351,29 @@ public class GraphEditorViewModel : ObservableObject
     public void AddNote(Point location)
     {
         _graph.Notes.Add(new NoteModel { Text = "Note", X = location.X, Y = location.Y });
+    }
+
+    /// <summary>
+    /// Reveals a canvas node's library entry: expands the tree to its category,
+    /// selects it and scrolls it into view. Works for zero-touch nodes (matched
+    /// by definition id) and interactive nodes (matched by node type tag).
+    /// </summary>
+    /// <param name="node">The canvas node.</param>
+    public void FindInLibrary(NodeViewModel? node)
+    {
+        if (node == null)
+        {
+            return;
+        }
+
+        var libraryId = node.Model is ZeroTouchNodeModel zeroTouch
+            ? zeroTouch.Definition.Id
+            : node.Model.NodeType;
+
+        var entry = Library.RevealEntry(libraryId);
+        StatusMessage = entry != null
+            ? "Found '" + entry.Name + "' in the library."
+            : "'" + node.Title + "' is not in the library.";
     }
 
     /// <summary>
@@ -933,6 +997,120 @@ public class GraphEditorViewModel : ObservableObject
         foreach (var recent in _settings.RecentFiles)
         {
             RecentFiles.Add(recent);
+        }
+    }
+
+    // ----- sample graphs -------------------------------------------------------
+
+    /// <summary>
+    /// Re-enumerates the sample .dyc files (flat, ordered by name) into
+    /// <see cref="SampleGraphs"/>. Called by the view every time the open
+    /// dropdown is shown, so newly deployed samples appear without a restart.
+    /// Enumeration failures simply leave the menu empty.
+    /// </summary>
+    public void RefreshSampleGraphs()
+    {
+        SampleGraphs.Clear();
+        string? directory = ResolveSamplesDirectory();
+        if (directory == null)
+        {
+            return;
+        }
+
+        List<string> files;
+        try
+        {
+            files = System.IO.Directory
+                .GetFiles(directory, "*.dyc", System.IO.SearchOption.TopDirectoryOnly)
+                .OrderBy(System.IO.Path.GetFileNameWithoutExtension, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        catch (Exception)
+        {
+            return;
+        }
+
+        foreach (var file in files)
+        {
+            SampleGraphs.Add(new SampleGraphViewModel(
+                System.IO.Path.GetFileNameWithoutExtension(file),
+                file,
+                OpenSampleCommand));
+        }
+    }
+
+    /// <summary>
+    /// Locates the sample graphs folder: a "Samples" directory next to the
+    /// deployed plugin assemblies (Dyncamelo.UI.dll sits beside Dyncamelo.App.dll
+    /// in every layout), else the repository's samples folder when running from
+    /// a development bin directory.
+    /// </summary>
+    private static string? ResolveSamplesDirectory()
+    {
+        try
+        {
+            var assemblyDirectory = System.IO.Path.GetDirectoryName(typeof(GraphEditorViewModel).Assembly.Location);
+            if (string.IsNullOrEmpty(assemblyDirectory))
+            {
+                return null;
+            }
+
+            var deployed = System.IO.Path.Combine(assemblyDirectory, "Samples");
+            if (System.IO.Directory.Exists(deployed))
+            {
+                return deployed;
+            }
+
+            // Dev fallback: walk up from bin\<Configuration>\net48 to the repo
+            // root and use its samples folder.
+            var current = new System.IO.DirectoryInfo(assemblyDirectory);
+            for (int depth = 0; depth < 6 && current != null; depth++, current = current.Parent)
+            {
+                var dev = System.IO.Path.Combine(current.FullName, "samples");
+                if (System.IO.Directory.Exists(dev))
+                {
+                    return dev;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // A broken probing path must never break the toolbar.
+        }
+
+        return null;
+    }
+
+    private void OpenSample(SampleGraphViewModel? sample)
+    {
+        if (sample == null)
+        {
+            return;
+        }
+
+        if (!System.IO.File.Exists(sample.FilePath))
+        {
+            Dialogs.ShowError("The sample no longer exists:\n" + sample.FilePath, "Open Sample");
+            RefreshSampleGraphs();
+            return;
+        }
+
+        // Unlike Ctrl+O there is no file dialog to back out of, so guard
+        // against silently discarding work (same prompt style as New).
+        if (_graph.Nodes.Count > 0 &&
+            !Dialogs.Confirm("Discard the current graph and open sample '" + sample.Name + "'?", "Open Sample"))
+        {
+            return;
+        }
+
+        if (OpenFromPath(sample.FilePath))
+        {
+            // Samples are read-only templates: detach the file path so Ctrl+S
+            // becomes Save As instead of silently overwriting the shipped
+            // sample (which the Samples menu would then serve to every
+            // future open, and reinstalls would conflict with).
+            CurrentFilePath = null;
+            StatusMessage = "Opened sample '" + sample.Name + "' (save creates a copy).";
         }
     }
 

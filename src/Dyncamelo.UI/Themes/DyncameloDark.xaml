@@ -19,6 +19,8 @@
     <SolidColorBrush x:Key="Dyc.TextBrush" Color="#FFE8EAEE" />
     <SolidColorBrush x:Key="Dyc.SubtleTextBrush" Color="#FF9AA1AE" />
     <SolidColorBrush x:Key="Dyc.AccentBrush" Color="#FF1FAEFF" />
+    <!-- Softened accent for the selected-node outline (subtle, not a hard rectangle). -->
+    <SolidColorBrush x:Key="Dyc.SelectionBorderBrush" Color="#991FAEFF" />
     <SolidColorBrush x:Key="Dyc.WireBrush" Color="#FF8B94A5" />
     <SolidColorBrush x:Key="Dyc.WarningBrush" Color="#FFF59E0B" />
     <SolidColorBrush x:Key="Dyc.ErrorBrush" Color="#FFEF4444" />
@@ -124,13 +126,58 @@
         <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
     </Style>
 
-    <!-- ===== Canvas item container (nodes + notes + groups) ===== -->
+    <Style x:Key="Dyc.SmallToggle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource Dyc.ToolToggle}">
+        <Setter Property="Padding" Value="6,1" />
+        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+    </Style>
+
+    <!-- ===== Library search results (flat Dynamo-style list while searching) ===== -->
+    <Style x:Key="Dyc.LibraryResultItemStyle" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border x:Name="Chrome"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1,0,0,0"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Canvas item container (nodes + notes + groups) =====
+         Nodify's default ItemContainer style draws a 1px DodgerBlue border
+         around EVERY container (BorderBrush setter in Controls.xaml resolving
+         ItemContainer.BorderBrush/BorderColor from the Dark theme). Kill it for
+         unselected items by overriding the container's BorderBrush; the
+         selected/previewing-selection triggers still swap the border to
+         SelectedBrush (verified against the 7.3.0 ItemContainer template),
+         which we soften to a subtle accent. Warning/error state borders are
+         drawn by the node template itself and remain untouched. -->
     <Style x:Key="Dyc.ItemContainerStyle" TargetType="{x:Type nodify:ItemContainer}"
            BasedOn="{StaticResource {x:Type nodify:ItemContainer}}">
         <Setter Property="Location" Value="{Binding Location, Mode=TwoWay}" />
         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
         <Setter Property="ActualSize" Value="{Binding Size, Mode=OneWayToSource}" />
-        <Setter Property="SelectedBrush" Value="{StaticResource Dyc.AccentBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="SelectedBrush" Value="{StaticResource Dyc.SelectionBorderBrush}" />
+        <Setter Property="HighlightBrush" Value="{StaticResource Dyc.SelectionBorderBrush}" />
     </Style>
 
     <!-- ===== Connector (port) visuals: required inputs are filled, inputs with a
@@ -596,6 +643,8 @@
                             <MenuItem Header="Longest" Command="{Binding SetLacingCommand}" CommandParameter="Longest" />
                             <MenuItem Header="Cross Product" Command="{Binding SetLacingCommand}" CommandParameter="CrossProduct" />
                         </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Find in Library" Command="{Binding FindInLibraryCommand}" />
                     </ContextMenu>
                 </Border.ContextMenu>
                 <nodify:Node Header="{Binding}"

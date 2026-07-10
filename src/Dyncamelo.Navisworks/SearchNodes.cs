@@ -14,18 +14,23 @@ public static class SearchNodes
     /// <param name="categoryName">Category display name (e.g. "Element"). Internal names do not match.</param>
     /// <param name="propertyName">Property display name (e.g. "Category"). Internal names do not match.</param>
     /// <param name="value">The value to match (string, number, boolean or date). Numbers match plain, length, area, volume and angle properties; strings match display and identifier strings.</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyValue")]
     [NodeDescription("Finds every model item whose property exactly equals the given value.")]
     [NodeSearchTags("search", "find", "filter", "property", "equals", "query")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyValue@string,string,object,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyValue(
         string categoryName,
         string propertyName,
         object value,
+        string resolveTo = "Self",
         Document? document = null)
     {
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
         var results = new List<ModelItem>();
         var seen = new HashSet<ModelItem>();
@@ -41,23 +46,27 @@ public static class SearchNodes
             }
         }
 
-        return results;
+        return SelectionLevels.Resolve(results, level);
     }
 
     /// <summary>Finds every model item whose property display string contains a substring.</summary>
     /// <param name="categoryName">Category display name (e.g. "Item"). Internal names do not match.</param>
     /// <param name="propertyName">Property display name (e.g. "Name"). Internal names do not match.</param>
     /// <param name="value">The substring to look for (case sensitive, like Find Items).</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyContains")]
     [NodeDescription("Finds every model item whose property text contains the given substring.")]
     [NodeSearchTags("search", "find", "filter", "property", "contains", "text")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyContains(
         string categoryName,
         string propertyName,
         string value,
+        string resolveTo = "Self",
         Document? document = null)
     {
         if (value == null)
@@ -65,26 +74,31 @@ public static class SearchNodes
             throw new ArgumentNullException(nameof(value), "No search text provided.");
         }
 
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
         var condition = BuildPropertyCondition(categoryName, propertyName)
             .DisplayStringContains(value);
-        return RunSearch(doc, condition);
+        return SelectionLevels.Resolve(RunSearch(doc, condition), level);
     }
 
     /// <summary>Finds every model item whose property display string matches a wildcard pattern.</summary>
     /// <param name="categoryName">Category display name (e.g. "Item"). Internal names do not match.</param>
     /// <param name="propertyName">Property display name (e.g. "Name"). Internal names do not match.</param>
     /// <param name="pattern">Wildcard pattern: * matches any text, ? matches one character (e.g. "*-L1-*").</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyWildcard")]
     [NodeDescription("Finds every model item whose property text matches a wildcard pattern (* and ?).")]
     [NodeSearchTags("search", "find", "filter", "property", "wildcard", "pattern")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyWildcard@string,string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyWildcard(
         string categoryName,
         string propertyName,
         string pattern,
+        string resolveTo = "Self",
         Document? document = null)
     {
         if (string.IsNullOrEmpty(pattern))
@@ -92,10 +106,11 @@ public static class SearchNodes
             throw new ArgumentException("No wildcard pattern provided (use * and ?).", nameof(pattern));
         }
 
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
         var condition = BuildPropertyCondition(categoryName, propertyName)
             .DisplayStringWildcard(pattern);
-        return RunSearch(doc, condition);
+        return SelectionLevels.Resolve(RunSearch(doc, condition), level);
     }
 
     /// <summary>Finds every model item whose numeric property compares against a value.</summary>
@@ -103,19 +118,24 @@ public static class SearchNodes
     /// <param name="propertyName">Property display name (e.g. "Diameter"). Internal names do not match.</param>
     /// <param name="comparison">One of: &gt;, &gt;=, &lt;, &lt;= (or GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual).</param>
     /// <param name="value">The number to compare against, in document units.</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyCompare")]
     [NodeDescription("Finds every model item whose numeric property is >, >=, < or <= a value (e.g. pipes with Diameter > 100).")]
     [NodeSearchTags("search", "find", "filter", "property", "compare", "greater", "less", "numeric")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyCompare@string,string,string,double,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyCompare(
         string categoryName,
         string propertyName,
         string comparison,
         double value,
+        string resolveTo = "Self",
         Document? document = null)
     {
+        var level = SelectionLevels.Parse(resolveTo);
         var comparisonKind = ParseComparison(comparison);
         var doc = NavisworksContext.ResolveDocument(document);
         var results = new List<ModelItem>();
@@ -144,44 +164,53 @@ public static class SearchNodes
             }
         }
 
-        return results;
+        return SelectionLevels.Resolve(results, level);
     }
 
     /// <summary>Finds every model item that carries a property at all.</summary>
     /// <param name="categoryName">Category display name (e.g. "Element"). Internal names do not match.</param>
     /// <param name="propertyName">Property display name (e.g. "Level"). Internal names do not match.</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All items carrying the property.</returns>
     [NodeName("Search.HasProperty")]
     [NodeDescription("Finds every model item that carries the property at all, regardless of value.")]
     [NodeSearchTags("search", "find", "has", "property", "exists", "audit")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> HasProperty(
         string categoryName,
         string propertyName,
+        string resolveTo = "Self",
         Document? document = null)
     {
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        return RunSearch(doc, BuildPropertyCondition(categoryName, propertyName));
+        return SelectionLevels.Resolve(RunSearch(doc, BuildPropertyCondition(categoryName, propertyName)), level);
     }
 
     /// <summary>Finds every model item that carries a property category (tab).</summary>
     /// <param name="categoryName">Category display name (e.g. "TimeLiner"). Internal names do not match.</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All items carrying the category.</returns>
     [NodeName("Search.HasCategory")]
     [NodeDescription("Finds every model item that carries a property tab (e.g. every item with \"TimeLiner\" data).")]
     [NodeSearchTags("search", "find", "has", "category", "tab", "audit")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasCategory@string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
-    public static List<ModelItem> HasCategory(string categoryName, Document? document = null)
+    public static List<ModelItem> HasCategory(string categoryName, string resolveTo = "Self", Document? document = null)
     {
         if (string.IsNullOrEmpty(categoryName))
         {
             throw new ArgumentException("No property category name provided.", nameof(categoryName));
         }
 
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        return RunSearch(doc, SearchCondition.HasCategoryByDisplayName(categoryName));
+        return SelectionLevels.Resolve(RunSearch(doc, SearchCondition.HasCategoryByDisplayName(categoryName)), level);
     }
 
     /// <summary>Runs the property-equals test only inside the given items.</summary>
@@ -189,17 +218,21 @@ public static class SearchNodes
     /// <param name="categoryName">Category display name. Internal names do not match.</param>
     /// <param name="propertyName">Property display name. Internal names do not match.</param>
     /// <param name="value">The value to match (string, number, boolean or date).</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The matching subset.</returns>
     [NodeName("Search.InItems")]
     [NodeDescription("Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement).")]
     [NodeSearchTags("search", "find", "scoped", "within", "refine", "subset")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.InItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,object,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> InItems(
         IEnumerable<ModelItem> items,
         string categoryName,
         string propertyName,
         object value,
+        string resolveTo = "Self",
         Document? document = null)
     {
         if (items == null)
@@ -207,6 +240,7 @@ public static class SearchNodes
             throw new ArgumentNullException(nameof(items), "No model items provided.");
         }
 
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
         var scope = NavisValues.ToItemCollection(items);
         var results = new List<ModelItem>();
@@ -228,7 +262,7 @@ public static class SearchNodes
             }
         }
 
-        return results;
+        return SelectionLevels.Resolve(results, level);
     }
 
     /// <summary>
