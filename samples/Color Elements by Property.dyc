@@ -1,0 +1,305 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.3.2"
+  },
+  "Uuid": "5d14f8dbc4a79245bc5bfb8fd213d1a9",
+  "Name": "Color Elements by Property",
+  "Description": "Finds every model item whose property text contains a search string and paints it with the picked color. Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "849825f1e5b2c9f308c2270b37cac81a",
+      "NodeType": "StringInput",
+      "Name": "Property category",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "7413734e149d11c4517680a251fb7e78",
+      "NodeType": "StringInput",
+      "Name": "Property name",
+      "X": 0.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Name"
+      }
+    },
+    {
+      "Id": "083b36214646e3945ab1be18737b322f",
+      "NodeType": "StringInput",
+      "Name": "Search text",
+      "X": 0.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Wall"
+      }
+    },
+    {
+      "Id": "f447ef1a9f28c0d05518c1418a1014fb",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyContains",
+      "X": 340.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "cfbb39841646e7940a51fdc0d8479483",
+      "NodeType": "ColorPicker",
+      "Name": "Color Picker",
+      "X": 340.0,
+      "Y": 340.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "color"
+        }
+      ],
+      "Data": {
+        "A": 255,
+        "R": 230,
+        "G": 60,
+        "B": 60
+      }
+    },
+    {
+      "Id": "d35e18fa2cf93236535dd07035ef1d84",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.OverrideColor@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.OverrideColor",
+      "X": 700.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "color",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "76096011578539cc01b0d973655ad971",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "List.Count",
+      "X": 1040.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "dd483de1cdb31692c62e4ccec534a928",
+      "NodeType": "Watch",
+      "Name": "Items colored",
+      "X": 1300.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "42343e22399a25b9ed3b18822d5efe01",
+      "FromNode": "849825f1e5b2c9f308c2270b37cac81a",
+      "FromPort": "value",
+      "ToNode": "f447ef1a9f28c0d05518c1418a1014fb",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "57610010bc45c12568f1465de2a2497a",
+      "FromNode": "7413734e149d11c4517680a251fb7e78",
+      "FromPort": "value",
+      "ToNode": "f447ef1a9f28c0d05518c1418a1014fb",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "7a70f2fb5a54ac87065c924af9446a7a",
+      "FromNode": "083b36214646e3945ab1be18737b322f",
+      "FromPort": "value",
+      "ToNode": "f447ef1a9f28c0d05518c1418a1014fb",
+      "ToPort": "value"
+    },
+    {
+      "Id": "b6d0c48f36753cee9e48a5d0cb104e36",
+      "FromNode": "f447ef1a9f28c0d05518c1418a1014fb",
+      "FromPort": "items",
+      "ToNode": "d35e18fa2cf93236535dd07035ef1d84",
+      "ToPort": "items"
+    },
+    {
+      "Id": "1abbea3fe4cd6a4b436de60048fd96ec",
+      "FromNode": "cfbb39841646e7940a51fdc0d8479483",
+      "FromPort": "color",
+      "ToNode": "d35e18fa2cf93236535dd07035ef1d84",
+      "ToPort": "color"
+    },
+    {
+      "Id": "afab8c710e3c9a4a613564123001f851",
+      "FromNode": "d35e18fa2cf93236535dd07035ef1d84",
+      "FromPort": "items",
+      "ToNode": "76096011578539cc01b0d973655ad971",
+      "ToPort": "list"
+    },
+    {
+      "Id": "bbf75541899da34da3aa085ec03b0a3a",
+      "FromNode": "76096011578539cc01b0d973655ad971",
+      "FromPort": "count",
+      "ToNode": "dd483de1cdb31692c62e4ccec534a928",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "fd07aee4a5edef0e030adb0496b2e519",
+      "Text": "HOW TO USE: 1) Edit the three inputs on the left - the property category, the property name and the text to look for (defaults find items whose Item>Name contains \"Wall\"). 2) Double-click the Color Picker to choose a color. 3) Press Run.",
+      "X": 0.0,
+      "Y": -190.0
+    },
+    {
+      "Id": "6ae54ad7c5cb9111f060912ea0493590",
+      "Text": "The override is a normal Navisworks permanent override: it is saved with the file and undoable (Ctrl+Z). Wire the same items into Appearance.Reset to restore original materials.",
+      "X": 700.0,
+      "Y": 380.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

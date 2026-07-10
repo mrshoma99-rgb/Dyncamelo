@@ -50,25 +50,61 @@
                             Content="▾"
                             Padding="4,4"
                             Margin="0,0,1,0"
-                            ToolTip="Open a recent graph"
-                            Click="OnOpenRecentClick">
+                            ToolTip="Open a recent graph or a sample"
+                            Click="OnOpenRecentClick"
+                            ContextMenuOpening="OnOpenRecentContextMenuOpening">
                         <Button.ContextMenu>
-                            <ContextMenu ItemsSource="{Binding RecentFiles}">
-                                <ContextMenu.ItemContainerStyle>
-                                    <Style TargetType="{x:Type MenuItem}">
-                                        <Setter Property="Header" Value="{Binding}" />
-                                        <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                                        <Setter Property="CommandParameter" Value="{Binding}" />
-                                        <!-- Render the raw path: a plain Header would eat underscores as access keys. -->
-                                        <Setter Property="HeaderTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding}" MaxWidth="480" TextTrimming="CharacterEllipsis" />
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
+                            <ContextMenu>
+                                <ContextMenu.Resources>
+                                    <!-- Submenus disable themselves while empty. -->
+                                    <Style x:Key="Dyc.EmptyDisabledSubmenu" TargetType="{x:Type MenuItem}">
+                                        <Style.Triggers>
+                                            <Trigger Property="HasItems" Value="False">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
-                                </ContextMenu.ItemContainerStyle>
+                                </ContextMenu.Resources>
+                                <MenuItem Header="Recent Files"
+                                          Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
+                                          ItemsSource="{Binding RecentFiles}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}">
+                                            <Setter Property="Header" Value="{Binding}" />
+                                            <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                            <Setter Property="CommandParameter" Value="{Binding}" />
+                                            <!-- Render the raw path: a plain Header would eat underscores as access keys. -->
+                                            <Setter Property="HeaderTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}" MaxWidth="480" TextTrimming="CharacterEllipsis" />
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
+                                <MenuItem Header="Sample Graphs"
+                                          Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
+                                          ItemsSource="{Binding SampleGraphs}">
+                                    <MenuItem.ItemContainerStyle>
+                                        <Style TargetType="{x:Type MenuItem}">
+                                            <Setter Property="Header" Value="{Binding Name}" />
+                                            <Setter Property="ToolTip" Value="{Binding FilePath}" />
+                                            <!-- Each item carries its own open command (no ancestor lookup needed). -->
+                                            <Setter Property="Command" Value="{Binding OpenCommand}" />
+                                            <Setter Property="CommandParameter" Value="{Binding}" />
+                                            <!-- Render the raw name: a plain Header would eat underscores as access keys. -->
+                                            <Setter Property="HeaderTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}" MaxWidth="360" TextTrimming="CharacterEllipsis" />
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </MenuItem.ItemContainerStyle>
+                                </MenuItem>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
@@ -160,13 +196,95 @@
             </Grid.ColumnDefinitions>
 
             <!-- Library browser -->
-            <DockPanel Grid.Column="0" Background="{StaticResource Dyc.PanelBrush}">
+            <DockPanel x:Name="LibraryPanel"
+                       Grid.Column="0"
+                       Background="{StaticResource Dyc.PanelBrush}"
+                       PreviewKeyDown="OnLibraryPanelPreviewKeyDown"
+                       IsKeyboardFocusWithinChanged="OnLibraryPanelIsKeyboardFocusWithinChanged">
+                <DockPanel.Resources>
+                    <!-- One entry row template shared by the category tree and the
+                         flat search results (implicit by DataType). -->
+                    <DataTemplate DataType="{x:Type vm:LibraryEntryViewModel}">
+                        <Grid x:Name="EntryRow"
+                              Background="Transparent"
+                              ToolTipService.ShowDuration="30000"
+                              ToolTipService.InitialShowDelay="200">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.ToolTip>
+                                <ToolTip MaxWidth="380">
+                                    <StackPanel Margin="2">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Category}" Opacity="0.7" Margin="0,1,0,0" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Description}"
+                                                   Margin="0,6,0,0"
+                                                   TextWrapping="Wrap"
+                                                   Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                        <TextBlock Text="{Binding Signature}"
+                                                   Margin="0,6,0,0"
+                                                   FontStyle="Italic"
+                                                   Opacity="0.85"
+                                                   TextWrapping="Wrap"
+                                                   Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                    </StackPanel>
+                                </ToolTip>
+                            </Grid.ToolTip>
+                            <StackPanel Margin="0,1">
+                                <TextBlock Text="{Binding Name}"
+                                           Foreground="{StaticResource Dyc.TextBrush}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Description}"
+                                           FontSize="11"
+                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                           TextWrapping="Wrap"
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxHeight="30"
+                                           Margin="0,1,0,0"
+                                           Visibility="{Binding IsDescriptionVisible, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            </StackPanel>
+                            <Button x:Name="StarButton"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Top"
+                                    Margin="6,1,2,0"
+                                    Padding="2,0"
+                                    Content="☆"
+                                    FontSize="13"
+                                    Cursor="Hand"
+                                    Visibility="Hidden"
+                                    Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                    ToolTip="Add to favourites"
+                                    Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    CommandParameter="{Binding}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <Trigger SourceName="EntryRow" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="StarButton" Property="Content" Value="★" />
+                                <Setter TargetName="StarButton" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </DockPanel.Resources>
                 <TextBox DockPanel.Dock="Top"
                          Margin="6,6,6,3"
                          FontSize="13"
                          Style="{StaticResource Dyc.TextBox}"
                          Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         ToolTip="Search nodes" />
+                         ToolTip="Search nodes (Esc clears)" />
                 <DockPanel DockPanel.Dock="Top" Margin="6,0,6,3" LastChildFill="False">
                     <Button DockPanel.Dock="Left"
                             Style="{StaticResource Dyc.SmallButton}"
@@ -178,103 +296,90 @@
                             Content="Collapse all"
                             ToolTip="Collapse every category"
                             Command="{Binding Library.CollapseAllCommand}" />
+                    <ToggleButton DockPanel.Dock="Right"
+                                  Style="{StaticResource Dyc.SmallToggle}"
+                                  Content="Desc"
+                                  ToolTip="Show node descriptions under each name"
+                                  IsChecked="{Binding Library.ShowDescriptions}" />
                 </DockPanel>
-                <TreeView x:Name="LibraryTree"
-                          Margin="2,0,2,2"
-                          Background="Transparent"
-                          BorderThickness="0"
-                          FontSize="13"
-                          Foreground="{StaticResource Dyc.TextBrush}"
-                          ItemsSource="{Binding Library.RootItems}"
-                          PreviewMouseLeftButtonDown="OnLibraryMouseDown"
-                          PreviewMouseMove="OnLibraryMouseMove"
-                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                            <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-                            <Setter Property="Padding" Value="0,2" />
-                            <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                    <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
-                            <TextBlock x:Name="CategoryText"
-                                       Text="{Binding Name}"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                       Margin="0,2" />
-                            <HierarchicalDataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
-                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
-                                </DataTrigger>
-                            </HierarchicalDataTemplate.Triggers>
-                        </HierarchicalDataTemplate>
-                        <DataTemplate DataType="{x:Type vm:LibraryEntryViewModel}">
-                            <Grid x:Name="EntryRow"
-                                  Background="Transparent"
-                                  ToolTipService.ShowDuration="30000">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.ToolTip>
-                                    <ToolTip MaxWidth="380">
-                                        <StackPanel Margin="2">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding Category}" Opacity="0.7" Margin="0,1,0,0" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding Description}"
-                                                       Margin="0,6,0,0"
-                                                       TextWrapping="Wrap"
-                                                       Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                                            <TextBlock Text="{Binding Signature}"
-                                                       Margin="0,6,0,0"
-                                                       FontStyle="Italic"
-                                                       Opacity="0.85"
-                                                       TextWrapping="Wrap"
-                                                       Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                                        </StackPanel>
-                                    </ToolTip>
-                                </Grid.ToolTip>
-                                <TextBlock Text="{Binding Name}"
-                                           Foreground="{StaticResource Dyc.TextBrush}"
-                                           VerticalAlignment="Center"
-                                           Margin="0,1" />
-                                <Button x:Name="StarButton"
-                                        Grid.Column="1"
-                                        Margin="6,0,2,0"
-                                        Padding="2,0"
-                                        Content="☆"
-                                        FontSize="13"
-                                        Cursor="Hand"
-                                        Visibility="Hidden"
-                                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                        ToolTip="Add to favourites"
-                                        Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}}"
-                                        CommandParameter="{Binding}">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </Grid>
-                            <DataTemplate.Triggers>
-                                <Trigger SourceName="EntryRow" Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
-                                </Trigger>
-                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                    <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
-                                    <Setter TargetName="StarButton" Property="Content" Value="★" />
-                                    <Setter TargetName="StarButton" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
-                                    <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </TreeView.Resources>
-                </TreeView>
+                <Grid>
+                    <TreeView x:Name="LibraryTree"
+                              Margin="2,0,2,2"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              FontSize="13"
+                              Foreground="{StaticResource Dyc.TextBrush}"
+                              ItemsSource="{Binding Library.RootItems}"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              PreviewMouseLeftButtonDown="OnLibraryMouseDown"
+                              PreviewMouseMove="OnLibraryMouseMove"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <TreeView.Style>
+                            <Style TargetType="{x:Type TreeView}">
+                                <Style.Triggers>
+                                    <!-- While searching, the flat result list replaces the
+                                         tree; the tree keeps its expansion state untouched. -->
+                                    <DataTrigger Binding="{Binding Library.IsSearching}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeView.Style>
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Padding" Value="0,2" />
+                                <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                        <TreeView.Resources>
+                            <!-- Dark selection colors for the default TreeViewItem template. -->
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF343B49" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFE8EAEE" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#FF2B303B" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFE8EAEE" />
+                            <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
+                                <TextBlock x:Name="CategoryText"
+                                           Text="{Binding Name}"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                           Margin="0,2" />
+                                <HierarchicalDataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                    </DataTrigger>
+                                </HierarchicalDataTemplate.Triggers>
+                            </HierarchicalDataTemplate>
+                        </TreeView.Resources>
+                    </TreeView>
+                    <!-- Flat search results (Dynamo-style) -->
+                    <DockPanel Visibility="{Binding Library.IsSearching, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <TextBlock DockPanel.Dock="Bottom"
+                                   Margin="8,4"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                   Text="{Binding Library.SearchStatusText}"
+                                   Visibility="{Binding Library.HasSearchStatus, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                        <ListBox x:Name="LibraryResults"
+                                 Margin="2,0,2,2"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 FontSize="13"
+                                 Foreground="{StaticResource Dyc.TextBrush}"
+                                 ItemsSource="{Binding Library.SearchResults}"
+                                 ItemContainerStyle="{StaticResource Dyc.LibraryResultItemStyle}"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 PreviewMouseLeftButtonDown="OnLibraryMouseDown"
+                                 PreviewMouseMove="OnLibraryMouseMove"
+                                 MouseDoubleClick="OnLibraryResultsDoubleClick"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                    </DockPanel>
+                </Grid>
             </DockPanel>
 
             <GridSplitter Grid.Column="1"
@@ -297,7 +402,8 @@
                                  ItemContainerStyle="{StaticResource Dyc.ItemContainerStyle}"
                                  GridCellSize="15"
                                  AllowDrop="True"
-                                 Drop="OnEditorDrop">
+                                 Drop="OnEditorDrop"
+                                 PreviewMouseDown="OnEditorPreviewMouseDown">
 
                 <nodify:NodifyEditor.Background>
                     <DrawingBrush TileMode="Tile"

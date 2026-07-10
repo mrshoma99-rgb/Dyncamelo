@@ -75,8 +75,14 @@
       <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.Core.dll;$(TargetDir)Dyncamelo.Nodes.dll;$(TargetDir)Dyncamelo.Navisworks.dll;$(TargetDir)Dyncamelo.UI.dll" />
       <PluginLayoutFiles Include="$(TargetDir)Nodify.dll;$(TargetDir)Newtonsoft.Json.dll" />
       <RibbonIconFiles Include="$(ProjectDir)Resources\*.png" />
+      <!-- Example workflow graphs surfaced by the UI's Samples menu (reads the Samples folder next to the plugin DLL).
+           Only the six curated in-app workflows (Title Case names) ship; the four lower-case developer graphs are
+           test fixtures (csv-roundtrip additionally writes a relative-path CSV, which fails under Navisworks'
+           Program Files working directory). Keep this exclusion in sync with samples/README.md. -->
+      <SampleGraphFiles Include="$(ProjectDir)..\..\samples\*.dyc"
+                        Exclude="$(ProjectDir)..\..\samples\csv-roundtrip.dyc;$(ProjectDir)..\..\samples\hello-math.dyc;$(ProjectDir)..\..\samples\list-lacing.dyc;$(ProjectDir)..\..\samples\string-report.dyc" />
     </ItemGroup>
-    <MakeDir Directories="$(PluginLayoutDir);$(PluginLayoutDir)Packages;$(PluginLayoutDir)en-US;$(PluginLayoutDir)Resources" />
+    <MakeDir Directories="$(PluginLayoutDir);$(PluginLayoutDir)Packages;$(PluginLayoutDir)en-US;$(PluginLayoutDir)Resources;$(PluginLayoutDir)Samples" />
     <Copy SourceFiles="@(PluginLayoutFiles)"
           DestinationFolder="$(PluginLayoutDir)"
           SkipUnchangedFiles="true"
@@ -86,6 +92,9 @@
           SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(RibbonIconFiles)"
           DestinationFolder="$(PluginLayoutDir)Resources"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SampleGraphFiles)"
+          DestinationFolder="$(PluginLayoutDir)Samples"
           SkipUnchangedFiles="true" />
     <Message Importance="high"
              Text="Dyncamelo plugin layout: $(PluginLayoutDir) — copy this folder into %25APPDATA%25\Autodesk Navisworks Manage 2024\Plugins\" />
@@ -103,7 +112,7 @@
       <BundleRoot>$(APPDATA)\Autodesk\ApplicationPlugins\Dyncamelo.bundle</BundleRoot>
       <BundleYearDir>$(BundleRoot)\2024</BundleYearDir>
     </PropertyGroup>
-    <MakeDir Directories="$(BundleYearDir);$(BundleYearDir)\en-US;$(BundleYearDir)\Resources" />
+    <MakeDir Directories="$(BundleYearDir);$(BundleYearDir)\en-US;$(BundleYearDir)\Resources;$(BundleYearDir)\Samples" />
     <Copy SourceFiles="@(PluginLayoutFiles)"
           DestinationFolder="$(BundleYearDir)"
           SkipUnchangedFiles="true"
@@ -113,6 +122,9 @@
           SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(RibbonIconFiles)"
           DestinationFolder="$(BundleYearDir)\Resources"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SampleGraphFiles)"
+          DestinationFolder="$(BundleYearDir)\Samples"
           SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(ProjectDir)..\..\dist\Dyncamelo.bundle\PackageContents.xml"
           DestinationFolder="$(BundleRoot)"
