@@ -2,7 +2,7 @@
 
 Thanks for your interest in Dyncamelo! This document explains how to set up a development environment, the coding conventions the project enforces, and how to get a change merged.
 
-By contributing you agree that your contributions are licensed under the project's [MIT License](LICENSE).
+Dyncamelo is proprietary software (see [LICENSE](LICENSE)). By submitting a contribution you assign to the project owner (BIMCamel) all rights in the contribution, and you confirm you are entitled to do so.
 
 ## Ways to contribute
 

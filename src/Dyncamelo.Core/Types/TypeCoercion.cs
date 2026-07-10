@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,12 +8,72 @@ using System.Linq;
 namespace Dyncamelo.Core.Types;
 
 /// <summary>
-/// Gentle value coercion used at node-invocation time: exact match, numeric
-/// widening, enum conversion, <see cref="IConvertible"/> fallback (invariant
-/// culture) and element-wise list conversion. Pure static helpers — no state.
+/// Gentle value coercion used at node-invocation time: exact match, registered
+/// custom converters, numeric widening, enum conversion, <see cref="IConvertible"/>
+/// fallback (invariant culture) and element-wise list conversion. Node packs may
+/// contribute converters between their own boundary types via
+/// <see cref="RegisterConverter"/>; those are consulted both by the runtime
+/// coercion (<see cref="TryCoerce"/>) and by the connection compatibility check
+/// (<see cref="CanConvert"/>).
 /// </summary>
 public static class TypeCoercion
 {
+    /// <summary>
+    /// Custom converters keyed by (source, target) type pair. Registered by node
+    /// packs (e.g. Dyncamelo.Nodes color → Navisworks color) via a
+    /// <c>[TypeConverterRegistration]</c> hook when their assembly is loaded.
+    /// </summary>
+    private static readonly ConcurrentDictionary<ConverterKey, Func<object, object?>> Converters =
+        new ConcurrentDictionary<ConverterKey, Func<object, object?>>();
+
+    /// <summary>
+    /// Registers (or replaces) a custom converter from <paramref name="sourceType"/>
+    /// to <paramref name="targetType"/>. The converter receives a non-null instance
+    /// of <paramref name="sourceType"/> (or a subtype) and returns the converted
+    /// value. Registration is process-wide and idempotent per type pair.
+    /// </summary>
+    /// <param name="sourceType">The value type the converter accepts.</param>
+    /// <param name="targetType">The type the converter produces.</param>
+    /// <param name="converter">The conversion function.</param>
+    public static void RegisterConverter(Type sourceType, Type targetType, Func<object, object?> converter)
+    {
+        if (sourceType == null)
+        {
+            throw new ArgumentNullException(nameof(sourceType));
+        }
+
+        if (targetType == null)
+        {
+            throw new ArgumentNullException(nameof(targetType));
+        }
+
+        if (converter == null)
+        {
+            throw new ArgumentNullException(nameof(converter));
+        }
+
+        Converters[new ConverterKey(sourceType, targetType)] = converter;
+    }
+
+    /// <summary>Removes a previously registered custom converter.</summary>
+    /// <param name="sourceType">The converter's source type.</param>
+    /// <param name="targetType">The converter's target type.</param>
+    /// <returns>True when a converter for the exact type pair was removed.</returns>
+    public static bool UnregisterConverter(Type sourceType, Type targetType)
+    {
+        if (sourceType == null)
+        {
+            throw new ArgumentNullException(nameof(sourceType));
+        }
+
+        if (targetType == null)
+        {
+            throw new ArgumentNullException(nameof(targetType));
+        }
+
+        return Converters.TryRemove(new ConverterKey(sourceType, targetType), out _);
+    }
+
     /// <summary>
     /// Attempts to coerce <paramref name="value"/> to <paramref name="targetType"/>.
     /// Lists are never coerced to scalars or vice versa (replication owns that).
@@ -45,6 +106,37 @@ public static class TypeCoercion
         {
             result = value;
             return true;
+        }
+
+        // Custom converters take precedence over the generic fallbacks so a node
+        // pack can define exactly how its boundary types translate.
+        var converter = FindConverter(value.GetType(), effective);
+        if (converter != null)
+        {
+            try
+            {
+                var converted = converter(value);
+                if (converted == null &&
+                    targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
+                {
+                    // A converter returning null cannot satisfy a non-nullable
+                    // value-type target; treat it as "not convertible" so the
+                    // caller gets the descriptive type-pair error instead of a
+                    // null smuggled into a value-typed input.
+                    result = null;
+                    return false;
+                }
+
+                result = converted;
+                return true;
+            }
+            catch (Exception)
+            {
+                // TryCoerce never throws: a failing custom converter simply
+                // means "not convertible" (Coerce then reports the type pair).
+                result = null;
+                return false;
+            }
         }
 
         if (effective.IsEnum)
@@ -142,7 +234,9 @@ public static class TypeCoercion
             return true;
         }
 
-        return false;
+        // A registered custom converter can bridge otherwise-unrelated types
+        // (e.g. a node-pack color type into a host API color type).
+        return HasConverterFor(source, target);
     }
 
     /// <summary>
@@ -398,5 +492,93 @@ public static class TypeCoercion
             || type == typeof(decimal)
             || type == typeof(string)
             || type == typeof(DateTime);
+    }
+
+    /// <summary>
+    /// Finds a converter applicable to a runtime value of <paramref name="valueType"/>
+    /// requested as <paramref name="targetType"/>: exact pair first, then any
+    /// converter whose source accepts the value and whose product satisfies the target.
+    /// </summary>
+    private static Func<object, object?>? FindConverter(Type valueType, Type targetType)
+    {
+        if (Converters.IsEmpty)
+        {
+            return null;
+        }
+
+        if (Converters.TryGetValue(new ConverterKey(valueType, targetType), out var exact))
+        {
+            return exact;
+        }
+
+        foreach (var entry in Converters)
+        {
+            if (entry.Key.SourceType.IsAssignableFrom(valueType) &&
+                targetType.IsAssignableFrom(entry.Key.TargetType))
+            {
+                return entry.Value;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Loose declared-type check for <see cref="CanConvert"/>: a converter is a
+    /// potential bridge when its source relates to the output port's declared type
+    /// and its product relates to the input port's declared type (either
+    /// assignability direction — declared types are often wider than runtime types).
+    /// </summary>
+    private static bool HasConverterFor(Type source, Type target)
+    {
+        if (Converters.IsEmpty)
+        {
+            return false;
+        }
+
+        foreach (var entry in Converters)
+        {
+            var from = entry.Key.SourceType;
+            var to = entry.Key.TargetType;
+            if ((from.IsAssignableFrom(source) || source.IsAssignableFrom(from)) &&
+                (target.IsAssignableFrom(to) || to.IsAssignableFrom(target)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Dictionary key for the custom-converter registry: an ordered (source, target) type pair.</summary>
+    private readonly struct ConverterKey : IEquatable<ConverterKey>
+    {
+        public ConverterKey(Type sourceType, Type targetType)
+        {
+            SourceType = sourceType;
+            TargetType = targetType;
+        }
+
+        public Type SourceType { get; }
+
+        public Type TargetType { get; }
+
+        public bool Equals(ConverterKey other)
+        {
+            return SourceType == other.SourceType && TargetType == other.TargetType;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is ConverterKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (SourceType.GetHashCode() * 397) ^ TargetType.GetHashCode();
+            }
+        }
     }
 }

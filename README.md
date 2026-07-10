@@ -5,7 +5,7 @@
 <!-- Badges: enabled once CI workflows land in .github/workflows -->
 [![Build](https://img.shields.io/badge/build-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
 [![Tests](https://img.shields.io/badge/tests-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 [![Navisworks 2024](https://img.shields.io/badge/Navisworks-2024-blue)](#requirements)
 
 Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
@@ -19,16 +19,29 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
+## What's new in 0.3 — the "plugin parity" wave
+
+- **Custom property tabs** — `Properties.SetCustom` writes user-defined, searchable, schedulable property tabs that travel with the NWF/NWD; with lacing and `Table.JoinByKey` this is spreadsheet→model data enrichment (iConstruct SmartProperties territory).
+- **Native Excel** — `Excel.ReadFromFile` / `Excel.WriteToFile` handle .xlsx directly, zero new dependencies, headless-capable.
+- **BCF 2.1 exchange** — export clash results/viewpoints as .bcfzip issues and import them back: the vendor-neutral bridge to BIMcollab, Newforma Konekt, Revizto and ACC Coordination.
+- **Clash management** — batch rename tests/results, comments on results, grouping by status or by the model's own grid ("B-3 : Level 2"), a one-node summary matrix, and between-run **clash delta snapshots** (new / resolved / persisting).
+- **Transforms & distance** — move/rotate/reset permanent transform overrides; true mesh surface-to-surface `Distance.BetweenItems` with witness points.
+- **Tree ops & comments** — rename viewpoints/sets, nested folders, move-to-folder, and full Review-tab comment threads on viewpoints, sets and clash items.
+- **Document lifecycle** — open/append/refresh/merge/remove-model nodes: the Navisworks Batch Utility as a three-node headless graph.
+- **Grids, zones, 4D** — read levels/grid intersections, one-node zone tagging, and TimeLiner auto-attach by property.
+
+**50 new nodes** (see the [full changelog](docs/WHATS_NEW_0.3.md)); v0.2 brought the editor quality-of-life wave and doubled the library ([WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md)).
+
 ## Features
 
 - **Dynamo-like editor** — a node canvas (built on [Nodify](https://github.com/miroiu/nodify)) docked inside Navisworks: searchable node library, drag-to-wire connectors, pan/zoom, notes, watch nodes.
 - **Real dataflow engine** — eager evaluation, topological execution, and dirty propagation: change one slider and only its downstream nodes re-run. Manual and Automatic run modes.
 - **Replication ("lacing")** — feed a list into a scalar input and the node maps over it, exactly like Dynamo: Shortest by default, Longest and Cross-Product per node.
 - **Robust by design** — a failing node surfaces a per-node Warning/Error state; it never crashes the graph run or Navisworks.
-- **Deep Navisworks node library** — properties/QTO extraction, Find-Items-grade search, selection sets, color/transparency/hide overrides, saved viewpoints, clash test read-out and triage, TimeLiner, CSV/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (~190 nodes planned, ~88 in the MVP).
+- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides, transforms, saved viewpoints, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (250+ nodes implemented as of v0.3).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
-- **MIT licensed** — permissive dependencies only.
+- **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
 ## Architecture at a glance
 
@@ -45,6 +58,7 @@ graph TD
     APP --> NODES
     UI --> CORE
     NAV --> CORE
+    NAV --> NODES
     NODES --> CORE
 
     NWAPI["Autodesk Navisworks 2024 API<br/>(bound from the host at runtime)"]
@@ -143,6 +157,6 @@ Contributions are very welcome — nodes, engine work, docs, sample graphs, bug 
 
 ## License
 
-Dyncamelo is released under the [MIT License](LICENSE) — Copyright (c) 2026 Dyncamelo contributors.
+Dyncamelo is proprietary software — Copyright (c) 2026 BIMCamel, all rights reserved (see [LICENSE](LICENSE)). Releases up to v0.1.1 were MIT-licensed; that grant remains valid for copies obtained under it. Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit, and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at runtime the API is provided by your licensed Navisworks installation.

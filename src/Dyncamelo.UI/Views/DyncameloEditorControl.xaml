@@ -20,6 +20,9 @@
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsCommand}" />
         <KeyBinding Key="D" Modifiers="Control" Command="{Binding DuplicateSelectionCommand}" />
+        <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopySelectionCommand}" />
+        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
+        <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
         <KeyBinding Key="F5" Command="{Binding RunCommand}" />
     </UserControl.InputBindings>
 
@@ -33,8 +36,42 @@
                 Padding="4,3">
             <DockPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
+                           Width="20"
+                           Height="20"
+                           Margin="4,0,6,0"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           ToolTip="Dyncamelo — by BIMCamel" />
                     <Button Style="{StaticResource Dyc.ToolButton}" Content="New" ToolTip="New graph (Ctrl+N)" Command="{Binding NewCommand}" />
                     <Button Style="{StaticResource Dyc.ToolButton}" Content="Open" ToolTip="Open .dyc graph (Ctrl+O)" Command="{Binding OpenCommand}" />
+                    <Button x:Name="OpenRecentButton"
+                            Style="{StaticResource Dyc.ToolButton}"
+                            Content="▾"
+                            Padding="4,4"
+                            Margin="0,0,1,0"
+                            ToolTip="Open a recent graph"
+                            Click="OnOpenRecentClick">
+                        <Button.ContextMenu>
+                            <ContextMenu ItemsSource="{Binding RecentFiles}">
+                                <ContextMenu.ItemContainerStyle>
+                                    <Style TargetType="{x:Type MenuItem}">
+                                        <Setter Property="Header" Value="{Binding}" />
+                                        <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                        <Setter Property="CommandParameter" Value="{Binding}" />
+                                        <!-- Render the raw path: a plain Header would eat underscores as access keys. -->
+                                        <Setter Property="HeaderTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" MaxWidth="480" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ContextMenu.ItemContainerStyle>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
                     <Button Style="{StaticResource Dyc.ToolButton}" Content="Save" ToolTip="Save graph (Ctrl+S)" Command="{Binding SaveCommand}" />
                     <Button Style="{StaticResource Dyc.ToolButton}" Content="Save As" ToolTip="Save graph to a new file (Ctrl+Shift+S)" Command="{Binding SaveAsCommand}" />
 
@@ -50,6 +87,10 @@
                                   Content="Auto"
                                   ToolTip="Re-run automatically after every change"
                                   IsChecked="{Binding IsAutoRun}" />
+                    <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
+                                  Content="Preview"
+                                  ToolTip="Show a value preview bubble under each node after a run"
+                                  IsChecked="{Binding ShowNodePreviews}" />
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
@@ -122,13 +163,27 @@
             <DockPanel Grid.Column="0" Background="{StaticResource Dyc.PanelBrush}">
                 <TextBox DockPanel.Dock="Top"
                          Margin="6,6,6,3"
+                         FontSize="13"
                          Style="{StaticResource Dyc.TextBox}"
                          Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
                          ToolTip="Search nodes" />
+                <DockPanel DockPanel.Dock="Top" Margin="6,0,6,3" LastChildFill="False">
+                    <Button DockPanel.Dock="Left"
+                            Style="{StaticResource Dyc.SmallButton}"
+                            Content="Expand all"
+                            ToolTip="Expand every category"
+                            Command="{Binding Library.ExpandAllCommand}" />
+                    <Button DockPanel.Dock="Left"
+                            Style="{StaticResource Dyc.SmallButton}"
+                            Content="Collapse all"
+                            ToolTip="Collapse every category"
+                            Command="{Binding Library.CollapseAllCommand}" />
+                </DockPanel>
                 <TreeView x:Name="LibraryTree"
                           Margin="2,0,2,2"
                           Background="Transparent"
                           BorderThickness="0"
+                          FontSize="13"
                           Foreground="{StaticResource Dyc.TextBrush}"
                           ItemsSource="{Binding Library.RootItems}"
                           PreviewMouseLeftButtonDown="OnLibraryMouseDown"
@@ -138,21 +193,85 @@
                         <Style TargetType="{x:Type TreeViewItem}">
                             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                             <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                            <Setter Property="Padding" Value="0,2" />
                             <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
                         </Style>
                     </TreeView.ItemContainerStyle>
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Name}"
+                            <TextBlock x:Name="CategoryText"
+                                       Text="{Binding Name}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
                                        Margin="0,2" />
+                            <HierarchicalDataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
+                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                </DataTrigger>
+                            </HierarchicalDataTemplate.Triggers>
                         </HierarchicalDataTemplate>
                         <DataTemplate DataType="{x:Type vm:LibraryEntryViewModel}">
-                            <TextBlock Text="{Binding Name}"
-                                       Foreground="{StaticResource Dyc.TextBrush}"
-                                       Margin="0,1"
-                                       ToolTip="{Binding Description}" />
+                            <Grid x:Name="EntryRow"
+                                  Background="Transparent"
+                                  ToolTipService.ShowDuration="30000">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.ToolTip>
+                                    <ToolTip MaxWidth="380">
+                                        <StackPanel Margin="2">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Category}" Opacity="0.7" Margin="0,1,0,0" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       Margin="0,6,0,0"
+                                                       TextWrapping="Wrap"
+                                                       Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                            <TextBlock Text="{Binding Signature}"
+                                                       Margin="0,6,0,0"
+                                                       FontStyle="Italic"
+                                                       Opacity="0.85"
+                                                       TextWrapping="Wrap"
+                                                       Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Grid.ToolTip>
+                                <TextBlock Text="{Binding Name}"
+                                           Foreground="{StaticResource Dyc.TextBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,1" />
+                                <Button x:Name="StarButton"
+                                        Grid.Column="1"
+                                        Margin="6,0,2,0"
+                                        Padding="2,0"
+                                        Content="☆"
+                                        FontSize="13"
+                                        Cursor="Hand"
+                                        Visibility="Hidden"
+                                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                        ToolTip="Add to favourites"
+                                        Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <Trigger SourceName="EntryRow" Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                    <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="StarButton" Property="Content" Value="★" />
+                                    <Setter TargetName="StarButton" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                    <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </TreeView.Resources>
                 </TreeView>
@@ -169,6 +288,7 @@
                                  ItemsSource="{Binding Items}"
                                  Connections="{Binding Connections}"
                                  SelectedItems="{Binding SelectedItems}"
+                                 SelectedConnections="{Binding SelectedConnections}"
                                  PendingConnection="{Binding PendingConnection}"
                                  PendingConnectionTemplate="{StaticResource Dyc.PendingConnectionTemplate}"
                                  ConnectionTemplate="{StaticResource Dyc.ConnectionTemplate}"
@@ -216,6 +336,19 @@
                         <MenuItem Header="Add Note Here"
                                   Command="{Binding PlacementTarget.DataContext.AddNoteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
                                   CommandParameter="{Binding PlacementTarget.MouseLocation, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <Separator />
+                        <MenuItem Header="Copy"
+                                  InputGestureText="Ctrl+C"
+                                  Command="{Binding PlacementTarget.DataContext.CopySelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Paste"
+                                  InputGestureText="Ctrl+V"
+                                  Command="{Binding PlacementTarget.DataContext.PasteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Duplicate"
+                                  InputGestureText="Ctrl+D"
+                                  Command="{Binding PlacementTarget.DataContext.DuplicateSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Group Selection"
+                                  InputGestureText="Ctrl+G"
+                                  Command="{Binding PlacementTarget.DataContext.GroupSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <Separator />
                         <MenuItem Header="Run"
                                   Command="{Binding PlacementTarget.DataContext.RunCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />

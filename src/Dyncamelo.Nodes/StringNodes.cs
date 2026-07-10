@@ -170,4 +170,133 @@ public static class StringNodes
     {
         return TypeCoercion.FormatValue(obj);
     }
+
+    /// <summary>Tests whether a string starts with a prefix.</summary>
+    /// <param name="text">The string to test.</param>
+    /// <param name="searchFor">The prefix to look for.</param>
+    /// <param name="ignoreCase">True (default) to compare case-insensitively.</param>
+    /// <returns>True when the string starts with the prefix.</returns>
+    [NodeName("String.StartsWith")]
+    [NodeDescription("Tests whether a string starts with the given prefix.")]
+    [NodeSearchTags("prefix", "begins", "leading")]
+    public static bool StartsWith(string text, string searchFor, bool ignoreCase = true)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.StartsWith requires a string.");
+        }
+
+        var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return text.StartsWith(searchFor ?? string.Empty, comparison);
+    }
+
+    /// <summary>Tests whether a string ends with a suffix.</summary>
+    /// <param name="text">The string to test.</param>
+    /// <param name="searchFor">The suffix to look for.</param>
+    /// <param name="ignoreCase">True (default) to compare case-insensitively.</param>
+    /// <returns>True when the string ends with the suffix.</returns>
+    [NodeName("String.EndsWith")]
+    [NodeDescription("Tests whether a string ends with the given suffix.")]
+    [NodeSearchTags("suffix", "trailing", "extension")]
+    public static bool EndsWith(string text, string searchFor, bool ignoreCase = true)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.EndsWith requires a string.");
+        }
+
+        var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return text.EndsWith(searchFor ?? string.Empty, comparison);
+    }
+
+    /// <summary>
+    /// Extracts part of a string. The default length (-1) takes everything from
+    /// the start index to the end of the string.
+    /// </summary>
+    /// <param name="text">The string to slice.</param>
+    /// <param name="startIndex">Zero-based index of the first character to take.</param>
+    /// <param name="length">Number of characters to take; -1 = to the end.</param>
+    /// <returns>The extracted substring.</returns>
+    [NodeName("String.Substring")]
+    [NodeDescription("Extracts part of a string from a start index (-1 length = to the end).")]
+    [NodeSearchTags("slice", "extract", "mid", "part")]
+    public static string Substring(string text, int startIndex, int length = -1)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.Substring requires a string.");
+        }
+
+        if (startIndex < 0 || startIndex > text.Length)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(startIndex),
+                "String.Substring: start index " + startIndex.ToString(CultureInfo.InvariantCulture) +
+                " is out of range for a string of " + text.Length.ToString(CultureInfo.InvariantCulture) + " character(s).");
+        }
+
+        if (length < 0)
+        {
+            return text.Substring(startIndex);
+        }
+
+        if (startIndex + length > text.Length)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(length),
+                "String.Substring: start index " + startIndex.ToString(CultureInfo.InvariantCulture) +
+                " plus length " + length.ToString(CultureInfo.InvariantCulture) +
+                " exceeds the string's " + text.Length.ToString(CultureInfo.InvariantCulture) + " character(s).");
+        }
+
+        return text.Substring(startIndex, length);
+    }
+
+    /// <summary>Converts a string to uppercase (invariant culture).</summary>
+    /// <param name="text">The string to convert.</param>
+    /// <returns>The uppercase string.</returns>
+    [NodeName("String.ToUpper")]
+    [NodeDescription("Converts a string to uppercase.")]
+    [NodeSearchTags("uppercase", "capital", "case")]
+    public static string ToUpper(string text)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.ToUpper requires a string.");
+        }
+
+        return text.ToUpperInvariant();
+    }
+
+    /// <summary>Converts a string to lowercase (invariant culture).</summary>
+    /// <param name="text">The string to convert.</param>
+    /// <returns>The lowercase string.</returns>
+    [NodeName("String.ToLower")]
+    [NodeDescription("Converts a string to lowercase.")]
+    [NodeSearchTags("lowercase", "case")]
+    public static string ToLower(string text)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.ToLower requires a string.");
+        }
+
+        return text.ToLowerInvariant();
+    }
+
+    /// <summary>Removes leading and trailing whitespace from a string.</summary>
+    /// <param name="text">The string to trim.</param>
+    /// <returns>The trimmed string.</returns>
+    [NodeName("String.Trim")]
+    [NodeDescription("Removes leading and trailing whitespace from a string.")]
+    [NodeSearchTags("whitespace", "strip", "clean")]
+    public static string Trim(string text)
+    {
+        if (text == null)
+        {
+            throw new ArgumentNullException(nameof(text), "String.Trim requires a string.");
+        }
+
+        return text.Trim();
+    }
 }

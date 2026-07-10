@@ -71,4 +71,60 @@ public class DictionaryNodesTests
         var value = DictionaryNodes.ValueAtKey(multi, "in");
         Assert.IsAssignableFrom<IList<object?>>(value);
     }
+
+    [Fact]
+    public void Keys_ReturnsAllKeys()
+    {
+        var dictionary = new Dictionary<string, object?> { ["name"] = "Wall", ["height"] = 3.5 };
+        Assert.Equal(new[] { "name", "height" }, DictionaryNodes.Keys(dictionary));
+        Assert.Empty(DictionaryNodes.Keys(new Dictionary<string, object?>()));
+    }
+
+    [Fact]
+    public void Values_ReturnsAllValues()
+    {
+        var dictionary = new Dictionary<string, object?> { ["name"] = "Wall", ["height"] = 3.5, ["extra"] = null };
+        Assert.Equal(new object?[] { "Wall", 3.5, null }, DictionaryNodes.Values(dictionary));
+    }
+
+    [Fact]
+    public void KeysAndValues_WorkWithMultiReturnStyleDictionaries()
+    {
+        var multi = new Dictionary<string, object> { ["in"] = 1, ["out"] = 2 };
+        Assert.Equal(new[] { "in", "out" }, DictionaryNodes.Keys(multi));
+        Assert.Equal(new object?[] { 1, 2 }, DictionaryNodes.Values(multi));
+    }
+
+    [Fact]
+    public void SetValueAtKey_AddsNewKey_WithoutMutatingInput()
+    {
+        var input = new Dictionary<string, object?> { ["a"] = 1 };
+        var result = DictionaryNodes.SetValueAtKey(input, "b", 2);
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(1, result["a"]);
+        Assert.Equal(2, result["b"]);
+        Assert.Single(input);
+        Assert.False(input.ContainsKey("b"));
+    }
+
+    [Fact]
+    public void SetValueAtKey_OverwritesExistingKey()
+    {
+        var input = new Dictionary<string, object?> { ["a"] = 1 };
+        var result = DictionaryNodes.SetValueAtKey(input, "a", "updated");
+        Assert.Equal("updated", result["a"]);
+        Assert.Equal(1, input["a"]);
+    }
+
+    [Fact]
+    public void DictionaryNodes_NullInputs_ThrowHelpfulMessages()
+    {
+        Assert.Contains("Dictionary.Keys", Assert.Throws<ArgumentNullException>(() => DictionaryNodes.Keys(null!)).Message);
+        Assert.Contains("Dictionary.Values", Assert.Throws<ArgumentNullException>(() => DictionaryNodes.Values(null!)).Message);
+        Assert.Contains("Dictionary.SetValueAtKey", Assert.Throws<ArgumentNullException>(
+            () => DictionaryNodes.SetValueAtKey(null!, "k", 1)).Message);
+        Assert.Contains("key", Assert.Throws<ArgumentNullException>(
+            () => DictionaryNodes.SetValueAtKey(new Dictionary<string, object?>(), null!, 1)).Message);
+    }
 }

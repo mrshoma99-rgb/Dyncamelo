@@ -23,6 +23,8 @@ public class GraphSerializer
     /// <summary>Highest .dyc format version this serializer writes and fully understands.</summary>
     public const int CurrentFormatVersion = 1;
 
+    private static readonly string AppVersion = ResolveAppVersion();
+
     private readonly NodeRegistry _registry;
 
     /// <summary>Creates a serializer bound to a node registry.</summary>
@@ -30,6 +32,29 @@ public class GraphSerializer
     public GraphSerializer(NodeRegistry registry)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+    }
+
+    /// <summary>
+    /// Version stamped into the envelope's <c>AppVersion</c> field: the
+    /// assembly's informational version (build metadata stripped), falling
+    /// back to the plain assembly version.
+    /// </summary>
+    private static string ResolveAppVersion()
+    {
+        var assembly = typeof(GraphSerializer).Assembly;
+        var informational = assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault();
+        var version = informational?.InformationalVersion;
+        if (!string.IsNullOrEmpty(version))
+        {
+            int metadata = version!.IndexOf('+');
+            return metadata >= 0 ? version.Substring(0, metadata) : version;
+        }
+
+        var name = assembly.GetName().Version;
+        return name != null ? name.ToString(3) : "0.0.0";
     }
 
     /// <summary>Serializes a graph to indented .dyc JSON.</summary>
@@ -47,7 +72,7 @@ public class GraphSerializer
             {
                 ["FormatVersion"] = CurrentFormatVersion,
                 ["MinReaderVersion"] = 1,
-                ["AppVersion"] = "0.1.0",
+                ["AppVersion"] = AppVersion,
             },
             ["Uuid"] = graph.Uuid.ToString("N"),
             ["Name"] = graph.Name,
@@ -55,6 +80,7 @@ public class GraphSerializer
             ["Nodes"] = new JArray(graph.Nodes.Select(SerializeNode)),
             ["Connectors"] = new JArray(graph.Connections.Select(SerializeConnection)),
             ["Notes"] = new JArray(graph.Notes.Select(SerializeNote)),
+            ["Groups"] = new JArray(graph.Groups.Select(SerializeGroup)),
             ["View"] = new JObject
             {
                 ["RunType"] = graph.RunType.ToString(),
@@ -163,7 +189,146 @@ public class GraphSerializer
             }
         }
 
+        // "Groups" is an additive field (format version 1 stays readable by
+        // older applications, which simply ignore it).
+        if (root["Groups"] is JArray groups)
+        {
+            foreach (var token in groups.OfType<JObject>())
+            {
+                var group = new GroupModel
+                {
+                    Title = token.Value<string>("Title") ?? "Group",
+                    X = token.Value<double?>("X") ?? 0d,
+                    Y = token.Value<double?>("Y") ?? 0d,
+                    Width = token.Value<double?>("Width") ?? 200d,
+                    Height = token.Value<double?>("Height") ?? 200d,
+                    Color = token.Value<string>("Color") ?? GroupModel.DefaultColor,
+                };
+                if (TryParseGuid(token.Value<string>("Id"), out var groupId))
+                {
+                    group.Id = groupId;
+                }
+
+                graph.Groups.Add(group);
+            }
+        }
+
         return graph;
+    }
+
+    /// <summary>
+    /// Serializes a set of nodes plus the connections that run among them into a
+    /// standalone JSON fragment (used by copy/paste and duplicate). Connections
+    /// touching nodes outside the set are omitted.
+    /// </summary>
+    /// <param name="nodes">The nodes to serialize. They may belong to any graph (or none).</param>
+    public string SerializeFragment(IReadOnlyCollection<NodeModel> nodes)
+    {
+        if (nodes == null)
+        {
+            throw new ArgumentNullException(nameof(nodes));
+        }
+
+        var nodeSet = new HashSet<NodeModel>(nodes);
+        var connections = nodes
+            .Select(n => n.Graph)
+            .FirstOrDefault(g => g != null)?
+            .Connections
+            .Where(c => nodeSet.Contains(c.SourceNode) && nodeSet.Contains(c.TargetNode))
+            ?? Enumerable.Empty<ConnectionModel>();
+
+        var root = new JObject
+        {
+            ["Dyncamelo"] = new JObject
+            {
+                ["FormatVersion"] = CurrentFormatVersion,
+                ["MinReaderVersion"] = 1,
+                ["Fragment"] = true,
+            },
+            ["Nodes"] = new JArray(nodes.Select(SerializeNode)),
+            ["Connectors"] = new JArray(connections.Select(SerializeConnection)),
+        };
+
+        return root.ToString(Formatting.Indented);
+    }
+
+    /// <summary>
+    /// Materializes a fragment produced by <see cref="SerializeFragment"/> into a
+    /// graph: every node gets a fresh identifier and is offset by the given
+    /// amount; connections among the pasted nodes are re-created. The same
+    /// fragment can be pasted any number of times.
+    /// </summary>
+    /// <param name="target">The graph receiving the pasted nodes.</param>
+    /// <param name="json">Fragment JSON.</param>
+    /// <param name="offsetX">Horizontal offset applied to every pasted node.</param>
+    /// <param name="offsetY">Vertical offset applied to every pasted node.</param>
+    /// <returns>The pasted nodes, in fragment order.</returns>
+    /// <exception cref="GraphFormatException">The content is not a readable fragment.</exception>
+    public IReadOnlyList<NodeModel> PasteFragment(GraphModel target, string json, double offsetX, double offsetY)
+    {
+        if (target == null)
+        {
+            throw new ArgumentNullException(nameof(target));
+        }
+
+        if (json == null)
+        {
+            throw new ArgumentNullException(nameof(json));
+        }
+
+        JObject root;
+        try
+        {
+            root = JObject.Parse(json);
+        }
+        catch (JsonException ex)
+        {
+            throw new GraphFormatException("The fragment is not valid JSON.", ex);
+        }
+
+        var pasted = new List<NodeModel>();
+        var nodesByOriginalId = new Dictionary<Guid, NodeModel>();
+        if (root["Nodes"] is JArray nodes)
+        {
+            foreach (var token in nodes.OfType<JObject>())
+            {
+                var node = DeserializeNode(token);
+                if (node.Id != Guid.Empty && !nodesByOriginalId.ContainsKey(node.Id))
+                {
+                    nodesByOriginalId[node.Id] = node;
+                }
+
+                node.Id = Guid.NewGuid();
+                node.X += offsetX;
+                node.Y += offsetY;
+                target.AddNode(node);
+                pasted.Add(node);
+            }
+        }
+
+        if (root["Connectors"] is JArray connectors)
+        {
+            foreach (var token in connectors.OfType<JObject>())
+            {
+                RestoreConnection(target, nodesByOriginalId, token, restoreId: false);
+            }
+        }
+
+        // Inputs that were fed by nodes outside the fragment lost their wire:
+        // let them fall back to their default value instead of pasting a node
+        // with a missing required input.
+        foreach (var node in pasted)
+        {
+            foreach (var port in node.InPorts)
+            {
+                if (port.HasDefault && !port.UsingDefaultValue && target.FindConnectionInto(port) == null)
+                {
+                    port.UsingDefaultValue = true;
+                }
+            }
+        }
+
+        return pasted;
     }
 
     /// <summary>Loads a graph from a .dyc file.</summary>
@@ -246,6 +411,20 @@ public class GraphSerializer
             ["Text"] = note.Text,
             ["X"] = note.X,
             ["Y"] = note.Y,
+        };
+    }
+
+    private static JObject SerializeGroup(GroupModel group)
+    {
+        return new JObject
+        {
+            ["Id"] = group.Id.ToString("N"),
+            ["Title"] = group.Title,
+            ["X"] = group.X,
+            ["Y"] = group.Y,
+            ["Width"] = group.Width,
+            ["Height"] = group.Height,
+            ["Color"] = group.Color,
         };
     }
 
@@ -336,7 +515,7 @@ public class GraphSerializer
         return node;
     }
 
-    private static void RestoreConnection(GraphModel graph, Dictionary<Guid, NodeModel> nodesById, JObject json)
+    private static void RestoreConnection(GraphModel graph, Dictionary<Guid, NodeModel> nodesById, JObject json, bool restoreId = true)
     {
         if (!TryParseGuid(json.Value<string>("FromNode"), out var fromNodeId) ||
             !TryParseGuid(json.Value<string>("ToNode"), out var toNodeId) ||
@@ -354,7 +533,7 @@ public class GraphSerializer
         }
 
         var result = graph.Connect(fromPort, toPort);
-        if (result.Success && TryParseGuid(json.Value<string>("Id"), out var connectionId))
+        if (result.Success && restoreId && TryParseGuid(json.Value<string>("Id"), out var connectionId))
         {
             result.Connection!.Id = connectionId;
         }

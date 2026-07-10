@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dyncamelo.Core\Dyncamelo.Core.csproj" />
+    <!-- For the DyncameloColor → Autodesk.Navisworks.Api.Color converter; both DLLs ship side by side in the plugin folder. -->
+    <ProjectReference Include="..\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +31,8 @@
   <ItemGroup>
     <!-- System.Drawing.Color support at the Appearance node boundary. -->
     <Reference Include="System.Drawing" />
+    <!-- ZipArchive for the BCF 2.1 (.bcfzip) exchange nodes (framework assembly, no NuGet). -->
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
 </Project>

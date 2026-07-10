@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Navisworks.Api;
+using Dyncamelo.Core.Types;
+using Dyncamelo.Nodes;
 using NwColor = Autodesk.Navisworks.Api.Color;
 
 namespace Dyncamelo.Navisworks.Internal;
@@ -61,7 +63,12 @@ internal static class NavisValues
             case string text: return VariantData.FromDisplayString(text);
             case bool flag: return VariantData.FromBoolean(flag);
             case int i: return VariantData.FromInt32(i);
-            case long l: return VariantData.FromInt32(checked((int)l));
+            // A long that fits Int32 stays integral; anything bigger widens to
+            // double (never a raw OverflowException on e.g. large IDs).
+            case long l:
+                return l >= int.MinValue && l <= int.MaxValue
+                    ? VariantData.FromInt32((int)l)
+                    : VariantData.FromDouble(l);
             case double d: return VariantData.FromDouble(d);
             case float f: return VariantData.FromDouble(f);
             case decimal m: return VariantData.FromDouble((double)m);
@@ -74,9 +81,12 @@ internal static class NavisValues
 
     /// <summary>
     /// Converts a port value to a Navisworks <see cref="NwColor"/>. Accepts a
-    /// Navisworks Color, a <see cref="System.Drawing.Color"/>, a hex string
-    /// ("#RRGGBB" or "RRGGBB"), or a list of three numbers (0-255, or 0.0-1.0
-    /// when every component is at most 1).
+    /// Navisworks Color, a Dyncamelo <see cref="DyncameloColor"/> (Color.ByARGB,
+    /// Color Picker — alpha is dropped, transparency is a separate override), a
+    /// <see cref="System.Drawing.Color"/>, a hex string ("#RRGGBB" or "RRGGBB"),
+    /// a list of three numbers (0-255, or 0.0-1.0 when every component is at
+    /// most 1), or any type with a registered TypeCoercion converter to
+    /// <see cref="NwColor"/>.
     /// </summary>
     internal static NwColor ToNavisColor(object? value)
     {
@@ -86,6 +96,8 @@ internal static class NavisValues
                 throw new ArgumentNullException(nameof(value), "No color provided.");
             case NwColor navisColor:
                 return navisColor;
+            case DyncameloColor dyncameloColor:
+                return NwColor.FromByteRGB(dyncameloColor.R, dyncameloColor.G, dyncameloColor.B);
             case System.Drawing.Color drawingColor:
                 return NwColor.FromByteRGB(drawingColor.R, drawingColor.G, drawingColor.B);
             case string text:
@@ -93,6 +105,11 @@ internal static class NavisValues
             case IList list when !(value is string):
                 return FromComponentList(list);
             default:
+                if (TypeCoercion.TryCoerce(value, typeof(NwColor), out var coerced) && coerced is NwColor converted)
+                {
+                    return converted;
+                }
+
                 throw new ArgumentException(
                     "Cannot interpret a value of type '" + value.GetType().Name +
                     "' as a color. Wire a Color, a \"#RRGGBB\" string, or a list of three numbers.");
@@ -209,6 +226,74 @@ internal static class NavisValues
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Converts a port value to a Navisworks <see cref="Point3D"/>. Accepts a
+    /// Navisworks Point3D, a Dyncamelo <see cref="DyncameloPoint"/>
+    /// (Point.ByCoordinates), or a list of three numbers.
+    /// </summary>
+    internal static Point3D ToPoint3D(object? value)
+    {
+        switch (value)
+        {
+            case null:
+                throw new ArgumentNullException(nameof(value), "No point provided.");
+            case Point3D point:
+                return point;
+            case DyncameloPoint dyncameloPoint:
+                return new Point3D(dyncameloPoint.X, dyncameloPoint.Y, dyncameloPoint.Z);
+            case IList list when !(value is string):
+                if (list.Count < 3)
+                {
+                    throw new ArgumentException("A point list needs three numeric components (x, y, z).");
+                }
+
+                return new Point3D(
+                    Convert.ToDouble(list[0], CultureInfo.InvariantCulture),
+                    Convert.ToDouble(list[1], CultureInfo.InvariantCulture),
+                    Convert.ToDouble(list[2], CultureInfo.InvariantCulture));
+            default:
+                if (TypeCoercion.TryCoerce(value, typeof(Point3D), out var coerced) && coerced is Point3D converted)
+                {
+                    return converted;
+                }
+
+                throw new ArgumentException(
+                    "Cannot interpret a value of type '" + value.GetType().Name +
+                    "' as a point. Wire a Point (e.g. Point.ByCoordinates or ClashResult.Center) or a list of three numbers.");
+        }
+    }
+
+    /// <summary>
+    /// A human-readable selection-tree path for a model item, e.g.
+    /// "file.nwc &gt; Level 1 &gt; Walls &gt; Basic Wall". Unnamed nodes fall back to
+    /// their class display name; still-empty segments are skipped.
+    /// </summary>
+    internal static string ItemPath(ModelItem? item)
+    {
+        if (item == null)
+        {
+            return string.Empty;
+        }
+
+        var segments = new List<string>();
+        for (var current = item; current != null; current = current.Parent)
+        {
+            var name = current.DisplayName;
+            if (string.IsNullOrEmpty(name))
+            {
+                name = current.ClassDisplayName;
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                segments.Add(name);
+            }
+        }
+
+        segments.Reverse();
+        return string.Join(" > ", segments);
     }
 
     private static NwColor ParseHexColor(string text)

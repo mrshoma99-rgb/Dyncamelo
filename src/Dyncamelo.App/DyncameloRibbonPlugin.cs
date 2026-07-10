@@ -38,7 +38,7 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
             if (commandId == "ID_Button_DyncameloAbout")
             {
                 ShowInfo(
-                    "Dyncamelo — open-source visual programming for Autodesk Navisworks.\n\n" +
+                    "Dyncamelo — visual programming for Autodesk Navisworks.\n\n" +
                     "Wire nodes on a canvas to automate selection, properties, search, " +
                     "viewpoints, clash and TimeLiner.\n\n" +
                     "Part of the BIMCamel toolset.\n" +
