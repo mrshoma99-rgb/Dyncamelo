@@ -159,10 +159,8 @@ public static class SelectionSetTreeNodes
     /// <returns>The stored folder (an existing same-named folder in that location is reused).</returns>
     /// <remarks>
     /// v0.3 extension of the v0.2 SelectionSets.CreateFolder node (adds the
-    /// parentFolder input). Lives in a separate class so concurrent workstreams
-    /// do not touch SelectionSetNodes.cs — INTEGRATOR: when merging, drop the
-    /// v0.2 SelectionSetNodes.CreateFolder method in favor of this one (same
-    /// node name; this signature is a superset).
+    /// parentFolder input). This is now the sole definition — the v0.2 method
+    /// was removed from SelectionSetNodes.cs during v0.3 integration.
     /// </remarks>
     [NodeName("SelectionSets.CreateFolder")]
     [NodeDescription("Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.")]
