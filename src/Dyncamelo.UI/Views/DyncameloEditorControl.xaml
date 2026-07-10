@@ -51,7 +51,8 @@
                             Padding="4,4"
                             Margin="0,0,1,0"
                             ToolTip="Open a recent graph or a sample"
-                            Click="OnOpenRecentClick">
+                            Click="OnOpenRecentClick"
+                            ContextMenuOpening="OnOpenRecentContextMenuOpening">
                         <Button.ContextMenu>
                             <ContextMenu>
                                 <ContextMenu.Resources>

@@ -44,11 +44,27 @@ public partial class DyncameloEditorControl : UserControl
         if (e.OldValue is GraphEditorViewModel oldViewModel)
         {
             oldViewModel.Library.EntryRevealRequested -= OnLibraryEntryRevealRequested;
+            oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         }
 
         if (e.NewValue is GraphEditorViewModel newViewModel)
         {
             newViewModel.Library.EntryRevealRequested += OnLibraryEntryRevealRequested;
+            newViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        // A freshly loaded graph can have content anywhere in graph space —
+        // the samples put their "HOW TO USE" note above the origin — while the
+        // viewport stays wherever it was. Fit once the containers exist;
+        // FitToScreen is a no-op on an empty (new) graph.
+        if (e.PropertyName == nameof(GraphEditorViewModel.Graph))
+        {
+            Dispatcher.BeginInvoke(
+                new System.Action(() => Editor.FitToScreen(null)),
+                System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }
 
@@ -104,6 +120,20 @@ public partial class DyncameloEditorControl : UserControl
         button.ContextMenu.PlacementTarget = button;
         button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
         button.ContextMenu.IsOpen = true;
+    }
+
+    private void OnOpenRecentContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        // Right-clicking the button opens the same ContextMenu through WPF's
+        // built-in behaviour, bypassing OnOpenRecentClick: refresh the sample
+        // list and pin the placement so both paths show an identical, current
+        // dropdown.
+        if (sender is Button button && button.ContextMenu != null && ViewModel != null)
+        {
+            ViewModel.RefreshSampleGraphs();
+            button.ContextMenu.PlacementTarget = button;
+            button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        }
     }
 
     private void OnLibraryItemDoubleClick(object sender, MouseButtonEventArgs e)

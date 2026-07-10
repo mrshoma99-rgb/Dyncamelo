@@ -20,6 +20,8 @@ public static class SearchNodes
     [NodeName("Search.ByPropertyValue")]
     [NodeDescription("Finds every model item whose property exactly equals the given value.")]
     [NodeSearchTags("search", "find", "filter", "property", "equals", "query")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyValue@string,string,object,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyValue(
         string categoryName,
@@ -57,6 +59,8 @@ public static class SearchNodes
     [NodeName("Search.ByPropertyContains")]
     [NodeDescription("Finds every model item whose property text contains the given substring.")]
     [NodeSearchTags("search", "find", "filter", "property", "contains", "text")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyContains(
         string categoryName,
@@ -87,6 +91,8 @@ public static class SearchNodes
     [NodeName("Search.ByPropertyWildcard")]
     [NodeDescription("Finds every model item whose property text matches a wildcard pattern (* and ?).")]
     [NodeSearchTags("search", "find", "filter", "property", "wildcard", "pattern")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyWildcard@string,string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyWildcard(
         string categoryName,
@@ -118,6 +124,8 @@ public static class SearchNodes
     [NodeName("Search.ByPropertyCompare")]
     [NodeDescription("Finds every model item whose numeric property is >, >=, < or <= a value (e.g. pipes with Diameter > 100).")]
     [NodeSearchTags("search", "find", "filter", "property", "compare", "greater", "less", "numeric")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.ByPropertyCompare@string,string,string,double,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> ByPropertyCompare(
         string categoryName,
@@ -168,6 +176,8 @@ public static class SearchNodes
     [NodeName("Search.HasProperty")]
     [NodeDescription("Finds every model item that carries the property at all, regardless of value.")]
     [NodeSearchTags("search", "find", "has", "property", "exists", "audit")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> HasProperty(
         string categoryName,
@@ -188,6 +198,8 @@ public static class SearchNodes
     [NodeName("Search.HasCategory")]
     [NodeDescription("Finds every model item that carries a property tab (e.g. every item with \"TimeLiner\" data).")]
     [NodeSearchTags("search", "find", "has", "category", "tab", "audit")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasCategory@string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> HasCategory(string categoryName, string resolveTo = "Self", Document? document = null)
     {
@@ -212,6 +224,8 @@ public static class SearchNodes
     [NodeName("Search.InItems")]
     [NodeDescription("Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement).")]
     [NodeSearchTags("search", "find", "scoped", "within", "refine", "subset")]
+    // Pre-0.4 id (before the optional resolveTo parameter was appended).
+    [NodeAliases("Dyncamelo.Navisworks.SearchNodes.InItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,object,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> InItems(
         IEnumerable<ModelItem> items,

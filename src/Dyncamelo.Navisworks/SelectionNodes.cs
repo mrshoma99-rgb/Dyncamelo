@@ -17,6 +17,8 @@ public static class SelectionNodes
     [NodeName("Selection.Current")]
     [NodeDescription("The model items currently selected in Navisworks.")]
     [NodeSearchTags("selection", "selected", "current", "picked", "resolution")]
+    // Pre-0.4 id (before the optional resolveTo parameter was prepended).
+    [NodeAliases("Dyncamelo.Navisworks.SelectionNodes.Current@Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> Current(string resolveTo = "Self", Document? document = null)
     {

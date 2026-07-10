@@ -46,6 +46,13 @@ public class NodeDefinition
     /// <summary>Extra search keywords for the library browser.</summary>
     public IReadOnlyList<string> SearchTags { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// Legacy definition ids this node was previously serialized under (see
+    /// <see cref="NodeAliasesAttribute"/>). Saved graphs carrying one of these
+    /// ids resolve to this definition; re-saving writes <see cref="Id"/>.
+    /// </summary>
+    public IReadOnlyList<string> Aliases { get; set; } = Array.Empty<string>();
+
     /// <summary>Input port descriptors, one per method parameter.</summary>
     public IReadOnlyList<PortDescriptor> Inputs { get; set; } = Array.Empty<PortDescriptor>();
 

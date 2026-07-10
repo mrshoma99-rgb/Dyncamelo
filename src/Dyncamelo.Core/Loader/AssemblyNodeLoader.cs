@@ -257,6 +257,7 @@ public static class AssemblyNodeLoader
                 ?? type.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? string.Empty,
             SearchTags = method.GetCustomAttribute<NodeSearchTagsAttribute>()?.Tags ?? Array.Empty<string>(),
+            Aliases = method.GetCustomAttribute<NodeAliasesAttribute>()?.Aliases ?? Array.Empty<string>(),
             Inputs = method.GetParameters().Select(CreateInputDescriptor).ToList(),
         };
 

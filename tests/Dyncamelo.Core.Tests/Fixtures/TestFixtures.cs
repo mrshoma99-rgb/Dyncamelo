@@ -76,6 +76,15 @@ public static class MathFixtures
 
     /// <summary>Optional Guid parameter declared "= default".</summary>
     public static Guid GuidThing(Guid id = default) => id;
+
+    /// <summary>
+    /// Simulates a shipped node whose signature grew an optional parameter:
+    /// the pre-change definition id ("...Doubler@double") is kept loadable via
+    /// <see cref="NodeAliasesAttribute"/> and the appended parameter's default
+    /// preserves the old behavior exactly.
+    /// </summary>
+    [NodeAliases("Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double")]
+    public static double Doubler(double x, double scale = 2.0) => x * scale;
 }
 
 /// <summary>Node that reports its own failure via an Error message without throwing.</summary>

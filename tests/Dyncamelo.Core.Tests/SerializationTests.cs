@@ -129,6 +129,51 @@ public class SerializationTests
     }
 
     [Fact]
+    public void LegacyDefinitionId_LoadsViaAlias_KeepsOldBehavior_AndMigratesOnSave()
+    {
+        // Build a graph with the CURRENT Doubler(x, scale = 2), then rewrite its
+        // serialized form into what a pre-change file looked like: the legacy
+        // definition id and no "scale" input port.
+        var graph = new GraphModel();
+        var value = new NumberInputNode { Value = 3 };
+        graph.AddNode(value);
+        var doubler = ZT.Node("Doubler");
+        graph.AddNode(doubler);
+        var watch = new WatchNode();
+        graph.AddNode(watch);
+        ZT.Wire(graph, value, 0, doubler, 0);
+        ZT.Wire(graph, doubler, 0, watch, 0);
+
+        var serializer = new GraphSerializer(FullRegistry());
+
+        var json = JObject.Parse(serializer.Serialize(graph));
+        var nodeJson = (JObject)json["Nodes"]!
+            .Single(n => n.Value<string>("DefinitionId") != null);
+        nodeJson["DefinitionId"] = "Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double";
+        var inputPorts = (JArray)nodeJson["InputPorts"]!;
+        inputPorts.Remove(inputPorts.Single(p => p.Value<string>("Name") == "scale"));
+
+        // The legacy file loads as a LIVE node (not a MissingNodeModel)...
+        var loaded = serializer.Deserialize(json.ToString());
+        var loadedDoubler = Assert.IsType<ZeroTouchNodeModel>(loaded.Nodes.Single(n => n is ZeroTouchNodeModel));
+
+        // ...the appended port exists and keeps its default, so behavior is the
+        // pre-change behavior exactly...
+        var scale = loadedDoubler.InPorts.Single(p => p.Name == "scale");
+        Assert.True(scale.UsingDefaultValue);
+        Assert.Equal(2, loaded.Connections.Count);
+        new GraphEngine().Run(loaded);
+        var loadedWatch = (WatchNode)loaded.Nodes.Single(n => n is WatchNode);
+        Assert.Equal(6.0, (double)loadedWatch.OutPorts[0].Value!); // 3 * 2 (old semantics)
+
+        // ...and re-saving migrates the file to the current id.
+        var resaved = JObject.Parse(serializer.Serialize(loaded));
+        Assert.Equal(
+            "Dyncamelo.Core.Tests.Fixtures.MathFixtures.Doubler@double,double",
+            resaved["Nodes"]!.Single(n => n.Value<string>("DefinitionId") != null).Value<string>("DefinitionId"));
+    }
+
+    [Fact]
     public void UnknownDefinition_LoadsAsMissingNode_PreservingPortsAndConnections()
     {
         var graph = BuildSampleGraph();
