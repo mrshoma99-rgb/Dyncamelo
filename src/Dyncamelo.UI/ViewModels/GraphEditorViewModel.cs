@@ -29,6 +29,7 @@ public class GraphEditorViewModel : ObservableObject
 
     private readonly GraphEngine _engine = new GraphEngine();
     private readonly DispatcherTimer _autoRunTimer;
+    private readonly UiSettingsService _settings;
 
     private GraphModel _graph;
     private string? _currentFilePath;
@@ -44,11 +45,14 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Creates the editor with an empty untitled graph.</summary>
     /// <param name="registry">Node registry (already populated by the host).</param>
     /// <param name="dialogs">Dialog service; a default WPF implementation is used when null.</param>
-    public GraphEditorViewModel(NodeRegistry registry, IDialogService? dialogs = null)
+    /// <param name="settings">Persisted UI settings (favourites, recent files); the default %APPDATA% store is used when null.</param>
+    public GraphEditorViewModel(NodeRegistry registry, IDialogService? dialogs = null, UiSettingsService? settings = null)
     {
         Registry = registry ?? throw new ArgumentNullException(nameof(registry));
         Dialogs = dialogs ?? new WpfDialogService();
-        Library = new LibraryViewModel(registry);
+        _settings = settings ?? new UiSettingsService();
+        Library = new LibraryViewModel(registry, _settings);
+        RecentFiles = new ObservableCollection<string>(_settings.RecentFiles);
 
         Items = new ObservableCollection<CanvasItemViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
