@@ -1,17 +1,25 @@
 name: release
 
-# Publishes a GitHub Release with the installable Navisworks 2024 bundle
-# whenever a version tag (v*) is pushed:
+# Publishes a GitHub Release with the installable Navisworks 2024 bundle.
+# Two ways to run it:
 #
-#   git tag v0.1.0 && git push origin v0.1.0
+#   * push a version tag:        git tag v0.1.0 && git push origin v0.1.0
+#   * manual dispatch (Actions → release → Run workflow) with the version
+#     input — the release is created at the dispatched commit and the tag is
+#     created server-side by gh, so no local tag push is needed.
 #
-# The zip is assembled from dist/ at the tagged commit — dist/Dyncamelo.bundle
+# The zip is assembled from dist/ at the released commit — dist/Dyncamelo.bundle
 # carries the compiled Release DLLs, ribbon layout, icons and manifest, and
 # install-dyncamelo.bat installs it for the current user.
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version tag (e.g. v0.1.0)"
+        required: true
 
 permissions:
   contents: write
@@ -23,8 +31,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Package bundle zip
+        env:
+          VERSION: ${{ inputs.version || github.ref_name }}
         run: |
-          ZIP="Dyncamelo-${GITHUB_REF_NAME}-navisworks2024.zip"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          ZIP="Dyncamelo-${VERSION}-navisworks2024.zip"
           cd dist
           zip -r "../$ZIP" Dyncamelo.bundle install-dyncamelo.bat README.md \
               -x "Dyncamelo.bundle/2024/PLACE_DYNCAMELO_DLLS_HERE.txt"
@@ -53,6 +64,7 @@ jobs:
             cat "$ZIP.sha256"
             echo '```'
           } > notes.md
-          gh release create "$GITHUB_REF_NAME" "$ZIP" "$ZIP.sha256" \
-            --title "Dyncamelo $GITHUB_REF_NAME (Navisworks 2024)" \
+          gh release create "$VERSION" "$ZIP" "$ZIP.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "Dyncamelo $VERSION (Navisworks 2024)" \
             --notes-file notes.md
