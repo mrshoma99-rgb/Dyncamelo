@@ -3,10 +3,14 @@ name: release
 # Publishes a GitHub Release with the installable Navisworks 2024 bundle.
 # Two ways to run it:
 #
-#   * push a version tag:        git tag v0.1.0 && git push origin v0.1.0
+#   * commit a new tag name (e.g. v0.1.0) to dist/RELEASE_VERSION and push —
+#     the release is created at that commit and the tag is created
+#     server-side by gh, so no tag push or Actions UI access is needed.
 #   * manual dispatch (Actions → release → Run workflow) with the version
-#     input — the release is created at the dispatched commit and the tag is
-#     created server-side by gh, so no local tag push is needed.
+#     input.
+#
+# A version that already has a release is skipped, so ordinary pushes that
+# happen to touch dist/RELEASE_VERSION never fail the workflow.
 #
 # The zip is assembled from dist/ at the released commit — dist/Dyncamelo.bundle
 # carries the compiled Release DLLs, ribbon layout, icons and manifest, and
@@ -14,7 +18,8 @@ name: release
 
 on:
   push:
-    tags: ['v*']
+    branches: ['**']
+    paths: ['dist/RELEASE_VERSION']
   workflow_dispatch:
     inputs:
       version:
@@ -30,11 +35,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Package bundle zip
+      - name: Resolve version
         env:
-          VERSION: ${{ inputs.version || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
+          VERSION="${INPUT_VERSION:-$(tr -d '[:space:]' < dist/RELEASE_VERSION)}"
+          case "$VERSION" in
+            v[0-9]*) ;;
+            *) echo "::error::'$VERSION' is not a valid version tag (expected v<major>.<minor>.<patch>)"; exit 1 ;;
+          esac
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists — nothing to do."
+            echo "SKIP=true" >> "$GITHUB_ENV"
+          fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Package bundle zip
+        if: env.SKIP != 'true'
+        run: |
           ZIP="Dyncamelo-${VERSION}-navisworks2024.zip"
           cd dist
           zip -r "../$ZIP" Dyncamelo.bundle install-dyncamelo.bat README.md \
@@ -44,6 +63,7 @@ jobs:
           echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
+        if: env.SKIP != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
