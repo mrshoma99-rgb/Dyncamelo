@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Navisworks.Api;
+using Dyncamelo.Core.Types;
+using Dyncamelo.Nodes;
 using NwColor = Autodesk.Navisworks.Api.Color;
 
 namespace Dyncamelo.Navisworks.Internal;
@@ -74,9 +76,12 @@ internal static class NavisValues
 
     /// <summary>
     /// Converts a port value to a Navisworks <see cref="NwColor"/>. Accepts a
-    /// Navisworks Color, a <see cref="System.Drawing.Color"/>, a hex string
-    /// ("#RRGGBB" or "RRGGBB"), or a list of three numbers (0-255, or 0.0-1.0
-    /// when every component is at most 1).
+    /// Navisworks Color, a Dyncamelo <see cref="DyncameloColor"/> (Color.ByARGB,
+    /// Color Picker — alpha is dropped, transparency is a separate override), a
+    /// <see cref="System.Drawing.Color"/>, a hex string ("#RRGGBB" or "RRGGBB"),
+    /// a list of three numbers (0-255, or 0.0-1.0 when every component is at
+    /// most 1), or any type with a registered TypeCoercion converter to
+    /// <see cref="NwColor"/>.
     /// </summary>
     internal static NwColor ToNavisColor(object? value)
     {
@@ -86,6 +91,8 @@ internal static class NavisValues
                 throw new ArgumentNullException(nameof(value), "No color provided.");
             case NwColor navisColor:
                 return navisColor;
+            case DyncameloColor dyncameloColor:
+                return NwColor.FromByteRGB(dyncameloColor.R, dyncameloColor.G, dyncameloColor.B);
             case System.Drawing.Color drawingColor:
                 return NwColor.FromByteRGB(drawingColor.R, drawingColor.G, drawingColor.B);
             case string text:
@@ -93,6 +100,11 @@ internal static class NavisValues
             case IList list when !(value is string):
                 return FromComponentList(list);
             default:
+                if (TypeCoercion.TryCoerce(value, typeof(NwColor), out var coerced) && coerced is NwColor converted)
+                {
+                    return converted;
+                }
+
                 throw new ArgumentException(
                     "Cannot interpret a value of type '" + value.GetType().Name +
                     "' as a color. Wire a Color, a \"#RRGGBB\" string, or a list of three numbers.");

@@ -71,11 +71,17 @@ public class NodeRegistry
         }
     }
 
-    /// <summary>Discovers and registers all zero-touch nodes in an assembly.</summary>
+    /// <summary>
+    /// Discovers and registers all zero-touch nodes in an assembly, and runs the
+    /// assembly's <see cref="TypeConverterRegistrationAttribute"/> hooks (once per
+    /// process) so its custom type converters are available to connection checks
+    /// and runtime coercion.
+    /// </summary>
     /// <param name="assembly">The node-pack assembly.</param>
     /// <returns>The definitions that were registered.</returns>
     public List<NodeDefinition> RegisterAssembly(Assembly assembly)
     {
+        AssemblyNodeLoader.RunConverterRegistrations(assembly);
         var definitions = AssemblyNodeLoader.LoadFrom(assembly);
         RegisterDefinitions(definitions);
         return definitions;
