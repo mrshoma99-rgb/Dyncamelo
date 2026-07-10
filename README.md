@@ -19,14 +19,18 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
-## What's new in 0.2
+## What's new in 0.3 — the "plugin parity" wave
 
-- **Canvas quality-of-life** — copy/paste/duplicate (`Ctrl+C`/`Ctrl+V`/`Ctrl+D`), node **groups** (`Ctrl+G`, colored, drag as one), wire disconnect from ports or the wire itself, inline **value previews** under every node, floating error balloons, resizable Watch nodes, live slider readouts, double-click to drop a quick input node.
-- **Library quality-of-life** — hover **tooltips** with full node signatures, pinned **favourites** (star any node), collapse/expand all, bigger text, and a **recent files** menu on the Open button.
-- **Node library doubled** — 43 new general nodes (Math, String, List, Dictionary, Color, DateTime, File, Geometry) and 59 new Navisworks nodes (clash triage/grouping/reports, camera, bulk search-set creation, model audits, TimeLiner set links, image/NWD export): **200+ nodes** total.
-- **Bug fixes** — `Color`/`Color Picker` wires into `Appearance.OverrideColor` now work (pluggable type-converter registry), and Color Picker sliders update the swatch and downstream nodes live.
+- **Custom property tabs** — `Properties.SetCustom` writes user-defined, searchable, schedulable property tabs that travel with the NWF/NWD; with lacing and `Table.JoinByKey` this is spreadsheet→model data enrichment (iConstruct SmartProperties territory).
+- **Native Excel** — `Excel.ReadFromFile` / `Excel.WriteToFile` handle .xlsx directly, zero new dependencies, headless-capable.
+- **BCF 2.1 exchange** — export clash results/viewpoints as .bcfzip issues and import them back: the vendor-neutral bridge to BIMcollab, Newforma Konekt, Revizto and ACC Coordination.
+- **Clash management** — batch rename tests/results, comments on results, grouping by status or by the model's own grid ("B-3 : Level 2"), a one-node summary matrix, and between-run **clash delta snapshots** (new / resolved / persisting).
+- **Transforms & distance** — move/rotate/reset permanent transform overrides; true mesh surface-to-surface `Distance.BetweenItems` with witness points.
+- **Tree ops & comments** — rename viewpoints/sets, nested folders, move-to-folder, and full Review-tab comment threads on viewpoints, sets and clash items.
+- **Document lifecycle** — open/append/refresh/merge/remove-model nodes: the Navisworks Batch Utility as a three-node headless graph.
+- **Grids, zones, 4D** — read levels/grid intersections, one-node zone tagging, and TimeLiner auto-attach by property.
 
-Full changelog: [docs/WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md).
+**50 new nodes** (see the [full changelog](docs/WHATS_NEW_0.3.md)); v0.2 brought the editor quality-of-life wave and doubled the library ([WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md)).
 
 ## Features
 
@@ -34,7 +38,7 @@ Full changelog: [docs/WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md).
 - **Real dataflow engine** — eager evaluation, topological execution, and dirty propagation: change one slider and only its downstream nodes re-run. Manual and Automatic run modes.
 - **Replication ("lacing")** — feed a list into a scalar input and the node maps over it, exactly like Dynamo: Shortest by default, Longest and Cross-Product per node.
 - **Robust by design** — a failing node surfaces a per-node Warning/Error state; it never crashes the graph run or Navisworks.
-- **Deep Navisworks node library** — properties/QTO extraction, Find-Items-grade search, selection sets, color/transparency/hide overrides, saved viewpoints, clash test read-out and triage, TimeLiner, CSV/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (200+ nodes implemented as of v0.2).
+- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides, transforms, saved viewpoints, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (250+ nodes implemented as of v0.3).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
 - **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).

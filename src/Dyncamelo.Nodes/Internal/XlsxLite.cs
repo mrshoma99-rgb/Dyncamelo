@@ -110,14 +110,20 @@ internal static class XlsxLite
     {
         ValidateSheetName(sheetName);
 
+        IReadOnlyList<IReadOnlyList<object?>?> newRows = rows ?? new List<IReadOnlyList<object?>?>();
         var sheets = new List<KeyValuePair<string, IReadOnlyList<IReadOnlyList<object?>?>>>();
+        var replacedInPlace = false;
         if (append && File.Exists(path))
         {
             foreach (var existingName in SheetNames(path))
             {
                 if (string.Equals(existingName, sheetName, StringComparison.OrdinalIgnoreCase))
                 {
-                    continue; // replaced by the new data below
+                    // Replace the same-named sheet AT ITS ORIGINAL POSITION so
+                    // re-emitting a mid-workbook sheet keeps the sheet order.
+                    sheets.Add(new KeyValuePair<string, IReadOnlyList<IReadOnlyList<object?>?>>(sheetName, newRows));
+                    replacedInPlace = true;
+                    continue;
                 }
 
                 IReadOnlyList<IReadOnlyList<object?>?> existingRows = ReadSheet(path, existingName)
@@ -127,8 +133,10 @@ internal static class XlsxLite
             }
         }
 
-        sheets.Add(new KeyValuePair<string, IReadOnlyList<IReadOnlyList<object?>?>>(
-            sheetName, rows ?? new List<IReadOnlyList<object?>?>()));
+        if (!replacedInPlace)
+        {
+            sheets.Add(new KeyValuePair<string, IReadOnlyList<IReadOnlyList<object?>?>>(sheetName, newRows));
+        }
 
         var directory = Path.GetDirectoryName(path);
         if (!string.IsNullOrEmpty(directory))
@@ -419,7 +427,21 @@ internal static class XlsxLite
             case "b":
                 return raw == "1";
             default:
-                return double.Parse(raw, NumberStyles.Float, CultureInfo.InvariantCulture);
+                // Some non-Excel generators emit numeric cells with an empty
+                // <v></v> — treat those as empty cells rather than crashing.
+                if (raw.Length == 0)
+                {
+                    return null;
+                }
+
+                if (!double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
+                {
+                    throw new InvalidDataException(
+                        "The numeric cell value '" + raw + "' is not a valid number — " +
+                        "the worksheet part is malformed or uses an unsupported cell type.");
+                }
+
+                return number;
         }
     }
 

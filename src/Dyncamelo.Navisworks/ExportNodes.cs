@@ -308,29 +308,46 @@ public static class ExportNodes
         EnsureDirectory(filePath);
 
         var state = ComApiBridge.State;
-        var options = state.GetIOPluginOptions("lcodpimage");
-        foreach (InwOaProperty option in options.Properties())
+        InwOaPropertyVec? options = null;
+        InwOaPropertyColl? properties = null;
+        try
         {
-            switch (option.name)
+            options = state.GetIOPluginOptions("lcodpimage");
+            properties = options.Properties();
+            foreach (InwOaProperty option in properties)
             {
-                case "export.image.format":
-                    option.value = formatCode;
-                    break;
-                case "export.image.width":
-                    option.value = width;
-                    break;
-                case "export.image.height":
-                    option.value = height;
-                    break;
+                try
+                {
+                    switch (option.name)
+                    {
+                        case "export.image.format":
+                            option.value = formatCode;
+                            break;
+                        case "export.image.width":
+                            option.value = width;
+                            break;
+                        case "export.image.height":
+                            option.value = height;
+                            break;
+                    }
+                }
+                finally
+                {
+                    ComBridge.Release(option);
+                }
+            }
+
+            var status = state.DriveIOPlugin("lcodpimage", Path.GetFullPath(filePath), options);
+            if (status != nwEExportStatus.eExport_OK)
+            {
+                throw new InvalidOperationException(
+                    "Navisworks image export failed with status '" + status +
+                    "'. Check that the path is writable and a model is visible in the viewport.");
             }
         }
-
-        var status = state.DriveIOPlugin("lcodpimage", Path.GetFullPath(filePath), options);
-        if (status != nwEExportStatus.eExport_OK)
+        finally
         {
-            throw new InvalidOperationException(
-                "Navisworks image export failed with status '" + status +
-                "'. Check that the path is writable and a model is visible in the viewport.");
+            ComBridge.Release(properties, options);
         }
 
         return filePath;

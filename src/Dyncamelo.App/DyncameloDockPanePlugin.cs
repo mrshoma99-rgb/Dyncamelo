@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
+using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Plugins;
 using Dyncamelo.Navisworks;
 using Dyncamelo.UI.ViewModels;
@@ -24,6 +25,7 @@ public class DyncameloDockPanePlugin : DockPanePlugin
     public const string PluginId = "Dyncamelo.DockPane.DYNC";
 
     private GraphEditorViewModel? _viewModel;
+    private Document? _subscribedDocument;
 
     /// <inheritdoc />
     public override Control CreateControlPane()
@@ -42,6 +44,13 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         // whenever the active document changes.
         NavisApplication.ActiveDocumentChanged += OnActiveDocumentChanged;
 
+        // Plan gate I3: Document.Open/AppendFiles/Refresh/Merge and Model.Remove
+        // mutate the contents of the SAME active document without changing its
+        // identity, so ActiveDocumentChanged never fires for them — yet every
+        // cached ModelItem handle from earlier runs is now dead. Subscribe the
+        // document's own content-mutation events and flush node output caches.
+        SubscribeDocumentEvents(GetActiveDocument());
+
         var host = new ElementHost
         {
             Child = editor,
@@ -55,12 +64,76 @@ public class DyncameloDockPanePlugin : DockPanePlugin
     public override void DestroyControlPane(Control pane)
     {
         NavisApplication.ActiveDocumentChanged -= OnActiveDocumentChanged;
+        SubscribeDocumentEvents(null);
         _viewModel = null;
         pane.Dispose();
     }
 
     private void OnActiveDocumentChanged(object? sender, EventArgs e)
     {
+        SubscribeDocumentEvents(GetActiveDocument());
         _viewModel?.InvalidateAllNodes();
+    }
+
+    /// <summary>
+    /// Fires on Models.CollectionChanged (open/append/remove/merge),
+    /// Models.SceneLoaded and Document.FilesUpdated (refresh). All are raised
+    /// synchronously on the main thread — when one of the lifecycle nodes
+    /// triggers them mid-run, marking everything dirty here is safe: the engine
+    /// clears the executing node's dirty flag AFTER it returns, so the mutating
+    /// node itself ends the run clean and an auto-run cannot re-mutate in a loop.
+    /// </summary>
+    private void OnDocumentContentsChanged(object? sender, EventArgs e)
+    {
+        _viewModel?.InvalidateAllNodes();
+    }
+
+    /// <summary>
+    /// Moves the content-mutation subscriptions to <paramref name="document"/>
+    /// (null unsubscribes only). Idempotent per document.
+    /// </summary>
+    private void SubscribeDocumentEvents(Document? document)
+    {
+        if (ReferenceEquals(_subscribedDocument, document))
+        {
+            return;
+        }
+
+        if (_subscribedDocument != null)
+        {
+            try
+            {
+                _subscribedDocument.Models.CollectionChanged -= OnDocumentContentsChanged;
+                _subscribedDocument.Models.SceneLoaded -= OnDocumentContentsChanged;
+                _subscribedDocument.FilesUpdated -= OnDocumentContentsChanged;
+            }
+            catch (Exception)
+            {
+                // The old document may already be disposed during shutdown.
+            }
+
+            _subscribedDocument = null;
+        }
+
+        if (document != null)
+        {
+            document.Models.CollectionChanged += OnDocumentContentsChanged;
+            document.Models.SceneLoaded += OnDocumentContentsChanged;
+            document.FilesUpdated += OnDocumentContentsChanged;
+            _subscribedDocument = document;
+        }
+    }
+
+    private static Document? GetActiveDocument()
+    {
+        try
+        {
+            return NavisApplication.ActiveDocument;
+        }
+        catch (Exception)
+        {
+            // Outside a fully initialized Navisworks session there is no document.
+            return null;
+        }
     }
 }
