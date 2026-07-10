@@ -21,7 +21,7 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ## What's new in 0.2
 
-- **Canvas quality-of-life** — copy/paste/duplicate (`Ctrl+C`/`Ctrl+V`), node **groups** (`Ctrl+G`, colored, drag as one), wire disconnect from ports or the wire itself, inline **value previews** under every node, floating error balloons, resizable Watch nodes, live slider readouts, double-click to drop a quick input node.
+- **Canvas quality-of-life** — copy/paste/duplicate (`Ctrl+C`/`Ctrl+V`/`Ctrl+D`), node **groups** (`Ctrl+G`, colored, drag as one), wire disconnect from ports or the wire itself, inline **value previews** under every node, floating error balloons, resizable Watch nodes, live slider readouts, double-click to drop a quick input node.
 - **Library quality-of-life** — hover **tooltips** with full node signatures, pinned **favourites** (star any node), collapse/expand all, bigger text, and a **recent files** menu on the Open button.
 - **Node library doubled** — 43 new general nodes (Math, String, List, Dictionary, Color, DateTime, File, Geometry) and 59 new Navisworks nodes (clash triage/grouping/reports, camera, bulk search-set creation, model audits, TimeLiner set links, image/NWD export): **200+ nodes** total.
 - **Bug fixes** — `Color`/`Color Picker` wires into `Appearance.OverrideColor` now work (pluggable type-converter registry), and Color Picker sliders update the swatch and downstream nodes live.
