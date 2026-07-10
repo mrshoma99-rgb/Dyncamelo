@@ -45,6 +45,13 @@ if errorlevel 8 (
     exit /b 1
 )
 
+rem Files extracted from a downloaded zip carry the "from the internet" mark
+rem (Zone.Identifier). .NET Framework refuses to load such DLLs -
+rem FileLoadException 0x80131515, shown by Navisworks as PLUGIN_LOAD_02.
+rem Strip the mark from everything just installed.
+echo Unblocking installed files...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -LiteralPath '%DEST%' -Recurse -File | Unblock-File" >nul 2>&1
+
 echo [OK] Dyncamelo installed to:
 echo      %DEST%
 echo.

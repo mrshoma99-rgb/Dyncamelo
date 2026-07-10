@@ -26,6 +26,12 @@ This guide takes you from a fresh Navisworks installation to your first working 
 3. Start Navisworks 2024 — Dyncamelo appears on the **BIMCamel** ribbon tab,
    in the *Visual Programming* panel.
 
+   > If Navisworks reports `PLUGIN_LOAD_02` / `0x80131515`, the DLLs still
+   > carry Windows' "downloaded file" mark. The release installer
+   > (`install-dyncamelo.bat`) unblocks automatically; for a manual copy run
+   > `Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File`
+   > in PowerShell and restart Navisworks.
+
 ### Option B — classic Plugins folder (no ribbon tab)
 
 1. Close Navisworks.
