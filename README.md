@@ -19,13 +19,22 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
+## What's new in 0.2
+
+- **Canvas quality-of-life** — copy/paste/duplicate (`Ctrl+C`/`Ctrl+V`), node **groups** (`Ctrl+G`, colored, drag as one), wire disconnect from ports or the wire itself, inline **value previews** under every node, floating error balloons, resizable Watch nodes, live slider readouts, double-click to drop a quick input node.
+- **Library quality-of-life** — hover **tooltips** with full node signatures, pinned **favourites** (star any node), collapse/expand all, bigger text, and a **recent files** menu on the Open button.
+- **Node library doubled** — 43 new general nodes (Math, String, List, Dictionary, Color, DateTime, File, Geometry) and 59 new Navisworks nodes (clash triage/grouping/reports, camera, bulk search-set creation, model audits, TimeLiner set links, image/NWD export): **200+ nodes** total.
+- **Bug fixes** — `Color`/`Color Picker` wires into `Appearance.OverrideColor` now work (pluggable type-converter registry), and Color Picker sliders update the swatch and downstream nodes live.
+
+Full changelog: [docs/WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md).
+
 ## Features
 
 - **Dynamo-like editor** — a node canvas (built on [Nodify](https://github.com/miroiu/nodify)) docked inside Navisworks: searchable node library, drag-to-wire connectors, pan/zoom, notes, watch nodes.
 - **Real dataflow engine** — eager evaluation, topological execution, and dirty propagation: change one slider and only its downstream nodes re-run. Manual and Automatic run modes.
 - **Replication ("lacing")** — feed a list into a scalar input and the node maps over it, exactly like Dynamo: Shortest by default, Longest and Cross-Product per node.
 - **Robust by design** — a failing node surfaces a per-node Warning/Error state; it never crashes the graph run or Navisworks.
-- **Deep Navisworks node library** — properties/QTO extraction, Find-Items-grade search, selection sets, color/transparency/hide overrides, saved viewpoints, clash test read-out and triage, TimeLiner, CSV/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (~190 nodes planned, ~88 in the MVP).
+- **Deep Navisworks node library** — properties/QTO extraction, Find-Items-grade search, selection sets, color/transparency/hide overrides, saved viewpoints, clash test read-out and triage, TimeLiner, CSV/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (200+ nodes implemented as of v0.2).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
 - **MIT licensed** — permissive dependencies only.
@@ -45,6 +54,7 @@ graph TD
     APP --> NODES
     UI --> CORE
     NAV --> CORE
+    NAV --> NODES
     NODES --> CORE
 
     NWAPI["Autodesk Navisworks 2024 API<br/>(bound from the host at runtime)"]
