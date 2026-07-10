@@ -24,8 +24,10 @@ Related reading: [ARCHITECTURE.md](ARCHITECTURE.md) for engine semantics (replic
 
 | Tier | Meaning |
 |---|---|
-| **MVP** | Buildable now; ships in v0.1. Covers the core dataflow toolkit plus the highest-value Navisworks workflows (property extraction/QTO, search, selection sets, color/hide, viewpoints, clash triage read-out). ~88 nodes. |
-| **Beta** | v0.2. Rounds out each category; write-heavy or composite Navisworks operations (clash status edits, TimeLiner, image export, camera). |
+| **MVP** | Shipped in v0.1. Covers the core dataflow toolkit plus the highest-value Navisworks workflows (property extraction/QTO, search, selection sets, color/hide, viewpoints, clash triage read-out). |
+| **Implemented (v0.1)** / **Implemented (v0.2)** | Rows implemented after the original tier plan: v0.1 rows shipped with the first release under this exact name; v0.2 rows are new in the current release (43 general + 59 Navisworks nodes). |
+| **Beta** | Planned but not yet implemented (a handful of NodeModel and composite rows remain). |
+| **Skipped** | Deliberately not built — the row notes what covers it instead. |
 | **Future** | v1.0+. Script nodes, condition-builder search DSL, package manager, geometry preview, multi-document. |
 
 ---
@@ -201,7 +203,7 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| Application.Version | Navisworks.Application | — | product: string, apiVersion: string | Running Navisworks product name and API version (for report headers, compatibility checks). | `Autodesk.Navisworks.Api.Application.Version.RuntimeProductName`, `Application.Version.ApiMajor/ApiMinor` | Beta |
+| Application.Version | Navisworks.Application | — | product: string, apiVersion: string | Running Navisworks product name and API version (for report headers, compatibility checks). | `Autodesk.Navisworks.Api.Application.Version.RuntimeProductName`, `Application.Version.ApiMajor/ApiMinor` | Implemented (v0.2) |
 
 ## Navisworks.Document
 
@@ -211,7 +213,7 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | Document.Info | Navisworks.Document | document: Document | title: string, fileName: string, isClear: bool | Title, full file path, and whether no file is open. | `Document.Title`, `Document.FileName`, `Document.IsClear` | MVP |
 | Document.Models | Navisworks.Document | document: Document | models: List&lt;Model&gt; | All appended source models. | `Document.Models` (DocumentModels) | MVP |
 | Document.Units | Navisworks.Document | document: Document | units: string | Display units of the document (e.g. "Meters"). Not implemented — `Units.Current` already covers it. | `Document.Units` (Units enum) | Skipped (dup of Units.Current) |
-| Document.Save | Navisworks.Document | filePath: string, document: Document | filePath: string | Save the document as .nwf/.nwd to the given path (directory created when missing). | `Document.SaveFile(string)` | Beta |
+| Document.Save | Navisworks.Document | filePath: string, document: Document | filePath: string | Save the document as .nwf/.nwd to the given path (directory created when missing). | `Document.SaveFile(string)` | Implemented (v0.2) |
 
 ## Navisworks.Model
 
@@ -219,8 +221,8 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 |---|---|---|---|---|---|---|
 | Model.RootItem | Navisworks.Model | model: Model | rootItem: ModelItem | Root node of a source model's item tree. | `Model.RootItem` | MVP |
 | Models.RootItems | Navisworks.Model | document: Document | rootItems: List&lt;ModelItem&gt; | Roots of all appended models in one step (start of most graphs). | `Document.Models.RootItems` | MVP |
-| Model.FileName | Navisworks.Model | model: Model | fileName: string, sourceFileName: string | Cached and original source file paths. | `Model.FileName`, `Model.SourceFileName` | Beta |
-| Model.Units | Navisworks.Model | model: Model | units: string | Native units of the source file. | `Model.Units` | Beta |
+| Model.FileName | Navisworks.Model | model: Model | fileName: string, sourceFileName: string | Cached and original source file paths. | `Model.FileName`, `Model.SourceFileName` | Implemented (v0.2) |
+| Model.Units | Navisworks.Model | model: Model | units: string | Native units of the source file. | `Model.Units` | Implemented (v0.2) |
 
 ## Navisworks.ModelItem
 
@@ -231,12 +233,12 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | ModelItem.DisplayName | Navisworks.ModelItem | modelItem: ModelItem | name: string | Selection-tree display name. | `ModelItem.DisplayName` | MVP |
 | ModelItem.HasGeometry | Navisworks.ModelItem | modelItem: ModelItem | hasGeometry: bool | True for geometry-bearing leaf items. | `ModelItem.HasGeometry` | MVP |
 | ModelItem.BoundingBox | Navisworks.ModelItem | modelItem: ModelItem | boundingBox: BoundingBox | Axis-aligned bounding box in world coordinates. | `ModelItem.BoundingBox()` (→ BoundingBox3D) | MVP |
-| ModelItem.Parent | Navisworks.ModelItem | modelItem: ModelItem | parent: ModelItem | Parent item (null + warning at root). | `ModelItem.Parent` | Beta |
-| ModelItem.Ancestors | Navisworks.ModelItem | modelItem: ModelItem, includeSelf: bool = false | ancestors: List&lt;ModelItem&gt; | Chain of parents up to the model root. | `ModelItem.Ancestors` / `AncestorsAndSelf` | Beta |
-| ModelItem.ClassInfo | Navisworks.ModelItem | modelItem: ModelItem | className: string, classDisplayName: string | Internal and localized class names (layer/group/geometry detection). | `ModelItem.ClassName`, `ModelItem.ClassDisplayName` | Beta |
-| ModelItem.IsHidden | Navisworks.ModelItem | modelItem: ModelItem | isHidden: bool | Current hidden state. | `ModelItem.IsHidden` | Beta |
-| ModelItem.InstanceGuid | Navisworks.ModelItem | modelItem: ModelItem | guid: string | Stable instance GUID (empty when absent) — cross-run item identity for reports. | `ModelItem.InstanceGuid` | Beta |
-| ModelItem.GeometryLeaves | Navisworks.ModelItem | modelItems: List&lt;ModelItem&gt; | leaves: List&lt;ModelItem&gt; | Convenience: flatten to unique geometry-bearing descendants (the items QTO and coloring actually want). | composite: `DescendantsAndSelf` + `HasGeometry` filter | Beta |
+| ModelItem.Parent | Navisworks.ModelItem | modelItem: ModelItem | parent: ModelItem | Parent item (null + warning at root). | `ModelItem.Parent` | Implemented (v0.2) |
+| ModelItem.Ancestors | Navisworks.ModelItem | modelItem: ModelItem, includeSelf: bool = false | ancestors: List&lt;ModelItem&gt; | Chain of parents up to the model root. | `ModelItem.Ancestors` / `AncestorsAndSelf` | Implemented (v0.2) |
+| ModelItem.ClassInfo | Navisworks.ModelItem | modelItem: ModelItem | className: string, classDisplayName: string | Internal and localized class names (layer/group/geometry detection). | `ModelItem.ClassName`, `ModelItem.ClassDisplayName` | Implemented (v0.2) |
+| ModelItem.IsHidden | Navisworks.ModelItem | modelItem: ModelItem | isHidden: bool | Current hidden state. | `ModelItem.IsHidden` | Implemented (v0.2) |
+| ModelItem.InstanceGuid | Navisworks.ModelItem | modelItem: ModelItem | guid: string | Stable instance GUID (empty when absent) — cross-run item identity for reports. | `ModelItem.InstanceGuid` | Implemented (v0.2) |
+| ModelItem.GeometryLeaves | Navisworks.ModelItem | modelItems: List&lt;ModelItem&gt; | leaves: List&lt;ModelItem&gt; | Convenience: flatten to unique geometry-bearing descendants (the items QTO and coloring actually want). | composite: `DescendantsAndSelf` + `HasGeometry` filter | Implemented (v0.2) |
 
 ## Navisworks.Properties
 
@@ -244,11 +246,11 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 |---|---|---|---|---|---|---|
 | Properties.Value | Navisworks.Properties | modelItem: ModelItem, category: string, property: string | value: object | Read one property by display names ("Item"/"Name", "Element"/"Volume"…). Returns typed value (double/string/bool/DateTime) via VariantData coercion; null + warning when missing. Replicates over item lists — the QTO workhorse. | `ModelItem.PropertyCategories.FindPropertyByDisplayName(cat, prop)` → `DataProperty.Value` (VariantData: ToDouble/ToDisplayString/ToDateTime/ToBoolean per `VariantData.DataType`) | MVP |
 | Properties.Categories | Navisworks.Properties | modelItem: ModelItem | names: List&lt;string&gt;, categories: List&lt;PropertyCategory&gt; | List all property tabs on an item (discovery/QA). | `ModelItem.PropertyCategories` (PropertyCategoryCollection) / [MultiReturn] | MVP |
-| Properties.InCategory | Navisworks.Properties | modelItem: ModelItem, category: string | names: List&lt;string&gt;, values: List&lt;object&gt; | All property names + values inside one category. | `PropertyCategoryCollection.FindCategoryByDisplayName` → `PropertyCategory.Properties` (DataPropertyCollection) / [MultiReturn] | Beta |
-| Properties.ValueAsString | Navisworks.Properties | modelItem: ModelItem, category: string, property: string | text: string | Read a property as text ("" when absent; invariant formatting — VariantData converters throw on wrong types, so a units-suffixed display string is not obtainable). | `DataProperty.Value` via VariantData `DataType` switch → invariant text | Beta |
-| Properties.HasProperty | Navisworks.Properties | modelItem: ModelItem, category: string, property: string | hasProperty: bool | Existence test — drives model-QA "missing data" masks. | `FindPropertyByDisplayName(...) != null` | Beta |
-| Properties.AsDictionary | Navisworks.Properties | modelItem: ModelItem | properties: Dictionary&lt;string,object&gt; | Every category/property flattened to "Category.Property" → value (full data dump/JSON export). | iterate `PropertyCategories` → `PropertyCategory.Properties` → `DataProperty` | Beta |
-| Property.Info | Navisworks.Properties | property: DataProperty | name: string, displayName: string, value: object | Deconstruct a raw DataProperty (pairs with Properties.InCategory categories output). | `DataProperty.Name`, `DataProperty.DisplayName`, `DataProperty.Value` | Beta |
+| Properties.InCategory | Navisworks.Properties | modelItem: ModelItem, category: string | names: List&lt;string&gt;, values: List&lt;object&gt; | All property names + values inside one category. | `PropertyCategoryCollection.FindCategoryByDisplayName` → `PropertyCategory.Properties` (DataPropertyCollection) / [MultiReturn] | Implemented (v0.2) |
+| Properties.ValueAsString | Navisworks.Properties | modelItem: ModelItem, category: string, property: string | text: string | Read a property as text ("" when absent; invariant formatting — VariantData converters throw on wrong types, so a units-suffixed display string is not obtainable). | `DataProperty.Value` via VariantData `DataType` switch → invariant text | Implemented (v0.2) |
+| Properties.HasProperty | Navisworks.Properties | modelItem: ModelItem, category: string, property: string | hasProperty: bool | Existence test — drives model-QA "missing data" masks. | `FindPropertyByDisplayName(...) != null` | Implemented (v0.2) |
+| Properties.AsDictionary | Navisworks.Properties | modelItem: ModelItem | properties: Dictionary&lt;string,object&gt; | Every category/property flattened to "Category.Property" → value (full data dump/JSON export). | iterate `PropertyCategories` → `PropertyCategory.Properties` → `DataProperty` | Implemented (v0.2) |
+| Property.Info | Navisworks.Properties | property: DataProperty | name: string, displayName: string, value: object | Deconstruct a raw DataProperty (pairs with Properties.InCategory categories output). | `DataProperty.Name`, `DataProperty.DisplayName`, `DataProperty.Value` | Implemented (v0.2) |
 
 ## Navisworks.Search
 
@@ -256,11 +258,11 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 |---|---|---|---|---|---|---|
 | Search.ByPropertyValue | Navisworks.Search | document: Document, category: string, property: string, value: string | modelItems: List&lt;ModelItem&gt; | Find every item whose property equals the value — the bulk-selection workhorse (equivalent to Find Items → Equals). | `new Search()`; `Search.Selection.SelectAll()`; `SearchConditions.Add(SearchCondition.HasPropertyByDisplayName(cat, prop).EqualValue(VariantData.FromDisplayString(value)))`; `Search.FindAll(doc, false)` | MVP |
 | Search.ByPropertyContains | Navisworks.Search | document: Document, category: string, property: string, value: string | modelItems: List&lt;ModelItem&gt; | Find items whose property display-string contains the text. | `SearchCondition...DisplayStringContains(value)` + `Search.FindAll` | MVP |
-| Search.ByPropertyWildcard | Navisworks.Search | category: string, property: string, pattern: string, document: Document | items: List&lt;ModelItem&gt; | Wildcard match (`*`, `?`) on property display string. | `SearchCondition...DisplayStringWildcard(pattern)` | Beta |
-| Search.ByPropertyCompare | Navisworks.Search | category: string, property: string, comparison: string, value: double, document: Document | items: List&lt;ModelItem&gt; | Numeric comparison search: &gt;, &gt;=, &lt;, &lt;= (e.g. pipes with Diameter &gt; 100). Runs once per numeric variant type and unions the hits. | `SearchCondition...CompareWith(SearchConditionComparison.Numeric*, VariantData.FromDouble/Length/Area/Volume/Angle/Int32)` | Beta |
-| Search.HasProperty | Navisworks.Search | category: string, property: string, document: Document | items: List&lt;ModelItem&gt; | All items that carry the property at all (data-completeness audits; see Audit.MissingProperty for the inverse). | `SearchCondition.HasPropertyByDisplayName(cat, prop)` (no value test) | Beta |
-| Search.HasCategory | Navisworks.Search | category: string, document: Document | items: List&lt;ModelItem&gt; | All items carrying a property tab (e.g. every item with "TimeLiner" data). | `SearchCondition.HasCategoryByDisplayName(cat)` | Beta |
-| Search.InItems | Navisworks.Search | modelItems: List&lt;ModelItem&gt;, category: string, property: string, value: object, document: Document | items: List&lt;ModelItem&gt; | Scoped search: run the property-equals test only inside the given items (chained refinement). | `Search.Selection.CopyFrom(ModelItemCollection)` + conditions + `FindAll` | Beta |
+| Search.ByPropertyWildcard | Navisworks.Search | category: string, property: string, pattern: string, document: Document | items: List&lt;ModelItem&gt; | Wildcard match (`*`, `?`) on property display string. | `SearchCondition...DisplayStringWildcard(pattern)` | Implemented (v0.2) |
+| Search.ByPropertyCompare | Navisworks.Search | category: string, property: string, comparison: string, value: double, document: Document | items: List&lt;ModelItem&gt; | Numeric comparison search: &gt;, &gt;=, &lt;, &lt;= (e.g. pipes with Diameter &gt; 100). Runs once per numeric variant type and unions the hits. | `SearchCondition...CompareWith(SearchConditionComparison.Numeric*, VariantData.FromDouble/Length/Area/Volume/Angle/Int32)` | Implemented (v0.2) |
+| Search.HasProperty | Navisworks.Search | category: string, property: string, document: Document | items: List&lt;ModelItem&gt; | All items that carry the property at all (data-completeness audits; see Audit.MissingProperty for the inverse). | `SearchCondition.HasPropertyByDisplayName(cat, prop)` (no value test) | Implemented (v0.2) |
+| Search.HasCategory | Navisworks.Search | category: string, document: Document | items: List&lt;ModelItem&gt; | All items carrying a property tab (e.g. every item with "TimeLiner" data). | `SearchCondition.HasCategoryByDisplayName(cat)` | Implemented (v0.2) |
+| Search.InItems | Navisworks.Search | modelItems: List&lt;ModelItem&gt;, category: string, property: string, value: object, document: Document | items: List&lt;ModelItem&gt; | Scoped search: run the property-equals test only inside the given items (chained refinement). | `Search.Selection.CopyFrom(ModelItemCollection)` + conditions + `FindAll` | Implemented (v0.2) |
 | Search.ByConditions | Navisworks.Search | document: Document, conditions: List&lt;object&gt;, matchAll: bool = true | modelItems: List&lt;ModelItem&gt; | Compose arbitrary condition objects (AND/OR groups, numeric compare, negation) built by companion condition nodes. | `SearchConditionGroup`, `SearchCondition` full surface | Future |
 
 ## Navisworks.Selection
@@ -270,8 +272,8 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | Selection.Current | Navisworks.Selection | document: Document | modelItems: List&lt;ModelItem&gt; | Items currently selected in the Navisworks UI (bridge from manual picking into the graph). | `Document.CurrentSelection.SelectedItems` (ModelItemCollection) | MVP |
 | Selection.SetCurrent | Navisworks.Selection | document: Document, modelItems: List&lt;ModelItem&gt; | modelItems: List&lt;ModelItem&gt; | Make these items the live UI selection (visual feedback of graph results). | `Document.CurrentSelection.CopyFrom(ModelItemCollection)` | MVP |
 | Selection.Clear | Navisworks.Selection | document: Document, run: bool = true | done: bool | Clear the UI selection. | `Document.CurrentSelection.Clear()` | MVP |
-| Selection.SelectAll | Navisworks.Selection | document: Document | items: List&lt;ModelItem&gt; | Select everything and return the snapshot. | `Document.CurrentSelection.SelectAll()` | Beta |
-| Selection.AddToCurrent | Navisworks.Selection | modelItems: List&lt;ModelItem&gt;, document: Document | items: List&lt;ModelItem&gt; | Union new items into the existing selection; returns the unioned snapshot. | `Document.CurrentSelection.AddRange(IEnumerable<ModelItem>)` | Beta |
+| Selection.SelectAll | Navisworks.Selection | document: Document | items: List&lt;ModelItem&gt; | Select everything and return the snapshot. | `Document.CurrentSelection.SelectAll()` | Implemented (v0.2) |
+| Selection.AddToCurrent | Navisworks.Selection | modelItems: List&lt;ModelItem&gt;, document: Document | items: List&lt;ModelItem&gt; | Union new items into the existing selection; returns the unioned snapshot. | `Document.CurrentSelection.AddRange(IEnumerable<ModelItem>)` | Implemented (v0.2) |
 
 ## Navisworks.SelectionSets
 
@@ -281,10 +283,10 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | SelectionSet.ByName | Navisworks.SelectionSets | document: Document, name: string | set: SelectionSet | Find a saved set by display name (folder-recursive; warns if absent). | walk `DocumentSelectionSets.RootItem`, match `SavedItem.DisplayName` | MVP |
 | SelectionSet.Items | Navisworks.SelectionSets | set: SelectionSet, document: Document | modelItems: List&lt;ModelItem&gt; | Resolve a set to its model items (explicit items, or executes the stored search for search sets). | `SelectionSet.ExplicitModelItems`; `SelectionSet.HasSearch` → `SelectionSet.Search.FindAll(doc, false)` | MVP |
 | SelectionSet.Create | Navisworks.SelectionSets | document: Document, name: string, modelItems: List&lt;ModelItem&gt;, overwrite: bool = true | set: SelectionSet | Save items as a named selection set — the "bulk set creation from property rules" payoff node. Replicates over name/items lists to create many sets in one run. | `new SelectionSet(ModelItemCollection) { DisplayName = name }`; `Document.SelectionSets.AddCopy(set)` (or `ReplaceWithCopy` when overwriting) | MVP |
-| SelectionSet.CreateFromSearch | Navisworks.SelectionSets | name: string, category: string, property: string, value: object, document: Document | selectionSet: SelectionSet | Save a live *search set* (re-evaluates as the model changes) from a property rule; equality variants are OR-grouped so numbers match measured types too. | `new SelectionSet(Search)` + `DocumentSelectionSets.AddCopy`/`ReplaceWithCopy` | Beta |
-| SelectionSets.CreateFolder | Navisworks.SelectionSets | name: string, document: Document | folder: FolderItem | Create (or reuse) a top-level folder to organize generated sets. | `new FolderItem { DisplayName = name }` + `DocumentSelectionSets.AddCopy` | Beta |
-| SelectionSet.Delete | Navisworks.SelectionSets | name: string, document: Document | deleted: bool | Remove a saved set by name; false when absent (clean re-runs). | locate SavedItem, `Document.SelectionSets.Remove(parent, item)` | Beta |
-| SelectionSet.Name | Navisworks.SelectionSets | set: SelectionSet | name: string | Display name of a set. | `SavedItem.DisplayName` | Beta |
+| SelectionSet.CreateFromSearch | Navisworks.SelectionSets | name: string, category: string, property: string, value: object, document: Document | selectionSet: SelectionSet | Save a live *search set* (re-evaluates as the model changes) from a property rule; equality variants are OR-grouped so numbers match measured types too. | `new SelectionSet(Search)` + `DocumentSelectionSets.AddCopy`/`ReplaceWithCopy` | Implemented (v0.2) |
+| SelectionSets.CreateFolder | Navisworks.SelectionSets | name: string, document: Document | folder: FolderItem | Create (or reuse) a top-level folder to organize generated sets. | `new FolderItem { DisplayName = name }` + `DocumentSelectionSets.AddCopy` | Implemented (v0.2) |
+| SelectionSet.Delete | Navisworks.SelectionSets | name: string, document: Document | deleted: bool | Remove a saved set by name; false when absent (clean re-runs). | locate SavedItem, `Document.SelectionSets.Remove(parent, item)` | Implemented (v0.2) |
+| SelectionSet.Name | Navisworks.SelectionSets | set: SelectionSet | name: string | Display name of a set. | `SavedItem.DisplayName` | Implemented (v0.2) |
 
 ## Navisworks.Appearance
 
@@ -295,9 +297,9 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | Appearance.Reset | Navisworks.Appearance | document: Document, modelItems: List&lt;ModelItem&gt; | modelItems: List&lt;ModelItem&gt; | Remove color/transparency overrides from these items. | `Document.Models.ResetPermanentMaterials(items)` | MVP |
 | Appearance.Hide | Navisworks.Appearance | document: Document, modelItems: List&lt;ModelItem&gt; | modelItems: List&lt;ModelItem&gt; | Hide items. | `Document.Models.SetHidden(items, true)` | MVP |
 | Appearance.Show | Navisworks.Appearance | document: Document, modelItems: List&lt;ModelItem&gt; | modelItems: List&lt;ModelItem&gt; | Unhide items. | `Document.Models.SetHidden(items, false)` | MVP |
-| Appearance.ResetAll | Navisworks.Appearance | document: Document | done: bool | Clear every appearance override in the model (clean slate before re-coloring). | `Document.Models.ResetAllPermanentMaterials()` | Beta |
-| Appearance.Isolate | Navisworks.Appearance | modelItems: List&lt;ModelItem&gt;, document: Document | items: List&lt;ModelItem&gt; | Show only these items; hide everything else. | `ModelItemCollection.Invert(doc)` → `SetHidden(true)`; items → `SetHidden(false)` | Beta |
-| Appearance.ColorByValues | Navisworks.Appearance | modelItems: List&lt;ModelItem&gt;, values: List&lt;object&gt;, palette: List&lt;Color&gt; = null, document: Document | items: List&lt;ModelItem&gt;, legend: Dictionary&lt;string,string&gt; | One-node color-coding: all-numeric values → blue→red gradient, discrete values → built-in or supplied categorical palette; outputs a value→"#RRGGBB" legend for reporting. | grouping + `Models.OverridePermanentColor` per bucket | Beta |
+| Appearance.ResetAll | Navisworks.Appearance | document: Document | done: bool | Clear every appearance override in the model (clean slate before re-coloring). | `Document.Models.ResetAllPermanentMaterials()` | Implemented (v0.2) |
+| Appearance.Isolate | Navisworks.Appearance | modelItems: List&lt;ModelItem&gt;, document: Document | items: List&lt;ModelItem&gt; | Show only these items; hide everything else. | `ModelItemCollection.Invert(doc)` → `SetHidden(true)`; items → `SetHidden(false)` | Implemented (v0.2) |
+| Appearance.ColorByValues | Navisworks.Appearance | modelItems: List&lt;ModelItem&gt;, values: List&lt;object&gt;, palette: List&lt;Color&gt; = null, document: Document | items: List&lt;ModelItem&gt;, legend: Dictionary&lt;string,string&gt; | One-node color-coding: all-numeric values → blue→red gradient, discrete values → built-in or supplied categorical palette; outputs a value→"#RRGGBB" legend for reporting. | grouping + `Models.OverridePermanentColor` per bucket | Implemented (v0.2) |
 
 ## Navisworks.Viewpoints
 
@@ -307,17 +309,17 @@ All nodes below live in `Dyncamelo.Navisworks` (net48) and execute on the Navisw
 | SavedViewpoint.ByName | Navisworks.Viewpoints | document: Document, name: string | viewpoint: SavedViewpoint | Find a saved viewpoint by name. | walk `DocumentSavedViewpoints.RootItem`, match `SavedItem.DisplayName` | MVP |
 | SavedViewpoint.Apply | Navisworks.Viewpoints | document: Document, viewpoint: SavedViewpoint | viewpoint: SavedViewpoint | Make it the current view (restores camera + hidden/override state saved with it). | `Document.SavedViewpoints.CurrentSavedViewpoint = viewpoint` | MVP |
 | Viewpoint.SaveCurrent | Navisworks.Viewpoints | document: Document, name: string | viewpoint: SavedViewpoint | Snapshot the current camera (+ hide/override state) as a named saved viewpoint. Replicates over name lists for batch generation. | `new SavedViewpoint(Document.CurrentViewpoint.ToViewpoint()) { DisplayName = name }`; `Document.SavedViewpoints.AddCopy(...)` | MVP |
-| SavedViewpoint.Name | Navisworks.Viewpoints | viewpoint: SavedViewpoint | name: string | Display name. | `SavedItem.DisplayName` | Beta |
-| SavedViewpoint.Delete | Navisworks.Viewpoints | name: string, document: Document | deleted: bool | Remove a saved viewpoint by name; false when absent (clean re-runs of batch generation). | locate SavedItem + `DocumentSavedViewpoints.Remove(...)` | Beta |
-| Viewpoints.FromClashResults | Navisworks.Viewpoints | results: List&lt;ClashResult&gt;, folderName: string = "Clash Views", document: Document | viewpoints: List&lt;SavedViewpoint&gt; | Batch-generate one saved viewpoint per clash result, camera aimed at the clash, named after the result — clash-triage staple. Same-named viewpoints in the folder are replaced. | `DocumentClashTests.TestsViewpointForResult` + `SavedViewpoints.AddCopy/ReplaceWithCopy` into a `FolderItem` | Beta |
+| SavedViewpoint.Name | Navisworks.Viewpoints | viewpoint: SavedViewpoint | name: string | Display name. | `SavedItem.DisplayName` | Implemented (v0.2) |
+| SavedViewpoint.Delete | Navisworks.Viewpoints | name: string, document: Document | deleted: bool | Remove a saved viewpoint by name; false when absent (clean re-runs of batch generation). | locate SavedItem + `DocumentSavedViewpoints.Remove(...)` | Implemented (v0.2) |
+| Viewpoints.FromClashResults | Navisworks.Viewpoints | results: List&lt;ClashResult&gt;, folderName: string = "Clash Views", document: Document | viewpoints: List&lt;SavedViewpoint&gt; | Batch-generate one saved viewpoint per clash result, camera aimed at the clash, named after the result — clash-triage staple. Same-named viewpoints in the folder are replaced. | `DocumentClashTests.TestsViewpointForResult` + `SavedViewpoints.AddCopy/ReplaceWithCopy` into a `FolderItem` | Implemented (v0.2) |
 
 ## Navisworks.Camera
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| Camera.Current | Navisworks.Camera | document: Document | position: Point, focalDistance: double, heightField: double | Current camera position and lens parameters (focalDistance null when unset). | `Document.CurrentViewpoint.Value` → `Viewpoint.Position`, `Viewpoint.FocalDistance`, `Viewpoint.HeightField` | Beta |
-| Camera.LookAt | Navisworks.Camera | eye: Point, target: Point, document: Document | done: bool | Move the camera to `eye` looking at `target` (up = +Z). Accepts Navisworks or Dyncamelo points, or [x,y,z] lists. | `CurrentViewpoint.CreateCopy()`; set `Viewpoint.Position`; `Viewpoint.PointAt(target)`; `Viewpoint.AlignUp(Vector3D 0,0,1)`; `Document.CurrentViewpoint.CopyFrom(vp)` | Beta |
-| Camera.ZoomToItems | Navisworks.Camera | modelItems: List&lt;ModelItem&gt;, paddingFactor: double = 1.5, document: Document | done: bool | Frame the given items in the view (per-item screenshots, clash close-ups). | `ModelItemCollection.BoundingBox(true)` padded around its center → `Viewpoint.ZoomBox(box)` + `CurrentViewpoint.CopyFrom` | Beta |
+| Camera.Current | Navisworks.Camera | document: Document | position: Point, focalDistance: double, heightField: double | Current camera position and lens parameters (focalDistance null when unset). | `Document.CurrentViewpoint.Value` → `Viewpoint.Position`, `Viewpoint.FocalDistance`, `Viewpoint.HeightField` | Implemented (v0.2) |
+| Camera.LookAt | Navisworks.Camera | eye: Point, target: Point, document: Document | done: bool | Move the camera to `eye` looking at `target` (up = +Z). Accepts Navisworks or Dyncamelo points, or [x,y,z] lists. | `CurrentViewpoint.CreateCopy()`; set `Viewpoint.Position`; `Viewpoint.PointAt(target)`; `Viewpoint.AlignUp(Vector3D 0,0,1)`; `Document.CurrentViewpoint.CopyFrom(vp)` | Implemented (v0.2) |
+| Camera.ZoomToItems | Navisworks.Camera | modelItems: List&lt;ModelItem&gt;, paddingFactor: double = 1.5, document: Document | done: bool | Frame the given items in the view (per-item screenshots, clash close-ups). | `ModelItemCollection.BoundingBox(true)` padded around its center → `Viewpoint.ZoomBox(box)` + `CurrentViewpoint.CopyFrom` | Implemented (v0.2) |
 
 ## Navisworks.Clash
 
@@ -326,16 +328,16 @@ Namespace `Autodesk.Navisworks.Api.Clash`; the clash test document part is `Docu
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
 | Clash.Tests | Navisworks.Clash | document: Document | names: List&lt;string&gt;, tests: List&lt;ClashTest&gt; | All clash tests in the document. | `document.GetClash().TestsData.Tests` (SavedItemCollection of ClashTest) / [MultiReturn] | MVP |
-| ClashTest.ByName | Navisworks.Clash | name: string, document: Document | test: ClashTest | Find one clash test by display name (searches folders too). | iterate `DocumentClashTests.Tests`, match `SavedItem.DisplayName` | Beta |
+| ClashTest.ByName | Navisworks.Clash | name: string, document: Document | test: ClashTest | Find one clash test by display name (searches folders too). | iterate `DocumentClashTests.Tests`, match `SavedItem.DisplayName` | Implemented (v0.2) |
 | ClashTest.Info | Navisworks.Clash | test: ClashTest | name: string, status: string, lastRun: DateTime | Test name, status (New/Done/OK…), and last run time — report headers. | `ClashTest.DisplayName`, `ClashTest.Status` (ClashTestStatus), `ClashTest.LastRun` / [MultiReturn] | MVP |
 | ClashTest.Results | Navisworks.Clash | test: ClashTest, includeGroups: bool = true | results: List&lt;ClashResult&gt;, groupNames: List&lt;string&gt; | All individual results of a test, flattening clash groups (group name reported per result, "" when ungrouped). | `ClashTest.Children` recursed through `ClashResultGroup.Children` → `ClashResult` / [MultiReturn] | MVP |
 | ClashResult.Info | Navisworks.Clash | result: ClashResult | name: string, status: string, distance: double, created: DateTime, assignedTo: string | Core result metadata in one node — feeds the CSV triage report. | `ClashResult.DisplayName`, `.Status` (ClashResultStatus), `.Distance`, `.CreatedTime`, `.AssignedTo` / [MultiReturn] | MVP |
 | ClashResult.Items | Navisworks.Clash | result: ClashResult | item1: ModelItem, item2: ModelItem | The two clashing model items (composite ancestors preferred so names are human-meaningful). | `ClashResult.CompositeItem1` / `CompositeItem2` (fallback `Item1`/`Item2`) / [MultiReturn] | MVP |
 | ClashResult.Center | Navisworks.Clash | result: ClashResult | point: Point | Clash location in world coordinates (viewpoint targets, zone bucketing). | `ClashResult.Center` (Point3D) | MVP |
-| ClashTest.Run | Navisworks.Clash | test: ClashTest, document: Document | test: ClashTest, resultCount: int | Execute one clash test now (requires the stored test, not a detached copy). | `DocumentClashTests.TestsRunTest(storedTest)` / [MultiReturn] | Beta |
-| Clash.RunAllTests | Navisworks.Clash | document: Document | tests: List&lt;ClashTest&gt; | Execute every clash test — the weekly re-run in one node. | `DocumentClashTests.TestsRunAllTests()` | Beta |
-| ClashResult.SetStatus | Navisworks.Clash | result: ClashResult, status: string, document: Document | result: ClashResult | Set result status (New/Active/Reviewed/Approved/Resolved) — bulk triage by rule (e.g. "distance < 10 mm → Reviewed") via lacing. | `DocumentClashTests.TestsEditResultStatus(result, ClashResultStatus)` | Beta |
-| ClashResult.Assign | Navisworks.Clash | result: ClashResult, assignedTo: string, document: Document | result: ClashResult | Assign a result to a person/trade in bulk via lacing. | `DocumentClashTests.TestsEditResultAssignedTo(result, assignedTo)` | Beta |
+| ClashTest.Run | Navisworks.Clash | test: ClashTest, document: Document | test: ClashTest, resultCount: int | Execute one clash test now (requires the stored test, not a detached copy). | `DocumentClashTests.TestsRunTest(storedTest)` / [MultiReturn] | Implemented (v0.2) |
+| Clash.RunAllTests | Navisworks.Clash | document: Document | tests: List&lt;ClashTest&gt; | Execute every clash test — the weekly re-run in one node. | `DocumentClashTests.TestsRunAllTests()` | Implemented (v0.2) |
+| ClashResult.SetStatus | Navisworks.Clash | result: ClashResult, status: string, document: Document | result: ClashResult | Set result status (New/Active/Reviewed/Approved/Resolved) — bulk triage by rule (e.g. "distance < 10 mm → Reviewed") via lacing. | `DocumentClashTests.TestsEditResultStatus(result, ClashResultStatus)` | Implemented (v0.2) |
+| ClashResult.Assign | Navisworks.Clash | result: ClashResult, assignedTo: string, document: Document | result: ClashResult | Assign a result to a person/trade in bulk via lacing. | `DocumentClashTests.TestsEditResultAssignedTo(result, assignedTo)` | Implemented (v0.2) |
 | ClashResult.Comments | Navisworks.Clash | result: ClashResult | comments: List&lt;string&gt;, authors: List&lt;string&gt; | Read the comment thread on a result. | `SavedItem.Comments` (Comment.Body, Comment.Author) | Future |
 
 ## Navisworks.TimeLiner
@@ -344,32 +346,32 @@ Namespace `Autodesk.Navisworks.Api.Timeliner`; the document part is `DocumentTim
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| TimeLiner.Tasks | Navisworks.TimeLiner | document: Document, flatten: bool = true | tasks: List&lt;TimelinerTask&gt;, names: List&lt;string&gt; | All TimeLiner tasks (hierarchy flattened depth-first by default). | `document.GetTimeliner().Tasks` walked via `GroupItem.Children` → `TimelinerTask` / [MultiReturn] | Beta |
+| TimeLiner.Tasks | Navisworks.TimeLiner | document: Document, flatten: bool = true | tasks: List&lt;TimelinerTask&gt;, names: List&lt;string&gt; | All TimeLiner tasks (hierarchy flattened depth-first by default). | `document.GetTimeliner().Tasks` walked via `GroupItem.Children` → `TimelinerTask` / [MultiReturn] | Implemented (v0.1) |
 | TimelinerTask.Name | Navisworks.TimeLiner | task: TimelinerTask | name: string | Task display name. | `TimelinerTask.DisplayName` | Beta |
 | TimelinerTask.Dates | Navisworks.TimeLiner | task: TimelinerTask | plannedStart: DateTime, plannedEnd: DateTime, actualStart: DateTime, actualEnd: DateTime | All four schedule dates (null when unset). | `TimelinerTask.PlannedStartDate`, `.PlannedEndDate`, `.ActualStartDate`, `.ActualEndDate` / [MultiReturn] | Beta |
 | TimelinerTask.Type | Navisworks.TimeLiner | task: TimelinerTask | taskType: string | Simulation task type (Construct/Demolish/Temporary…). | `TimelinerTask.SimulationTaskTypeName` | Beta |
 | TimelinerTask.AttachedItems | Navisworks.TimeLiner | document: Document, task: TimelinerTask | modelItems: List&lt;ModelItem&gt; | Model items attached to a task (audit unlinked geometry). | `TimelinerTask.Selection` (TimelinerSelection) resolved against the document | Beta |
-| TimelinerTask.AttachSet | Navisworks.TimeLiner | task: TimelinerTask, setName: string, document: Document | task: TimelinerTask | Attach a saved selection/search set as a LIVE link (like the UI's Attach Set) — the core 4D-linking automation. | `DocumentSelectionSets.CreateSelectionSource(set)` → `Selection.SelectionSources` → copy-edit + `DocumentTimeliner.TaskEdit(index, copy)` (located via `TaskCreateIndexPath`) | Beta |
+| TimelinerTask.AttachSet | Navisworks.TimeLiner | task: TimelinerTask, setName: string, document: Document | task: TimelinerTask | Attach a saved selection/search set as a LIVE link (like the UI's Attach Set) — the core 4D-linking automation. | `DocumentSelectionSets.CreateSelectionSource(set)` → `Selection.SelectionSources` → copy-edit + `DocumentTimeliner.TaskEdit(index, copy)` (located via `TaskCreateIndexPath`) | Implemented (v0.2) |
 | TimeLiner.AddTask | Navisworks.TimeLiner | document: Document, name: string, plannedStart: DateTime, plannedEnd: DateTime, taskType: string = "Construct" | task: TimelinerTask | Create a new root-level task. Replicates over lists for CSV-driven schedules. | `new TimelinerTask { DisplayName, PlannedStartDate, PlannedEndDate, SimulationTaskTypeName }` + `DocumentTimeliner.TaskAddCopy(root, task)` | Beta |
-| TimelinerTask.SetDates | Navisworks.TimeLiner | task: TimelinerTask, plannedStart: DateTime, plannedEnd: DateTime, document: Document | task: TimelinerTask | Update a task's planned dates in place — bulk schedule edits without a re-import. | copy-edit pattern: `TimelinerTask.CreateCopy()` set dates + `DocumentTimeliner.TaskEdit(index, copy)` (located via `TaskCreateIndexPath`) | Beta |
+| TimelinerTask.SetDates | Navisworks.TimeLiner | task: TimelinerTask, plannedStart: DateTime, plannedEnd: DateTime, document: Document | task: TimelinerTask | Update a task's planned dates in place — bulk schedule edits without a re-import. | copy-edit pattern: `TimelinerTask.CreateCopy()` set dates + `DocumentTimeliner.TaskEdit(index, copy)` (located via `TaskCreateIndexPath`) | Implemented (v0.2) |
 | TimeLiner.ImportTasksFromCsv | Navisworks.TimeLiner | document: Document, path: string, attachBySetName: bool = true | tasks: List&lt;TimelinerTask&gt;, report: string | One-node schedule import: CSV columns (name, start, end, type, set) → tasks with attachments; row-level error report. | composite: CSV.ReadFromFile + TimeLiner.AddTask + TimelinerTask.AttachSet | Future |
 
 ## Navisworks.Export
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| Export.ViewpointImage | Navisworks.Export | filePath: string, width: int = 1920, height: int = 1080, document: Document | filePath: string | Render the current view to a .png/.jpg/.bmp file. Replicated after SavedViewpoint.Apply it becomes a batch screenshot factory. | COM bridge: `ComApiBridge.State.GetIOPluginOptions("lcodpimage")` (format/width/height options) + `DriveIOPlugin("lcodpimage", path, options)` | Beta |
-| Export.ClashReportCsv | Navisworks.Export | filePath: string, tests: List&lt;ClashTest&gt; = null, document: Document | filePath: string, rowCount: int | One-node clash CSV: test, group, result, status, distance, assigned-to, description, created date, item1/2 paths + GUIDs, clash point (null tests = every test). | flatten `ClashTest.Children` (groups included) + plain file IO | Beta |
+| Export.ViewpointImage | Navisworks.Export | filePath: string, width: int = 1920, height: int = 1080, document: Document | filePath: string | Render the current view to a .png/.jpg/.bmp file. Replicated after SavedViewpoint.Apply it becomes a batch screenshot factory. | COM bridge: `ComApiBridge.State.GetIOPluginOptions("lcodpimage")` (format/width/height options) + `DriveIOPlugin("lcodpimage", path, options)` | Implemented (v0.2) |
+| Export.ClashReportCsv | Navisworks.Export | filePath: string, tests: List&lt;ClashTest&gt; = null, document: Document | filePath: string, rowCount: int | One-node clash CSV: test, group, result, status, distance, assigned-to, description, created date, item1/2 paths + GUIDs, clash point (null tests = every test). | flatten `ClashTest.Children` (groups included) + plain file IO | Implemented (v0.2) |
 | Export.PropertyReportCsv | Navisworks.Export | modelItems: List&lt;ModelItem&gt;, categories: List&lt;string&gt;, properties: List&lt;string&gt;, path: string | path: string, rowCount: int | One-node property/QTO dump: one row per item, one column per requested property. | composite over Properties.Value + CSV.WriteToFile | Beta |
-| Export.NWD | Navisworks.Export | filePath: string, document: Document | filePath: string | Publish the current document as .nwd (with any appearance overrides baked in). | `Document.SaveFile(path)` with .nwd extension | Beta |
+| Export.NWD | Navisworks.Export | filePath: string, document: Document | filePath: string | Publish the current document as .nwd (with any appearance overrides baked in). | `Document.SaveFile(path)` with .nwd extension | Implemented (v0.2) |
 
 ## Navisworks.Units
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| Units.Convert | Navisworks.Units | value: double, fromUnits: string, toUnits: string | value: double | Convert a length value between unit systems (QTO normalization: model units → project units). | `Autodesk.Navisworks.Api.UnitConversion.ScaleFactor(Units from, Units to)` × value | Beta |
-| Units.ScaleFactor | Navisworks.Units | fromUnits: string, toUnits: string | factor: double | Raw multiplier between two unit systems (apply to areas/volumes by squaring/cubing). | `UnitConversion.ScaleFactor(Units, Units)` | Beta |
-| Units.All | Navisworks.Units | — | names: List&lt;string&gt; | Valid unit names accepted by the convert nodes. | `Enum.GetNames(typeof(Autodesk.Navisworks.Api.Units))` | Beta |
+| Units.Convert | Navisworks.Units | value: double, fromUnits: string, toUnits: string | value: double | Convert a length value between unit systems (QTO normalization: model units → project units). | `Autodesk.Navisworks.Api.UnitConversion.ScaleFactor(Units from, Units to)` × value | Implemented (v0.1) |
+| Units.ScaleFactor | Navisworks.Units | fromUnits: string, toUnits: string | factor: double | Raw multiplier between two unit systems (apply to areas/volumes by squaring/cubing). | `UnitConversion.ScaleFactor(Units, Units)` | Implemented (v0.1) |
+| Units.All | Navisworks.Units | — | names: List&lt;string&gt; | Valid unit names accepted by the convert nodes. | `Enum.GetNames(typeof(Autodesk.Navisworks.Api.Units))` | Implemented (v0.2) |
 
 ## Coordination (v0.2 workflow nodes)
 
@@ -377,19 +379,19 @@ Nodes built directly from BIM-coordination pain-point research: clash-test scrip
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| ClashTest.Create | Navisworks.Clash | name: string, itemsA: List&lt;ModelItem&gt;, itemsB: List&lt;ModelItem&gt;, testType: string = "Hard", tolerance: double = 0.01, document: Document | test: ClashTest | Script the weekly clash-test matrix: creates (or replaces) a test between two selections, ready for ClashTest.Run. | `new ClashTest`; `SelectionA/B.Selection.CopyFrom(items)`; `TestsAddCopy`/`TestsReplaceWithCopy`; stored copy re-fetched | Beta |
-| ClashTest.ResultsByStatus | Navisworks.Clash | test: ClashTest, status: string | results: List&lt;ClashResult&gt; | The results of a test with one status (New/Active/Reviewed/Approved/Resolved) — triage filtering. | flatten `ClashTest.Children`, filter `ClashResult.Status` | Beta |
-| ClashResult.SetDescription | Navisworks.Clash | result: ClashResult, description: string, document: Document | result: ClashResult | Set a result's description text (context for reports and reviews). | `DocumentClashTests.TestsEditResultDescription` | Beta |
-| ClashResult.Viewpoint | Navisworks.Clash | result: ClashResult, apply: bool = false, document: Document | viewpoint: Viewpoint | The camera viewpoint Navisworks generates for a clash; optionally applies it to the current view. | `DocumentClashTests.TestsViewpointForResult`; `CurrentViewpoint.CopyFrom` | Beta |
-| ClashResult.SaveImage | Navisworks.Clash | result: ClashResult, filePath: string, width: int = 1280, height: int = 720, document: Document | filePath: string | Renders a clash snapshot (scene + clash highlight) to .png/.jpg/.bmp — the picture half of every clash report; a snapshot folder via lacing. | `DocumentClashTests.TestsImageForResult(result, ImageGenerationStyle.ScenePlusOverlay, w, h)` → `Bitmap.Save` | Beta |
-| Clash.GroupResultsBySameItem | Navisworks.Clash | test: ClashTest, useItem1: bool = true, document: Document | test: ClashTest, groupCount: int | Groups all clashes involving the same element into one named group — the auto-grouping third-party plugins exist for. Singleton buckets stay ungrouped. | detached `CreateCopy()` repartitioned into `ClashResultGroup`s (identity via `InstanceHashCode` + `IsSameInstance`), committed with `TestsEditTestFromCopy` | Beta |
-| Clash.GroupResultsByProximity | Navisworks.Clash | test: ClashTest, radius: double, document: Document | test: ClashTest, groupCount: int | Clusters results whose clash points lie within a radius of the cluster seed — one issue per hotspot. | greedy clustering on `ClashResult.Center` (`Point3D.DistanceTo`) + `TestsEditTestFromCopy` commit | Beta |
-| Clash.GroupResultsByLevel | Navisworks.Clash | test: ClashTest, levelNames: List&lt;string&gt;, levelElevations: List&lt;double&gt;, document: Document | test: ClashTest, groupCount: int | Groups results by nearest level at/below each clash point (explicit level list — ClashResult carries no grid data in the 2024 API) — per-floor triage. | classify `Center.Z` against elevations + `TestsEditTestFromCopy` commit | Beta |
-| Export.ClashReportHtml | Navisworks.Export | filePath: string, tests: List&lt;ClashTest&gt; = null, includeImages: bool = false, imageWidth: int = 320, imageHeight: int = 240, document: Document | filePath: string, rowCount: int | Self-contained single-file HTML clash report (one section per test), optionally with embedded base64 snapshots — shareable without any add-in. | flatten results + `TestsImageForResult` → base64 PNG + string templating | Beta |
-| Audit.MissingProperty | Navisworks.Audit | category: string, property: string, items: List&lt;ModelItem&gt; = null, geometryOnly: bool = true, document: Document | items: List&lt;ModelItem&gt;, count: int | Every item NOT carrying a property (whole model or a scope) — the "find items missing property X" forum ask; batch over a property list via lacing. | `SearchCondition.HasPropertyByDisplayName(cat, prop).Negate()` + `FindAll` | Beta |
-| Audit.DuplicateItems | Navisworks.Audit | items: List&lt;ModelItem&gt;, tolerance: double = 0.001, document: Document | items1: List&lt;ModelItem&gt;, items2: List&lt;ModelItem&gt;, count: int | Finds double-exported geometry by running (and then removing) a temporary Duplicate clash test over the items. | throwaway `ClashTest { TestType = Duplicate, SelfIntersect }` + `TestsRunTest` + `TestsRemove` | Beta |
-| SelectionSets.BulkByPropertyValues | Navisworks.SelectionSets | category: string, property: string, folderName: string = null, document: Document | selectionSets: List&lt;SelectionSet&gt;, values: List&lt;string&gt; | One live search set per distinct value of a property (one set per Level / System / Category), optionally filed in a folder — kills hours of Find Items clicking. Re-runs replace, not duplicate. | distinct `DataProperty.Value` variants → `new SelectionSet(Search)` per value + `AddCopy`/`ReplaceWithCopy` (folder-aware) | Beta |
-| Takeoff.SumPropertyByGroup | Navisworks.Takeoff | items: List&lt;ModelItem&gt;, groupCategory: string, groupProperty: string, valueCategory: string, valueProperty: string | keys: List&lt;string&gt;, sums: List&lt;double&gt;, counts: List&lt;int&gt; | One-node QTO rollup: group items by a property and sum a numeric property per group (Volume per Level) — replaces Selection Inspector + Excel pivots. | property reads via VariantData coercion + in-memory grouping | Beta |
+| ClashTest.Create | Navisworks.Clash | name: string, itemsA: List&lt;ModelItem&gt;, itemsB: List&lt;ModelItem&gt;, testType: string = "Hard", tolerance: double = 0.01, document: Document | test: ClashTest | Script the weekly clash-test matrix: creates (or replaces) a test between two selections, ready for ClashTest.Run. | `new ClashTest`; `SelectionA/B.Selection.CopyFrom(items)`; `TestsAddCopy`/`TestsReplaceWithCopy`; stored copy re-fetched | Implemented (v0.2) |
+| ClashTest.ResultsByStatus | Navisworks.Clash | test: ClashTest, status: string | results: List&lt;ClashResult&gt; | The results of a test with one status (New/Active/Reviewed/Approved/Resolved) — triage filtering. | flatten `ClashTest.Children`, filter `ClashResult.Status` | Implemented (v0.2) |
+| ClashResult.SetDescription | Navisworks.Clash | result: ClashResult, description: string, document: Document | result: ClashResult | Set a result's description text (context for reports and reviews). | `DocumentClashTests.TestsEditResultDescription` | Implemented (v0.2) |
+| ClashResult.Viewpoint | Navisworks.Clash | result: ClashResult, apply: bool = false, document: Document | viewpoint: Viewpoint | The camera viewpoint Navisworks generates for a clash; optionally applies it to the current view. | `DocumentClashTests.TestsViewpointForResult`; `CurrentViewpoint.CopyFrom` | Implemented (v0.2) |
+| ClashResult.SaveImage | Navisworks.Clash | result: ClashResult, filePath: string, width: int = 1280, height: int = 720, document: Document | filePath: string | Renders a clash snapshot (scene + clash highlight) to .png/.jpg/.bmp — the picture half of every clash report; a snapshot folder via lacing. | `DocumentClashTests.TestsImageForResult(result, ImageGenerationStyle.ScenePlusOverlay, w, h)` → `Bitmap.Save` | Implemented (v0.2) |
+| Clash.GroupResultsBySameItem | Navisworks.Clash | test: ClashTest, useItem1: bool = true, document: Document | test: ClashTest, groupCount: int | Groups all clashes involving the same element into one named group — the auto-grouping third-party plugins exist for. Singleton buckets stay ungrouped. | detached `CreateCopy()` repartitioned into `ClashResultGroup`s (identity via `InstanceHashCode` + `IsSameInstance`), committed with `TestsEditTestFromCopy` | Implemented (v0.2) |
+| Clash.GroupResultsByProximity | Navisworks.Clash | test: ClashTest, radius: double, document: Document | test: ClashTest, groupCount: int | Clusters results whose clash points lie within a radius of the cluster seed — one issue per hotspot. | greedy clustering on `ClashResult.Center` (`Point3D.DistanceTo`) + `TestsEditTestFromCopy` commit | Implemented (v0.2) |
+| Clash.GroupResultsByLevel | Navisworks.Clash | test: ClashTest, levelNames: List&lt;string&gt;, levelElevations: List&lt;double&gt;, document: Document | test: ClashTest, groupCount: int | Groups results by nearest level at/below each clash point (explicit level list — ClashResult carries no grid data in the 2024 API) — per-floor triage. | classify `Center.Z` against elevations + `TestsEditTestFromCopy` commit | Implemented (v0.2) |
+| Export.ClashReportHtml | Navisworks.Export | filePath: string, tests: List&lt;ClashTest&gt; = null, includeImages: bool = false, imageWidth: int = 320, imageHeight: int = 240, document: Document | filePath: string, rowCount: int | Self-contained single-file HTML clash report (one section per test), optionally with embedded base64 snapshots — shareable without any add-in. | flatten results + `TestsImageForResult` → base64 PNG + string templating | Implemented (v0.2) |
+| Audit.MissingProperty | Navisworks.Audit | category: string, property: string, items: List&lt;ModelItem&gt; = null, geometryOnly: bool = true, document: Document | items: List&lt;ModelItem&gt;, count: int | Every item NOT carrying a property (whole model or a scope) — the "find items missing property X" forum ask; batch over a property list via lacing. | `SearchCondition.HasPropertyByDisplayName(cat, prop).Negate()` + `FindAll` | Implemented (v0.2) |
+| Audit.DuplicateItems | Navisworks.Audit | items: List&lt;ModelItem&gt;, tolerance: double = 0.001, document: Document | items1: List&lt;ModelItem&gt;, items2: List&lt;ModelItem&gt;, count: int | Finds double-exported geometry by running (and then removing) a temporary Duplicate clash test over the items. | throwaway `ClashTest { TestType = Duplicate, SelfIntersect }` + `TestsRunTest` + `TestsRemove` | Implemented (v0.2) |
+| SelectionSets.BulkByPropertyValues | Navisworks.SelectionSets | category: string, property: string, folderName: string = null, document: Document | selectionSets: List&lt;SelectionSet&gt;, values: List&lt;string&gt; | One live search set per distinct value of a property (one set per Level / System / Category), optionally filed in a folder — kills hours of Find Items clicking. Re-runs replace, not duplicate. | distinct `DataProperty.Value` variants → `new SelectionSet(Search)` per value + `AddCopy`/`ReplaceWithCopy` (folder-aware) | Implemented (v0.2) |
+| Takeoff.SumPropertyByGroup | Navisworks.Takeoff | items: List&lt;ModelItem&gt;, groupCategory: string, groupProperty: string, valueCategory: string, valueProperty: string | keys: List&lt;string&gt;, sums: List&lt;double&gt;, counts: List&lt;int&gt; | One-node QTO rollup: group items by a property and sum a numeric property per group (Volume per Level) — replaces Selection Inspector + Excel pivots. | property reads via VariantData coercion + in-memory grouping | Implemented (v0.2) |
 
 ---
 
@@ -405,19 +407,24 @@ Nodes built directly from BIM-coordination pain-point research: clash-test scrip
 
 ## Reference workflows (what the MVP set must support end-to-end)
 
-1. **Property extraction / QTO to CSV** — `Models.RootItems → ModelItem.Descendants → ModelItem.HasGeometry → List.FilterByBoolMask → Properties.Value("Element","Volume") → CSV.WriteToFile` (+ `List.GroupByKey` per system in Beta).
+1. **Property extraction / QTO to CSV** — `Models.RootItems → ModelItem.Descendants → ModelItem.HasGeometry → List.FilterByBoolMask → Properties.Value("Element","Volume") → CSV.WriteToFile` (+ `List.GroupByKey` per system, implemented in v0.2).
 2. **Bulk selection sets from property rules** — `String` (list of system names) → `Search.ByPropertyValue → SelectionSet.Create` with lacing, one set per value.
-3. **Color-coding by system/status** — `Search.ByPropertyValue → Appearance.OverrideColor` fed by `Color.ByARGB`/`Color Picker`; `Appearance.ResetAll` first (Beta) for idempotent re-runs.
-4. **Clash triage + reporting** — `Clash.Tests → ClashTest.Results → ClashResult.Info / .Items → ModelItem.DisplayName → CSV.WriteToFile`; Beta adds `ClashResult.SetStatus`, `ClashResult.Assign`, `Viewpoints.FromClashResults`, `Export.ViewpointImage`.
-5. **Viewpoint batch generation** — names list → `Viewpoint.SaveCurrent` / `SavedViewpoint.Apply` loops; Beta camera nodes aim views automatically.
+3. **Color-coding by system/status** — `Search.ByPropertyValue → Appearance.OverrideColor` fed by `Color.ByARGB`/`Color Picker`; `Appearance.ResetAll` first (v0.2) for idempotent re-runs.
+4. **Clash triage + reporting** — `Clash.Tests → ClashTest.Results → ClashResult.Info / .Items → ModelItem.DisplayName → CSV.WriteToFile`; v0.2 adds `ClashResult.SetStatus`, `ClashResult.Assign`, `Viewpoints.FromClashResults`, `Export.ViewpointImage`.
+5. **Viewpoint batch generation** — names list → `Viewpoint.SaveCurrent` / `SavedViewpoint.Apply` loops; the v0.2 camera nodes aim views automatically.
 6. **Model QA audit** — `Properties.HasProperty` mask → `List.FilterByBoolMask` → count + `SelectionSet.Create("Missing <prop>")` + `Appearance.OverrideColor` red.
-7. **TimeLiner 4D linking (Beta)** — `CSV.ReadFromFile → TimeLiner.AddTask → TimelinerTask.AttachSet` by selection-set name.
+7. **TimeLiner 4D linking (v0.2)** — `CSV.ReadFromFile → TimeLiner.AddTask → TimelinerTask.AttachSet` by selection-set name.
 
 ## Tier totals
 
 | Tier | Count |
 |---|---|
-| MVP | 88 |
-| Beta | 99 |
-| Future | 7 (in-catalog) + 5 platform backlog |
-| **Total catalog** | **194** |
+| MVP (shipped v0.1) | 89 |
+| Implemented (v0.1) | 4 |
+| Implemented (v0.2) | 102 |
+| Beta (not yet implemented) | 8 |
+| Skipped | 1 |
+| Future | 8 (in-catalog) + 5 platform backlog |
+| **Total catalog** | **212** |
+
+Registered node count as built: **100** general (`dyncamelo list-nodes`, includes the interactive Input/Output nodes) + **103** Navisworks = **203 nodes**. A few v0.1 nodes shipped under slightly different names than their catalog rows (`TimelinerTask.Info`/`Items` cover the `TimelinerTask.Name`/`Dates`/`Type`/`AttachedItems` rows; `Export.ToCsv` covers `Export.PropertyReportCsv`; plus `JSON.ReadFromFile`, `JSON.WriteToFile`, `BoundingBox.ByCorners`, `Units.Current`, `TimelinerTask.Create` beyond the catalog).
