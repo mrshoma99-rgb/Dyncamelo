@@ -202,7 +202,16 @@ public static class TimelinerNodes
         var timeliner = doc.GetTimeliner()
             ?? throw new InvalidOperationException("TimeLiner is not available in this Navisworks edition.");
 
-        var path = timeliner.TaskCreateIndexPath(storedTask);
+        System.Collections.ObjectModel.Collection<int>? path;
+        try
+        {
+            path = timeliner.TaskCreateIndexPath(storedTask);
+        }
+        catch (Exception)
+        {
+            path = null;
+        }
+
         if (path == null || path.Count == 0)
         {
             throw new ArgumentException(
