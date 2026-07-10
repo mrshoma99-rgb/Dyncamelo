@@ -31,6 +31,8 @@
   <ItemGroup>
     <!-- System.Drawing.Color support at the Appearance node boundary. -->
     <Reference Include="System.Drawing" />
+    <!-- ZipArchive for the BCF 2.1 (.bcfzip) exchange nodes (framework assembly, no NuGet). -->
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
 </Project>

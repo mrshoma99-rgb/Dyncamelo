@@ -135,24 +135,10 @@ public static class SelectionSetNodes
         return StoreTopLevel(doc, set, name);
     }
 
-    /// <summary>Creates a top-level folder to organize saved sets.</summary>
-    /// <param name="name">The folder's display name.</param>
-    /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The stored folder (an existing top-level folder with the name is reused).</returns>
-    [NodeName("SelectionSets.CreateFolder")]
-    [NodeDescription("Creates a top-level folder in the Sets window (an existing same-named folder is reused, so re-runs are clean).")]
-    [NodeSearchTags("selection", "sets", "folder", "create", "organize")]
-    [return: NodeName("folder")]
-    public static FolderItem CreateFolder(string name, Document? document = null)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentException("No folder name provided.", nameof(name));
-        }
-
-        var doc = NavisworksContext.ResolveDocument(document);
-        return FindOrCreateTopLevelFolder(doc, name);
-    }
+    // NOTE (v0.3): the SelectionSets.CreateFolder node moved to
+    // SelectionSetTreeNodes (SavedItemTreeNodes.cs) where it gained a
+    // parentFolder input for nested folders. The FindOrCreateTopLevelFolder
+    // helper below stays because BulkByPropertyValues uses it.
 
     /// <summary>Deletes a saved set by display name.</summary>
     /// <param name="name">The set's display name (folders are searched too).</param>
