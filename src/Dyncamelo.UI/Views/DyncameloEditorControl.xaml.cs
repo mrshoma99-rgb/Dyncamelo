@@ -50,6 +50,21 @@ public partial class DyncameloEditorControl : UserControl
         ViewModel?.AddNote(ViewportCenter);
     }
 
+    private void OnOpenRecentClick(object sender, RoutedEventArgs e)
+    {
+        // The recent-files dropdown is the button's ContextMenu, opened on left
+        // click (split-button behaviour). Nothing to show for an empty list.
+        if (!(sender is Button button) || button.ContextMenu == null ||
+            ViewModel == null || ViewModel.RecentFiles.Count == 0)
+        {
+            return;
+        }
+
+        button.ContextMenu.PlacementTarget = button;
+        button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        button.ContextMenu.IsOpen = true;
+    }
+
     private void OnLibraryItemDoubleClick(object sender, MouseButtonEventArgs e)
     {
         // MouseDoubleClick bubbles through every ancestor TreeViewItem; only the
@@ -65,8 +80,33 @@ public partial class DyncameloEditorControl : UserControl
 
     private void OnLibraryMouseDown(object sender, MouseButtonEventArgs e)
     {
+        // Clicks on the favourite star toggle a command; they must not arm a drag.
+        if (IsWithinButton(e.OriginalSource))
+        {
+            _libraryDragEntry = null;
+            return;
+        }
+
         _libraryDragStart = e.GetPosition(LibraryTree);
         _libraryDragEntry = (e.OriginalSource as FrameworkElement)?.DataContext as LibraryEntryViewModel;
+    }
+
+    private static bool IsWithinButton(object originalSource)
+    {
+        var current = originalSource as DependencyObject;
+        while (current != null && !(current is TreeViewItem))
+        {
+            if (current is System.Windows.Controls.Primitives.ButtonBase)
+            {
+                return true;
+            }
+
+            current = current is Visual || current is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(current)
+                : LogicalTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private void OnLibraryMouseMove(object sender, MouseEventArgs e)
