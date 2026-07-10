@@ -75,6 +75,109 @@ public static class ModelItemNodes
         return RequireItem(item).BoundingBox(ignoreHidden);
     }
 
+    /// <summary>The parent of a model item.</summary>
+    /// <param name="item">The model item.</param>
+    /// <returns>The parent item, or null for a model root.</returns>
+    [NodeName("ModelItem.Parent")]
+    [NodeDescription("The parent of a model item (null for a model root).")]
+    [NodeSearchTags("item", "parent", "tree", "hierarchy", "up")]
+    [return: NodeName("parent")]
+    public static ModelItem? Parent(ModelItem item)
+    {
+        return RequireItem(item).Parent;
+    }
+
+    /// <summary>The chain of parents of a model item, up to its model root.</summary>
+    /// <param name="item">The model item.</param>
+    /// <param name="includeSelf">True to include the item itself.</param>
+    /// <returns>The ancestors (nearest first).</returns>
+    [NodeName("ModelItem.Ancestors")]
+    [NodeDescription("The chain of parents of a model item, up to its model root.")]
+    [NodeSearchTags("item", "ancestors", "parents", "tree", "hierarchy")]
+    [return: NodeName("ancestors")]
+    public static List<ModelItem> Ancestors(ModelItem item, bool includeSelf = false)
+    {
+        var modelItem = RequireItem(item);
+        return NavisValues.ToItemList(includeSelf ? modelItem.AncestorsAndSelf : modelItem.Ancestors);
+    }
+
+    /// <summary>The class names of a model item.</summary>
+    /// <param name="item">The model item.</param>
+    /// <returns>The internal and localized class names (layer/group/geometry detection).</returns>
+    [NodeName("ModelItem.ClassInfo")]
+    [NodeDescription("The internal and localized class names of a model item (layer/group/geometry detection).")]
+    [NodeSearchTags("item", "class", "classname", "type", "kind")]
+    [MultiReturn("className", "classDisplayName")]
+    public static Dictionary<string, object?> ClassInfo(ModelItem item)
+    {
+        var modelItem = RequireItem(item);
+        return new Dictionary<string, object?>
+        {
+            ["className"] = modelItem.ClassName,
+            ["classDisplayName"] = modelItem.ClassDisplayName,
+        };
+    }
+
+    /// <summary>Whether a model item is currently hidden.</summary>
+    /// <param name="item">The model item.</param>
+    /// <returns>True when the item is hidden.</returns>
+    [NodeName("ModelItem.IsHidden")]
+    [NodeDescription("True when the model item is currently hidden in the viewport.")]
+    [NodeSearchTags("item", "hidden", "visible", "state")]
+    [return: NodeName("isHidden")]
+    public static bool IsHidden(ModelItem item)
+    {
+        return RequireItem(item).IsHidden;
+    }
+
+    /// <summary>The stable instance GUID of a model item.</summary>
+    /// <param name="item">The model item.</param>
+    /// <returns>The GUID string, or "" when the item has none — cross-run identity for reports.</returns>
+    [NodeName("ModelItem.InstanceGuid")]
+    [NodeDescription("The stable instance GUID of a model item (\"\" when absent) — cross-run identity for reports.")]
+    [NodeSearchTags("item", "guid", "id", "identity", "instance")]
+    [return: NodeName("guid")]
+    public static string InstanceGuid(ModelItem item)
+    {
+        var guid = RequireItem(item).InstanceGuid;
+        return guid == Guid.Empty ? string.Empty : guid.ToString();
+    }
+
+    /// <summary>Flattens items to their unique geometry-bearing descendants.</summary>
+    /// <param name="items">The model items to flatten.</param>
+    /// <returns>The unique geometry leaves — the items QTO, coloring and clash selections actually want.</returns>
+    [NodeName("ModelItem.GeometryLeaves")]
+    [NodeDescription("Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want).")]
+    [NodeSearchTags("item", "geometry", "leaves", "flatten", "descendants")]
+    [return: NodeName("leaves")]
+    public static List<ModelItem> GeometryLeaves(IEnumerable<ModelItem> items)
+    {
+        if (items == null)
+        {
+            throw new ArgumentNullException(nameof(items), "No model items provided.");
+        }
+
+        var leaves = new List<ModelItem>();
+        var seen = new ModelItemSet();
+        foreach (var item in items)
+        {
+            if (item == null)
+            {
+                continue;
+            }
+
+            foreach (var descendant in item.DescendantsAndSelf)
+            {
+                if (descendant.HasGeometry && seen.Add(descendant))
+                {
+                    leaves.Add(descendant);
+                }
+            }
+        }
+
+        return leaves;
+    }
+
     private static ModelItem RequireItem(ModelItem? item)
     {
         return item ?? throw new ArgumentNullException(nameof(item), "No model item provided.");

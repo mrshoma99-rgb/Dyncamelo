@@ -3,7 +3,7 @@ name: release
 # Publishes a GitHub Release with the installable Navisworks 2024 bundle.
 # Two ways to run it:
 #
-#   * commit a new tag name (e.g. v0.1.0) to dist/RELEASE_VERSION and push —
+#   * commit a new tag name (e.g. v0.2.0) to dist/RELEASE_VERSION and push —
 #     the release is created at that commit and the tag is created
 #     server-side by gh, so no tag push or Actions UI access is needed.
 #   * manual dispatch (Actions → release → Run workflow) with the version
@@ -12,9 +12,11 @@ name: release
 # A version that already has a release is skipped, so ordinary pushes that
 # happen to touch dist/RELEASE_VERSION never fail the workflow.
 #
-# The zip is assembled from dist/ at the released commit — dist/Dyncamelo.bundle
-# carries the compiled Release DLLs, ribbon layout, icons and manifest, and
-# install-dyncamelo.bat installs it for the current user.
+# The bundle is BUILT FROM SOURCE on windows-latest (dotnet build -c Release):
+# the DLLs come from the Dyncamelo.App plugin-layout build output, while
+# dist/Dyncamelo.bundle supplies the template pieces (PackageContents.xml,
+# en-US ribbon layout, icons) and dist/ supplies install-dyncamelo.bat and the
+# bundle README. Committed DLLs under dist/ are never shipped.
 
 on:
   push:
@@ -23,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version tag (e.g. v0.1.0)"
+        description: "Release version tag (e.g. v0.2.0)"
         required: true
 
 permissions:
@@ -31,7 +33,12 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    env:
+      CI: "true"
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - uses: actions/checkout@v4
 
@@ -40,53 +47,111 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
-          VERSION="${INPUT_VERSION:-$(tr -d '[:space:]' < dist/RELEASE_VERSION)}"
-          case "$VERSION" in
-            v[0-9]*) ;;
-            *) echo "::error::'$VERSION' is not a valid version tag (expected v<major>.<minor>.<patch>)"; exit 1 ;;
-          esac
-          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $VERSION already exists — nothing to do."
-            echo "SKIP=true" >> "$GITHUB_ENV"
-          fi
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          $version = if ($env:INPUT_VERSION) { $env:INPUT_VERSION.Trim() } else { (Get-Content dist/RELEASE_VERSION -Raw).Trim() }
+          if ($version -notmatch '^v\d+\.\d+\.\d+$') {
+            Write-Host "::error::'$version' is not a valid version tag (expected v<major>.<minor>.<patch>)"
+            exit 1
+          }
+          gh release view $version --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $version already exists — nothing to do."
+            Add-Content -Path $env:GITHUB_ENV -Value "SKIP=true"
+          }
+          Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$version"
+          exit 0
+
+      - name: Setup .NET SDK 8
+        if: env.SKIP != 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build solution (Release)
+        if: env.SKIP != 'true'
+        run: |
+          dotnet restore Dyncamelo.sln
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          dotnet build Dyncamelo.sln -c Release --no-restore
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Assemble bundle from build output
+        if: env.SKIP != 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # The Dyncamelo.App build assembles the complete plugin file set here
+          # (see the LayoutNavisworksPlugin target in Dyncamelo.App.csproj).
+          $layout  = "src/Dyncamelo.App/bin/Release/net48/NavisworksPlugin/Dyncamelo.App"
+          $staging = "staging"
+          $year    = "$staging/Dyncamelo.bundle/2024"
+          New-Item -ItemType Directory -Force -Path "$year/en-US", "$year/Resources" | Out-Null
+
+          $dlls = @(
+            'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll',
+            'Dyncamelo.Navisworks.dll', 'Dyncamelo.UI.dll',
+            'Nodify.dll', 'Newtonsoft.Json.dll'
+          )
+          foreach ($dll in $dlls) {
+            $src = Join-Path $layout $dll
+            if (-not (Test-Path $src)) {
+              Write-Host "::error::Missing build output: $src"
+              exit 1
+            }
+            Copy-Item $src -Destination $year
+          }
+          Copy-Item "$layout/en-US/Dyncamelo.xaml" -Destination "$year/en-US"
+          Copy-Item "$layout/Resources/*.png"      -Destination "$year/Resources"
+
+          # Bundle manifest from the dist template, stamped with the release
+          # version (ApplicationPackage Version, not SchemaVersion).
+          $numeric  = $env:VERSION.TrimStart('v')
+          $manifest = Get-Content "dist/Dyncamelo.bundle/PackageContents.xml" -Raw
+          $manifest = $manifest -replace '(?<!Schema)Version="[^"]*"', "Version=`"$numeric.0`""
+          Set-Content -Path "$staging/Dyncamelo.bundle/PackageContents.xml" -Value $manifest -NoNewline
+
+          Copy-Item "dist/install-dyncamelo.bat" -Destination $staging
+          Copy-Item "dist/README.md"             -Destination $staging
+          Copy-Item "THIRD-PARTY-NOTICES.md"     -Destination $staging
+          Copy-Item "LICENSE"                    -Destination $staging
 
       - name: Package bundle zip
         if: env.SKIP != 'true'
         run: |
-          ZIP="Dyncamelo-${VERSION}-navisworks2024.zip"
-          cd dist
-          zip -r "../$ZIP" Dyncamelo.bundle install-dyncamelo.bat README.md \
-              -x "Dyncamelo.bundle/2024/PLACE_DYNCAMELO_DLLS_HERE.txt"
-          cd ..
-          sha256sum "$ZIP" > "$ZIP.sha256"
-          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+          $ErrorActionPreference = 'Stop'
+          $zip = "Dyncamelo-$env:VERSION-navisworks2024.zip"
+          Compress-Archive -Path "staging/*" -DestinationPath $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "$zip.sha256" -Value "$hash  $zip" -NoNewline
+          Add-Content -Path $env:GITHUB_ENV -Value "ZIP=$zip"
 
       - name: Create GitHub release
         if: env.SKIP != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          {
-            echo "Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks."
-            echo
-            echo "## Install"
-            echo
-            echo "1. Download and extract \`$ZIP\`."
-            echo "2. Double-click \`install-dyncamelo.bat\` (copies the bundle to \`%APPDATA%\\Autodesk\\ApplicationPlugins\` — no admin rights needed)."
-            echo "3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button."
-            echo
-            echo "Uninstall: \`install-dyncamelo.bat uninstall\`."
-            echo
-            echo "**Troubleshooting** — if Navisworks reports \`PLUGIN_LOAD_02\` / \`0x80131515\`, Windows kept the browser's \"downloaded file\" mark on the DLLs. Re-run \`install-dyncamelo.bat\` (it unblocks automatically since v0.1.1), or run: \`Get-ChildItem \\\"\$env:APPDATA\\Autodesk\\ApplicationPlugins\\Dyncamelo.bundle\\\" -Recurse -File | Unblock-File\` in PowerShell."
-            echo
-            echo "## Checksum"
-            echo
-            echo '```'
-            cat "$ZIP.sha256"
-            echo '```'
-          } > notes.md
-          gh release create "$VERSION" "$ZIP" "$ZIP.sha256" \
-            --target "$GITHUB_SHA" \
-            --title "Dyncamelo $VERSION (Navisworks 2024)" \
+          $ErrorActionPreference = 'Stop'
+          $checksum = Get-Content "$env:ZIP.sha256" -Raw
+          $notes = @"
+          Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks.
+
+          ## Install
+
+          1. Download and extract ``$env:ZIP``.
+          2. Double-click ``install-dyncamelo.bat`` (copies the bundle to ``%APPDATA%\Autodesk\ApplicationPlugins`` — no admin rights needed).
+          3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
+
+          Uninstall: ``install-dyncamelo.bat uninstall``.
+
+          **Troubleshooting** — if Navisworks reports ``PLUGIN_LOAD_02`` / ``0x80131515``, Windows kept the browser's "downloaded file" mark on the DLLs. Re-run ``install-dyncamelo.bat`` (it unblocks automatically since v0.1.1), or run: ``Get-ChildItem "`$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File`` in PowerShell.
+
+          ## Checksum
+
+          ``````
+          $checksum
+          ``````
+          "@
+          Set-Content -Path notes.md -Value $notes
+          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" `
+            --target $env:GITHUB_SHA `
+            --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
             --notes-file notes.md
+          if ($LASTEXITCODE -ne 0) { exit 1 }

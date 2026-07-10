@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
 
-    <Version>0.1.0</Version>
+    <Version>0.3.0</Version>
     <Authors>Dyncamelo Contributors</Authors>
     <Company>Dyncamelo</Company>
     <Product>Dyncamelo</Product>
     <Copyright>Copyright (c) Dyncamelo Contributors</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) 2026 BIMCamel. All rights reserved.</Copyright>
     <RepositoryUrl>https://github.com/mrshoma99-rgb/dyncamelo</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 

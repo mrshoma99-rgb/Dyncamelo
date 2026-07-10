@@ -148,4 +148,135 @@ public class ListNodesTests
         var ex = Assert.Throws<ArgumentNullException>(() => ListNodes.Count(null!));
         Assert.Contains("List.Count", ex.Message);
     }
+
+    [Fact]
+    public void LastItem_ReturnsLastElement_ThrowsWhenEmpty()
+    {
+        Assert.Equal(3, ListNodes.LastItem(L(1, 2, 3)));
+        Assert.Throws<InvalidOperationException>(() => ListNodes.LastItem(L()));
+    }
+
+    [Fact]
+    public void Contains_UsesCoercingEquality()
+    {
+        Assert.True(ListNodes.Contains(L(1, 2, 3), 2.0));
+        Assert.True(ListNodes.Contains(L("a", null), null));
+        Assert.False(ListNodes.Contains(L(1, 2, 3), "2"));
+        Assert.False(ListNodes.Contains(L(), 1));
+    }
+
+    [Fact]
+    public void IndexOf_ReturnsFirstMatch_MinusOneWhenAbsent()
+    {
+        Assert.Equal(1, ListNodes.IndexOf(L("a", "b", "b"), "b"));
+        Assert.Equal(0, ListNodes.IndexOf(L(2, 2.0), 2L));
+        Assert.Equal(-1, ListNodes.IndexOf(L(1, 2), 9));
+        Assert.Equal(1, ListNodes.IndexOf(L("x", null), null));
+    }
+
+    [Fact]
+    public void Reverse_ReturnsNewReversedList_InputUntouched()
+    {
+        var input = L(1, 2, 3);
+        var reversed = ListNodes.Reverse(input);
+        Assert.Equal(new object?[] { 3, 2, 1 }, reversed);
+        Assert.Equal(new object?[] { 1, 2, 3 }, input);
+    }
+
+    [Fact]
+    public void AddItemToEnd_AppendsWithoutMutatingInput()
+    {
+        var input = L(1, 2);
+        var result = ListNodes.AddItemToEnd(input, 3);
+        Assert.Equal(new object?[] { 1, 2, 3 }, result);
+        Assert.Equal(new object?[] { 1, 2 }, input);
+    }
+
+    [Fact]
+    public void Join_ConcatenatesTwoLists()
+    {
+        Assert.Equal(new object?[] { 1, 2, "a" }, ListNodes.Join(L(1, 2), L("a")));
+        Assert.Equal(new object?[] { 1 }, ListNodes.Join(L(1), L()));
+        var ex = Assert.Throws<ArgumentNullException>(() => ListNodes.Join(L(1), null!));
+        Assert.Contains("listB", ex.Message);
+    }
+
+    [Fact]
+    public void RemoveItemAtIndex_RemovesElement_SupportsNegativeIndex()
+    {
+        var input = L("a", "b", "c");
+        Assert.Equal(new object?[] { "a", "c" }, ListNodes.RemoveItemAtIndex(input, 1));
+        Assert.Equal(new object?[] { "a", "b" }, ListNodes.RemoveItemAtIndex(input, -1));
+        Assert.Equal(new object?[] { "a", "b", "c" }, input);
+    }
+
+    [Fact]
+    public void RemoveItemAtIndex_OutOfRange_ThrowsWithClearMessage()
+    {
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => ListNodes.RemoveItemAtIndex(L("a"), 5));
+        Assert.Contains("5", ex.Message);
+        Assert.Contains("1 element", ex.Message);
+    }
+
+    [Fact]
+    public void GroupByKey_GroupsInFirstAppearanceOrder()
+    {
+        var result = ListNodes.GroupByKey(
+            L("duct", "pipe", "tray", "elbow"),
+            L("HVAC", "Plumbing", "HVAC", "Plumbing"));
+
+        var uniqueKeys = Assert.IsAssignableFrom<IList<object?>>(result["uniqueKeys"]);
+        Assert.Equal(new object?[] { "HVAC", "Plumbing" }, uniqueKeys);
+
+        var groups = Assert.IsAssignableFrom<IList<object?>>(result["groups"]);
+        Assert.Equal(new object?[] { "duct", "tray" }, (IList<object?>)groups[0]!);
+        Assert.Equal(new object?[] { "pipe", "elbow" }, (IList<object?>)groups[1]!);
+    }
+
+    [Fact]
+    public void GroupByKey_NumericKeysCoerce_AndNullKeysGroupTogether()
+    {
+        var result = ListNodes.GroupByKey(L("a", "b", "c", "d"), L(1, null, 1.0, null));
+
+        var uniqueKeys = (IList<object?>)result["uniqueKeys"];
+        Assert.Equal(2, uniqueKeys.Count);
+        Assert.Equal(1, uniqueKeys[0]);
+        Assert.Null(uniqueKeys[1]);
+
+        var groups = (IList<object?>)result["groups"];
+        Assert.Equal(new object?[] { "a", "c" }, (IList<object?>)groups[0]!);
+        Assert.Equal(new object?[] { "b", "d" }, (IList<object?>)groups[1]!);
+    }
+
+    [Fact]
+    public void GroupByKey_LengthMismatch_Throws()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => ListNodes.GroupByKey(L(1, 2), L("k")));
+        Assert.Contains("same length", ex.Message);
+    }
+
+    [Fact]
+    public void SortByKey_SortsItemsAndKeysTogether()
+    {
+        var result = ListNodes.SortByKey(L("late", "early", "mid"), L(3, 1, 2));
+        Assert.Equal(new object?[] { "early", "mid", "late" }, (IList<object?>)result["sorted"]);
+        Assert.Equal(new object?[] { 1, 2, 3 }, (IList<object?>)result["sortedKeys"]);
+    }
+
+    [Fact]
+    public void SortByKey_IsStable_AndDoesNotMutateInputs()
+    {
+        var items = L("first", "second", "third");
+        var keys = L(1, 1, 0);
+        var result = ListNodes.SortByKey(items, keys);
+        Assert.Equal(new object?[] { "third", "first", "second" }, (IList<object?>)result["sorted"]);
+        Assert.Equal(new object?[] { "first", "second", "third" }, items);
+        Assert.Equal(new object?[] { 1, 1, 0 }, keys);
+    }
+
+    [Fact]
+    public void SortByKey_LengthMismatch_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => ListNodes.SortByKey(L(1), L(1, 2)));
+    }
 }

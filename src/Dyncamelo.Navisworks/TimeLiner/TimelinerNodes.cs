@@ -130,6 +130,110 @@ public static class TimelinerNodes
         return index >= 0 && timeliner.Tasks[index] is TimelinerTask stored ? stored : task;
     }
 
+    /// <summary>Attaches a saved selection/search set to a TimeLiner task.</summary>
+    /// <param name="task">The stored TimeLiner task (from TimeLiner.Tasks or TimelinerTask.Create).</param>
+    /// <param name="setName">The saved set's display name (folders are searched too).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The updated stored task. Lace over task/set-name lists for bulk 4D linking.</returns>
+    [NodeName("TimelinerTask.AttachSet")]
+    [NodeDescription("Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation.")]
+    [NodeSearchTags("timeliner", "task", "attach", "set", "link", "4d")]
+    [return: NodeName("task")]
+    public static TimelinerTask AttachSet(TimelinerTask task, string setName, Document? document = null)
+    {
+        var timelinerTask = RequireTask(task);
+        if (string.IsNullOrEmpty(setName))
+        {
+            throw new ArgumentException("No selection set name provided.", nameof(setName));
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var set = NavisValues.FindSavedItemByName<SelectionSet>(doc.SelectionSets.RootItem.Children, setName)
+            ?? throw new InvalidOperationException(
+                "No selection set named '" + setName + "' exists in the document.");
+
+        // A selection SOURCE keeps the attachment linked to the set (the UI's
+        // "Attach Set"), so the task follows the set as the model changes.
+        var source = doc.SelectionSets.CreateSelectionSource(set);
+        var selection = new Selection();
+        selection.SelectionSources.Add(source);
+
+        var copy = timelinerTask.CreateCopy();
+        copy.Selection.CopyFrom(selection);
+        return CommitTaskEdit(doc, timelinerTask, copy);
+    }
+
+    /// <summary>Updates the planned dates of a TimeLiner task.</summary>
+    /// <param name="task">The stored TimeLiner task.</param>
+    /// <param name="plannedStart">New planned start date.</param>
+    /// <param name="plannedEnd">New planned end date.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The updated stored task. Lace over lists for bulk schedule updates.</returns>
+    [NodeName("TimelinerTask.SetDates")]
+    [NodeDescription("Updates a task's planned start/end dates in place — bulk schedule edits without a re-import.")]
+    [NodeSearchTags("timeliner", "task", "dates", "schedule", "update", "planned")]
+    [return: NodeName("task")]
+    public static TimelinerTask SetDates(
+        TimelinerTask task,
+        DateTime plannedStart,
+        DateTime plannedEnd,
+        Document? document = null)
+    {
+        var timelinerTask = RequireTask(task);
+        if (plannedEnd < plannedStart)
+        {
+            throw new ArgumentException("The planned end date is before the planned start date.", nameof(plannedEnd));
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var copy = timelinerTask.CreateCopy();
+        copy.PlannedStartDate = plannedStart;
+        copy.PlannedEndDate = plannedEnd;
+        return CommitTaskEdit(doc, timelinerTask, copy);
+    }
+
+    /// <summary>
+    /// Commits an edited copy over a stored task via the document part's TaskEdit
+    /// (locating the task by index path, so nested subtasks work too) and returns
+    /// the stored, updated instance.
+    /// </summary>
+    private static TimelinerTask CommitTaskEdit(Document doc, TimelinerTask storedTask, TimelinerTask editedCopy)
+    {
+        var timeliner = doc.GetTimeliner()
+            ?? throw new InvalidOperationException("TimeLiner is not available in this Navisworks edition.");
+
+        System.Collections.ObjectModel.Collection<int>? path;
+        try
+        {
+            path = timeliner.TaskCreateIndexPath(storedTask);
+        }
+        catch (Exception)
+        {
+            path = null;
+        }
+
+        if (path == null || path.Count == 0)
+        {
+            throw new ArgumentException(
+                "The task '" + storedTask.DisplayName + "' is not stored in the document. " +
+                "Wire a stored task from TimeLiner.Tasks or TimelinerTask.Create.");
+        }
+
+        if (path.Count == 1)
+        {
+            timeliner.TaskEdit(path[0], editedCopy);
+        }
+        else
+        {
+            var parentPath = new List<int>(path);
+            parentPath.RemoveAt(parentPath.Count - 1);
+            var parent = timeliner.TaskResolveIndexPath(parentPath);
+            timeliner.TaskEdit(parent, path[path.Count - 1], editedCopy);
+        }
+
+        return timeliner.TaskResolveIndexPath(path);
+    }
+
     private static void CollectTasks(IEnumerable<SavedItem> items, List<TimelinerTask> tasks)
     {
         foreach (var item in items)

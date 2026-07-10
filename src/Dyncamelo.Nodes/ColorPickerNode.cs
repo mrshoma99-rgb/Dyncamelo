@@ -32,28 +32,28 @@ public class ColorPickerNode : NodeModel
     public int A
     {
         get => _a;
-        set => SetChannel(ref _a, value);
+        set => SetChannel(ref _a, value, nameof(A));
     }
 
     /// <summary>Red channel (0-255, clamped). Changing it dirties the node.</summary>
     public int R
     {
         get => _r;
-        set => SetChannel(ref _r, value);
+        set => SetChannel(ref _r, value, nameof(R));
     }
 
     /// <summary>Green channel (0-255, clamped). Changing it dirties the node.</summary>
     public int G
     {
         get => _g;
-        set => SetChannel(ref _g, value);
+        set => SetChannel(ref _g, value, nameof(G));
     }
 
     /// <summary>Blue channel (0-255, clamped). Changing it dirties the node.</summary>
     public int B
     {
         get => _b;
-        set => SetChannel(ref _b, value);
+        set => SetChannel(ref _b, value, nameof(B));
     }
 
     /// <summary>The currently chosen color.</summary>
@@ -86,10 +86,13 @@ public class ColorPickerNode : NodeModel
         B = data.Value<int?>("B") ?? 0;
     }
 
-    private void SetChannel(ref int field, int value)
+    private void SetChannel(ref int field, int value, string propertyName)
     {
+        // The property name is passed explicitly: relying on [CallerMemberName]
+        // here would report "SetChannel" instead of "A"/"R"/"G"/"B", so the UI
+        // bindings (color swatch, slider echo) would never refresh.
         var clamped = Math.Max(0, Math.Min(255, value));
-        if (SetField(ref field, clamped))
+        if (SetField(ref field, clamped, propertyName))
         {
             OnPropertyChanged(nameof(Value));
             MarkDirty();

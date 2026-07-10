@@ -30,6 +30,8 @@
 
     <views:NodeBodyTemplateSelector x:Key="Dyc.NodeBodySelector" />
     <views:ColorChannelsToBrushConverter x:Key="Dyc.ColorChannelsToBrush" />
+    <views:AutoSizeLimitConverter x:Key="Dyc.AutoSizeLimit" />
+    <BooleanToVisibilityConverter x:Key="Dyc.BoolToVisibility" />
 
     <!-- ===== Small controls used inside nodes and the chrome ===== -->
     <Style x:Key="Dyc.TextBox" TargetType="{x:Type TextBox}">
@@ -122,20 +124,58 @@
         <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
     </Style>
 
-    <!-- ===== Canvas item container (nodes + notes) ===== -->
+    <!-- ===== Canvas item container (nodes + notes + groups) ===== -->
     <Style x:Key="Dyc.ItemContainerStyle" TargetType="{x:Type nodify:ItemContainer}"
            BasedOn="{StaticResource {x:Type nodify:ItemContainer}}">
         <Setter Property="Location" Value="{Binding Location, Mode=TwoWay}" />
         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+        <Setter Property="ActualSize" Value="{Binding Size, Mode=OneWayToSource}" />
         <Setter Property="SelectedBrush" Value="{StaticResource Dyc.AccentBrush}" />
     </Style>
 
-    <!-- ===== Connector (port) styles ===== -->
+    <!-- ===== Connector (port) visuals: required inputs are filled, inputs with a
+         default value are hollow/dimmed. Both light up when connected. ===== -->
+    <ControlTemplate x:Key="Dyc.RequiredConnectorTemplate" TargetType="{x:Type Control}">
+        <Ellipse x:Name="Dot"
+                 Width="11" Height="11"
+                 Fill="{StaticResource Dyc.WireBrush}"
+                 Stroke="{StaticResource Dyc.WireBrush}"
+                 StrokeThickness="1.5" />
+        <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+            </DataTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="Dyc.OptionalConnectorTemplate" TargetType="{x:Type Control}">
+        <Ellipse x:Name="Dot"
+                 Width="11" Height="11"
+                 Fill="Transparent"
+                 Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                 StrokeThickness="1.5" />
+        <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+            </DataTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <Style TargetType="{x:Type nodify:NodeInput}" BasedOn="{StaticResource {x:Type nodify:NodeInput}}">
         <Setter Property="Header" Value="{Binding}" />
         <Setter Property="IsConnected" Value="{Binding IsConnected}" />
         <Setter Property="Anchor" Value="{Binding Anchor, Mode=OneWayToSource}" />
         <Setter Property="ToolTip" Value="{Binding ToolTip}" />
+        <Setter Property="ConnectorTemplate" Value="{StaticResource Dyc.RequiredConnectorTemplate}" />
+        <Setter Property="ContextMenu">
+            <Setter.Value>
+                <ContextMenu>
+                    <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                </ContextMenu>
+            </Setter.Value>
+        </Setter>
         <Setter Property="HeaderTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -145,6 +185,11 @@
                 </DataTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsOptional}" Value="True">
+                <Setter Property="ConnectorTemplate" Value="{StaticResource Dyc.OptionalConnectorTemplate}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type nodify:NodeOutput}" BasedOn="{StaticResource {x:Type nodify:NodeOutput}}">
@@ -152,6 +197,14 @@
         <Setter Property="IsConnected" Value="{Binding IsConnected}" />
         <Setter Property="Anchor" Value="{Binding Anchor, Mode=OneWayToSource}" />
         <Setter Property="ToolTip" Value="{Binding ToolTip}" />
+        <Setter Property="ConnectorTemplate" Value="{StaticResource Dyc.RequiredConnectorTemplate}" />
+        <Setter Property="ContextMenu">
+            <Setter.Value>
+                <ContextMenu>
+                    <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                </ContextMenu>
+            </Setter.Value>
+        </Setter>
         <Setter Property="HeaderTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -163,14 +216,31 @@
         </Setter>
     </Style>
 
-    <!-- ===== Wires ===== -->
+    <!-- ===== Wires (click to select, Delete or context menu to remove) ===== -->
     <DataTemplate x:Key="Dyc.ConnectionTemplate" DataType="{x:Type vm:ConnectionViewModel}">
-        <nodify:Connection Source="{Binding Source.Anchor}"
+        <nodify:Connection nodify:BaseConnection.IsSelectable="True"
+                           Source="{Binding Source.Anchor}"
                            Target="{Binding Target.Anchor}"
                            SourceOffsetMode="Edge"
-                           TargetOffsetMode="Edge"
-                           Stroke="{StaticResource Dyc.WireBrush}"
-                           StrokeThickness="2" />
+                           TargetOffsetMode="Edge">
+            <nodify:Connection.Style>
+                <Style TargetType="{x:Type nodify:Connection}" BasedOn="{StaticResource {x:Type nodify:Connection}}">
+                    <Setter Property="Stroke" Value="{StaticResource Dyc.WireBrush}" />
+                    <Setter Property="StrokeThickness" Value="2" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter Property="StrokeThickness" Value="3" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </nodify:Connection.Style>
+            <nodify:Connection.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                </ContextMenu>
+            </nodify:Connection.ContextMenu>
+        </nodify:Connection>
     </DataTemplate>
 
     <DataTemplate x:Key="Dyc.PendingConnectionTemplate" DataType="{x:Type vm:PendingConnectionViewModel}">
@@ -199,7 +269,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.NumberSlider">
-        <StackPanel Margin="4" MinWidth="180">
+        <StackPanel Margin="4" MinWidth="200">
             <TextBox Style="{StaticResource Dyc.TextBox}"
                      HorizontalAlignment="Stretch"
                      Text="{Binding Value}" />
@@ -207,6 +277,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="44" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="44" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
@@ -220,7 +291,16 @@
                         Minimum="{Binding Min}"
                         Maximum="{Binding Max}"
                         Value="{Binding Value}" />
-                <TextBox Grid.Column="2"
+                <TextBlock Grid.Column="2"
+                           Margin="0,0,4,0"
+                           VerticalAlignment="Center"
+                           MinWidth="30"
+                           TextAlignment="Right"
+                           FontSize="10"
+                           Foreground="{StaticResource Dyc.AccentBrush}"
+                           ToolTip="Current value"
+                           Text="{Binding Value, StringFormat={}{0:0.###}}" />
+                <TextBox Grid.Column="3"
                          Style="{StaticResource Dyc.TextBox}"
                          FontSize="10"
                          Text="{Binding Max}"
@@ -230,7 +310,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.IntegerSlider">
-        <StackPanel Margin="4" MinWidth="180">
+        <StackPanel Margin="4" MinWidth="200">
             <TextBox Style="{StaticResource Dyc.TextBox}"
                      HorizontalAlignment="Stretch"
                      Text="{Binding Value}" />
@@ -238,6 +318,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="44" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="44" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0"
@@ -253,7 +334,16 @@
                         Value="{Binding Value}"
                         IsSnapToTickEnabled="True"
                         TickFrequency="1" />
-                <TextBox Grid.Column="2"
+                <TextBlock Grid.Column="2"
+                           Margin="0,0,4,0"
+                           VerticalAlignment="Center"
+                           MinWidth="30"
+                           TextAlignment="Right"
+                           FontSize="10"
+                           Foreground="{StaticResource Dyc.AccentBrush}"
+                           ToolTip="Current value"
+                           Text="{Binding Value}" />
+                <TextBox Grid.Column="3"
                          Style="{StaticResource Dyc.TextBox}"
                          FontSize="10"
                          Text="{Binding Max}"
@@ -300,17 +390,55 @@
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.Watch">
-        <TextBox Style="{StaticResource Dyc.TextBox}"
-                 Margin="4"
-                 MinWidth="120"
-                 MaxWidth="280"
-                 MaxHeight="200"
-                 FontFamily="Consolas"
-                 FontSize="11"
-                 IsReadOnly="True"
-                 TextWrapping="Wrap"
-                 VerticalScrollBarVisibility="Auto"
-                 Text="{Binding FormattedValue, Mode=OneWay}" />
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Margin="1,0,1,3"
+                       FontSize="10"
+                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
+            <TextBox x:Name="WatchBox"
+                     Grid.Row="1"
+                     Style="{StaticResource Dyc.TextBox}"
+                     MinWidth="120"
+                     MinHeight="24"
+                     Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                     Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                     MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
+                     MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=200}"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding FormattedValue, Mode=OneWay}" />
+            <views:SizeGripThumb Grid.Row="2"
+                                 HorizontalAlignment="Right"
+                                 Width="14"
+                                 Height="12"
+                                 Margin="0,2,0,0"
+                                 ToolTip="Drag to resize"
+                                 TargetElement="{Binding ElementName=WatchBox}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 MinTargetWidth="120"
+                                 MinTargetHeight="24">
+                <views:SizeGripThumb.Template>
+                    <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
+                        <Grid Background="Transparent">
+                            <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
+                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  StrokeThickness="1.5" />
+                        </Grid>
+                    </ControlTemplate>
+                </views:SizeGripThumb.Template>
+            </views:SizeGripThumb>
+        </Grid>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.Missing">
@@ -325,16 +453,54 @@
     <!-- Bodies for Dyncamelo.Nodes interactive nodes (matched by type name;
          bindings resolve reflectively, so no assembly reference is needed). -->
     <DataTemplate x:Key="NodeBody.WatchListNode">
-        <TextBox Style="{StaticResource Dyc.TextBox}"
-                 Margin="4"
-                 MinWidth="140"
-                 MaxWidth="280"
-                 MaxHeight="220"
-                 FontFamily="Consolas"
-                 FontSize="11"
-                 IsReadOnly="True"
-                 VerticalScrollBarVisibility="Auto"
-                 Text="{Binding FormattedValue, Mode=OneWay}" />
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Margin="1,0,1,3"
+                       FontSize="10"
+                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
+            <TextBox x:Name="WatchListBox"
+                     Grid.Row="1"
+                     Style="{StaticResource Dyc.TextBox}"
+                     MinWidth="140"
+                     MinHeight="24"
+                     Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                     Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                     MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
+                     MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=220}"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     IsReadOnly="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding FormattedValue, Mode=OneWay}" />
+            <views:SizeGripThumb Grid.Row="2"
+                                 HorizontalAlignment="Right"
+                                 Width="14"
+                                 Height="12"
+                                 Margin="0,2,0,0"
+                                 ToolTip="Drag to resize"
+                                 TargetElement="{Binding ElementName=WatchListBox}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 MinTargetWidth="140"
+                                 MinTargetHeight="24">
+                <views:SizeGripThumb.Template>
+                    <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
+                        <Grid Background="Transparent">
+                            <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
+                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  StrokeThickness="1.5" />
+                        </Grid>
+                    </ControlTemplate>
+                </views:SizeGripThumb.Template>
+            </views:SizeGripThumb>
+        </Grid>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.ListCreateNode">
@@ -389,60 +555,106 @@
 
     <!-- ===== Canvas item templates (implicit, picked by view-model type) ===== -->
     <DataTemplate DataType="{x:Type vm:NodeViewModel}">
-        <Border x:Name="StateBorder"
-                BorderThickness="2"
-                BorderBrush="Transparent"
-                CornerRadius="6"
-                Background="Transparent">
-            <Border.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Freeze"
-                              IsCheckable="True"
-                              IsChecked="{Binding IsFrozen}" />
-                    <MenuItem Header="Lacing">
-                        <MenuItem Header="Auto" Command="{Binding SetLacingCommand}" CommandParameter="Auto" />
-                        <MenuItem Header="Shortest" Command="{Binding SetLacingCommand}" CommandParameter="Shortest" />
-                        <MenuItem Header="Longest" Command="{Binding SetLacingCommand}" CommandParameter="Longest" />
-                        <MenuItem Header="Cross Product" Command="{Binding SetLacingCommand}" CommandParameter="CrossProduct" />
-                    </MenuItem>
-                </ContextMenu>
-            </Border.ContextMenu>
-            <nodify:Node Header="{Binding}"
-                         HeaderBrush="{Binding HeaderBrush}"
-                         ContentBrush="{StaticResource Dyc.NodeBodyBrush}"
-                         Foreground="{StaticResource Dyc.TextBrush}"
-                         BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
-                         Input="{Binding Inputs}"
-                         Output="{Binding Outputs}">
-                <nodify:Node.HeaderTemplate>
-                    <DataTemplate>
-                        <DockPanel MinWidth="90">
-                            <TextBlock DockPanel.Dock="Right"
-                                       Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       FontSize="9"
-                                       Opacity="0.85"
-                                       Foreground="White"
-                                       Text="{Binding LacingLabel}" />
-                            <TextBlock FontWeight="SemiBold"
-                                       Foreground="White"
-                                       TextTrimming="CharacterEllipsis"
-                                       Text="{Binding Title}"
-                                       ToolTip="{Binding Description}" />
-                        </DockPanel>
-                    </DataTemplate>
-                </nodify:Node.HeaderTemplate>
-                <ContentControl Focusable="False"
-                                Content="{Binding Model}"
-                                ContentTemplateSelector="{StaticResource Dyc.NodeBodySelector}" />
-            </nodify:Node>
-        </Border>
+        <StackPanel>
+            <!-- Zero-height canvas: the diagnostics balloon floats above the node
+                 without shifting its position when it appears. -->
+            <Canvas Height="0" HorizontalAlignment="Left">
+                <Border x:Name="Balloon"
+                        Canvas.Bottom="8"
+                        Canvas.Left="0"
+                        Visibility="Collapsed"
+                        MaxWidth="300"
+                        CornerRadius="4"
+                        Padding="8,5"
+                        BorderThickness="1.5"
+                        Background="{StaticResource Dyc.PanelBrush}"
+                        BorderBrush="{StaticResource Dyc.WarningBrush}">
+                    <TextBlock FontSize="11"
+                               Foreground="{StaticResource Dyc.TextBrush}"
+                               TextWrapping="Wrap"
+                               MaxHeight="120"
+                               Text="{Binding StateMessage}"
+                               ToolTip="{Binding StateMessage}" />
+                </Border>
+            </Canvas>
+            <Border x:Name="StateBorder"
+                    BorderThickness="2"
+                    BorderBrush="Transparent"
+                    CornerRadius="6"
+                    Background="Transparent">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Freeze"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IsFrozen}" />
+                        <MenuItem Header="Show Preview"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding ShowPreview}" />
+                        <MenuItem Header="Lacing">
+                            <MenuItem Header="Auto" Command="{Binding SetLacingCommand}" CommandParameter="Auto" />
+                            <MenuItem Header="Shortest" Command="{Binding SetLacingCommand}" CommandParameter="Shortest" />
+                            <MenuItem Header="Longest" Command="{Binding SetLacingCommand}" CommandParameter="Longest" />
+                            <MenuItem Header="Cross Product" Command="{Binding SetLacingCommand}" CommandParameter="CrossProduct" />
+                        </MenuItem>
+                    </ContextMenu>
+                </Border.ContextMenu>
+                <nodify:Node Header="{Binding}"
+                             HeaderBrush="{Binding HeaderBrush}"
+                             ContentBrush="{StaticResource Dyc.NodeBodyBrush}"
+                             Foreground="{StaticResource Dyc.TextBrush}"
+                             BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
+                             Input="{Binding Inputs}"
+                             Output="{Binding Outputs}">
+                    <nodify:Node.HeaderTemplate>
+                        <DataTemplate>
+                            <DockPanel MinWidth="90">
+                                <TextBlock DockPanel.Dock="Right"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="9"
+                                           Opacity="0.85"
+                                           Foreground="White"
+                                           Text="{Binding LacingLabel}" />
+                                <TextBlock FontWeight="SemiBold"
+                                           Foreground="White"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{Binding Title}"
+                                           ToolTip="{Binding Description}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </nodify:Node.HeaderTemplate>
+                    <ContentControl Focusable="False"
+                                    Content="{Binding Model}"
+                                    ContentTemplateSelector="{StaticResource Dyc.NodeBodySelector}" />
+                </nodify:Node>
+            </Border>
+            <!-- Dynamo-style value preview bubble (global toolbar toggle +
+                 per-node "Show Preview" pin; renders after a run). -->
+            <Border x:Name="PreviewBubble"
+                    Margin="8,4,8,0"
+                    HorizontalAlignment="Center"
+                    MaxWidth="300"
+                    CornerRadius="3"
+                    Padding="6,3"
+                    BorderThickness="1"
+                    Background="{StaticResource Dyc.PanelBrush}"
+                    BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                    Visibility="{Binding IsPreviewVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <TextBlock FontSize="10"
+                           FontFamily="Consolas"
+                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                           TextWrapping="Wrap"
+                           Text="{Binding PreviewText}"
+                           ToolTip="{Binding PreviewText}" />
+            </Border>
+        </StackPanel>
         <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding State}" Value="Warning">
                 <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.WarningBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Error">
                 <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
+                <Setter TargetName="Balloon" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding HasMessage}" Value="True">
                 <Setter TargetName="StateBorder" Property="ToolTip" Value="{Binding StateMessage}" />
@@ -450,7 +662,63 @@
             <DataTrigger Binding="{Binding IsFrozen}" Value="True">
                 <Setter TargetName="StateBorder" Property="Opacity" Value="0.45" />
             </DataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding State}" Value="Warning" />
+                    <Condition Binding="{Binding HasMessage}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="Balloon" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding State}" Value="Error" />
+                    <Condition Binding="{Binding HasMessage}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="Balloon" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
         </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <!-- ===== Groups (Dynamo-style: colored rectangle behind its nodes; dragging
+         the header moves the members, the thumb resizes, title is editable) ===== -->
+    <DataTemplate DataType="{x:Type vm:GroupViewModel}">
+        <nodify:GroupingNode ActualSize="{Binding GroupSize, Mode=TwoWay}"
+                             HeaderBrush="{Binding HeaderBrush}"
+                             Background="{Binding BodyBrush}"
+                             MovementMode="Group"
+                             HorizontalContentAlignment="Stretch">
+            <nodify:GroupingNode.Header>
+                <Grid Background="Transparent" ToolTip="Drag the colored bar to move the group and its nodes">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" MinWidth="40" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             MinWidth="60"
+                             MaxWidth="260"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="White"
+                             CaretBrush="White"
+                             FontWeight="SemiBold"
+                             ToolTip="Group title (click to edit)"
+                             Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </nodify:GroupingNode.Header>
+            <nodify:GroupingNode.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Ungroup" Command="{Binding UngroupCommand}" />
+                    <MenuItem Header="Color">
+                        <MenuItem Header="Blue" Command="{Binding SetColorCommand}" CommandParameter="#FF3D6A99" />
+                        <MenuItem Header="Green" Command="{Binding SetColorCommand}" CommandParameter="#FF3F7249" />
+                        <MenuItem Header="Amber" Command="{Binding SetColorCommand}" CommandParameter="#FF9A7B2D" />
+                        <MenuItem Header="Red" Command="{Binding SetColorCommand}" CommandParameter="#FF8A3B3B" />
+                        <MenuItem Header="Purple" Command="{Binding SetColorCommand}" CommandParameter="#FF6B4E8E" />
+                        <MenuItem Header="Gray" Command="{Binding SetColorCommand}" CommandParameter="#FF5A6273" />
+                    </MenuItem>
+                </ContextMenu>
+            </nodify:GroupingNode.ContextMenu>
+        </nodify:GroupingNode>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:NoteViewModel}">

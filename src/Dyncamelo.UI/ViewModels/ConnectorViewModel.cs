@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Types;
 using Dyncamelo.UI.Mvvm;
@@ -22,6 +23,9 @@ public class ConnectorViewModel : ObservableObject
     {
         Node = node;
         Port = port;
+        DisconnectCommand = new RelayCommand(
+            () => Node.Owner.DisconnectConnectorCommand.Execute(this),
+            () => IsConnected);
     }
 
     /// <summary>Owning node view model.</summary>
@@ -36,15 +40,23 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>True for input ports (rendered on the left side of the node).</summary>
     public bool IsInput => Port.Direction == PortDirection.Input;
 
-    /// <summary>Tooltip: name, declared type, default marker and description.</summary>
+    /// <summary>
+    /// True for input ports that carry a default value (usable while unconnected).
+    /// Rendered as a hollow/dimmed connector; required inputs are filled.
+    /// </summary>
+    public bool IsOptional => IsInput && Port.HasDefault;
+
+    /// <summary>Tooltip: name, declared type, required/optional marker and description.</summary>
     public string ToolTip
     {
         get
         {
             var text = Port.Name + " : " + FriendlyTypeName(Port.DeclaredType);
-            if (Port.HasDefault)
+            if (IsInput)
             {
-                text += "\nDefault: " + TypeCoercion.FormatValue(Port.DefaultValue);
+                text += Port.HasDefault
+                    ? "\noptional (default: " + TypeCoercion.FormatValue(Port.DefaultValue) + ")"
+                    : "\nrequired";
             }
 
             if (Port.Description.Length > 0)
@@ -55,6 +67,9 @@ public class ConnectorViewModel : ObservableObject
             return text;
         }
     }
+
+    /// <summary>Removes every wire touching this port (context menu "Disconnect").</summary>
+    public ICommand DisconnectCommand { get; }
 
     /// <summary>Graph-space position of the connector dot; written by the view.</summary>
     public Point Anchor

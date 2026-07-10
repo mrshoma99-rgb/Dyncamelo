@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Dyncamelo.Core.Loader;
 
 namespace Dyncamelo.Nodes;
@@ -115,4 +116,141 @@ public static class MathNodes
     {
         return Math.Max(a, b);
     }
+
+    /// <summary>Absolute value of a number.</summary>
+    /// <param name="number">The number.</param>
+    /// <returns>The absolute value.</returns>
+    [NodeName("Math.Abs")]
+    [NodeDescription("Returns the absolute value of a number.")]
+    [NodeSearchTags("absolute", "magnitude", "unsigned")]
+    public static double Abs(double number)
+    {
+        return Math.Abs(number);
+    }
+
+    /// <summary>Raises a number to a power.</summary>
+    /// <param name="base">The base.</param>
+    /// <param name="exponent">The exponent.</param>
+    /// <returns>base raised to exponent.</returns>
+    [NodeName("Math.Pow")]
+    [NodeDescription("Raises the first number to the power of the second.")]
+    [NodeSearchTags("power", "exponent", "^", "raise")]
+    public static double Pow(double @base, double exponent)
+    {
+        return Math.Pow(@base, exponent);
+    }
+
+    /// <summary>
+    /// Square root of a number. Negative inputs raise an error (surfaced as the
+    /// node's Error state) instead of silently returning NaN.
+    /// </summary>
+    /// <param name="number">The number (must be non-negative).</param>
+    /// <returns>The square root.</returns>
+    [NodeName("Math.Sqrt")]
+    [NodeDescription("Returns the square root of a non-negative number.")]
+    [NodeSearchTags("root", "radical")]
+    public static double Sqrt(double number)
+    {
+        if (number < 0d)
+        {
+            throw new ArgumentException(
+                "Math.Sqrt requires a non-negative number; got " + number.ToString(CultureInfo.InvariantCulture) + ".",
+                nameof(number));
+        }
+
+        return Math.Sqrt(number);
+    }
+
+    /// <summary>Rounds a number down to the nearest integer.</summary>
+    /// <param name="number">The number.</param>
+    /// <returns>The largest integer less than or equal to the number.</returns>
+    [NodeName("Math.Floor")]
+    [NodeDescription("Rounds a number down to the nearest integer.")]
+    [NodeSearchTags("round", "down", "truncate")]
+    public static double Floor(double number)
+    {
+        return Math.Floor(number);
+    }
+
+    /// <summary>Rounds a number up to the nearest integer.</summary>
+    /// <param name="number">The number.</param>
+    /// <returns>The smallest integer greater than or equal to the number.</returns>
+    [NodeName("Math.Ceiling")]
+    [NodeDescription("Rounds a number up to the nearest integer.")]
+    [NodeSearchTags("round", "up", "ceil")]
+    public static double Ceiling(double number)
+    {
+        return Math.Ceiling(number);
+    }
+
+    /// <summary>
+    /// Linearly remaps a value from one range to another, e.g. mapping a
+    /// property value in 0–100 onto 0–1 for a color gradient. Values outside
+    /// the source range extrapolate (they are not clamped).
+    /// </summary>
+    /// <param name="value">The value to remap.</param>
+    /// <param name="fromLow">Low end of the source range.</param>
+    /// <param name="fromHigh">High end of the source range (must differ from fromLow).</param>
+    /// <param name="toLow">Low end of the target range.</param>
+    /// <param name="toHigh">High end of the target range.</param>
+    /// <returns>The remapped value.</returns>
+    [NodeName("Math.MapRange")]
+    [NodeDescription("Linearly remaps a value from one range to another (values outside the range extrapolate).")]
+    [NodeSearchTags("remap", "scale", "normalize", "interpolate", "gradient")]
+    public static double MapRange(double value, double fromLow, double fromHigh, double toLow, double toHigh)
+    {
+        if (fromLow.Equals(fromHigh))
+        {
+            throw new ArgumentException(
+                "Math.MapRange requires fromLow and fromHigh to differ (both are " +
+                fromLow.ToString(CultureInfo.InvariantCulture) + ").",
+                nameof(fromHigh));
+        }
+
+        return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+    }
+
+    /// <summary>
+    /// A random number in a range. With the default seed (-1) each execution
+    /// draws a fresh value; a seed of 0 or greater makes the result
+    /// deterministic (the same seed always yields the same number).
+    /// </summary>
+    /// <param name="min">Inclusive lower bound.</param>
+    /// <param name="max">Exclusive upper bound (must be at least min).</param>
+    /// <param name="seed">-1 for non-deterministic; 0 or greater for a repeatable value.</param>
+    /// <returns>A random number in [min, max).</returns>
+    [NodeName("Math.Random")]
+    [NodeDescription("Returns a random number in a range (seed >= 0 makes it deterministic).")]
+    [NodeSearchTags("rand", "noise", "seed", "dice")]
+    public static double Random(double min = 0d, double max = 1d, int seed = -1)
+    {
+        if (max < min)
+        {
+            throw new ArgumentException(
+                "Math.Random requires max (" + max.ToString(CultureInfo.InvariantCulture) +
+                ") to be at least min (" + min.ToString(CultureInfo.InvariantCulture) + ").",
+                nameof(max));
+        }
+
+        double sample;
+        if (seed >= 0)
+        {
+            sample = new Random(seed).NextDouble();
+        }
+        else
+        {
+            // A shared generator (guarded for replication over lists, which
+            // calls this many times in quick succession) avoids the identical
+            // values that per-call, time-seeded Random instances would produce.
+            lock (SharedRandomLock)
+            {
+                sample = SharedRandom.NextDouble();
+            }
+        }
+
+        return min + sample * (max - min);
+    }
+
+    private static readonly Random SharedRandom = new Random();
+    private static readonly object SharedRandomLock = new object();
 }

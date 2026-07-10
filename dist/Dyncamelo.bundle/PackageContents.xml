@@ -2,7 +2,7 @@
 <ApplicationPackage SchemaVersion="3.0" Version="0.1.0.0" Author="BIMCamel"
     ProductCode="8916CF22-26BD-463C-ACFD-EFA4B2222610"
     Name="Dyncamelo"
-    Description="Dyncamelo - open-source visual programming (node graphs) for Autodesk Navisworks">
+    Description="Dyncamelo - visual programming (node graphs) for Autodesk Navisworks">
   <CompanyDetails Name="BIMCamel" Url="https://github.com/mrshoma99-rgb/Dyncamelo" />
 
   <!-- One DLL PER RELEASE: a Navisworks plug-in must be compiled against the API of the release it

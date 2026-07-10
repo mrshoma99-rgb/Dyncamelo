@@ -42,8 +42,25 @@ public static class NavisworksContext
     /// <exception cref="InvalidOperationException">No active Navisworks document is available.</exception>
     public static Document ResolveDocument(Document? document = null)
     {
+        return ResolveDocument(document, allowClear: false);
+    }
+
+    /// <summary>
+    /// Resolves the document a node should operate on, optionally accepting an
+    /// empty (IsClear) document. Lifecycle nodes whose purpose is to load the
+    /// FIRST file(s) into a fresh session (Document.Open, Document.AppendFiles,
+    /// Document.Merge — the headless Batch-Utility scenario) pass
+    /// <paramref name="allowClear"/> = true; read/query nodes keep the default
+    /// rejection of clear documents.
+    /// </summary>
+    /// <param name="document">The value of the node's optional "document" input.</param>
+    /// <param name="allowClear">True to accept a non-null document with no files loaded.</param>
+    /// <returns>A non-null document; non-empty unless <paramref name="allowClear"/> is true.</returns>
+    /// <exception cref="InvalidOperationException">No active Navisworks document is available.</exception>
+    public static Document ResolveDocument(Document? document, bool allowClear)
+    {
         var resolved = document ?? HostService?.ActiveDocument ?? GetApplicationDocument();
-        if (resolved == null || resolved.IsClear)
+        if (resolved == null || (!allowClear && resolved.IsClear))
         {
             throw new InvalidOperationException("No active Navisworks document.");
         }

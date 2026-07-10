@@ -2,6 +2,8 @@
 
 This guide takes you from a fresh Navisworks installation to your first working graph: **find every item whose Material contains "Concrete", color it red, and save it as a selection set** — without writing a line of code.
 
+> **What's new in 0.2** — copy/paste and duplicate nodes (`Ctrl+C`/`Ctrl+V`/`Ctrl+D`), group nodes into colored frames (`Ctrl+G`), value previews under every node, library favourites (star any node) and tooltips, a recent-files menu on **Open**, resizable Watch nodes — and the node library has grown past **200 nodes** (clash triage and reports, camera control, bulk search sets, model audits, and 43 new general-purpose nodes).
+
 ## 1. What you need
 
 - Autodesk **Navisworks Manage or Simulate 2024** (Windows).

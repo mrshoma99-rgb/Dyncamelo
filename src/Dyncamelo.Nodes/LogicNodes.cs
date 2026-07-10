@@ -102,6 +102,30 @@ public static class LogicNodes
     {
         return a < b;
     }
+
+    /// <summary>Tests whether the first number is greater than or equal to the second.</summary>
+    /// <param name="a">First operand.</param>
+    /// <param name="b">Second operand.</param>
+    /// <returns>True when a &gt;= b.</returns>
+    [NodeName("GreaterThanOrEqual")]
+    [NodeDescription("Returns true when the first number is greater than or equal to the second.")]
+    [NodeSearchTags(">=", "compare", "atleast")]
+    public static bool GreaterThanOrEqual(double a, double b)
+    {
+        return a >= b;
+    }
+
+    /// <summary>Tests whether the first number is less than or equal to the second.</summary>
+    /// <param name="a">First operand.</param>
+    /// <param name="b">Second operand.</param>
+    /// <returns>True when a &lt;= b.</returns>
+    [NodeName("LessThanOrEqual")]
+    [NodeDescription("Returns true when the first number is less than or equal to the second.")]
+    [NodeSearchTags("<=", "compare", "atmost")]
+    public static bool LessThanOrEqual(double a, double b)
+    {
+        return a <= b;
+    }
 }
 
 /// <summary>
