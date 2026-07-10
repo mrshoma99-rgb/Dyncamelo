@@ -83,7 +83,7 @@ jobs:
           $layout  = "src/Dyncamelo.App/bin/Release/net48/NavisworksPlugin/Dyncamelo.App"
           $staging = "staging"
           $year    = "$staging/Dyncamelo.bundle/2024"
-          New-Item -ItemType Directory -Force -Path "$year/en-US", "$year/Resources" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$year/en-US", "$year/Resources", "$year/Samples" | Out-Null
 
           $dlls = @(
             'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll',
@@ -100,6 +100,15 @@ jobs:
           }
           Copy-Item "$layout/en-US/Dyncamelo.xaml" -Destination "$year/en-US"
           Copy-Item "$layout/Resources/*.png"      -Destination "$year/Resources"
+
+          # Example workflow graphs for the in-app Samples menu (staged into the
+          # plugin layout by the LayoutNavisworksPlugin build target).
+          $samples = Get-ChildItem "$layout/Samples/*.dyc"
+          if ($samples.Count -lt 1) {
+            Write-Host "::error::No sample graphs found in $layout/Samples"
+            exit 1
+          }
+          Copy-Item "$layout/Samples/*.dyc" -Destination "$year/Samples"
 
           # Bundle manifest from the dist template, stamped with the release
           # version via XML DOM (a case-insensitive regex here once corrupted the
