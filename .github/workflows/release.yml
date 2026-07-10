@@ -1,0 +1,58 @@
+name: release
+
+# Publishes a GitHub Release with the installable Navisworks 2024 bundle
+# whenever a version tag (v*) is pushed:
+#
+#   git tag v0.1.0 && git push origin v0.1.0
+#
+# The zip is assembled from dist/ at the tagged commit — dist/Dyncamelo.bundle
+# carries the compiled Release DLLs, ribbon layout, icons and manifest, and
+# install-dyncamelo.bat installs it for the current user.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package bundle zip
+        run: |
+          ZIP="Dyncamelo-${GITHUB_REF_NAME}-navisworks2024.zip"
+          cd dist
+          zip -r "../$ZIP" Dyncamelo.bundle install-dyncamelo.bat README.md \
+              -x "Dyncamelo.bundle/2024/PLACE_DYNCAMELO_DLLS_HERE.txt"
+          cd ..
+          sha256sum "$ZIP" > "$ZIP.sha256"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks."
+            echo
+            echo "## Install"
+            echo
+            echo "1. Download and extract \`$ZIP\`."
+            echo "2. Double-click \`install-dyncamelo.bat\` (copies the bundle to \`%APPDATA%\\Autodesk\\ApplicationPlugins\` — no admin rights needed)."
+            echo "3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button."
+            echo
+            echo "Uninstall: \`install-dyncamelo.bat uninstall\`."
+            echo
+            echo "## Checksum"
+            echo
+            echo '```'
+            cat "$ZIP.sha256"
+            echo '```'
+          } > notes.md
+          gh release create "$GITHUB_REF_NAME" "$ZIP" "$ZIP.sha256" \
+            --title "Dyncamelo $GITHUB_REF_NAME (Navisworks 2024)" \
+            --notes-file notes.md
