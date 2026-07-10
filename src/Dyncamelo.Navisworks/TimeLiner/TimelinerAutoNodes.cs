@@ -80,7 +80,7 @@ public static class TimelinerAutoNodes
                 continue;
             }
 
-            var items = SearchNodes.ByPropertyValue(category, property, taskName, doc);
+            var items = SearchNodes.ByPropertyValue(category, property, taskName, document: doc);
             if (items.Count == 0)
             {
                 unmatched.Add(taskName);

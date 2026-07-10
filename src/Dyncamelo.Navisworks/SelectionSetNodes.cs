@@ -204,7 +204,7 @@ public static class SelectionSetNodes
 
         // Gather the distinct values, keeping each value's TRUE storage variant so
         // the generated search matches the property's data type exactly.
-        var carriers = SearchNodes.HasProperty(categoryName, propertyName, doc);
+        var carriers = SearchNodes.HasProperty(categoryName, propertyName, document: doc);
         var values = new List<string>();
         var variantByValue = new Dictionary<string, VariantData>(StringComparer.Ordinal);
         foreach (var item in carriers)

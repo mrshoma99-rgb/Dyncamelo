@@ -65,7 +65,7 @@
     {
       "Id": "f447ef1a9f28c0d05518c1418a1014fb",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,Autodesk.Navisworks.Api.Document",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 340.0,
@@ -90,6 +90,13 @@
         {
           "Name": "value",
           "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false
