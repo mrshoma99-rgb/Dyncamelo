@@ -1,14 +1,8 @@
-# What's new in Dyncamelo v0.2 (in progress)
-
-> Living document — generated from the code on the v0.2 branch; the team is
-> still adding Navisworks coordination nodes, so this list grows until release.
+# What's new in Dyncamelo v0.2
 
 ## Fixes
-- **Color → Appearance.OverrideColor now connects.** The engine gained a
-  pluggable type-converter registry (checked at wire time and at run time);
-  the Navisworks library registers a Dyncamelo-color → Autodesk color converter.
-- **Color Picker propagates changes** — edits now mark the node dirty and
-  re-execute downstream (AutoRun) / on the next Run.
+- **Color → Appearance.OverrideColor now works end-to-end.** Root cause was the runtime conversion, not the wire: the engine gained a pluggable type-converter registry (checked at wire time and run time) and the Navisworks value converter now understands Dyncamelo colors.
+- **Color Picker propagates changes** — edits mark the node dirty and re-execute downstream (AutoRun) or on the next Run.
 
 ## Editor quality-of-life
 - Copy / paste / duplicate nodes (Ctrl+C/V/D) with connections preserved
@@ -19,13 +13,12 @@
 - Required vs optional input ports styled differently (tooltip shows defaults)
 - Watch List shows item count and is **resizable**; sliders show live values
 - Double-click empty canvas → quick String node at the cursor
-- Library: **tooltips with node descriptions**, collapse/expand all,
-  **★ Favourites** (persisted), bigger text, **Recent files** menu,
-  BIMCamel logo in the header
+- Library: **tooltips with node descriptions**, collapse/expand all, **★ Favourites** (persisted), bigger text, **Recent files** menu, BIMCamel logo in the header
 
-## New nodes (102 so far)
+## New nodes (103)
 
 ### Color
+
 | Node | Description |
 |---|---|
 | `Color.Components` | Splits a color into its red, green, blue and alpha channels (0-255). |
@@ -33,6 +26,7 @@
 | `Color.Lerp` | Interpolates between two colors (t clamped to 0-1). |
 
 ### DateTime
+
 | Node | Description |
 |---|---|
 | `DateTime.AddDays` | Offsets a date/time by a number of days (fractional and negative values allowed). |
@@ -41,6 +35,7 @@
 | `DateTime.Parse` | Parses text as a date/time, optionally with an exact .NET format string. |
 
 ### Dictionary
+
 | Node | Description |
 |---|---|
 | `Dictionary.Keys` | Returns all keys of a dictionary as a list. |
@@ -48,6 +43,7 @@
 | `Dictionary.Values` | Returns all values of a dictionary as a list. |
 
 ### File
+
 | Node | Description |
 |---|---|
 | `Directory.GetFiles` | Lists the files in a folder (optionally filtered by a wildcard such as "*.nwd"). |
@@ -57,6 +53,7 @@
 | `Path.Combine` | Joins a folder path and a file name with the correct separator. |
 
 ### Geometry
+
 | Node | Description |
 |---|---|
 | `BoundingBox.Intersects` | Tests whether two bounding boxes overlap (touching counts as intersecting). |
@@ -65,6 +62,7 @@
 | `Vector.ByCoordinates` | Creates a 3D direction vector from X, Y and Z components. |
 
 ### List
+
 | Node | Description |
 |---|---|
 | `List.AddItemToEnd` | Appends a value to the end of a list (returns a new list). |
@@ -78,12 +76,14 @@
 | `List.SortByKey` | Sorts list elements by a parallel key list; returns the sorted elements and keys. |
 
 ### Logic
+
 | Node | Description |
 |---|---|
 | `GreaterThanOrEqual` | Returns true when the first number is greater than or equal to the second. |
 | `LessThanOrEqual` | Returns true when the first number is less than or equal to the second. |
 
 ### Math
+
 | Node | Description |
 |---|---|
 | `Math.Abs` | Returns the absolute value of a number. |
@@ -95,24 +95,29 @@
 | `Math.Sqrt` | Returns the square root of a non-negative number. |
 
 ### Navisworks.Appearance
+
 | Node | Description |
 |---|---|
 | `Appearance.ColorByValues` | One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend. |
-| `Appearance.Isolate` | Shows only these items and hides everything else (undo with Appearance.Show on Models.RootItems). |
+| `Appearance.Isolate` | Shows only these items and hides everything else (undo with Appearance.ShowAll). |
 | `Appearance.ResetAll` | Removes every permanent color/transparency override in the model — a clean slate before re-coloring. |
+| `Appearance.ShowAll` | Shows (un-hides) every item in the model — undoes Appearance.Hide and Appearance.Isolate. |
 
 ### Navisworks.Application
+
 | Node | Description |
 |---|---|
 | `Application.Version` | The running Navisworks product name and API version (report headers, compatibility checks). |
 
 ### Navisworks.Audit
+
 | Node | Description |
 |---|---|
 | `Audit.DuplicateItems` | Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items. |
 | `Audit.MissingProperty` | Finds every item that does NOT carry the given property — the data-completeness audit. Lace over a property list to batch-audit. |
 
 ### Navisworks.Camera
+
 | Node | Description |
 |---|---|
 | `Camera.Current` | The current camera position, focal distance and vertical field height. |
@@ -120,6 +125,7 @@
 | `Camera.ZoomToItems` | Frames the given items in the current view (per-item close-ups, screenshot staging). |
 
 ### Navisworks.Clash
+
 | Node | Description |
 |---|---|
 | `Clash.GroupResultsByLevel` | Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage. |
@@ -137,11 +143,13 @@
 | `ClashTest.Run` | Runs one clash test now and reports the result count. |
 
 ### Navisworks.Document
+
 | Node | Description |
 |---|---|
 | `Document.Save` | Saves the document as .nwf (references) or .nwd (published snapshot) to the given path. |
 
 ### Navisworks.Export
+
 | Node | Description |
 |---|---|
 | `Export.ClashReportCsv` | One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready). |
@@ -150,12 +158,14 @@
 | `Export.ViewpointImage` | Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter. |
 
 ### Navisworks.Model
+
 | Node | Description |
 |---|---|
 | `Model.FileName` | The cached and original source file paths of a model (federated-file inventory). |
 | `Model.Units` | The native units of a model's source file (unit-mismatch audits across appended files). |
 
 ### Navisworks.ModelItem
+
 | Node | Description |
 |---|---|
 | `ModelItem.Ancestors` | The chain of parents of a model item, up to its model root. |
@@ -166,6 +176,7 @@
 | `ModelItem.Parent` | The parent of a model item (null for a model root). |
 
 ### Navisworks.Properties
+
 | Node | Description |
 |---|---|
 | `Properties.AsDictionary` | Every property of an item flattened to a "Category.Property" → value dictionary (full data dump). |
@@ -175,6 +186,7 @@
 | `Property.Info` | The internal name, display name and plain value of a raw data property. |
 
 ### Navisworks.Search
+
 | Node | Description |
 |---|---|
 | `Search.ByPropertyCompare` | Finds every model item whose numeric property is >, >=, < or <= a value (e.g. pipes with Diameter > 100). |
@@ -184,12 +196,14 @@
 | `Search.InItems` | Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement). |
 
 ### Navisworks.Selection
+
 | Node | Description |
 |---|---|
 | `Selection.AddToCurrent` | Adds items to the existing Navisworks selection (union) and returns the result. |
 | `Selection.SelectAll` | Selects everything in the Navisworks UI and returns the selected items. |
 
 ### Navisworks.SelectionSets
+
 | Node | Description |
 |---|---|
 | `SelectionSet.CreateFromSearch` | Creates a live SEARCH set from a property-equals rule — it re-evaluates as the model changes. An existing top-level set with the same name is replaced. |
@@ -199,22 +213,26 @@
 | `SelectionSets.CreateFolder` | Creates a top-level folder in the Sets window (an existing same-named folder is reused, so re-runs are clean). |
 
 ### Navisworks.Takeoff
+
 | Node | Description |
 |---|---|
 | `Takeoff.SumPropertyByGroup` | One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in "(none)". |
 
 ### Navisworks.TimeLiner
+
 | Node | Description |
 |---|---|
 | `TimelinerTask.AttachSet` | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation. |
 | `TimelinerTask.SetDates` | Updates a task's planned start/end dates in place — bulk schedule edits without a re-import. |
 
 ### Navisworks.Units
+
 | Node | Description |
 |---|---|
 | `Units.All` | Every unit name accepted by Units.Convert and Units.ScaleFactor. |
 
 ### Navisworks.Viewpoints
+
 | Node | Description |
 |---|---|
 | `SavedViewpoint.Delete` | Deletes a saved viewpoint by name (searches folders too). Returns false when absent — safe for clean re-runs of batch generation. |
@@ -222,6 +240,7 @@
 | `Viewpoints.FromClashResults` | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced. |
 
 ### String
+
 | Node | Description |
 |---|---|
 | `String.EndsWith` | Tests whether a string ends with the given suffix. |

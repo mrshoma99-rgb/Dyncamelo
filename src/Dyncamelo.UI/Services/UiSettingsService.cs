@@ -127,7 +127,28 @@ public class UiSettingsService
                 FavoriteNodeIds = new List<string>(_favoriteNodeIds),
                 RecentFiles = new List<string>(_recentFiles),
             };
-            File.WriteAllText(_settingsPath, JsonConvert.SerializeObject(data, Formatting.Indented));
+
+            // Write-to-temp-then-replace so a crash (or a concurrent reader in
+            // another Navisworks session) never sees a truncated settings file,
+            // which Load() would silently interpret as "reset to defaults".
+            var tempPath = _settingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            File.WriteAllText(tempPath, JsonConvert.SerializeObject(data, Formatting.Indented));
+            try
+            {
+                if (File.Exists(_settingsPath))
+                {
+                    File.Replace(tempPath, _settingsPath, null);
+                }
+                else
+                {
+                    File.Move(tempPath, _settingsPath);
+                }
+            }
+            catch (Exception)
+            {
+                File.Delete(tempPath);
+                throw;
+            }
         }
         catch (Exception)
         {

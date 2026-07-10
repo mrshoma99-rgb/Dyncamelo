@@ -115,7 +115,19 @@ public static class TypeCoercion
         {
             try
             {
-                result = converter(value);
+                var converted = converter(value);
+                if (converted == null &&
+                    targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
+                {
+                    // A converter returning null cannot satisfy a non-nullable
+                    // value-type target; treat it as "not convertible" so the
+                    // caller gets the descriptive type-pair error instead of a
+                    // null smuggled into a value-typed input.
+                    result = null;
+                    return false;
+                }
+
+                result = converted;
                 return true;
             }
             catch (Exception)
