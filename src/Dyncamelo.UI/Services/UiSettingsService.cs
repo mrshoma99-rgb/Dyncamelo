@@ -18,6 +18,7 @@ public class UiSettingsService
     private readonly string _settingsPath;
     private readonly List<string> _favoriteNodeIds = new List<string>();
     private readonly List<string> _recentFiles = new List<string>();
+    private bool _showLibraryDescriptions = true;
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
     public UiSettingsService()
@@ -38,6 +39,20 @@ public class UiSettingsService
 
     /// <summary>Recently opened/saved .dyc paths, most recent first (max 10, missing files pruned).</summary>
     public IReadOnlyList<string> RecentFiles => _recentFiles;
+
+    /// <summary>True when the library shows a description line under each node name (default on).</summary>
+    public bool ShowLibraryDescriptions => _showLibraryDescriptions;
+
+    /// <summary>Persists the library descriptions toggle.</summary>
+    /// <param name="show">True to show the description line under each node name.</param>
+    public void SetShowLibraryDescriptions(bool show)
+    {
+        if (_showLibraryDescriptions != show)
+        {
+            _showLibraryDescriptions = show;
+            Save();
+        }
+    }
 
     /// <summary>True when the node id is starred.</summary>
     /// <param name="nodeId">Library id (zero-touch definition id or node type tag).</param>
@@ -126,6 +141,7 @@ public class UiSettingsService
             {
                 FavoriteNodeIds = new List<string>(_favoriteNodeIds),
                 RecentFiles = new List<string>(_recentFiles),
+                ShowLibraryDescriptions = _showLibraryDescriptions,
             };
 
             // Write-to-temp-then-replace so a crash (or a concurrent reader in
@@ -174,10 +190,13 @@ public class UiSettingsService
 
         _favoriteNodeIds.Clear();
         _recentFiles.Clear();
+        _showLibraryDescriptions = true;
         if (data == null)
         {
             return;
         }
+
+        _showLibraryDescriptions = data.ShowLibraryDescriptions ?? true;
 
         if (data.FavoriteNodeIds != null)
         {
@@ -269,5 +288,8 @@ public class UiSettingsService
 
         [JsonProperty("recentFiles")]
         public List<string>? RecentFiles { get; set; }
+
+        [JsonProperty("showLibraryDescriptions")]
+        public bool? ShowLibraryDescriptions { get; set; }
     }
 }

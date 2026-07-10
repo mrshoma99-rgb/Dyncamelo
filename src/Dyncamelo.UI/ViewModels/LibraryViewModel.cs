@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.UI.Mvvm;
@@ -18,13 +19,18 @@ namespace Dyncamelo.UI.ViewModels;
 /// </summary>
 public class LibraryEntryViewModel : ObservableObject
 {
+    private readonly string _lowerName;
+    private readonly string _lowerCategoryAndTags;
+    private readonly string _searchHaystack;
     private bool _isFavorite;
+    private bool _isSelected;
+    private bool _isDescriptionVisible;
 
-    /// <summary>Creates an entry.</summary>
+    /// <summary>Creates an entry and precomputes its lower-case search index.</summary>
     /// <param name="id">Definition id (zero-touch) or node type tag (interactive nodes).</param>
     /// <param name="name">Display name.</param>
     /// <param name="category">Dot-separated category path.</param>
-    /// <param name="description">Tooltip text.</param>
+    /// <param name="description">Description shown under the name and in the tooltip.</param>
     /// <param name="searchTags">Extra search keywords.</param>
     /// <param name="signature">Input/output signature line for the tooltip.</param>
     public LibraryEntryViewModel(string id, string name, string category, string description, IReadOnlyList<string> searchTags, string signature = "")
@@ -35,6 +41,14 @@ public class LibraryEntryViewModel : ObservableObject
         Description = description;
         SearchTags = searchTags;
         Signature = signature;
+
+        // The search index is built exactly once so typing in the search box
+        // never lowercases or concatenates entry metadata again.
+        _lowerName = name.ToLowerInvariant();
+        _lowerCategoryAndTags = searchTags.Count == 0
+            ? category.ToLowerInvariant()
+            : category.ToLowerInvariant() + "\n" + string.Join("\n", searchTags).ToLowerInvariant();
+        _searchHaystack = _lowerName + "\n" + _lowerCategoryAndTags + "\n" + description.ToLowerInvariant();
     }
 
     /// <summary>Creation id understood by the editor's AddNode.</summary>
@@ -46,7 +60,7 @@ public class LibraryEntryViewModel : ObservableObject
     /// <summary>Dot-separated category path.</summary>
     public string Category { get; }
 
-    /// <summary>Tooltip text.</summary>
+    /// <summary>Description shown under the name (when enabled) and in the tooltip.</summary>
     public string Description { get; }
 
     /// <summary>Extra search keywords.</summary>
@@ -68,30 +82,62 @@ public class LibraryEntryViewModel : ObservableObject
         set => SetProperty(ref _isFavorite, value);
     }
 
+    /// <summary>
+    /// Selection highlight in the library browser (tree and search results bind
+    /// this two-way, so the highlight can be cleared when focus moves to the canvas).
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+
+    /// <summary>
+    /// True when the in-row description line renders: the entry has a
+    /// description and the library's descriptions toggle is on.
+    /// </summary>
+    public bool IsDescriptionVisible
+    {
+        get => _isDescriptionVisible;
+        set => SetProperty(ref _isDescriptionVisible, value);
+    }
+
     /// <summary>True when the entry matches the (lower-case) search text.</summary>
     /// <param name="lowerSearch">Search text, already lower-cased. Empty matches everything.</param>
     public bool Matches(string lowerSearch)
     {
-        if (lowerSearch.Length == 0)
-        {
-            return true;
-        }
+        return lowerSearch.Length == 0 || _searchHaystack.Contains(lowerSearch);
+    }
 
-        if (Name.ToLowerInvariant().Contains(lowerSearch) ||
-            Category.ToLowerInvariant().Contains(lowerSearch))
+    /// <summary>
+    /// Relevance of the entry for a tokenized search: 0 name-starts-with,
+    /// 1 name-contains, 2 category/tag match, 3 description-only match,
+    /// -1 when any token misses. Every token must occur somewhere in the
+    /// prebuilt index; the first token decides the rank.
+    /// </summary>
+    /// <param name="lowerTokens">Search tokens, already lower-cased and non-empty.</param>
+    public int MatchRank(IReadOnlyList<string> lowerTokens)
+    {
+        for (int i = 0; i < lowerTokens.Count; i++)
         {
-            return true;
-        }
-
-        foreach (var tag in SearchTags)
-        {
-            if (tag.ToLowerInvariant().Contains(lowerSearch))
+            if (!_searchHaystack.Contains(lowerTokens[i]))
             {
-                return true;
+                return -1;
             }
         }
 
-        return false;
+        var first = lowerTokens[0];
+        if (_lowerName.StartsWith(first, StringComparison.Ordinal))
+        {
+            return 0;
+        }
+
+        if (_lowerName.Contains(first))
+        {
+            return 1;
+        }
+
+        return _lowerCategoryAndTags.Contains(first) ? 2 : 3;
     }
 }
 
@@ -101,6 +147,7 @@ public class LibraryEntryViewModel : ObservableObject
 public class LibraryCategoryViewModel : ObservableObject
 {
     private bool _isExpanded;
+    private bool _isSelected;
 
     /// <summary>Creates a category folder.</summary>
     /// <param name="name">Category segment name.</param>
@@ -116,47 +163,97 @@ public class LibraryCategoryViewModel : ObservableObject
     /// <summary>Sub-categories (<see cref="LibraryCategoryViewModel"/>) then entries (<see cref="LibraryEntryViewModel"/>).</summary>
     public ObservableCollection<object> Children { get; }
 
-    /// <summary>Tree expansion state (expanded automatically while searching).</summary>
+    /// <summary>Tree expansion state.</summary>
     public bool IsExpanded
     {
         get => _isExpanded;
         set => SetProperty(ref _isExpanded, value);
     }
+
+    /// <summary>Selection highlight in the library tree (two-way bound, clearable).</summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+}
+
+/// <summary>
+/// Payload of <see cref="LibraryViewModel.EntryRevealRequested"/>: the tree path
+/// (root category, sub-categories, then the entry) the view should materialize
+/// and scroll into view.
+/// </summary>
+public class LibraryRevealEventArgs : EventArgs
+{
+    /// <summary>Creates the payload.</summary>
+    /// <param name="path">Tree path from root category down to the entry.</param>
+    public LibraryRevealEventArgs(IReadOnlyList<object> path)
+    {
+        Path = path;
+    }
+
+    /// <summary>Tree path from root category down to the entry.</summary>
+    public IReadOnlyList<object> Path { get; }
 }
 
 /// <summary>
 /// The node library browser: a category tree built from a <see cref="NodeRegistry"/>
-/// (zero-touch definitions plus hand-written interactive node types) with live
-/// search, a pinned Favourites section, and expand/collapse-all commands.
+/// (zero-touch definitions plus hand-written interactive node types) with a
+/// debounced search that renders a flat, capped result list (the tree keeps its
+/// expansion state and comes back untouched when the search is cleared), a
+/// pinned Favourites section, per-row descriptions and expand/collapse-all commands.
 /// </summary>
 public class LibraryViewModel : ObservableObject
 {
     /// <summary>Display name of the pinned favourites section.</summary>
     public const string FavoritesCategoryName = "★ Favourites";
 
+    /// <summary>Maximum number of search hits shown before asking to refine the search.</summary>
+    public const int MaxSearchResults = 200;
+
     private readonly NodeRegistry _registry;
     private readonly UiSettingsService? _settings;
     private readonly List<LibraryEntryViewModel> _allEntries = new List<LibraryEntryViewModel>();
     private readonly HashSet<string> _expandedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    private readonly DispatcherTimer _searchTimer;
     private string _searchText = string.Empty;
-    private bool _treeShowsSearchResults;
+    private bool _isSearching;
+    private string _searchStatusText = string.Empty;
+    private bool _showDescriptions;
 
     /// <summary>Creates the browser and builds the catalog from the registry.</summary>
     /// <param name="registry">Registry to browse.</param>
-    /// <param name="settings">Optional persisted UI settings (favourites); favourites are session-only when null.</param>
+    /// <param name="settings">Optional persisted UI settings (favourites, descriptions toggle); session-only when null.</param>
     public LibraryViewModel(NodeRegistry registry, UiSettingsService? settings = null)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
         _settings = settings;
+        _showDescriptions = settings == null || settings.ShowLibraryDescriptions;
         RootItems = new ObservableCollection<object>();
+        SearchResults = new ObservableCollection<LibraryEntryViewModel>();
         ExpandAllCommand = new RelayCommand(() => SetAllExpanded(true));
         CollapseAllCommand = new RelayCommand(() => SetAllExpanded(false));
         ToggleFavoriteCommand = new RelayCommand<LibraryEntryViewModel>(ToggleFavorite);
+
+        // Typing must never rebuild UI per keystroke: the search itself is
+        // debounced and only fills the flat results list.
+        _searchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _searchTimer.Tick += OnSearchTimerTick;
+
         Refresh();
     }
 
-    /// <summary>Top level of the (filtered) category tree.</summary>
+    /// <summary>
+    /// Raised when <see cref="RevealEntry"/> selected an entry; the view scrolls
+    /// the given tree path into view.
+    /// </summary>
+    public event EventHandler<LibraryRevealEventArgs>? EntryRevealRequested;
+
+    /// <summary>Top level of the category tree (always unfiltered; hidden while searching).</summary>
     public ObservableCollection<object> RootItems { get; }
+
+    /// <summary>Flat search hits (relevance-ordered, capped at <see cref="MaxSearchResults"/>).</summary>
+    public ObservableCollection<LibraryEntryViewModel> SearchResults { get; }
 
     /// <summary>Expands every category folder in the tree.</summary>
     public ICommand ExpandAllCommand { get; }
@@ -167,7 +264,50 @@ public class LibraryViewModel : ObservableObject
     /// <summary>Stars/un-stars an entry (parameter: the <see cref="LibraryEntryViewModel"/>).</summary>
     public ICommand ToggleFavoriteCommand { get; }
 
-    /// <summary>Search box text; changing it rebuilds the filtered tree.</summary>
+    /// <summary>True while a non-empty search is active (the view swaps tree ⇄ result list).</summary>
+    public bool IsSearching
+    {
+        get => _isSearching;
+        private set => SetProperty(ref _isSearching, value);
+    }
+
+    /// <summary>Result-list footer ("no matches" / "refine your search"); empty when not needed.</summary>
+    public string SearchStatusText
+    {
+        get => _searchStatusText;
+        private set
+        {
+            if (SetProperty(ref _searchStatusText, value))
+            {
+                OnPropertyChanged(nameof(HasSearchStatus));
+            }
+        }
+    }
+
+    /// <summary>True when <see cref="SearchStatusText"/> has content.</summary>
+    public bool HasSearchStatus => _searchStatusText.Length > 0;
+
+    /// <summary>
+    /// Library-header toggle: render the description line under each node name.
+    /// Persisted in ui-settings.json; defaults to on.
+    /// </summary>
+    public bool ShowDescriptions
+    {
+        get => _showDescriptions;
+        set
+        {
+            if (SetProperty(ref _showDescriptions, value))
+            {
+                _settings?.SetShowLibraryDescriptions(value);
+                UpdateDescriptionVisibility();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Search box text. Non-empty values apply after a short debounce; clearing
+    /// applies immediately and restores the tree with its previous expansion.
+    /// </summary>
     public string SearchText
     {
         get => _searchText;
@@ -175,14 +315,22 @@ public class LibraryViewModel : ObservableObject
         {
             if (SetProperty(ref _searchText, value))
             {
-                RebuildTree();
+                _searchTimer.Stop();
+                if (_searchText.Trim().Length == 0)
+                {
+                    ApplySearch();
+                }
+                else
+                {
+                    _searchTimer.Start();
+                }
             }
         }
     }
 
     /// <summary>
     /// Re-reads the registry (call after the host registers additional node
-    /// assemblies) and rebuilds the tree.
+    /// assemblies), rebuilds the tree and re-applies any active search.
     /// </summary>
     public void Refresh()
     {
@@ -218,16 +366,177 @@ public class LibraryViewModel : ObservableObject
                 FormatSignature(sample.InPorts, sample.OutPorts)));
         }
 
-        if (_settings != null)
+        foreach (var entry in _allEntries)
         {
-            foreach (var entry in _allEntries)
+            if (_settings != null)
             {
                 entry.IsFavorite = _settings.IsFavorite(entry.Id);
             }
+
+            entry.IsDescriptionVisible = _showDescriptions && entry.HasDescription;
         }
 
         RebuildTree();
+        if (IsSearching || _searchText.Trim().Length > 0)
+        {
+            _searchTimer.Stop();
+            ApplySearch();
+        }
     }
+
+    /// <summary>Clears the selection highlight everywhere in the library (tree and results).</summary>
+    public void ClearSelection()
+    {
+        foreach (var item in RootItems)
+        {
+            if (item is LibraryCategoryViewModel category)
+            {
+                ClearSelectionRecursive(category);
+            }
+        }
+
+        foreach (var entry in SearchResults)
+        {
+            entry.IsSelected = false;
+        }
+
+        foreach (var entry in _allEntries)
+        {
+            entry.IsSelected = false;
+        }
+    }
+
+    /// <summary>
+    /// Finds the entry with the given library id, clears any active search,
+    /// expands its category chain, selects it and asks the view (via
+    /// <see cref="EntryRevealRequested"/>) to scroll it into view.
+    /// </summary>
+    /// <param name="libraryId">Zero-touch definition id or interactive node type tag.</param>
+    /// <returns>The revealed entry, or null when the id is not in the library.</returns>
+    public LibraryEntryViewModel? RevealEntry(string libraryId)
+    {
+        if (string.IsNullOrEmpty(libraryId))
+        {
+            return null;
+        }
+
+        LibraryEntryViewModel? entry = null;
+        foreach (var candidate in _allEntries)
+        {
+            if (string.Equals(candidate.Id, libraryId, StringComparison.Ordinal))
+            {
+                entry = candidate;
+                break;
+            }
+        }
+
+        if (entry == null)
+        {
+            return null;
+        }
+
+        // A live search hides the tree; clear it first (immediate, restores the
+        // previous expansion) so the reveal has real tree items to walk.
+        if (_searchText.Length > 0)
+        {
+            SearchText = string.Empty;
+        }
+
+        ClearSelection();
+
+        var path = FindTreePath(entry);
+        if (path == null)
+        {
+            return null;
+        }
+
+        foreach (var step in path)
+        {
+            if (step is LibraryCategoryViewModel category)
+            {
+                category.IsExpanded = true;
+            }
+        }
+
+        entry.IsSelected = true;
+        EntryRevealRequested?.Invoke(this, new LibraryRevealEventArgs(path));
+        return entry;
+    }
+
+    // ----- searching -----------------------------------------------------------
+
+    private void OnSearchTimerTick(object? sender, EventArgs e)
+    {
+        _searchTimer.Stop();
+        ApplySearch();
+    }
+
+    private void ApplySearch()
+    {
+        var lowerSearch = _searchText.Trim().ToLowerInvariant();
+        if (lowerSearch.Length == 0)
+        {
+            SearchResults.Clear();
+            SearchStatusText = string.Empty;
+            IsSearching = false;
+            return;
+        }
+
+        var tokens = lowerSearch.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var hits = new List<KeyValuePair<int, LibraryEntryViewModel>>();
+        foreach (var entry in _allEntries)
+        {
+            int rank = entry.MatchRank(tokens);
+            if (rank >= 0)
+            {
+                hits.Add(new KeyValuePair<int, LibraryEntryViewModel>(rank, entry));
+            }
+        }
+
+        hits.Sort(CompareHits);
+
+        SearchResults.Clear();
+        int shown = Math.Min(hits.Count, MaxSearchResults);
+        for (int i = 0; i < shown; i++)
+        {
+            SearchResults.Add(hits[i].Value);
+        }
+
+        if (hits.Count == 0)
+        {
+            SearchStatusText = "No nodes match '" + _searchText.Trim() + "'.";
+        }
+        else if (hits.Count > MaxSearchResults)
+        {
+            SearchStatusText = "Showing " + MaxSearchResults.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                               " of " + hits.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                               " matches — refine your search.";
+        }
+        else
+        {
+            SearchStatusText = string.Empty;
+        }
+
+        IsSearching = true;
+    }
+
+    private static int CompareHits(
+        KeyValuePair<int, LibraryEntryViewModel> left,
+        KeyValuePair<int, LibraryEntryViewModel> right)
+    {
+        int byRank = left.Key.CompareTo(right.Key);
+        if (byRank != 0)
+        {
+            return byRank;
+        }
+
+        int byName = string.Compare(left.Value.Name, right.Value.Name, StringComparison.OrdinalIgnoreCase);
+        return byName != 0
+            ? byName
+            : string.Compare(left.Value.Category, right.Value.Category, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // ----- favourites / descriptions -------------------------------------------
 
     private void ToggleFavorite(LibraryEntryViewModel? entry)
     {
@@ -238,8 +547,21 @@ public class LibraryViewModel : ObservableObject
 
         entry.IsFavorite = !entry.IsFavorite;
         _settings?.SetFavorite(entry.Id, entry.IsFavorite);
+
+        // Only the tree owns a favourites section; the flat search results
+        // update in place through the IsFavorite binding.
         RebuildTree();
     }
+
+    private void UpdateDescriptionVisibility()
+    {
+        foreach (var entry in _allEntries)
+        {
+            entry.IsDescriptionVisible = _showDescriptions && entry.HasDescription;
+        }
+    }
+
+    // ----- tree ----------------------------------------------------------------
 
     private void SetAllExpanded(bool expanded)
     {
@@ -264,44 +586,53 @@ public class LibraryViewModel : ObservableObject
         }
     }
 
+    private static void ClearSelectionRecursive(LibraryCategoryViewModel category)
+    {
+        category.IsSelected = false;
+        foreach (var child in category.Children)
+        {
+            if (child is LibraryCategoryViewModel sub)
+            {
+                ClearSelectionRecursive(sub);
+            }
+            else if (child is LibraryEntryViewModel entry)
+            {
+                entry.IsSelected = false;
+            }
+        }
+    }
+
     private void RebuildTree()
     {
         // Snapshot the user's expansion state so rebuilds (favourite toggles,
-        // registry refreshes, clearing a search) keep the folders they opened.
-        // Search results are always shown fully expanded, so a tree that is
-        // currently showing search hits must not overwrite the snapshot.
-        if (!_treeShowsSearchResults)
+        // registry refreshes) keep the folders they opened. The tree always
+        // shows the full catalog — searching renders a separate flat list.
+        _expandedPaths.Clear();
+        foreach (var item in RootItems)
         {
-            _expandedPaths.Clear();
-            foreach (var item in RootItems)
+            if (item is LibraryCategoryViewModel category &&
+                !string.Equals(category.Name, FavoritesCategoryName, StringComparison.Ordinal))
             {
-                if (item is LibraryCategoryViewModel category &&
-                    !string.Equals(category.Name, FavoritesCategoryName, StringComparison.Ordinal))
-                {
-                    CollectExpandedPaths(category, category.Name);
-                }
+                CollectExpandedPaths(category, category.Name);
             }
         }
 
         RootItems.Clear();
 
-        var lowerSearch = _searchText.Trim().ToLowerInvariant();
-        bool searching = lowerSearch.Length > 0;
         var roots = new Dictionary<string, LibraryCategoryViewModel>(StringComparer.OrdinalIgnoreCase);
-        var matching = _allEntries
-            .Where(e => e.Matches(lowerSearch))
+        var ordered = _allEntries
             .OrderBy(e => e.Category, StringComparer.OrdinalIgnoreCase)
             .ThenBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        foreach (var entry in matching)
+        foreach (var entry in ordered)
         {
-            var category = ResolveCategory(roots, entry.Category, searching);
+            var category = ResolveCategory(roots, entry.Category);
             category.Children.Add(entry);
         }
 
         // The pinned favourites section always sits at the top, expanded.
-        var favorites = matching
+        var favorites = ordered
             .Where(e => e.IsFavorite)
             .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -320,8 +651,6 @@ public class LibraryViewModel : ObservableObject
         {
             RootItems.Add(root);
         }
-
-        _treeShowsSearchResults = searching;
     }
 
     private void CollectExpandedPaths(LibraryCategoryViewModel category, string path)
@@ -342,19 +671,16 @@ public class LibraryViewModel : ObservableObject
 
     private LibraryCategoryViewModel ResolveCategory(
         Dictionary<string, LibraryCategoryViewModel> roots,
-        string categoryPath,
-        bool searching)
+        string categoryPath)
     {
-        var segments = string.IsNullOrEmpty(categoryPath)
-            ? new[] { "Other" }
-            : categoryPath.Split('.');
+        var segments = SplitCategory(categoryPath);
 
         var path = segments[0];
         if (!roots.TryGetValue(segments[0], out var current))
         {
             current = new LibraryCategoryViewModel(segments[0])
             {
-                IsExpanded = searching || _expandedPaths.Contains(path)
+                IsExpanded = _expandedPaths.Contains(path)
             };
             roots[segments[0]] = current;
         }
@@ -377,7 +703,7 @@ public class LibraryViewModel : ObservableObject
             {
                 child = new LibraryCategoryViewModel(segments[i])
                 {
-                    IsExpanded = searching || _expandedPaths.Contains(path)
+                    IsExpanded = _expandedPaths.Contains(path)
                 };
                 // Keep sub-categories ahead of entries.
                 int insertAt = 0;
@@ -393,6 +719,71 @@ public class LibraryViewModel : ObservableObject
         }
 
         return current;
+    }
+
+    private static string[] SplitCategory(string categoryPath)
+    {
+        return string.IsNullOrEmpty(categoryPath)
+            ? new[] { "Other" }
+            : categoryPath.Split('.');
+    }
+
+    /// <summary>
+    /// Walks the visible tree for the entry's real category location (the
+    /// favourites section is skipped) and returns root-to-entry path items.
+    /// </summary>
+    private IReadOnlyList<object>? FindTreePath(LibraryEntryViewModel entry)
+    {
+        var segments = SplitCategory(entry.Category);
+        var path = new List<object>(segments.Length + 1);
+
+        LibraryCategoryViewModel? current = null;
+        foreach (var item in RootItems)
+        {
+            if (item is LibraryCategoryViewModel category &&
+                !string.Equals(category.Name, FavoritesCategoryName, StringComparison.Ordinal) &&
+                string.Equals(category.Name, segments[0], StringComparison.OrdinalIgnoreCase))
+            {
+                current = category;
+                break;
+            }
+        }
+
+        if (current == null)
+        {
+            return null;
+        }
+
+        path.Add(current);
+        for (int i = 1; i < segments.Length; i++)
+        {
+            LibraryCategoryViewModel? child = null;
+            foreach (var existing in current.Children)
+            {
+                if (existing is LibraryCategoryViewModel c &&
+                    string.Equals(c.Name, segments[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    child = c;
+                    break;
+                }
+            }
+
+            if (child == null)
+            {
+                return null;
+            }
+
+            current = child;
+            path.Add(current);
+        }
+
+        if (!current.Children.Contains(entry))
+        {
+            return null;
+        }
+
+        path.Add(entry);
+        return path;
     }
 
     // ----- signatures ----------------------------------------------------------

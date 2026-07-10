@@ -1,0 +1,442 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.3.2"
+  },
+  "Uuid": "4ac8a8bc9a3035401a647e1b71b91ad9",
+  "Name": "QTO Rollup by Category",
+  "Description": "Sums a numeric property (default: Element>Volume) grouped by another property (default: Element>Category) and writes the rollup to Excel. Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "718aeb4e6a5fec90f1fc9c11f83a948d",
+      "NodeType": "StringInput",
+      "Name": "Quantity category",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Element"
+      }
+    },
+    {
+      "Id": "cbf381511ed9cb0716d268f40ca6aebb",
+      "NodeType": "StringInput",
+      "Name": "Quantity property",
+      "X": 0.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Volume"
+      }
+    },
+    {
+      "Id": "3dc2ede0bd9ddf503a329deeb3cc3fd0",
+      "NodeType": "StringInput",
+      "Name": "Group by property",
+      "X": 0.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Category"
+      }
+    },
+    {
+      "Id": "347d47ddc58286f4e9df0539ba1d2968",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.HasProperty",
+      "X": 360.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9074ad5a44fd127abcfe26b75156a979",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.TakeoffNodes.SumPropertyByGroup@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,string,string",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Takeoff.SumPropertyByGroup",
+      "X": 720.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "groupCategoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "groupPropertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "valueCategoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "valuePropertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "keys"
+        },
+        {
+          "Name": "sums"
+        },
+        {
+          "Name": "counts"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "d30ab2377937261dd648ace7f235c715",
+      "NodeType": "WatchList",
+      "Name": "Groups found",
+      "X": 720.0,
+      "Y": 420.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "39a522c7f21c264d58a56a74f262ed20",
+      "NodeType": "ListCreate",
+      "Name": "Rows (sums + counts)",
+      "X": 1120.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item0",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item1",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ItemCount": 2
+      }
+    },
+    {
+      "Id": "1c221ae671b9b3215786e0a857e94c80",
+      "NodeType": "FilePath",
+      "Name": "Excel output",
+      "X": 1120.0,
+      "Y": 20.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "C:\\Temp\\dyncamelo-qto.xlsx"
+      }
+    },
+    {
+      "Id": "b949053321df5e0a8b5f3e8f26b09442",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Excel.WriteToFile",
+      "X": 1480.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "rows",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "headers",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "sheet",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "append",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "eeeb9d809af3de9f30558b9eb1b2b5ee",
+      "NodeType": "Watch",
+      "Name": "Workbook written",
+      "X": 1820.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "b7b0d1c10f5f13bf796cb210b8edc40a",
+      "FromNode": "718aeb4e6a5fec90f1fc9c11f83a948d",
+      "FromPort": "value",
+      "ToNode": "347d47ddc58286f4e9df0539ba1d2968",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "08f7c96833f38913d69d9ee735c7d876",
+      "FromNode": "cbf381511ed9cb0716d268f40ca6aebb",
+      "FromPort": "value",
+      "ToNode": "347d47ddc58286f4e9df0539ba1d2968",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "d1b0a732439af7293c85cc3a51407202",
+      "FromNode": "347d47ddc58286f4e9df0539ba1d2968",
+      "FromPort": "items",
+      "ToNode": "9074ad5a44fd127abcfe26b75156a979",
+      "ToPort": "items"
+    },
+    {
+      "Id": "778b59de5eb603e981a76fe35c25cb6f",
+      "FromNode": "718aeb4e6a5fec90f1fc9c11f83a948d",
+      "FromPort": "value",
+      "ToNode": "9074ad5a44fd127abcfe26b75156a979",
+      "ToPort": "groupCategoryName"
+    },
+    {
+      "Id": "34c7b579e9f8d3fad8e10a2b582cf303",
+      "FromNode": "3dc2ede0bd9ddf503a329deeb3cc3fd0",
+      "FromPort": "value",
+      "ToNode": "9074ad5a44fd127abcfe26b75156a979",
+      "ToPort": "groupPropertyName"
+    },
+    {
+      "Id": "b85eaa43cddbe7c9bebd201bf98cfa16",
+      "FromNode": "718aeb4e6a5fec90f1fc9c11f83a948d",
+      "FromPort": "value",
+      "ToNode": "9074ad5a44fd127abcfe26b75156a979",
+      "ToPort": "valueCategoryName"
+    },
+    {
+      "Id": "88a5b3fc680126af02e480980282c5a5",
+      "FromNode": "cbf381511ed9cb0716d268f40ca6aebb",
+      "FromPort": "value",
+      "ToNode": "9074ad5a44fd127abcfe26b75156a979",
+      "ToPort": "valuePropertyName"
+    },
+    {
+      "Id": "dd1cda15a1eda0ba4c654e30866e44c6",
+      "FromNode": "9074ad5a44fd127abcfe26b75156a979",
+      "FromPort": "keys",
+      "ToNode": "d30ab2377937261dd648ace7f235c715",
+      "ToPort": "list"
+    },
+    {
+      "Id": "38fcc26c4002953d94686fc5b1cde2d9",
+      "FromNode": "9074ad5a44fd127abcfe26b75156a979",
+      "FromPort": "sums",
+      "ToNode": "39a522c7f21c264d58a56a74f262ed20",
+      "ToPort": "item0"
+    },
+    {
+      "Id": "d4152d67c7bcb10b35abb6ca8210e8ed",
+      "FromNode": "9074ad5a44fd127abcfe26b75156a979",
+      "FromPort": "counts",
+      "ToNode": "39a522c7f21c264d58a56a74f262ed20",
+      "ToPort": "item1"
+    },
+    {
+      "Id": "8eb17bc84a500f5cadc6797165145839",
+      "FromNode": "1c221ae671b9b3215786e0a857e94c80",
+      "FromPort": "path",
+      "ToNode": "b949053321df5e0a8b5f3e8f26b09442",
+      "ToPort": "path"
+    },
+    {
+      "Id": "faaedb59b62e1741b0a1cb76fb4cb1f4",
+      "FromNode": "39a522c7f21c264d58a56a74f262ed20",
+      "FromPort": "list",
+      "ToNode": "b949053321df5e0a8b5f3e8f26b09442",
+      "ToPort": "rows"
+    },
+    {
+      "Id": "76d62fa527cf6d7fae8f94d13863ff33",
+      "FromNode": "9074ad5a44fd127abcfe26b75156a979",
+      "FromPort": "keys",
+      "ToNode": "b949053321df5e0a8b5f3e8f26b09442",
+      "ToPort": "headers"
+    },
+    {
+      "Id": "edd0b4f9e4604c6d9bd038a31592ca20",
+      "FromNode": "b949053321df5e0a8b5f3e8f26b09442",
+      "FromPort": "path",
+      "ToNode": "eeeb9d809af3de9f30558b9eb1b2b5ee",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "9de566f80a7c1c25d020565cd031ef75",
+      "Text": "HOW TO USE: 1) Point the inputs at your model's properties - Revit-sourced models carry \"Element\">\"Volume\" and \"Element\">\"Category\"; IFC models often use \"BaseQuantities\". 2) Set the output path. 3) Press Run. Sums are in the property's stored (document) units.",
+      "X": 0.0,
+      "Y": -210.0
+    },
+    {
+      "Id": "952e7da05391ca38ba78b61b50f83ff0",
+      "Text": "SHEET LAYOUT: the header row lists the group values (one column per Category); row 1 holds the summed quantity and row 2 the number of items in each group.",
+      "X": 1120.0,
+      "Y": 480.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

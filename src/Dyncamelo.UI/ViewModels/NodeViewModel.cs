@@ -63,6 +63,7 @@ public class NodeViewModel : CanvasItemViewModel
         RemovePortCommand = new RelayCommand(RemovePort, () => _removePortMethod != null && Model.InPorts.Count > 1);
         SetLacingCommand = new RelayCommand<string>(SetLacing);
         BrowseFileCommand = new RelayCommand(BrowseFile, () => Model is FilePathNode);
+        FindInLibraryCommand = new RelayCommand(() => _owner.FindInLibrary(this));
 
         HeaderBrush = GetCategoryBrush(model.Category);
         SetLocationFromModel(new Point(model.X, model.Y));
@@ -242,6 +243,9 @@ public class NodeViewModel : CanvasItemViewModel
 
     /// <summary>Opens a file dialog for <see cref="FilePathNode"/> inline editors.</summary>
     public ICommand BrowseFileCommand { get; }
+
+    /// <summary>Reveals this node's entry in the library browser (context menu).</summary>
+    public ICommand FindInLibraryCommand { get; }
 
     /// <summary>Finds the connector wrapping a Core port, or null.</summary>
     /// <param name="port">The Core port.</param>

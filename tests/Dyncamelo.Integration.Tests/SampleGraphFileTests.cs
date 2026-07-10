@@ -13,14 +13,32 @@ using Xunit;
 namespace Dyncamelo.Integration.Tests;
 
 /// <summary>
-/// Loads every shipped .dyc file in <c>samples/</c> from disk and runs it.
-/// This pins the on-disk .dyc format: if serialization, node names or port
-/// names drift, these tests fail before any user's saved graph breaks.
+/// Loads every shipped runnable .dyc file in <c>samples/</c> from disk and
+/// runs it. This pins the on-disk .dyc format: if serialization, node names
+/// or port names drift, these tests fail before any user's saved graph
+/// breaks. Samples that need Navisworks nodes cannot run here; they are
+/// statically pinned by <see cref="SampleGraphStaticValidationTests"/>.
 /// </summary>
 public class SampleGraphFileTests
 {
     private static readonly string[] ExpectedSamples =
     {
+        "Bulk Selection Sets from Values.dyc",
+        "Clash Triage and BCF Export.dyc",
+        "Color Elements by Property.dyc",
+        "Export Properties to Excel.dyc",
+        "Getting Started - Math and Watch.dyc",
+        "QTO Rollup by Category.dyc",
+        "csv-roundtrip.dyc",
+        "hello-math.dyc",
+        "list-lacing.dyc",
+        "string-report.dyc",
+    };
+
+    /// <summary>Samples built purely from general nodes, runnable without Navisworks.</summary>
+    private static readonly string[] RunnableSamples =
+    {
+        "Getting Started - Math and Watch.dyc",
         "csv-roundtrip.dyc",
         "hello-math.dyc",
         "list-lacing.dyc",
@@ -29,9 +47,9 @@ public class SampleGraphFileTests
 
     public static IEnumerable<object[]> SampleFiles()
     {
-        return Directory.EnumerateFiles(SamplesDirectory(), "*.dyc")
+        return RunnableSamples
             .OrderBy(p => p, StringComparer.Ordinal)
-            .Select(p => new object[] { Path.GetFileName(p) });
+            .Select(p => new object[] { p });
     }
 
     [Fact]
@@ -41,7 +59,7 @@ public class SampleGraphFileTests
             .Select(Path.GetFileName)
             .OrderBy(n => n, StringComparer.Ordinal)
             .ToArray();
-        Assert.Equal(ExpectedSamples, found);
+        Assert.Equal(ExpectedSamples.OrderBy(n => n, StringComparer.Ordinal).ToArray(), found);
     }
 
     [Theory]
@@ -70,6 +88,11 @@ public class SampleGraphFileTests
     {
         switch (fileName)
         {
+            case "Getting Started - Math and Watch.dyc":
+                Assert.Equal("32", Watch(graph, "Area"));
+                Assert.Equal("Area = 32", Watch(graph, "Report"));
+                break;
+
             case "hello-math.dyc":
                 Assert.Equal("85", Watch(graph, "Result"));
                 break;
@@ -109,7 +132,7 @@ public class SampleGraphFileTests
     }
 
     /// <summary>Walks up from the test binaries to the repository root (marked by Dyncamelo.sln).</summary>
-    private static string SamplesDirectory()
+    internal static string SamplesDirectory()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Dyncamelo.sln")))
