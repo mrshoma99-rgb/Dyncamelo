@@ -71,11 +71,22 @@ jobs:
       - name: Test Dyncamelo.Integration.Tests
         run: dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj -c Release --verbosity normal
 
-      - name: CLI smoke-run every sample graph
+      - name: CLI smoke-run every runnable sample graph
         run: |
           set -e
+          # Samples using Navisworks nodes can only run inside the Navisworks
+          # host (their assemblies are host-only); they are covered by the
+          # SampleGraphStaticValidation integration test instead. Smoke-run
+          # only the general-purpose graphs here.
+          ran=0
           for sample in samples/*.dyc; do
+            if grep -q 'Dyncamelo\.Navisworks\.' "$sample"; then
+              echo "skip (needs Navisworks host): $sample"
+              continue
+            fi
             echo "::group::dyncamelo run $sample"
             dotnet run --project src/Dyncamelo.Cli -c Release --no-build -- run "$sample"
             echo "::endgroup::"
+            ran=$((ran+1))
           done
+          if [ "$ran" -lt 1 ]; then echo "::error::No runnable samples were smoke-tested"; exit 1; fi
