@@ -78,6 +78,7 @@ public class GraphEditorViewModel : ObservableObject
         CopySelectionCommand = new RelayCommand(CopySelection);
         PasteCommand = new RelayCommand(Paste, () => _clipboardFragment != null);
         GroupSelectionCommand = new RelayCommand(GroupSelection);
+        OpenRecentFileCommand = new RelayCommand<string>(OpenRecentFile);
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
 
@@ -96,6 +97,12 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>The library browser shown in the left panel.</summary>
     public LibraryViewModel Library { get; }
+
+    /// <summary>
+    /// Last opened/saved .dyc paths, most recent first (max 10, persisted in
+    /// ui-settings.json, files that no longer exist pruned).
+    /// </summary>
+    public ObservableCollection<string> RecentFiles { get; }
 
     /// <summary>Canvas items (nodes and notes); bound to the editor's ItemsSource.</summary>
     public ObservableCollection<CanvasItemViewModel> Items { get; }
@@ -265,6 +272,9 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Creates a group rectangle around the current selection (Ctrl+G).</summary>
     public ICommand GroupSelectionCommand { get; }
+
+    /// <summary>Opens a file from the recent list (parameter: the .dyc path).</summary>
+    public ICommand OpenRecentFileCommand { get; }
 
     /// <summary>Adds a node; parameter is a <see cref="LibraryEntryViewModel"/> (placed at origin).</summary>
     public ICommand AddNodeCommand { get; }
@@ -851,17 +861,43 @@ public class GraphEditorViewModel : ObservableObject
     private void OpenGraph()
     {
         var path = Dialogs.ShowOpenFile(FileFilter, "Open Dyncamelo Graph");
-        if (path == null)
+        if (path != null)
+        {
+            OpenFromPath(path);
+        }
+    }
+
+    private void OpenRecentFile(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
         {
             return;
         }
 
+        if (!System.IO.File.Exists(path))
+        {
+            _settings.RemoveRecentFile(path!);
+            RefreshRecentFiles();
+            Dialogs.ShowError("The file no longer exists:\n" + path, "Open Recent");
+            return;
+        }
+
+        OpenFromPath(path!);
+    }
+
+    /// <summary>Opens a .dyc file from an explicit path (toolbar recents, host shell).</summary>
+    /// <param name="path">Full path of the .dyc file.</param>
+    /// <returns>True when the graph was loaded.</returns>
+    public bool OpenFromPath(string path)
+    {
         try
         {
             var serializer = new GraphSerializer(Registry);
             var graph = serializer.LoadFromFile(path);
             LoadGraph(graph, path);
             StatusMessage = "Opened " + System.IO.Path.GetFileName(path) + ".";
+            RecordRecentFile(path);
+            return true;
         }
         catch (GraphFormatException ex)
         {
@@ -880,6 +916,23 @@ public class GraphEditorViewModel : ObservableObject
             // Opening a graph must never take down the host application: anything
             // unexpected (corrupt payloads, security exceptions, ...) becomes a dialog.
             Dialogs.ShowError("The graph could not be opened: " + ex.Message, "Open Graph");
+        }
+
+        return false;
+    }
+
+    private void RecordRecentFile(string path)
+    {
+        _settings.AddRecentFile(path);
+        RefreshRecentFiles();
+    }
+
+    private void RefreshRecentFiles()
+    {
+        RecentFiles.Clear();
+        foreach (var recent in _settings.RecentFiles)
+        {
+            RecentFiles.Add(recent);
         }
     }
 
@@ -919,6 +972,7 @@ public class GraphEditorViewModel : ObservableObject
             CurrentFilePath = path;
             OnPropertyChanged(nameof(Title));
             StatusMessage = "Saved " + System.IO.Path.GetFileName(path) + ".";
+            RecordRecentFile(path);
         }
         catch (System.IO.IOException ex)
         {

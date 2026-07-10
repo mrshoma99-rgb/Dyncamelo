@@ -2,6 +2,7 @@ using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Types;
 using Dyncamelo.Nodes;
 using NwColor = Autodesk.Navisworks.Api.Color;
+using NwPoint3D = Autodesk.Navisworks.Api.Point3D;
 
 namespace Dyncamelo.Navisworks;
 
@@ -40,6 +41,27 @@ public static class NavisworksTypeConverters
             {
                 var color = (System.Drawing.Color)value;
                 return NwColor.FromByteRGB(color.R, color.G, color.B);
+            });
+
+        // Points flow both ways: general Geometry nodes (Point.ByCoordinates)
+        // feed Navisworks camera nodes, and Navisworks points (ClashResult.Center,
+        // Camera.Current) feed general Geometry nodes.
+        TypeCoercion.RegisterConverter(
+            typeof(DyncameloPoint),
+            typeof(NwPoint3D),
+            value =>
+            {
+                var point = (DyncameloPoint)value;
+                return new NwPoint3D(point.X, point.Y, point.Z);
+            });
+
+        TypeCoercion.RegisterConverter(
+            typeof(NwPoint3D),
+            typeof(DyncameloPoint),
+            value =>
+            {
+                var point = (NwPoint3D)value;
+                return new DyncameloPoint(point.X, point.Y, point.Z);
             });
     }
 }
