@@ -11,18 +11,20 @@ namespace Dyncamelo.Navisworks;
 public static class SelectionNodes
 {
     /// <summary>The model items currently selected in Navisworks.</summary>
+    /// <param name="resolveTo">Optional selection resolution applied to the picked items, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep items as picked), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>A snapshot of the currently selected items.</returns>
     [NodeName("Selection.Current")]
     [NodeDescription("The model items currently selected in Navisworks.")]
-    [NodeSearchTags("selection", "selected", "current", "picked")]
+    [NodeSearchTags("selection", "selected", "current", "picked", "resolution")]
     [return: NodeName("items")]
-    public static List<ModelItem> Current(Document? document = null)
+    public static List<ModelItem> Current(string resolveTo = "Self", Document? document = null)
     {
+        var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
 
         // SelectedItems is a live view — snapshot it before handing it downstream.
-        return NavisValues.ToItemList(new ModelItemCollection(doc.CurrentSelection.SelectedItems));
+        return SelectionLevels.Resolve(new ModelItemCollection(doc.CurrentSelection.SelectedItems), level);
     }
 
     /// <summary>Replaces the interactive selection with the given items.</summary>

@@ -11,7 +11,8 @@ Dyncamelo.bundle/
 └── 2024/
     ├── Dyncamelo.App.dll        # + dependency DLLs — see PLACE_DYNCAMELO_DLLS_HERE.txt
     ├── en-US/Dyncamelo.xaml     # ribbon layout (tab "BIMCamel" → panel "Visual Programming")
-    └── Resources/*.png          # ribbon icons (16 px + 32 px)
+    ├── Resources/*.png          # ribbon icons (16 px + 32 px)
+    └── Samples/*.dyc            # example workflow graphs (in-app Samples menu)
 ```
 
 ## Install
@@ -32,6 +33,17 @@ Manual install / rebuilding from source:
    (or `C:\ProgramData\Autodesk\ApplicationPlugins\` for all users).
 4. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** tab appears with
    the Dyncamelo button; it toggles the node editor dock pane.
+
+## Example workflows (Samples)
+
+The `2024/Samples/` folder ships six ready-made `.dyc` example graphs —
+open them from Dyncamelo's **Samples** menu (or via File → Open). *Getting
+Started - Math and Watch* runs without a model; the others (color by
+property, Excel property export, bulk selection sets, clash triage + BCF
+export, QTO rollup) expect an open Navisworks model and explain their
+editable inputs in notes on the canvas. When building from source, the
+`LayoutNavisworksPlugin` / `DeployToBundle` targets stage them automatically
+from the repository's `samples/` directory.
 
 ## Troubleshooting
 
