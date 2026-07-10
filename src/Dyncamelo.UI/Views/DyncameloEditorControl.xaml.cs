@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Dyncamelo.UI.ViewModels;
+using Nodify;
 
 namespace Dyncamelo.UI.Views;
 
@@ -21,6 +23,14 @@ public partial class DyncameloEditorControl : UserControl
     public DyncameloEditorControl()
     {
         InitializeComponent();
+
+        // Double-clicking empty canvas inserts a String input node at the click
+        // position (Dynamo-style quick node). handledEventsToo because the
+        // editor consumes mouse-downs for selection.
+        Editor.AddHandler(
+            MouseLeftButtonDownEvent,
+            new MouseButtonEventHandler(OnEditorMouseLeftButtonDown),
+            handledEventsToo: true);
     }
 
     /// <summary>The editor view model (stored in the DataContext).</summary>
@@ -77,6 +87,48 @@ public partial class DyncameloEditorControl : UserControl
         _libraryDragEntry = null;
         var data = new DataObject(DragDataFormat, entry.Id);
         DragDrop.DoDragDrop(LibraryTree, data, DragDropEffects.Copy);
+    }
+
+    private void OnEditorMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount != 2 || ViewModel == null || !IsEmptyCanvasHit(e.OriginalSource))
+        {
+            return;
+        }
+
+        // MouseLocation is already in graph-space coordinates.
+        var node = ViewModel.AddNode(Dyncamelo.Core.Nodes.StringInputNode.TypeName, Editor.MouseLocation);
+        if (node != null)
+        {
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>
+    /// True when the original event source lies on the editor's empty canvas —
+    /// not on a node/note/group container, a port, or a wire.
+    /// </summary>
+    private bool IsEmptyCanvasHit(object originalSource)
+    {
+        var current = originalSource as DependencyObject;
+        while (current != null && !ReferenceEquals(current, Editor))
+        {
+            if (current is ItemContainer ||
+                current is Connector ||
+                current is BaseConnection ||
+                current is ConnectionContainer ||
+                current is GroupingNode ||
+                current is System.Windows.Controls.Primitives.ScrollBar)
+            {
+                return false;
+            }
+
+            current = current is Visual || current is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(current)
+                : LogicalTreeHelper.GetParent(current);
+        }
+
+        return ReferenceEquals(current, Editor);
     }
 
     private void OnEditorDrop(object sender, DragEventArgs e)

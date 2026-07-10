@@ -11,6 +11,7 @@ public abstract class CanvasItemViewModel : ObservableObject
 {
     private Point _location;
     private bool _isSelected;
+    private Size _size;
 
     /// <summary>Graph-space position of the item's top-left corner.</summary>
     public Point Location
@@ -30,6 +31,16 @@ public abstract class CanvasItemViewModel : ObservableObject
     {
         get => _isSelected;
         set => SetProperty(ref _isSelected, value);
+    }
+
+    /// <summary>
+    /// Rendered size of the item, written by the view (the Nodify item container
+    /// binds its ActualSize OneWayToSource). Used to compute group bounds.
+    /// </summary>
+    public Size Size
+    {
+        get => _size;
+        set => SetProperty(ref _size, value);
     }
 
     /// <summary>Pushes a location change into the wrapped model. Does not raise change notifications.</summary>

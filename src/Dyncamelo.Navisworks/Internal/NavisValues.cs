@@ -223,6 +223,74 @@ internal static class NavisValues
         return -1;
     }
 
+    /// <summary>
+    /// Converts a port value to a Navisworks <see cref="Point3D"/>. Accepts a
+    /// Navisworks Point3D, a Dyncamelo <see cref="DyncameloPoint"/>
+    /// (Point.ByCoordinates), or a list of three numbers.
+    /// </summary>
+    internal static Point3D ToPoint3D(object? value)
+    {
+        switch (value)
+        {
+            case null:
+                throw new ArgumentNullException(nameof(value), "No point provided.");
+            case Point3D point:
+                return point;
+            case DyncameloPoint dyncameloPoint:
+                return new Point3D(dyncameloPoint.X, dyncameloPoint.Y, dyncameloPoint.Z);
+            case IList list when !(value is string):
+                if (list.Count < 3)
+                {
+                    throw new ArgumentException("A point list needs three numeric components (x, y, z).");
+                }
+
+                return new Point3D(
+                    Convert.ToDouble(list[0], CultureInfo.InvariantCulture),
+                    Convert.ToDouble(list[1], CultureInfo.InvariantCulture),
+                    Convert.ToDouble(list[2], CultureInfo.InvariantCulture));
+            default:
+                if (TypeCoercion.TryCoerce(value, typeof(Point3D), out var coerced) && coerced is Point3D converted)
+                {
+                    return converted;
+                }
+
+                throw new ArgumentException(
+                    "Cannot interpret a value of type '" + value.GetType().Name +
+                    "' as a point. Wire a Point (e.g. Point.ByCoordinates or ClashResult.Center) or a list of three numbers.");
+        }
+    }
+
+    /// <summary>
+    /// A human-readable selection-tree path for a model item, e.g.
+    /// "file.nwc &gt; Level 1 &gt; Walls &gt; Basic Wall". Unnamed nodes fall back to
+    /// their class display name; still-empty segments are skipped.
+    /// </summary>
+    internal static string ItemPath(ModelItem? item)
+    {
+        if (item == null)
+        {
+            return string.Empty;
+        }
+
+        var segments = new List<string>();
+        for (var current = item; current != null; current = current.Parent)
+        {
+            var name = current.DisplayName;
+            if (string.IsNullOrEmpty(name))
+            {
+                name = current.ClassDisplayName;
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                segments.Add(name);
+            }
+        }
+
+        segments.Reverse();
+        return string.Join(" > ", segments);
+    }
+
     private static NwColor ParseHexColor(string text)
     {
         var hex = text.Trim().TrimStart('#');

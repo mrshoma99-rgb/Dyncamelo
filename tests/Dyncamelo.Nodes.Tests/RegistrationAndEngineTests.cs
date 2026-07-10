@@ -78,6 +78,85 @@ public class RegistrationAndEngineTests
     }
 
     [Fact]
+    public void RegisterAll_ImportsEveryBetaZeroTouchNode()
+    {
+        var registry = CreateRegistry();
+        var names = new HashSet<string>(registry.Definitions.Select(d => d.Name), StringComparer.Ordinal);
+
+        var expected = new[]
+        {
+            // Math
+            "Math.Abs", "Math.Pow", "Math.Sqrt", "Math.Floor", "Math.Ceiling", "Math.MapRange", "Math.Random",
+            // Logic
+            "GreaterThanOrEqual", "LessThanOrEqual",
+            // String
+            "String.StartsWith", "String.EndsWith", "String.Substring",
+            "String.ToUpper", "String.ToLower", "String.Trim",
+            // List
+            "List.LastItem", "List.Contains", "List.IndexOf", "List.Reverse",
+            "List.AddItemToEnd", "List.Join", "List.RemoveItemAtIndex",
+            "List.GroupByKey", "List.SortByKey",
+            // Dictionary
+            "Dictionary.Keys", "Dictionary.Values", "Dictionary.SetValueAtKey",
+            // Color
+            "Color.FromHex", "Color.Components", "Color.Lerp",
+            // DateTime
+            "DateTime.Parse", "DateTime.ByDate", "DateTime.AddDays", "DateTime.DaysBetween",
+            // File
+            "JSON.Parse", "JSON.Stringify", "File.Exists", "Directory.GetFiles", "Path.Combine",
+            // Geometry
+            "Point.DistanceTo", "Vector.ByCoordinates", "BoundingBox.Size", "BoundingBox.Intersects",
+        };
+
+        foreach (var name in expected)
+        {
+            Assert.Contains(name, names);
+        }
+    }
+
+    [Fact]
+    public void Engine_MultiReturnGroupByKey_SplitsIntoPorts()
+    {
+        var registry = CreateRegistry();
+        var graph = new GraphModel();
+        var items = new ListCreateNode();
+        var keys = new ListCreateNode();
+        var group = CreateZeroTouch(registry, "List.GroupByKey");
+
+        var a = new StringInputNode { Value = "duct" };
+        var b = new StringInputNode { Value = "pipe" };
+        var c = new StringInputNode { Value = "tray" };
+        var keyA = new StringInputNode { Value = "HVAC" };
+        var keyB = new StringInputNode { Value = "Plumbing" };
+        var keyC = new StringInputNode { Value = "HVAC" };
+
+        foreach (var node in new NodeModel[] { items, keys, group, a, b, c, keyA, keyB, keyC })
+        {
+            graph.AddNode(node);
+        }
+
+        items.AddItemPort();
+        items.AddItemPort();
+        keys.AddItemPort();
+        keys.AddItemPort();
+        Assert.True(graph.Connect(a.OutPorts[0], items.InPorts[0]).Success);
+        Assert.True(graph.Connect(b.OutPorts[0], items.InPorts[1]).Success);
+        Assert.True(graph.Connect(c.OutPorts[0], items.InPorts[2]).Success);
+        Assert.True(graph.Connect(keyA.OutPorts[0], keys.InPorts[0]).Success);
+        Assert.True(graph.Connect(keyB.OutPorts[0], keys.InPorts[1]).Success);
+        Assert.True(graph.Connect(keyC.OutPorts[0], keys.InPorts[2]).Success);
+        Assert.True(graph.Connect(items.OutPorts[0], group.InPorts[0]).Success);
+        Assert.True(graph.Connect(keys.OutPorts[0], group.InPorts[1]).Success);
+
+        new GraphEngine().Run(graph);
+
+        Assert.Equal(NodeState.Executed, group.State);
+        Assert.Equal(new[] { "groups", "uniqueKeys" }, group.OutPorts.Select(p => p.Name));
+        var uniqueKeys = Assert.IsAssignableFrom<IEnumerable<object?>>(group.OutPorts[1].Value);
+        Assert.Equal(new object?[] { "HVAC", "Plumbing" }, uniqueKeys.ToArray());
+    }
+
+    [Fact]
     public void RegisterAll_DoesNotImportHelpers()
     {
         var registry = CreateRegistry();

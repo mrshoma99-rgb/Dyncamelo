@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Dyncamelo.Core.Loader;
 
@@ -45,5 +46,16 @@ public static class UnitNodes
     public static double Convert(double value, Units fromUnits, Units toUnits)
     {
         return value * UnitConversion.ScaleFactor(fromUnits, toUnits);
+    }
+
+    /// <summary>Every unit name the conversion nodes accept.</summary>
+    /// <returns>The valid unit names (e.g. "Meters", "Feet", "Millimeters").</returns>
+    [NodeName("Units.All")]
+    [NodeDescription("Every unit name accepted by Units.Convert and Units.ScaleFactor.")]
+    [NodeSearchTags("units", "all", "names", "list", "valid")]
+    [return: NodeName("names")]
+    public static List<string> All()
+    {
+        return new List<string>(Enum.GetNames(typeof(Units)));
     }
 }

@@ -13,7 +13,6 @@ using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Serialization;
 using Dyncamelo.UI.Mvvm;
 using Dyncamelo.UI.Services;
-using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.UI.ViewModels;
 
@@ -38,6 +37,9 @@ public class GraphEditorViewModel : ObservableObject
     private int _nodeCount;
     private int _errorCount;
     private int _warningCount;
+    private bool _showNodePreviews = true;
+    private string? _clipboardFragment;
+    private int _pasteGeneration;
 
     /// <summary>Creates the editor with an empty untitled graph.</summary>
     /// <param name="registry">Node registry (already populated by the host).</param>
@@ -51,6 +53,8 @@ public class GraphEditorViewModel : ObservableObject
         Items = new ObservableCollection<CanvasItemViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
         SelectedItems = new ObservableCollection<CanvasItemViewModel>();
+        SelectedConnections = new ObservableCollection<ConnectionViewModel>();
+        SelectedConnections.CollectionChanged += OnSelectedConnectionsChanged;
         PendingConnection = new PendingConnectionViewModel();
 
         StartConnectionCommand = new RelayCommand<ConnectorViewModel>(
@@ -67,6 +71,9 @@ public class GraphEditorViewModel : ObservableObject
         SaveAsCommand = new RelayCommand(SaveGraphAs);
         DeleteSelectionCommand = new RelayCommand(DeleteSelection);
         DuplicateSelectionCommand = new RelayCommand(DuplicateSelection);
+        CopySelectionCommand = new RelayCommand(CopySelection);
+        PasteCommand = new RelayCommand(Paste, () => _clipboardFragment != null);
+        GroupSelectionCommand = new RelayCommand(GroupSelection);
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
 
@@ -94,6 +101,9 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Current canvas selection; kept in sync by the editor.</summary>
     public ObservableCollection<CanvasItemViewModel> SelectedItems { get; }
+
+    /// <summary>Currently selected wires; kept in sync by the editor.</summary>
+    public ObservableCollection<ConnectionViewModel> SelectedConnections { get; }
 
     /// <summary>State of the wire currently being dragged.</summary>
     public PendingConnectionViewModel PendingConnection { get; }
@@ -167,6 +177,28 @@ public class GraphEditorViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Global toggle for the per-node value preview bubbles (toolbar). Default on;
+    /// individual nodes can additionally be hidden via their pin.
+    /// </summary>
+    public bool ShowNodePreviews
+    {
+        get => _showNodePreviews;
+        set
+        {
+            if (SetProperty(ref _showNodePreviews, value))
+            {
+                foreach (var item in Items)
+                {
+                    if (item is NodeViewModel node)
+                    {
+                        node.RefreshPreviewVisibility();
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// True when the graph re-runs automatically (debounced) on every change.
     /// Mirrored to <see cref="GraphModel.RunType"/> so it persists in the .dyc file.
     /// </summary>
@@ -215,11 +247,20 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Saves to a new file.</summary>
     public ICommand SaveAsCommand { get; }
 
-    /// <summary>Deletes the selected nodes and notes (Delete key).</summary>
+    /// <summary>Deletes the selected nodes, notes, groups and wires (Delete key).</summary>
     public ICommand DeleteSelectionCommand { get; }
 
     /// <summary>Duplicates the selected nodes including wires between them (Ctrl+D).</summary>
     public ICommand DuplicateSelectionCommand { get; }
+
+    /// <summary>Copies the selected nodes and the wires among them to the in-memory clipboard (Ctrl+C).</summary>
+    public ICommand CopySelectionCommand { get; }
+
+    /// <summary>Pastes the clipboard at an increasing offset; repeat-paste keeps offsetting (Ctrl+V).</summary>
+    public ICommand PasteCommand { get; }
+
+    /// <summary>Creates a group rectangle around the current selection (Ctrl+G).</summary>
+    public ICommand GroupSelectionCommand { get; }
 
     /// <summary>Adds a node; parameter is a <see cref="LibraryEntryViewModel"/> (placed at origin).</summary>
     public ICommand AddNodeCommand { get; }
@@ -360,6 +401,11 @@ public class GraphEditorViewModel : ObservableObject
             Items.Add(new NoteViewModel(note));
         }
 
+        foreach (var group in graph.Groups)
+        {
+            Items.Add(new GroupViewModel(this, group));
+        }
+
         graph.NodeAdded += OnNodeAdded;
         graph.NodeRemoved += OnNodeRemoved;
         graph.ConnectionAdded += OnConnectionAdded;
@@ -367,6 +413,7 @@ public class GraphEditorViewModel : ObservableObject
         graph.Modified += OnGraphModified;
         graph.PropertyChanged += OnGraphPropertyChanged;
         graph.Notes.CollectionChanged += OnNotesChanged;
+        graph.Groups.CollectionChanged += OnGroupsChanged;
 
         RefreshConnectedFlags();
         NodeCount = graph.Nodes.Count;
@@ -382,6 +429,7 @@ public class GraphEditorViewModel : ObservableObject
         _graph.Modified -= OnGraphModified;
         _graph.PropertyChanged -= OnGraphPropertyChanged;
         _graph.Notes.CollectionChanged -= OnNotesChanged;
+        _graph.Groups.CollectionChanged -= OnGroupsChanged;
 
         foreach (var item in Items)
         {
@@ -393,9 +441,14 @@ public class GraphEditorViewModel : ObservableObject
             {
                 note.Detach();
             }
+            else if (item is GroupViewModel group)
+            {
+                group.Detach();
+            }
         }
 
         SelectedItems.Clear();
+        SelectedConnections.Clear();
         Connections.Clear();
         Items.Clear();
     }
@@ -433,11 +486,71 @@ public class GraphEditorViewModel : ObservableObject
         {
             if (Connections[i].Model == e.Connection)
             {
+                SelectedConnections.Remove(Connections[i]);
                 Connections.RemoveAt(i);
             }
         }
 
         RefreshConnectedFlags();
+    }
+
+    private void OnSelectedConnectionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        // Mirror the editor-maintained selection into per-wire flags so the
+        // connection template can restyle selected wires.
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            foreach (var connection in Connections)
+            {
+                connection.IsSelected = SelectedConnections.Contains(connection);
+            }
+
+            return;
+        }
+
+        if (e.OldItems != null)
+        {
+            foreach (ConnectionViewModel connection in e.OldItems)
+            {
+                connection.IsSelected = false;
+            }
+        }
+
+        if (e.NewItems != null)
+        {
+            foreach (ConnectionViewModel connection in e.NewItems)
+            {
+                connection.IsSelected = true;
+            }
+        }
+    }
+
+    private void OnGroupsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+        {
+            foreach (GroupModel group in e.OldItems)
+            {
+                var viewModel = FindGroupViewModel(group);
+                if (viewModel != null)
+                {
+                    viewModel.Detach();
+                    SelectedItems.Remove(viewModel);
+                    Items.Remove(viewModel);
+                }
+            }
+        }
+
+        if (e.NewItems != null)
+        {
+            foreach (GroupModel group in e.NewItems)
+            {
+                if (FindGroupViewModel(group) == null)
+                {
+                    Items.Add(new GroupViewModel(this, group));
+                }
+            }
+        }
     }
 
     private void OnNotesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -498,7 +611,7 @@ public class GraphEditorViewModel : ObservableObject
         var target = targetNode?.FindConnector(connection.Target);
         if (source != null && target != null)
         {
-            Connections.Add(new ConnectionViewModel(connection, source, target));
+            Connections.Add(new ConnectionViewModel(this, connection, source, target));
         }
     }
 
@@ -575,6 +688,11 @@ public class GraphEditorViewModel : ObservableObject
 
     private void DeleteSelection()
     {
+        foreach (var connection in SelectedConnections.ToList())
+        {
+            _graph.Disconnect(connection.Model);
+        }
+
         foreach (var item in SelectedItems.ToList())
         {
             if (item is NodeViewModel node)
@@ -585,87 +703,131 @@ public class GraphEditorViewModel : ObservableObject
             {
                 _graph.Notes.Remove(note.Model);
             }
+            else if (item is GroupViewModel group)
+            {
+                _graph.Groups.Remove(group.Model);
+            }
         }
+    }
+
+    private List<NodeModel> GetSelectedNodeModels()
+    {
+        return SelectedItems.OfType<NodeViewModel>().Select(n => n.Model).ToList();
+    }
+
+    private void CopySelection()
+    {
+        var selected = GetSelectedNodeModels();
+        if (selected.Count == 0)
+        {
+            StatusMessage = "Nothing selected to copy.";
+            return;
+        }
+
+        var serializer = new GraphSerializer(Registry);
+        _clipboardFragment = serializer.SerializeFragment(selected);
+        _pasteGeneration = 0;
+        StatusMessage = "Copied " + selected.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
+    }
+
+    private void Paste()
+    {
+        if (_clipboardFragment == null)
+        {
+            return;
+        }
+
+        _pasteGeneration++;
+        double offset = 40d * _pasteGeneration;
+        var pasted = PasteFragment(_clipboardFragment, offset, offset);
+        StatusMessage = "Pasted " + pasted.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
     }
 
     private void DuplicateSelection()
     {
-        var selected = SelectedItems.OfType<NodeViewModel>()
-            .Where(n => !(n.Model is MissingNodeModel))
-            .Select(n => n.Model)
-            .ToList();
+        var selected = GetSelectedNodeModels();
         if (selected.Count == 0)
         {
             return;
         }
 
-        var clones = new Dictionary<NodeModel, NodeModel>();
-        foreach (var original in selected)
+        var serializer = new GraphSerializer(Registry);
+        var fragment = serializer.SerializeFragment(selected);
+        var duplicated = PasteFragment(fragment, 40d, 40d);
+        StatusMessage = "Duplicated " + duplicated.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
+    }
+
+    private IReadOnlyList<NodeModel> PasteFragment(string fragment, double offsetX, double offsetY)
+    {
+        var serializer = new GraphSerializer(Registry);
+        IReadOnlyList<NodeModel> pasted;
+        try
         {
-            var clone = CreateClone(original);
-            if (clone == null)
-            {
-                continue;
-            }
-
-            clone.Name = original.Name;
-            clone.X = original.X + 40;
-            clone.Y = original.Y + 40;
-            clone.Lacing = original.Lacing;
-            clone.IsFrozen = original.IsFrozen;
-
-            var data = new JObject();
-            original.SerializeData(data);
-            clone.DeserializeData(data);
-
-            _graph.AddNode(clone);
-            clones[original] = clone;
-
-            // Note: UsingDefaultValue is deliberately NOT copied from the
-            // original. It is pure connection state (Connect clears it,
-            // Disconnect restores it), so a fresh clone keeps its defaults
-            // usable; re-created internal wires below clear it via Connect.
-            // Copying it would break clones whose original was wired to a node
-            // outside the duplicated selection (default off, but no wire either).
+            pasted = serializer.PasteFragment(_graph, fragment, offsetX, offsetY);
+        }
+        catch (GraphFormatException ex)
+        {
+            StatusMessage = "Paste failed: " + ex.Message;
+            return new List<NodeModel>();
         }
 
-        // Re-create wires that ran between duplicated nodes.
-        foreach (var connection in _graph.Connections.ToList())
-        {
-            if (clones.TryGetValue(connection.SourceNode, out var newSource) &&
-                clones.TryGetValue(connection.TargetNode, out var newTarget))
-            {
-                var fromPort = newSource.OutPorts.FirstOrDefault(p => p.Name == connection.Source.Name);
-                var toPort = newTarget.InPorts.FirstOrDefault(p => p.Name == connection.Target.Name);
-                if (fromPort != null && toPort != null)
-                {
-                    _graph.Connect(fromPort, toPort);
-                }
-            }
-        }
-
-        // Move the selection to the duplicates.
+        // Move the selection to the pasted nodes.
         SelectedItems.Clear();
-        foreach (var clone in clones.Values)
+        foreach (var node in pasted)
         {
-            var viewModel = FindNodeViewModel(clone);
+            var viewModel = FindNodeViewModel(node);
             if (viewModel != null)
             {
                 SelectedItems.Add(viewModel);
             }
         }
 
-        StatusMessage = "Duplicated " + clones.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
+        return pasted;
     }
 
-    private NodeModel? CreateClone(NodeModel original)
+    private void GroupSelection()
     {
-        if (original is ZeroTouchNodeModel zeroTouch)
+        var members = SelectedItems.Where(item => !(item is GroupViewModel)).ToList();
+        if (members.Count == 0)
         {
-            return Registry.CreateZeroTouchNode(zeroTouch.Definition.Id);
+            StatusMessage = "Select some nodes to group.";
+            return;
         }
 
-        return Registry.CreateNode(original.NodeType);
+        double left = double.MaxValue, top = double.MaxValue, right = double.MinValue, bottom = double.MinValue;
+        foreach (var item in members)
+        {
+            // Fall back to a nominal size when the view has not measured the item yet.
+            double width = item.Size.Width > 0 ? item.Size.Width : 160d;
+            double height = item.Size.Height > 0 ? item.Size.Height : 90d;
+            left = Math.Min(left, item.Location.X);
+            top = Math.Min(top, item.Location.Y);
+            right = Math.Max(right, item.Location.X + width);
+            bottom = Math.Max(bottom, item.Location.Y + height);
+        }
+
+        const double padding = 20d;
+        const double headerHeight = 42d;
+        var group = new GroupModel
+        {
+            Title = "Group",
+            X = left - padding,
+            Y = top - padding - headerHeight,
+            Width = right - left + padding * 2d,
+            Height = bottom - top + padding * 2d + headerHeight,
+        };
+        _graph.Groups.Add(group);
+        StatusMessage = "Grouped " + members.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " item(s).";
+    }
+
+    /// <summary>Removes a group rectangle, leaving its nodes on the canvas.</summary>
+    /// <param name="group">The group to remove.</param>
+    public void Ungroup(GroupViewModel group)
+    {
+        if (group != null && _graph.Groups.Remove(group.Model))
+        {
+            StatusMessage = "Ungrouped '" + group.Title + "'.";
+        }
     }
 
     // ----- files -------------------------------------------------------------
@@ -841,6 +1003,19 @@ public class GraphEditorViewModel : ObservableObject
             if (item is NoteViewModel note && note.Model == model)
             {
                 return note;
+            }
+        }
+
+        return null;
+    }
+
+    private GroupViewModel? FindGroupViewModel(GroupModel model)
+    {
+        foreach (var item in Items)
+        {
+            if (item is GroupViewModel group && group.Model == model)
+            {
+                return group;
             }
         }
 

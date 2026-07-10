@@ -94,4 +94,78 @@ public class StringNodesTests
         Assert.Equal("[1, 2, [3]]", StringNodes.FromObject(
             new List<object?> { 1, 2, new List<object?> { 3 } }));
     }
+
+    [Fact]
+    public void StartsWith_IgnoresCaseByDefault()
+    {
+        Assert.True(StringNodes.StartsWith("Basic Wall", "basic"));
+        Assert.False(StringNodes.StartsWith("Basic Wall", "basic", ignoreCase: false));
+        Assert.False(StringNodes.StartsWith("Basic Wall", "Wall"));
+        Assert.True(StringNodes.StartsWith("anything", ""));
+    }
+
+    [Fact]
+    public void EndsWith_IgnoresCaseByDefault()
+    {
+        Assert.True(StringNodes.EndsWith("report.CSV", ".csv"));
+        Assert.False(StringNodes.EndsWith("report.CSV", ".csv", ignoreCase: false));
+        Assert.False(StringNodes.EndsWith("report.CSV", "report"));
+    }
+
+    [Fact]
+    public void StartsWith_NullText_ThrowsHelpfulMessage()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() => StringNodes.StartsWith(null!, "a"));
+        Assert.Contains("String.StartsWith", ex.Message);
+    }
+
+    [Fact]
+    public void Substring_DefaultLength_TakesToEnd()
+    {
+        Assert.Equal("llo", StringNodes.Substring("hello", 2));
+        Assert.Equal("", StringNodes.Substring("hello", 5));
+    }
+
+    [Fact]
+    public void Substring_ExplicitLength_TakesSlice()
+    {
+        Assert.Equal("ell", StringNodes.Substring("hello", 1, 3));
+        Assert.Equal("", StringNodes.Substring("hello", 1, 0));
+    }
+
+    [Fact]
+    public void Substring_OutOfRange_ThrowsWithClearMessage()
+    {
+        var startEx = Assert.Throws<ArgumentOutOfRangeException>(() => StringNodes.Substring("abc", 4));
+        Assert.Contains("start index 4", startEx.Message);
+        Assert.Contains("3 character", startEx.Message);
+
+        var lengthEx = Assert.Throws<ArgumentOutOfRangeException>(() => StringNodes.Substring("abc", 1, 5));
+        Assert.Contains("length 5", lengthEx.Message);
+    }
+
+    [Fact]
+    public void ToUpper_ToLower_UseInvariantCasing()
+    {
+        Assert.Equal("WALL-01", StringNodes.ToUpper("Wall-01"));
+        Assert.Equal("wall-01", StringNodes.ToLower("Wall-01"));
+        Assert.Equal("", StringNodes.ToUpper(""));
+    }
+
+    [Fact]
+    public void Trim_StripsSurroundingWhitespace()
+    {
+        Assert.Equal("value", StringNodes.Trim("  value\t\n"));
+        Assert.Equal("a  b", StringNodes.Trim(" a  b "));
+        Assert.Equal("", StringNodes.Trim("   "));
+    }
+
+    [Fact]
+    public void CaseAndTrimNodes_NullText_ThrowHelpfulMessages()
+    {
+        Assert.Contains("String.ToUpper", Assert.Throws<ArgumentNullException>(() => StringNodes.ToUpper(null!)).Message);
+        Assert.Contains("String.ToLower", Assert.Throws<ArgumentNullException>(() => StringNodes.ToLower(null!)).Message);
+        Assert.Contains("String.Trim", Assert.Throws<ArgumentNullException>(() => StringNodes.Trim(null!)).Message);
+        Assert.Contains("String.Substring", Assert.Throws<ArgumentNullException>(() => StringNodes.Substring(null!, 0)).Message);
+    }
 }
