@@ -35,6 +35,47 @@
     <views:AutoSizeLimitConverter x:Key="Dyc.AutoSizeLimit" />
     <BooleanToVisibilityConverter x:Key="Dyc.BoolToVisibility" />
 
+    <!-- ===== Material Symbols icon geometries (Apache-2.0, google/material-design-icons) ===== -->
+    <!-- viewBox 0 -960 960 960; Stretch=Uniform normalises the coordinate space. F1 = nonzero winding. -->
+    <StreamGeometry x:Key="Dyc.Icon.New">F1 M450-234h60v-129h130v-60H510v-130h-60v130H320v60h130v129ZM220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Open">F1 M140-160q-23 0-41.5-18.5T80-220v-520q0-23 18.5-41.5T140-800h281l60 60h339q23 0 41.5 18.5T880-680H455l-60-60H140v520l102-400h698L833-206q-6 24-22 35t-41 11H140Zm63-60h572l84-340H287l-84 340Zm0 0 84-340-84 340Zm-63-460v-60 60Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Save">F1 M840-683v503q0 24-18 42t-42 18H180q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h503l157 157Zm-60 27L656-780H180v600h600v-476ZM553.5-275.26q30.5-30.27 30.5-73.5 0-43.24-30.26-73.74-30.27-30.5-73.5-30.5-43.24 0-73.74 30.26-30.5 30.27-30.5 73.5 0 43.24 30.26 73.74 30.27 30.5 73.5 30.5 43.24 0 73.74-30.26ZM233-584h358v-143H233v143Zm-53-72v476-600 124Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.SaveAs">F1 M180-120q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h503l157 157v238q-14-8-29-11.5t-31-3.5v-196L656-780H180v600h280v60H180Zm0-660v600-600ZM520-40v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-260L643-40H520Zm300-263-37-37 37 37ZM580-100h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19ZM233-584h358v-143H233v143Zm247 339q14 0 27-3t24-10l39-40q7-11 10.5-24t3.5-27q0-43.33-30.26-73.67Q523.47-453 480.24-453q-43.24 0-73.74 30.26-30.5 30.27-30.5 73.5 0 43.24 30.33 73.74Q436.67-245 480-245Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Run">F1 M320-203v-560l440 280-440 280Zm60-280Zm0 171 269-171-269-171v342Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Fit">F1 M820-610v-130H690v-60h130q24 0 42 18t18 42v130h-60Zm-740 0v-130q0-24 18-42t42-18h130v60H140v130H80Zm610 450v-60h130v-130h60v130q0 24-18 42t-42 18H690Zm-550 0q-24 0-42-18t-18-42v-130h60v130h130v60H140Zm60-120v-400h560v400H200Zm60-60h440v-280H260v280Zm0 0v-280 280Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.ZoomIn">F1 M796-121 533-384q-30 26-69.96 40.5Q423.08-329 378-329q-108.16 0-183.08-75Q120-479 120-585t75-181q75-75 181.5-75t181 75Q632-691 632-584.85 632-542 618-502q-14 40-42 75l264 262-44 44ZM377-389q81.25 0 138.13-57.5Q572-504 572-585t-56.87-138.5Q458.25-781 377-781q-82.08 0-139.54 57.5Q180-666 180-585t57.46 138.5Q294.92-389 377-389Zm-31-85v-82h-82v-60h82v-81h60v81h81v60h-81v82h-60Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.ZoomOut">F1 M796-121 533-384q-30 26-70 40.5T378-329q-108 0-183-75t-75-181q0-106 75-181t182-75q106 0 180.5 75T632-585q0 43-14 83t-42 75l264 262-44 44ZM377-389q81 0 138-57.5T572-585q0-81-57-138.5T377-781q-82 0-139.5 57.5T180-585q0 81 57.5 138.5T377-389ZM275-556v-60h201v60H275Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Note">F1 M180-180h400v-200h200v-400H180v600Zm0 60q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v420L600-120H180Zm120-300v-60h170v60H300Zm0-160v-60h360v60H300ZM180-180v-600 600Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Settings">F1 m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Rename">F1 M180-180h44l472-471-44-44-472 471v44Zm-60 60v-128l575-574q8-8 19-12.5t23-4.5q11 0 22 4.5t20 12.5l44 44q9 9 13 20t4 22q0 11-4.5 22.5T823-694L248-120H120Zm659-617-41-41 41 41Zm-105 64-22-22 44 44-22-22Z</StreamGeometry>
+    <!-- Library category glyphs -->
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Annotation">F1 M240-400h480v-60H240v60Zm0-130h480v-60H240v60Zm0-130h480v-60H240v60ZM880-80 720-240H140q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v740ZM140-300h606l74 80v-600H140v520Zm0 0v-520 520Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Color">F1 M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-85 32-158t87.5-127q55.5-54 130-84.5T489-880q79 0 150 26.5T763.5-780q53.5 47 85 111.5T880-527q0 108-63 170.5T650-294h-75q-18 0-31 14t-13 31q0 27 14.5 46t14.5 44q0 38-21 58.5T480-80Zm0-400Zm-198 11q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm126-170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm214 0q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm131 170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15ZM480-140q11 0 15.5-4.5T500-159q0-14-14.5-26T471-238q0-46 30-81t76-35h73q76 0 123-44.5T820-527q0-132-100-212.5T489-820q-146 0-247.5 98.5T140-480q0 141 99.5 240.5T480-140Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.DateTime">F1 m627-287 45-45-159-160v-201h-60v225l174 181ZM480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-82 31.5-155t86-127.5Q252-817 325-848.5T480-880q82 0 155 31.5t127.5 86Q817-708 848.5-635T880-480q0 82-31.5 155t-86 127.5Q708-143 635-111.5T480-80Zm0-400Zm0 340q140 0 240-100t100-240q0-140-100-240T480-820q-140 0-240 100T140-480q0 140 100 240t240 100Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Dictionary">F1 M560-574v-48q33-14 67.5-21t72.5-7q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-610q-38 0-73 9.5T560-574Zm0 220v-49q33-13.5 67.5-20.25T700-430q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-390q-38 0-73 9t-67 27Zm0-110v-48q33-14 67.5-21t72.5-7q26 0 51 4t49 10v44q-24-9-48.5-13.5T700-500q-38 0-73 9.5T560-464ZM248-300q53.57 0 104.28 12.5Q403-275 452-250v-427q-45-30-97.62-46.5Q301.76-740 248-740q-38 0-74.5 9.5T100-707v434q31-14 70.5-20.5T248-300Zm264 50q50-25 98-37.5T712-300q38 0 78.5 6t69.5 16v-429q-34-17-71.82-25-37.82-8-76.18-8-54 0-104.5 16.5T512-677v427Zm-30 90q-51-38-111-58.5T248-239q-36.54 0-71.77 9T106-208q-23.1 11-44.55-3Q40-225 40-251v-463q0-15 7-27.5T68-761q42-20 87.39-29.5 45.4-9.5 92.61-9.5 63 0 122.5 17T482-731q51-35 109.5-52T712-800q46.87 0 91.93 9.5Q849-781 891-761q14 7 21.5 19.5T920-714v463q0 27.89-22.5 42.45Q875-194 853-208q-34-14-69.23-22.5Q748.54-239 712-239q-63 0-121 21t-109 58ZM276-489Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Display">F1 M600.5-379.5Q650-429 650-500t-49.5-120.5Q551-670 480-670t-120.5 49.5Q310-571 310-500t49.5 120.5Q409-330 480-330t120.5-49.5Zm-200-41Q368-453 368-500t32.5-79.5Q433-612 480-612t79.5 32.5Q592-547 592-500t-32.5 79.5Q527-388 480-388t-79.5-32.5ZM216-283Q98-366 40-500q58-134 176-217t264-83q146 0 264 83t176 217q-58 134-176 217t-264 83q-146 0-264-83Zm264-217Zm222.5 174.5Q804-391 857-500q-53-109-154.5-174.5T480-740q-121 0-222.5 65.5T102-500q54 109 155.5 174.5T480-260q121 0 222.5-65.5Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.File">F1 M319-250h322v-60H319v60Zm0-170h322v-60H319v60ZM220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Geometry">F1 M450-154v-309L180-619v309l270 156Zm60 0 270-156v-310L510-463.16V-154Zm-30-360 266-155-266-154-267 154 267 155ZM150-258q-14.25-8.43-22.12-22.21Q120-294 120-310v-340q0-16 7.88-29.79Q135.75-693.57 150-702l300-173q14.33-8 30.16-8 15.84 0 29.84 8l300 173q14.25 8.43 22.13 22.21Q840-666 840-650v340q0 16-7.87 29.79Q824.25-266.43 810-258L510-85q-14.33 8-30.16 8Q464-77 450-85L150-258Zm330-222Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Input">F1 M140-160q-24 0-42-18t-18-42v-169h60v169h680v-520H140v171H80v-171q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm319-143-43-43 103-103H80v-60h439L416-612l43-43 176 176-176 176Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.List">F1 M377-198v-60h463v60H377Zm0-252v-60h463v60H377Zm0-253v-60h463v60H377ZM189-161q-28.05 0-48.02-19Q121-199 121-227.5t19.5-48q19.5-19.5 48-19.5t47.5 19.98q19 19.97 19 48.02 0 27.23-19.39 46.61Q216.23-161 189-161Zm0-252q-28.05 0-48.02-19.5Q121-452 121-480t19.98-47.5Q160.95-547 189-547q27.23 0 46.61 19.5Q255-508 255-480t-19.39 47.5Q216.23-413 189-413Zm-48.5-272.5Q121-705 121-733t19.5-47.5Q160-800 188-800t47.5 19.5Q255-761 255-733t-19.5 47.5Q216-666 188-666t-47.5-19.5Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Logic">F1 M452-160v-306L220-698v123h-60v-225h225v60H263l249 249v331h-60Zm113-364-42-42 174-174H575v-60h225v225h-60v-123L565-524Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Math">F1 M314-228h50v-88h88v-50h-88v-88h-50v88h-88v50h88v88Zm215-35h201v-49H529v49Zm0-107h201v-50H529v50Zm37-163 61-61 61 61 36-36-61-61 61-61-36-36-61 61-61-61-36 36 61 61-61 61 36 36Zm-325-72h196v-50H241v50Zm-61 485q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Navisworks">F1 M120-120v-555h165v-165h390v330h165v390H533v-165H427v165H120Zm60-60h105v-105H180v105Zm0-165h105v-105H180v105Zm0-165h105v-105H180v105Zm165 165h105v-105H345v105Zm0-165h105v-105H345v105Zm0-165h105v-105H345v105Zm165 330h105v-105H510v105Zm0-165h105v-105H510v105Zm0-165h105v-105H510v105Zm165 495h105v-105H675v105Zm0-165h105v-105H675v105Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.String">F1 M290-160v-540H80v-100h520v100H390v540H290Zm360 0v-340H520v-100h360v100H750v340H650Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Cat.Favorites">F1 m323-245 157-94 157 95-42-178 138-120-182-16-71-168-71 167-182 16 138 120-42 178Zm-90 125 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-355Z</StreamGeometry>
+
+    <!-- Reusable toolbar icon: 13px, filled with the text colour, spaced before a label. -->
+    <Style x:Key="Dyc.ToolIcon" TargetType="{x:Type Path}">
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Width" Value="13" />
+        <Setter Property="Height" Value="13" />
+        <Setter Property="Fill" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,5,0" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+
     <!-- ===== Small controls used inside nodes and the chrome ===== -->
     <Style x:Key="Dyc.TextBox" TargetType="{x:Type TextBox}">
         <Setter Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
@@ -129,6 +170,40 @@
     <Style x:Key="Dyc.SmallToggle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource Dyc.ToolToggle}">
         <Setter Property="Padding" Value="6,1" />
         <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+    </Style>
+
+    <!-- A full-width selectable row in the settings panel; the selected option
+         (ChoiceOption.IsSelected) shows an accent border. -->
+    <Style x:Key="Dyc.SettingsChoice" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Chrome"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="3"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- ===== Library search results (flat Dynamo-style list while searching) ===== -->
@@ -664,11 +739,11 @@
                                            Opacity="0.85"
                                            Foreground="White"
                                            Text="{Binding LacingLabel}" />
-                                <TextBlock FontWeight="SemiBold"
-                                           Foreground="White"
-                                           TextTrimming="CharacterEllipsis"
-                                           Text="{Binding Title}"
-                                           ToolTip="{Binding Description}" />
+                                <!-- Double-click the title to rename the placed node (commits to NodeViewModel.Title -> Model.Name). -->
+                                <views:EditableTextBlock FontWeight="SemiBold"
+                                                         Foreground="White"
+                                                         Text="{Binding Title, Mode=TwoWay}"
+                                                         ToolTip="{Binding Description}" />
                             </DockPanel>
                         </DataTemplate>
                     </nodify:Node.HeaderTemplate>
