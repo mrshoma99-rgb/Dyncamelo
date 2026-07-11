@@ -51,6 +51,8 @@ public partial class DyncameloEditorControl : UserControl
         {
             newViewModel.Library.EntryRevealRequested += OnLibraryEntryRevealRequested;
             newViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            // Apply the persisted palette once the view model is attached.
+            ApplyPalette(newViewModel.PaletteId);
         }
     }
 
@@ -65,6 +67,31 @@ public partial class DyncameloEditorControl : UserControl
             Dispatcher.BeginInvoke(
                 new System.Action(() => Editor.FitToScreen(null)),
                 System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.PaletteId) && ViewModel != null)
+        {
+            ApplyPalette(ViewModel.PaletteId);
+        }
+    }
+
+    /// <summary>
+    /// Recolours the UI by mutating each theme brush's <c>Color</c> in place.
+    /// The theme is referenced entirely through StaticResource, so the shared
+    /// (unfrozen) <see cref="SolidColorBrush"/> instances must be mutated rather
+    /// than replaced for already-rendered elements to update. Node header and
+    /// group colours are view-model/hardcoded and deliberately not themed.
+    /// </summary>
+    private void ApplyPalette(string paletteId)
+    {
+        var palette = Dyncamelo.UI.Services.PaletteCatalog.ById(paletteId)
+            ?? Dyncamelo.UI.Services.PaletteCatalog.Default;
+
+        foreach (var pair in palette.Colors)
+        {
+            if (TryFindResource(pair.Key) is SolidColorBrush brush && !brush.IsFrozen)
+            {
+                brush.Color = pair.Value;
+            }
         }
     }
 
@@ -258,11 +285,31 @@ public partial class DyncameloEditorControl : UserControl
             return;
         }
 
-        // MouseLocation is already in graph-space coordinates.
-        var node = ViewModel.AddNode(Dyncamelo.Core.Nodes.StringInputNode.TypeName, Editor.MouseLocation);
-        if (node != null)
+        // MouseLocation is already in graph-space coordinates. What the
+        // double-click does is a persisted setting (Settings ▸ double-click).
+        switch (ViewModel.DoubleClickAction)
         {
-            e.Handled = true;
+            case "none":
+                return;
+            case "note":
+                ViewModel.AddNote(Editor.MouseLocation);
+                e.Handled = true;
+                return;
+            case "number":
+                if (ViewModel.AddNode(Dyncamelo.Core.Nodes.NumberInputNode.TypeName, Editor.MouseLocation) != null)
+                {
+                    e.Handled = true;
+                }
+
+                return;
+            case "string":
+            default:
+                if (ViewModel.AddNode(Dyncamelo.Core.Nodes.StringInputNode.TypeName, Editor.MouseLocation) != null)
+                {
+                    e.Handled = true;
+                }
+
+                return;
         }
     }
 

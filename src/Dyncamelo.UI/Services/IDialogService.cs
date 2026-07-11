@@ -29,4 +29,11 @@ public interface IDialogService
     /// <param name="message">Error text.</param>
     /// <param name="title">Dialog caption.</param>
     void ShowError(string message, string title);
+
+    /// <summary>Prompts for a single line of text.</summary>
+    /// <param name="message">Prompt text.</param>
+    /// <param name="title">Dialog caption.</param>
+    /// <param name="defaultValue">Pre-filled, pre-selected text.</param>
+    /// <returns>The entered text, or null when cancelled.</returns>
+    string? Prompt(string message, string title, string defaultValue);
 }

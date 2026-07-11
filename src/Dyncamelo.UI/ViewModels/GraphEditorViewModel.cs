@@ -68,6 +68,8 @@ public class GraphEditorViewModel : ObservableObject
     private bool _showNodePreviews = true;
     private string? _clipboardFragment;
     private int _pasteGeneration;
+    private string _doubleClickAction;
+    private string _paletteId;
 
     /// <summary>Creates the editor with an empty untitled graph.</summary>
     /// <param name="registry">Node registry (already populated by the host).</param>
@@ -101,6 +103,7 @@ public class GraphEditorViewModel : ObservableObject
         OpenCommand = new RelayCommand(OpenGraph);
         SaveCommand = new RelayCommand(SaveGraph);
         SaveAsCommand = new RelayCommand(SaveGraphAs);
+        RenameCommand = new RelayCommand(RenameGraph);
         DeleteSelectionCommand = new RelayCommand(DeleteSelection);
         DuplicateSelectionCommand = new RelayCommand(DuplicateSelection);
         CopySelectionCommand = new RelayCommand(CopySelection);
@@ -111,6 +114,24 @@ public class GraphEditorViewModel : ObservableObject
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
         RefreshSampleGraphs();
+
+        // Settings-panel state: the double-click action and the colour palette.
+        DoubleClickActions = new ObservableCollection<ChoiceOption>(new[]
+        {
+            new ChoiceOption("string", "Insert a String node"),
+            new ChoiceOption("number", "Insert a Number node"),
+            new ChoiceOption("note", "Add a note"),
+            new ChoiceOption("none", "Do nothing"),
+        });
+        Palettes = new ObservableCollection<ChoiceOption>(
+            PaletteCatalog.All.Select(p => new ChoiceOption(p.Id, p.DisplayName, p.AccentColor)));
+        SelectDoubleClickActionCommand = new RelayCommand<ChoiceOption>(
+            option => { if (option != null) DoubleClickAction = option.Id; });
+        SelectPaletteCommand = new RelayCommand<ChoiceOption>(
+            option => { if (option != null) PaletteId = option.Id; });
+        _doubleClickAction = _settings.DoubleClickAction;
+        _paletteId = _settings.PaletteId;
+        UpdateChoiceSelection();
 
         _autoRunTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _autoRunTimer.Tick += OnAutoRunTimerTick;
@@ -295,6 +316,56 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Saves to a new file.</summary>
     public ICommand SaveAsCommand { get; }
+
+    /// <summary>Renames the current .dyc file on disk (F2); asks for a name when unsaved.</summary>
+    public ICommand RenameCommand { get; }
+
+    /// <summary>Sets the empty-canvas double-click action (parameter: the chosen <see cref="ChoiceOption"/>).</summary>
+    public ICommand SelectDoubleClickActionCommand { get; }
+
+    /// <summary>Sets the UI colour palette (parameter: the chosen <see cref="ChoiceOption"/>).</summary>
+    public ICommand SelectPaletteCommand { get; }
+
+    /// <summary>Options for the empty-canvas double-click action (settings panel).</summary>
+    public ObservableCollection<ChoiceOption> DoubleClickActions { get; }
+
+    /// <summary>Available UI colour palettes (settings panel).</summary>
+    public ObservableCollection<ChoiceOption> Palettes { get; }
+
+    /// <summary>
+    /// What double-clicking the empty canvas does ("string", "number", "note"
+    /// or "none"). Persisted in ui-settings.json; the view reads it in the
+    /// canvas double-click handler.
+    /// </summary>
+    public string DoubleClickAction
+    {
+        get => _doubleClickAction;
+        set
+        {
+            if (SetProperty(ref _doubleClickAction, value))
+            {
+                _settings.SetDoubleClickAction(value);
+                UpdateChoiceSelection();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Selected UI colour palette id. Persisted in ui-settings.json; the view
+    /// watches this property and swaps the theme brushes when it changes.
+    /// </summary>
+    public string PaletteId
+    {
+        get => _paletteId;
+        set
+        {
+            if (SetProperty(ref _paletteId, value))
+            {
+                _settings.SetPaletteId(value);
+                UpdateChoiceSelection();
+            }
+        }
+    }
 
     /// <summary>Deletes the selected nodes, notes, groups and wires (Delete key).</summary>
     public ICommand DeleteSelectionCommand { get; }
@@ -1123,6 +1194,88 @@ public class GraphEditorViewModel : ObservableObject
         else
         {
             SaveTo(CurrentFilePath);
+        }
+    }
+
+    private void RenameGraph()
+    {
+        // Nothing on disk to rename (new / sample graph): renaming is "choose a
+        // file name", i.e. Save As.
+        if (CurrentFilePath == null)
+        {
+            SaveGraphAs();
+            return;
+        }
+
+        var oldPath = CurrentFilePath;
+        var directory = System.IO.Path.GetDirectoryName(oldPath) ?? string.Empty;
+        var current = System.IO.Path.GetFileNameWithoutExtension(oldPath);
+
+        var input = Dialogs.Prompt("New file name:", "Rename Graph", current);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return;
+        }
+
+        // IsNullOrWhiteSpace guarantees non-null here (net48's BCL lacks the
+        // [NotNullWhen] annotation, so assert it explicitly).
+        var name = input!.Trim();
+        if (name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
+        {
+            Dialogs.ShowError("A file name can't contain any of these characters:  \\ / : * ? \" < > |", "Rename Graph");
+            return;
+        }
+
+        if (!name.EndsWith(".dyc", StringComparison.OrdinalIgnoreCase))
+        {
+            name += ".dyc";
+        }
+
+        var newPath = System.IO.Path.Combine(directory, name);
+        if (string.Equals(newPath, oldPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (System.IO.File.Exists(newPath))
+        {
+            Dialogs.ShowError("A file named '" + name + "' already exists in this folder.", "Rename Graph");
+            return;
+        }
+
+        try
+        {
+            System.IO.File.Move(oldPath, newPath);
+            _settings.RemoveRecentFile(oldPath);
+            CurrentFilePath = newPath;   // setter refreshes Title
+            StatusMessage = "Renamed to " + name + ".";
+            RecordRecentFile(newPath);
+        }
+        catch (System.IO.IOException ex)
+        {
+            Dialogs.ShowError(ex.Message, "Rename Graph");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Dialogs.ShowError(ex.Message, "Rename Graph");
+        }
+        catch (Exception ex)
+        {
+            // A rename must never take down the Navisworks host dispatcher.
+            Dialogs.ShowError("The graph could not be renamed: " + ex.Message, "Rename Graph");
+        }
+    }
+
+    private void UpdateChoiceSelection()
+    {
+        foreach (var option in DoubleClickActions)
+        {
+            option.IsSelected = string.Equals(option.Id, _doubleClickAction, StringComparison.OrdinalIgnoreCase);
+        }
+
+        foreach (var option in Palettes)
+        {
+            option.IsSelected = string.Equals(option.Id, _paletteId, StringComparison.OrdinalIgnoreCase);
         }
     }
 

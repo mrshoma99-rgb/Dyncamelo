@@ -19,6 +19,7 @@
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsCommand}" />
+        <KeyBinding Key="F2" Command="{Binding RenameCommand}" />
         <KeyBinding Key="D" Modifiers="Control" Command="{Binding DuplicateSelectionCommand}" />
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopySelectionCommand}" />
         <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
@@ -43,8 +44,18 @@
                            VerticalAlignment="Center"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            ToolTip="Dyncamelo — by BIMCamel" />
-                    <Button Style="{StaticResource Dyc.ToolButton}" Content="New" ToolTip="New graph (Ctrl+N)" Command="{Binding NewCommand}" />
-                    <Button Style="{StaticResource Dyc.ToolButton}" Content="Open" ToolTip="Open .dyc graph (Ctrl+O)" Command="{Binding OpenCommand}" />
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="New graph (Ctrl+N)" Command="{Binding NewCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.New}" />
+                            <TextBlock Text="New" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Open .dyc graph (Ctrl+O)" Command="{Binding OpenCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Open}" />
+                            <TextBlock Text="Open" />
+                        </StackPanel>
+                    </Button>
                     <Button x:Name="OpenRecentButton"
                             Style="{StaticResource Dyc.ToolButton}"
                             Content="▾"
@@ -108,14 +119,30 @@
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" Content="Save" ToolTip="Save graph (Ctrl+S)" Command="{Binding SaveCommand}" />
-                    <Button Style="{StaticResource Dyc.ToolButton}" Content="Save As" ToolTip="Save graph to a new file (Ctrl+Shift+S)" Command="{Binding SaveAsCommand}" />
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Save graph (Ctrl+S)" Command="{Binding SaveCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Save}" />
+                            <TextBlock Text="Save" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Save graph to a new file (Ctrl+Shift+S)" Command="{Binding SaveAsCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.SaveAs}" />
+                            <TextBlock Text="Save As" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Rename the current .dyc file (F2)" Command="{Binding RenameCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Rename}" />
+                            <TextBlock Text="Rename" />
+                        </StackPanel>
+                    </Button>
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
                     <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Run the graph (F5)" Command="{Binding RunCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="▶" Foreground="{StaticResource Dyc.AccentBrush}" Margin="0,0,5,0" />
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Run}" Fill="{StaticResource Dyc.AccentBrush}" />
                             <TextBlock Text="Run" />
                         </StackPanel>
                     </Button>
@@ -131,10 +158,14 @@
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
                     <Button Style="{StaticResource Dyc.ToolButton}"
-                            Content="Fit"
                             ToolTip="Zoom to fit all nodes"
                             Command="{x:Static nodify:EditorCommands.FitToScreen}"
-                            CommandTarget="{Binding ElementName=Editor}" />
+                            CommandTarget="{Binding ElementName=Editor}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Fit}" />
+                            <TextBlock Text="Fit" />
+                        </StackPanel>
+                    </Button>
                     <Button Style="{StaticResource Dyc.ToolButton}"
                             Content="+"
                             ToolTip="Zoom in"
@@ -149,9 +180,86 @@
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
                     <Button Style="{StaticResource Dyc.ToolButton}"
-                            Content="Note"
                             ToolTip="Add a note at the center of the view"
-                            Click="OnAddNoteClick" />
+                            Click="OnAddNoteClick">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Note}" />
+                            <TextBlock Text="Note" />
+                        </StackPanel>
+                    </Button>
+
+                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
+
+                    <!-- ===== Settings (descriptions / double-click action / colour palette) ===== -->
+                    <ToggleButton x:Name="SettingsButton"
+                                  Style="{StaticResource Dyc.ToolToggle}"
+                                  ToolTip="Settings">
+                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Settings}" />
+                    </ToggleButton>
+                    <Popup PlacementTarget="{Binding ElementName=SettingsButton}"
+                           Placement="Bottom"
+                           StaysOpen="False"
+                           AllowsTransparency="True"
+                           PopupAnimation="Fade"
+                           IsOpen="{Binding IsChecked, ElementName=SettingsButton, Mode=TwoWay}">
+                        <Border Background="{StaticResource Dyc.PanelBrush}"
+                                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Margin="6"
+                                Padding="14">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.5" Color="#000000" />
+                            </Border.Effect>
+                            <StackPanel Width="230">
+                                <TextBlock Text="Settings"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource Dyc.TextBrush}"
+                                           Margin="0,0,0,10" />
+
+                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
+                                              HorizontalAlignment="Left"
+                                              Content="Show node descriptions"
+                                              ToolTip="Show a description line under each library node"
+                                              IsChecked="{Binding Library.ShowDescriptions}" />
+
+                                <TextBlock Text="Double-click empty canvas"
+                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                           Margin="0,14,0,4" />
+                                <ItemsControl ItemsSource="{Binding DoubleClickActions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource Dyc.SettingsChoice}"
+                                                    Content="{Binding DisplayName}"
+                                                    Command="{Binding DataContext.SelectDoubleClickActionCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    CommandParameter="{Binding}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="Colour palette"
+                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                           Margin="0,14,0,4" />
+                                <ItemsControl ItemsSource="{Binding Palettes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource Dyc.SettingsChoice}"
+                                                    Command="{Binding DataContext.SelectPaletteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    CommandParameter="{Binding}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0"
+                                                            Background="{Binding Swatch}"
+                                                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                                            BorderThickness="1" />
+                                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
                 </StackPanel>
 
                 <TextBlock DockPanel.Dock="Right"
@@ -279,12 +387,40 @@
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </DockPanel.Resources>
-                <TextBox DockPanel.Dock="Top"
-                         Margin="6,6,6,3"
-                         FontSize="13"
-                         Style="{StaticResource Dyc.TextBox}"
-                         Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                         ToolTip="Search nodes (Esc clears)" />
+                <!-- Search box with a quick-clear ✕ (shown only while there is text;
+                     the Dyc.TextBox style has no template slot, so the button overlays). -->
+                <Grid DockPanel.Dock="Top" Margin="6,6,6,3">
+                    <TextBox FontSize="13"
+                             Style="{StaticResource Dyc.TextBox}"
+                             Padding="4,2,22,2"
+                             Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Search nodes (Esc clears)" />
+                    <Button HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0"
+                            Padding="3,0"
+                            Content="✕"
+                            FontSize="11"
+                            Cursor="Hand"
+                            Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                            ToolTip="Clear search"
+                            Command="{Binding Library.ClearSearchCommand}"
+                            Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="{x:Type Button}">
+                                <Border x:Name="Chrome" Background="Transparent" CornerRadius="2" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
                 <DockPanel DockPanel.Dock="Top" Margin="6,0,6,3" LastChildFill="False">
                     <Button DockPanel.Dock="Left"
                             Style="{StaticResource Dyc.SmallButton}"
@@ -342,12 +478,79 @@
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#FF2B303B" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFE8EAEE" />
                             <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
-                                <TextBlock x:Name="CategoryText"
-                                           Text="{Binding Name}"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                           Margin="0,2" />
+                                <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Path x:Name="CategoryIcon"
+                                          Width="13" Height="13"
+                                          Stretch="Uniform"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,6,0"
+                                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                                          Visibility="Collapsed" />
+                                    <TextBlock x:Name="CategoryText"
+                                               Text="{Binding Name}"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                </StackPanel>
                                 <HierarchicalDataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Annotation">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Annotation}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Color">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Color}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="DateTime">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.DateTime}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Dictionary">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Dictionary}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Display">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Display}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="File">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.File}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Geometry">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Geometry}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Input">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Input}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="List">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.List}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Logic">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Logic}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Math">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Math}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Navisworks">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Navisworks}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="String">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.String}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.WarningBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
                                         <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
                                     </DataTrigger>
