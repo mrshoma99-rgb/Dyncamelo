@@ -19,6 +19,8 @@ public class UiSettingsService
     private readonly List<string> _favoriteNodeIds = new List<string>();
     private readonly List<string> _recentFiles = new List<string>();
     private bool _showLibraryDescriptions = true;
+    private string _doubleClickAction = "string";
+    private string _paletteId = "DyncameloDark";
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
     public UiSettingsService()
@@ -50,6 +52,34 @@ public class UiSettingsService
         if (_showLibraryDescriptions != show)
         {
             _showLibraryDescriptions = show;
+            Save();
+        }
+    }
+
+    /// <summary>What double-clicking the empty canvas does ("string", "number", "note" or "none"; default "string").</summary>
+    public string DoubleClickAction => _doubleClickAction;
+
+    /// <summary>Persists the empty-canvas double-click action.</summary>
+    /// <param name="action">Action id ("string", "number", "note" or "none").</param>
+    public void SetDoubleClickAction(string action)
+    {
+        if (!string.IsNullOrEmpty(action) && _doubleClickAction != action)
+        {
+            _doubleClickAction = action;
+            Save();
+        }
+    }
+
+    /// <summary>Selected UI colour palette id (default "DyncameloDark").</summary>
+    public string PaletteId => _paletteId;
+
+    /// <summary>Persists the selected UI colour palette.</summary>
+    /// <param name="paletteId">Palette id from the palette catalog.</param>
+    public void SetPaletteId(string paletteId)
+    {
+        if (!string.IsNullOrEmpty(paletteId) && _paletteId != paletteId)
+        {
+            _paletteId = paletteId;
             Save();
         }
     }
@@ -142,6 +172,8 @@ public class UiSettingsService
                 FavoriteNodeIds = new List<string>(_favoriteNodeIds),
                 RecentFiles = new List<string>(_recentFiles),
                 ShowLibraryDescriptions = _showLibraryDescriptions,
+                DoubleClickAction = _doubleClickAction,
+                PaletteId = _paletteId,
             };
 
             // Write-to-temp-then-replace so a crash (or a concurrent reader in
@@ -191,12 +223,16 @@ public class UiSettingsService
         _favoriteNodeIds.Clear();
         _recentFiles.Clear();
         _showLibraryDescriptions = true;
+        _doubleClickAction = "string";
+        _paletteId = "DyncameloDark";
         if (data == null)
         {
             return;
         }
 
         _showLibraryDescriptions = data.ShowLibraryDescriptions ?? true;
+        _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
+        _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
 
         if (data.FavoriteNodeIds != null)
         {
@@ -291,5 +327,11 @@ public class UiSettingsService
 
         [JsonProperty("showLibraryDescriptions")]
         public bool? ShowLibraryDescriptions { get; set; }
+
+        [JsonProperty("doubleClickAction")]
+        public string? DoubleClickAction { get; set; }
+
+        [JsonProperty("paletteId")]
+        public string? PaletteId { get; set; }
     }
 }
