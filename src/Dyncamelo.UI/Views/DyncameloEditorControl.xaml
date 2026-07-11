@@ -229,9 +229,13 @@
                                 <ItemsControl ItemsSource="{Binding DoubleClickActions}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
+                                            <!-- ElementName (not FindAncestor): the Popup is a separate
+                                                 visual tree, so an AncestorType=UserControl walk never
+                                                 reaches the view model. SettingsButton shares this
+                                                 namescope and its DataContext is the view model. -->
                                             <Button Style="{StaticResource Dyc.SettingsChoice}"
                                                     Content="{Binding DisplayName}"
-                                                    Command="{Binding DataContext.SelectDoubleClickActionCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    Command="{Binding DataContext.SelectDoubleClickActionCommand, ElementName=SettingsButton}"
                                                     CommandParameter="{Binding}" />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -244,7 +248,7 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Button Style="{StaticResource Dyc.SettingsChoice}"
-                                                    Command="{Binding DataContext.SelectPaletteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    Command="{Binding DataContext.SelectPaletteCommand, ElementName=SettingsButton}"
                                                     CommandParameter="{Binding}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0"
@@ -472,11 +476,14 @@
                             </Style>
                         </TreeView.ItemContainerStyle>
                         <TreeView.Resources>
-                            <!-- Dark selection colors for the default TreeViewItem template. -->
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF343B49" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFE8EAEE" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#FF2B303B" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#FFE8EAEE" />
+                            <!-- Selection colors for the default TreeViewItem template. Their
+                                 Color is bound to the theme brushes so the selection highlight
+                                 follows a live palette swap (the palette mutates those brushes'
+                                 Color in place). -->
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.HoverBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.TextBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.PanelBorderBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.TextBrush}}" />
                             <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
                                 <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
