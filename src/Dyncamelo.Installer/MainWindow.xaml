@@ -1,0 +1,103 @@
+<Window x:Class="Dyncamelo.Installer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dyncamelo Setup"
+        Width="620" Height="460"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        FontFamily="Segoe UI"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType">
+
+    <Border Background="{StaticResource Ink}"
+            BorderBrush="{StaticResource Hairline}"
+            BorderThickness="1"
+            CornerRadius="14">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- window chrome -->
+            <Grid Grid.Row="0" Margin="16,12,12,0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Source="Resources/logo.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="Dyncamelo Setup" Foreground="{StaticResource Paper45}"
+                               FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource ChromeButton}" Content="─" Click="Minimize_Click"/>
+                    <Button Style="{StaticResource ChromeButton}" Content="✕" Click="Close_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- WELCOME -->
+            <StackPanel x:Name="WelcomePanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8">
+                <Image Source="Resources/logo.png" Width="84" Height="84" HorizontalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                <TextBlock Text="Dyncamelo" Foreground="{StaticResource Paper}" FontSize="27"
+                           FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,4"/>
+                <TextBlock Text="Visual programming for Autodesk Navisworks 2024"
+                           Style="{StaticResource Body}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock x:Name="InstallPathText" Style="{StaticResource Fine}"
+                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,14,0,0"/>
+                <TextBlock x:Name="RunningWarning" Style="{StaticResource Fine}"
+                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,6,0,0"
+                           Visibility="Collapsed"
+                           Text="Navisworks is running — close it (or restart it after setup) to load the new version."/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,26,0,0">
+                    <Button x:Name="InstallButton" Style="{StaticResource PrimaryButton}"
+                            Content="Install" Click="Install_Click"/>
+                    <Button x:Name="RemoveButton" Style="{StaticResource GhostButton}" Margin="12,0,0,0"
+                            Content="Remove existing install" Click="Remove_Click" Visibility="Collapsed"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- PROGRESS -->
+            <StackPanel x:Name="ProgressPanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8" Visibility="Collapsed">
+                <TextBlock x:Name="ProgressTitle" Text="Installing…" Foreground="{StaticResource Paper}"
+                           FontSize="20" FontWeight="SemiBold"/>
+                <ProgressBar x:Name="Progress" Style="{StaticResource InkProgress}" Margin="0,22,0,10"
+                             Minimum="0" Maximum="100"/>
+                <TextBlock x:Name="ProgressStatus" Style="{StaticResource Fine}"/>
+            </StackPanel>
+
+            <!-- DONE -->
+            <StackPanel x:Name="DonePanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8" Visibility="Collapsed">
+                <TextBlock x:Name="DoneTitle" Text="Installed." Foreground="{StaticResource Paper}"
+                           FontSize="27" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="DoneBody" Style="{StaticResource Body}" TextAlignment="Center"
+                           HorizontalAlignment="Center" Margin="0,12,0,0"
+                           Text="Start Navisworks Manage or Simulate 2024 — the BIMCamel ribbon tab appears with the Dyncamelo button."/>
+                <Button Style="{StaticResource PrimaryButton}" Content="Close" Margin="0,26,0,0"
+                        HorizontalAlignment="Center" Click="Close_Click"/>
+            </StackPanel>
+
+            <!-- ERROR -->
+            <StackPanel x:Name="ErrorPanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8" Visibility="Collapsed">
+                <TextBlock Text="Setup could not finish" Foreground="{StaticResource Paper}"
+                           FontSize="20" FontWeight="SemiBold"/>
+                <TextBlock x:Name="ErrorBody" Style="{StaticResource Body}" Margin="0,12,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                    <Button Style="{StaticResource PrimaryButton}" Content="Try again" Click="Retry_Click"/>
+                    <Button Style="{StaticResource GhostButton}" Content="Close" Margin="12,0,0,0" Click="Close_Click"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- footer -->
+            <Border Grid.Row="2" BorderBrush="{StaticResource Hairline}" BorderThickness="0,1,0,0" Padding="20,10">
+                <Grid>
+                    <TextBlock Style="{StaticResource Fine}">
+                        <Hyperlink Click="Website_Click" Foreground="#73FFFFFF" TextDecorations="{x:Null}">BIMCamel — bimcamel.com/plugins/dyncamelo</Hyperlink>
+                    </TextBlock>
+                    <TextBlock x:Name="VersionText" Style="{StaticResource Fine}" HorizontalAlignment="Right"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -17,11 +17,18 @@ Dyncamelo.bundle/
 
 ## Install
 
-Easiest: double-click **`install-dyncamelo.bat`** (next to the bundle). It
-copies `Dyncamelo.bundle/` into `%APPDATA%\Autodesk\ApplicationPlugins\` for
-the current user. Run `install-dyncamelo.bat uninstall` to remove it again.
-The `2024/` folder in this repo already contains the compiled Release DLLs,
-so no build step is needed.
+Easiest: run **`DyncameloSetup.exe`** — the graphical installer (black/white
+BIMCamel theme, built from `src/Dyncamelo.Installer`). It extracts the bundle
+to `%APPDATA%\Autodesk\ApplicationPlugins\` for the current user (files it
+writes carry no Mark-of-the-Web, so the PLUGIN_LOAD_02 blocked-DLL failure
+can't happen), registers an Add/Remove Programs entry and can remove
+everything again. Command line: `/silent` installs, `/uninstall [/silent]`
+removes. The standalone exe downloaded from bimcamel.com embeds the bundle;
+the copy inside the release zip installs the `Dyncamelo.bundle/` folder
+sitting next to it.
+
+Scripted alternative: **`install-dyncamelo.bat`** does the same copy with
+robocopy + `Unblock-File`; `install-dyncamelo.bat uninstall` removes it.
 
 Manual install / rebuilding from source:
 
