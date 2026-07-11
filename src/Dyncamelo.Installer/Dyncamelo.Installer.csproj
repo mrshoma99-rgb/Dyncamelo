@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    DyncameloSetup — the graphical installer for the Navisworks 2024 bundle.
+
+    A plain WPF app (black-and-white BIMCamel theme, borderless window) that
+    extracts the application bundle to
+    %APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle, copies itself in
+    for later removal, and registers a per-user Add/Remove Programs entry.
+    Files it writes carry no Mark-of-the-Web, so the PLUGIN_LOAD_02 /
+    0x80131515 blocked-DLL failure cannot happen with this install path.
+
+    PAYLOAD
+    =======
+    The bundle ships as an embedded zip. CI builds it like so:
+
+        dotnet build src/Dyncamelo.Installer -c Release -p:BundlePayload=<abs path to payload.zip>
+
+    where payload.zip contains a single root folder "Dyncamelo.bundle/".
+    Without the property (plain solution builds) the exe still compiles; at
+    run time it falls back to a Dyncamelo.bundle folder sitting next to the
+    exe (the layout inside the release zip), and reports an error otherwise.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Dyncamelo.Installer</RootNamespace>
+    <AssemblyName>DyncameloSetup</AssemblyName>
+    <ApplicationIcon>Resources\dyncamelo.ico</ApplicationIcon>
+    <Description>Installer for Dyncamelo — visual programming for Autodesk Navisworks 2024.</Description>
+    <Company>BIMCamel</Company>
+    <Product>Dyncamelo</Product>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <!-- ZipFileExtensions (CreateEntryFromFile / ExtractToFile) -->
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\logo.png" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BundlePayload)' != ''">
+    <EmbeddedResource Include="$(BundlePayload)" Link="payload.zip" LogicalName="Dyncamelo.Installer.payload.zip" />
+  </ItemGroup>
+
+</Project>

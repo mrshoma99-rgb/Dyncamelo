@@ -132,6 +132,27 @@ jobs:
           Copy-Item "THIRD-PARTY-NOTICES.md"     -Destination $staging
           Copy-Item "LICENSE"                    -Destination $staging
 
+      - name: Build graphical installer (DyncameloSetup.exe)
+        if: env.SKIP != 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # The staged bundle becomes the installer's embedded payload.
+          $numeric = $env:VERSION.TrimStart('v')
+          Compress-Archive -Path "staging/Dyncamelo.bundle" -DestinationPath "payload.zip"
+          dotnet build src/Dyncamelo.Installer/Dyncamelo.Installer.csproj -c Release `
+            -p:BundlePayload="$(Join-Path (Get-Location) 'payload.zip')" `
+            -p:Version=$numeric `
+            -o installer-out
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path "installer-out/DyncameloSetup.exe")) {
+            Write-Host "::error::Installer build produced no DyncameloSetup.exe"
+            exit 1
+          }
+          Copy-Item "installer-out/DyncameloSetup.exe" "DyncameloSetup.exe"
+          # The zip distribution gets the setup exe too: it installs the
+          # sibling Dyncamelo.bundle folder when run without a payload.
+          Copy-Item "installer-out/DyncameloSetup.exe" "staging/DyncameloSetup.exe"
+
       - name: Package bundle zip
         if: env.SKIP != 'true'
         run: |
@@ -140,6 +161,8 @@ jobs:
           Compress-Archive -Path "staging/*" -DestinationPath $zip
           $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "$zip.sha256" -Value "$hash  $zip" -NoNewline
+          $setupHash = (Get-FileHash "DyncameloSetup.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "DyncameloSetup.exe.sha256" -Value "$setupHash  DyncameloSetup.exe" -NoNewline
           Add-Content -Path $env:GITHUB_ENV -Value "ZIP=$zip"
 
       - name: Create GitHub release
@@ -149,29 +172,36 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $checksum = Get-Content "$env:ZIP.sha256" -Raw
+          $setupChecksum = Get-Content "DyncameloSetup.exe.sha256" -Raw
           $notes = @"
           Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks.
 
-          ## Install
+          ## Install (recommended)
 
-          1. Download and extract ``$env:ZIP``.
-          2. Double-click ``install-dyncamelo.bat`` (copies the bundle to ``%APPDATA%\Autodesk\ApplicationPlugins`` — no admin rights needed).
+          1. Download ``DyncameloSetup.exe`` and run it — a graphical installer puts the bundle in ``%APPDATA%\Autodesk\ApplicationPlugins`` (per-user, no admin rights) and registers an Add/Remove Programs entry.
+          2. If Windows SmartScreen appears (unsigned download), click **More info → Run anyway**.
           3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
 
-          Uninstall: ``install-dyncamelo.bat uninstall``.
+          Uninstall from Windows **Settings → Apps → Dyncamelo for Navisworks 2024**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
 
-          **Troubleshooting** — if Navisworks reports ``PLUGIN_LOAD_02`` / ``0x80131515``, Windows kept the browser's "downloaded file" mark on the DLLs. Re-run ``install-dyncamelo.bat`` (it unblocks automatically since v0.1.1), or run: ``Get-ChildItem "`$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File`` in PowerShell.
+          ## Install (zip, scripted deployments)
 
-          ## Checksum
+          Download and extract ``$env:ZIP``, then run ``DyncameloSetup.exe`` (or ``install-dyncamelo.bat``) from the extracted folder.
+
+          **Troubleshooting** — if Navisworks reports ``PLUGIN_LOAD_02`` / ``0x80131515`` after a *manual* copy of the extracted bundle, Windows kept the browser's "downloaded file" mark on the DLLs; the setup exe and the .bat both strip it automatically. Manual fix: ``Get-ChildItem "`$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File`` in PowerShell.
+
+          ## Checksums
 
           ``````
           $checksum
+          $setupChecksum
           ``````
           "@
           Set-Content -Path notes.md -Value $notes
           # Stable-named copy so releases/latest/download/<name> URLs never change.
           Copy-Item $env:ZIP "Dyncamelo-navisworks2024.zip"
           gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" "Dyncamelo-navisworks2024.zip" `
+            "DyncameloSetup.exe" "DyncameloSetup.exe.sha256" `
             --target $env:GITHUB_SHA `
             --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
             --notes-file notes.md
@@ -186,7 +216,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           New-Item -ItemType Directory -Force -Path relay | Out-Null
-          gh release download $env:VERSION --repo $env:GITHUB_REPOSITORY --dir relay --pattern "*.zip" --pattern "*.sha256"
+          gh release download $env:VERSION --repo $env:GITHUB_REPOSITORY --dir relay --pattern "*.zip" --pattern "*.sha256" --pattern "*.exe"
           if ($LASTEXITCODE -ne 0) { Write-Host "No release to relay" }
           exit 0
       - uses: actions/upload-artifact@v4
@@ -217,7 +247,16 @@ jobs:
           Copy-Item $versioned.FullName "$dl/Dyncamelo-navisworks2024.zip" -Force
           $hash = (Get-FileHash "$dl/Dyncamelo-navisworks2024.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "$dl/Dyncamelo-navisworks2024.zip.sha256" -Value "$hash  Dyncamelo-navisworks2024.zip" -NoNewline
-          Set-Content -Path "$dl/dyncamelo-latest.json" -Value ('{"version":"' + $env:VERSION + '","file":"Dyncamelo-navisworks2024.zip","sha256":"' + $hash + '"}') -NoNewline
+          $setupHash = ""
+          if (Test-Path "relay/DyncameloSetup.exe") {
+            Copy-Item "relay/DyncameloSetup.exe" "$dl/DyncameloSetup.exe" -Force
+            $setupHash = (Get-FileHash "$dl/DyncameloSetup.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+            Set-Content -Path "$dl/DyncameloSetup.exe.sha256" -Value "$setupHash  DyncameloSetup.exe" -NoNewline
+          }
+          Set-Content -Path "$dl/dyncamelo-latest.json" -Value ('{"version":"' + $env:VERSION + '","file":"Dyncamelo-navisworks2024.zip","sha256":"' + $hash + '","setup":"DyncameloSetup.exe","setupSha256":"' + $setupHash + '"}') -NoNewline
+          # Keep the website's node-library catalog in lockstep with the release.
+          python tools/generate_node_catalog.py --out "$dl/dyncamelo-nodes.json"
+          if ($LASTEXITCODE -ne 0) { Write-Host "::warning::node catalog generation failed - site keeps its previous catalog"; git -C sitework checkout -- src/bimcamel-web/public/downloads/dyncamelo-nodes.json 2>$null }
           Push-Location sitework
           git config user.name "dyncamelo-release-bot"
           git config user.email "noreply@bimcamel.com"
