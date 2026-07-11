@@ -139,13 +139,27 @@ jobs:
           # The staged bundle becomes the installer's embedded payload.
           $numeric = $env:VERSION.TrimStart('v')
           Compress-Archive -Path "staging/Dyncamelo.bundle" -DestinationPath "payload.zip"
+          # --no-incremental is load-bearing: the earlier full-solution build
+          # already compiled this project WITHOUT the payload, and MSBuild's
+          # incremental check does not treat the added EmbeddedResource as a
+          # change — an incremental build here shipped a payload-less exe once.
           dotnet build src/Dyncamelo.Installer/Dyncamelo.Installer.csproj -c Release `
             -p:BundlePayload="$(Join-Path (Get-Location) 'payload.zip')" `
             -p:Version=$numeric `
+            --no-incremental `
             -o installer-out
           if ($LASTEXITCODE -ne 0) { exit 1 }
           if (-not (Test-Path "installer-out/DyncameloSetup.exe")) {
             Write-Host "::error::Installer build produced no DyncameloSetup.exe"
+            exit 1
+          }
+          # Embedding gate: a resource is stored verbatim, so the exe MUST be
+          # larger than the payload it carries. Anything smaller means the
+          # payload is missing and the standalone download would be broken.
+          $payloadSize = (Get-Item "payload.zip").Length
+          $exeSize = (Get-Item "installer-out/DyncameloSetup.exe").Length
+          if ($exeSize -le $payloadSize) {
+            Write-Host "::error::DyncameloSetup.exe ($exeSize bytes) is smaller than its payload ($payloadSize bytes) - the bundle was not embedded"
             exit 1
           }
           Copy-Item "installer-out/DyncameloSetup.exe" "DyncameloSetup.exe"
