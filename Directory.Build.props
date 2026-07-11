@@ -6,11 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
 
-    <Version>0.4.0</Version>
-    <Authors>Dyncamelo Contributors</Authors>
-    <Company>Dyncamelo</Company>
+    <!-- Assembly version, read at runtime by the About box (DyncameloRibbonPlugin).
+         Bump this in lockstep with dist/RELEASE_VERSION on every release. -->
+    <Version>0.5.1</Version>
+    <Authors>BIMCamel</Authors>
+    <Company>BIMCamel</Company>
     <Product>Dyncamelo</Product>
-    <Copyright>Copyright (c) Dyncamelo Contributors</Copyright>
     <Copyright>Copyright (c) 2026 BIMCamel. All rights reserved.</Copyright>
     <RepositoryUrl>https://github.com/mrshoma99-rgb/dyncamelo</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

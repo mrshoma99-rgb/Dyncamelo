@@ -151,14 +151,23 @@ public class LibraryCategoryViewModel : ObservableObject
 
     /// <summary>Creates a category folder.</summary>
     /// <param name="name">Category segment name.</param>
-    public LibraryCategoryViewModel(string name)
+    /// <param name="iconKey">Icon key for the tree glyph (top-level roots only; null for sub-categories).</param>
+    public LibraryCategoryViewModel(string name, string? iconKey = null)
     {
         Name = name;
+        IconKey = iconKey;
         Children = new ObservableCollection<object>();
     }
 
     /// <summary>Category segment name.</summary>
     public string Name { get; }
+
+    /// <summary>
+    /// Icon key that selects the category glyph in the tree; set only for
+    /// top-level roots (and the favourites section) so sub-categories stay
+    /// text-only. Null means "no glyph".
+    /// </summary>
+    public string? IconKey { get; }
 
     /// <summary>Sub-categories (<see cref="LibraryCategoryViewModel"/>) then entries (<see cref="LibraryEntryViewModel"/>).</summary>
     public ObservableCollection<object> Children { get; }
@@ -234,6 +243,7 @@ public class LibraryViewModel : ObservableObject
         ExpandAllCommand = new RelayCommand(() => SetAllExpanded(true));
         CollapseAllCommand = new RelayCommand(() => SetAllExpanded(false));
         ToggleFavoriteCommand = new RelayCommand<LibraryEntryViewModel>(ToggleFavorite);
+        ClearSearchCommand = new RelayCommand(() => SearchText = string.Empty);
 
         // Typing must never rebuild UI per keystroke: the search itself is
         // debounced and only fills the flat results list.
@@ -263,6 +273,9 @@ public class LibraryViewModel : ObservableObject
 
     /// <summary>Stars/un-stars an entry (parameter: the <see cref="LibraryEntryViewModel"/>).</summary>
     public ICommand ToggleFavoriteCommand { get; }
+
+    /// <summary>Clears the search box (restoring the tree). Bound to the search box's ✕ button.</summary>
+    public ICommand ClearSearchCommand { get; }
 
     /// <summary>True while a non-empty search is active (the view swaps tree ⇄ result list).</summary>
     public bool IsSearching
@@ -315,6 +328,7 @@ public class LibraryViewModel : ObservableObject
         {
             if (SetProperty(ref _searchText, value))
             {
+                OnPropertyChanged(nameof(HasSearchText));
                 _searchTimer.Stop();
                 if (_searchText.Trim().Length == 0)
                 {
@@ -327,6 +341,9 @@ public class LibraryViewModel : ObservableObject
             }
         }
     }
+
+    /// <summary>True when the search box has any text (drives the ✕ clear button's visibility).</summary>
+    public bool HasSearchText => _searchText.Length > 0;
 
     /// <summary>
     /// Re-reads the registry (call after the host registers additional node
@@ -638,7 +655,7 @@ public class LibraryViewModel : ObservableObject
             .ToList();
         if (favorites.Count > 0)
         {
-            var section = new LibraryCategoryViewModel(FavoritesCategoryName) { IsExpanded = true };
+            var section = new LibraryCategoryViewModel(FavoritesCategoryName, "Favorites") { IsExpanded = true };
             foreach (var entry in favorites)
             {
                 section.Children.Add(entry);
@@ -678,7 +695,8 @@ public class LibraryViewModel : ObservableObject
         var path = segments[0];
         if (!roots.TryGetValue(segments[0], out var current))
         {
-            current = new LibraryCategoryViewModel(segments[0])
+            // The top-level segment is also its icon key (sub-categories get none).
+            current = new LibraryCategoryViewModel(segments[0], segments[0])
             {
                 IsExpanded = _expandedPaths.Contains(path)
             };

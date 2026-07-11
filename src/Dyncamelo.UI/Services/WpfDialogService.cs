@@ -45,4 +45,19 @@ public class WpfDialogService : IDialogService
     {
         MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
     }
+
+    /// <inheritdoc />
+    public string? Prompt(string message, string title, string defaultValue)
+    {
+        var dialog = new Views.TextInputDialog(message, title, defaultValue);
+        // Owner keeps the dialog above the host; Application.Current is null in
+        // the Navisworks WinForms/ElementHost, so this is best-effort.
+        var owner = System.Windows.Application.Current?.MainWindow;
+        if (owner != null)
+        {
+            dialog.Owner = owner;
+        }
+
+        return dialog.ShowDialog() == true ? dialog.ResponseText : null;
+    }
 }

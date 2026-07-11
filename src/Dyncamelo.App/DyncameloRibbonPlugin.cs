@@ -22,8 +22,8 @@ namespace Dyncamelo.App;
     ToolTip = "Open the Dyncamelo node editor panel")]
 [Command("ID_Button_DyncameloAbout",
     DisplayName = "About",
-    Icon = "Resources\\camel_16.png",
-    LargeIcon = "Resources\\camel_32.png",
+    Icon = "Resources\\info_16.png",
+    LargeIcon = "Resources\\info_32.png",
     ToolTip = "About Dyncamelo")]
 public class DyncameloRibbonPlugin : CommandHandlerPlugin
 {
@@ -37,12 +37,20 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
         {
             if (commandId == "ID_Button_DyncameloAbout")
             {
+                // Version comes from the assembly (stamped by Directory.Build.props),
+                // never a hard-coded string — Major.Minor.Build, e.g. "0.5.1".
+                var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                var versionText = version == null
+                    ? "dev"
+                    : version.Major + "." + version.Minor + "." + version.Build;
+
                 ShowInfo(
                     "Dyncamelo — visual programming for Autodesk Navisworks.\n\n" +
                     "Wire nodes on a canvas to automate selection, properties, search, " +
-                    "viewpoints, clash and TimeLiner.\n\n" +
-                    "Part of the BIMCamel toolset.\n" +
-                    "https://github.com/mrshoma99-rgb/Dyncamelo");
+                    "viewpoints, clash, TimeLiner and more — no code.\n\n" +
+                    "Visit bimcamel.com for guides, the node library and updates:\n" +
+                    "https://www.bimcamel.com/plugins/dyncamelo\n\n" +
+                    "Version " + versionText + "   ·   Part of the BIMCamel toolset");
                 return 0;
             }
 
