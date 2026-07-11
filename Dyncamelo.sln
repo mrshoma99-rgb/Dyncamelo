@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dyncamelo.Cli", "src\Dyncam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dyncamelo.Integration.Tests", "tests\Dyncamelo.Integration.Tests\Dyncamelo.Integration.Tests.csproj", "{D29A1B83-DFDC-425D-9AD0-D3E52CCFAFA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dyncamelo.Installer", "src\Dyncamelo.Installer\Dyncamelo.Installer.csproj", "{E4A3F8B2-9D35-4B31-905B-93084B7A176B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{D29A1B83-DFDC-425D-9AD0-D3E52CCFAFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D29A1B83-DFDC-425D-9AD0-D3E52CCFAFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D29A1B83-DFDC-425D-9AD0-D3E52CCFAFA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4A3F8B2-9D35-4B31-905B-93084B7A176B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A3F8B2-9D35-4B31-905B-93084B7A176B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A3F8B2-9D35-4B31-905B-93084B7A176B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A3F8B2-9D35-4B31-905B-93084B7A176B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2893E98F-746B-4E50-BA1B-F0B26C5DE523} = {5BE7D427-362F-4E3F-A75C-867980AFB823}
@@ -81,5 +87,6 @@ Global
 		{2E93508B-2324-45C6-8E4E-BB37AF47E169} = {125CD392-4D68-433A-A8F5-E9883851E26E}
 		{4848FF9E-6CA5-4DDF-B5EF-F969956E8921} = {5BE7D427-362F-4E3F-A75C-867980AFB823}
 		{D29A1B83-DFDC-425D-9AD0-D3E52CCFAFA5} = {125CD392-4D68-433A-A8F5-E9883851E26E}
+		{E4A3F8B2-9D35-4B31-905B-93084B7A176B} = {5BE7D427-362F-4E3F-A75C-867980AFB823}
 	EndGlobalSection
 EndGlobal
