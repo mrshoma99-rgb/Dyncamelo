@@ -257,11 +257,19 @@ public static class ClashNodes
     [return: NodeName("result")]
     public static ClashResult SetStatus(ClashResult result, string status, Document? document = null)
     {
+#if !NAV2026
         var clashResult = RequireResult(result);
         var wanted = ClashHelpers.ParseResultStatus(status);
         var doc = NavisworksContext.ResolveDocument(document);
         ClashHelpers.RequireClash(doc).TestsData.TestsEditResultStatus(clashResult, wanted);
         return clashResult;
+#else
+        // TestsEditResultStatus gained a required Assignee (current-user) argument in
+        // Navisworks 2026; pending a port verified on that release.
+        throw new System.NotSupportedException(
+            "ClashResult.SetStatus is currently supported on Navisworks 2024 and 2025; " +
+            "the 2026 clash-status API differs and this node is pending an update.");
+#endif
     }
 
     /// <summary>Assigns a clash result to a person or trade.</summary>
@@ -275,10 +283,18 @@ public static class ClashNodes
     [return: NodeName("result")]
     public static ClashResult Assign(ClashResult result, string assignedTo, Document? document = null)
     {
+#if !NAV2026
         var clashResult = RequireResult(result);
         var doc = NavisworksContext.ResolveDocument(document);
         ClashHelpers.RequireClash(doc).TestsData.TestsEditResultAssignedTo(clashResult, assignedTo ?? string.Empty);
         return clashResult;
+#else
+        // TestsEditResultAssignedTo takes an Assignee (not a string) in Navisworks 2026;
+        // pending a port verified on that release.
+        throw new System.NotSupportedException(
+            "ClashResult.Assign is currently supported on Navisworks 2024 and 2025; " +
+            "the 2026 clash-assignee API differs and this node is pending an update.");
+#endif
     }
 
     /// <summary>Sets the description of a clash result.</summary>

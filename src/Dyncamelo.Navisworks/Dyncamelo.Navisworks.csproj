@@ -4,7 +4,10 @@
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>Dyncamelo.Navisworks</RootNamespace>
     <AssemblyName>Dyncamelo.Navisworks</AssemblyName>
-    <Description>Navisworks 2024 node library for Dyncamelo (zero-touch nodes).</Description>
+    <Description>Navisworks 2024/2025/2026 node library for Dyncamelo (zero-touch nodes).</Description>
+    <!-- NAV2024 / NAV2025 / NAV2026 gate the handful of nodes whose Navisworks API
+         changed across releases (section-box clip planes; clash Assignee). -->
+    <DefineConstants>$(DefineConstants);NAV$(NavisworksYear)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Compile-time references only: the host (Navisworks Manage 2024) supplies these assemblies at runtime. -->
-    <PackageReference Include="Speckle.Navisworks.API" Version="2024.0.0" ExcludeAssets="runtime" />
+    <!-- Compile-time references only: the host Navisworks supplies these at runtime.
+         Version tracks NavisworksYear (2024=v21, 2025=v22, 2026=v23) — see Directory.Build.props. -->
+    <PackageReference Include="Speckle.Navisworks.API" Version="$(NavisPkgVersion)" ExcludeAssets="runtime" />
     <!--
       TimeLiner: the 2024 Timeliner assembly is not published on NuGet. The 2023.0.7 package exposes the
       same public surface, but its DLL IS strong-named (Version=20.0.1399.50, PublicKeyToken=d85e58fa5af9b484)
@@ -35,14 +39,16 @@
     <Reference Include="System.IO.Compression" />
     <!--
       Vendored BIMCamel IFC exporter engine (github.com/mrshoma99-rgb/bimcamel-ifc-exporter),
-      built Release/net48 against the Navisworks 2024 API. Powers the Export.ToIfc node family.
+      one build PER Navisworks year under lib\<year>\ (each compiled against that year's API, so a
+      distinct DLL); the HintPath selects the year via $(NavisworksYear). Powers Export.ToIfc.
       Private=true: unlike the compile-only Navisworks API, this DLL is OURS to ship — it is copied
       to output and MUST be added to the plugin bundle (see release.yml + Dyncamelo.App layout target).
       Self-contained: no third-party deps beyond the framework (System.Numerics / .Serialization).
-      Refresh: rebuild the exporter (-c Release -p:NavisworksYear=2024) and replace lib\BIMCamel.dll.
+      Refresh: for each year, rebuild the exporter (-c Release -p:NavisworksYear=<year>) into
+      lib\<year>\BIMCamel.dll.
     -->
     <Reference Include="BIMCamel">
-      <HintPath>lib\BIMCamel.dll</HintPath>
+      <HintPath>lib\$(NavisworksYear)\BIMCamel.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>

@@ -66,66 +66,75 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Build solution (Release)
-        if: env.SKIP != 'true'
-        run: |
-          dotnet restore Dyncamelo.sln
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-          dotnet build Dyncamelo.sln -c Release --no-restore
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-
-      - name: Assemble bundle from build output
+      - name: Build & stage per-year bundle (2024/2025/2026)
         if: env.SKIP != 'true'
         run: |
           $ErrorActionPreference = 'Stop'
-          # The Dyncamelo.App build assembles the complete plugin file set here
-          # (see the LayoutNavisworksPlugin target in Dyncamelo.App.csproj).
-          $layout  = "src/Dyncamelo.App/bin/Release/net48/NavisworksPlugin/Dyncamelo.App"
+          # A Navisworks plug-in must be compiled against the API of the release it runs
+          # in, so the App/Navisworks projects (and the vendored BIMCamel engine) build
+          # once PER YEAR (NavisworksYear selects the Speckle.Navisworks.API version and
+          # the per-year BIMCamel.dll). The year-agnostic DLLs (Core/Nodes/UI/Nodify/
+          # Newtonsoft) are identical each build and ship in every year folder. Navisworks
+          # loads the folder matching its own release via PackageContents.xml.
+          $years   = '2024', '2025', '2026'
           $staging = "staging"
-          $year    = "$staging/Dyncamelo.bundle/2024"
-          New-Item -ItemType Directory -Force -Path "$year/en-US", "$year/Resources", "$year/Samples" | Out-Null
-
+          $numeric = $env:VERSION.TrimStart('v')
           $dlls = @(
             'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll',
             'Dyncamelo.Navisworks.dll', 'Dyncamelo.UI.dll',
             'Nodify.dll', 'Newtonsoft.Json.dll',
             'BIMCamel.dll'
           )
-          foreach ($dll in $dlls) {
-            $src = Join-Path $layout $dll
-            if (-not (Test-Path $src)) {
-              Write-Host "::error::Missing build output: $src"
+          foreach ($year in $years) {
+            Write-Host "=== Building for Navisworks $year ==="
+            # Restore per year — the Speckle.Navisworks.API package version differs by year.
+            dotnet restore Dyncamelo.sln -p:NavisworksYear=$year
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+            dotnet build Dyncamelo.sln -c Release --no-restore -p:NavisworksYear=$year
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+
+            $layout  = "src/Dyncamelo.App/bin/Release/net48/NavisworksPlugin/Dyncamelo.App"
+            $yeardir = "$staging/Dyncamelo.bundle/$year"
+            New-Item -ItemType Directory -Force -Path "$yeardir/en-US", "$yeardir/Resources", "$yeardir/Samples" | Out-Null
+            foreach ($dll in $dlls) {
+              $src = Join-Path $layout $dll
+              if (-not (Test-Path $src)) {
+                Write-Host "::error::Missing build output for ${year}: $src"
+                exit 1
+              }
+              Copy-Item $src -Destination $yeardir
+            }
+            Copy-Item "$layout/en-US/Dyncamelo.xaml" -Destination "$yeardir/en-US"
+            Copy-Item "$layout/Resources/*.png"      -Destination "$yeardir/Resources"
+            $samples = Get-ChildItem "$layout/Samples/*.dyc"
+            if ($samples.Count -lt 1) {
+              Write-Host "::error::No sample graphs found in $layout/Samples"
               exit 1
             }
-            Copy-Item $src -Destination $year
+            Copy-Item "$layout/Samples/*.dyc" -Destination "$yeardir/Samples"
           }
-          Copy-Item "$layout/en-US/Dyncamelo.xaml" -Destination "$year/en-US"
-          Copy-Item "$layout/Resources/*.png"      -Destination "$year/Resources"
 
-          # Example workflow graphs for the in-app Samples menu (staged into the
-          # plugin layout by the LayoutNavisworksPlugin build target).
-          $samples = Get-ChildItem "$layout/Samples/*.dyc"
-          if ($samples.Count -lt 1) {
-            Write-Host "::error::No sample graphs found in $layout/Samples"
-            exit 1
-          }
-          Copy-Item "$layout/Samples/*.dyc" -Destination "$year/Samples"
-
-          # Bundle manifest from the dist template, stamped with the release
-          # version via XML DOM (a case-insensitive regex here once corrupted the
-          # <?xml version=...?> declaration, making Navisworks silently ignore
-          # the whole bundle — never string-edit this file).
-          $numeric  = $env:VERSION.TrimStart('v')
+          # Bundle manifest (multi-year Components) from the dist template, stamped with
+          # the release version via XML DOM (a case-insensitive regex here once corrupted
+          # the <?xml version=...?> declaration, making Navisworks silently ignore the
+          # whole bundle — never string-edit this file).
           [xml]$doc = Get-Content "dist/Dyncamelo.bundle/PackageContents.xml" -Raw
           $doc.ApplicationPackage.Version = "$numeric.0"
           $manifestPath = Join-Path (Get-Location) "$staging/Dyncamelo.bundle/PackageContents.xml"
           $doc.Save($manifestPath)
 
-          # Validation gate: the staged manifest MUST parse and carry the version.
+          # Validation gate: the staged manifest MUST parse, carry the version, and list
+          # all three year folders as ManagedPlugin components.
           [xml]$check = Get-Content $manifestPath -Raw
           if ($check.ApplicationPackage.Version -ne "$numeric.0") {
             Write-Host "::error::Staged PackageContents.xml failed validation"
             exit 1
+          }
+          foreach ($year in $years) {
+            if (-not (Test-Path "$staging/Dyncamelo.bundle/$year/Dyncamelo.App.dll")) {
+              Write-Host "::error::Year folder $year missing from staged bundle"
+              exit 1
+            }
           }
 
           Copy-Item "dist/install-dyncamelo.bat" -Destination $staging
@@ -189,13 +198,13 @@ jobs:
           $checksum = Get-Content "$env:ZIP.sha256" -Raw
           $setupChecksum = Get-Content "DyncameloSetup.exe.sha256" -Raw
           $notes = @"
-          Dyncamelo for Autodesk Navisworks 2024 — visual programming (node graphs) inside Navisworks.
+          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks.
 
           ## Install (recommended)
 
           1. Download ``DyncameloSetup.exe`` and run it — a graphical installer puts the bundle in ``%APPDATA%\Autodesk\ApplicationPlugins`` (per-user, no admin rights) and registers an Add/Remove Programs entry.
           2. If Windows SmartScreen appears (unsigned download), click **More info → Run anyway**.
-          3. Start Navisworks Manage/Simulate 2024 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
+          3. Start Navisworks Manage/Simulate 2024, 2025 or 2026 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
 
           Uninstall from Windows **Settings → Apps → Dyncamelo for Navisworks 2024**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
 
