@@ -33,6 +33,18 @@
     <Reference Include="System.Drawing" />
     <!-- ZipArchive for the BCF 2.1 (.bcfzip) exchange nodes (framework assembly, no NuGet). -->
     <Reference Include="System.IO.Compression" />
+    <!--
+      Vendored BIMCamel IFC exporter engine (github.com/mrshoma99-rgb/bimcamel-ifc-exporter),
+      built Release/net48 against the Navisworks 2024 API. Powers the Export.ToIfc node family.
+      Private=true: unlike the compile-only Navisworks API, this DLL is OURS to ship — it is copied
+      to output and MUST be added to the plugin bundle (see release.yml + Dyncamelo.App layout target).
+      Self-contained: no third-party deps beyond the framework (System.Numerics / .Serialization).
+      Refresh: rebuild the exporter (-c Release -p:NavisworksYear=2024) and replace lib\BIMCamel.dll.
+    -->
+    <Reference Include="BIMCamel">
+      <HintPath>lib\BIMCamel.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>
