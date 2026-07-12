@@ -6,11 +6,12 @@
   <CompanyDetails Name="BIMCamel" Url="https://github.com/mrshoma99-rgb/Dyncamelo" />
 
   <!-- One DLL PER RELEASE: a Navisworks plug-in must be compiled against the API of the release it
-       runs in (2024 = Api v21). A DLL built against one year loads in the others but its ribbon tab
-       silently fails to register, so each component points at its own year folder. Dyncamelo currently
-       ships 2024 only; add further year folders + components here as support lands. -->
+       runs in (2024 = Api v21, 2025 = v22, 2026 = v23). A DLL built against one year loads in the
+       others but its ribbon tab silently fails to register, so each component points at its own year
+       folder and Navisworks selects the match via the RuntimeRequirements series below. Ships 2024,
+       2025 and 2026 for both Manage and Simulate. -->
 
-  <!-- Navisworks 2024 -->
+  <!-- Navisworks 2024 (Nw21) -->
   <Components Description="2024 Manage">
     <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw21" SeriesMax="Nw21" />
     <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2024\Dyncamelo.App.dll" />
@@ -18,6 +19,26 @@
   <Components Description="2024 Simulate">
     <RuntimeRequirements OS="Win64" Platform="NAVSIM" SeriesMin="Nw21" SeriesMax="Nw21" />
     <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2024\Dyncamelo.App.dll" />
+  </Components>
+
+  <!-- Navisworks 2025 (Nw22) -->
+  <Components Description="2025 Manage">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw22" SeriesMax="Nw22" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2025\Dyncamelo.App.dll" />
+  </Components>
+  <Components Description="2025 Simulate">
+    <RuntimeRequirements OS="Win64" Platform="NAVSIM" SeriesMin="Nw22" SeriesMax="Nw22" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2025\Dyncamelo.App.dll" />
+  </Components>
+
+  <!-- Navisworks 2026 (Nw23) -->
+  <Components Description="2026 Manage">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw23" SeriesMax="Nw23" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2026\Dyncamelo.App.dll" />
+  </Components>
+  <Components Description="2026 Simulate">
+    <RuntimeRequirements OS="Win64" Platform="NAVSIM" SeriesMin="Nw23" SeriesMax="Nw23" />
+    <ComponentEntry AppType="ManagedPlugin" ModuleName=".\2026\Dyncamelo.App.dll" />
   </Components>
 
 </ApplicationPackage>

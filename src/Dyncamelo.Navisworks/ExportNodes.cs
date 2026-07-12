@@ -238,7 +238,7 @@ public static class ExportNodes
                 html.Append("<td>" + Html(result.DisplayName ?? string.Empty) + "</td>");
                 html.Append("<td>" + Html(result.Status.ToString()) + "</td>");
                 html.Append("<td>" + Html(FormatNumber(result.Distance)) + "</td>");
-                html.Append("<td>" + Html(result.AssignedTo ?? string.Empty) + "</td>");
+                html.Append("<td>" + Html(AssigneeText(result)) + "</td>");
                 html.Append("<td>" + Html(result.Description ?? string.Empty) + "</td>");
                 html.Append("<td>" + Html(NavisValues.ItemPath(result.Item1)) + "</td>");
                 html.Append("<td>" + Html(NavisValues.ItemPath(result.Item2)) + "</td>");
@@ -404,7 +404,7 @@ public static class ExportNodes
                     result.DisplayName ?? string.Empty,
                     result.Status.ToString(),
                     FormatNumber(result.Distance),
-                    result.AssignedTo ?? string.Empty,
+                    AssigneeText(result),
                     result.Description ?? string.Empty,
                     result.CreatedTime?.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) ?? string.Empty,
                     NavisValues.ItemPath(result.Item1),
@@ -449,6 +449,17 @@ public static class ExportNodes
             bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
             return Convert.ToBase64String(stream.ToArray());
         }
+    }
+
+    // ClashResult.AssignedTo is a string through Navisworks 2025 but an Assignee
+    // object in 2026; normalise to display text for reports on every year.
+    private static string AssigneeText(ClashResult result)
+    {
+#if NAV2026
+        return result.AssignedTo?.ToString() ?? string.Empty;
+#else
+        return result.AssignedTo ?? string.Empty;
+#endif
     }
 
     private static string GuidText(ModelItem? item)

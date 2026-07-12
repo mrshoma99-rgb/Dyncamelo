@@ -68,6 +68,57 @@ public static class InstallerEngine
         return version == null ? "dev" : $"{version.Major}.{version.Minor}.{version.Build}";
     }
 
+    /// <summary>The Navisworks releases this bundle ships plug-ins for.</summary>
+    public static readonly string[] SupportedYears = { "2024", "2025", "2026" };
+
+    /// <summary>
+    /// Detects which supported Navisworks releases are installed (Manage or Simulate)
+    /// by probing the standard install folders for Roamer.exe. The bundle ships every
+    /// year and Navisworks loads the matching one via PackageContents.xml, so this is
+    /// used to inform the user (and warn when no supported release is present).
+    /// </summary>
+    public static string[] DetectNavisworksYears()
+    {
+        var found = new System.Collections.Generic.List<string>();
+        var roots = new[]
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+        };
+        foreach (var year in SupportedYears)
+        {
+            var installed = false;
+            foreach (var root in roots)
+            {
+                if (string.IsNullOrEmpty(root))
+                {
+                    continue;
+                }
+
+                foreach (var product in new[] { "Navisworks Manage " + year, "Navisworks Simulate " + year })
+                {
+                    if (File.Exists(Path.Combine(root, "Autodesk", product, "Roamer.exe")))
+                    {
+                        installed = true;
+                        break;
+                    }
+                }
+
+                if (installed)
+                {
+                    break;
+                }
+            }
+
+            if (installed)
+            {
+                found.Add(year);
+            }
+        }
+
+        return found.ToArray();
+    }
+
     /// <summary>Whether Navisworks (Roamer.exe) is currently running.</summary>
     public static bool IsNavisworksRunning()
     {
@@ -257,7 +308,7 @@ public static class InstallerEngine
     {
         var exe = Path.Combine(BundleDir, "DyncameloSetup.exe");
         using var key = Registry.CurrentUser.CreateSubKey(UninstallKeyPath);
-        key.SetValue("DisplayName", "Dyncamelo for Navisworks 2024");
+        key.SetValue("DisplayName", "Dyncamelo for Navisworks");
         key.SetValue("DisplayVersion", InstalledVersion() ?? SetupVersion());
         key.SetValue("Publisher", "BIMCamel");
         key.SetValue("DisplayIcon", exe);

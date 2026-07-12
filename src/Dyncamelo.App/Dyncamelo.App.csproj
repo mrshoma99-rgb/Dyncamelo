@@ -42,8 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Compile-time only: Navisworks Manage 2024 supplies these assemblies at runtime. -->
-    <PackageReference Include="Speckle.Navisworks.API" Version="2024.0.0" ExcludeAssets="runtime" />
+    <!-- Compile-time only: the host Navisworks supplies these at runtime.
+         Version tracks NavisworksYear (2024=v21, 2025=v22, 2026=v23) — see Directory.Build.props. -->
+    <PackageReference Include="Speckle.Navisworks.API" Version="$(NavisPkgVersion)" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <!--
@@ -113,7 +114,7 @@
   <Target Name="DeployToBundle" AfterTargets="LayoutNavisworksPlugin" Condition="'$(Configuration)' == 'Debug' AND '$(OS)' == 'Windows_NT'">
     <PropertyGroup>
       <BundleRoot>$(APPDATA)\Autodesk\ApplicationPlugins\Dyncamelo.bundle</BundleRoot>
-      <BundleYearDir>$(BundleRoot)\2024</BundleYearDir>
+      <BundleYearDir>$(BundleRoot)\$(NavisworksYear)</BundleYearDir>
     </PropertyGroup>
     <MakeDir Directories="$(BundleYearDir);$(BundleYearDir)\en-US;$(BundleYearDir)\Resources;$(BundleYearDir)\Samples" />
     <Copy SourceFiles="@(PluginLayoutFiles)"
