@@ -1,6 +1,6 @@
 name: release
 
-# Publishes a GitHub Release with the installable Navisworks 2024 bundle.
+# Publishes a GitHub Release with the installable Navisworks 2024/2025/2026 bundle.
 # Two ways to run it:
 #
 #   * commit a new tag name (e.g. v0.2.0) to dist/RELEASE_VERSION and push —
@@ -181,7 +181,7 @@ jobs:
         if: env.SKIP != 'true'
         run: |
           $ErrorActionPreference = 'Stop'
-          $zip = "Dyncamelo-$env:VERSION-navisworks2024.zip"
+          $zip = "Dyncamelo-$env:VERSION-navisworks.zip"
           Compress-Archive -Path "staging/*" -DestinationPath $zip
           $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "$zip.sha256" -Value "$hash  $zip" -NoNewline
@@ -206,7 +206,7 @@ jobs:
           2. If Windows SmartScreen appears (unsigned download), click **More info → Run anyway**.
           3. Start Navisworks Manage/Simulate 2024, 2025 or 2026 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
 
-          Uninstall from Windows **Settings → Apps → Dyncamelo for Navisworks 2024**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
+          Uninstall from Windows **Settings → Apps → Dyncamelo for Navisworks**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
 
           ## Install (zip, scripted deployments)
 
@@ -223,11 +223,11 @@ jobs:
           "@
           Set-Content -Path notes.md -Value $notes
           # Stable-named copy so releases/latest/download/<name> URLs never change.
-          Copy-Item $env:ZIP "Dyncamelo-navisworks2024.zip"
-          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" "Dyncamelo-navisworks2024.zip" `
+          Copy-Item $env:ZIP "Dyncamelo-navisworks.zip"
+          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" "Dyncamelo-navisworks.zip" `
             "DyncameloSetup.exe" "DyncameloSetup.exe.sha256" `
             --target $env:GITHUB_SHA `
-            --title "Dyncamelo $env:VERSION (Navisworks 2024)" `
+            --title "Dyncamelo $env:VERSION (Navisworks 2024-2026)" `
             --notes-file notes.md
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -254,7 +254,7 @@ jobs:
       # Optional full automation: if a fine-grained PAT with contents:write on
       # mrshoma99-rgb/bimcamel is stored as the SITE_REPO_TOKEN secret, every
       # release updates the website's static download asset automatically
-      # (bimcamel.com/downloads/Dyncamelo-navisworks2024.zip). Without the
+      # (bimcamel.com/downloads/Dyncamelo-navisworks.zip). Without the
       # secret this step is skipped and the site asset is updated manually
       # from the relay artifact.
       - name: Update website download asset (bimcamel repo)
@@ -263,21 +263,21 @@ jobs:
           SITETOKEN: ${{ secrets.SITE_REPO_TOKEN }}
         run: |
           if (-not $env:SITETOKEN) { Write-Host "SITE_REPO_TOKEN not set - skipping site asset update (use the release-zip artifact to update manually)"; exit 0 }
-          $versioned = Get-ChildItem relay -Filter "Dyncamelo-v*-navisworks2024.zip" | Select-Object -First 1
+          $versioned = Get-ChildItem relay -Filter "Dyncamelo-v*-navisworks.zip" | Select-Object -First 1
           if (-not $versioned) { Write-Host "::error::relay zip missing"; exit 1 }
           git clone --depth 1 "https://x-access-token:$($env:SITETOKEN)@github.com/mrshoma99-rgb/bimcamel.git" sitework
           $dl = "sitework/src/bimcamel-web/public/downloads"
           New-Item -ItemType Directory -Force -Path $dl | Out-Null
-          Copy-Item $versioned.FullName "$dl/Dyncamelo-navisworks2024.zip" -Force
-          $hash = (Get-FileHash "$dl/Dyncamelo-navisworks2024.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
-          Set-Content -Path "$dl/Dyncamelo-navisworks2024.zip.sha256" -Value "$hash  Dyncamelo-navisworks2024.zip" -NoNewline
+          Copy-Item $versioned.FullName "$dl/Dyncamelo-navisworks.zip" -Force
+          $hash = (Get-FileHash "$dl/Dyncamelo-navisworks.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path "$dl/Dyncamelo-navisworks.zip.sha256" -Value "$hash  Dyncamelo-navisworks.zip" -NoNewline
           $setupHash = ""
           if (Test-Path "relay/DyncameloSetup.exe") {
             Copy-Item "relay/DyncameloSetup.exe" "$dl/DyncameloSetup.exe" -Force
             $setupHash = (Get-FileHash "$dl/DyncameloSetup.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
             Set-Content -Path "$dl/DyncameloSetup.exe.sha256" -Value "$setupHash  DyncameloSetup.exe" -NoNewline
           }
-          Set-Content -Path "$dl/dyncamelo-latest.json" -Value ('{"version":"' + $env:VERSION + '","file":"Dyncamelo-navisworks2024.zip","sha256":"' + $hash + '","setup":"DyncameloSetup.exe","setupSha256":"' + $setupHash + '"}') -NoNewline
+          Set-Content -Path "$dl/dyncamelo-latest.json" -Value ('{"version":"' + $env:VERSION + '","file":"Dyncamelo-navisworks.zip","sha256":"' + $hash + '","setup":"DyncameloSetup.exe","setupSha256":"' + $setupHash + '"}') -NoNewline
           # Keep the website's node-library catalog in lockstep with the release.
           python tools/generate_node_catalog.py --out "$dl/dyncamelo-nodes.json"
           if ($LASTEXITCODE -ne 0) { Write-Host "::warning::node catalog generation failed - site keeps its previous catalog"; git -C sitework checkout -- src/bimcamel-web/public/downloads/dyncamelo-nodes.json 2>$null }
