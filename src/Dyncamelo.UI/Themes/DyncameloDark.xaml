@@ -9,26 +9,46 @@
         <ResourceDictionary Source="pack://application:,,,/Nodify;component/Themes/Dark.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- ===== Dyncamelo palette (Dynamo-like dark, accent #1FAEFF) ===== -->
-    <SolidColorBrush x:Key="Dyc.CanvasBrush" Color="#FF17191E" />
-    <SolidColorBrush x:Key="Dyc.GridLineBrush" Color="#FF23262E" />
-    <SolidColorBrush x:Key="Dyc.PanelBrush" Color="#FF1F222A" />
-    <SolidColorBrush x:Key="Dyc.PanelBorderBrush" Color="#FF333843" />
-    <SolidColorBrush x:Key="Dyc.NodeBodyBrush" Color="#FF2A2E38" />
-    <SolidColorBrush x:Key="Dyc.NodeBorderBrush" Color="#FF3A4050" />
-    <SolidColorBrush x:Key="Dyc.TextBrush" Color="#FFE8EAEE" />
-    <SolidColorBrush x:Key="Dyc.SubtleTextBrush" Color="#FF9AA1AE" />
-    <SolidColorBrush x:Key="Dyc.AccentBrush" Color="#FF1FAEFF" />
+    <!-- ===== Dyncamelo palette — aligned to the BIMCamel design system (dark
+         defaults; swapped live for the Light/Midnight/Slate palettes via
+         PaletteCatalog, which mutates these same 18 brushes in place). BIMCamel
+         dark tokens: Bg #15171B, Pane #1C1F24, Card #23272E, Accent #3AA0F0. ===== -->
+    <SolidColorBrush x:Key="Dyc.CanvasBrush" Color="#FF15171B" />
+    <SolidColorBrush x:Key="Dyc.GridLineBrush" Color="#FF20242C" />
+    <SolidColorBrush x:Key="Dyc.PanelBrush" Color="#FF1C1F24" />
+    <SolidColorBrush x:Key="Dyc.PanelBorderBrush" Color="#FF333941" />
+    <SolidColorBrush x:Key="Dyc.NodeBodyBrush" Color="#FF23272E" />
+    <SolidColorBrush x:Key="Dyc.NodeBorderBrush" Color="#FF3D444D" />
+    <SolidColorBrush x:Key="Dyc.TextBrush" Color="#FFE7EAEE" />
+    <SolidColorBrush x:Key="Dyc.SubtleTextBrush" Color="#FF9AA3AD" />
+    <SolidColorBrush x:Key="Dyc.AccentBrush" Color="#FF3AA0F0" />
     <!-- Softened accent for the selected-node outline (subtle, not a hard rectangle). -->
-    <SolidColorBrush x:Key="Dyc.SelectionBorderBrush" Color="#991FAEFF" />
-    <SolidColorBrush x:Key="Dyc.WireBrush" Color="#FF8B94A5" />
-    <SolidColorBrush x:Key="Dyc.WarningBrush" Color="#FFF59E0B" />
-    <SolidColorBrush x:Key="Dyc.ErrorBrush" Color="#FFEF4444" />
-    <SolidColorBrush x:Key="Dyc.InputBackgroundBrush" Color="#FF1B1E25" />
-    <SolidColorBrush x:Key="Dyc.InputBorderBrush" Color="#FF3A4050" />
-    <SolidColorBrush x:Key="Dyc.HoverBrush" Color="#FF343B49" />
-    <SolidColorBrush x:Key="Dyc.NoteBrush" Color="#FF4A452A" />
-    <SolidColorBrush x:Key="Dyc.NoteBorderBrush" Color="#FF6B6236" />
+    <SolidColorBrush x:Key="Dyc.SelectionBorderBrush" Color="#993AA0F0" />
+    <SolidColorBrush x:Key="Dyc.WireBrush" Color="#FF7E8896" />
+    <SolidColorBrush x:Key="Dyc.WarningBrush" Color="#FFF0C66A" />
+    <SolidColorBrush x:Key="Dyc.ErrorBrush" Color="#FFEF5350" />
+    <SolidColorBrush x:Key="Dyc.InputBackgroundBrush" Color="#FF1B1E23" />
+    <SolidColorBrush x:Key="Dyc.InputBorderBrush" Color="#FF3D444D" />
+    <SolidColorBrush x:Key="Dyc.HoverBrush" Color="#FF1F2D3D" />
+    <SolidColorBrush x:Key="Dyc.NoteBrush" Color="#FF3A2F12" />
+    <SolidColorBrush x:Key="Dyc.NoteBorderBrush" Color="#FF5C4A1E" />
+
+    <!-- ===== BIMCamel brand chrome (constant across palettes — the product identity).
+         The header is the BIMCamel blue gradient; the logo rides in a black chip so
+         its baked-in black background reads as an intentional rounded badge. ===== -->
+    <Color x:Key="Dyc.BrandStartColor">#0070C0</Color>
+    <Color x:Key="Dyc.BrandEndColor">#0D83DA</Color>
+    <SolidColorBrush x:Key="Dyc.BrandStartBrush" Color="#FF0070C0" />
+    <SolidColorBrush x:Key="Dyc.BrandEndBrush" Color="#FF0D83DA" />
+    <LinearGradientBrush x:Key="Dyc.BrandBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Dyc.BrandStartColor}" Offset="0" />
+        <GradientStop Color="{StaticResource Dyc.BrandEndColor}" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Dyc.OnBrandBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Dyc.OnBrandSubtleBrush" Color="#DDFFFFFF" />
+    <SolidColorBrush x:Key="Dyc.LogoChipBrush" Color="#FF000000" />
+    <SolidColorBrush x:Key="Dyc.BrandButtonBrush" Color="#29FFFFFF" />
+    <SolidColorBrush x:Key="Dyc.BrandButtonHoverBrush" Color="#47FFFFFF" />
 
     <views:NodeBodyTemplateSelector x:Key="Dyc.NodeBodySelector" />
     <views:ColorChannelsToBrushConverter x:Key="Dyc.ColorChannelsToBrush" />
@@ -48,6 +68,14 @@
     <StreamGeometry x:Key="Dyc.Icon.Note">F1 M180-180h400v-200h200v-400H180v600Zm0 60q-24.75 0-42.37-17.63Q120-155.25 120-180v-600q0-24.75 17.63-42.38Q155.25-840 180-840h600q24.75 0 42.38 17.62Q840-804.75 840-780v420L600-120H180Zm120-300v-60h170v60H300Zm0-160v-60h360v60H300ZM180-180v-600 600Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Settings">F1 m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Rename">F1 M180-180h44l472-471-44-44-472 471v44Zm-60 60v-128l575-574q8-8 19-12.5t23-4.5q11 0 22 4.5t20 12.5l44 44q9 9 13 20t4 22q0 11-4.5 22.5T823-694L248-120H120Zm659-617-41-41 41 41Zm-105 64-22-22 44 44-22-22Z</StreamGeometry>
+    <!-- Lightning bolt = "auto / live re-run" (clearer than the refresh-loop glyph). -->
+    <StreamGeometry x:Key="Dyc.Icon.Auto">F1 M11,21 L11,13 L6,13 L13,3 L13,11 L18,11 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Preview">F1 M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 240q113 0 207.5-59.5T832-500q-50-121-144.5-180.5T480-740q-113 0-207.5 59.5T128-500q50 121 144.5 180.5T480-260Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Search">F1 M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z</StreamGeometry>
+    <!-- Expand all = two solid chevrons pointing DOWN; collapse all = pointing UP.
+         Solid + opposite directions so they can't be confused at 14px. -->
+    <StreamGeometry x:Key="Dyc.Icon.UnfoldMore">F1 M4,5 L20,5 L12,13 Z M4,12 L20,12 L12,20 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.UnfoldLess">F1 M12,4 L20,12 L4,12 Z M12,11 L20,19 L4,19 Z</StreamGeometry>
     <!-- Library category glyphs -->
     <StreamGeometry x:Key="Dyc.Icon.Cat.Annotation">F1 M240-400h480v-60H240v60Zm0-130h480v-60H240v60Zm0-130h480v-60H240v60ZM880-80 720-240H140q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v740ZM140-300h606l74 80v-600H140v520Zm0 0v-520 520Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Cat.Color">F1 M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-85 32-158t87.5-127q55.5-54 130-84.5T489-880q79 0 150 26.5T763.5-780q53.5 47 85 111.5T880-527q0 108-63 170.5T650-294h-75q-18 0-31 14t-13 31q0 27 14.5 46t14.5 44q0 38-21 58.5T480-80Zm0-400Zm-198 11q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm126-170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm214 0q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm131 170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15ZM480-140q11 0 15.5-4.5T500-159q0-14-14.5-26T471-238q0-46 30-81t76-35h73q76 0 123-44.5T820-527q0-132-100-212.5T489-820q-146 0-247.5 98.5T140-480q0 141 99.5 240.5T480-140Z</StreamGeometry>
@@ -76,7 +104,118 @@
     </Style>
 
 
-    <!-- ===== Small controls used inside nodes and the chrome ===== -->
+    <!-- ===== Menus & tooltips follow the palette (else they keep system/Nodify
+         colours and go white-on-white when the Light palette is active). ===== -->
+    <Style TargetType="{x:Type ToolTip}">
+        <Setter Property="Background" Value="{StaticResource Dyc.PanelBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Dyc.PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,5" />
+    </Style>
+    <Style TargetType="{x:Type ContextMenu}">
+        <Setter Property="Background" Value="{StaticResource Dyc.PanelBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Dyc.PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <!-- Fully themed menu item. Crucially it templates the SUBMENU popup with a
+         dark themed border — WPF's default leaves that popup system-white, which
+         with light text reads white-on-white (the Open ▾ Recent/Sample lists).
+         Keyed so the explicit menu styles in the view can inherit it via BasedOn. -->
+    <Style x:Key="Dyc.MenuItem" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            Margin="2,1"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Path x:Name="Check"
+                                  Grid.Column="0"
+                                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                  Data="M0,4 L3,7 L8,0"
+                                  Stroke="{StaticResource Dyc.AccentBrush}"
+                                  StrokeThickness="1.6"
+                                  Visibility="Collapsed" />
+                            <ContentPresenter x:Name="HeaderHost"
+                                              Grid.Column="1"
+                                              ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              VerticalAlignment="Center"
+                                              Margin="4,5,10,5" />
+                            <TextBlock Grid.Column="2"
+                                       Text="{TemplateBinding InputGestureText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0"
+                                       Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                            <Path x:Name="Arrow"
+                                  Grid.Column="3"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,8,0"
+                                  Data="M0,0 L4,4 L0,8 Z"
+                                  Fill="{StaticResource Dyc.SubtleTextBrush}"
+                                  Visibility="Collapsed" />
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Right"
+                                   HorizontalOffset="-2"
+                                   IsOpen="{TemplateBinding IsSubmenuOpen}"
+                                   Focusable="False"
+                                   PopupAnimation="None">
+                                <Border Background="{StaticResource Dyc.PanelBrush}"
+                                        BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="3"
+                                        SnapsToDevicePixels="True">
+                                    <ScrollViewer CanContentScroll="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- Apply the themed item to every menu that doesn't set its own style. -->
+    <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}" />
+    <Style TargetType="{x:Type Separator}">
+        <Setter Property="Background" Value="{StaticResource Dyc.PanelBorderBrush}" />
+    </Style>
+
+    <!-- ===== Small controls used inside nodes and the chrome =====
+         Rounded, flat field matching the BIMCamel TextBox (CornerRadius 6, accent
+         focus ring). Templated so the corners actually round. -->
     <Style x:Key="Dyc.TextBox" TargetType="{x:Type TextBox}">
         <Setter Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
         <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
@@ -84,13 +223,64 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CaretBrush" Value="{StaticResource Dyc.TextBrush}" />
         <Setter Property="SelectionBrush" Value="{StaticResource Dyc.AccentBrush}" />
-        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="Padding" Value="6,3" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Style.Triggers>
-            <Trigger Property="IsKeyboardFocused" Value="True">
-                <Setter Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
-            </Trigger>
-        </Style.Triggers>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                        <!-- No forced VerticalAlignment: single-line boxes centre via
+                             VerticalContentAlignment; multiline Watch boxes fill and scroll. -->
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Compact icon-only button (square, rounded) for chrome affordances such as
+         the library expand/collapse controls next to the search box. -->
+    <Style x:Key="Dyc.IconButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource Dyc.SubtleTextBrush}" />
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="Dyc.ToolButton" TargetType="{x:Type Button}">
@@ -107,7 +297,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="3"
+                            CornerRadius="6"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -141,7 +331,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="3"
+                            CornerRadius="6"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -722,8 +912,12 @@
                         <MenuItem Header="Find in Library" Command="{Binding FindInLibraryCommand}" />
                     </ContextMenu>
                 </Border.ContextMenu>
+                <!-- Background colours the connector/IO strip; ContentBrush colours the
+                     inline-editor area. Both must be theme brushes or half the node keeps
+                     Nodify's dark default and ignores palette changes. -->
                 <nodify:Node Header="{Binding}"
                              HeaderBrush="{Binding HeaderBrush}"
+                             Background="{StaticResource Dyc.NodeBodyBrush}"
                              ContentBrush="{StaticResource Dyc.NodeBodyBrush}"
                              Foreground="{StaticResource Dyc.TextBrush}"
                              BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
@@ -845,9 +1039,12 @@
         </nodify:GroupingNode>
     </DataTemplate>
 
+    <!-- Notes are classic yellow stickies with fixed dark text: always readable on
+         either canvas, and independent of the active palette (a palette-swapped
+         note background could otherwise collide with the swapped text colour). -->
     <DataTemplate DataType="{x:Type vm:NoteViewModel}">
-        <Border Background="{StaticResource Dyc.NoteBrush}"
-                BorderBrush="{StaticResource Dyc.NoteBorderBrush}"
+        <Border Background="#FFFCE9A6"
+                BorderBrush="#FFE6C766"
                 BorderThickness="1"
                 CornerRadius="4"
                 Padding="8"
@@ -855,8 +1052,8 @@
                 MaxWidth="320">
             <TextBox Background="Transparent"
                      BorderThickness="0"
-                     Foreground="{StaticResource Dyc.TextBrush}"
-                     CaretBrush="{StaticResource Dyc.TextBrush}"
+                     Foreground="#FF3A3320"
+                     CaretBrush="#FF3A3320"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" />

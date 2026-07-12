@@ -1247,6 +1247,15 @@ public class GraphEditorViewModel : ObservableObject
         {
             System.IO.File.Move(oldPath, newPath);
             _settings.RemoveRecentFile(oldPath);
+
+            // Keep the graph name in sync with the file name when it tracked it
+            // (SaveTo names an untitled graph after its file); leave a custom
+            // graph name alone. Either way the Title refreshes below.
+            if (string.Equals(_graph.Name, current, StringComparison.Ordinal))
+            {
+                _graph.Name = System.IO.Path.GetFileNameWithoutExtension(newPath);
+            }
+
             CurrentFilePath = newPath;   // setter refreshes Title
             StatusMessage = "Renamed to " + name + ".";
             RecordRecentFile(newPath);

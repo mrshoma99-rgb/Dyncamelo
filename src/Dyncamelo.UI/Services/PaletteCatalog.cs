@@ -57,11 +57,12 @@ public static class PaletteCatalog
 
     private static readonly List<UiPalette> _all = new List<UiPalette>
     {
-        // Original theme values (DyncameloDark.xaml lines 13-31) — the default.
+        // Default — mirrors DyncameloDark.xaml's brush defaults (BIMCamel dark tokens);
+        // switching back to this palette restores the theme exactly.
         Make("DyncameloDark", "Dyncamelo Dark",
-            "#FF17191E", "#FF23262E", "#FF1F222A", "#FF333843", "#FF2A2E38", "#FF3A4050",
-            "#FFE8EAEE", "#FF9AA1AE", "#FF1FAEFF", "#991FAEFF", "#FF8B94A5", "#FFF59E0B",
-            "#FFEF4444", "#FF1B1E25", "#FF3A4050", "#FF343B49", "#FF4A452A", "#FF6B6236"),
+            "#FF15171B", "#FF20242C", "#FF1C1F24", "#FF333941", "#FF23272E", "#FF3D444D",
+            "#FFE7EAEE", "#FF9AA3AD", "#FF3AA0F0", "#993AA0F0", "#FF7E8896", "#FFF0C66A",
+            "#FFEF5350", "#FF1B1E23", "#FF3D444D", "#FF1F2D3D", "#FF3A2F12", "#FF5C4A1E"),
 
         // Deep blue.
         Make("Midnight", "Midnight",
@@ -75,11 +76,12 @@ public static class PaletteCatalog
             "#FFE9EAEC", "#FFA0A4AB", "#FF4CC2A8", "#994CC2A8", "#FF949AA3", "#FFE0A02A",
             "#FFE15B5B", "#FF1C1E22", "#FF444A52", "#FF383D44", "#FF3A3A28", "#FF59573A"),
 
-        // Light theme.
+        // Light theme — BIMCamel light tokens (Bg #EEF1F5, Pane #F7F8FA, Card #FFF,
+        // Text #1F2329, Accent #0070C0). Proper dark-on-light contrast throughout.
         Make("Light", "Light",
-            "#FFF4F5F7", "#FFE4E7EC", "#FFFFFFFF", "#FFD5DAE1", "#FFFFFFFF", "#FFCBD2DB",
-            "#FF1E2430", "#FF5D6675", "#FF1F82D8", "#991F82D8", "#FF9AA3B2", "#FFC77A0A",
-            "#FFD33A3A", "#FFFFFFFF", "#FFC4CCD6", "#FFE8ECF2", "#FFFBF3CC", "#FFE4D383"),
+            "#FFEEF1F5", "#FFE1E5EA", "#FFF7F8FA", "#FFE1E5EA", "#FFFFFFFF", "#FFCDD3DA",
+            "#FF1F2329", "#FF6B7480", "#FF0070C0", "#990070C0", "#FF8A93A0", "#FFB26B00",
+            "#FFD33A3A", "#FFFFFFFF", "#FFCDD3DA", "#FFE6F0FA", "#FFFFF7E6", "#FFFFE1A8"),
     };
 
     /// <summary>All built-in palettes, in display order (default first).</summary>
