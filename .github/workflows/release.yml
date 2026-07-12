@@ -88,7 +88,8 @@ jobs:
           $dlls = @(
             'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll',
             'Dyncamelo.Navisworks.dll', 'Dyncamelo.UI.dll',
-            'Nodify.dll', 'Newtonsoft.Json.dll'
+            'Nodify.dll', 'Newtonsoft.Json.dll',
+            'BIMCamel.dll'
           )
           foreach ($dll in $dlls) {
             $src = Join-Path $layout $dll
