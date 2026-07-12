@@ -29,6 +29,45 @@
 
     <DockPanel Background="{StaticResource Dyc.PanelBrush}">
 
+        <!-- ===== Brand bar (BIMCamel identity) — the blue gradient header carries
+             the logo in a black chip so its baked-in black background reads as an
+             intentional rounded badge, matching the BIMCamel exporter's title bar. -->
+        <Border DockPanel.Dock="Top" Height="38" Background="{StaticResource Dyc.BrandBrush}">
+            <Grid Margin="10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0"
+                        Width="26" Height="26"
+                        CornerRadius="7"
+                        Background="{StaticResource Dyc.LogoChipBrush}"
+                        VerticalAlignment="Center">
+                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
+                           Width="22" Height="22"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0">
+                    <TextBlock Text="Dyncamelo"
+                               Foreground="{StaticResource Dyc.OnBrandBrush}"
+                               FontWeight="SemiBold"
+                               FontSize="13.5" />
+                    <TextBlock Text="by BIMCamel"
+                               Foreground="{StaticResource Dyc.OnBrandSubtleBrush}"
+                               FontSize="9.5"
+                               Margin="0,-1,0,0" />
+                </StackPanel>
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource Dyc.OnBrandSubtleBrush}"
+                           FontSize="11"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="260"
+                           Text="{Binding Title}" />
+            </Grid>
+        </Border>
+
         <!-- ===== Toolbar ===== -->
         <Border DockPanel.Dock="Top"
                 Background="{StaticResource Dyc.PanelBrush}"
@@ -37,13 +76,6 @@
                 Padding="4,3">
             <DockPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
-                           Width="20"
-                           Height="20"
-                           Margin="4,0,6,0"
-                           VerticalAlignment="Center"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           ToolTip="Dyncamelo — by BIMCamel" />
                     <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="New graph (Ctrl+N)" Command="{Binding NewCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.New}" />
@@ -68,7 +100,7 @@
                             <ContextMenu>
                                 <ContextMenu.Resources>
                                     <!-- Submenus disable themselves while empty. -->
-                                    <Style x:Key="Dyc.EmptyDisabledSubmenu" TargetType="{x:Type MenuItem}">
+                                    <Style x:Key="Dyc.EmptyDisabledSubmenu" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
                                         <Style.Triggers>
                                             <Trigger Property="HasItems" Value="False">
                                                 <Setter Property="IsEnabled" Value="False" />
@@ -80,7 +112,7 @@
                                           Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
                                           ItemsSource="{Binding RecentFiles}">
                                     <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}">
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
                                             <Setter Property="Header" Value="{Binding}" />
                                             <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                             <Setter Property="CommandParameter" Value="{Binding}" />
@@ -99,7 +131,7 @@
                                           Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
                                           ItemsSource="{Binding SampleGraphs}">
                                     <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}">
+                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
                                             <Setter Property="Header" Value="{Binding Name}" />
                                             <Setter Property="ToolTip" Value="{Binding FilePath}" />
                                             <!-- Each item carries its own open command (no ancestor lookup needed). -->
@@ -147,13 +179,21 @@
                         </StackPanel>
                     </Button>
                     <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
-                                  Content="Auto"
                                   ToolTip="Re-run automatically after every change"
-                                  IsChecked="{Binding IsAutoRun}" />
+                                  IsChecked="{Binding IsAutoRun}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Auto}" />
+                            <TextBlock Text="Auto" />
+                        </StackPanel>
+                    </ToggleButton>
                     <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
-                                  Content="Preview"
                                   ToolTip="Show a value preview bubble under each node after a run"
-                                  IsChecked="{Binding ShowNodePreviews}" />
+                                  IsChecked="{Binding ShowNodePreviews}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Preview}" />
+                            <TextBlock Text="Preview" />
+                        </StackPanel>
+                    </ToggleButton>
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
@@ -202,15 +242,14 @@
                            AllowsTransparency="True"
                            PopupAnimation="Fade"
                            IsOpen="{Binding IsChecked, ElementName=SettingsButton, Mode=TwoWay}">
+                        <!-- No DropShadowEffect: a bordered, rounded popup reads fine and
+                             avoids the render-to-bitmap pass that shadows force in WPF. -->
                         <Border Background="{StaticResource Dyc.PanelBrush}"
                                 BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Margin="6"
                                 Padding="14">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.5" Color="#000000" />
-                            </Border.Effect>
                             <StackPanel Width="230">
                                 <TextBlock Text="Settings"
                                            FontWeight="SemiBold"
@@ -266,11 +305,6 @@
                     </Popup>
                 </StackPanel>
 
-                <TextBlock DockPanel.Dock="Right"
-                           VerticalAlignment="Center"
-                           Margin="8,0"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                           Text="{Binding Title}" />
                 <Border />
             </DockPanel>
         </Border>
@@ -391,56 +425,67 @@
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </DockPanel.Resources>
-                <!-- Search box with a quick-clear ✕ (shown only while there is text;
-                     the Dyc.TextBox style has no template slot, so the button overlays). -->
-                <Grid DockPanel.Dock="Top" Margin="6,6,6,3">
-                    <TextBox FontSize="13"
-                             Style="{StaticResource Dyc.TextBox}"
-                             Padding="4,2,22,2"
-                             Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="Search nodes (Esc clears)" />
-                    <Button HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,4,0"
-                            Padding="3,0"
-                            Content="✕"
-                            FontSize="11"
-                            Cursor="Hand"
-                            Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                            ToolTip="Clear search"
-                            Command="{Binding Library.ClearSearchCommand}"
-                            Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="{x:Type Button}">
-                                <Border x:Name="Chrome" Background="Transparent" CornerRadius="2" Padding="{TemplateBinding Padding}">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                                        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
+                <!-- Search row: a search-icon field with an inline quick-clear ✕, and
+                     compact expand/collapse symbol buttons sitting right beside it.
+                     (The "show descriptions" toggle now lives in the Settings popup.) -->
+                <DockPanel DockPanel.Dock="Top" Margin="6,6,6,4">
+                    <Button DockPanel.Dock="Right"
+                            Style="{StaticResource Dyc.IconButton}"
+                            Margin="4,0,0,0"
+                            ToolTip="Collapse all categories"
+                            Command="{Binding Library.CollapseAllCommand}">
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.UnfoldLess}" />
                     </Button>
-                </Grid>
-                <DockPanel DockPanel.Dock="Top" Margin="6,0,6,3" LastChildFill="False">
-                    <Button DockPanel.Dock="Left"
-                            Style="{StaticResource Dyc.SmallButton}"
-                            Content="Expand all"
-                            ToolTip="Expand every category"
-                            Command="{Binding Library.ExpandAllCommand}" />
-                    <Button DockPanel.Dock="Left"
-                            Style="{StaticResource Dyc.SmallButton}"
-                            Content="Collapse all"
-                            ToolTip="Collapse every category"
-                            Command="{Binding Library.CollapseAllCommand}" />
-                    <ToggleButton DockPanel.Dock="Right"
-                                  Style="{StaticResource Dyc.SmallToggle}"
-                                  Content="Desc"
-                                  ToolTip="Show node descriptions under each name"
-                                  IsChecked="{Binding Library.ShowDescriptions}" />
+                    <Button DockPanel.Dock="Right"
+                            Style="{StaticResource Dyc.IconButton}"
+                            Margin="4,0,0,0"
+                            ToolTip="Expand all categories"
+                            Command="{Binding Library.ExpandAllCommand}">
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.UnfoldMore}" />
+                    </Button>
+                    <Grid>
+                        <TextBox FontSize="13"
+                                 Style="{StaticResource Dyc.TextBox}"
+                                 Padding="26,3,22,3"
+                                 Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Search nodes (Esc clears)" />
+                        <!-- Search glyph inside the field (transparent to clicks). -->
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              HorizontalAlignment="Left" VerticalAlignment="Center"
+                              Margin="7,0,0,0"
+                              IsHitTestVisible="False"
+                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.Search}" />
+                        <Button HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,4,0"
+                                Padding="3,0"
+                                Content="✕"
+                                FontSize="11"
+                                Cursor="Hand"
+                                Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                ToolTip="Clear search"
+                                Command="{Binding Library.ClearSearchCommand}"
+                                Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border x:Name="Chrome" Background="Transparent" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                            <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
                 </DockPanel>
                 <Grid>
                     <TreeView x:Name="LibraryTree"
