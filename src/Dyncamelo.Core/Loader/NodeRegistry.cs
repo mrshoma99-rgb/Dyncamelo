@@ -49,6 +49,8 @@ public class NodeRegistry
         registry.RegisterNodeType(FilePathNode.TypeName, () => new FilePathNode());
         registry.RegisterNodeType(DirectoryPathNode.TypeName, () => new DirectoryPathNode());
         registry.RegisterNodeType(WatchNode.TypeName, () => new WatchNode());
+        registry.RegisterNodeType(LoopItemNode.TypeName, () => new LoopItemNode());
+        registry.RegisterNodeType(LoopCollectNode.TypeName, () => new LoopCollectNode());
         return registry;
     }
 

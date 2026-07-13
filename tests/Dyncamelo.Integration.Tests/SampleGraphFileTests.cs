@@ -28,6 +28,7 @@ public class SampleGraphFileTests
         "Color Elements by Property.dyc",
         "Export Properties to Excel.dyc",
         "Getting Started - Math and Watch.dyc",
+        "Isolated Viewpoints (Loop).dyc",
         "Isolated Viewpoints per Item.dyc",
         "QTO Rollup by Category.dyc",
         "Spotlight Viewpoints per Item.dyc",
