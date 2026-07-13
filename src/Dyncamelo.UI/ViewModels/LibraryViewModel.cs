@@ -43,12 +43,14 @@ public class LibraryEntryViewModel : ObservableObject
         Signature = signature;
 
         // The search index is built exactly once so typing in the search box
-        // never lowercases or concatenates entry metadata again.
-        _lowerName = name.ToLowerInvariant();
+        // never lowercases or concatenates entry metadata again. Index and
+        // query go through the same LibrarySearchText fold, so matching stays
+        // immune to case, exotic whitespace and invisible layout characters.
+        _lowerName = LibrarySearchText.Normalize(name);
         _lowerCategoryAndTags = searchTags.Count == 0
-            ? category.ToLowerInvariant()
-            : category.ToLowerInvariant() + "\n" + string.Join("\n", searchTags).ToLowerInvariant();
-        _searchHaystack = _lowerName + "\n" + _lowerCategoryAndTags + "\n" + description.ToLowerInvariant();
+            ? LibrarySearchText.Normalize(category)
+            : LibrarySearchText.Normalize(category) + "\n" + LibrarySearchText.Normalize(string.Join("\n", searchTags));
+        _searchHaystack = _lowerName + "\n" + _lowerCategoryAndTags + "\n" + LibrarySearchText.Normalize(description);
     }
 
     /// <summary>Creation id understood by the editor's AddNode.</summary>
@@ -490,8 +492,8 @@ public class LibraryViewModel : ObservableObject
 
     private void ApplySearch()
     {
-        var lowerSearch = _searchText.Trim().ToLowerInvariant();
-        if (lowerSearch.Length == 0)
+        var tokens = LibrarySearchText.Tokenize(_searchText);
+        if (tokens.Length == 0)
         {
             SearchResults.Clear();
             SearchStatusText = string.Empty;
@@ -499,7 +501,6 @@ public class LibraryViewModel : ObservableObject
             return;
         }
 
-        var tokens = lowerSearch.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         var hits = new List<KeyValuePair<int, LibraryEntryViewModel>>();
         foreach (var entry in _allEntries)
         {
