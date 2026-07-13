@@ -113,11 +113,32 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="8,5" />
     </Style>
+    <!-- Retemplated so the default WPF ContextMenu chrome is gone: the stock
+         template paints a light "icon gutter" strip down the left edge that,
+         over the dark panel, shows as a white stripe overlapping the items.
+         This template is just the themed border + items (matching the submenu
+         popup below), so there is no gutter. -->
     <Style TargetType="{x:Type ContextMenu}">
         <Setter Property="Background" Value="{StaticResource Dyc.PanelBrush}" />
         <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource Dyc.PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContextMenu}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="3"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer CanContentScroll="True">
+                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <!-- Fully themed menu item. Crucially it templates the SUBMENU popup with a
          dark themed border — WPF's default leaves that popup system-white, which
