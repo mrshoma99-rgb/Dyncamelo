@@ -726,6 +726,34 @@
                     </ContextMenu>
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
+
+            <!-- Busy overlay over the canvas. Graph runs are synchronous on the UI
+                 thread (Navisworks nodes must run on the host's main thread), so
+                 this appears just before the thread blocks to signal "working",
+                 alongside the wait cursor set in code-behind. -->
+            <Border Grid.Column="2"
+                    Background="#66000000"
+                    Visibility="{Binding IsRunning, Converter={StaticResource Dyc.BoolToVisibility}}"
+                    Panel.ZIndex="1000">
+                <Border HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource Dyc.PanelBrush}"
+                        BorderBrush="{StaticResource Dyc.AccentBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,14">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏳"
+                                   FontSize="16"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0" />
+                        <TextBlock Text="Running the graph…"
+                                   Foreground="{StaticResource Dyc.TextBrush}"
+                                   FontSize="13"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Border>
         </Grid>
     </DockPanel>
 </UserControl>

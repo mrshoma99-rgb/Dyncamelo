@@ -59,6 +59,7 @@ public class GraphEditorViewModel : ObservableObject
     private readonly UiSettingsService _settings;
     private readonly IPreviewService _preview;
     private bool _previewSelection;
+    private bool _isRunning;
 
     private GraphModel _graph;
     private string? _currentFilePath;
@@ -227,6 +228,19 @@ public class GraphEditorViewModel : ObservableObject
     {
         get => _statusMessage;
         private set => SetProperty(ref _statusMessage, value);
+    }
+
+    /// <summary>
+    /// True while an interactive run is executing. Graph execution is synchronous
+    /// on the UI thread (Navisworks nodes must run on the host's main thread), so
+    /// the view uses this to show a busy indicator and wait cursor before the
+    /// thread blocks — the run would otherwise look like a freeze. Not set for the
+    /// fast debounced auto-run, which would only flicker.
+    /// </summary>
+    public bool IsRunning
+    {
+        get => _isRunning;
+        private set => SetProperty(ref _isRunning, value);
     }
 
     /// <summary>Wall-clock duration of the last run in milliseconds.</summary>
@@ -522,10 +536,27 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Runs the dirty subgraph now (no-op while a run is already in progress).</summary>
     public void RunGraph()
     {
+        RunGraph(interactive: true);
+    }
+
+    /// <summary>
+    /// Runs the dirty subgraph. Interactive runs raise <see cref="IsRunning"/> so
+    /// the view can show a busy indicator before the (UI-thread-blocking) run; the
+    /// debounced auto-run passes <c>false</c> to stay silent.
+    /// </summary>
+    /// <param name="interactive">True for an explicit run (Run button / open / F5).</param>
+    private void RunGraph(bool interactive)
+    {
         _autoRunTimer.Stop();
         if (_engine.IsRunning)
         {
             return;
+        }
+
+        if (interactive)
+        {
+            StatusMessage = "Running…";
+            IsRunning = true; // raised synchronously so the view paints before we block
         }
 
         RunResult result;
@@ -538,6 +569,13 @@ public class GraphEditorViewModel : ObservableObject
         {
             StatusMessage = "Run failed: " + ex.Message;
             return;
+        }
+        finally
+        {
+            if (interactive)
+            {
+                IsRunning = false;
+            }
         }
 
         UpdateRunStatistics(result);
@@ -1439,7 +1477,7 @@ public class GraphEditorViewModel : ObservableObject
     private void OnAutoRunTimerTick(object? sender, EventArgs e)
     {
         _autoRunTimer.Stop();
-        RunGraph();
+        RunGraph(interactive: false);
     }
 
     private void UpdateRunStatistics(RunResult? result)

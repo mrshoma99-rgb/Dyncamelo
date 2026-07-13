@@ -72,6 +72,26 @@ public partial class DyncameloEditorControl : UserControl
         {
             ApplyPalette(ViewModel.PaletteId);
         }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.IsRunning) && ViewModel != null)
+        {
+            if (ViewModel.IsRunning)
+            {
+                // Graph execution is synchronous on this (UI) thread, so nothing
+                // will repaint until it returns. Show an OS-drawn wait cursor —
+                // which the system keeps drawing even while the thread is blocked —
+                // and force one render pass so the "Running…" overlay is on screen
+                // before we block. Without this the run looks like a freeze.
+                Mouse.OverrideCursor = Cursors.Wait;
+                UpdateLayout();
+                Dispatcher.Invoke(
+                    new System.Action(() => { }),
+                    System.Windows.Threading.DispatcherPriority.Render);
+            }
+            else
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
     }
 
     /// <summary>
