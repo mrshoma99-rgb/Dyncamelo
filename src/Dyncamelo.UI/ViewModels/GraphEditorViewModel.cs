@@ -57,6 +57,8 @@ public class GraphEditorViewModel : ObservableObject
     private readonly GraphEngine _engine = new GraphEngine();
     private readonly DispatcherTimer _autoRunTimer;
     private readonly UiSettingsService _settings;
+    private readonly IPreviewService _preview;
+    private bool _previewSelection;
 
     private GraphModel _graph;
     private string? _currentFilePath;
@@ -75,11 +77,16 @@ public class GraphEditorViewModel : ObservableObject
     /// <param name="registry">Node registry (already populated by the host).</param>
     /// <param name="dialogs">Dialog service; a default WPF implementation is used when null.</param>
     /// <param name="settings">Persisted UI settings (favourites, recent files); the default %APPDATA% store is used when null.</param>
-    public GraphEditorViewModel(NodeRegistry registry, IDialogService? dialogs = null, UiSettingsService? settings = null)
+    public GraphEditorViewModel(
+        NodeRegistry registry,
+        IDialogService? dialogs = null,
+        UiSettingsService? settings = null,
+        IPreviewService? preview = null)
     {
         Registry = registry ?? throw new ArgumentNullException(nameof(registry));
         Dialogs = dialogs ?? new WpfDialogService();
         _settings = settings ?? new UiSettingsService();
+        _preview = preview ?? new NullPreviewService();
         Library = new LibraryViewModel(registry, _settings);
         RecentFiles = new ObservableCollection<string>(_settings.RecentFiles);
         SampleGraphs = new ObservableCollection<SampleGraphViewModel>();
@@ -87,6 +94,7 @@ public class GraphEditorViewModel : ObservableObject
         Items = new ObservableCollection<CanvasItemViewModel>();
         Connections = new ObservableCollection<ConnectionViewModel>();
         SelectedItems = new ObservableCollection<CanvasItemViewModel>();
+        SelectedItems.CollectionChanged += OnSelectedItemsChanged;
         SelectedConnections = new ObservableCollection<ConnectionViewModel>();
         SelectedConnections.CollectionChanged += OnSelectedConnectionsChanged;
         PendingConnection = new PendingConnectionViewModel();
@@ -132,6 +140,7 @@ public class GraphEditorViewModel : ObservableObject
             option => { if (option != null) PaletteId = option.Id; });
         _doubleClickAction = _settings.DoubleClickAction;
         _paletteId = _settings.PaletteId;
+        _previewSelection = _settings.PreviewSelection;
         UpdateChoiceSelection();
 
         _autoRunTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
@@ -531,6 +540,7 @@ public class GraphEditorViewModel : ObservableObject
         }
 
         UpdateRunStatistics(result);
+        RefreshPreview(); // the selected node's outputs just changed
     }
 
     // ----- graph attachment -------------------------------------------------
@@ -645,6 +655,53 @@ public class GraphEditorViewModel : ObservableObject
         }
 
         RefreshConnectedFlags();
+    }
+
+    /// <summary>
+    /// Enables highlighting the selected node's output model items in the host
+    /// viewport (mirrored into the Navisworks selection). Off by default because
+    /// it overwrites the live selection, which graphs using Selection.Current read.
+    /// </summary>
+    public bool PreviewSelection
+    {
+        get => _previewSelection;
+        set
+        {
+            if (SetField(ref _previewSelection, value))
+            {
+                _settings.SetPreviewSelection(value);
+                RefreshPreview();
+            }
+        }
+    }
+
+    private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        RefreshPreview();
+    }
+
+    /// <summary>
+    /// Pushes the currently-selected node's output model items to the host
+    /// preview (a single node must be selected and previewing must be enabled),
+    /// otherwise clears it. Called on selection change and after each run.
+    /// </summary>
+    private void RefreshPreview()
+    {
+        if (!_previewSelection)
+        {
+            _preview.ClearPreview();
+            return;
+        }
+
+        var nodes = SelectedItems.OfType<NodeViewModel>().Take(2).ToList();
+        if (nodes.Count == 1)
+        {
+            _preview.ShowPreview(nodes[0].Model.OutputValues);
+        }
+        else
+        {
+            _preview.ClearPreview();
+        }
     }
 
     private void OnSelectedConnectionsChanged(object? sender, NotifyCollectionChangedEventArgs e)

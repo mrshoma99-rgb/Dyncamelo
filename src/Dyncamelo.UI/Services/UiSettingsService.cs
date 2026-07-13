@@ -20,6 +20,7 @@ public class UiSettingsService
     private readonly List<string> _recentFiles = new List<string>();
     private bool _showLibraryDescriptions = true;
     private string _doubleClickAction = "string";
+    private bool _previewSelection;
     private string _paletteId = "DyncameloDark";
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
@@ -52,6 +53,20 @@ public class UiSettingsService
         if (_showLibraryDescriptions != show)
         {
             _showLibraryDescriptions = show;
+            Save();
+        }
+    }
+
+    /// <summary>True to highlight the selected node's output items in Navisworks (default off).</summary>
+    public bool PreviewSelection => _previewSelection;
+
+    /// <summary>Persists the "highlight selected node's elements" toggle.</summary>
+    /// <param name="enabled">True to mirror the selected node's output into the Navisworks selection.</param>
+    public void SetPreviewSelection(bool enabled)
+    {
+        if (_previewSelection != enabled)
+        {
+            _previewSelection = enabled;
             Save();
         }
     }
@@ -173,6 +188,7 @@ public class UiSettingsService
                 RecentFiles = new List<string>(_recentFiles),
                 ShowLibraryDescriptions = _showLibraryDescriptions,
                 DoubleClickAction = _doubleClickAction,
+                PreviewSelection = _previewSelection,
                 PaletteId = _paletteId,
             };
 
@@ -224,6 +240,7 @@ public class UiSettingsService
         _recentFiles.Clear();
         _showLibraryDescriptions = true;
         _doubleClickAction = "string";
+        _previewSelection = false;
         _paletteId = "DyncameloDark";
         if (data == null)
         {
@@ -232,6 +249,7 @@ public class UiSettingsService
 
         _showLibraryDescriptions = data.ShowLibraryDescriptions ?? true;
         _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
+        _previewSelection = data.PreviewSelection ?? false;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
 
         if (data.FavoriteNodeIds != null)
@@ -327,6 +345,8 @@ public class UiSettingsService
 
         [JsonProperty("showLibraryDescriptions")]
         public bool? ShowLibraryDescriptions { get; set; }
+
+        public bool? PreviewSelection { get; set; }
 
         [JsonProperty("doubleClickAction")]
         public string? DoubleClickAction { get; set; }
