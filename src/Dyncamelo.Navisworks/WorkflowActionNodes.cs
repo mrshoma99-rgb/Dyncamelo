@@ -289,7 +289,11 @@ public static class WorkflowActionNodes
                 : new SavedViewpoint(doc.CurrentViewpoint.ToViewpoint());
             saved.DisplayName = name;
 
-            var stored = StoreViewpoint(viewpoints, saved, name, _folderName);
+            // CaptureRuntimeOverrides snapshots the appearance/visibility overrides
+            // but leaves the camera at a default (origin, top view); pull the current
+            // camera in afterwards with ReplaceFromCurrentView. The plain camera-only
+            // path already has the right camera, so it skips the refresh.
+            var stored = StoreViewpoint(viewpoints, saved, name, _folderName, refreshCamera: _bakeOverrides);
             context.Collect(stored);
         }
     }
@@ -303,7 +307,8 @@ public static class WorkflowActionNodes
         Autodesk.Navisworks.Api.DocumentParts.DocumentSavedViewpoints viewpoints,
         SavedViewpoint saved,
         string name,
-        string? folderName)
+        string? folderName,
+        bool refreshCamera)
     {
         FolderItem? folder = null;
         if (!string.IsNullOrEmpty(folderName))
@@ -342,6 +347,18 @@ public static class WorkflowActionNodes
 
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
         var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
-        return storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved;
+        var stored = storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved;
+
+        if (refreshCamera)
+        {
+            // Update the stored viewpoint's camera (and visibility) from the current
+            // view; the appearance overrides captured above are left intact. This is
+            // what CaptureRuntimeOverrides alone cannot do — it omits the camera.
+            viewpoints.ReplaceFromCurrentView(stored);
+            storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
+            stored = storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : stored;
+        }
+
+        return stored;
     }
 }

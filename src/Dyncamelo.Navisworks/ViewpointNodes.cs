@@ -168,7 +168,14 @@ public static class ViewpointNodes
 
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
         var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
-        return storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved;
+        var stored = storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved;
+
+        // CaptureRuntimeOverrides keeps the appearance/visibility overrides but not
+        // the camera (it leaves a default origin/top view); ReplaceFromCurrentView
+        // pulls the current camera into the stored viewpoint, preserving the overrides.
+        viewpoints.ReplaceFromCurrentView(stored);
+        storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
+        return storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : stored;
     }
 
     /// <summary>The display name of a saved viewpoint.</summary>
