@@ -1,7 +1,9 @@
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Types;
 using Dyncamelo.Nodes;
+using NwBoundingBox3D = Autodesk.Navisworks.Api.BoundingBox3D;
 using NwColor = Autodesk.Navisworks.Api.Color;
+using NwModelItem = Autodesk.Navisworks.Api.ModelItem;
 using NwPoint3D = Autodesk.Navisworks.Api.Point3D;
 
 namespace Dyncamelo.Navisworks;
@@ -19,7 +21,7 @@ namespace Dyncamelo.Navisworks;
 [IsVisibleInLibrary(false)]
 public static class NavisworksTypeConverters
 {
-    /// <summary>Registers the color converters. Idempotent; runs once per process.</summary>
+    /// <summary>Registers the color, point and bounding-box converters. Idempotent; runs once per process.</summary>
     [TypeConverterRegistration]
     public static void RegisterConverters()
     {
@@ -62,6 +64,45 @@ public static class NavisworksTypeConverters
             {
                 var point = (NwPoint3D)value;
                 return new DyncameloPoint(point.X, point.Y, point.Z);
+            });
+
+        // Bounding boxes flow both ways: ModelItem.BoundingBox (a Navisworks
+        // BoundingBox3D) feeds general geometry nodes like BoundingBox.Scale,
+        // and the scaled general box feeds Navisworks consumers (section boxes,
+        // zoom targets) back.
+        TypeCoercion.RegisterConverter(
+            typeof(NwBoundingBox3D),
+            typeof(DyncameloBoundingBox),
+            value =>
+            {
+                var box = (NwBoundingBox3D)value;
+                return new DyncameloBoundingBox(
+                    new DyncameloPoint(box.Min.X, box.Min.Y, box.Min.Z),
+                    new DyncameloPoint(box.Max.X, box.Max.Y, box.Max.Z));
+            });
+
+        TypeCoercion.RegisterConverter(
+            typeof(DyncameloBoundingBox),
+            typeof(NwBoundingBox3D),
+            value =>
+            {
+                var box = (DyncameloBoundingBox)value;
+                return new NwBoundingBox3D(
+                    new NwPoint3D(box.Min.X, box.Min.Y, box.Min.Z),
+                    new NwPoint3D(box.Max.X, box.Max.Y, box.Max.Z));
+            });
+
+        // An element wired straight into a bounding-box port means "this
+        // element's box" (replication maps lists item-by-item).
+        TypeCoercion.RegisterConverter(
+            typeof(NwModelItem),
+            typeof(DyncameloBoundingBox),
+            value =>
+            {
+                var box = ((NwModelItem)value).BoundingBox(false);
+                return new DyncameloBoundingBox(
+                    new DyncameloPoint(box.Min.X, box.Min.Y, box.Min.Z),
+                    new DyncameloPoint(box.Max.X, box.Max.Y, box.Max.Z));
             });
     }
 }

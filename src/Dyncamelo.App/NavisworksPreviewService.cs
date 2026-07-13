@@ -11,9 +11,14 @@ namespace Dyncamelo.App;
 /// selection, so users can see in the viewport (and the selection tree) what a
 /// node collected — the Dynamo-style "preview". Runs on the Navisworks main
 /// thread (the editor's UI thread) and never lets a preview disrupt the host.
+/// The service only ever touches the live selection while it owns it: until a
+/// preview has actually been applied, Show/Clear calls leave the user's own
+/// selection alone — graphs reading Selection.Current depend on that.
 /// </summary>
 public sealed class NavisworksPreviewService : IPreviewService
 {
+    private bool _previewApplied;
+
     /// <inheritdoc />
     public void ShowPreview(IReadOnlyList<object?> outputs)
     {
@@ -37,9 +42,14 @@ public sealed class NavisworksPreviewService : IPreviewService
             if (items.Count > 0)
             {
                 document.CurrentSelection.CopyFrom(items);
+                _previewApplied = true;
             }
-            else
+            else if (_previewApplied)
             {
+                // The previously previewed node now has nothing to show —
+                // release the selection we took over. A node that never showed
+                // anything must not clear what the user picked themselves.
+                _previewApplied = false;
                 document.CurrentSelection.Clear();
             }
         }
@@ -52,6 +62,12 @@ public sealed class NavisworksPreviewService : IPreviewService
     /// <inheritdoc />
     public void ClearPreview()
     {
+        if (!_previewApplied)
+        {
+            return;
+        }
+
+        _previewApplied = false;
         try
         {
             var document = DyncameloHost.DocumentService.ActiveDocument;
