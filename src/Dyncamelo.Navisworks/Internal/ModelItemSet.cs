@@ -34,4 +34,23 @@ internal sealed class ModelItemSet
         bucket.Add(item);
         return true;
     }
+
+    /// <summary>True when the same scene node is already present in the set.</summary>
+    internal bool Contains(ModelItem item)
+    {
+        if (!_buckets.TryGetValue(item.InstanceHashCode, out var bucket))
+        {
+            return false;
+        }
+
+        foreach (var existing in bucket)
+        {
+            if (existing.IsSameInstance(item))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

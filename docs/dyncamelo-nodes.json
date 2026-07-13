@@ -1,6 +1,6 @@
 {
- "version": "v0.10.0",
- "count": 283,
+ "version": "v0.10.1",
+ "count": 284,
  "categories": [
   {
    "name": "Annotation",
@@ -96,7 +96,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 14
+   "count": 15
   },
   {
    "name": "Navisworks.Properties",
@@ -6519,6 +6519,37 @@
     }
    ],
    "returns": "The internal and localized class names (layer/group/geometry detection)."
+  },
+  {
+   "name": "ModelItem.CommonAncestor",
+   "category": "Navisworks.ModelItem",
+   "description": "The deepest common ancestor of the given items in the selection tree — the smallest branch (room, level, block, model) that contains them all. Null when they share no ancestor.",
+   "tags": [
+    "item",
+    "common",
+    "ancestor",
+    "shared",
+    "parent",
+    "tree",
+    "lca",
+    "branch",
+    "container"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items (e.g. a multi-selection)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "ancestor",
+     "type": "ModelItem",
+     "description": "The last (deepest) common ancestor in the selection tree — the smallest branch that contains them all — or null when they share none (different models)."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "ModelItem.Descendants",

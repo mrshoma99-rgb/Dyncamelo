@@ -623,7 +623,9 @@
                         VerticalAlignment="Center"
                         Minimum="{Binding Min}"
                         Maximum="{Binding Max}"
-                        Value="{Binding Value}" />
+                        Value="{Binding Value}"
+                        IsSnapToTickEnabled="True"
+                        TickFrequency="{Binding Step}" />
                 <TextBlock Grid.Column="2"
                            Margin="0,0,4,0"
                            VerticalAlignment="Center"
@@ -639,6 +641,12 @@
                          Text="{Binding Max}"
                          ToolTip="Maximum" />
             </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
+                           Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
+                <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
+                         Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 
@@ -666,7 +674,7 @@
                         Maximum="{Binding Max}"
                         Value="{Binding Value}"
                         IsSnapToTickEnabled="True"
-                        TickFrequency="1" />
+                        TickFrequency="{Binding Step}" />
                 <TextBlock Grid.Column="2"
                            Margin="0,0,4,0"
                            VerticalAlignment="Center"
@@ -682,6 +690,12 @@
                          Text="{Binding Max}"
                          ToolTip="Maximum" />
             </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+                <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
+                           Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
+                <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
+                         Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 
@@ -852,17 +866,34 @@
 
     <DataTemplate x:Key="NodeBody.ColorPickerNode">
         <StackPanel Margin="4" MinWidth="180">
-            <Border Height="18" CornerRadius="2" BorderThickness="1"
-                    BorderBrush="{StaticResource Dyc.InputBorderBrush}">
-                <Border.Background>
-                    <MultiBinding Converter="{StaticResource Dyc.ColorChannelsToBrush}">
-                        <Binding Path="A" />
-                        <Binding Path="R" />
-                        <Binding Path="G" />
-                        <Binding Path="B" />
-                    </MultiBinding>
-                </Border.Background>
-            </Border>
+            <Button Height="24" Cursor="Hand"
+                    Command="{Binding DataContext.PickColorCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                    CommandParameter="{Binding}"
+                    ToolTip="Open the colour picker"
+                    BorderBrush="{StaticResource Dyc.InputBorderBrush}" BorderThickness="1">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="3"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                        <Border.Background>
+                                            <MultiBinding Converter="{StaticResource Dyc.ColorChannelsToBrush}">
+                                                <Binding Path="A" />
+                                                <Binding Path="R" />
+                                                <Binding Path="G" />
+                                                <Binding Path="B" />
+                                            </MultiBinding>
+                                        </Border.Background>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="14" />

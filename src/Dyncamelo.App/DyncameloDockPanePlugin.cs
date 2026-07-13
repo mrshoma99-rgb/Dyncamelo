@@ -33,7 +33,7 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         // Publish the document provider for zero-touch nodes before anything runs.
         NavisworksContext.HostService = DyncameloHost.DocumentService;
 
-        _viewModel = new GraphEditorViewModel(DyncameloHost.Registry)
+        _viewModel = new GraphEditorViewModel(DyncameloHost.Registry, preview: new NavisworksPreviewService())
         {
             EvaluationContextFactory = DyncameloHost.CreateEvaluationContext,
         };

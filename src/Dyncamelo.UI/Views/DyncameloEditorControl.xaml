@@ -262,6 +262,13 @@
                                               ToolTip="Show a description line under each library node"
                                               IsChecked="{Binding Library.ShowDescriptions}" />
 
+                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
+                                              HorizontalAlignment="Left"
+                                              Margin="0,8,0,0"
+                                              Content="Highlight selected node in Navisworks"
+                                              ToolTip="Select the model items a node outputs in the Navisworks viewport when you click the node. Overwrites the live selection, so turn off if you use Selection.Current."
+                                              IsChecked="{Binding PreviewSelection}" />
+
                                 <TextBlock Text="Double-click empty canvas"
                                            Foreground="{StaticResource Dyc.SubtleTextBrush}"
                                            Margin="0,14,0,4" />
