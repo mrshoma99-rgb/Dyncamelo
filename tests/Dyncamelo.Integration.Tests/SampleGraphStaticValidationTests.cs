@@ -299,7 +299,7 @@ public class SampleGraphStaticValidationTests
         return null;
     }
 
-    /// <summary>Splits on a separator, ignoring separators nested in &lt;&gt;, () or strings.</summary>
+    /// <summary>Splits on a separator, ignoring separators nested in &lt;&gt;, (), [] or strings.</summary>
     private static List<string> SplitTopLevel(string text, char separator)
     {
         var parts = new List<string>();
@@ -327,8 +327,10 @@ public class SampleGraphStaticValidationTests
             {
                 case '"': inString = true; break;
                 case '<':
+                case '[':
                 case '(': depth++; break;
                 case '>':
+                case ']':
                 case ')': depth--; break;
                 default:
                     if (c == separator && depth == 0)
@@ -347,6 +349,7 @@ public class SampleGraphStaticValidationTests
 
     private static SourceParameter ParseParameter(string parameter)
     {
+        parameter = StripLeadingAttributes(parameter);
         var declaration = SplitTopLevel(parameter, '=');
         bool optional = declaration.Count > 1;
         var typeAndName = declaration[0].Trim();
@@ -360,6 +363,66 @@ public class SampleGraphStaticValidationTests
             typeAndName.Substring(nameStart),
             typeAndName.Substring(0, nameStart).Trim(),
             optional);
+    }
+
+    /// <summary>
+    /// Removes any leading parameter attributes (e.g. <c>[NodeChoices("a", "b")] </c>)
+    /// so the remaining text is just the type, name and optional default. String- and
+    /// nesting-aware so commas/brackets inside the attribute don't confuse it.
+    /// </summary>
+    private static string StripLeadingAttributes(string text)
+    {
+        text = text.Trim();
+        while (text.StartsWith("["))
+        {
+            int depth = 0;
+            bool inString = false;
+            int end = -1;
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (inString)
+                {
+                    if (c == '\\')
+                    {
+                        i++;
+                    }
+                    else if (c == '"')
+                    {
+                        inString = false;
+                    }
+
+                    continue;
+                }
+
+                if (c == '"')
+                {
+                    inString = true;
+                }
+                else if (c == '[')
+                {
+                    depth++;
+                }
+                else if (c == ']')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        end = i;
+                        break;
+                    }
+                }
+            }
+
+            if (end < 0)
+            {
+                break;
+            }
+
+            text = text.Substring(end + 1).Trim();
+        }
+
+        return text;
     }
 
     private sealed class SourceParameter

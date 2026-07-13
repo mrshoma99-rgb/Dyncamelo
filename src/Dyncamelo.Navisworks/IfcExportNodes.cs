@@ -50,6 +50,7 @@ public static class IfcExportNodes
     public static Dictionary<string, object?> ToIfc(
         IEnumerable<ModelItem> items,
         string filePath,
+        [NodeChoices("IFC4", "IFC2X3")]
         string schema = "IFC4",
         bool instancing = true,
         bool properties = true,

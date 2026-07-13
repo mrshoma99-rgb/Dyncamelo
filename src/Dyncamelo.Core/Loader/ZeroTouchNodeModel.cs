@@ -28,13 +28,13 @@ public class ZeroTouchNodeModel : NodeModel
 
         foreach (var input in definition.Inputs)
         {
-            if (input.HasDefault)
+            var port = input.HasDefault
+                ? AddInput(input.Name, input.Type, input.DefaultValue, input.Description)
+                : AddInput(input.Name, input.Type, input.Description);
+
+            if (input.Choices != null && input.Choices.Count > 0)
             {
-                AddInput(input.Name, input.Type, input.DefaultValue, input.Description);
-            }
-            else
-            {
-                AddInput(input.Name, input.Type, input.Description);
+                port.Choices = input.Choices;
             }
         }
 

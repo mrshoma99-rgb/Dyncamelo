@@ -38,7 +38,10 @@ public static class SelectionLevelNodes
     [NodeDescription("Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection).")]
     [NodeSearchTags("selection", "resolve", "resolution", "level", "file", "layer", "first object", "last object", "last unique", "geometry", "parent", "ancestor")]
     [return: NodeName("items")]
-    public static List<ModelItem> Resolve(IEnumerable<ModelItem> modelItems, string level = "LastObject")
+    public static List<ModelItem> Resolve(
+        IEnumerable<ModelItem> modelItems,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
+        string level = "LastObject")
     {
         if (modelItems == null)
         {

@@ -288,6 +288,13 @@ public static class AssemblyNodeLoader
     private static PortDescriptor CreateInputDescriptor(ParameterInfo parameter)
     {
         var descriptor = new PortDescriptor(parameter.Name ?? "arg", parameter.ParameterType);
+
+        var choices = parameter.GetCustomAttribute<NodeChoicesAttribute>()?.Choices;
+        if (choices != null && choices.Length > 0)
+        {
+            descriptor.Choices = choices;
+        }
+
         if (parameter.IsOptional)
         {
             descriptor.HasDefault = true;

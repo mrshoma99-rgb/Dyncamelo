@@ -73,6 +73,28 @@ public sealed class NodeSearchTagsAttribute : Attribute
 }
 
 /// <summary>
+/// Declares a fixed set of allowed string values for a parameter, so the editor
+/// can offer a dropdown instead of a free-text box (e.g. selection-resolution
+/// levels, clash test types, export schemas). The values are the canonical
+/// spellings shown in the list; the node's own parsing decides how leniently
+/// they are matched. Purely advisory — it never changes the mangled definition
+/// id, so adding it to an existing parameter keeps saved .dyc files loading.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodeChoicesAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="choices">The allowed values, in the order to show them.</param>
+    public NodeChoicesAttribute(params string[] choices)
+    {
+        Choices = choices ?? Array.Empty<string>();
+    }
+
+    /// <summary>The allowed values, in display order.</summary>
+    public string[] Choices { get; }
+}
+
+/// <summary>
 /// Legacy definition ids under which a zero-touch node was previously
 /// serialized. When a method's signature changes (e.g. a new optional
 /// parameter is appended), its mangled definition id changes with it and

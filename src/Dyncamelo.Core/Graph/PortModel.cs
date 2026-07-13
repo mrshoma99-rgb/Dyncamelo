@@ -13,6 +13,8 @@ public class PortModel : INotifyPropertyChanged
 {
     private bool _usingDefaultValue;
     private object? _value;
+    private object? _userValue;
+    private bool _hasUserValue;
 
     /// <summary>Creates a port.</summary>
     /// <param name="owner">The node the port belongs to.</param>
@@ -71,6 +73,57 @@ public class PortModel : INotifyPropertyChanged
             OnPropertyChanged();
             Owner.MarkDirty();
         }
+    }
+
+    /// <summary>
+    /// Allowed values for a choice input (from a <c>[NodeChoices]</c> parameter),
+    /// or <c>null</c> for a free port. When present, the editor offers a dropdown
+    /// and the chosen value is stored in <see cref="UserValue"/>.
+    /// </summary>
+    public System.Collections.Generic.IReadOnlyList<string>? Choices { get; internal set; }
+
+    /// <summary>
+    /// True when the user has pinned an inline value on this unconnected input
+    /// (e.g. picked a choice from the dropdown). Takes precedence over
+    /// <see cref="DefaultValue"/> when the port has no incoming connection.
+    /// </summary>
+    public bool HasUserValue => _hasUserValue;
+
+    /// <summary>The user-pinned inline value; only meaningful when <see cref="HasUserValue"/> is true.</summary>
+    public object? UserValue => _userValue;
+
+    /// <summary>
+    /// Pins an inline value on this input (used by the choice dropdown). Marks
+    /// the owning node dirty so the graph re-evaluates.
+    /// </summary>
+    /// <param name="value">The value to feed the port while it is unconnected.</param>
+    public void SetUserValue(object? value)
+    {
+        if (_hasUserValue && Equals(_userValue, value))
+        {
+            return;
+        }
+
+        _hasUserValue = true;
+        _userValue = value;
+        OnPropertyChanged(nameof(UserValue));
+        OnPropertyChanged(nameof(HasUserValue));
+        Owner.MarkDirty();
+    }
+
+    /// <summary>Clears any pinned inline value, reverting to the port default. Marks the node dirty.</summary>
+    public void ClearUserValue()
+    {
+        if (!_hasUserValue)
+        {
+            return;
+        }
+
+        _hasUserValue = false;
+        _userValue = null;
+        OnPropertyChanged(nameof(UserValue));
+        OnPropertyChanged(nameof(HasUserValue));
+        Owner.MarkDirty();
     }
 
     /// <summary>Reserved for List@Level support (-1 = off). Persisted, not yet interpreted.</summary>

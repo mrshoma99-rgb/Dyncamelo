@@ -71,6 +71,26 @@ public class LoaderTests
     }
 
     [Fact]
+    public void ChoicesAttribute_PopulatesPortDescriptorChoices()
+    {
+        var option = ZT.Definition("Pick").Inputs.Single(p => p.Name == "option");
+        Assert.Equal(new[] { "Alpha", "Beta", "Gamma" }, option.Choices);
+    }
+
+    [Fact]
+    public void ParameterWithoutChoicesAttribute_HasNullChoices()
+    {
+        Assert.Null(ZT.Definition("AddStep").Inputs.Single(p => p.Name == "step").Choices);
+    }
+
+    [Fact]
+    public void ZeroTouchNode_CarriesChoicesOntoInputPort()
+    {
+        var port = ZT.Node("Pick").InPorts.Single(p => p.Name == "option");
+        Assert.Equal(new[] { "Alpha", "Beta", "Gamma" }, port.Choices);
+    }
+
+    [Fact]
     public void OptionalStructParameter_DeclaredDefault_GetsDefaultOfT()
     {
         // C# stores no compile-time constant for "= default" on non-nullable

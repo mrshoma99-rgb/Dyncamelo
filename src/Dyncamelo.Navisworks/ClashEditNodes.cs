@@ -78,6 +78,7 @@ public static class ClashEditNodes
     public static SavedItem AddComment(
         SavedItem result,
         string body,
+        [NodeChoices("New", "Active", "Approved", "Resolved")]
         string status = "New",
         string author = "",
         Document? document = null)

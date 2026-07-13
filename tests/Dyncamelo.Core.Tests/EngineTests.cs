@@ -428,4 +428,45 @@ public class EngineTests
             return new object?[] { null };
         }
     }
+
+    [Fact]
+    public void PinnedUserValue_OverridesDefault_OnUnconnectedPort()
+    {
+        var graph = new GraphModel();
+        var pick = ZT.Node("Pick"); // option defaults to "Alpha"
+        graph.AddNode(pick);
+        pick.InPorts.Single(p => p.Name == "option").SetUserValue("Gamma");
+
+        var result = _engine.Run(graph);
+
+        Assert.True(result.Success);
+        Assert.Equal("Gamma", pick.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void UnpinnedChoicePort_UsesCompileTimeDefault()
+    {
+        var graph = new GraphModel();
+        var pick = ZT.Node("Pick");
+        graph.AddNode(pick);
+
+        _engine.Run(graph);
+
+        Assert.Equal("Alpha", pick.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void Connection_WinsOverPinnedUserValue()
+    {
+        var graph = new GraphModel();
+        var source = ZT.Value(graph, "Zeta");
+        var pick = ZT.Node("Pick");
+        graph.AddNode(pick);
+        pick.InPorts.Single(p => p.Name == "option").SetUserValue("Gamma");
+        ZT.Wire(graph, source, 0, pick, 0);
+
+        _engine.Run(graph);
+
+        Assert.Equal("Zeta", pick.OutPorts[0].Value);
+    }
 }

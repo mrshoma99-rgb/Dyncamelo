@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Dyncamelo.Core.Loader;
 
@@ -30,4 +31,10 @@ public class PortDescriptor
 
     /// <summary>Compile-time default value of an optional parameter.</summary>
     public object? DefaultValue { get; set; }
+
+    /// <summary>
+    /// Allowed values for a choice parameter (from <see cref="NodeChoicesAttribute"/>),
+    /// or <c>null</c> for a free port. Drives the editor's dropdown.
+    /// </summary>
+    public IReadOnlyList<string>? Choices { get; set; }
 }

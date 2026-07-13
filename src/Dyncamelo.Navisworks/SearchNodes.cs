@@ -27,6 +27,7 @@ public static class SearchNodes
         string categoryName,
         string propertyName,
         object value,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
@@ -66,6 +67,7 @@ public static class SearchNodes
         string categoryName,
         string propertyName,
         string value,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
@@ -98,6 +100,7 @@ public static class SearchNodes
         string categoryName,
         string propertyName,
         string pattern,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
@@ -132,6 +135,7 @@ public static class SearchNodes
         string propertyName,
         string comparison,
         double value,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
@@ -182,6 +186,7 @@ public static class SearchNodes
     public static List<ModelItem> HasProperty(
         string categoryName,
         string propertyName,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
@@ -201,7 +206,11 @@ public static class SearchNodes
     // Pre-0.4 id (before the optional resolveTo parameter was appended).
     [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasCategory@string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
-    public static List<ModelItem> HasCategory(string categoryName, string resolveTo = "Self", Document? document = null)
+    public static List<ModelItem> HasCategory(
+        string categoryName,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
+        string resolveTo = "Self",
+        Document? document = null)
     {
         if (string.IsNullOrEmpty(categoryName))
         {
@@ -232,6 +241,7 @@ public static class SearchNodes
         string categoryName,
         string propertyName,
         object value,
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {

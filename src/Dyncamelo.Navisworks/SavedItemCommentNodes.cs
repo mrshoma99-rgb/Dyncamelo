@@ -30,6 +30,7 @@ public static class SavedItemCommentNodes
     public static SavedItem AddComment(
         SavedItem item,
         string body,
+        [NodeChoices("New", "Active", "Approved", "Resolved")]
         string status = "New",
         string author = "",
         Document? document = null)

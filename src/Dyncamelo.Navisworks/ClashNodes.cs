@@ -147,6 +147,7 @@ public static class ClashNodes
         string name,
         IEnumerable<ModelItem> itemsA,
         IEnumerable<ModelItem> itemsB,
+        [NodeChoices("Hard", "HardConservative", "Clearance", "Duplicate", "Custom")]
         string testType = "Hard",
         double tolerance = 0.01,
         Document? document = null)

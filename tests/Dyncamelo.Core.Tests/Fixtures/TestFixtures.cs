@@ -61,6 +61,9 @@ public static class MathFixtures
 
     public static string SeasonName(Season season) => season.ToString();
 
+    /// <summary>Choice-parameter fixture: a defaulted port with a fixed set of allowed values.</summary>
+    public static string Pick([NodeChoices("Alpha", "Beta", "Gamma")] string option = "Alpha") => option;
+
     public static void Consume(object item)
     {
         // side-effect placeholder; void methods pass their first input through

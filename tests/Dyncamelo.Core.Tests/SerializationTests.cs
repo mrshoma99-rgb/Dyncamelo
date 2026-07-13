@@ -129,6 +129,37 @@ public class SerializationTests
     }
 
     [Fact]
+    public void PinnedUserValue_RoundTrips()
+    {
+        var graph = new GraphModel();
+        var pick = ZT.Node("Pick");
+        graph.AddNode(pick);
+        pick.InPorts.Single(p => p.Name == "option").SetUserValue("Gamma");
+
+        var serializer = new GraphSerializer(FullRegistry());
+        var loaded = serializer.Deserialize(serializer.Serialize(graph));
+
+        var loadedPort = loaded.Nodes.OfType<ZeroTouchNodeModel>().Single()
+            .InPorts.Single(p => p.Name == "option");
+        Assert.True(loadedPort.HasUserValue);
+        Assert.Equal("Gamma", loadedPort.UserValue);
+    }
+
+    [Fact]
+    public void UnpinnedPort_HasNoUserValueAfterRoundTrip()
+    {
+        var graph = new GraphModel();
+        graph.AddNode(ZT.Node("Pick"));
+
+        var serializer = new GraphSerializer(FullRegistry());
+        var loaded = serializer.Deserialize(serializer.Serialize(graph));
+
+        var loadedPort = loaded.Nodes.OfType<ZeroTouchNodeModel>().Single()
+            .InPorts.Single(p => p.Name == "option");
+        Assert.False(loadedPort.HasUserValue);
+    }
+
+    [Fact]
     public void LegacyDefinitionId_LoadsViaAlias_KeepsOldBehavior_AndMigratesOnSave()
     {
         // Build a graph with the CURRENT Doubler(x, scale = 2), then rewrite its

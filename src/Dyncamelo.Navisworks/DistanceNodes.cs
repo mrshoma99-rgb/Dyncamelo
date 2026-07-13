@@ -29,6 +29,7 @@ public static class DistanceNodes
     public static Dictionary<string, object?> BetweenItems(
         IEnumerable<ModelItem> itemsA,
         IEnumerable<ModelItem> itemsB,
+        [NodeChoices("mesh", "bbox")]
         string method = "mesh",
         Document? document = null)
     {

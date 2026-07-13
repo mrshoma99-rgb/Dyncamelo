@@ -375,20 +375,53 @@ public class GraphSerializer
         json["Y"] = node.Y;
         json["Lacing"] = node.Lacing.ToString();
         json["IsFrozen"] = node.IsFrozen;
-        json["InputPorts"] = new JArray(node.InPorts.Select(p => new JObject
-        {
-            ["Name"] = p.Name,
-            ["UsingDefaultValue"] = p.UsingDefaultValue,
-            ["Level"] = p.Level,
-            ["UseLevels"] = p.UseLevels,
-            ["KeepListStructure"] = p.KeepListStructure,
-        }));
+        json["InputPorts"] = new JArray(node.InPorts.Select(SerializeInputPort));
         json["OutputPorts"] = new JArray(node.OutPorts.Select(p => new JObject
         {
             ["Name"] = p.Name,
         }));
         json["Data"] = data;
         return json;
+    }
+
+    private static JObject SerializeInputPort(PortModel port)
+    {
+        var json = new JObject
+        {
+            ["Name"] = port.Name,
+            ["UsingDefaultValue"] = port.UsingDefaultValue,
+            ["Level"] = port.Level,
+            ["UseLevels"] = port.UseLevels,
+            ["KeepListStructure"] = port.KeepListStructure,
+        };
+
+        // Persist an inline value pinned by the editor (choice dropdowns). Only
+        // JSON-primitive values are expected here; anything else is skipped so a
+        // stray boxed reference can never make a graph unserializable.
+        if (port.HasUserValue)
+        {
+            if (port.UserValue == null)
+            {
+                json["UserValue"] = JValue.CreateNull();
+            }
+            else if (IsSerializablePrimitive(port.UserValue))
+            {
+                json["UserValue"] = JToken.FromObject(port.UserValue);
+            }
+        }
+
+        return json;
+    }
+
+    private static bool IsSerializablePrimitive(object value)
+    {
+        return value is string
+            || value is bool
+            || value is long
+            || value is int
+            || value is double
+            || value is float
+            || value is decimal;
     }
 
     private static JObject SerializeConnection(ConnectionModel connection)
@@ -503,6 +536,14 @@ public class GraphSerializer
                     if (port.HasDefault)
                     {
                         port.UsingDefaultValue = portJson.Value<bool?>("UsingDefaultValue") ?? port.UsingDefaultValue;
+                    }
+
+                    // An inline value pinned by the editor (choice dropdowns). Present
+                    // only when set; a null token means "pinned to null", which is
+                    // distinct from an absent key ("not pinned").
+                    if (portJson["UserValue"] is JValue userValue)
+                    {
+                        port.SetUserValue(userValue.Value);
                     }
 
                     port.Level = portJson.Value<int?>("Level") ?? -1;

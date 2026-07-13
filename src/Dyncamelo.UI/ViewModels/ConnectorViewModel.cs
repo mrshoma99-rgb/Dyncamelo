@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 using Dyncamelo.Core.Graph;
@@ -82,7 +84,52 @@ public class ConnectorViewModel : ObservableObject
     public bool IsConnected
     {
         get => _isConnected;
-        set => SetProperty(ref _isConnected, value);
+        set
+        {
+            if (SetProperty(ref _isConnected, value))
+            {
+                // A wire hides the inline choice editor and vice-versa.
+                OnPropertyChanged(nameof(ShowChoiceEditor));
+                OnPropertyChanged(nameof(SelectedChoice));
+            }
+        }
+    }
+
+    /// <summary>True for an input port that declares a fixed set of choices (renders a dropdown).</summary>
+    public bool IsChoice => IsInput && Port.Choices != null && Port.Choices.Count > 0;
+
+    /// <summary>The allowed values for the dropdown (empty when this is not a choice port).</summary>
+    public IReadOnlyList<string> Choices => Port.Choices ?? Array.Empty<string>();
+
+    /// <summary>Show the inline dropdown only for an unconnected choice port.</summary>
+    public bool ShowChoiceEditor => IsChoice && !IsConnected;
+
+    /// <summary>
+    /// The value shown in the choice dropdown: the pinned user value if set,
+    /// otherwise the port's default. Setting it pins the choice (or clears it
+    /// when set back to the default), marking the node dirty for re-evaluation.
+    /// </summary>
+    public string? SelectedChoice
+    {
+        get
+        {
+            var current = Port.HasUserValue ? Port.UserValue : Port.DefaultValue;
+            return current?.ToString();
+        }
+
+        set
+        {
+            if (value == null)
+            {
+                Port.ClearUserValue();
+            }
+            else
+            {
+                Port.SetUserValue(value);
+            }
+
+            OnPropertyChanged();
+        }
     }
 
     private static string FriendlyTypeName(System.Type type)

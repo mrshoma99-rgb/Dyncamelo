@@ -122,6 +122,12 @@ public class GraphEngine
 
                 inputs[i] = connection.Source.Value;
             }
+            else if (port.HasUserValue)
+            {
+                // An inline value pinned by the editor (e.g. a choice dropdown)
+                // wins over the compile-time default on an unconnected port.
+                inputs[i] = port.UserValue;
+            }
             else if (port.HasDefault && port.UsingDefaultValue)
             {
                 inputs[i] = port.DefaultValue;
