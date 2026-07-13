@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -29,18 +28,16 @@ internal static class RunCommand
             + "  (" + graph.Nodes.Count + " nodes, " + graph.Connections.Count + " connectors)");
         output.WriteLine();
 
-        // Per-node wall time, measured between the engine's NodeExecuted events.
-        var timings = new Dictionary<NodeModel, TimeSpan>();
         var engine = new GraphEngine();
-        var nodeStopwatch = new Stopwatch();
-        engine.NodeExecuted += (sender, e) =>
-        {
-            timings[e.Node] = nodeStopwatch.Elapsed;
-            nodeStopwatch.Restart();
-        };
-
-        nodeStopwatch.Start();
         var result = engine.Run(graph);
+
+        // Accurate per-node evaluation time from the engine, summed across loop
+        // iterations (the old NodeExecuted-gap heuristic mis-attributed loop time).
+        var timings = new Dictionary<NodeModel, NodeTiming>();
+        foreach (var timing in result.NodeTimings)
+        {
+            timings[timing.Node] = timing;
+        }
 
         PrintNodeTable(graph, timings, result, output);
         PrintWatchValues(graph, output);
@@ -62,7 +59,7 @@ internal static class RunCommand
 
     private static void PrintNodeTable(
         GraphModel graph,
-        IReadOnlyDictionary<NodeModel, TimeSpan> timings,
+        IReadOnlyDictionary<NodeModel, NodeTiming> timings,
         RunResult result,
         TextWriter output)
     {
@@ -81,9 +78,14 @@ internal static class RunCommand
             }
 
             string time;
-            if (executed.Contains(node) && timings.TryGetValue(node, out var elapsed))
+            if (executed.Contains(node) && timings.TryGetValue(node, out var timing))
             {
-                time = elapsed.TotalMilliseconds.ToString("0.0", CultureInfo.InvariantCulture) + " ms";
+                time = timing.Elapsed.TotalMilliseconds.ToString("0.0", CultureInfo.InvariantCulture) + " ms";
+                if (timing.Executions > 1)
+                {
+                    // A loop-body node: show the item count so the per-item cost is clear.
+                    time += " (" + timing.Executions.ToString(CultureInfo.InvariantCulture) + "×)";
+                }
             }
             else
             {

@@ -20,6 +20,11 @@ public class GraphEngine
 {
     private bool _isRunning;
 
+    // Per-node evaluation time for the current run, summed across loop iterations.
+    // Reset at the start of every Run; consumed into the RunResult at the end.
+    private readonly Dictionary<NodeModel, TimingAccumulator> _timings =
+        new Dictionary<NodeModel, TimingAccumulator>();
+
     /// <summary>Raised after each node finishes executing (success or failure).</summary>
     public event EventHandler<NodeEventArgs>? NodeExecuted;
 
@@ -46,6 +51,7 @@ public class GraphEngine
         }
 
         _isRunning = true;
+        _timings.Clear();
         var stopwatch = Stopwatch.StartNew();
         var executed = new List<NodeModel>();
         bool cancelled = false;
@@ -98,7 +104,50 @@ public class GraphEngine
         }
 
         stopwatch.Stop();
-        return new RunResult(executed, cancelled, stopwatch.Elapsed);
+        return new RunResult(executed, cancelled, stopwatch.Elapsed, BuildTimings());
+    }
+
+    private List<NodeTiming> BuildTimings()
+    {
+        var timings = new List<NodeTiming>(_timings.Count);
+        foreach (var pair in _timings)
+        {
+            timings.Add(new NodeTiming(pair.Key, pair.Value.Elapsed, pair.Value.Count));
+        }
+
+        return timings;
+    }
+
+    private void RecordTiming(NodeModel node, TimeSpan elapsed)
+    {
+        if (_timings.TryGetValue(node, out var accumulator))
+        {
+            accumulator.Add(elapsed);
+        }
+        else
+        {
+            _timings[node] = new TimingAccumulator(elapsed);
+        }
+    }
+
+    /// <summary>Mutable per-node time+count accumulator (summed across loop iterations).</summary>
+    private sealed class TimingAccumulator
+    {
+        public TimingAccumulator(TimeSpan elapsed)
+        {
+            Elapsed = elapsed;
+            Count = 1;
+        }
+
+        public TimeSpan Elapsed { get; private set; }
+
+        public int Count { get; private set; }
+
+        public void Add(TimeSpan elapsed)
+        {
+            Elapsed += elapsed;
+            Count++;
+        }
     }
 
     private void ExecuteNode(GraphModel graph, NodeModel node, EvaluationContext context)
@@ -158,6 +207,10 @@ public class GraphEngine
             return;
         }
 
+        // Time only the evaluation (the node's real work — a Navisworks call, a
+        // file write, ...), not the cheap input gathering above; accumulate so a
+        // loop-body node's per-item cost sums into one figure for profiling.
+        var evalWatch = Stopwatch.StartNew();
         try
         {
             var outputs = Replicator.Execute(node, inputs, context);
@@ -184,6 +237,11 @@ public class GraphEngine
             SetOutputs(node, null);
             node.AddMessage(MessageSeverity.Error, ex.Message);
             node.State = NodeState.Error;
+        }
+        finally
+        {
+            evalWatch.Stop();
+            RecordTiming(node, evalWatch.Elapsed);
         }
     }
 

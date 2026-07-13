@@ -430,6 +430,49 @@ public class EngineTests
     }
 
     [Fact]
+    public void RunResult_ReportsPerNodeTimings_ForExecutedNodes()
+    {
+        var graph = new GraphModel();
+        var a = ZT.Value(graph, 16.0);
+        var sqrt = ZT.Node("Sqrt");
+        graph.AddNode(sqrt);
+        ZT.Wire(graph, a, 0, sqrt, 0);
+
+        var result = _engine.Run(graph);
+
+        var sqrtTiming = result.NodeTimings.SingleOrDefault(t => t.Node == sqrt);
+        Assert.NotNull(sqrtTiming);
+        Assert.Equal(1, sqrtTiming!.Executions);
+        Assert.True(sqrtTiming.Elapsed >= TimeSpan.Zero);
+        Assert.Equal(sqrt.Name, sqrtTiming.Name);
+    }
+
+    [Fact]
+    public void RunResult_SumsLoopBodyTimings_WithPerItemExecutionCount()
+    {
+        // items [10,20,30] -> Loop.Item -> AddStep(+1) -> Loop.Collect
+        var graph = new GraphModel();
+        var items = ZT.Value(graph, new List<object?> { 10.0, 20.0, 30.0 });
+        var loopItem = new LoopItemNode();
+        var addStep = ZT.Node("AddStep");
+        var loopCollect = new LoopCollectNode();
+        graph.AddNode(loopItem);
+        graph.AddNode(addStep);
+        graph.AddNode(loopCollect);
+        ZT.Wire(graph, items, 0, loopItem, 0);
+        ZT.Wire(graph, loopItem, 0, addStep, 0);            // item -> AddStep.x
+        ZT.Wire(graph, loopItem, 3, loopCollect, 0);        // loop -> Loop.Collect.loop
+        ZT.Wire(graph, addStep, 0, loopCollect, 1);         // value -> Loop.Collect.value
+
+        var result = _engine.Run(graph);
+
+        // The body node ran once per item, and its timing is summed across them.
+        var stepTiming = result.NodeTimings.SingleOrDefault(t => t.Node == addStep);
+        Assert.NotNull(stepTiming);
+        Assert.Equal(3, stepTiming!.Executions);
+    }
+
+    [Fact]
     public void PinnedUserValue_OverridesDefault_OnUnconnectedPort()
     {
         var graph = new GraphModel();

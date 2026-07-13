@@ -1506,12 +1506,47 @@ public class GraphEditorViewModel : ObservableObject
             StatusMessage = result.Cancelled
                 ? "Run cancelled."
                 : "Run finished: " + result.ExecutedNodes.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
-                  " node(s) executed in " + LastRunMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ms.";
+                  " node(s) executed in " + LastRunMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ms." +
+                  DescribeSlowest(result);
         }
         else
         {
             LastRunMilliseconds = 0;
         }
+    }
+
+    /// <summary>
+    /// Names the node that ate the most time when a run is slow enough to care
+    /// (≥1 s), so the status bar answers "where did the time go?" — e.g.
+    /// " — slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)".
+    /// </summary>
+    private static string DescribeSlowest(RunResult result)
+    {
+        if (result.Elapsed.TotalSeconds < 1.0 || result.NodeTimings.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        NodeTiming? slowest = null;
+        foreach (var timing in result.NodeTimings)
+        {
+            if (slowest == null || timing.Elapsed > slowest.Elapsed)
+            {
+                slowest = timing;
+            }
+        }
+
+        if (slowest == null || slowest.Elapsed.TotalMilliseconds < 1.0)
+        {
+            return string.Empty;
+        }
+
+        var ms = Math.Round(slowest.Elapsed.TotalMilliseconds, 1)
+            .ToString("#,0.#", System.Globalization.CultureInfo.InvariantCulture);
+        var runs = slowest.Executions > 1
+            ? " (" + slowest.Executions.ToString(System.Globalization.CultureInfo.InvariantCulture) + "×)"
+            : string.Empty;
+        return " — slowest: " + slowest.Name + " " + ms + " ms" + runs;
     }
 
     // ----- lookups -----------------------------------------------------------
