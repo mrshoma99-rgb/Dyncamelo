@@ -23,6 +23,14 @@ public partial class MainWindow : Window
         VersionText.Text = "v" + InstallerEngine.SetupVersion();
         InstallPathText.Text = "Installs for this user only (no admin rights): " + InstallerEngine.BundleDir;
 
+        // Detect which supported Navisworks releases are installed so the user knows
+        // the matching plug-in will load (the bundle ships all years; Navisworks picks).
+        var detected = InstallerEngine.DetectNavisworksYears();
+        DetectedText.Text = detected.Length > 0
+            ? "Detected Navisworks " + string.Join(", ", detected) + " — the matching version loads automatically."
+            : "No supported Navisworks (2024–2026) detected. You can still install; the ribbon appears once one is present.";
+        DetectedText.Visibility = Visibility.Visible;
+
         var installed = InstallerEngine.InstalledVersion();
         if (installed != null)
         {
@@ -119,9 +127,13 @@ public partial class MainWindow : Window
     private void ShowInstallDone()
     {
         DoneTitle.Text = "Installed.";
-        DoneBody.Text = InstallerEngine.IsNavisworksRunning()
-            ? "Restart Navisworks Manage or Simulate 2024 — the BIMCamel ribbon tab appears with the Dyncamelo button."
-            : "Start Navisworks Manage or Simulate 2024 — the BIMCamel ribbon tab appears with the Dyncamelo button.";
+        var detected = InstallerEngine.DetectNavisworksYears();
+        var which = detected.Length > 0
+            ? "Navisworks " + string.Join("/", detected)
+            : "Navisworks Manage or Simulate 2024/2025/2026";
+        var verb = InstallerEngine.IsNavisworksRunning() ? "Restart" : "Start";
+        DoneBody.Text = verb + " " + which +
+            " — the BIMCamel ribbon tab appears with the Dyncamelo button.";
         ShowPanel(DonePanel);
     }
 

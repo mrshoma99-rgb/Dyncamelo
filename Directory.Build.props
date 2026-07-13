@@ -8,7 +8,7 @@
 
     <!-- Assembly version, read at runtime by the About box (DyncameloRibbonPlugin).
          Bump this in lockstep with dist/RELEASE_VERSION on every release. -->
-    <Version>0.7.0</Version>
+    <Version>0.9.0</Version>
     <Authors>BIMCamel</Authors>
     <Company>BIMCamel</Company>
     <Product>Dyncamelo</Product>
@@ -22,6 +22,24 @@
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!-- ── Navisworks multi-year support (2024/2025/2026) ─────────────────────────
+       A Navisworks plug-in must be compiled against the API of the release it runs
+       in (2024 = Api v21, 2025 = v22, 2026 = v23); a DLL built for one year loads in
+       another but its ribbon tab silently fails to register. NavisworksYear selects
+       which release the Navisworks-facing projects (Dyncamelo.App, Dyncamelo.Navisworks)
+       compile against; it maps to the matching Speckle.Navisworks.API package and the
+       matching per-year vendored BIMCamel.dll. The year-agnostic projects (Core, Nodes,
+       UI — netstandard2.0 / no Navisworks API) ignore it and ship unchanged in every
+       year folder. Override per build:  dotnet build Dyncamelo.sln -p:NavisworksYear=2025
+       Release CI builds each year and stages a per-year bundle subfolder; Navisworks
+       loads the folder matching its own release via PackageContents.xml. -->
+  <PropertyGroup>
+    <NavisworksYear Condition="'$(NavisworksYear)' == ''">2024</NavisworksYear>
+    <NavisPkgVersion Condition="'$(NavisPkgVersion)' == '' and '$(NavisworksYear)' == '2024'">2024.0.0</NavisPkgVersion>
+    <NavisPkgVersion Condition="'$(NavisPkgVersion)' == '' and '$(NavisworksYear)' == '2025'">2025.0.0</NavisPkgVersion>
+    <NavisPkgVersion Condition="'$(NavisPkgVersion)' == '' and '$(NavisworksYear)' == '2026'">2026.0.1</NavisPkgVersion>
   </PropertyGroup>
 
   <!-- Test projects: no XML docs, relax nullable warnings for terse test code. -->

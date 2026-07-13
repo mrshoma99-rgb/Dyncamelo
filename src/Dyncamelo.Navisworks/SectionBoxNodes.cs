@@ -32,6 +32,7 @@ public static class SectionBoxNodes
     [return: NodeName("done")]
     public static bool SetSectionBox(object boundingBox, bool enabled = true, Document? document = null)
     {
+#if NAV2024
         var doc = NavisworksContext.ResolveDocument(document);
 
         // Edit a copy of the current viewpoint and copy it back — stored/current
@@ -55,6 +56,13 @@ public static class SectionBoxNodes
 
         doc.CurrentViewpoint.CopyFrom(viewpoint);
         return true;
+#else
+        // The internal clip-plane API (InternalClipPlanes / LcOaClipPlaneSetMode) changed
+        // in Navisworks 2025+; this node is pending a port verified on those releases.
+        throw new System.NotSupportedException(
+            "Viewpoint.SetSectionBox is currently supported only on Navisworks 2024. " +
+            "The 2025/2026 section-box (clip-plane) API differs and this node is pending an update.");
+#endif
     }
 
     /// <summary>

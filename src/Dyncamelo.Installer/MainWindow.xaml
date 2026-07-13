@@ -42,12 +42,18 @@
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 <TextBlock Text="Dyncamelo" Foreground="{StaticResource Paper}" FontSize="27"
                            FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,4"/>
-                <TextBlock Text="Visual programming for Autodesk Navisworks 2024"
+                <TextBlock Text="Visual programming for Autodesk Navisworks 2024, 2025 &amp; 2026"
                            Style="{StaticResource Body}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock x:Name="DetectedText" Style="{StaticResource Fine}"
+                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,10,0,0"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"/>
                 <TextBlock x:Name="InstallPathText" Style="{StaticResource Fine}"
-                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,14,0,0"/>
+                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
                 <TextBlock x:Name="RunningWarning" Style="{StaticResource Fine}"
                            HorizontalAlignment="Center" TextAlignment="Center" Margin="0,6,0,0"
+                           TextWrapping="Wrap"
                            Visibility="Collapsed"
                            Text="Navisworks is running — close it (or restart it after setup) to load the new version."/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,26,0,0">
