@@ -87,6 +87,40 @@ public static class GeometryNodes
         return boundingBox.Center;
     }
 
+    /// <summary>Scales a bounding box about its center by a factor.</summary>
+    /// <param name="boundingBox">The bounding box.</param>
+    /// <param name="factor">Scale factor (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center.</param>
+    /// <returns>The scaled bounding box.</returns>
+    [NodeName("BoundingBox.Scale")]
+    [return: NodeName("boundingBox")]
+    [NodeDescription("Scales a bounding box about its center by a factor (2 = double, 0.5 = half) — e.g. to pad a box before a section or zoom.")]
+    [NodeSearchTags("scale", "grow", "shrink", "expand", "pad", "resize", "inflate")]
+    public static DyncameloBoundingBox BoundingBoxScale(DyncameloBoundingBox boundingBox, double factor)
+    {
+        if (boundingBox == null)
+        {
+            throw new ArgumentNullException(nameof(boundingBox), "BoundingBox.Scale requires a bounding box.");
+        }
+
+        if (factor <= 0.0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(factor), "The scale factor must be positive.");
+        }
+
+        var center = boundingBox.Center;
+        var min = boundingBox.Min;
+        var max = boundingBox.Max;
+        return new DyncameloBoundingBox(
+            new DyncameloPoint(
+                center.X - (center.X - min.X) * factor,
+                center.Y - (center.Y - min.Y) * factor,
+                center.Z - (center.Z - min.Z) * factor),
+            new DyncameloPoint(
+                center.X + (max.X - center.X) * factor,
+                center.Y + (max.Y - center.Y) * factor,
+                center.Z + (max.Z - center.Z) * factor));
+    }
+
     /// <summary>Euclidean distance between two points (in model units).</summary>
     /// <param name="point">The first point.</param>
     /// <param name="other">The second point.</param>

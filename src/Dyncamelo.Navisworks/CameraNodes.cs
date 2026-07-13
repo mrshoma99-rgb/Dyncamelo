@@ -104,6 +104,46 @@ public static class CameraNodes
         return true;
     }
 
+    /// <summary>Switches the camera between perspective and orthographic projection.</summary>
+    /// <param name="perspective">True for perspective, false for orthographic.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>True when the projection was set.</returns>
+    [NodeName("Camera.SetProjection")]
+    [NodeDescription("Switches the camera between perspective (true) and orthographic (false) projection.")]
+    [NodeSearchTags("camera", "projection", "perspective", "orthographic", "ortho", "parallel")]
+    [return: NodeName("done")]
+    public static bool SetProjection(bool perspective, Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoint = doc.CurrentViewpoint.CreateCopy();
+        viewpoint.Projection = perspective ? ViewpointProjection.Perspective : ViewpointProjection.Orthographic;
+        doc.CurrentViewpoint.CopyFrom(viewpoint);
+        return true;
+    }
+
+    /// <summary>Sets the camera's vertical field of view (perspective).</summary>
+    /// <param name="degrees">Vertical field of view in degrees (typical 20–90). Applies to the perspective camera.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>True when the field of view was set.</returns>
+    [NodeName("Camera.SetFieldOfView")]
+    [NodeDescription("Sets the camera's vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider.")]
+    [NodeSearchTags("camera", "fov", "field of view", "lens", "zoom", "angle", "wide")]
+    [return: NodeName("done")]
+    public static bool SetFieldOfView(double degrees, Document? document = null)
+    {
+        if (degrees <= 0.0 || degrees >= 180.0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(degrees), "The field of view must be between 0 and 180 degrees.");
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoint = doc.CurrentViewpoint.CreateCopy();
+        viewpoint.HeightField = degrees * Math.PI / 180.0; // Navisworks stores the vertical FOV in radians.
+        doc.CurrentViewpoint.CopyFrom(viewpoint);
+        return true;
+    }
+
     private static BoundingBox3D PadBox(BoundingBox3D box, double paddingFactor)
     {
         if (Math.Abs(paddingFactor - 1.0) < 1e-9)

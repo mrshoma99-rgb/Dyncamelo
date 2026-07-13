@@ -101,6 +101,19 @@ public static class ModelItemNodes
         return NavisValues.ToItemList(includeSelf ? modelItem.AncestorsAndSelf : modelItem.Ancestors);
     }
 
+    /// <summary>The whole object/element a model item belongs to.</summary>
+    /// <param name="item">The model item (often a geometry leaf deep in the tree).</param>
+    /// <returns>The nearest ancestor flagged as a composite object (the "element" in the tree); the item itself when it is already an object.</returns>
+    [NodeName("ModelItem.ObjectAncestor")]
+    [NodeDescription("Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) — the item you usually want to name, colour or tag. Returns the item itself when it is already an object.")]
+    [NodeSearchTags("item", "object", "element", "ancestor", "parent", "composite", "tree", "up")]
+    [return: NodeName("object")]
+    public static ModelItem ObjectAncestor(ModelItem item)
+    {
+        var modelItem = RequireItem(item);
+        return modelItem.FindFirstObjectAncestor() ?? modelItem;
+    }
+
     /// <summary>The class names of a model item.</summary>
     /// <param name="item">The model item.</param>
     /// <returns>The internal and localized class names (layer/group/geometry detection).</returns>

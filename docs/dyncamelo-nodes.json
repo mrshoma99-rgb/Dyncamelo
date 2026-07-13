@@ -1,6 +1,6 @@
 {
- "version": "v0.9.2",
- "count": 279,
+ "version": "v0.10.0",
+ "count": 283,
  "categories": [
   {
    "name": "Annotation",
@@ -28,7 +28,7 @@
   },
   {
    "name": "Geometry",
-   "count": 10
+   "count": 11
   },
   {
    "name": "Input",
@@ -60,7 +60,7 @@
   },
   {
    "name": "Navisworks.Camera",
-   "count": 3
+   "count": 5
   },
   {
    "name": "Navisworks.Clash",
@@ -96,7 +96,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 13
+   "count": 14
   },
   {
    "name": "Navisworks.Properties",
@@ -1321,6 +1321,40 @@
      "name": "intersects",
      "type": "boolean",
      "description": "True when the boxes overlap or touch."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Scale",
+   "category": "Geometry",
+   "description": "Scales a bounding box about its center by a factor (2 = double, 0.5 = half) — e.g. to pad a box before a section or zoom.",
+   "tags": [
+    "scale",
+    "grow",
+    "shrink",
+    "expand",
+    "pad",
+    "resize",
+    "inflate"
+   ],
+   "inputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    },
+    {
+     "name": "factor",
+     "type": "number",
+     "description": "Scale factor (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The scaled bounding box."
     }
    ],
    "returns": ""
@@ -3594,6 +3628,75 @@
      "name": "done",
      "type": "boolean",
      "description": "True when the camera was moved."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Camera.SetFieldOfView",
+   "category": "Navisworks.Camera",
+   "description": "Sets the camera's vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider.",
+   "tags": [
+    "camera",
+    "fov",
+    "field of view",
+    "lens",
+    "zoom",
+    "angle",
+    "wide"
+   ],
+   "inputs": [
+    {
+     "name": "degrees",
+     "type": "number",
+     "description": "Vertical field of view in degrees (typical 20–90). Applies to the perspective camera."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "done",
+     "type": "boolean",
+     "description": "True when the field of view was set."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Camera.SetProjection",
+   "category": "Navisworks.Camera",
+   "description": "Switches the camera between perspective (true) and orthographic (false) projection.",
+   "tags": [
+    "camera",
+    "projection",
+    "perspective",
+    "orthographic",
+    "ortho",
+    "parallel"
+   ],
+   "inputs": [
+    {
+     "name": "perspective",
+     "type": "boolean",
+     "description": "True for perspective, false for orthographic."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "done",
+     "type": "boolean",
+     "description": "True when the projection was set."
     }
    ],
    "returns": ""
@@ -6572,6 +6675,36 @@
      "name": "isHidden",
      "type": "boolean",
      "description": "True when the item is hidden."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ModelItem.ObjectAncestor",
+   "category": "Navisworks.ModelItem",
+   "description": "Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) — the item you usually want to name, colour or tag. Returns the item itself when it is already an object.",
+   "tags": [
+    "item",
+    "object",
+    "element",
+    "ancestor",
+    "parent",
+    "composite",
+    "tree",
+    "up"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item (often a geometry leaf deep in the tree)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "object",
+     "type": "ModelItem",
+     "description": "The nearest ancestor flagged as a composite object (the \"element\" in the tree); the item itself when it is already an object."
     }
    ],
    "returns": ""
