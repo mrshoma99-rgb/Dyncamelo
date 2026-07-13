@@ -60,4 +60,17 @@ public class WpfDialogService : IDialogService
 
         return dialog.ShowDialog() == true ? dialog.ResponseText : null;
     }
+
+    /// <inheritdoc />
+    public (int A, int R, int G, int B)? PickColor(int a, int r, int g, int b)
+    {
+        var dialog = new Views.ColorPickerDialog(a, r, g, b);
+        var owner = System.Windows.Application.Current?.MainWindow;
+        if (owner != null)
+        {
+            dialog.Owner = owner;
+        }
+
+        return dialog.ShowDialog() == true ? (dialog.A, dialog.R, dialog.G, dialog.B) : ((int, int, int, int)?)null;
+    }
 }

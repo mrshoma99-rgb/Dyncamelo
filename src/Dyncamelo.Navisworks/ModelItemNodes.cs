@@ -114,6 +114,62 @@ public static class ModelItemNodes
         return modelItem.FindFirstObjectAncestor() ?? modelItem;
     }
 
+    /// <summary>The deepest ancestor shared by all the given items.</summary>
+    /// <param name="items">The model items (e.g. a multi-selection).</param>
+    /// <returns>The last (deepest) common ancestor in the selection tree — the smallest branch that contains them all — or null when they share none (different models).</returns>
+    [NodeName("ModelItem.CommonAncestor")]
+    [NodeDescription("The deepest common ancestor of the given items in the selection tree — the smallest branch (room, level, block, model) that contains them all. Null when they share no ancestor.")]
+    [NodeSearchTags("item", "common", "ancestor", "shared", "parent", "tree", "lca", "branch", "container")]
+    [return: NodeName("ancestor")]
+    public static ModelItem? CommonAncestor(IEnumerable<ModelItem> items)
+    {
+        if (items == null)
+        {
+            throw new ArgumentNullException(nameof(items), "No model items provided.");
+        }
+
+        var list = NavisValues.ToItemList(items);
+        if (list.Count == 0)
+        {
+            throw new ArgumentException("Common ancestor requires at least one model item.", nameof(items));
+        }
+
+        // Identity sets of ancestors-and-self for every item after the first.
+        var otherSets = new List<ModelItemSet>(list.Count - 1);
+        for (int i = 1; i < list.Count; i++)
+        {
+            var set = new ModelItemSet();
+            foreach (var ancestor in list[i].AncestorsAndSelf)
+            {
+                set.Add(ancestor);
+            }
+
+            otherSets.Add(set);
+        }
+
+        // AncestorsAndSelf is nearest-first, so the first of item[0]'s ancestors
+        // that every other item also has is the deepest shared one.
+        foreach (var ancestor in list[0].AncestorsAndSelf)
+        {
+            var inAll = true;
+            foreach (var set in otherSets)
+            {
+                if (!set.Contains(ancestor))
+                {
+                    inAll = false;
+                    break;
+                }
+            }
+
+            if (inAll)
+            {
+                return ancestor;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>The class names of a model item.</summary>
     /// <param name="item">The model item.</param>
     /// <returns>The internal and localized class names (layer/group/geometry detection).</returns>
