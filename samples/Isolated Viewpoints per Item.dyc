@@ -186,7 +186,7 @@
           "KeepListStructure": false
         },
         {
-          "Name": "bakeVisibility",
+          "Name": "bakeOverrides",
           "UsingDefaultValue": true,
           "Level": -1,
           "UseLevels": false,

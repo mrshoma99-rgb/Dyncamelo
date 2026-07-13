@@ -30,6 +30,7 @@ public class SampleGraphFileTests
         "Getting Started - Math and Watch.dyc",
         "Isolated Viewpoints per Item.dyc",
         "QTO Rollup by Category.dyc",
+        "Spotlight Viewpoints per Item.dyc",
         "csv-roundtrip.dyc",
         "hello-math.dyc",
         "list-lacing.dyc",

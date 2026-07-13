@@ -1,6 +1,6 @@
 {
- "version": "v0.7.0",
- "count": 270,
+ "version": "v0.9.0",
+ "count": 277,
  "categories": [
   {
    "name": "Annotation",
@@ -48,7 +48,7 @@
   },
   {
    "name": "Navisworks.Appearance",
-   "count": 9
+   "count": 12
   },
   {
    "name": "Navisworks.Application",
@@ -132,7 +132,7 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 12
+   "count": 13
   },
   {
    "name": "String",
@@ -144,7 +144,7 @@
   },
   {
    "name": "Workflow.Actions",
-   "count": 6
+   "count": 9
   }
  ],
  "nodes": [
@@ -3121,6 +3121,46 @@
    "returns": ""
   },
   {
+   "name": "Appearance.OverrideColorTemporary",
+   "category": "Navisworks.Appearance",
+   "description": "Applies a TEMPORARY (viewpoint-scoped) color override — unlike Appearance.OverrideColor (a single global permanent override), a temporary override is what Viewpoint.SaveWithOverrides bakes into each saved view, so every viewpoint keeps its own coloring. Clear with Appearance.ResetTemporary.",
+   "tags": [
+    "appearance",
+    "color",
+    "temporary",
+    "highlight",
+    "viewpoint",
+    "override",
+    "runtime"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to recolor."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "A Color, a \"#RRGGBB\" string, or a list of three numbers."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The recolored items (pass-through)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Appearance.OverrideTransparency",
    "category": "Navisworks.Appearance",
    "description": "Overrides the transparency of model items (0 = opaque, 1 = invisible).",
@@ -3130,6 +3170,46 @@
     "override",
     "ghost",
     "opacity"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to change."
+    },
+    {
+     "name": "transparency",
+     "type": "number",
+     "description": "0 = fully opaque, 1 = fully transparent."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The changed items (pass-through)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Appearance.OverrideTransparencyTemporary",
+   "category": "Navisworks.Appearance",
+   "description": "Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) — the ghosting that Viewpoint.SaveWithOverrides bakes into each saved view. Fade 'the other' items so the highlighted one stands out. Clear with Appearance.ResetTemporary.",
+   "tags": [
+    "appearance",
+    "transparency",
+    "temporary",
+    "ghost",
+    "fade",
+    "viewpoint",
+    "runtime"
    ],
    "inputs": [
     {
@@ -3215,6 +3295,36 @@
      "name": "done",
      "type": "boolean",
      "description": "True when the overrides were cleared."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Appearance.ResetTemporary",
+   "category": "Navisworks.Appearance",
+   "description": "Clears every TEMPORARY color/transparency override in the model — a clean slate before highlighting the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints.",
+   "tags": [
+    "appearance",
+    "reset",
+    "temporary",
+    "clear",
+    "clean",
+    "runtime",
+    "highlight"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "done",
+     "type": "boolean",
+     "description": "True when the temporary overrides were cleared."
     }
    ],
    "returns": ""
@@ -8940,6 +9050,49 @@
    "returns": ""
   },
   {
+   "name": "Viewpoint.SaveWithOverrides",
+   "category": "Navisworks.Viewpoints",
+   "description": "Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) — so recalling it restores that exact look, frozen as created. Unlike Viewpoint.SaveCurrent (camera only), each view keeps its own appearance. Use with Appearance.OverrideColorTemporary / OverrideTransparencyTemporary. An existing same-named viewpoint is replaced.",
+   "tags": [
+    "viewpoint",
+    "view",
+    "save",
+    "overrides",
+    "appearance",
+    "capture",
+    "isolate",
+    "color",
+    "freeze"
+   ],
+   "inputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "Display name for the new viewpoint."
+    },
+    {
+     "name": "folderName",
+     "type": "string",
+     "description": "Viewpoint folder to file it under (null/empty stores it at the top level).",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored saved viewpoint."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Viewpoint.SetSectionBox",
    "category": "Navisworks.Viewpoints",
    "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.",
@@ -9542,6 +9695,77 @@
    "returns": ""
   },
   {
+   "name": "Action.Ghost",
+   "category": "Workflow.Actions",
+   "description": "Per item: applies a TEMPORARY transparency to the given items (wire the whole found set) so the highlighted item reads against a faded context. Captured per viewpoint. Put before Action.Highlight; reset each item with Action.ResetTemporaryAppearance.",
+   "tags": [
+    "action",
+    "ghost",
+    "fade",
+    "transparency",
+    "temporary",
+    "workflow",
+    "foreach",
+    "context"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight)."
+    },
+    {
+     "name": "transparency",
+     "type": "number",
+     "description": "0 = opaque, 1 = invisible (0.85 fades to a faint context).",
+     "default": "0.85"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "action",
+     "type": "IWorkflowAction",
+     "description": "A ghost action for Workflow.ForEach."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Action.Highlight",
+   "category": "Workflow.Actions",
+   "description": "Per item: applies a TEMPORARY color to the current item so it stands out — captured per viewpoint by Action.SaveViewpoint, so each view keeps its own highlight. Pair with Action.Ghost to fade the rest.",
+   "tags": [
+    "action",
+    "highlight",
+    "color",
+    "temporary",
+    "workflow",
+    "foreach",
+    "spotlight"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "any",
+     "description": "A Color, a \"#RRGGBB\" string, or a list of three numbers."
+    },
+    {
+     "name": "transparency",
+     "type": "number",
+     "description": "Transparency for the highlighted item (0 = solid, so it stands out of the ghosted rest).",
+     "default": "0.0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "action",
+     "type": "IWorkflowAction",
+     "description": "A highlight action for Workflow.ForEach."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Action.Isolate",
    "category": "Workflow.Actions",
    "description": "Per item: shows the current item and hides everything else (Appearance.Isolate). Place before Save Viewpoint to bake the isolation into each view.",
@@ -9616,9 +9840,33 @@
    "returns": ""
   },
   {
+   "name": "Action.ResetTemporaryAppearance",
+   "category": "Workflow.Actions",
+   "description": "Per item: clears all TEMPORARY color/transparency overrides (Appearance.ResetTemporary) — put first in the sequence so the previous item's highlight/ghost doesn't linger into this view.",
+   "tags": [
+    "action",
+    "reset",
+    "temporary",
+    "appearance",
+    "workflow",
+    "foreach",
+    "clear",
+    "clean"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "action",
+     "type": "IWorkflowAction",
+     "description": "A reset-temporary-appearance action for Workflow.ForEach."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Action.SaveViewpoint",
    "category": "Workflow.Actions",
-   "description": "Per item: saves the current view as a saved viewpoint named from the item. With bakeVisibility on, the current isolation is stored in the view, so recalling it re-isolates the item. Collected as the loop's per-item result.",
+   "description": "Per item: saves the current view as a saved viewpoint named from the item. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.",
    "tags": [
     "action",
     "viewpoint",
@@ -9643,9 +9891,9 @@
      "default": "\"Dyncamelo Views\""
     },
     {
-     "name": "bakeVisibility",
+     "name": "bakeOverrides",
      "type": "boolean",
-     "description": "True to capture the current hidden/appearance state into the viewpoint, so recalling it re-isolates the item.",
+     "description": "True to capture the current hidden AND temporary color/transparency overrides into the viewpoint, so recalling it restores that exact isolation and highlighting.",
      "default": "true"
     }
    ],

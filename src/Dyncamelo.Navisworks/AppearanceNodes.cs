@@ -69,6 +69,71 @@ public static class AppearanceNodes
         return list;
     }
 
+    /// <summary>Applies a temporary (viewpoint-scoped) color override.</summary>
+    /// <param name="items">The model items to recolor.</param>
+    /// <param name="color">A Color, a "#RRGGBB" string, or a list of three numbers.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The recolored items (pass-through).</returns>
+    [NodeName("Appearance.OverrideColorTemporary")]
+    [NodeDescription(
+        "Applies a TEMPORARY (viewpoint-scoped) color override — unlike Appearance.OverrideColor " +
+        "(a single global permanent override), a temporary override is what Viewpoint.SaveWithOverrides " +
+        "bakes into each saved view, so every viewpoint keeps its own coloring. Clear with Appearance.ResetTemporary.")]
+    [NodeSearchTags("appearance", "color", "temporary", "highlight", "viewpoint", "override", "runtime")]
+    [return: NodeName("items")]
+    public static List<ModelItem> OverrideColorTemporary(IEnumerable<ModelItem> items, object color, Document? document = null)
+    {
+        var list = RequireItems(items);
+        var doc = NavisworksContext.ResolveDocument(document);
+        doc.Models.OverrideTemporaryColor(list, NavisValues.ToNavisColor(color));
+        return list;
+    }
+
+    /// <summary>Applies a temporary (viewpoint-scoped) transparency override.</summary>
+    /// <param name="items">The model items to change.</param>
+    /// <param name="transparency">0 = fully opaque, 1 = fully transparent.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The changed items (pass-through).</returns>
+    [NodeName("Appearance.OverrideTransparencyTemporary")]
+    [NodeDescription(
+        "Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) — " +
+        "the ghosting that Viewpoint.SaveWithOverrides bakes into each saved view. Fade 'the other' items " +
+        "so the highlighted one stands out. Clear with Appearance.ResetTemporary.")]
+    [NodeSearchTags("appearance", "transparency", "temporary", "ghost", "fade", "viewpoint", "runtime")]
+    [return: NodeName("items")]
+    public static List<ModelItem> OverrideTransparencyTemporary(
+        IEnumerable<ModelItem> items,
+        double transparency,
+        Document? document = null)
+    {
+        if (transparency < 0.0 || transparency > 1.0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(transparency), "Transparency must be between 0 (opaque) and 1 (invisible).");
+        }
+
+        var list = RequireItems(items);
+        var doc = NavisworksContext.ResolveDocument(document);
+        doc.Models.OverrideTemporaryTransparency(list, transparency);
+        return list;
+    }
+
+    /// <summary>Clears every temporary (viewpoint-scoped) color/transparency override in the model.</summary>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>True when the temporary overrides were cleared.</returns>
+    [NodeName("Appearance.ResetTemporary")]
+    [NodeDescription(
+        "Clears every TEMPORARY color/transparency override in the model — a clean slate before highlighting " +
+        "the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints.")]
+    [NodeSearchTags("appearance", "reset", "temporary", "clear", "clean", "runtime", "highlight")]
+    [return: NodeName("done")]
+    public static bool ResetTemporary(Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        doc.Models.ResetAllTemporaryMaterials();
+        return true;
+    }
+
     /// <summary>Hides model items in the viewport.</summary>
     /// <param name="items">The model items to hide.</param>
     /// <param name="document">The document (defaults to the active document).</param>
