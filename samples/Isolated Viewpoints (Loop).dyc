@@ -1,0 +1,449 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.10.0"
+  },
+  "Uuid": "2f29a036da854a8a81c3698c4e2a7792",
+  "Name": "Isolated Viewpoints (Loop)",
+  "Description": "The universal per-item loop: for every found item, isolate it, zoom to it and save a viewpoint named after it \u2014 built from the ordinary nodes wired between Loop.Item and Loop.Collect (no Action.* nodes). Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "607bc752505d411dbf03097ee5483c41",
+      "NodeType": "StringInput",
+      "Name": "String",
+      "X": -120.0,
+      "Y": -160.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "0b924d692d1a4ea7a57c5d4bda45d89f",
+      "NodeType": "StringInput",
+      "Name": "String",
+      "X": -120.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Type"
+      }
+    },
+    {
+      "Id": "09d0d6e2938743e68c81223b6d0af113",
+      "NodeType": "StringInput",
+      "Name": "String",
+      "X": -120.0,
+      "Y": 80.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "3D Solid"
+      }
+    },
+    {
+      "Id": "da94ab767a794bd886c6aa73c3a7fcd3",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyValue@string,string,object,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyValue",
+      "X": 160.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b779259eabec4ca9bc629bb9bd056341",
+      "NodeType": "LoopItem",
+      "Name": "Loop.Item",
+      "X": 460.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "item"
+        },
+        {
+          "Name": "index"
+        },
+        {
+          "Name": "count"
+        },
+        {
+          "Name": "loop"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "01d2ea6ca4d2405ca84c7ad0c50615af",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.Isolate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.Isolate",
+      "X": 720.0,
+      "Y": -140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "1b84fac0a93b4405b8ad1659ca54fa6e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ModelItemNodes.DisplayName@Autodesk.Navisworks.Api.ModelItem",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ModelItem.DisplayName",
+      "X": 720.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "name"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "bcae90d9cfaf42708306fd5e74ccf477",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.CameraNodes.ZoomToItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Camera.ZoomToItems",
+      "X": 980.0,
+      "Y": -140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "paddingFactor",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "done"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9695eb5a84854dc0a1d7a7910cd442b6",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ViewpointNodes.SaveWithOverrides@string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Viewpoint.SaveWithOverrides",
+      "X": 980.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "name",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "folderName",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "viewpoint"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "0eb27a2bff72465d9bb070721d7337cf",
+      "NodeType": "LoopCollect",
+      "Name": "Loop.Collect",
+      "X": 1260.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "loop",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "39111b59fafd436e995ad2e78ab5a46d",
+      "NodeType": "Watch",
+      "Name": "Viewpoints created",
+      "X": 1500.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "c7ec9186bd4d4ce6bb09d6d2d8ad0c00",
+      "FromNode": "607bc752505d411dbf03097ee5483c41",
+      "FromPort": "value",
+      "ToNode": "da94ab767a794bd886c6aa73c3a7fcd3",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "81375a06b7d24ba6b60a2397b31aa251",
+      "FromNode": "0b924d692d1a4ea7a57c5d4bda45d89f",
+      "FromPort": "value",
+      "ToNode": "da94ab767a794bd886c6aa73c3a7fcd3",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "db197a31980b42aa9fa08a7bb4ec6e28",
+      "FromNode": "09d0d6e2938743e68c81223b6d0af113",
+      "FromPort": "value",
+      "ToNode": "da94ab767a794bd886c6aa73c3a7fcd3",
+      "ToPort": "value"
+    },
+    {
+      "Id": "a1c4c8d8e3094e05882c5189084effc4",
+      "FromNode": "da94ab767a794bd886c6aa73c3a7fcd3",
+      "FromPort": "items",
+      "ToNode": "b779259eabec4ca9bc629bb9bd056341",
+      "ToPort": "items"
+    },
+    {
+      "Id": "a42e1901f68d4d6b8306dcd168d78254",
+      "FromNode": "b779259eabec4ca9bc629bb9bd056341",
+      "FromPort": "item",
+      "ToNode": "01d2ea6ca4d2405ca84c7ad0c50615af",
+      "ToPort": "items"
+    },
+    {
+      "Id": "3ee6f84a6d3d45d18994c3464638b629",
+      "FromNode": "b779259eabec4ca9bc629bb9bd056341",
+      "FromPort": "item",
+      "ToNode": "1b84fac0a93b4405b8ad1659ca54fa6e",
+      "ToPort": "item"
+    },
+    {
+      "Id": "01ca07db50604a96b3e4c8a8add2bd98",
+      "FromNode": "01d2ea6ca4d2405ca84c7ad0c50615af",
+      "FromPort": "items",
+      "ToNode": "bcae90d9cfaf42708306fd5e74ccf477",
+      "ToPort": "items"
+    },
+    {
+      "Id": "4d82525b25ab447391f970020eaf7acb",
+      "FromNode": "1b84fac0a93b4405b8ad1659ca54fa6e",
+      "FromPort": "name",
+      "ToNode": "9695eb5a84854dc0a1d7a7910cd442b6",
+      "ToPort": "name"
+    },
+    {
+      "Id": "92f25673bacc48939b83799f75267f79",
+      "FromNode": "b779259eabec4ca9bc629bb9bd056341",
+      "FromPort": "loop",
+      "ToNode": "0eb27a2bff72465d9bb070721d7337cf",
+      "ToPort": "loop"
+    },
+    {
+      "Id": "dcdd860a05254426ae2fe6aeae0a783b",
+      "FromNode": "9695eb5a84854dc0a1d7a7910cd442b6",
+      "FromPort": "viewpoint",
+      "ToNode": "0eb27a2bff72465d9bb070721d7337cf",
+      "ToPort": "value"
+    },
+    {
+      "Id": "e523c095e64c49baad5dad427b2951a2",
+      "FromNode": "0eb27a2bff72465d9bb070721d7337cf",
+      "FromPort": "results",
+      "ToNode": "39111b59fafd436e995ad2e78ab5a46d",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "db730601bccd469d96f22ca6db9f4796",
+      "Text": "UNIVERSAL LOOP: everything between Loop.Item and Loop.Collect runs once per found item, in order. These are the REAL nodes (Appearance.Isolate, Camera.ZoomToItems, Viewpoint.SaveWithOverrides) \u2014 no special 'action' nodes. Wire a list into Loop.Item, wire 'loop' into Loop.Collect, and build the body with any nodes you like.",
+      "X": 460,
+      "Y": -320
+    },
+    {
+      "Id": "146e9661cb0240d1b028f54eea7c7765",
+      "Text": "Per item: isolate it, zoom to it, then save a viewpoint named after it (with the isolation baked in). Loop.Collect gathers one viewpoint per item. Body nodes run in dependency order, then top-to-bottom \u2014 chain them (isolate -> zoom) where the data allows to pin the sequence.",
+      "X": 720,
+      "Y": 260
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

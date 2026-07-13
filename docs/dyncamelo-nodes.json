@@ -1,6 +1,6 @@
 {
- "version": "v0.9.0",
- "count": 277,
+ "version": "v0.9.2",
+ "count": 279,
  "categories": [
   {
    "name": "Annotation",
@@ -140,7 +140,7 @@
   },
   {
    "name": "Workflow",
-   "count": 1
+   "count": 3
   },
   {
    "name": "Workflow.Actions",
@@ -9657,6 +9657,70 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "Loop.Collect",
+   "category": "Workflow",
+   "description": "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "loop",
+     "type": "any",
+     "description": "Loop handle from Loop.Item."
+    },
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to collect this iteration."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "any[]",
+     "description": "One collected value per item."
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
+   "name": "Loop.Item",
+   "category": "Workflow",
+   "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "any[]",
+     "description": "The list to iterate."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The current item (per iteration)."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The current 0-based index."
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "The total number of items."
+    },
+    {
+     "name": "loop",
+     "type": "any",
+     "description": "Loop handle — wire into Loop.Collect to close the loop."
+    }
+   ],
+   "returns": "",
+   "interactive": true
   },
   {
    "name": "Workflow.ForEach",
