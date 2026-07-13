@@ -8,6 +8,33 @@ public class SpatialNodesTests
     private static DyncameloBoundingBox Box(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) =>
         new DyncameloBoundingBox(new DyncameloPoint(minX, minY, minZ), new DyncameloPoint(maxX, maxY, maxZ));
 
+    // ------------------------------------------------- BoundingBox.Scale
+
+    [Fact]
+    public void BoundingBoxScale_ScalesAboutCenter()
+    {
+        var box = Box(0, 0, 0, 10, 10, 10); // center (5,5,5)
+        var doubled = GeometryNodes.BoundingBoxScale(box, 2.0);
+
+        Assert.Equal(new DyncameloPoint(-5, -5, -5), doubled.Min);
+        Assert.Equal(new DyncameloPoint(15, 15, 15), doubled.Max);
+        Assert.Equal(box.Center, doubled.Center); // center is preserved
+    }
+
+    [Fact]
+    public void BoundingBoxScale_HalvingShrinksAboutCenter()
+    {
+        var half = GeometryNodes.BoundingBoxScale(Box(0, 0, 0, 10, 10, 10), 0.5);
+        Assert.Equal(new DyncameloPoint(2.5, 2.5, 2.5), half.Min);
+        Assert.Equal(new DyncameloPoint(7.5, 7.5, 7.5), half.Max);
+    }
+
+    [Fact]
+    public void BoundingBoxScale_RejectsNonPositiveFactor()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => GeometryNodes.BoundingBoxScale(Box(0, 0, 0, 1, 1, 1), 0.0));
+    }
+
     // ------------------------------------------------- BoundingBox.Contains
 
     [Fact]

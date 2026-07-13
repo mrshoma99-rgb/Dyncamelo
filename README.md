@@ -6,9 +6,13 @@
 [![Build](https://img.shields.io/badge/build-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
 [![Tests](https://img.shields.io/badge/tests-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
 [![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
-[![Navisworks 2024](https://img.shields.io/badge/Navisworks-2024-blue)](#requirements)
+[![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
+[![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
-Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
+> ## ⚠️ Proprietary software — public, but **not open source**
+> This repository is public so you can browse the code and download official releases. Dyncamelo is **© 2026 BIMCamel — all rights reserved**. No license is granted to use, copy, modify, merge, publish, distribute, sublicense, or sell any part of this software, in source or binary form, except as expressly permitted in writing by BIMCamel. Being able to read the source here does **not** grant any such rights. See [LICENSE](LICENSE).
+
+Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024, 2025 & 2026**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
 
 > Search a federated model by property, color-code it by system, bulk-create selection sets, dump quantities to CSV, triage clashes by rule, and batch-generate viewpoints — as reusable, shareable `.dyc` graph files.
 
@@ -19,20 +23,16 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
-## What's new in 0.4 — the "user feedback" wave
+## What's new in v0.10 — per-item workflows
 
-Everything in v0.4 answers field reports from the first production users:
+- **Universal loops** — a real loop construct: drop **`Loop.Item`** and **`Loop.Collect`** on the canvas and everything wired between them runs **once per item, in order**, built from the ordinary nodes. Generate a viewpoint per room, recolour per system, export per level — no special "action" nodes required.
+- **Per-item viewpoints that keep their look** — `Viewpoint.SaveWithOverrides` captures the camera **and** the current isolation/colour into each saved view (Navisworks runtime overrides), so recalling a view restores exactly what it showed. Temporary highlight/ghost nodes (`Appearance.OverrideColorTemporary`, `Action.Highlight`/`Action.Ghost`) make "spotlight each element in its own view" a handful of nodes.
+- **Reified actions + `Workflow.ForEach`** — the earlier per-item mechanism (`Action.Isolate` / `ZoomTo` / `SaveViewpoint`) still ships alongside the loop region.
+- **Navisworks 2024, 2025 & 2026** — one multi-year bundle and installer.
+- **Graphical installer** — `DyncameloSetup.exe` (per-user, no admin rights) with a BIMCamel-themed UI; installs the ribbon add-in and an Add/Remove Programs entry.
+- **280+ nodes** and growing — including IFC export, quick geometry/selection-tree utilities (bounding-box scaling, object-ancestor), and camera projection / field-of-view.
 
-- **Instant library search** — index-backed, debounced, relevance-ranked flat results; no more per-keystroke stalls, and your tree expansion survives a search.
-- **Cleaner canvas** — the stray blue rectangle Nodify drew around every node is gone; selected nodes get a subtle accent outline instead.
-- **Sample graphs in the Open menu** — Open ▾ now lists **Recent Files** and **Sample Graphs**; 10 shipped `.dyc` samples (6 new curated workflows from color-coding to clash-triage-to-BCF) open straight from the menu, each with teaching notes on the canvas.
-- **Library polish** — entry selection clears when you leave the library; optional node **descriptions** under every entry (toggleable, persisted); right-click a node → **Find in Library** jumps to its entry.
-- **`Selection.Resolve` + `resolveTo`** — re-select items at another selection-tree level (File / Layer / FirstObject / LastObject / LastUnique / Geometry), mirroring *Options > Interface > Selection > Resolution*; the seven `Search.*` pickers and `Selection.Current` take it as an optional input.
-- **Sample validation in CI** — every shipped sample is statically pinned against the real node registry (definition ids, ports, connectors), so samples can't silently rot.
-
-> **Heads-up:** the `resolveTo` input changes the definition id of the 7 `Search.*` pickers and `Selection.Current` — v0.3 graphs using them load with those nodes flagged Missing (wires preserved; re-place from the library). Details in the [full changelog](docs/WHATS_NEW_0.4.md).
-
-Previous waves: v0.3 "plugin parity" — 50 nodes for custom property tabs, Excel, BCF 2.1, clash management, transforms, grids and document lifecycle ([WHATS_NEW_0.3.md](docs/WHATS_NEW_0.3.md)); v0.2 editor quality-of-life ([WHATS_NEW_0.2.md](docs/WHATS_NEW_0.2.md)).
+Earlier waves: v0.4 instant library search & curated samples, v0.3 "plugin parity" (50 nodes: custom property tabs, Excel, BCF 2.1, clash management, transforms, grids, document lifecycle), v0.2 editor quality-of-life — see the changelogs under [docs/](docs/).
 
 ## Features
 
@@ -40,7 +40,8 @@ Previous waves: v0.3 "plugin parity" — 50 nodes for custom property tabs, Exce
 - **Real dataflow engine** — eager evaluation, topological execution, and dirty propagation: change one slider and only its downstream nodes re-run. Manual and Automatic run modes.
 - **Replication ("lacing")** — feed a list into a scalar input and the node maps over it, exactly like Dynamo: Shortest by default, Longest and Cross-Product per node.
 - **Robust by design** — a failing node surfaces a per-node Warning/Error state; it never crashes the graph run or Navisworks.
-- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides, transforms, saved viewpoints, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (250+ nodes implemented as of v0.4).
+- **Per-item workflows** — a universal loop (`Loop.Item` → body → `Loop.Collect`) runs any nodes once per item, in order, so stateful "isolate → zoom → save viewpoint → next" jobs work with the real nodes, not just pure data mapping.
+- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides (permanent and viewpoint-scoped), transforms, saved viewpoints, IFC export, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (280+ nodes).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
 - **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
@@ -63,7 +64,7 @@ graph TD
     NAV --> NODES
     NODES --> CORE
 
-    NWAPI["Autodesk Navisworks 2024 API<br/>(bound from the host at runtime)"]
+    NWAPI["Autodesk Navisworks 2024–2026 API<br/>(bound from the host at runtime)"]
     NAV -.compile-time reference.-> NWAPI
 ```
 
@@ -71,12 +72,16 @@ graph TD
 
 ## Requirements
 
-- **To run:** Autodesk Navisworks Manage or Simulate **2024** on Windows.
+- **To run:** Autodesk Navisworks Manage or Simulate **2024, 2025, or 2026** on Windows.
 - **To build:** Windows 10/11 with **Visual Studio 2022** (with ".NET desktop development" workload) or the **.NET 8 SDK**. No Navisworks installation is needed to build — the Navisworks API is referenced through compile-time-only NuGet packages.
 
-## Quick start
+## Install (recommended)
 
-### 1. Build from source (Windows)
+Download **[`DyncameloSetup.exe`](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)** from the latest release and run it. The graphical installer places the bundle in `%APPDATA%\Autodesk\ApplicationPlugins` (per-user, no admin rights) and registers an Add/Remove Programs entry. If Windows SmartScreen appears (unsigned download), choose **More info → Run anyway**. Start Navisworks 2024/2025/2026 and open **Dyncamelo** from the **BIMCamel** ribbon tab.
+
+Silent install/uninstall: `DyncameloSetup.exe /silent` and `DyncameloSetup.exe /uninstall /silent`.
+
+## Build from source (Windows)
 
 ```powershell
 git clone https://github.com/mrshoma99-rgb/dyncamelo.git
@@ -106,26 +111,11 @@ Or open `Dyncamelo.sln` in Visual Studio 2022 and build the `Release` configurat
 > ```
 > See [samples/README.md](samples/README.md) for the bundled example graphs.
 
-### 2. Install into Navisworks 2024
+To run a source build in Navisworks without the installer, use the application-bundle layout under `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` (see [`dist/README.md`](dist/README.md)); the released `DyncameloSetup.exe` sets this up for you.
 
-Copy the build output of `Dyncamelo.App` into a plugin folder named **exactly like the plugin assembly**:
+## Your first graph
 
-```
-C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\
-    Dyncamelo.App.dll
-    Dyncamelo.UI.dll
-    Dyncamelo.Navisworks.dll
-    Dyncamelo.Nodes.dll
-    Dyncamelo.Core.dll
-    Nodify.dll
-    Newtonsoft.Json.dll
-```
-
-(Adjust the path for Navisworks Simulate. A packaged installer/release zip is on the [roadmap](docs/IMPLEMENTATION_PLAN.md).)
-
-### 3. Open the editor
-
-Start Navisworks 2024, open a model, and launch **Dyncamelo** from the **BIMCamel** ribbon tab (application-bundle install — see [`dist/README.md`](dist/README.md)) or from the *Tool add-ins* tab (classic Plugins-folder install). The editor opens as a dockable pane. Now follow the [Getting Started guide](docs/GETTING_STARTED.md) to build your first graph:
+Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon tab — the editor opens as a dockable pane. Then follow the [Getting Started guide](docs/GETTING_STARTED.md):
 
 > *Find every item whose Material contains "Concrete", color it red, and save it as a selection set* — about six nodes, no code.
 
@@ -153,12 +143,12 @@ Start Navisworks 2024, open a model, and launch **Dyncamelo** from the **BIMCame
 
 Full milestone breakdown with exit criteria and risks: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 
-## Contributing
+## Feedback
 
-Contributions are very welcome — nodes, engine work, docs, sample graphs, bug reports. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Core engine and general-node changes can be developed and tested on any OS; only the WPF editor and the in-host smoke tests need Windows/Navisworks.
+Dyncamelo is proprietary software developed by BIMCamel; the source is public for transparency and distribution, **not** for outside contribution, and external pull requests are not accepted. Bug reports and feature requests are welcome — please open a [GitHub issue](https://github.com/mrshoma99-rgb/dyncamelo/issues) or reach us at [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo).
 
 ## License
 
-Dyncamelo is proprietary software — Copyright (c) 2026 BIMCamel, all rights reserved (see [LICENSE](LICENSE)). Releases up to v0.1.1 were MIT-licensed; that grant remains valid for copies obtained under it. Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Dyncamelo is **proprietary software** — Copyright (c) 2026 BIMCamel, all rights reserved (see [LICENSE](LICENSE)). This repository being public does not grant any license to use, copy, modify, or redistribute the source or binaries; all rights are reserved except where BIMCamel grants them in writing. Releases up to v0.1.1 were MIT-licensed; that grant remains valid only for copies obtained while it was in effect. Third-party components ship under their own licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit, and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at runtime the API is provided by your licensed Navisworks installation.
