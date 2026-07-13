@@ -77,6 +77,7 @@ public class GraphEditorViewModel : ObservableObject
     /// <param name="registry">Node registry (already populated by the host).</param>
     /// <param name="dialogs">Dialog service; a default WPF implementation is used when null.</param>
     /// <param name="settings">Persisted UI settings (favourites, recent files); the default %APPDATA% store is used when null.</param>
+    /// <param name="preview">Host preview service that highlights a selected node's outputs; a no-op is used when null.</param>
     public GraphEditorViewModel(
         NodeRegistry registry,
         IDialogService? dialogs = null,
@@ -667,7 +668,7 @@ public class GraphEditorViewModel : ObservableObject
         get => _previewSelection;
         set
         {
-            if (SetField(ref _previewSelection, value))
+            if (SetProperty(ref _previewSelection, value))
             {
                 _settings.SetPreviewSelection(value);
                 RefreshPreview();

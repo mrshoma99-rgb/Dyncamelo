@@ -213,7 +213,7 @@ public partial class ColorPickerDialog : Window
             return false;
         }
 
-        var hex = text.Trim().TrimStart('#');
+        var hex = text!.Trim().TrimStart('#');
         if (hex.Length == 6)
         {
             hex = "FF" + hex;
