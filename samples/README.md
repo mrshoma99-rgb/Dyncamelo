@@ -5,10 +5,11 @@ Two families of `.dyc` graphs live here:
 - **Developer samples** (lower-case file names) — four small graphs that
   exercise the headless pipeline end to end. None of them need Navisworks or
   WPF; they run anywhere the `dyncamelo` CLI runs, including Linux and CI.
-- **In-app example workflows** (Title Case file names) — six teaching graphs
-  that ship with the Navisworks plugin (the build stages exactly these six
-  files — the developer graphs are excluded — into a `Samples` folder next
-  to the plugin DLL, where the UI's Samples menu finds them). Except for *Getting Started - Math and Watch*, they use
+- **In-app example workflows** (Title Case file names) — nine teaching graphs
+  that ship with the Navisworks plugin (the build stages every Title-Case
+  graph — the four lower-case developer graphs are excluded — into a
+  `Samples` folder next to the plugin DLL, where the UI's Samples menu finds
+  them). Except for *Getting Started - Math and Watch*, they use
   `Dyncamelo.Navisworks` nodes and need a running Navisworks with a model
   open — on other machines they load as placeholder nodes.
 
@@ -66,6 +67,38 @@ summary CSV of every test.
 `Search.HasProperty → Takeoff.SumPropertyByGroup → Excel.WriteToFile`: sums a
 numeric property (default: Element ▸ Volume) grouped by another property
 (default: Element ▸ Category) and writes the rollup to a workbook.
+
+### Isolated Viewpoints per Item.dyc
+
+The per-item loop, built from **reified actions**. `Search.ByPropertyContains`
+finds a set of items, and a `List.Create` gathers an ordered action recipe
+(`Action.Isolate → Action.ZoomTo → Action.SaveViewpoint`) that
+`Workflow.ForEach` replays once for every found item. The result is one saved
+viewpoint per element, each framed on its own item (the save captures the live
+camera, not the origin) and titled from the item name via the `{name}`
+template. Nothing is hard-coded to a specific element — point it at any search
+and it fans the same recipe across the whole result set.
+
+### Spotlight Viewpoints per Item.dyc
+
+The same `Workflow.ForEach` loop, dressed for presentation. For each item the
+recipe first `Action.ResetTemporaryAppearance`, then `Action.Ghost`s the whole
+model to a faint grey, `Action.Highlight`s the current item in a picked colour,
+`Action.ZoomTo`s it and `Action.SaveViewpoint`. Every viewpoint is a spotlight —
+the item in full colour against a ghosted context — and because these are
+*temporary* overrides captured into the viewpoint, each saved view keeps its own
+appearance without disturbing the others.
+
+### Isolated Viewpoints (Loop).dyc
+
+The **universal loop region** — the same isolate-zoom-save outcome as *Isolated
+Viewpoints per Item*, but built from ordinary nodes instead of packaged actions.
+`Loop.Item` and `Loop.Collect` bracket a body of real nodes
+(`Appearance.Isolate → Camera.ZoomToItems → Viewpoint.SaveWithOverrides`, with
+`ModelItem.DisplayName` naming each view); the engine re-runs that body once per
+item and `Loop.Collect` gathers the results. This is the general mechanism: any
+subgraph placed between the two boundaries becomes a per-item loop, so you are
+never limited to the pre-built action set.
 
 ## Developer graphs
 
