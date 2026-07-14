@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using Autodesk.Navisworks.Api.DocumentParts;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
 
@@ -117,6 +118,181 @@ public static class ViewpointTreeNodes
             ["folderPath"] = folderPath,
             ["folder"] = folder,
         };
+    }
+
+    /// <summary>Renames a saved-viewpoint folder.</summary>
+    /// <param name="folder">The folder (e.g. from Viewpoints.CreateFolder), or its current name.</param>
+    /// <param name="newName">The new folder name.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The renamed stored folder (pass-through for chaining).</returns>
+    [NodeName("Viewpoints.RenameFolder")]
+    [NodeDescription("Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).")]
+    [NodeSearchTags("viewpoints", "folder", "rename", "name", "organize")]
+    [return: NodeName("folder")]
+    public static FolderItem RenameFolder(object folder, string newName, Document? document = null)
+    {
+        if (string.IsNullOrEmpty(newName))
+        {
+            throw new ArgumentException("No new folder name provided.", nameof(newName));
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+        var stored = SavedItemTreeHelpers.ResolveStored<FolderItem>(viewpoints.RootItem, folder, "viewpoint folder");
+        viewpoints.EditDisplayName(stored, newName);
+        return stored;
+    }
+
+    /// <summary>Duplicates a saved viewpoint in place (same folder).</summary>
+    /// <param name="viewpoint">The saved viewpoint, or its display name.</param>
+    /// <param name="newName">Name for the copy (null uses "&lt;name&gt; copy").</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The new stored viewpoint copy.</returns>
+    [NodeName("SavedViewpoint.Duplicate")]
+    [NodeDescription("Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given.")]
+    [NodeSearchTags("viewpoint", "view", "duplicate", "copy", "clone")]
+    [return: NodeName("viewpoint")]
+    public static SavedViewpoint Duplicate(object viewpoint, string? newName = null, Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+        var stored = SavedItemTreeHelpers.ResolveStored<SavedViewpoint>(
+            viewpoints.RootItem, viewpoint, "saved viewpoint");
+
+        // Top-level items report RootItem as their parent; treat that as "no folder".
+        var parentFolder = ReferenceEquals(stored.Parent, viewpoints.RootItem)
+            ? null
+            : stored.Parent as FolderItem;
+
+        // AddCopy appends a copy at the end of the target collection.
+        if (parentFolder != null)
+        {
+            viewpoints.AddCopy(parentFolder, stored);
+        }
+        else
+        {
+            viewpoints.AddCopy(stored);
+        }
+
+        var siblings = parentFolder != null ? parentFolder.Children : viewpoints.Value;
+        var copy = (SavedViewpoint)siblings[siblings.Count - 1];
+        var name = string.IsNullOrEmpty(newName) ? stored.DisplayName + " copy" : newName!;
+        viewpoints.EditDisplayName(copy, name);
+        return copy;
+    }
+
+    /// <summary>Duplicates a folder and all of its viewpoints (and sub-folders).</summary>
+    /// <param name="folder">The source folder, or its name.</param>
+    /// <param name="newName">Name for the new folder.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The new stored folder.</returns>
+    [NodeName("Viewpoints.DuplicateFolder")]
+    [NodeDescription("Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.")]
+    [NodeSearchTags("viewpoints", "folder", "duplicate", "copy", "clone", "organize")]
+    [return: NodeName("folder")]
+    public static FolderItem DuplicateFolder(object folder, string newName, Document? document = null)
+    {
+        if (string.IsNullOrEmpty(newName))
+        {
+            throw new ArgumentException("No new folder name provided.", nameof(newName));
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+        var source = SavedItemTreeHelpers.ResolveStored<FolderItem>(viewpoints.RootItem, folder, "viewpoint folder");
+
+        var sourceParent = ReferenceEquals(source.Parent, viewpoints.RootItem)
+            ? null
+            : source.Parent as FolderItem;
+        var target = SavedItemTreeNodesShared.FindOrCreateFolder(
+            viewpoints.RootItem,
+            sourceParent,
+            newName,
+            item => viewpoints.AddCopy(item),
+            (parent, item) => viewpoints.AddCopy(parent, item),
+            "viewpoint");
+
+        CopyFolderContents(viewpoints, source, target);
+        return target;
+    }
+
+    /// <summary>Sorts a folder's contents alphabetically (A→Z) by name.</summary>
+    /// <param name="folder">The folder to sort, or its name; null/empty sorts the top level.</param>
+    /// <param name="recursive">True to also sort every nested folder.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The sorted folder (null when the top level was sorted).</returns>
+    [NodeName("Viewpoints.SortFolder")]
+    [NodeDescription("Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.")]
+    [NodeSearchTags("viewpoints", "folder", "sort", "alphabetical", "order", "organize", "arrange")]
+    [return: NodeName("folder")]
+    public static FolderItem? SortFolder(object? folder = null, bool recursive = false, Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+
+        FolderItem parent = folder == null || (folder is string text && string.IsNullOrEmpty(text))
+            ? viewpoints.RootItem
+            : SavedItemTreeHelpers.ResolveStored<FolderItem>(viewpoints.RootItem, folder, "viewpoint folder");
+
+        SortFolderContents(viewpoints, parent, recursive);
+        return ReferenceEquals(parent, viewpoints.RootItem) ? null : parent;
+    }
+
+    // Recursively copies a source folder's children into a target folder: viewpoints
+    // (and animations) are AddCopy'd; sub-folders are recreated and descended into.
+    private static void CopyFolderContents(DocumentSavedViewpoints viewpoints, FolderItem source, FolderItem target)
+    {
+        foreach (var child in source.Children)
+        {
+            if (child is FolderItem subFolder)
+            {
+                var newSub = SavedItemTreeNodesShared.FindOrCreateFolder(
+                    viewpoints.RootItem,
+                    target,
+                    subFolder.DisplayName,
+                    item => viewpoints.AddCopy(item),
+                    (parent, item) => viewpoints.AddCopy(parent, item),
+                    "viewpoint");
+                CopyFolderContents(viewpoints, subFolder, newSub);
+            }
+            else
+            {
+                viewpoints.AddCopy(target, child);
+            }
+        }
+    }
+
+    // Reorders one folder's children alphabetically by moving each item, in reverse
+    // sorted order, to the front (index 0 — the one unambiguous Move target).
+    private static void SortFolderContents(DocumentSavedViewpoints viewpoints, FolderItem parent, bool recursive)
+    {
+        var desired = new List<SavedItem>();
+        foreach (var child in parent.Children)
+        {
+            desired.Add(child);
+        }
+
+        desired.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase));
+
+        for (int i = desired.Count - 1; i >= 0; i--)
+        {
+            int current = SavedItemTreeHelpers.IndexByIdentity(parent.Children, desired[i]);
+            if (current > 0)
+            {
+                viewpoints.Move(parent, current, parent, 0);
+            }
+        }
+
+        if (recursive)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (child is FolderItem subFolder)
+                {
+                    SortFolderContents(viewpoints, subFolder, true);
+                }
+            }
+        }
     }
 }
 

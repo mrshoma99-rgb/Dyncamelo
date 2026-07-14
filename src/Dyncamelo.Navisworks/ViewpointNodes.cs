@@ -178,6 +178,68 @@ public static class ViewpointNodes
         return storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : stored;
     }
 
+    /// <summary>Copies one viewpoint's appearance/visibility overrides onto another's view.</summary>
+    /// <param name="fromViewpoint">The viewpoint whose colour/transparency/hidden overrides to copy (or its name).</param>
+    /// <param name="toViewpoint">The viewpoint to update — keeps its own camera, gains the source's look (or its name).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The updated target viewpoint.</returns>
+    [NodeName("SavedViewpoint.CopyOverrides")]
+    [NodeDescription(
+        "Copies the appearance the way one saved view looks — its colour, transparency and hidden-item overrides — onto another saved view, WITHOUT changing that view's camera. Apply one view's highlighting scheme to many others in one graph. Both views must have their overrides baked in (Viewpoint.SaveWithOverrides).")]
+    [NodeSearchTags("viewpoint", "view", "override", "appearance", "copy", "color", "transparency", "hidden", "apply")]
+    [return: NodeName("viewpoint")]
+    public static SavedViewpoint CopyOverrides(object fromViewpoint, object toViewpoint, Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+        var source = SavedItemTreeHelpers.ResolveStored<SavedViewpoint>(
+            viewpoints.RootItem, fromViewpoint, "saved viewpoint");
+        var target = SavedItemTreeHelpers.ResolveStored<SavedViewpoint>(
+            viewpoints.RootItem, toViewpoint, "saved viewpoint");
+
+        if (ReferenceEquals(source, target))
+        {
+            return target; // nothing to do — copying a view's look onto itself
+        }
+
+        // Apply the source view so its overrides become the live runtime state,
+        // then snapshot them (CaptureRuntimeOverrides ignores the camera, leaving
+        // a default one — the target's camera is restored below).
+        viewpoints.CurrentSavedViewpoint = source;
+        var captured = viewpoints.CaptureRuntimeOverrides();
+        captured.DisplayName = target.DisplayName;
+
+        // Put the target's own camera on the live view so ReplaceFromCurrentView
+        // restores it onto the replacement while keeping the captured overrides.
+        doc.CurrentViewpoint.CopyFrom(target.Viewpoint);
+
+        // Replace the target in place (same folder, same position).
+        var parentFolder = ReferenceEquals(target.Parent, viewpoints.RootItem)
+            ? null
+            : target.Parent as FolderItem;
+        var siblings = parentFolder != null ? parentFolder.Children : viewpoints.Value;
+        int index = SavedItemTreeHelpers.IndexByIdentity(siblings, target);
+        if (index < 0)
+        {
+            throw new InvalidOperationException(
+                "Could not locate the target viewpoint '" + target.DisplayName + "' under its parent.");
+        }
+
+        if (parentFolder != null)
+        {
+            viewpoints.ReplaceWithCopy(parentFolder, index, captured);
+        }
+        else
+        {
+            viewpoints.ReplaceWithCopy(index, captured);
+        }
+
+        siblings = parentFolder != null ? parentFolder.Children : viewpoints.Value;
+        var updated = (SavedViewpoint)siblings[index];
+        viewpoints.ReplaceFromCurrentView(updated); // camera = target's; overrides = source's
+        return updated;
+    }
+
     /// <summary>The display name of a saved viewpoint.</summary>
     /// <param name="viewpoint">The saved viewpoint.</param>
     /// <returns>The viewpoint's display name.</returns>

@@ -224,7 +224,7 @@ internal static class SavedItemTreeHelpers
     }
 
     /// <summary>Index of an item in a collection by reference/Guid identity, or -1.</summary>
-    private static int IndexByIdentity(SavedItemCollection children, SavedItem item)
+    internal static int IndexByIdentity(SavedItemCollection children, SavedItem item)
     {
         int index = 0;
         foreach (var child in children)
