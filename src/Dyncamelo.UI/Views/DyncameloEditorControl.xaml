@@ -605,6 +605,14 @@
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.String}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
                                     </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Workflow">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Workflow}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Table">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Table}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
                                         <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.WarningBrush}" />

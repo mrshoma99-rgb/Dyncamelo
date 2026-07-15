@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using Dyncamelo.Core.Loader;
 
 namespace Dyncamelo.Nodes.Imaging;
 
@@ -9,7 +10,9 @@ namespace Dyncamelo.Nodes.Imaging;
 /// portable node library (netstandard2.0) so the whole imaging path — including
 /// the heat-map render — is unit-testable off Windows, without System.Drawing.
 /// Writes a single-IDAT, non-interlaced, truecolour-with-alpha image.
+/// Infrastructure helper, not a node.
 /// </summary>
+[IsVisibleInLibrary(false)]
 public static class PngWriter
 {
     private static readonly byte[] Signature = { 137, 80, 78, 71, 13, 10, 26, 10 };

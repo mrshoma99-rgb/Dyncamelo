@@ -750,24 +750,8 @@ public class LibraryViewModel : ObservableObject
             return;
         }
 
-        // Only split when there is something to split: a leaf whose nodes are all
-        // one function gets no header (it would just be noise).
-        bool mixed = false;
-        var firstFunction = entries[0].Function;
-        foreach (var entry in entries)
-        {
-            if (entry.Function != firstFunction)
-            {
-                mixed = true;
-                break;
-            }
-        }
-
-        if (!mixed)
-        {
-            return;
-        }
-
+        // Every leaf's nodes sit under a Create / Modify / Info header, even when
+        // they are all one function, so the classification is always visible.
         category.Children.Clear();
         foreach (var sub in subCategories)
         {

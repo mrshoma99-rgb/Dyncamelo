@@ -145,7 +145,9 @@ public sealed class FloorGapResult
 /// mistaken for a hole), grades each opening by how far its centre sits from the
 /// nearest edge, and renders the result to an RGBA heat map / PNG. All geometry
 /// arrives already projected to the analysis plane — no Navisworks types here.
+/// Called by the FallHazard node; not itself a node.
 /// </summary>
+[Dyncamelo.Core.Loader.IsVisibleInLibrary(false)]
 public static class FloorGapHeatmap
 {
     /// <summary>The largest grid the analysis will build, as a guard against a tiny cell size.</summary>
