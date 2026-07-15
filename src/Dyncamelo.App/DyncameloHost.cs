@@ -130,9 +130,12 @@ internal static class DyncameloHost
         // Watch List and Color Picker interactive nodes).
         NodeLibrary.RegisterAll(registry);
 
-        // Navisworks zero-touch nodes.
+        // Navisworks zero-touch nodes + the interactive Captured Selection node.
         try
         {
+            registry.RegisterNodeType(
+                Dyncamelo.Navisworks.CapturedSelectionNode.TypeName,
+                () => new Dyncamelo.Navisworks.CapturedSelectionNode());
             registry.RegisterAssembly(typeof(NavisworksContext).Assembly);
         }
         catch (Exception ex)

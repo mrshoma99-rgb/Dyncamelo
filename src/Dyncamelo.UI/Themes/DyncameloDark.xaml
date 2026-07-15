@@ -1039,6 +1039,26 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate x:Key="NodeBody.CapturedSelectionNode">
+        <StackPanel Margin="4" MinWidth="180">
+            <TextBlock Text="{Binding CapturedSummary}" TextWrapping="Wrap"
+                       Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,0,6" />
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource Dyc.SmallButton}"
+                        Content="Capture"
+                        ToolTip="Store the current Navisworks selection in this node"
+                        Command="{Binding DataContext.CaptureSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                        CommandParameter="{Binding}" />
+                <Button Style="{StaticResource Dyc.SmallButton}"
+                        Margin="6,0,0,0"
+                        Content="Clear"
+                        ToolTip="Forget the stored selection"
+                        Command="{Binding DataContext.ClearCapturedSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                        CommandParameter="{Binding}" />
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
     <!-- ===== Canvas item templates (implicit, picked by view-model type) ===== -->
     <DataTemplate DataType="{x:Type vm:NodeViewModel}">
         <StackPanel>

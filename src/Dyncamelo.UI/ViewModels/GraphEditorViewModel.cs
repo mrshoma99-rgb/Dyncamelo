@@ -124,6 +124,8 @@ public class GraphEditorViewModel : ObservableObject
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
         PickColorCommand = new RelayCommand<NodeModel>(PickColor);
+        CaptureSelectionCommand = new RelayCommand<NodeModel>(CaptureSelection);
+        ClearCapturedSelectionCommand = new RelayCommand<NodeModel>(ClearCapturedSelection);
         RefreshSampleGraphs();
 
         // Settings-panel state: the double-click action and the colour palette.
@@ -421,6 +423,12 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Opens the colour picker for a Color Picker node; parameter is the node.</summary>
     public ICommand PickColorCommand { get; }
+
+    /// <summary>Snapshots the live host selection into a Captured Selection node.</summary>
+    public ICommand CaptureSelectionCommand { get; }
+
+    /// <summary>Forgets the stored selection of a Captured Selection node.</summary>
+    public ICommand ClearCapturedSelectionCommand { get; }
 
     /// <summary>
     /// Creates a node from a library id (zero-touch definition id or node type
@@ -940,6 +948,22 @@ public class GraphEditorViewModel : ObservableObject
     /// The node type lives in Dyncamelo.Nodes (not referenced by the UI), so its
     /// A/R/G/B channels are read and written reflectively.
     /// </summary>
+    private void CaptureSelection(NodeModel? node)
+    {
+        if (node is ICapturedSelectionNode captured)
+        {
+            captured.CaptureFromCurrentSelection();
+        }
+    }
+
+    private void ClearCapturedSelection(NodeModel? node)
+    {
+        if (node is ICapturedSelectionNode captured)
+        {
+            captured.ClearCapturedSelection();
+        }
+    }
+
     private void PickColor(NodeModel? node)
     {
         if (node == null)
