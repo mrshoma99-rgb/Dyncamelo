@@ -316,6 +316,39 @@ public class FloorGapHeatmapTests
     }
 
     [Fact]
+    public void AnalyzeEdges_LabelsDangerousRunsWithGapOverLimit()
+    {
+        // 6×6 opening, limit 0.5 → one dangerous rim run labelled ≈ +5.5.
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 10, 2));
+        slab.AddRange(Rect(0, 8, 10, 10));
+        slab.AddRange(Rect(0, 2, 2, 8));
+        slab.AddRange(Rect(8, 2, 10, 8));
+
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.05, slab, Array.Empty<Tri2>(), minGap: 0.5);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit: 0.5, tolerance: 0.3);
+
+        var label = Assert.Single(edges.Labels);
+        Assert.InRange(label.Overage, 5.1, 5.9);        // widest gap ~6 − limit 0.5
+        Assert.InRange(label.X, 4, 6);                  // centroid of the rim ≈ opening centre
+        Assert.InRange(label.Y, 4, 6);
+    }
+
+    [Fact]
+    public void RenderEdgePng_CustomPaletteAndOverageLabels()
+    {
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit: 0.5, tolerance: 0.3);
+
+        var palette = new EdgePalette { Dangerous = 0xFF00FF }; // magenta instead of red
+        var png = FloorGapHeatmap.RenderEdgePng(edges, 4, palette, showOverage: true);
+
+        Assert.True(CountExact(png, 255, 0, 255) > 0, "expected magenta dangerous edges");
+        Assert.Equal(0, CountExact(png, 220, 40, 40));  // default red fully replaced
+        Assert.True(CountExact(png, 255, 255, 255) > 0, "expected white label text");
+    }
+
+    [Fact]
     public void RenderEdgePng_ProducesAValidPng()
     {
         var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
@@ -410,6 +443,29 @@ public class FloorGapHeatmapTests
         int Read(int offset) =>
             (png[offset] << 24) | (png[offset + 1] << 16) | (png[offset + 2] << 8) | png[offset + 3];
         return (Read(16), Read(20));
+    }
+
+    /// <summary>Counts pixels exactly matching an RGB value in a rendered PNG.</summary>
+    private static int CountExact(byte[] png, byte r, byte g, byte b)
+    {
+        var raw = InflateIdat(png);
+        var (w, h) = ReadPngSize(png);
+        var stride = w * 4;
+        var count = 0;
+        for (int y = 0; y < h; y++)
+        {
+            var rowStart = y * (stride + 1) + 1;
+            for (int x = 0; x < w; x++)
+            {
+                var o = rowStart + x * 4;
+                if (raw[o] == r && raw[o + 1] == g && raw[o + 2] == b)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 
     /// <summary>Counts clearly-red pixels (hot end of the ramp) in a rendered PNG.</summary>

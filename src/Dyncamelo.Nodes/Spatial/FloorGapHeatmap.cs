@@ -136,6 +136,9 @@ public sealed class FloorGapResult
 
     /// <summary>The openings found, largest widest-gap first.</summary>
     public IReadOnlyList<FloorOpening> Openings { get; }
+
+    /// <summary>Per-cell index into <see cref="Openings"/> for hazard cells (-1 elsewhere); may be empty when not computed.</summary>
+    public int[] OpeningIndex { get; internal set; } = Array.Empty<int>();
 }
 
 /// <summary>How a floor edge cell facing a void is classified.</summary>
@@ -154,20 +157,59 @@ public enum EdgeClass : byte
     Dangerous = 3,
 }
 
+/// <summary>Colours for the edge render, as 0xRRGGBB values.</summary>
+public sealed class EdgePalette
+{
+    /// <summary>Colour of unprotected dangerous edges (default red).</summary>
+    public int Dangerous { get; set; } = 0xDC2828;
+
+    /// <summary>Colour of handrail-protected edges (default blue).</summary>
+    public int Protected { get; set; } = 0x3C8CDC;
+
+    /// <summary>Colour of edges safe by gap alone (default green).</summary>
+    public int Safe { get; set; } = 0x46B45A;
+}
+
+/// <summary>A printable annotation for one connected dangerous run of edge.</summary>
+public sealed class EdgeLabel
+{
+    /// <summary>Creates the label.</summary>
+    public EdgeLabel(double x, double y, double overage)
+    {
+        X = x;
+        Y = y;
+        Overage = overage;
+    }
+
+    /// <summary>World X of the run's centroid.</summary>
+    public double X { get; }
+
+    /// <summary>World Y of the run's centroid.</summary>
+    public double Y { get; }
+
+    /// <summary>How far the gap the run faces exceeds the limit (world units).</summary>
+    public double Overage { get; }
+}
+
 /// <summary>The result of classifying the floor edges of a <see cref="FloorGapResult"/>.</summary>
 public sealed class FloorEdgeResult
 {
     /// <summary>Creates the result.</summary>
     public FloorEdgeResult(
         FloorGapResult baseResult, EdgeClass[] edges,
-        double dangerousLength, double protectedLength, double safeLength)
+        double dangerousLength, double protectedLength, double safeLength,
+        IReadOnlyList<EdgeLabel>? labels = null)
     {
         Base = baseResult;
         Edges = edges;
         DangerousLength = dangerousLength;
         ProtectedLength = protectedLength;
         SafeLength = safeLength;
+        Labels = labels ?? Array.Empty<EdgeLabel>();
     }
+
+    /// <summary>One annotation per connected dangerous run: where it is and by how much it exceeds the limit.</summary>
+    public IReadOnlyList<EdgeLabel> Labels { get; }
 
     /// <summary>The underlying floor/void analysis this edge pass sits on.</summary>
     public FloorGapResult Base { get; }
@@ -255,10 +297,13 @@ public static class FloorGapHeatmap
         var hazard = EnclosedOpens(floor, plug, cols, rows);
 
         var clearance = ChamferClearance(hazard, cols, rows, cellSize, out var maxClearance);
-        var openings = LabelOpenings(hazard, clearance, minX, minY, cellSize, cols, rows, minGap);
+        var openings = LabelOpenings(hazard, clearance, minX, minY, cellSize, cols, rows, minGap, out var openingIndex);
 
         return new FloorGapResult(
-            cols, rows, minX, minY, cellSize, floor, plug, hazard, clearance, maxClearance, openings);
+            cols, rows, minX, minY, cellSize, floor, plug, hazard, clearance, maxClearance, openings)
+        {
+            OpeningIndex = openingIndex,
+        };
     }
 
     // ----------------------------------------------------------- Edge / handrail
@@ -391,15 +436,19 @@ public static class FloorGapHeatmap
             }
         }
 
-        // A person cannot fit through a break in the protection shorter than
-        // minPassage — a gap between two handrails, or a handrail and an
-        // obstacle. Walk each 8-connected run of dangerous cells; a run shorter
-        // than the threshold is reclassified safe.
-        if (minPassage > 0.0)
+        // Walk each 8-connected run of dangerous cells. A run shorter than
+        // minPassage is reclassified safe — a person cannot fit through so small
+        // a break in the protection (between two handrails, or a handrail and an
+        // obstacle). Every surviving run gets a label stating how far the gap it
+        // faces exceeds the limit, placed at the run's centroid.
+        var labels = new List<EdgeLabel>();
         {
             var visited = new bool[count];
             var run = new List<int>();
             var stack = new Stack<int>();
+            var openingIndex = result.OpeningIndex;
+            var openings = result.Openings;
+
             for (int start = 0; start < count; start++)
             {
                 if (edges[start] != EdgeClass.Dangerous || visited[start])
@@ -410,12 +459,16 @@ public static class FloorGapHeatmap
                 run.Clear();
                 visited[start] = true;
                 stack.Push(start);
+                var facedGap = 0.0;
+                double sumX = 0, sumY = 0;
                 while (stack.Count > 0)
                 {
                     var idx = stack.Pop();
                     run.Add(idx);
                     var r = idx / cols;
                     var c = idx % cols;
+                    sumX += result.OriginX + (c + 0.5) * cellSize;
+                    sumY += result.OriginY + (r + 0.5) * cellSize;
                     for (int d = 0; d < 8; d++)
                     {
                         var nr = r + neighbourR[d];
@@ -431,16 +484,33 @@ public static class FloorGapHeatmap
                             visited[nIdx] = true;
                             stack.Push(nIdx);
                         }
+
+                        // The widest gap of the void this run borders.
+                        if (hazard[nIdx] && openingIndex.Length == count)
+                        {
+                            var oi = openingIndex[nIdx];
+                            if (oi >= 0 && openings[oi].WidestGap > facedGap)
+                            {
+                                facedGap = openings[oi].WidestGap;
+                            }
+                        }
                     }
                 }
 
                 var runLength = run.Count * cellSize;
-                if (runLength < minPassage)
+                if (minPassage > 0.0 && runLength < minPassage)
                 {
                     foreach (var idx in run)
                     {
                         edges[idx] = EdgeClass.SafeGap;
                     }
+
+                    continue;
+                }
+
+                if (facedGap > limit)
+                {
+                    labels.Add(new EdgeLabel(sumX / run.Count, sumY / run.Count, facedGap - limit));
                 }
             }
         }
@@ -459,7 +529,7 @@ public static class FloorGapHeatmap
         }
 
         return new FloorEdgeResult(
-            result, edges, dangerousCells * cellSize, protectedCells * cellSize, safeCells * cellSize);
+            result, edges, dangerousCells * cellSize, protectedCells * cellSize, safeCells * cellSize, labels);
     }
 
     /// <summary>
@@ -594,12 +664,20 @@ public static class FloorGapHeatmap
 
     /// <summary>
     /// Renders the edge classification: floor dark, void faint, and edge cells in
-    /// green (safe), blue (handrail-protected) or red (dangerous, needs a handrail).
+    /// the palette's colours (default green safe, blue handrail-protected, red
+    /// dangerous). With <paramref name="showOverage"/>, each dangerous run is
+    /// annotated with how far its gap exceeds the limit (e.g. "+0.35"), so the
+    /// plan can go straight into a report.
     /// </summary>
     /// <param name="edgeResult">The edge analysis to draw.</param>
     /// <param name="pixelsPerCell">Image pixels per grid cell (≥1).</param>
+    /// <param name="palette">Colours for the three edge classes; null = defaults.</param>
+    /// <param name="showOverage">True to print each dangerous run's gap-over-limit at its centroid.</param>
+    /// <param name="labelDivisor">Divides label values before formatting (unit conversion); 1 = world units.</param>
     /// <returns>The PNG bytes.</returns>
-    public static byte[] RenderEdgePng(FloorEdgeResult edgeResult, int pixelsPerCell = 4)
+    public static byte[] RenderEdgePng(
+        FloorEdgeResult edgeResult, int pixelsPerCell = 4,
+        EdgePalette? palette = null, bool showOverage = false, double labelDivisor = 1.0)
     {
         if (edgeResult == null)
         {
@@ -611,6 +689,7 @@ public static class FloorGapHeatmap
             throw new ArgumentOutOfRangeException(nameof(pixelsPerCell), "There must be at least one pixel per cell.");
         }
 
+        palette ??= new EdgePalette();
         var result = edgeResult.Base;
         var cols = result.Cols;
         var rows = result.Rows;
@@ -627,9 +706,9 @@ public static class FloorGapHeatmap
                 byte cr, cg, cb, ca;
                 switch (edgeResult.Edges[idx])
                 {
-                    case EdgeClass.Dangerous: cr = 220; cg = 40; cb = 40; ca = 255; break;
-                    case EdgeClass.Protected: cr = 60; cg = 140; cb = 220; ca = 255; break;
-                    case EdgeClass.SafeGap: cr = 70; cg = 180; cb = 90; ca = 255; break;
+                    case EdgeClass.Dangerous: Unpack(palette.Dangerous, out cr, out cg, out cb); ca = 255; break;
+                    case EdgeClass.Protected: Unpack(palette.Protected, out cr, out cg, out cb); ca = 255; break;
+                    case EdgeClass.SafeGap: Unpack(palette.Safe, out cr, out cg, out cb); ca = 255; break;
                     default:
                         if (result.Hazard[idx]) { cr = 44; cg = 46; cb = 58; ca = 255; }        // void
                         else if (result.Plug[idx]) { cr = 96; cg = 100; cb = 108; ca = 255; }   // equipment
@@ -650,7 +729,95 @@ public static class FloorGapHeatmap
             }
         }
 
+        if (showOverage && labelDivisor > 0)
+        {
+            var glyphScale = Math.Max(2, pixelsPerCell / 2);
+            foreach (var label in edgeResult.Labels)
+            {
+                var text = "+" + (label.Overage / labelDivisor).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                var px = (int)((label.X - result.OriginX) / result.CellSize) * pixelsPerCell;
+                var py = (rows - 1 - (int)((label.Y - result.OriginY) / result.CellSize)) * pixelsPerCell;
+                DrawText(rgba, width, height, text, px, py, glyphScale);
+            }
+        }
+
         return PngWriter.Encode(width, height, rgba);
+    }
+
+    private static void Unpack(int rgb, out byte r, out byte g, out byte b)
+    {
+        r = (byte)((rgb >> 16) & 0xFF);
+        g = (byte)((rgb >> 8) & 0xFF);
+        b = (byte)(rgb & 0xFF);
+    }
+
+    // ------------------------------------------------------------ Label text
+
+    /// <summary>5×7 pixel glyphs for the label alphabet ('#' = lit).</summary>
+    private static readonly Dictionary<char, string[]> Glyphs = new Dictionary<char, string[]>
+    {
+        ['0'] = new[] { " ### ", "#   #", "#  ##", "# # #", "##  #", "#   #", " ### " },
+        ['1'] = new[] { "  #  ", " ##  ", "  #  ", "  #  ", "  #  ", "  #  ", " ### " },
+        ['2'] = new[] { " ### ", "#   #", "    #", "   # ", "  #  ", " #   ", "#####" },
+        ['3'] = new[] { " ### ", "#   #", "    #", "  ## ", "    #", "#   #", " ### " },
+        ['4'] = new[] { "   # ", "  ## ", " # # ", "#  # ", "#####", "   # ", "   # " },
+        ['5'] = new[] { "#####", "#    ", "#### ", "    #", "    #", "#   #", " ### " },
+        ['6'] = new[] { " ### ", "#    ", "#    ", "#### ", "#   #", "#   #", " ### " },
+        ['7'] = new[] { "#####", "    #", "   # ", "  #  ", "  #  ", "  #  ", "  #  " },
+        ['8'] = new[] { " ### ", "#   #", "#   #", " ### ", "#   #", "#   #", " ### " },
+        ['9'] = new[] { " ### ", "#   #", "#   #", " ####", "    #", "    #", " ### " },
+        ['.'] = new[] { "     ", "     ", "     ", "     ", "     ", " ##  ", " ##  " },
+        ['+'] = new[] { "     ", "  #  ", "  #  ", "#####", "  #  ", "  #  ", "     " },
+        ['-'] = new[] { "     ", "     ", "     ", "#####", "     ", "     ", "     " },
+    };
+
+    /// <summary>Draws text centred on (cx, cy): white glyphs over a dark backing box.</summary>
+    private static void DrawText(byte[] rgba, int width, int height, string text, int cx, int cy, int scale)
+    {
+        var advance = 6 * scale; // 5-wide glyph + 1 gap
+        var textWidth = text.Length * advance - scale;
+        var textHeight = 7 * scale;
+        var x0 = cx - textWidth / 2;
+        var y0 = cy - textHeight / 2;
+
+        // Dark backing box (1-glyph-pixel margin) so the label reads on any colour.
+        FillRect(rgba, width, height, x0 - scale, y0 - scale, textWidth + 2 * scale, textHeight + 2 * scale, 20, 20, 24);
+
+        var x = x0;
+        foreach (var ch in text)
+        {
+            if (Glyphs.TryGetValue(ch, out var glyph))
+            {
+                for (int gy = 0; gy < 7; gy++)
+                {
+                    for (int gx = 0; gx < 5; gx++)
+                    {
+                        if (glyph[gy][gx] == '#')
+                        {
+                            FillRect(rgba, width, height, x + gx * scale, y0 + gy * scale, scale, scale, 255, 255, 255);
+                        }
+                    }
+                }
+            }
+
+            x += advance;
+        }
+    }
+
+    private static void FillRect(
+        byte[] rgba, int width, int height, int x, int y, int w, int h, byte r, byte g, byte b)
+    {
+        var x1 = Math.Min(width, x + w);
+        var y1 = Math.Min(height, y + h);
+        for (int py = Math.Max(0, y); py < y1; py++)
+        {
+            var row = py * width;
+            for (int px = Math.Max(0, x); px < x1; px++)
+            {
+                var o = (row + px) * 4;
+                rgba[o] = r; rgba[o + 1] = g; rgba[o + 2] = b; rgba[o + 3] = 255;
+            }
+        }
     }
 
     // ---------------------------------------------------------------- Rasterize
@@ -847,12 +1014,14 @@ public static class FloorGapHeatmap
 
     private static IReadOnlyList<FloorOpening> LabelOpenings(
         bool[] hazard, double[] clearance, double originX, double originY, double cellSize,
-        int cols, int rows, double minGap)
+        int cols, int rows, double minGap, out int[] openingIndex)
     {
         var count = cols * rows;
         var visited = new bool[count];
         var openings = new List<FloorOpening>();
         var stack = new Stack<int>();
+        openingIndex = new int[count];
+        for (int i = 0; i < count; i++) openingIndex[i] = -1;
 
         for (int start = 0; start < count; start++)
         {
@@ -861,6 +1030,7 @@ public static class FloorGapHeatmap
                 continue;
             }
 
+            var componentId = openings.Count;
             visited[start] = true;
             stack.Push(start);
 
@@ -871,6 +1041,7 @@ public static class FloorGapHeatmap
             while (stack.Count > 0)
             {
                 var idx = stack.Pop();
+                openingIndex[idx] = componentId;
                 var r = idx / cols;
                 var c = idx % cols;
                 cells++;
@@ -923,8 +1094,27 @@ public static class FloorGapHeatmap
             openings.Add(opening);
         }
 
-        openings.Sort((a, b) => b.WidestGap.CompareTo(a.WidestGap));
-        return openings;
+        // Sort widest-first for callers, remapping the per-cell indices to match.
+        var order = new List<int>();
+        for (int i = 0; i < openings.Count; i++) order.Add(i);
+        order.Sort((a, b) => openings[b].WidestGap.CompareTo(openings[a].WidestGap));
+        var remap = new int[openings.Count];
+        var sorted = new List<FloorOpening>(openings.Count);
+        for (int newIdx = 0; newIdx < order.Count; newIdx++)
+        {
+            remap[order[newIdx]] = newIdx;
+            sorted.Add(openings[order[newIdx]]);
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            if (openingIndex[i] >= 0)
+            {
+                openingIndex[i] = remap[openingIndex[i]];
+            }
+        }
+
+        return sorted;
     }
 
     // ------------------------------------------------------------------- Render
