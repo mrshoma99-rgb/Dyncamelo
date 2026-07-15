@@ -68,6 +68,20 @@ summary CSV of every test.
 numeric property (default: Element ▸ Volume) grouped by another property
 (default: Element ▸ Category) and writes the rollup to a workbook.
 
+### Floor Opening Fall-Hazard Map.dyc
+
+A whole-floor safety sweep. `FallHazard.FloorOpeningMap` slices the model at a
+chosen level, reads the **real floor and equipment mesh** (via the COM geometry
+bridge, so it sees true holes cut inside a slab), rasterises them onto a plan
+grid, isolates the openings that are fully enclosed by floor, and grades each by
+how far its centre sits from the nearest edge. It writes a top-down **heat-map
+PNG** (hot = the middle of a big opening, the worst fall hazard) and drops one
+**saved viewpoint** per opening whose widest gap ≥ your threshold, into a "Floor
+Openings" folder. Point the two searches at your floor and equipment elements,
+set the level and the trigger gap, and run. Needs a live Navisworks session; the
+`Cell size` input trades accuracy for speed. This is the grid/heat-map approach —
+like a sunlight study, but for fall hazards.
+
 ### Floor Openings Needing Handrails.dyc
 
 A two-part QA graph for slab openings that equipment (a boiler, duct or pipe)

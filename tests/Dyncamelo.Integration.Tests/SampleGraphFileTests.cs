@@ -27,6 +27,7 @@ public class SampleGraphFileTests
         "Clash Triage and BCF Export.dyc",
         "Color Elements by Property.dyc",
         "Export Properties to Excel.dyc",
+        "Floor Opening Fall-Hazard Map.dyc",
         "Floor Openings Needing Handrails.dyc",
         "Getting Started - Math and Watch.dyc",
         "Isolated Viewpoints (Loop).dyc",

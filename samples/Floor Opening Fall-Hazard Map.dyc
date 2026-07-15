@@ -1,0 +1,511 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.12.0"
+  },
+  "Uuid": "7a2c3e9b41d84f0a9c6e1d5b8f30a2c4",
+  "Name": "Floor Opening Fall-Hazard Map",
+  "Description": "Whole-floor fall-hazard analysis: slices the model at a level, rasterises the floor and equipment mesh, finds the openings enclosed by floor, grades each by its widest clear span, exports a top-down heat-map PNG and a saved viewpoint per opening that needs a handrail. Needs a live Navisworks session.",
+  "Nodes": [
+    {
+      "Id": "10000000000000000000000000000001",
+      "NodeType": "StringInput",
+      "Name": "Category",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000002",
+      "NodeType": "StringInput",
+      "Name": "Property",
+      "X": 0.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Name"
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000003",
+      "NodeType": "StringInput",
+      "Name": "Floor name contains",
+      "X": 0.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Floor"
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000004",
+      "NodeType": "StringInput",
+      "Name": "Equipment name contains",
+      "X": 0.0,
+      "Y": 360.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Boiler"
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000005",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyContains",
+      "X": 340.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "10000000000000000000000000000006",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyContains",
+      "X": 340.0,
+      "Y": 360.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "10000000000000000000000000000007",
+      "NodeType": "NumberInput",
+      "Name": "Level (Z)",
+      "X": 340.0,
+      "Y": 560.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 0.0
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000008",
+      "NodeType": "NumberInput",
+      "Name": "Cell size",
+      "X": 340.0,
+      "Y": 680.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 0.25
+      }
+    },
+    {
+      "Id": "10000000000000000000000000000009",
+      "NodeType": "NumberInput",
+      "Name": "Min gap (needs handrail)",
+      "X": 340.0,
+      "Y": 800.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 0.5
+      }
+    },
+    {
+      "Id": "1000000000000000000000000000000a",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "FallHazard.FloorOpeningMap",
+      "X": 720.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "floors",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "level",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "obstructions",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "band",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "cellSize",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "minGap",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "imagePath",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "saveViewpoints",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "pixelsPerCell",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "imagePath"
+        },
+        {
+          "Name": "openingCount"
+        },
+        {
+          "Name": "widestGaps"
+        },
+        {
+          "Name": "centers"
+        },
+        {
+          "Name": "viewpoints"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "1000000000000000000000000000000b",
+      "NodeType": "Watch",
+      "Name": "Openings needing handrail",
+      "X": 1080.0,
+      "Y": 220.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "1000000000000000000000000000000c",
+      "NodeType": "Watch",
+      "Name": "Heat-map image path",
+      "X": 1080.0,
+      "Y": 400.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "20000000000000000000000000000001",
+      "FromNode": "10000000000000000000000000000001",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000005",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "20000000000000000000000000000002",
+      "FromNode": "10000000000000000000000000000002",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000005",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "20000000000000000000000000000003",
+      "FromNode": "10000000000000000000000000000003",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000005",
+      "ToPort": "value"
+    },
+    {
+      "Id": "20000000000000000000000000000004",
+      "FromNode": "10000000000000000000000000000001",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000006",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "20000000000000000000000000000005",
+      "FromNode": "10000000000000000000000000000002",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000006",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "20000000000000000000000000000006",
+      "FromNode": "10000000000000000000000000000004",
+      "FromPort": "value",
+      "ToNode": "10000000000000000000000000000006",
+      "ToPort": "value"
+    },
+    {
+      "Id": "20000000000000000000000000000007",
+      "FromNode": "10000000000000000000000000000005",
+      "FromPort": "items",
+      "ToNode": "1000000000000000000000000000000a",
+      "ToPort": "floors"
+    },
+    {
+      "Id": "20000000000000000000000000000008",
+      "FromNode": "10000000000000000000000000000006",
+      "FromPort": "items",
+      "ToNode": "1000000000000000000000000000000a",
+      "ToPort": "obstructions"
+    },
+    {
+      "Id": "20000000000000000000000000000009",
+      "FromNode": "10000000000000000000000000000007",
+      "FromPort": "value",
+      "ToNode": "1000000000000000000000000000000a",
+      "ToPort": "level"
+    },
+    {
+      "Id": "2000000000000000000000000000000a",
+      "FromNode": "10000000000000000000000000000008",
+      "FromPort": "value",
+      "ToNode": "1000000000000000000000000000000a",
+      "ToPort": "cellSize"
+    },
+    {
+      "Id": "2000000000000000000000000000000b",
+      "FromNode": "10000000000000000000000000000009",
+      "FromPort": "value",
+      "ToNode": "1000000000000000000000000000000a",
+      "ToPort": "minGap"
+    },
+    {
+      "Id": "2000000000000000000000000000000c",
+      "FromNode": "1000000000000000000000000000000a",
+      "FromPort": "openingCount",
+      "ToNode": "1000000000000000000000000000000b",
+      "ToPort": "value"
+    },
+    {
+      "Id": "2000000000000000000000000000000d",
+      "FromNode": "1000000000000000000000000000000a",
+      "FromPort": "imagePath",
+      "ToNode": "1000000000000000000000000000000c",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "30000000000000000000000000000001",
+      "Text": "FLOOR OPENING FALL-HAZARD MAP.  Slices the model at a chosen level, reads the real floor and equipment mesh, finds the openings enclosed by floor and grades each by its widest clear span.  Writes a top-down heat-map PNG (hot = middle of a big opening) and adds one saved viewpoint per opening whose widest gap \u2265 Min gap.  Needs a live Navisworks session (the geometry read uses the COM bridge).",
+      "X": 0.0,
+      "Y": -170.0
+    },
+    {
+      "Id": "30000000000000000000000000000002",
+      "Text": "HOW TO USE: 1) Point the two searches at your floor and equipment elements (edit the name text).  2) Set Level to the slab elevation and Min gap to the size that triggers a handrail (document units).  3) Run.  Open the returned image path to see the heat map; the flagged openings appear as saved viewpoints in a 'Floor Openings' folder.  Cell size trades accuracy for speed \u2014 start coarse, refine if needed.  Band defaults to \u00b11; widen it if your slab is thick.",
+      "X": 340.0,
+      "Y": 900.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
