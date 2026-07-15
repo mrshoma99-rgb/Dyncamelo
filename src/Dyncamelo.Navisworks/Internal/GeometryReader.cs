@@ -7,6 +7,25 @@ using ComApi = Autodesk.Navisworks.Api.Interop.ComApi;
 
 namespace Dyncamelo.Navisworks.Internal;
 
+/// <summary>The outcome of a banded geometry read: the in-band triangles plus context for diagnostics.</summary>
+internal sealed class BandRead
+{
+    /// <summary>Triangles (XY projected) whose world-Z range overlaps the requested band.</summary>
+    public List<Tri2> Triangles { get; } = new List<Tri2>();
+
+    /// <summary>Lowest world Z of any triangle read (before band filtering); +∞ when none.</summary>
+    public double MinZ { get; set; } = double.PositiveInfinity;
+
+    /// <summary>Highest world Z of any triangle read (before band filtering); −∞ when none.</summary>
+    public double MaxZ { get; set; } = double.NegativeInfinity;
+
+    /// <summary>Total triangles read across all items, regardless of the band.</summary>
+    public int TotalTriangles { get; set; }
+
+    /// <summary>True when any geometry at all was read.</summary>
+    public bool HasAnyGeometry => TotalTriangles > 0;
+}
+
 /// <summary>
 /// Reads world-space geometry from model items through the COM bridge
 /// (<c>InwOaFragment3.GenerateSimplePrimitives</c>) and projects the triangles
@@ -19,20 +38,24 @@ internal static class GeometryReader
 {
     /// <summary>
     /// Collects the XY projection of every triangle in the items whose world-Z
-    /// range intersects the band [<paramref name="zMin"/>, <paramref name="zMax"/>].
+    /// range intersects the band [<paramref name="zMin"/>, <paramref name="zMax"/>],
+    /// while also reporting the full world-Z range of all geometry read (so a
+    /// caller can tell the user where their floor actually sits when the band
+    /// catches nothing).
     /// </summary>
-    /// <param name="items">The model items to read.</param>
+    /// <param name="items">The model items to read (flatten to geometry leaves first).</param>
     /// <param name="zMin">Bottom of the analysis band (world Z).</param>
     /// <param name="zMax">Top of the analysis band (world Z).</param>
-    /// <returns>The projected triangles; empty when the items carry no geometry in the band.</returns>
-    internal static List<Tri2> ReadTrianglesInBand(IEnumerable<ModelItem> items, double zMin, double zMax)
+    /// <returns>The triangles in the band plus the overall Z range and triangle count observed.</returns>
+    internal static BandRead ReadTrianglesInBand(IEnumerable<ModelItem> items, double zMin, double zMax)
     {
-        var triangles = new List<Tri2>();
+        var read = new BandRead();
         if (items == null)
         {
-            return triangles;
+            return read;
         }
 
+        var callback = new TriangleCollector(zMin, zMax, read);
         foreach (var item in items)
         {
             if (item == null || !item.HasGeometry)
@@ -40,13 +63,13 @@ internal static class GeometryReader
                 continue;
             }
 
-            ReadItem(item, zMin, zMax, triangles);
+            ReadItem(item, callback);
         }
 
-        return triangles;
+        return read;
     }
 
-    private static void ReadItem(ModelItem item, double zMin, double zMax, List<Tri2> sink)
+    private static void ReadItem(ModelItem item, TriangleCollector callback)
     {
         ComApi.InwOaPath? path = null;
         ComApi.InwNodeFragsColl? fragments = null;
@@ -54,7 +77,6 @@ internal static class GeometryReader
         {
             path = ComBridge.ToPath(item);
             fragments = path.Fragments();
-            var callback = new TriangleCollector(zMin, zMax, sink);
             foreach (var fragmentObject in fragments)
             {
                 var fragment = fragmentObject as ComApi.InwOaFragment3;
@@ -114,20 +136,21 @@ internal static class GeometryReader
 
     /// <summary>
     /// The <c>InwSimplePrimitivesCB</c> sink: keeps the XY footprint of triangles
-    /// whose world-Z band overlaps the requested slice. Lines/points are ignored.
+    /// whose world-Z band overlaps the requested slice, and tracks the full Z
+    /// range and count of all triangles seen. Lines/points are ignored.
     /// </summary>
     private sealed class TriangleCollector : ComApi.InwSimplePrimitivesCB
     {
         private readonly double _zMin;
         private readonly double _zMax;
-        private readonly List<Tri2> _sink;
+        private readonly BandRead _read;
         private double[]? _matrix;
 
-        internal TriangleCollector(double zMin, double zMax, List<Tri2> sink)
+        internal TriangleCollector(double zMin, double zMax, BandRead read)
         {
             _zMin = zMin;
             _zMax = zMax;
-            _sink = sink;
+            _read = read;
         }
 
         internal void SetMatrix(double[]? matrix)
@@ -146,12 +169,17 @@ internal static class GeometryReader
 
             var loZ = Math.Min(az, Math.Min(bz, cz));
             var hiZ = Math.Max(az, Math.Max(bz, cz));
+
+            _read.TotalTriangles++;
+            if (loZ < _read.MinZ) _read.MinZ = loZ;
+            if (hiZ > _read.MaxZ) _read.MaxZ = hiZ;
+
             if (hiZ < _zMin || loZ > _zMax)
             {
                 return;
             }
 
-            _sink.Add(new Tri2(ax, ay, bx, by, cx, cy));
+            _read.Triangles.Add(new Tri2(ax, ay, bx, by, cx, cy));
         }
 
         public void Line(ComApi.InwSimpleVertex v1, ComApi.InwSimpleVertex v2)

@@ -73,19 +73,21 @@ public static class FallHazardNodes
         var zMin = level - band;
         var zMax = level + band;
 
-        var floorTriangles = GeometryReader.ReadTrianglesInBand(floorList, zMin, zMax);
-        if (floorTriangles.Count == 0)
+        // The search usually returns floor *objects* (grouping nodes) whose geometry
+        // lives on leaf descendants, so flatten to the geometry-bearing leaves first —
+        // otherwise HasGeometry is false on the object and nothing is read.
+        var floorLeaves = ModelItemNodes.GeometryLeaves(floorList);
+        var floorRead = GeometryReader.ReadTrianglesInBand(floorLeaves, zMin, zMax);
+        if (floorRead.Triangles.Count == 0)
         {
-            throw new InvalidOperationException(
-                "No floor geometry was found in the band around level " +
-                level.ToString(CultureInfo.InvariantCulture) + " (±" + band.ToString(CultureInfo.InvariantCulture) +
-                "). Check the level and band match the slab elevation, that the items carry geometry, and that " +
-                "this is running inside a live Navisworks session (the geometry read uses the COM bridge).");
+            throw new InvalidOperationException(BuildEmptyFloorMessage(floorRead, level, band, zMin, zMax));
         }
+
+        var floorTriangles = floorRead.Triangles;
 
         var obstructionList = NavisValues.ToItemList(obstructions);
         var plugTriangles = obstructionList.Count > 0
-            ? GeometryReader.ReadTrianglesInBand(obstructionList, zMin, zMax)
+            ? GeometryReader.ReadTrianglesInBand(ModelItemNodes.GeometryLeaves(obstructionList), zMin, zMax).Triangles
             : new List<Tri2>();
 
         Bounds(floorTriangles, out var minX, out var minY, out var maxX, out var maxY);
@@ -125,6 +127,23 @@ public static class FallHazardNodes
             ["centers"] = centers,
             ["viewpoints"] = viewpoints,
         };
+    }
+
+    private static string BuildEmptyFloorMessage(BandRead read, double level, double band, double zMin, double zMax)
+    {
+        if (!read.HasAnyGeometry)
+        {
+            return "No floor geometry could be read from the given items. Make sure they carry geometry " +
+                "and that this is running inside a live Navisworks session (the geometry read uses the COM " +
+                "bridge, which is unavailable when running headless).";
+        }
+
+        string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+        var mid = (read.MinZ + read.MaxZ) * 0.5;
+        return "Floor geometry was found, but it sits at world Z " + F(read.MinZ) + " to " + F(read.MaxZ) +
+            ", outside the analysis band [" + F(zMin) + ", " + F(zMax) + "] around level " + F(level) +
+            " (±" + F(band) + "). These are world coordinates — the model may be offset from your project " +
+            "datum, or in different units. Set 'level' to about " + F(mid) + ", or widen 'band' to cover the slab.";
     }
 
     private static void Bounds(
