@@ -162,6 +162,35 @@ public class FloorGapHeatmapTests
         Assert.True(edges.DangerousLength > 0);         // the other three sides
     }
 
+    [Theory]
+    [InlineData(0.5, false)]  // 0.2 m slot < 0.5 limit → every edge safe, ends included
+    [InlineData(0.15, true)]  // 0.2 m slot ≥ 0.15 limit → dangerous
+    public void AnalyzeEdges_NarrowSlot_EndsJudgedByWidthNotLength(double limit, bool expectDanger)
+    {
+        // A 0.2 m × 3 m slot in a 10×10 slab. The old axis-march measured the
+        // slot's LENGTH from its end edges (3 m ≥ any limit → dangerous); the gap
+        // that matters is its WIDTH — you cannot fall through 0.2 m however long
+        // it is. Regression for: a 0.184 m gap read as above a 0.5 limit.
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 3, 10));      // left of the slot
+        slab.AddRange(Rect(3.2, 0, 10, 10));   // right of the slot
+        slab.AddRange(Rect(3, 0, 3.2, 3));     // below it
+        slab.AddRange(Rect(3, 6, 3.2, 10));    // above it → slot [3,3.2]×[3,6]
+
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.05, slab, Array.Empty<Tri2>(), minGap: limit);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit, tolerance: 0.3);
+
+        if (expectDanger)
+        {
+            Assert.True(edges.DangerousLength > 0);
+        }
+        else
+        {
+            Assert.Equal(0.0, edges.DangerousLength);
+            Assert.True(edges.SafeLength > 0);
+        }
+    }
+
     [Fact]
     public void RenderEdgePng_ProducesAValidPng()
     {

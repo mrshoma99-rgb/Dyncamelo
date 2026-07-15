@@ -265,15 +265,18 @@ public static class FloorGapHeatmap
 
     /// <summary>
     /// Classifies each floor edge cell that faces a void. An edge is dangerous
-    /// when the gap straight across the void to the nearest solid (far floor edge
-    /// or equipment) is at least <paramref name="limit"/>; it is safe below that.
-    /// A dangerous edge becomes protected when a handrail (its geometry projected
-    /// onto the plane and rasterised) runs within <paramref name="tolerance"/> of it —
-    /// per cell, so a short handrail only covers the length it actually spans.
+    /// when the void it faces is locally wide enough to fall through — it contains
+    /// a point whose distance to the nearest solid on every side reaches half the
+    /// <paramref name="limit"/> (local width ≥ limit) within reach of the edge. An
+    /// edge whose void is narrower than that everywhere nearby (the nearest object
+    /// across it is closer than the limit) is safe. A dangerous edge becomes
+    /// protected when a handrail (its geometry projected onto the plane and
+    /// rasterised) runs within <paramref name="tolerance"/> of it — per cell, so a
+    /// short handrail only covers the length it actually spans.
     /// </summary>
     /// <param name="result">The floor/void analysis to classify the edges of.</param>
     /// <param name="handrailTriangles">Handrail geometry projected to the plane; may be empty.</param>
-    /// <param name="limit">A gap ≥ this across the void makes the facing edge a hazard.</param>
+    /// <param name="limit">A void locally at least this wide makes the facing edge a hazard.</param>
     /// <param name="tolerance">A handrail within this distance of a dangerous edge protects it.</param>
     /// <returns>The per-cell edge classification and the length in each class.</returns>
     public static FloorEdgeResult AnalyzeEdges(
@@ -288,8 +291,8 @@ public static class FloorGapHeatmap
         var rows = result.Rows;
         var cellSize = result.CellSize;
         var floor = result.Floor;
-        var plug = result.Plug;
         var hazard = result.Hazard;
+        var clearance = result.Clearance;
         var count = cols * rows;
 
         // Handrails, projected and rasterised, then a distance field from them.
@@ -301,10 +304,30 @@ public static class FloorGapHeatmap
 
         var handrailDistance = ChamferFromSeeds(handrail, cols, rows, cellSize);
 
+        // Fall-through core: void cells whose clearance reaches half the limit —
+        // the spots where the void is locally wide enough to fall through. An edge
+        // is dangerous only when that core comes within reach of it THROUGH the
+        // void. Measuring this way (instead of marching one axis until the next
+        // solid) keeps the ends of a long narrow slot safe: the void there is long
+        // but never wide enough to fall through, so its length is irrelevant.
+        var core = new bool[count];
+        var coreSlack = 0.25 * cellSize;
+        for (int i = 0; i < count; i++)
+        {
+            core[i] = hazard[i] && clearance[i] >= limit / 2.0 - coreSlack;
+        }
+
+        var coreDistance = ChamferThroughMask(core, hazard, cols, rows, cellSize);
+
+        // The first core cell sits ~limit/2 beyond the edge's wall face; the rest
+        // covers the half-cell to the edge cell's centre plus discretisation.
+        var reach = limit / 2.0 + 1.75 * cellSize;
+
         var edges = new EdgeClass[count];
         double dangerousLen = 0, protectedLen = 0, safeLen = 0;
-        var neighbourR = new[] { -1, 1, 0, 0 };
-        var neighbourC = new[] { 0, 0, -1, 1 };
+        var neighbourR = new[] { -1, 1, 0, 0, -1, -1, 1, 1 };
+        var neighbourC = new[] { 0, 0, -1, 1, -1, 1, -1, 1 };
+        var diagonalStep = cellSize * Math.Sqrt(2.0);
 
         for (int r = 0; r < rows; r++)
         {
@@ -316,33 +339,32 @@ public static class FloorGapHeatmap
                     continue; // only floor cells can be an edge of the void
                 }
 
-                // The widest void the edge faces: march perpendicular into each
-                // adjacent void until the next solid, and take the largest span.
-                double gap = 0;
                 var facesVoid = false;
-                for (int d = 0; d < 4; d++)
+                var coreDist = double.PositiveInfinity;
+                for (int d = 0; d < 8; d++)
                 {
                     var nr = r + neighbourR[d];
                     var nc = c + neighbourC[d];
-                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || !hazard[nr * cols + nc])
+                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols)
                     {
                         continue;
                     }
 
-                    facesVoid = true;
-                    var steps = 0;
-                    int mr = nr, mc = nc;
-                    while (mr >= 0 && mr < rows && mc >= 0 && mc < cols && hazard[mr * cols + mc])
+                    var nIdx = nr * cols + nc;
+                    if (!hazard[nIdx])
                     {
-                        steps++;
-                        mr += neighbourR[d];
-                        mc += neighbourC[d];
+                        continue;
                     }
 
-                    var span = steps * cellSize;
-                    if (span > gap)
+                    if (d < 4)
                     {
-                        gap = span;
+                        facesVoid = true; // an edge borders the void orthogonally
+                    }
+
+                    var reached = coreDistance[nIdx] + (d < 4 ? cellSize : diagonalStep);
+                    if (reached < coreDist)
+                    {
+                        coreDist = reached;
                     }
                 }
 
@@ -352,7 +374,7 @@ public static class FloorGapHeatmap
                 }
 
                 EdgeClass cls;
-                if (gap < limit)
+                if (coreDist > reach)
                 {
                     cls = EdgeClass.SafeGap;
                     safeLen += cellSize;
@@ -373,6 +395,80 @@ public static class FloorGapHeatmap
         }
 
         return new FloorEdgeResult(result, edges, dangerousLen, protectedLen, safeLen);
+    }
+
+    /// <summary>
+    /// Chamfer distance (world units) to the nearest seed, propagating only
+    /// through <paramref name="passable"/> cells — distance THROUGH the void, so
+    /// danger cannot leak across equipment or floor. The two sweeps are iterated
+    /// to convergence because a masked (non-convex) domain may need several
+    /// passes; impassable cells stay +∞.
+    /// </summary>
+    private static double[] ChamferThroughMask(
+        bool[] seeds, bool[] passable, int cols, int rows, double cellSize)
+    {
+        var count = cols * rows;
+        var dist = new double[count];
+        const double big = 1e18;
+        var anySeed = false;
+        for (int i = 0; i < count; i++)
+        {
+            if (seeds[i]) { dist[i] = 0.0; anySeed = true; }
+            else { dist[i] = big; }
+        }
+
+        if (!anySeed)
+        {
+            for (int i = 0; i < count; i++) dist[i] = double.PositiveInfinity;
+            return dist;
+        }
+
+        const double d1 = 1.0;
+        var d2 = Math.Sqrt(2.0);
+
+        bool changed;
+        var iterations = 0;
+        do
+        {
+            changed = false;
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var idx = r * cols + c;
+                    if (!passable[idx] || dist[idx] == 0.0) continue;
+                    var best = dist[idx];
+                    if (c > 0 && passable[idx - 1]) best = Math.Min(best, dist[idx - 1] + d1);
+                    if (r > 0 && passable[idx - cols]) best = Math.Min(best, dist[idx - cols] + d1);
+                    if (r > 0 && c > 0 && passable[idx - cols - 1]) best = Math.Min(best, dist[idx - cols - 1] + d2);
+                    if (r > 0 && c < cols - 1 && passable[idx - cols + 1]) best = Math.Min(best, dist[idx - cols + 1] + d2);
+                    if (best < dist[idx]) { dist[idx] = best; changed = true; }
+                }
+            }
+
+            for (int r = rows - 1; r >= 0; r--)
+            {
+                for (int c = cols - 1; c >= 0; c--)
+                {
+                    var idx = r * cols + c;
+                    if (!passable[idx] || dist[idx] == 0.0) continue;
+                    var best = dist[idx];
+                    if (c < cols - 1 && passable[idx + 1]) best = Math.Min(best, dist[idx + 1] + d1);
+                    if (r < rows - 1 && passable[idx + cols]) best = Math.Min(best, dist[idx + cols] + d1);
+                    if (r < rows - 1 && c < cols - 1 && passable[idx + cols + 1]) best = Math.Min(best, dist[idx + cols + 1] + d2);
+                    if (r < rows - 1 && c > 0 && passable[idx + cols - 1]) best = Math.Min(best, dist[idx + cols - 1] + d2);
+                    if (best < dist[idx]) { dist[idx] = best; changed = true; }
+                }
+            }
+        }
+        while (changed && ++iterations < 16);
+
+        for (int i = 0; i < count; i++)
+        {
+            dist[i] = dist[i] >= big ? double.PositiveInfinity : dist[i] * cellSize;
+        }
+
+        return dist;
     }
 
     /// <summary>Two-pass chamfer distance (world units) to the nearest seed cell; +∞ when no seeds.</summary>

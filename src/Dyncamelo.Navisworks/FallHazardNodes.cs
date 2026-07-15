@@ -76,7 +76,7 @@ public static class FallHazardNodes
         // its full footprint, including the horizontal cap faces a thin Z-band around the
         // level would miss. (Missing those caps was why equipment read as open floor, not
         // as a plug: its side walls alone project to outlines, not a filled area.)
-        var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
+        var floorLeaves = SelectSpanningLeaves(NormalizeToObjects(floorList), level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
         var floorTriangles = GeometryReader
             .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         if (floorTriangles.Count == 0)
@@ -90,7 +90,7 @@ public static class FallHazardNodes
         var plugLeafCount = 0;
         if (obstructionList.Count > 0)
         {
-            var plugLeaves = SelectSpanningLeaves(obstructionList, level, band, out _, out _, out _);
+            var plugLeaves = SelectSpanningLeaves(NormalizeToObjects(obstructionList), level, band, out _, out _, out _);
             plugLeafCount = plugLeaves.Count;
             plugTriangles = GeometryReader
                 .ReadTrianglesInBand(plugLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
@@ -175,11 +175,11 @@ public static class FallHazardNodes
     /// <summary>Classifies each floor edge along a void as safe, handrail-protected, or dangerous.</summary>
     /// <param name="floors">The floor/slab items to treat as safe ground.</param>
     /// <param name="level">The elevation (world Z) of the plan to analyse.</param>
-    /// <param name="handrails">The handrail items — their geometry is projected flat onto the plan (posts and rails alike), so a handrail protects only the length it actually runs along an edge.</param>
+    /// <param name="handrails">The handrail items, picked at any selection-tree level (a leaf, the railing object or a whole group all resolve to the same railings). Only railings standing on this level (bbox underside within ±band) count; their geometry is projected flat onto the plan (posts and rails alike), so a handrail protects only the length it actually runs along an edge.</param>
     /// <param name="obstructions">Equipment/ducts/pipes that plug openings; a floor edge facing one at less than the limit is safe. Optional.</param>
     /// <param name="band">Vertical tolerance for deciding a floor/equipment element crosses the level.</param>
     /// <param name="cellSize">Grid resolution in document units (smaller = finer, use a few times below the limit).</param>
-    /// <param name="limit">A floor edge whose gap across the void to the nearest solid is at least this needs a handrail (e.g. 0.2 = 20 cm).</param>
+    /// <param name="limit">A floor edge needs a handrail when the void it faces is locally at least this wide (e.g. 0.2 = 20 cm, document units) — a narrower gap cannot be fallen through however long it runs.</param>
     /// <param name="handrailTolerance">A handrail within this distance of a dangerous edge protects it.</param>
     /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned).</param>
     /// <param name="pixelsPerCell">Image pixels per grid cell.</param>
@@ -216,7 +216,7 @@ public static class FallHazardNodes
 
         var doc = NavisworksContext.ResolveDocument(document);
 
-        var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
+        var floorLeaves = SelectSpanningLeaves(NormalizeToObjects(floorList), level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
         var floorTriangles = GeometryReader
             .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         if (floorTriangles.Count == 0)
@@ -229,21 +229,41 @@ public static class FallHazardNodes
         var plugTriangles = new List<Tri2>();
         if (obstructionList.Count > 0)
         {
-            var plugLeaves = SelectSpanningLeaves(obstructionList, level, band, out _, out _, out _);
+            var plugLeaves = SelectSpanningLeaves(NormalizeToObjects(obstructionList), level, band, out _, out _, out _);
             plugTriangles = GeometryReader
                 .ReadTrianglesInBand(plugLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         }
 
-        // Handrails sit above the floor and don't cross the level, so read all of
-        // their geometry and let the projection to the plan (dropping Z) place it.
-        var handrailList = NavisValues.ToItemList(handrails);
-        var handrailTriangles = new List<Tri2>();
-        if (handrailList.Count > 0)
+        // Handrails sit above the floor and don't cross the level, so read ALL of
+        // each relevant handrail's geometry (posts and rails alike) and let the
+        // projection to the plan (dropping Z) place it. Normalising to whole
+        // object-level elements first makes the result independent of where in
+        // the selection tree the handrail was picked (a single post leaf, the
+        // railing object or a group all resolve to the same railings). A railing
+        // is relevant to this level when it stands on it: bbox underside within
+        // ±band of the level — so railings of other storeys never protect here.
+        var handrailObjects = NormalizeToObjects(handrails);
+        var handrailLeaves = new List<ModelItem>();
+        var handrailsOnLevel = 0;
+        foreach (var railing in handrailObjects)
         {
-            handrailTriangles = GeometryReader
-                .ReadTrianglesInBand(ModelItemNodes.GeometryLeaves(handrailList),
-                    double.NegativeInfinity, double.PositiveInfinity).Triangles;
+            var box = railing.BoundingBox();
+            if (box == null || box.IsEmpty)
+            {
+                continue;
+            }
+
+            if (box.Min.Z >= level - band && box.Min.Z <= level + band)
+            {
+                handrailsOnLevel++;
+                handrailLeaves.AddRange(ModelItemNodes.GeometryLeaves(new[] { railing }));
+            }
         }
+
+        var handrailTriangles = handrailLeaves.Count > 0
+            ? GeometryReader.ReadTrianglesInBand(
+                handrailLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles
+            : new List<Tri2>();
 
         Bounds(floorTriangles, out var minX, out var minY, out var maxX, out var maxY);
         var pad = cellSize * 2.0;
@@ -260,7 +280,8 @@ public static class FallHazardNodes
         var report =
             "Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) + ", handrail tol " + F(handrailTolerance) + ". " +
             "Floor: " + floorTriangles.Count + " triangles, world Z " + F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
-            "Handrails: " + handrailTriangles.Count + " triangles from " + handrailList.Count + " item(s). " +
+            "Handrails: " + handrailObjects.Count + " element(s), " + handrailsOnLevel + " on this level, " +
+            handrailTriangles.Count + " triangles. " +
             "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
             "Edge length — dangerous " + F(edges.DangerousLength) + ", protected " + F(edges.ProtectedLength) +
             ", safe " + F(edges.SafeLength) + ".";
@@ -298,6 +319,33 @@ public static class FallHazardNodes
         return "Floor elements crossing the level were found, but no mesh triangles could be read from them " +
             "(the COM geometry bridge returned nothing). This usually means it is not running inside a live " +
             "Navisworks session.";
+    }
+
+    /// <summary>
+    /// Normalizes picked items to whole object-level elements, so the result does
+    /// not depend on where in the selection tree the user picked: a geometry leaf
+    /// (one post of a railing), the object itself, or a group above it all resolve
+    /// to the same element set. Each item is expanded to its geometry leaves and
+    /// every leaf is lifted to its first composite-object ancestor (the leaf
+    /// itself when it has none), deduplicated.
+    /// </summary>
+    private static List<ModelItem> NormalizeToObjects(IEnumerable<ModelItem>? items)
+    {
+        var objects = new List<ModelItem>();
+        var seen = new ModelItemSet();
+        foreach (var item in NavisValues.ToItemList(items))
+        {
+            foreach (var leaf in ModelItemNodes.GeometryLeaves(new[] { item }))
+            {
+                var element = leaf.FindFirstObjectAncestor() ?? leaf;
+                if (seen.Add(element))
+                {
+                    objects.Add(element);
+                }
+            }
+        }
+
+        return objects;
     }
 
     /// <summary>
