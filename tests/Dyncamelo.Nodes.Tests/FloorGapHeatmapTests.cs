@@ -77,8 +77,8 @@ public class FloorGapHeatmapTests
     }
 
     [Theory]
-    [InlineData(1.0, true)]   // gap ≈ 2 ≥ 1 → flagged
-    [InlineData(3.0, false)]  // gap ≈ 2 < 3 → not flagged
+    [InlineData(0.5, true)]   // deepest point ≈ 0.875 from an edge ≥ 0.5 → flagged
+    [InlineData(1.5, false)]  // 0.875 < 1.5 → within reach of an edge → not flagged
     public void Analyze_FlagsByThreshold(double minGap, bool expectFlagged)
     {
         var result = FloorGapHeatmap.Analyze(
@@ -117,11 +117,27 @@ public class FloorGapHeatmapTests
     {
         var result = FloorGapHeatmap.Analyze(
             0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.0);
-        var png = FloorGapHeatmap.RenderPng(result, pixelsPerCell: 3);
+        var png = FloorGapHeatmap.RenderPng(result, pixelsPerCell: 3, minGap: 0.5);
 
         var (w, h) = ReadPngSize(png);
         Assert.Equal(result.Cols * 3, w);
         Assert.Equal(result.Rows * 3, h);
+    }
+
+    [Fact]
+    public void RenderPng_BelowLimitVoidIsNotRed_AboveLimitIsRed()
+    {
+        // Donut hole is 2×2, so its deepest point is ~1 unit from any edge.
+        var result = FloorGapHeatmap.Analyze(
+            0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.0);
+
+        // Limit far above the hole's clearance → nothing reaches it → no red.
+        var below = CountRed(FloorGapHeatmap.RenderPng(result, 3, minGap: 5.0));
+        Assert.Equal(0, below);
+
+        // Limit well below the clearance → the middle exceeds it → red present.
+        var above = CountRed(FloorGapHeatmap.RenderPng(result, 3, minGap: 0.3));
+        Assert.True(above > 0, "Expected red hazard pixels above the limit.");
     }
 
     // ---------------------------------------------------------------- PngWriter
@@ -170,6 +186,29 @@ public class FloorGapHeatmapTests
         int Read(int offset) =>
             (png[offset] << 24) | (png[offset + 1] << 16) | (png[offset + 2] << 8) | png[offset + 3];
         return (Read(16), Read(20));
+    }
+
+    /// <summary>Counts clearly-red pixels (hot end of the ramp) in a rendered PNG.</summary>
+    private static int CountRed(byte[] png)
+    {
+        var raw = InflateIdat(png);
+        var (w, h) = ReadPngSize(png);
+        var stride = w * 4;
+        var count = 0;
+        for (int y = 0; y < h; y++)
+        {
+            var rowStart = y * (stride + 1) + 1; // skip the per-row filter byte
+            for (int x = 0; x < w; x++)
+            {
+                var o = rowStart + x * 4;
+                if (raw[o] >= 180 && raw[o + 1] <= 90 && raw[o + 2] <= 90)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 
     private static byte[] InflateIdat(byte[] png)

@@ -25,7 +25,7 @@ public static class FallHazardNodes
     /// <param name="obstructions">Equipment, ducts and pipes that plug openings — where these sit, there is no fall hazard. Optional.</param>
     /// <param name="band">Vertical tolerance for deciding an element crosses the level: an element counts when its bounding box reaches within this of the level. Its full silhouette is then read, so this need not match the slab thickness.</param>
     /// <param name="cellSize">Grid resolution in document units (smaller = finer and slower).</param>
-    /// <param name="minGap">Openings whose widest clear span is at least this need a handrail — these are the flagged ones.</param>
+    /// <param name="minGap">The handrail limit as a distance from the nearest floor edge or obstacle (e.g. 0.2 = 20 cm): a void point farther than this from any solid is a hazard. It is the heat-map pivot — cells below it read cool, at it yellow, above it red — and openings that contain such a point are flagged.</param>
     /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).</param>
     /// <param name="saveViewpoints">True to add one top-down saved viewpoint per flagged opening.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (bigger = larger image).</param>
@@ -33,7 +33,7 @@ public static class FallHazardNodes
     /// <returns>The image path, the flagged-opening count, their widest gaps and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the openings enclosed by floor, subtracts the equipment that plugs them, grades each remaining gap by its widest clear span, and writes a top-down PNG heat map (hot = middle of a big opening; equipment shows steel-blue). Openings whose widest gap ≥ minGap are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
+    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), yellow at it, red beyond it (a genuine fall hazard). Openings that reach past the limit are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
     public static Dictionary<string, object?> FloorOpeningMap(
@@ -42,7 +42,7 @@ public static class FallHazardNodes
         IEnumerable<ModelItem>? obstructions = null,
         double band = 1.0,
         double cellSize = 0.25,
-        double minGap = 0.5,
+        double minGap = 0.2,
         string? imagePath = null,
         bool saveViewpoints = true,
         int pixelsPerCell = 6,
@@ -102,7 +102,7 @@ public static class FallHazardNodes
             minX - pad, minY - pad, maxX + pad, maxY + pad, cellSize, floorTriangles, plugTriangles, minGap);
 
         var path = ResolveImagePath(imagePath, doc);
-        var png = FloorGapHeatmap.RenderPng(result, pixelsPerCell);
+        var png = FloorGapHeatmap.RenderPng(result, pixelsPerCell, minGap);
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
         File.WriteAllBytes(path, png);
 

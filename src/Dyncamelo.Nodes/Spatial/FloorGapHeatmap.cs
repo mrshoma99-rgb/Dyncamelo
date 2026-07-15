@@ -459,15 +459,17 @@ public static class FloorGapHeatmap
                 }
             }
 
-            // Peak clearance is the inscribed-circle radius; the widest clear span
-            // across the opening is roughly its diameter.
+            // Peak clearance is how far the opening's deepest point sits from any
+            // edge/obstacle; the widest clear span across it is roughly twice that.
+            // An opening is flagged when that deepest point exceeds the limit — i.e.
+            // it contains at least one cell more than `minGap` from any solid.
             var widestGap = peak * 2.0;
             var opening = new FloorOpening(
                 sumCx / cells, sumCy / cells, cells * cellSize * cellSize, widestGap,
                 originX + minC * cellSize, originY + minR * cellSize,
                 originX + (maxC + 1) * cellSize, originY + (maxR + 1) * cellSize, (int)cells)
             {
-                Flagged = widestGap >= minGap,
+                Flagged = peak >= minGap,
             };
             openings.Add(opening);
         }
@@ -478,12 +480,19 @@ public static class FloorGapHeatmap
 
     // ------------------------------------------------------------------- Render
 
-    /// <summary>Renders the analysis to a PNG: floor dark, obstructions steel, openings heat-graded.</summary>
+    /// <summary>
+    /// Renders the analysis to a PNG. Open cells are coloured by a gradient that
+    /// pivots on the <paramref name="minGap"/> limit: a cell's local gap width
+    /// (twice its clearance) maps blue/green when it is well under the limit,
+    /// yellow right at the limit, and orange→red the further it exceeds it — so a
+    /// gap narrower than the limit never reads as red. Floor is dark grey,
+    /// equipment mid grey.
+    /// </summary>
     /// <param name="result">The analysis result.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (≥1).</param>
-    /// <param name="flaggedOnly">When true, only flagged openings get the heat ramp; others stay muted.</param>
+    /// <param name="minGap">The handrail limit: the gap width that maps to the yellow pivot.</param>
     /// <returns>The PNG bytes.</returns>
-    public static byte[] RenderPng(FloorGapResult result, int pixelsPerCell = 4, bool flaggedOnly = false)
+    public static byte[] RenderPng(FloorGapResult result, int pixelsPerCell = 4, double minGap = 0.0)
     {
         if (result == null)
         {
@@ -501,10 +510,6 @@ public static class FloorGapHeatmap
         var height = rows * pixelsPerCell;
         var rgba = new byte[width * height * 4];
 
-        // Which cells belong to a flagged opening (for the muted/heat split and outline).
-        var flaggedCell = flaggedOnly ? BuildFlaggedMask(result) : null;
-        var scale = result.MaxClearance > 1e-9 ? 1.0 / result.MaxClearance : 0.0;
-
         for (int r = 0; r < rows; r++)
         {
             // PNG row 0 is the top; grid row 0 is min-Y (south), so flip vertically.
@@ -512,7 +517,7 @@ public static class FloorGapHeatmap
             for (int c = 0; c < cols; c++)
             {
                 var idx = r * cols + c;
-                GetCellColor(result, idx, flaggedCell, scale, out var cr, out var cg, out var cb, out var ca);
+                GetCellColor(result, idx, minGap, out var cr, out var cg, out var cb, out var ca);
 
                 for (int py = 0; py < pixelsPerCell; py++)
                 {
@@ -532,103 +537,23 @@ public static class FloorGapHeatmap
         return PngWriter.Encode(width, height, rgba);
     }
 
-    private static bool[] BuildFlaggedMask(FloorGapResult result)
-    {
-        // Re-walk hazard components, keeping only cells whose component is flagged.
-        var cols = result.Cols;
-        var rows = result.Rows;
-        var hazard = result.Hazard;
-        var clearance = result.Clearance;
-        var count = cols * rows;
-        var mask = new bool[count];
-        var visited = new bool[count];
-        var stack = new Stack<int>();
-
-        for (int start = 0; start < count; start++)
-        {
-            if (!hazard[start] || visited[start])
-            {
-                continue;
-            }
-
-            var component = new List<int>();
-            double peak = 0;
-            visited[start] = true;
-            stack.Push(start);
-            while (stack.Count > 0)
-            {
-                var idx = stack.Pop();
-                component.Add(idx);
-                if (clearance[idx] > peak) peak = clearance[idx];
-                var r = idx / cols;
-                var c = idx % cols;
-                for (int dr = -1; dr <= 1; dr++)
-                {
-                    for (int dc = -1; dc <= 1; dc++)
-                    {
-                        if (dr == 0 && dc == 0) continue;
-                        var nr = r + dr;
-                        var nc = c + dc;
-                        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
-                        var nIdx = nr * cols + nc;
-                        if (hazard[nIdx] && !visited[nIdx])
-                        {
-                            visited[nIdx] = true;
-                            stack.Push(nIdx);
-                        }
-                    }
-                }
-            }
-
-            if (peak * 2.0 >= MinFlaggedGap(result))
-            {
-                foreach (var idx in component)
-                {
-                    mask[idx] = true;
-                }
-            }
-        }
-
-        return mask;
-    }
-
-    private static double MinFlaggedGap(FloorGapResult result)
-    {
-        // The smallest flagged opening's widest gap defines the flag threshold in
-        // effect for this result (openings are sorted; flagged ones share it).
-        var min = double.PositiveInfinity;
-        foreach (var opening in result.Openings)
-        {
-            if (opening.Flagged && opening.WidestGap < min)
-            {
-                min = opening.WidestGap;
-            }
-        }
-
-        return double.IsPositiveInfinity(min) ? double.PositiveInfinity : min;
-    }
-
     private static void GetCellColor(
-        FloorGapResult result, int idx, bool[]? flaggedCell, double scale,
+        FloorGapResult result, int idx, double minGap,
         out byte r, out byte g, out byte b, out byte a)
     {
         if (result.Hazard[idx])
         {
-            if (flaggedCell != null && !flaggedCell[idx])
-            {
-                r = 90; g = 90; b = 96; a = 150; // muted: hazard below threshold
-                return;
-            }
-
-            var t = Math.Min(1.0, result.Clearance[idx] * scale);
-            HeatRamp(t, out r, out g, out b);
+            // Distance from this void cell to the nearest floor edge or obstacle:
+            // the limit thresholds this directly (> limit from any solid = hazard).
+            var clearance = result.Clearance[idx];
+            LimitRamp(clearance, minGap, result.MaxClearance, out r, out g, out b);
             a = 255;
             return;
         }
 
         if (result.Plug[idx])
         {
-            r = 96; g = 120; b = 150; a = 255; // obstruction (equipment/pipe)
+            r = 122; g = 126; b = 133; a = 255; // obstruction (equipment/pipe)
             return;
         }
 
@@ -641,34 +566,62 @@ public static class FloorGapHeatmap
         r = 0; g = 0; b = 0; a = 0; // exterior / empty
     }
 
-    /// <summary>Cool→hot ramp: deep blue (edge) → cyan → green → yellow → red (centre).</summary>
-    private static void HeatRamp(double t, out byte r, out byte g, out byte b)
+    /// <summary>
+    /// Maps a clearance (distance to the nearest floor edge or obstacle) to the
+    /// heat gradient, pivoting on the limit: the limit lands at the yellow
+    /// midpoint, below it runs blue→green (safe — within reach of an edge), above
+    /// it yellow→red (saturating at twice the limit, or at the largest clearance
+    /// when no limit is set).
+    /// </summary>
+    private static void LimitRamp(double clearance, double minGap, double maxClearance, out byte r, out byte g, out byte b)
     {
-        t = t < 0 ? 0 : (t > 1 ? 1 : t);
-        double rr, gg, bb;
-        if (t < 0.25)
+        double s;
+        if (minGap > 1e-9)
         {
-            var u = t / 0.25;
-            rr = 0.15; gg = 0.35 + 0.45 * u; bb = 0.9;
-        }
-        else if (t < 0.5)
-        {
-            var u = (t - 0.25) / 0.25;
-            rr = 0.15; gg = 0.8; bb = 0.9 - 0.6 * u;
-        }
-        else if (t < 0.75)
-        {
-            var u = (t - 0.5) / 0.25;
-            rr = 0.15 + 0.85 * u; gg = 0.85; bb = 0.3 - 0.2 * u;
+            var ratio = clearance / minGap;
+            s = ratio <= 1.0
+                ? 0.5 * Math.Max(0.0, ratio)                          // below the limit
+                : 0.5 + 0.5 * Math.Min(1.0, ratio - 1.0);             // above (2× limit → full red)
         }
         else
         {
-            var u = (t - 0.75) / 0.25;
-            rr = 1.0; gg = 0.85 - 0.7 * u; bb = 0.1;
+            // No limit set: fall back to a plain cool→hot ramp over the range.
+            s = maxClearance > 1e-9 ? Math.Min(1.0, clearance / maxClearance) : 0.5;
         }
 
-        r = (byte)Math.Round(rr * 255);
-        g = (byte)Math.Round(gg * 255);
-        b = (byte)Math.Round(bb * 255);
+        JetColor(s, out r, out g, out b);
+    }
+
+    private static readonly double[][] JetStops =
+    {
+        new[] { 0.00, 40, 70, 190 },   // blue      (gap → 0)
+        new[] { 0.25, 40, 180, 200 },  // cyan
+        new[] { 0.42, 80, 190, 80 },   // green
+        new[] { 0.50, 245, 225, 50 },  // yellow    (at the limit)
+        new[] { 0.75, 242, 120, 30 },  // orange
+        new[] { 1.00, 210, 30, 30 },   // red       (≥ 2× the limit)
+    };
+
+    /// <summary>Blue→green→yellow→orange→red gradient over s ∈ [0, 1].</summary>
+    private static void JetColor(double s, out byte r, out byte g, out byte b)
+    {
+        s = s < 0 ? 0 : (s > 1 ? 1 : s);
+        for (int i = 1; i < JetStops.Length; i++)
+        {
+            if (s <= JetStops[i][0])
+            {
+                var lo = JetStops[i - 1];
+                var hi = JetStops[i];
+                var u = (s - lo[0]) / (hi[0] - lo[0]);
+                r = (byte)Math.Round(lo[1] + (hi[1] - lo[1]) * u);
+                g = (byte)Math.Round(lo[2] + (hi[2] - lo[2]) * u);
+                b = (byte)Math.Round(lo[3] + (hi[3] - lo[3]) * u);
+                return;
+            }
+        }
+
+        r = (byte)JetStops[JetStops.Length - 1][1];
+        g = (byte)JetStops[JetStops.Length - 1][2];
+        b = (byte)JetStops[JetStops.Length - 1][3];
     }
 }
