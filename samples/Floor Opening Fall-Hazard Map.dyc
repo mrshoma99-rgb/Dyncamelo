@@ -245,7 +245,7 @@
     {
       "Id": "1000000000000000000000000000000a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,Autodesk.Navisworks.Api.Document",
+      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,bool,object,object,Autodesk.Navisworks.Api.Document",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "FallHazard.FloorOpeningMap",
       "X": 720.0,
@@ -319,6 +319,27 @@
         },
         {
           "Name": "pixelsPerCell",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "showOverage",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "lowColor",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "highColor",
           "UsingDefaultValue": true,
           "Level": -1,
           "UseLevels": false,

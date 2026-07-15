@@ -1129,9 +1129,15 @@ public static class FloorGapHeatmap
     /// </summary>
     /// <param name="result">The analysis result.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (≥1).</param>
-    /// <param name="minGap">The handrail limit: the gap width that maps to the yellow pivot.</param>
+    /// <param name="minGap">The handrail limit: the gap width that maps to the ramp's pivot.</param>
+    /// <param name="lowColor">Optional 0xRRGGBB for the safe end of a custom two-colour gradient.</param>
+    /// <param name="highColor">Optional 0xRRGGBB for the hazard end of a custom two-colour gradient.</param>
+    /// <param name="showOverage">True to print each flagged opening's gap-over-limit at its centre.</param>
+    /// <param name="labelDivisor">Divides label values before formatting (unit conversion); 1 = world units.</param>
     /// <returns>The PNG bytes.</returns>
-    public static byte[] RenderPng(FloorGapResult result, int pixelsPerCell = 4, double minGap = 0.0)
+    public static byte[] RenderPng(
+        FloorGapResult result, int pixelsPerCell = 4, double minGap = 0.0,
+        int? lowColor = null, int? highColor = null, bool showOverage = false, double labelDivisor = 1.0)
     {
         if (result == null)
         {
@@ -1156,7 +1162,7 @@ public static class FloorGapHeatmap
             for (int c = 0; c < cols; c++)
             {
                 var idx = r * cols + c;
-                GetCellColor(result, idx, minGap, out var cr, out var cg, out var cb, out var ca);
+                GetCellColor(result, idx, minGap, lowColor, highColor, out var cr, out var cg, out var cb, out var ca);
 
                 for (int py = 0; py < pixelsPerCell; py++)
                 {
@@ -1173,11 +1179,29 @@ public static class FloorGapHeatmap
             }
         }
 
+        if (showOverage && labelDivisor > 0 && minGap > 0)
+        {
+            var glyphScale = Math.Max(2, pixelsPerCell / 2);
+            foreach (var opening in result.Openings)
+            {
+                if (!opening.Flagged || opening.WidestGap <= minGap)
+                {
+                    continue;
+                }
+
+                var text = "+" + ((opening.WidestGap - minGap) / labelDivisor)
+                    .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                var px = (int)((opening.CenterX - result.OriginX) / result.CellSize) * pixelsPerCell;
+                var py = (rows - 1 - (int)((opening.CenterY - result.OriginY) / result.CellSize)) * pixelsPerCell;
+                DrawText(rgba, width, height, text, px, py, glyphScale);
+            }
+        }
+
         return PngWriter.Encode(width, height, rgba);
     }
 
     private static void GetCellColor(
-        FloorGapResult result, int idx, double minGap,
+        FloorGapResult result, int idx, double minGap, int? lowColor, int? highColor,
         out byte r, out byte g, out byte b, out byte a)
     {
         if (result.Hazard[idx])
@@ -1185,7 +1209,7 @@ public static class FloorGapHeatmap
             // Distance from this void cell to the nearest floor edge or obstacle:
             // the limit thresholds this directly (> limit from any solid = hazard).
             var clearance = result.Clearance[idx];
-            LimitRamp(clearance, minGap, result.MaxClearance, out r, out g, out b);
+            LimitRamp(clearance, minGap, result.MaxClearance, lowColor, highColor, out r, out g, out b);
             a = 255;
             return;
         }
@@ -1212,7 +1236,9 @@ public static class FloorGapHeatmap
     /// it yellow→red (saturating at twice the limit, or at the largest clearance
     /// when no limit is set).
     /// </summary>
-    private static void LimitRamp(double clearance, double minGap, double maxClearance, out byte r, out byte g, out byte b)
+    private static void LimitRamp(
+        double clearance, double minGap, double maxClearance, int? lowColor, int? highColor,
+        out byte r, out byte g, out byte b)
     {
         double s;
         if (minGap > 1e-9)
@@ -1226,6 +1252,19 @@ public static class FloorGapHeatmap
         {
             // No limit set: fall back to a plain cool→hot ramp over the range.
             s = maxClearance > 1e-9 ? Math.Min(1.0, clearance / maxClearance) : 0.5;
+        }
+
+        if (lowColor.HasValue || highColor.HasValue)
+        {
+            // Custom report gradient: a straight blend from the low colour (gap → 0,
+            // the safe end) to the high colour (≥ 2× the limit, the worst hazard);
+            // the limit itself sits at the 50% blend.
+            Unpack(lowColor ?? 0x2846BE, out var lr, out var lg, out var lb);
+            Unpack(highColor ?? 0xD21E1E, out var hr, out var hg, out var hb);
+            r = (byte)Math.Round(lr + (hr - lr) * s);
+            g = (byte)Math.Round(lg + (hg - lg) * s);
+            b = (byte)Math.Round(lb + (hb - lb) * s);
+            return;
         }
 
         JetColor(s, out r, out g, out b);

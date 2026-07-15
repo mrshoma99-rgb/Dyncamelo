@@ -30,14 +30,19 @@ public static class FallHazardNodes
     /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).</param>
     /// <param name="saveViewpoints">True to add one top-down saved viewpoint per flagged opening.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (bigger = larger image).</param>
+    /// <param name="showOverage">True to print, at each flagged opening, how far its widest gap exceeds the limit (e.g. "+0.35", in the chosen units) — for plans that go into reports.</param>
+    /// <param name="lowColor">Gradient colour for the safe end (gap → 0; a Color, "#RRGGBB" or [r,g,b]); empty = the default multi-colour ramp.</param>
+    /// <param name="highColor">Gradient colour for the worst hazard (≥ 2× the limit); empty = the default multi-colour ramp.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The image path, the flagged-opening count, their widest gaps (in the chosen units) and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    // Pre-0.14 id (before the units parameter).
-    [NodeAliases("Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document")]
-    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), yellow at it, red beyond it (a genuine fall hazard). Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
-    [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab")]
+    // Pre-0.14 id (before units) and 0.14 id (before overage/colours).
+    [NodeAliases(
+        "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document",
+        "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.")]
+    [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab", "color", "gradient", "label", "report")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
     public static Dictionary<string, object?> FloorOpeningMap(
         IEnumerable<ModelItem> floors,
@@ -51,6 +56,9 @@ public static class FallHazardNodes
         string? imagePath = null,
         bool saveViewpoints = true,
         int pixelsPerCell = 6,
+        bool showOverage = false,
+        object? lowColor = null,
+        object? highColor = null,
         Document? document = null)
     {
         var floorList = NavisValues.ToItemList(floors);
@@ -117,7 +125,11 @@ public static class FallHazardNodes
             minX - pad, minY - pad, maxX + pad, maxY + pad, cellSize, floorTriangles, plugTriangles, minGap);
 
         var path = ResolveImagePath(imagePath, doc);
-        var png = FloorGapHeatmap.RenderPng(result, pixelsPerCell, minGap);
+        var png = FloorGapHeatmap.RenderPng(
+            result, pixelsPerCell, minGap,
+            lowColor != null ? PackColor(lowColor) : (int?)null,
+            highColor != null ? PackColor(highColor) : (int?)null,
+            showOverage, labelDivisor: scale);
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
         File.WriteAllBytes(path, png);
 

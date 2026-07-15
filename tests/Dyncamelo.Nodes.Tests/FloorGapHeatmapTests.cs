@@ -370,6 +370,21 @@ public class FloorGapHeatmapTests
     // -------------------------------------------------------------------- Render
 
     [Fact]
+    public void RenderPng_CustomGradientAndOverageLabels()
+    {
+        // Donut hole clearance ~0.875 ≥ 2× minGap 0.2 → the centre saturates to
+        // the exact high colour; the flagged opening gets a printed overage.
+        var result = FloorGapHeatmap.Analyze(
+            0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        var png = FloorGapHeatmap.RenderPng(
+            result, 4, minGap: 0.2, lowColor: 0x0000FF, highColor: 0xFF00FF, showOverage: true);
+
+        Assert.True(CountExact(png, 255, 0, 255) > 0, "expected saturated high-colour cells");
+        Assert.Equal(0, CountExact(png, 210, 30, 30));  // default jet red replaced
+        Assert.True(CountExact(png, 255, 255, 255) > 0, "expected white label text");
+    }
+
+    [Fact]
     public void RenderPng_ProducesAValidPngOfTheRightSize()
     {
         var result = FloorGapHeatmap.Analyze(
