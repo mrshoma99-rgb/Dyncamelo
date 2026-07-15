@@ -23,7 +23,7 @@ public static class FallHazardNodes
     /// <param name="floors">The floor/slab items to treat as safe ground (e.g. a search for floor elements).</param>
     /// <param name="level">The elevation (world Z) of the plan to analyse.</param>
     /// <param name="obstructions">Equipment, ducts and pipes that plug openings — where these sit, there is no fall hazard. Optional.</param>
-    /// <param name="band">Half-thickness of the slice around the level; make it span the slab thickness so a full horizontal face is captured.</param>
+    /// <param name="band">Vertical tolerance for deciding an element crosses the level: an element counts when its bounding box reaches within this of the level. Its full silhouette is then read, so this need not match the slab thickness.</param>
     /// <param name="cellSize">Grid resolution in document units (smaller = finer and slower).</param>
     /// <param name="minGap">Openings whose widest clear span is at least this need a handrail — these are the flagged ones.</param>
     /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).</param>
@@ -33,7 +33,7 @@ public static class FallHazardNodes
     /// <returns>The image path, the flagged-opening count, their widest gaps and centre points, and any saved viewpoints.</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Whole-floor fall-hazard heat map. Slices the model at 'level', rasterises the floor and (optional) equipment geometry, finds the openings enclosed by floor, grades each by its widest clear span, and writes a top-down PNG heat map (hot = middle of a big opening). Openings whose widest gap ≥ minGap are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab. Needs a live Navisworks session; run it once at a level rather than per element.")]
+    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the openings enclosed by floor, subtracts the equipment that plugs them, grades each remaining gap by its widest clear span, and writes a top-down PNG heat map (hot = middle of a big opening; equipment shows steel-blue). Openings whose widest gap ≥ minGap are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints")]
     public static Dictionary<string, object?> FloorOpeningMap(
@@ -70,25 +70,29 @@ public static class FallHazardNodes
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
-        var zMin = level - band;
-        var zMax = level + band;
-
-        // The search usually returns floor *objects* (grouping nodes) whose geometry
-        // lives on leaf descendants, so flatten to the geometry-bearing leaves first —
-        // otherwise HasGeometry is false on the object and nothing is read.
-        var floorLeaves = ModelItemNodes.GeometryLeaves(floorList);
-        var floorRead = GeometryReader.ReadTrianglesInBand(floorLeaves, zMin, zMax);
-        if (floorRead.Triangles.Count == 0)
+        // Select whole elements whose bounding box crosses the level (band = vertical
+        // tolerance), then read ALL of their triangles — the filled silhouette. A slab
+        // contributes its holed top/bottom faces; equipment passing through contributes
+        // its full footprint, including the horizontal cap faces a thin Z-band around the
+        // level would miss. (Missing those caps was why equipment read as open floor, not
+        // as a plug: its side walls alone project to outlines, not a filled area.)
+        var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
+        var floorTriangles = GeometryReader
+            .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
+        if (floorTriangles.Count == 0)
         {
-            throw new InvalidOperationException(BuildEmptyFloorMessage(floorRead, level, band, zMin, zMax));
+            throw new InvalidOperationException(
+                BuildEmptyFloorMessage(floorLeaves.Count, floorHasBox, floorMinZ, floorMaxZ, level, band));
         }
 
-        var floorTriangles = floorRead.Triangles;
-
         var obstructionList = NavisValues.ToItemList(obstructions);
-        var plugTriangles = obstructionList.Count > 0
-            ? GeometryReader.ReadTrianglesInBand(ModelItemNodes.GeometryLeaves(obstructionList), zMin, zMax).Triangles
-            : new List<Tri2>();
+        var plugTriangles = new List<Tri2>();
+        if (obstructionList.Count > 0)
+        {
+            var plugLeaves = SelectSpanningLeaves(obstructionList, level, band, out _, out _, out _);
+            plugTriangles = GeometryReader
+                .ReadTrianglesInBand(plugLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
+        }
 
         Bounds(floorTriangles, out var minX, out var minY, out var maxX, out var maxY);
         var pad = cellSize * 2.0;
@@ -129,21 +133,71 @@ public static class FallHazardNodes
         };
     }
 
-    private static string BuildEmptyFloorMessage(BandRead read, double level, double band, double zMin, double zMax)
+    private static string BuildEmptyFloorMessage(
+        int spanningLeafCount, bool hasBox, double minZ, double maxZ, double level, double band)
     {
-        if (!read.HasAnyGeometry)
+        string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+        if (!hasBox)
         {
             return "No floor geometry could be read from the given items. Make sure they carry geometry " +
                 "and that this is running inside a live Navisworks session (the geometry read uses the COM " +
                 "bridge, which is unavailable when running headless).";
         }
 
-        string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
-        var mid = (read.MinZ + read.MaxZ) * 0.5;
-        return "Floor geometry was found, but it sits at world Z " + F(read.MinZ) + " to " + F(read.MaxZ) +
-            ", outside the analysis band [" + F(zMin) + ", " + F(zMax) + "] around level " + F(level) +
-            " (±" + F(band) + "). These are world coordinates — the model may be offset from your project " +
-            "datum, or in different units. Set 'level' to about " + F(mid) + ", or widen 'band' to cover the slab.";
+        if (spanningLeafCount == 0)
+        {
+            return "Floor elements were found, but their geometry sits at world Z " + F(minZ) + " to " + F(maxZ) +
+                ", which does not reach the level " + F(level) + " (±" + F(band) + " tolerance). These are world " +
+                "coordinates — the model may be offset from your project datum, or in different units. Set 'level' " +
+                "between " + F(minZ) + " and " + F(maxZ) + ".";
+        }
+
+        return "Floor elements crossing the level were found, but no mesh triangles could be read from them " +
+            "(the COM geometry bridge returned nothing). This usually means it is not running inside a live " +
+            "Navisworks session.";
+    }
+
+    /// <summary>
+    /// The geometry leaves of every element whose bounding box reaches within
+    /// <paramref name="band"/> of the level — i.e. the elements that cross the
+    /// analysis plane. Reports the overall world-Z range seen for diagnostics.
+    /// </summary>
+    private static List<ModelItem> SelectSpanningLeaves(
+        List<ModelItem> items, double level, double band,
+        out double minZ, out double maxZ, out bool hasBox)
+    {
+        minZ = double.PositiveInfinity;
+        maxZ = double.NegativeInfinity;
+        hasBox = false;
+        var lo = level - band;
+        var hi = level + band;
+        var leaves = new List<ModelItem>();
+
+        foreach (var item in items)
+        {
+            if (item == null)
+            {
+                continue;
+            }
+
+            var box = item.BoundingBox();
+            if (box == null || box.IsEmpty)
+            {
+                continue;
+            }
+
+            hasBox = true;
+            if (box.Min.Z < minZ) minZ = box.Min.Z;
+            if (box.Max.Z > maxZ) maxZ = box.Max.Z;
+
+            if (box.Min.Z <= hi && box.Max.Z >= lo)
+            {
+                leaves.AddRange(ModelItemNodes.GeometryLeaves(new[] { item }));
+            }
+        }
+
+        return leaves;
     }
 
     private static void Bounds(
