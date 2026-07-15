@@ -23,6 +23,7 @@ public static class ExportNodes
     /// <param name="categoryName">Property category to export; null exports every category as "Category.Property" columns.</param>
     /// <param name="propertyNames">Property names to export from the category; null exports all found.</param>
     /// <returns>The written file path.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ToCsv")]
     [NodeDescription("Writes one CSV row per model item with a Name column plus property columns. Useful for quantity take-offs.")]
     [NodeSearchTags("export", "csv", "qto", "takeoff", "report", "excel")]
@@ -126,6 +127,7 @@ public static class ExportNodes
     /// <param name="tests">The clash tests to report (null reports every test in the document).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path and the number of result rows.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ClashReportCsv")]
     [NodeDescription("One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready).")]
     [NodeSearchTags("export", "clash", "report", "csv", "excel", "triage")]
@@ -167,6 +169,7 @@ public static class ExportNodes
     /// <param name="imageHeight">Snapshot height in pixels.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path and the number of result rows.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ClashReportHtml")]
     [NodeDescription("Self-contained HTML clash report — one section per test, one row per result, optionally with embedded snapshots. Shareable as a single file.")]
     [NodeSearchTags("export", "clash", "report", "html", "snapshot", "share")]
@@ -267,6 +270,7 @@ public static class ExportNodes
     /// <param name="height">Image height in pixels.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path. After SavedViewpoint.Apply in a lacing loop this is a batch screenshot factory.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ViewpointImage")]
     [NodeDescription("Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter.")]
     [NodeSearchTags("export", "image", "screenshot", "render", "viewpoint", "png")]
@@ -357,6 +361,7 @@ public static class ExportNodes
     /// <param name="filePath">Destination .nwd path; the directory is created when missing.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.NWD")]
     [NodeDescription("Saves the document as a published .nwd snapshot (appearance overrides baked in).")]
     [NodeSearchTags("export", "nwd", "publish", "save", "snapshot")]

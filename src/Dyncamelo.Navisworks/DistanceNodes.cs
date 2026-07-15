@@ -13,7 +13,7 @@ namespace Dyncamelo.Navisworks;
 /// "bbox" (cheap axis-aligned bounding-box approximation). All distances are
 /// in document units — chain Units.Convert for meters/feet.
 /// </summary>
-[NodeCategory("Navisworks.Geometry")]
+[NodeCategory("Navisworks.Analysis")]
 public static class DistanceNodes
 {
     /// <summary>Shortest distance between two selections of model items, with witness points.</summary>

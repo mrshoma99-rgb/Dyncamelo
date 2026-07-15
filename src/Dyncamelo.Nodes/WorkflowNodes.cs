@@ -26,6 +26,7 @@ public static class WorkflowNodes
     /// (unwrapped when a single value, a list when several, the item itself when
     /// none). For a per-item Save Viewpoint workflow this is the list of created
     /// viewpoints.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Workflow.ForEach")]
     [NodeDescription(
         "Runs a sequence of actions on each item, one item fully before the next — " +

@@ -43,6 +43,7 @@ public static class IfcExportNodes
     /// <param name="validate">Run the built-in structural validator on each written file.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written path(s) and export statistics.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ToIfc")]
     [NodeDescription("Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing.")]
     [NodeSearchTags("export", "ifc", "openbim", "bim", "qto", "ifc4", "ifc2x3", "bimcamel")]
@@ -168,6 +169,7 @@ public static class IfcExportNodes
     /// <param name="rotationDegrees">Grid/true-north rotation, recorded in IFC4 georeferencing.</param>
     /// <param name="writeGeoref">Write IfcMapConversion/IfcProjectedCRS (IFC4 only).</param>
     /// <returns>A coordinate-options object to wire into Export.ToIfc.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcCoordinates")]
     [NodeDescription("Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing.")]
     [NodeSearchTags("ifc", "export", "coordinates", "base point", "georeferencing", "origin", "rotation")]
@@ -197,6 +199,7 @@ public static class IfcExportNodes
     /// <param name="building">IfcBuilding name.</param>
     /// <param name="storey">Default IfcBuildingStorey name (level-less elements).</param>
     /// <returns>A spatial-names object to wire into Export.ToIfc.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcSpatialNames")]
     [NodeDescription("Names for the IFC spatial tree (Project/Site/Building/default Storey) used by Export.ToIfc.")]
     [NodeSearchTags("ifc", "export", "project", "site", "building", "storey", "spatial")]
@@ -226,6 +229,7 @@ public static class IfcExportNodes
     /// <param name="classificationProperty">Property whose value becomes an IfcClassificationReference (IFC4).</param>
     /// <param name="classificationCategory">Category carrying the classification property (blank = any).</param>
     /// <returns>A property-roles object to wire into Export.ToIfc.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcRoles")]
     [NodeDescription("Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc.")]
     [NodeSearchTags("ifc", "export", "roles", "type", "level", "storey", "material", "classification", "mapping")]
@@ -255,6 +259,7 @@ public static class IfcExportNodes
     /// <param name="targetName">Destination property name (blank = keep original name).</param>
     /// <param name="sourceCategory">Only match this source category (blank = any).</param>
     /// <returns>A parameter-map rule; collect several into a list for Export.ToIfc.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcParameterRule")]
     [NodeDescription("One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export.")]
     [NodeSearchTags("ifc", "export", "parameter", "property", "pset", "rename", "map", "rule")]
@@ -285,6 +290,7 @@ public static class IfcExportNodes
     /// <param name="predefinedTypes">Optional predefined type per set (parallel list; blank entries allowed).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>An item→class map to wire into Export.ToIfc's classMap.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcSetClassMap")]
     [NodeDescription("Assigns an IFC class to every item of the named saved/search sets (set→class), producing the classMap for Export.ToIfc.")]
     [NodeSearchTags("ifc", "export", "class", "set", "selection set", "map", "type", "ifcwall")]

@@ -86,6 +86,27 @@ public class LoaderTests
     }
 
     [Fact]
+    public void NodeFunction_ReaderNoun_IsInfo()
+    {
+        // A model op with no mutation verb and no factory prefix reads data → Info.
+        Assert.Equal(NodeFunction.Info, ZT.Definition("Comments").Function);
+    }
+
+    [Fact]
+    public void NodeFunction_ActionVerb_IsModify()
+    {
+        // "Isolate" is an action, not an "Is…" predicate.
+        Assert.Equal(NodeFunction.Modify, ZT.Definition("Isolate").Function);
+    }
+
+    [Fact]
+    public void NodeFunction_DataPackTransform_IsCreate()
+    {
+        // A mutating-sounding op in a pure-data category still produces a new value.
+        Assert.Equal(NodeFunction.Create, ZT.Definition("SortValues").Function);
+    }
+
+    [Fact]
     public void ZeroTouchNode_ReportsDefinitionFunction()
     {
         Assert.Equal(NodeFunction.Info, ZT.Node("Peek").Function);

@@ -68,6 +68,16 @@ public static class MathFixtures
     [NodeFunction(NodeFunction.Info)]
     public static double Peek(double x) => x;
 
+    /// <summary>Reader-noun fixture: no verb, no factory prefix → Info.</summary>
+    public static object Comments(object item) => item;
+
+    /// <summary>Action-verb fixture: "Isolate" must be Modify, not read as an "Is…" query.</summary>
+    public static object Isolate(object item) => item;
+
+    /// <summary>Data-pack fixture: a mutating-sounding op in a data category is still Create.</summary>
+    [NodeCategory("List")]
+    public static IList<object> SortValues(IList<object> items) => items;
+
     public static void Consume(object item)
     {
         // side-effect placeholder; void methods pass their first input through

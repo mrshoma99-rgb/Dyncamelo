@@ -250,11 +250,12 @@ public static class AssemblyNodeLoader
         var assemblyName = type.Assembly.GetName().Name ?? string.Empty;
 
         var category = ResolveCategory(method, type, assemblyName);
+        var name = method.GetCustomAttribute<NodeNameAttribute>()?.Name ?? type.Name + "." + method.Name;
         var definition = new NodeDefinition(signature, assemblyName, method)
         {
-            Name = method.GetCustomAttribute<NodeNameAttribute>()?.Name ?? type.Name + "." + method.Name,
+            Name = name,
             Category = category,
-            Function = ResolveFunction(method, category),
+            Function = ResolveFunction(method, name, category),
             Description = method.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? type.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? string.Empty,
@@ -292,7 +293,8 @@ public static class AssemblyNodeLoader
     // every node. A [NodeFunction] attribute overrides this. Rules mirror the
     // user-facing definition: Info reads, Create produces new data/elements,
     // Modify changes things or has a side-effect (the catch-all).
-    private static Dyncamelo.Core.Graph.NodeFunction ResolveFunction(MethodInfo method, string category)
+    private static Dyncamelo.Core.Graph.NodeFunction ResolveFunction(
+        MethodInfo method, string nodeName, string category)
     {
         var explicitFunction = method.GetCustomAttribute<NodeFunctionAttribute>();
         if (explicitFunction != null)
@@ -300,42 +302,59 @@ public static class AssemblyNodeLoader
             return explicitFunction.Function;
         }
 
-        var name = method.Name;
+        // The operation token is the part after the last dot of the node name
+        // ("ClashResult.Comments" → "Comments"), which reflects intent better than
+        // the raw method name ("ResultComments").
+        var op = nodeName;
+        var dot = op.LastIndexOf('.');
+        if (dot >= 0 && dot < op.Length - 1)
+        {
+            op = op.Substring(dot + 1);
+        }
 
-        // Info — reads/returns data, changes nothing.
-        if (StartsWithAny(name, "Get", "Is", "Are", "Has", "Can", "Find", "Search", "Nearest", "Closest", "Count")
-            || EqualsAny(name, "Name", "Value", "Length", "Area", "Volume", "Distance", "Center",
-                "BoundingBox", "Properties", "Property", "Parent", "Children", "Ancestor", "Ancestors",
-                "Descendants", "Folder", "Level", "DisplayName", "Category", "First", "Last", "Sum", "Average",
-                "Min", "Max", "Contains", "IndexOf"))
+        // 1) Info — reads, queries, tests, measures; never changes anything.
+        //    Prefixes cover getters/predicates; the nouns are the data-pack queries
+        //    that would otherwise be mistaken for value factories. ("Is" is left out
+        //    on purpose — it would swallow the "Isolate" action.)
+        if (StartsWithAny(op, "Get", "Are", "Has", "Can", "Count", "Nearest", "Closest",
+                "Value", "First", "Last", "Root", "Results")
+            || EqualsAny(op, "Contains", "Intersects", "Size", "Center", "Components", "DistanceTo",
+                "IndexOf", "Length", "Keys", "DaysBetween", "Min", "Max", "Area", "Volume", "Distance",
+                "BoundingBox", "Sum", "Average", "Exists", "StartsWith", "EndsWith", "IsHidden"))
         {
             return Dyncamelo.Core.Graph.NodeFunction.Info;
         }
 
-        // Modify — an explicit action or side-effect on existing things/the scene.
-        if (StartsWithAny(name, "Set", "Override", "Isolate", "Hide", "Show", "Move", "Rename", "Sort",
+        // 2) The pure-data packs (Math/List/String/…) are functional: every
+        //    non-query op returns a NEW value, so it is Create, never Modify —
+        //    even when named Add/Remove/Sort/Replace.
+        if (StartsWithAny(category, "Math", "List", "String", "Logic", "Boolean", "Color", "Geometry",
+            "DateTime", "Dictionary", "Range", "Conversion", "Text", "Number", "Table"))
+        {
+            return Dyncamelo.Core.Graph.NodeFunction.Create;
+        }
+
+        // 3) Model world — explicit mutations / side-effects on the scene, document,
+        //    or a file on disk.
+        if (StartsWithAny(op, "Set", "Override", "Isolate", "Hide", "Show", "Move", "Rename", "Sort",
             "Delete", "Remove", "Reset", "Apply", "Zoom", "Save", "Export", "Write", "Ghost", "Highlight",
             "Transform", "Update", "Replace", "Clear", "Enable", "Disable", "Add", "Append", "Insert",
-            "Select", "Focus", "Rotate", "Scale", "Translate", "Offset", "Color", "Paint"))
+            "Select", "Focus", "Rotate", "Translate", "Offset", "Paint", "Color", "Assign", "Attach", "Run",
+            "Merge", "Open", "Refresh", "Import", "Auto", "Snapshot", "Copy", "Look", "Duplicate"))
         {
             return Dyncamelo.Core.Graph.NodeFunction.Modify;
         }
 
-        // Create — a factory/constructor that produces a new element or value.
-        if (StartsWithAny(name, "By", "Create", "From", "New", "Make", "Build", "Generate", "Of"))
+        // 4) Model-world factories → Create.
+        if (StartsWithAny(op, "By", "Create", "From", "New", "Make", "Build", "Generate", "Of",
+            "Convert", "Bulk"))
         {
             return Dyncamelo.Core.Graph.NodeFunction.Create;
         }
 
-        // Default by category family: the pure-data packs (Math/List/String/...)
-        // compute new values → Create; everything else acts on the model → Modify.
-        if (StartsWithAny(category, "Math", "List", "String", "Logic", "Boolean", "Color", "Geometry",
-            "DateTime", "Range", "Conversion", "Text", "Number"))
-        {
-            return Dyncamelo.Core.Graph.NodeFunction.Create;
-        }
-
-        return Dyncamelo.Core.Graph.NodeFunction.Modify;
+        // 5) A model-world op with no mutation verb and no factory prefix reads or
+        //    derives data from what you pass in → Info.
+        return Dyncamelo.Core.Graph.NodeFunction.Info;
     }
 
     private static bool StartsWithAny(string value, params string[] prefixes)

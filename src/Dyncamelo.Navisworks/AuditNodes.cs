@@ -73,6 +73,7 @@ public static class AuditNodes
     /// <param name="tolerance">Duplicate tolerance in document units.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Index-aligned lists of duplicate pairs and the pair count.</returns>
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeName("Audit.DuplicateItems")]
     [NodeDescription("Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.")]
     [NodeSearchTags("audit", "duplicate", "geometry", "double", "export", "qa")]
