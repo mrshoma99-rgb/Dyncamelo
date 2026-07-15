@@ -163,7 +163,7 @@ public static class FallHazardNodes
         var largest = result.Openings.Count > 0 ? result.Openings[0].WidestGap : 0.0;
 
         return
-            "Level " + F(level) + " (±" + F(band) + "). " +
+            "v" + PluginVersion() + ". Level " + F(level) + " (±" + F(band) + "). " +
             "Floor: " + floorTriangles + " triangles from " + floorLeaves + " geometry item(s), world Z " +
             F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
             "Equipment: " + plugTriangles + " triangles from " + plugLeaves + " of " + obstructionCount + " item(s). " +
@@ -258,7 +258,8 @@ public static class FallHazardNodes
 
         string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
         var report =
-            "Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) + ", handrail tol " + F(handrailTolerance) + ". " +
+            "v" + PluginVersion() + ". Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) +
+            ", handrail tol " + F(handrailTolerance) + ". " +
             "Floor: " + floorTriangles.Count + " triangles, world Z " + F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
             "Handrails: " + handrailList.Count + " item(s), " + handrailTriangles.Count + " triangles. " +
             "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
@@ -273,6 +274,13 @@ public static class FallHazardNodes
             ["safeLength"] = edges.SafeLength,
             ["report"] = report,
         };
+    }
+
+    /// <summary>The plugin version, stamped into every report so a result can always be traced to a build.</summary>
+    private static string PluginVersion()
+    {
+        var version = typeof(FallHazardNodes).Assembly.GetName().Version;
+        return version == null ? "?" : version.ToString(3);
     }
 
     private static string BuildEmptyFloorMessage(
