@@ -191,6 +191,64 @@ public class FloorGapHeatmapTests
         }
     }
 
+    [Theory]
+    [InlineData(0.15, "DDDD")]  // all four strips ≥ 0.15
+    [InlineData(0.20, "SDDD")]  // right 0.184 < 0.2 → safe; others dangerous
+    [InlineData(0.30, "SSDD")]  // top 0.275 < 0.3 → safe
+    [InlineData(0.45, "SSDD")]  // left 0.516 ≥ 0.45 → still dangerous
+    [InlineData(0.70, "SSSD")]  // left 0.516 < 0.7 → safe; bottom 1.025 dangerous
+    [InlineData(1.10, "SSSS")]  // bottom 1.025 < 1.1 → all safe
+    public void AnalyzeEdges_StripsFlipExactlyAtTheirGapWidth(double limit, string expected)
+    {
+        // The user's real model, distilled: an opening with equipment through it
+        // leaving four strips — right 0.184, top 0.275, left 0.516, bottom 1.025.
+        // Each strip's edge must flip from dangerous to safe exactly when the
+        // limit passes its width (±1 cell). Regression for: a 0.184 m gap read
+        // as dangerous at a 0.2 m (and even 0.3 m) limit.
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 10, 2));       // hole [2,6.4]×[2,6.5]
+        slab.AddRange(Rect(0, 6.5, 10, 10));
+        slab.AddRange(Rect(0, 2, 2, 6.5));
+        slab.AddRange(Rect(6.4, 2, 10, 6.5));
+        var box = Rect(2.516, 3.025, 6.216, 6.225).ToList(); // the equipment
+
+        const double cell = 0.05;
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, cell, slab, box, limit);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit, tolerance: 0.3);
+
+        string Probe(double x, double y)
+        {
+            var c = (int)((x - result.OriginX) / cell);
+            var r = (int)((y - result.OriginY) / cell);
+            // walk outward from the probe until a classified edge cell is found
+            for (int ring = 0; ring <= 4; ring++)
+            {
+                for (int dr = -ring; dr <= ring; dr++)
+                {
+                    for (int dc = -ring; dc <= ring; dc++)
+                    {
+                        var rr = r + dr;
+                        var cc = c + dc;
+                        if (rr < 0 || rr >= result.Rows || cc < 0 || cc >= result.Cols) continue;
+                        var cls = edges.Edges[rr * result.Cols + cc];
+                        if (cls == EdgeClass.Dangerous) return "D";
+                        if (cls == EdgeClass.SafeGap) return "S";
+                    }
+                }
+            }
+
+            return "?";
+        }
+
+        // Mid-strip probes on the floor just outside each opening edge.
+        var actual =
+            Probe(6.4 + cell, 4.5) +   // right strip (0.184)
+            Probe(4.5, 6.5 + cell) +   // top strip (0.275)
+            Probe(2 - cell, 4.5) +     // left strip (0.516)
+            Probe(4.5, 2 - cell);      // bottom strip (1.025)
+        Assert.Equal(expected, actual);
+    }
+
     [Fact]
     public void RenderEdgePng_ProducesAValidPng()
     {

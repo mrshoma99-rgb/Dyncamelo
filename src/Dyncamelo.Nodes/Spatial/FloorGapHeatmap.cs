@@ -310,11 +310,17 @@ public static class FloorGapHeatmap
         // void. Measuring this way (instead of marching one axis until the next
         // solid) keeps the ends of a long narrow slot safe: the void there is long
         // but never wide enough to fall through, so its length is irrelevant.
+        //
+        // The chamfer clearance is measured cell-centre to cell-centre, which
+        // overestimates the true distance to the solid boundary by half a cell;
+        // the +0.5·cell on the threshold cancels that, guaranteeing a gap
+        // narrower than the limit NEVER reads dangerous (a gap within one cell
+        // above the limit may read safe — the resolution the cell size buys).
         var core = new bool[count];
-        var coreSlack = 0.25 * cellSize;
+        var coreThreshold = limit / 2.0 + 0.5 * cellSize;
         for (int i = 0; i < count; i++)
         {
-            core[i] = hazard[i] && clearance[i] >= limit / 2.0 - coreSlack;
+            core[i] = hazard[i] && clearance[i] >= coreThreshold;
         }
 
         var coreDistance = ChamferThroughMask(core, hazard, cols, rows, cellSize);
