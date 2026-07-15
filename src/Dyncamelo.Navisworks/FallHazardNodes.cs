@@ -198,6 +198,7 @@ public static class FallHazardNodes
     /// <param name="cellSize">Grid resolution in document units (smaller = finer, use a few times below the limit).</param>
     /// <param name="limit">A floor edge needs a handrail when the void it faces is locally at least this wide (e.g. 0.2 = 20 cm, document units) — a narrower gap cannot be fallen through however long it runs.</param>
     /// <param name="handrailTolerance">A handrail within this distance of a dangerous edge protects it.</param>
+    /// <param name="minPassage">A dangerous stretch of edge shorter than this counts as safe — a person cannot fit through so small a break in the protection (e.g. between two handrails, or a handrail and an obstacle). 0 disables.</param>
     /// <param name="units">The unit every number on this node is in ("Meters", "Millimeters", "Feet", …). "document" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.</param>
     /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned).</param>
     /// <param name="pixelsPerCell">Image pixels per grid cell.</param>
@@ -205,9 +206,11 @@ public static class FallHazardNodes
     /// <returns>The image path, the dangerous/protected/safe edge lengths (in the chosen units), and a diagnostic report.</returns>
     [NodeName("FallHazard.EdgeHandrailCheck")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    // Pre-0.14 id (before the units parameter).
-    [NodeAliases("Dyncamelo.Navisworks.FallHazardNodes.EdgeHandrailCheck@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,double,string,int,Autodesk.Navisworks.Api.Document")]
-    [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
+    // Pre-0.14 id (before the units parameter) and 0.14 id (before minPassage).
+    [NodeAliases(
+        "Dyncamelo.Navisworks.FallHazardNodes.EdgeHandrailCheck@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,double,string,int,Autodesk.Navisworks.Api.Document",
+        "Dyncamelo.Navisworks.FallHazardNodes.EdgeHandrailCheck@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,double,string,string,int,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. A dangerous stretch shorter than 'minPassage' also counts as safe (a person cannot fit through the break). Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "edge", "handrail", "guardrail", "railing", "floor", "void", "opening", "safety", "protected", "perimeter")]
     [MultiReturn("imagePath", "dangerousLength", "protectedLength", "safeLength", "report")]
     public static Dictionary<string, object?> EdgeHandrailCheck(
@@ -219,6 +222,7 @@ public static class FallHazardNodes
         double cellSize = 0.1,
         double limit = 0.2,
         double handrailTolerance = 0.3,
+        double minPassage = 0.0,
         [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
         string units = "document",
         string? imagePath = null,
@@ -241,12 +245,14 @@ public static class FallHazardNodes
         // Convert every numeric input from the user's chosen units into document
         // units; results convert back on the way out. Originals kept for the report.
         var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
-        double inLevel = level, inBand = band, inCell = cellSize, inLimit = limit, inTolerance = handrailTolerance;
+        double inLevel = level, inBand = band, inCell = cellSize, inLimit = limit,
+            inTolerance = handrailTolerance, inMinPassage = minPassage;
         level *= scale;
         band *= scale;
         cellSize *= scale;
         limit *= scale;
         handrailTolerance *= scale;
+        minPassage *= scale;
 
         var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
         var floorTriangles = GeometryReader
@@ -281,7 +287,7 @@ public static class FallHazardNodes
         var pad = cellSize * 2.0;
         var result = FloorGapHeatmap.Analyze(
             minX - pad, minY - pad, maxX + pad, maxY + pad, cellSize, floorTriangles, plugTriangles, limit);
-        var edges = FloorGapHeatmap.AnalyzeEdges(result, handrailTriangles, limit, handrailTolerance);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, handrailTriangles, limit, handrailTolerance, minPassage);
 
         var path = ResolveImagePath(imagePath, doc);
         var png = FloorGapHeatmap.RenderEdgePng(edges, pixelsPerCell);
@@ -306,7 +312,7 @@ public static class FallHazardNodes
         var report =
             "v" + PluginVersion() + ", units " + unitsLabel + " (doc: " + doc.Units + "). " +
             "Level " + F(inLevel) + " (±" + F(inBand) + "), limit " + F(inLimit) +
-            ", handrail tol " + F(inTolerance) + ". " +
+            ", handrail tol " + F(inTolerance) + ", min passage " + F(inMinPassage) + ". " +
             "Floor: " + floorTriangles.Count + " triangles, Z " + F(floorMinZ / scale) + " to " + F(floorMaxZ / scale) + ". " +
             "Equipment: " + obstructionList.Count + " item(s), " + plugTriangles.Count + " triangles, plug area " +
             F(plugCells * cellArea / areaScale) + ". " +

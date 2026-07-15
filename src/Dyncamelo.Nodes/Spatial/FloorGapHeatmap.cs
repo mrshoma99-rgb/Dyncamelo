@@ -278,9 +278,11 @@ public static class FloorGapHeatmap
     /// <param name="handrailTriangles">Handrail geometry projected to the plane; may be empty.</param>
     /// <param name="limit">A void locally at least this wide makes the facing edge a hazard.</param>
     /// <param name="tolerance">A handrail within this distance of a dangerous edge protects it.</param>
+    /// <param name="minPassage">A connected dangerous stretch of edge shorter than this is reclassified safe — a person cannot fit through so small a break in the protection (e.g. between two handrails, or a handrail and an obstacle). 0 disables.</param>
     /// <returns>The per-cell edge classification and the length in each class.</returns>
     public static FloorEdgeResult AnalyzeEdges(
-        FloorGapResult result, IReadOnlyList<Tri2> handrailTriangles, double limit, double tolerance)
+        FloorGapResult result, IReadOnlyList<Tri2> handrailTriangles, double limit, double tolerance,
+        double minPassage = 0.0)
     {
         if (result == null)
         {
@@ -325,12 +327,15 @@ public static class FloorGapHeatmap
 
         var coreDistance = ChamferThroughMask(core, hazard, cols, rows, cellSize);
 
-        // The first core cell sits ~limit/2 beyond the edge's wall face; the rest
-        // covers the half-cell to the edge cell's centre plus discretisation.
-        var reach = limit / 2.0 + 1.75 * cellSize;
+        // Along a straight wall the first core cell sits ~limit/2 beyond the
+        // edge's face; at a CORNER of an opening the core is pulled back from
+        // both walls, so the nearest core sits diagonally at √2·(limit/2). Reach
+        // must cover that or corner cells read safe while the sides read
+        // dangerous; the 1.75-cell tail covers the half-cell to the edge cell's
+        // centre plus discretisation.
+        var reach = Math.Sqrt(2.0) * (limit / 2.0) + 1.75 * cellSize;
 
         var edges = new EdgeClass[count];
-        double dangerousLen = 0, protectedLen = 0, safeLen = 0;
         var neighbourR = new[] { -1, 1, 0, 0, -1, -1, 1, 1 };
         var neighbourC = new[] { 0, 0, -1, 1, -1, 1, -1, 1 };
         var diagonalStep = cellSize * Math.Sqrt(2.0);
@@ -362,10 +367,11 @@ public static class FloorGapHeatmap
                         continue;
                     }
 
-                    if (d < 4)
-                    {
-                        facesVoid = true; // an edge borders the void orthogonally
-                    }
+                    // Diagonal contact counts too: the floor cell at the exact
+                    // corner of a rectangular opening touches the void only
+                    // diagonally, and skipping it left an unclassified notch at
+                    // every corner.
+                    facesVoid = true;
 
                     var reached = coreDistance[nIdx] + (d < 4 ? cellSize : diagonalStep);
                     if (reached < coreDist)
@@ -379,28 +385,81 @@ public static class FloorGapHeatmap
                     continue;
                 }
 
-                EdgeClass cls;
-                if (coreDist > reach)
-                {
-                    cls = EdgeClass.SafeGap;
-                    safeLen += cellSize;
-                }
-                else if (handrailDistance[idx] <= tolerance)
-                {
-                    cls = EdgeClass.Protected;
-                    protectedLen += cellSize;
-                }
-                else
-                {
-                    cls = EdgeClass.Dangerous;
-                    dangerousLen += cellSize;
-                }
-
-                edges[idx] = cls;
+                edges[idx] = coreDist > reach ? EdgeClass.SafeGap
+                    : handrailDistance[idx] <= tolerance ? EdgeClass.Protected
+                    : EdgeClass.Dangerous;
             }
         }
 
-        return new FloorEdgeResult(result, edges, dangerousLen, protectedLen, safeLen);
+        // A person cannot fit through a break in the protection shorter than
+        // minPassage — a gap between two handrails, or a handrail and an
+        // obstacle. Walk each 8-connected run of dangerous cells; a run shorter
+        // than the threshold is reclassified safe.
+        if (minPassage > 0.0)
+        {
+            var visited = new bool[count];
+            var run = new List<int>();
+            var stack = new Stack<int>();
+            for (int start = 0; start < count; start++)
+            {
+                if (edges[start] != EdgeClass.Dangerous || visited[start])
+                {
+                    continue;
+                }
+
+                run.Clear();
+                visited[start] = true;
+                stack.Push(start);
+                while (stack.Count > 0)
+                {
+                    var idx = stack.Pop();
+                    run.Add(idx);
+                    var r = idx / cols;
+                    var c = idx % cols;
+                    for (int d = 0; d < 8; d++)
+                    {
+                        var nr = r + neighbourR[d];
+                        var nc = c + neighbourC[d];
+                        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols)
+                        {
+                            continue;
+                        }
+
+                        var nIdx = nr * cols + nc;
+                        if (edges[nIdx] == EdgeClass.Dangerous && !visited[nIdx])
+                        {
+                            visited[nIdx] = true;
+                            stack.Push(nIdx);
+                        }
+                    }
+                }
+
+                var runLength = run.Count * cellSize;
+                if (runLength < minPassage)
+                {
+                    foreach (var idx in run)
+                    {
+                        edges[idx] = EdgeClass.SafeGap;
+                    }
+                }
+            }
+        }
+
+        // Lengths from the final classification in one pass, so reclassification
+        // leaves no floating-point residue in the totals.
+        int dangerousCells = 0, protectedCells = 0, safeCells = 0;
+        for (int i = 0; i < count; i++)
+        {
+            switch (edges[i])
+            {
+                case EdgeClass.Dangerous: dangerousCells++; break;
+                case EdgeClass.Protected: protectedCells++; break;
+                case EdgeClass.SafeGap: safeCells++; break;
+            }
+        }
+
+        return new FloorEdgeResult(
+            result, edges, dangerousCells * cellSize, protectedCells * cellSize, safeCells * cellSize);
     }
 
     /// <summary>

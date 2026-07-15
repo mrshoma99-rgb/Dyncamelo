@@ -250,6 +250,72 @@ public class FloorGapHeatmapTests
     }
 
     [Fact]
+    public void AnalyzeEdges_CornersOfADangerousOpening_AreDangerous()
+    {
+        // Regression: the core of a big opening sits diagonally at √2·(limit/2)
+        // from a corner, which slipped past the straight-wall reach — every
+        // corner of a square opening read safe while its sides read dangerous.
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 10, 2));   // opening [2,8]×[2,8] — 6×6, clearly dangerous
+        slab.AddRange(Rect(0, 8, 10, 10));
+        slab.AddRange(Rect(0, 2, 2, 8));
+        slab.AddRange(Rect(8, 2, 10, 8));
+
+        const double cell = 0.05;
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, cell, slab, Array.Empty<Tri2>(), minGap: 0.5);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit: 0.5, tolerance: 0.3);
+
+        // The floor cell diagonally outside the corner and the side cells beside
+        // it must all be dangerous — nothing green at the corner of a 6 m hole.
+        foreach (var (x, y) in new[] { (2 - cell, 2 - cell), (2 + cell, 2 - cell), (2 - cell, 2 + cell) })
+        {
+            var c = (int)((x - result.OriginX) / cell);
+            var r = (int)((y - result.OriginY) / cell);
+            var cls = edges.Edges[r * result.Cols + c];
+            Assert.True(cls == EdgeClass.Dangerous, $"corner cell at ({x},{y}) was {cls}");
+        }
+
+        Assert.Equal(0.0, edges.SafeLength);
+    }
+
+    [Theory]
+    [InlineData(0.5, true)]   // 0.4 m break < 0.5 min passage → nobody fits through → safe
+    [InlineData(0.1, false)]  // 0.4 m break ≥ 0.1 min passage → stays dangerous
+    public void AnalyzeEdges_ShortBreakBetweenHandrails_IsSafeUnderMinPassage(double minPassage, bool expectSafe)
+    {
+        // Opening [2,8]×[2,6]; rails cover the whole rim except a 0.6 m break in
+        // the top side. With tolerance 0.1, the unprotected run is ~0.4 m.
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 10, 2));
+        slab.AddRange(Rect(0, 6, 10, 10));
+        slab.AddRange(Rect(0, 2, 2, 6));
+        slab.AddRange(Rect(8, 2, 10, 6));
+
+        var rails = new List<Tri2>();
+        rails.AddRange(Rect(1.9, 1.9, 8.1, 2.0));    // south rim
+        rails.AddRange(Rect(1.9, 6.0, 4.7, 6.1));    // north rim, west part
+        rails.AddRange(Rect(5.3, 6.0, 8.1, 6.1));    // north rim, east part → 0.6 break
+        rails.AddRange(Rect(1.9, 1.9, 2.0, 6.1));    // west rim
+        rails.AddRange(Rect(8.0, 1.9, 8.1, 6.1));    // east rim
+
+        const double cell = 0.05;
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, cell, slab, Array.Empty<Tri2>(), minGap: 0.5);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, rails, limit: 0.5, tolerance: 0.1, minPassage: minPassage);
+
+        if (expectSafe)
+        {
+            Assert.Equal(0.0, edges.DangerousLength);
+            Assert.True(edges.SafeLength > 0);
+        }
+        else
+        {
+            Assert.InRange(edges.DangerousLength, 0.2, 0.7); // the ~0.4 m break
+        }
+
+        Assert.True(edges.ProtectedLength > 10); // most of the ~20 m rim is railed
+    }
+
+    [Fact]
     public void RenderEdgePng_ProducesAValidPng()
     {
         var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
