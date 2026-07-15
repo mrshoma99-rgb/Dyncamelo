@@ -26,14 +26,17 @@ public static class FallHazardNodes
     /// <param name="band">Vertical tolerance for deciding an element crosses the level: an element counts when its bounding box reaches within this of the level. Its full silhouette is then read, so this need not match the slab thickness.</param>
     /// <param name="cellSize">Grid resolution in document units (smaller = finer and slower).</param>
     /// <param name="minGap">The handrail limit as a distance from the nearest floor edge or obstacle (e.g. 0.2 = 20 cm): a void point farther than this from any solid is a hazard. It is the heat-map pivot — cells below it read cool, at it yellow, above it red — and openings that contain such a point are flagged.</param>
+    /// <param name="units">The unit every number on this node is in ("Meters", "Millimeters", "Feet", …). "document" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.</param>
     /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).</param>
     /// <param name="saveViewpoints">True to add one top-down saved viewpoint per flagged opening.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (bigger = larger image).</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The image path, the flagged-opening count, their widest gaps and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
+    /// <returns>The image path, the flagged-opening count, their widest gaps (in the chosen units) and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), yellow at it, red beyond it (a genuine fall hazard). Openings that reach past the limit are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
+    // Pre-0.14 id (before the units parameter).
+    [NodeAliases("Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), yellow at it, red beyond it (a genuine fall hazard). Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
     public static Dictionary<string, object?> FloorOpeningMap(
@@ -43,6 +46,8 @@ public static class FallHazardNodes
         double band = 1.0,
         double cellSize = 0.25,
         double minGap = 0.2,
+        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        string units = "document",
         string? imagePath = null,
         bool saveViewpoints = true,
         int pixelsPerCell = 6,
@@ -70,6 +75,16 @@ public static class FallHazardNodes
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
+
+        // Convert every numeric input from the user's chosen units into document
+        // units; results convert back on the way out. Originals kept for the report.
+        var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
+        double inLevel = level, inBand = band, inCell = cellSize, inMinGap = minGap;
+        level *= scale;
+        band *= scale;
+        cellSize *= scale;
+        minGap *= scale;
+
         // Select whole elements whose bounding box crosses the level (band = vertical
         // tolerance), then read ALL of their triangles — the filled silhouette. A slab
         // contributes its holed top/bottom faces; equipment passing through contributes
@@ -81,8 +96,8 @@ public static class FallHazardNodes
             .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         if (floorTriangles.Count == 0)
         {
-            throw new InvalidOperationException(
-                BuildEmptyFloorMessage(floorLeaves.Count, floorHasBox, floorMinZ, floorMaxZ, level, band));
+            throw new InvalidOperationException(BuildEmptyFloorMessage(
+                floorLeaves.Count, floorHasBox, floorMinZ / scale, floorMaxZ / scale, inLevel, inBand, unitsLabel));
         }
 
         var obstructionList = NavisValues.ToItemList(obstructions);
@@ -117,7 +132,7 @@ public static class FallHazardNodes
             }
 
             flagged.Add(opening);
-            widestGaps.Add(opening.WidestGap);
+            widestGaps.Add(opening.WidestGap / scale);
             centers.Add(new Point3D(opening.CenterX, opening.CenterY, level));
         }
 
@@ -135,10 +150,10 @@ public static class FallHazardNodes
         }
 
         var report = BuildReport(
-            level, band, cellSize, result,
-            floorTriangles.Count, floorLeaves.Count, floorMinZ, floorMaxZ,
+            inLevel, inBand, inCell, unitsLabel, doc.Units.ToString(), scale, result,
+            floorTriangles.Count, floorLeaves.Count, floorMinZ / scale, floorMaxZ / scale,
             plugTriangles.Count, plugLeafCount, obstructionList.Count,
-            flagged.Count, minGap, hazardCells);
+            flagged.Count, inMinGap, hazardCells);
 
         return new Dictionary<string, object?>
         {
@@ -151,20 +166,22 @@ public static class FallHazardNodes
         };
     }
 
-    /// <summary>A one-line summary of what the analysis actually saw, for diagnosis.</summary>
+    /// <summary>A one-line summary of what the analysis actually saw, for diagnosis. All lengths in the input units.</summary>
     private static string BuildReport(
-        double level, double band, double cellSize, FloorGapResult result,
+        double level, double band, double cellSize, string unitsLabel, string docUnits, double scale,
+        FloorGapResult result,
         int floorTriangles, int floorLeaves, double floorMinZ, double floorMaxZ,
         int plugTriangles, int plugLeaves, int obstructionCount,
         int flaggedCount, double minGap, int hazardCells)
     {
         string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
         var openArea = hazardCells * cellSize * cellSize;
-        var largest = result.Openings.Count > 0 ? result.Openings[0].WidestGap : 0.0;
+        var largest = result.Openings.Count > 0 ? result.Openings[0].WidestGap / scale : 0.0;
 
         return
-            "v" + PluginVersion() + ". Level " + F(level) + " (±" + F(band) + "). " +
-            "Floor: " + floorTriangles + " triangles from " + floorLeaves + " geometry item(s), world Z " +
+            "v" + PluginVersion() + ", units " + unitsLabel + " (doc: " + docUnits + "). " +
+            "Level " + F(level) + " (±" + F(band) + "). " +
+            "Floor: " + floorTriangles + " triangles from " + floorLeaves + " geometry item(s), Z " +
             F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
             "Equipment: " + plugTriangles + " triangles from " + plugLeaves + " of " + obstructionCount + " item(s). " +
             "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
@@ -181,13 +198,16 @@ public static class FallHazardNodes
     /// <param name="cellSize">Grid resolution in document units (smaller = finer, use a few times below the limit).</param>
     /// <param name="limit">A floor edge needs a handrail when the void it faces is locally at least this wide (e.g. 0.2 = 20 cm, document units) — a narrower gap cannot be fallen through however long it runs.</param>
     /// <param name="handrailTolerance">A handrail within this distance of a dangerous edge protects it.</param>
+    /// <param name="units">The unit every number on this node is in ("Meters", "Millimeters", "Feet", …). "document" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.</param>
     /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned).</param>
     /// <param name="pixelsPerCell">Image pixels per grid cell.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The image path, the dangerous/protected/safe edge lengths, and a diagnostic report.</returns>
+    /// <returns>The image path, the dangerous/protected/safe edge lengths (in the chosen units), and a diagnostic report.</returns>
     [NodeName("FallHazard.EdgeHandrailCheck")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
+    // Pre-0.14 id (before the units parameter).
+    [NodeAliases("Dyncamelo.Navisworks.FallHazardNodes.EdgeHandrailCheck@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,double,string,int,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "edge", "handrail", "guardrail", "railing", "floor", "void", "opening", "safety", "protected", "perimeter")]
     [MultiReturn("imagePath", "dangerousLength", "protectedLength", "safeLength", "report")]
     public static Dictionary<string, object?> EdgeHandrailCheck(
@@ -199,6 +219,8 @@ public static class FallHazardNodes
         double cellSize = 0.1,
         double limit = 0.2,
         double handrailTolerance = 0.3,
+        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        string units = "document",
         string? imagePath = null,
         int pixelsPerCell = 6,
         Document? document = null)
@@ -216,13 +238,23 @@ public static class FallHazardNodes
 
         var doc = NavisworksContext.ResolveDocument(document);
 
+        // Convert every numeric input from the user's chosen units into document
+        // units; results convert back on the way out. Originals kept for the report.
+        var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
+        double inLevel = level, inBand = band, inCell = cellSize, inLimit = limit, inTolerance = handrailTolerance;
+        level *= scale;
+        band *= scale;
+        cellSize *= scale;
+        limit *= scale;
+        handrailTolerance *= scale;
+
         var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
         var floorTriangles = GeometryReader
             .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         if (floorTriangles.Count == 0)
         {
-            throw new InvalidOperationException(
-                BuildEmptyFloorMessage(floorLeaves.Count, floorHasBox, floorMinZ, floorMaxZ, level, band));
+            throw new InvalidOperationException(BuildEmptyFloorMessage(
+                floorLeaves.Count, floorHasBox, floorMinZ / scale, floorMaxZ / scale, inLevel, inBand, unitsLabel));
         }
 
         var obstructionList = NavisValues.ToItemList(obstructions);
@@ -270,25 +302,53 @@ public static class FallHazardNodes
             if (result.Hazard[i]) voidCells++;
         }
 
+        var areaScale = scale * scale;
         var report =
-            "v" + PluginVersion() + ". Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) +
-            ", handrail tol " + F(handrailTolerance) + ". " +
-            "Floor: " + floorTriangles.Count + " triangles, world Z " + F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
+            "v" + PluginVersion() + ", units " + unitsLabel + " (doc: " + doc.Units + "). " +
+            "Level " + F(inLevel) + " (±" + F(inBand) + "), limit " + F(inLimit) +
+            ", handrail tol " + F(inTolerance) + ". " +
+            "Floor: " + floorTriangles.Count + " triangles, Z " + F(floorMinZ / scale) + " to " + F(floorMaxZ / scale) + ". " +
             "Equipment: " + obstructionList.Count + " item(s), " + plugTriangles.Count + " triangles, plug area " +
-            F(plugCells * cellArea) + ". " +
+            F(plugCells * cellArea / areaScale) + ". " +
             "Handrails: " + handrailList.Count + " item(s), " + handrailTriangles.Count + " triangles. " +
-            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ", void area " + F(voidCells * cellArea) + ". " +
-            "Edge length — dangerous " + F(edges.DangerousLength) + ", protected " + F(edges.ProtectedLength) +
-            ", safe " + F(edges.SafeLength) + ".";
+            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(inCell) + ", void area " + F(voidCells * cellArea / areaScale) + ". " +
+            "Edge length — dangerous " + F(edges.DangerousLength / scale) + ", protected " + F(edges.ProtectedLength / scale) +
+            ", safe " + F(edges.SafeLength / scale) + ".";
 
         return new Dictionary<string, object?>
         {
             ["imagePath"] = path,
-            ["dangerousLength"] = edges.DangerousLength,
-            ["protectedLength"] = edges.ProtectedLength,
-            ["safeLength"] = edges.SafeLength,
+            ["dangerousLength"] = edges.DangerousLength / scale,
+            ["protectedLength"] = edges.ProtectedLength / scale,
+            ["safeLength"] = edges.SafeLength / scale,
             ["report"] = report,
         };
+    }
+
+    /// <summary>
+    /// The factor that converts the user's chosen input units into the document's
+    /// units (1.0 for "document"). Navisworks documents often store coordinates in
+    /// feet even when the measure tool displays metres, so letting the user name
+    /// the unit their numbers are in keeps the node's inputs and outputs honest.
+    /// </summary>
+    private static double ResolveUnitsScale(Document doc, string? units, out string unitsLabel)
+    {
+        var trimmed = (units ?? string.Empty).Trim();
+        if (trimmed.Length == 0 || trimmed.Equals("document", StringComparison.OrdinalIgnoreCase))
+        {
+            unitsLabel = doc.Units.ToString();
+            return 1.0;
+        }
+
+        if (!Enum.TryParse<Units>(trimmed, true, out var parsed))
+        {
+            throw new ArgumentException(
+                "Unknown units '" + units + "'. Use \"document\" or a Navisworks unit name " +
+                "(e.g. \"Meters\", \"Millimeters\", \"Feet\" — Units.All lists them).", nameof(units));
+        }
+
+        unitsLabel = parsed.ToString();
+        return UnitConversion.ScaleFactor(parsed, doc.Units);
     }
 
     /// <summary>The plugin version, stamped into every report so a result can always be traced to a build.</summary>
@@ -299,7 +359,7 @@ public static class FallHazardNodes
     }
 
     private static string BuildEmptyFloorMessage(
-        int spanningLeafCount, bool hasBox, double minZ, double maxZ, double level, double band)
+        int spanningLeafCount, bool hasBox, double minZ, double maxZ, double level, double band, string unitsLabel)
     {
         string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
 
@@ -312,10 +372,10 @@ public static class FallHazardNodes
 
         if (spanningLeafCount == 0)
         {
-            return "Floor elements were found, but their geometry sits at world Z " + F(minZ) + " to " + F(maxZ) +
-                ", which does not reach the level " + F(level) + " (±" + F(band) + " tolerance). These are world " +
-                "coordinates — the model may be offset from your project datum, or in different units. Set 'level' " +
-                "between " + F(minZ) + " and " + F(maxZ) + ".";
+            return "Floor elements were found, but their geometry sits at Z " + F(minZ) + " to " + F(maxZ) +
+                " " + unitsLabel + ", which does not reach the level " + F(level) + " (±" + F(band) +
+                " tolerance). The model may be offset from your project datum, or your numbers may be in a " +
+                "different unit than the 'units' input. Set 'level' between " + F(minZ) + " and " + F(maxZ) + ".";
         }
 
         return "Floor elements crossing the level were found, but no mesh triangles could be read from them " +

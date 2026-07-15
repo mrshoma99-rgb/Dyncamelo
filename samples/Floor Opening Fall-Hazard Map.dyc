@@ -245,7 +245,7 @@
     {
       "Id": "1000000000000000000000000000000a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document",
+      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,Autodesk.Navisworks.Api.Document",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "FallHazard.FloorOpeningMap",
       "X": 720.0,
@@ -294,6 +294,14 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false
+        },
+        {
+          "Name": "units",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Meters"
         },
         {
           "Name": "imagePath",
@@ -528,7 +536,7 @@
     },
     {
       "Id": "30000000000000000000000000000002",
-      "Text": "HOW TO USE: 1) Point the two searches at your floor and equipment elements (edit the name text).  2) Set Level to the slab elevation and Min gap to the size that triggers a handrail (document units).  3) Run.  Open the returned image path to see the heat map; the flagged openings appear as saved viewpoints in a 'Floor Openings' folder.  Cell size trades accuracy for speed \u2014 start coarse, refine if needed.  Band defaults to \u00b11; widen it if your slab is thick.",
+      "Text": "HOW TO USE: 1) Point the two searches at your floor and equipment elements (edit the name text).  2) Set Level to the slab elevation and Min gap to the size that triggers a handrail. The node's 'units' input is pinned to Meters, so every number here is metres \u2014 regardless of the document's internal units (often feet!).  3) Run.  Open the returned image path to see the heat map; the flagged openings appear as saved viewpoints in a 'Floor Openings' folder.  Cell size trades accuracy for speed \u2014 start coarse, refine if needed.",
       "X": 340.0,
       "Y": 900.0
     }

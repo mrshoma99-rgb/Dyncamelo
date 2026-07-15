@@ -8,7 +8,7 @@
 
     <!-- Assembly version, read at runtime by the About box (DyncameloRibbonPlugin).
          Bump this in lockstep with dist/RELEASE_VERSION on every release. -->
-    <Version>0.13.8</Version>
+    <Version>0.14.0</Version>
     <Authors>BIMCamel</Authors>
     <Company>BIMCamel</Company>
     <Product>Dyncamelo</Product>
