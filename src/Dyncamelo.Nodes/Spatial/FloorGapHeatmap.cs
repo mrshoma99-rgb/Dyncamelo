@@ -366,28 +366,36 @@ public static class FloorGapHeatmap
             }
         }
 
-        // Backward pass.
-        maxClearance = 0.0;
+        // Backward pass (still in cell units — do NOT scale here, or the reads of
+        // already-visited right/below neighbours would mix world units with the
+        // cell-unit step weights and collapse the distance to ~1 cell).
         for (int r = rows - 1; r >= 0; r--)
         {
             for (int c = cols - 1; c >= 0; c--)
             {
                 var idx = r * cols + c;
-                if (dist[idx] != 0.0)
+                if (dist[idx] == 0.0)
                 {
-                    var best = dist[idx];
-                    if (c < cols - 1) best = Math.Min(best, dist[idx + 1] + d1);
-                    if (r < rows - 1) best = Math.Min(best, dist[idx + cols] + d1);
-                    if (r < rows - 1 && c < cols - 1) best = Math.Min(best, dist[idx + cols + 1] + d2);
-                    if (r < rows - 1 && c > 0) best = Math.Min(best, dist[idx + cols - 1] + d2);
-                    dist[idx] = best;
+                    continue;
                 }
 
-                dist[idx] *= cellSize;
-                if (dist[idx] > maxClearance)
-                {
-                    maxClearance = dist[idx];
-                }
+                var best = dist[idx];
+                if (c < cols - 1) best = Math.Min(best, dist[idx + 1] + d1);
+                if (r < rows - 1) best = Math.Min(best, dist[idx + cols] + d1);
+                if (r < rows - 1 && c < cols - 1) best = Math.Min(best, dist[idx + cols + 1] + d2);
+                if (r < rows - 1 && c > 0) best = Math.Min(best, dist[idx + cols - 1] + d2);
+                dist[idx] = best;
+            }
+        }
+
+        // Convert cell distances to world units in a separate pass.
+        maxClearance = 0.0;
+        for (int i = 0; i < count; i++)
+        {
+            dist[i] *= cellSize;
+            if (dist[i] > maxClearance)
+            {
+                maxClearance = dist[i];
             }
         }
 

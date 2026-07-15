@@ -103,6 +103,29 @@ public class FloorGapHeatmapTests
         Assert.Equal(2, result.Openings.Count);
     }
 
+    [Theory]
+    [InlineData(0.1)]
+    [InlineData(0.25)]
+    [InlineData(0.5)]
+    public void Analyze_ClearanceIsCellSizeIndependent(double cell)
+    {
+        // A 6×6 slab with a 4×4 hole: the hole's deepest point is ~2 m from any
+        // edge, whatever the resolution. (Regression: the distance transform used
+        // to collapse this to ~1 cell, so the clearance — and therefore the heat-map
+        // colours — changed with cell size.)
+        var slab = new List<Tri2>();
+        slab.AddRange(Rect(0, 0, 6, 1));   // bottom
+        slab.AddRange(Rect(0, 5, 6, 6));   // top
+        slab.AddRange(Rect(0, 1, 1, 5));   // left
+        slab.AddRange(Rect(5, 1, 6, 5));   // right  → hole [1,5]×[1,5]
+
+        var result = FloorGapHeatmap.Analyze(0, 0, 6, 6, cell, slab, Array.Empty<Tri2>(), minGap: 0.2);
+
+        Assert.Single(result.Openings);
+        Assert.InRange(result.MaxClearance, 1.8, 2.2); // ≈ 2 m at every cell size
+        Assert.InRange(result.Openings[0].WidestGap, 3.6, 4.4);
+    }
+
     [Fact]
     public void Analyze_RejectsTooFineAGrid()
     {
