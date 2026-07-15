@@ -68,6 +68,21 @@ summary CSV of every test.
 numeric property (default: Element ▸ Volume) grouped by another property
 (default: Element ▸ Category) and writes the rollup to a workbook.
 
+### Floor Openings Needing Handrails.dyc
+
+A two-part QA graph for slab openings that equipment (a boiler, duct or pipe)
+drops through, leaving a gap that may need a handrail. **Part 1** takes the
+current selection as the equipment, `Search.ByPropertyContains` finds the
+handrails, and `Proximity.NearestDistance` measures each item to its nearest
+handrail; `GreaterThan` a trigger distance flags the equipment with none close
+by. **Part 2** measures the gap itself with `BoundingBox.PlanGap`, which
+compares the opening's footprint (outer) to the equipment's footprint (inner)
+and returns the **widest** of the four side gaps — the biggest open strip, which
+is the actual fall hazard, not the nearest edge. Part 2 is self-contained (fixed
+boxes, reports `0.8`); swap in `ModelItem.BoundingBox` of the opening and the
+equipment to run it on a real model — the Navisworks box converts to a geometry
+box automatically.
+
 ### Isolated Viewpoints per Item.dyc
 
 The per-item loop, built from **reified actions**. `Search.ByPropertyContains`

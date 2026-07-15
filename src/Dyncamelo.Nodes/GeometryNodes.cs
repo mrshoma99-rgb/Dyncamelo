@@ -215,4 +215,41 @@ public static class GeometryNodes
                boundingBox.Min.Y <= other.Max.Y && other.Min.Y <= boundingBox.Max.Y &&
                boundingBox.Min.Z <= other.Max.Z && other.Min.Z <= boundingBox.Max.Z;
     }
+
+    /// <summary>
+    /// The largest horizontal (plan) gap between an inner box and the outer box
+    /// around it — the widest strip of open floor beside equipment that sits in
+    /// an opening. Compares the two XY footprints on all four sides and returns
+    /// the biggest single-sided clearance; 0 when the inner box reaches or passes
+    /// every edge. A bounding-rectangle approximation of the true perimeter-to-edge
+    /// gap (exact for rectangular openings, a slight over-estimate for round ones).
+    /// </summary>
+    /// <param name="outer">The opening's bounding box.</param>
+    /// <param name="inner">The equipment's bounding box.</param>
+    /// <returns>The largest horizontal clear gap, in the same units as the boxes.</returns>
+    [NodeName("BoundingBox.PlanGap")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [return: NodeName("gap")]
+    [NodeDescription("The widest strip of open floor between an inner box (equipment) and the outer box (opening) in plan — the 'space between the equipment and the opening edge'. Returns the largest of the four horizontal side gaps; 0 when the equipment reaches every edge. Threshold it to flag openings that need a handrail.")]
+    [NodeSearchTags("gap", "clearance", "opening", "edge", "plan", "space", "perimeter", "handrail")]
+    public static double BoundingBoxPlanGap(DyncameloBoundingBox outer, DyncameloBoundingBox inner)
+    {
+        if (outer == null)
+        {
+            throw new ArgumentNullException(nameof(outer), "BoundingBox.PlanGap requires the opening box.");
+        }
+
+        if (inner == null)
+        {
+            throw new ArgumentNullException(nameof(inner), "BoundingBox.PlanGap requires the equipment box.");
+        }
+
+        var gapMinX = inner.Min.X - outer.Min.X;
+        var gapMaxX = outer.Max.X - inner.Max.X;
+        var gapMinY = inner.Min.Y - outer.Min.Y;
+        var gapMaxY = outer.Max.Y - inner.Max.Y;
+
+        var maxGap = Math.Max(Math.Max(gapMinX, gapMaxX), Math.Max(gapMinY, gapMaxY));
+        return maxGap < 0.0 ? 0.0 : maxGap;
+    }
 }

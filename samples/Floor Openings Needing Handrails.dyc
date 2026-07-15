@@ -1,0 +1,803 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.11.2"
+  },
+  "Uuid": "0f100e2d5a7b46c98d13a2f4e6c7b9d0",
+  "Name": "Floor Openings Needing Handrails",
+  "Description": "Two-part QA graph for openings where equipment passes through a floor slab. Part 1 flags equipment with no handrail within a set distance; Part 2 measures the widest plan gap between the opening edge and the equipment (BoundingBox.PlanGap) and tests it against a threshold. Part 1 needs an open model; Part 2 runs on its own.",
+  "Nodes": [
+    {
+      "Id": "a1000000000000000000000000000002",
+      "NodeType": "StringInput",
+      "Name": "Handrail category",
+      "X": 0.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "a1000000000000000000000000000003",
+      "NodeType": "StringInput",
+      "Name": "Handrail property",
+      "X": 0.0,
+      "Y": 330.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Name"
+      }
+    },
+    {
+      "Id": "a1000000000000000000000000000004",
+      "NodeType": "StringInput",
+      "Name": "Handrail search text",
+      "X": 0.0,
+      "Y": 460.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Handrail"
+      }
+    },
+    {
+      "Id": "a1000000000000000000000000000001",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionNodes.Current@string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Selection.Current",
+      "X": 0.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a1000000000000000000000000000005",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyContains",
+      "X": 360.0,
+      "Y": 330.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a1000000000000000000000000000006",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.DistanceNodes.NearestDistance@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Proximity.NearestDistance",
+      "X": 720.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "targets",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "method",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "bbox"
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "distances"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a1000000000000000000000000000007",
+      "NodeType": "NumberInput",
+      "Name": "Handrail trigger distance",
+      "X": 720.0,
+      "Y": 360.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 1.0
+      }
+    },
+    {
+      "Id": "a1000000000000000000000000000008",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.LogicNodes.GreaterThan@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "GreaterThan",
+      "X": 1040.0,
+      "Y": 180.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a1000000000000000000000000000009",
+      "NodeType": "Watch",
+      "Name": "No handrail within range?",
+      "X": 1320.0,
+      "Y": 180.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000001",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.PointByCoordinates@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Point.ByCoordinates",
+      "X": 0.0,
+      "Y": 760.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "x",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.0
+        },
+        {
+          "Name": "y",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.0
+        },
+        {
+          "Name": "z",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.0
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "point"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000002",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.PointByCoordinates@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Point.ByCoordinates",
+      "X": 0.0,
+      "Y": 900.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "x",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 2.0
+        },
+        {
+          "Name": "y",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 2.0
+        },
+        {
+          "Name": "z",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.3
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "point"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000003",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.BoundingBoxByCorners@Dyncamelo.Nodes.DyncameloPoint,Dyncamelo.Nodes.DyncameloPoint",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "BoundingBox.ByCorners",
+      "X": 360.0,
+      "Y": 820.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "min",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "max",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "boundingBox"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000004",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.PointByCoordinates@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Point.ByCoordinates",
+      "X": 0.0,
+      "Y": 1080.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "x",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.2
+        },
+        {
+          "Name": "y",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.2
+        },
+        {
+          "Name": "z",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.0
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "point"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000005",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.PointByCoordinates@double,double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Point.ByCoordinates",
+      "X": 0.0,
+      "Y": 1220.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "x",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 1.2
+        },
+        {
+          "Name": "y",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 1.8
+        },
+        {
+          "Name": "z",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0.3
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "point"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000006",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.BoundingBoxByCorners@Dyncamelo.Nodes.DyncameloPoint,Dyncamelo.Nodes.DyncameloPoint",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "BoundingBox.ByCorners",
+      "X": 360.0,
+      "Y": 1140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "min",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "max",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "boundingBox"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000007",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.GeometryNodes.BoundingBoxPlanGap@Dyncamelo.Nodes.DyncameloBoundingBox,Dyncamelo.Nodes.DyncameloBoundingBox",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "BoundingBox.PlanGap",
+      "X": 720.0,
+      "Y": 980.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "outer",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "inner",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "gap"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b200000000000000000000000000000a",
+      "NodeType": "Watch",
+      "Name": "Widest gap (units)",
+      "X": 1040.0,
+      "Y": 900.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2000000000000000000000000000008",
+      "NodeType": "NumberInput",
+      "Name": "Handrail threshold",
+      "X": 720.0,
+      "Y": 1200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 0.5
+      }
+    },
+    {
+      "Id": "b2000000000000000000000000000009",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.LogicNodes.GreaterThan@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "GreaterThan",
+      "X": 1040.0,
+      "Y": 1080.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b200000000000000000000000000000b",
+      "NodeType": "Watch",
+      "Name": "Gap needs a handrail?",
+      "X": 1320.0,
+      "Y": 1080.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "c00000000000000000000000000000a1",
+      "FromNode": "a1000000000000000000000000000001",
+      "FromPort": "items",
+      "ToNode": "a1000000000000000000000000000006",
+      "ToPort": "items"
+    },
+    {
+      "Id": "c00000000000000000000000000000a2",
+      "FromNode": "a1000000000000000000000000000002",
+      "FromPort": "value",
+      "ToNode": "a1000000000000000000000000000005",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "c00000000000000000000000000000a3",
+      "FromNode": "a1000000000000000000000000000003",
+      "FromPort": "value",
+      "ToNode": "a1000000000000000000000000000005",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "c00000000000000000000000000000a4",
+      "FromNode": "a1000000000000000000000000000004",
+      "FromPort": "value",
+      "ToNode": "a1000000000000000000000000000005",
+      "ToPort": "value"
+    },
+    {
+      "Id": "c00000000000000000000000000000a5",
+      "FromNode": "a1000000000000000000000000000005",
+      "FromPort": "items",
+      "ToNode": "a1000000000000000000000000000006",
+      "ToPort": "targets"
+    },
+    {
+      "Id": "c00000000000000000000000000000a6",
+      "FromNode": "a1000000000000000000000000000006",
+      "FromPort": "distances",
+      "ToNode": "a1000000000000000000000000000008",
+      "ToPort": "a"
+    },
+    {
+      "Id": "c00000000000000000000000000000a7",
+      "FromNode": "a1000000000000000000000000000007",
+      "FromPort": "value",
+      "ToNode": "a1000000000000000000000000000008",
+      "ToPort": "b"
+    },
+    {
+      "Id": "c00000000000000000000000000000a8",
+      "FromNode": "a1000000000000000000000000000008",
+      "FromPort": "result",
+      "ToNode": "a1000000000000000000000000000009",
+      "ToPort": "value"
+    },
+    {
+      "Id": "c00000000000000000000000000000b1",
+      "FromNode": "b2000000000000000000000000000001",
+      "FromPort": "point",
+      "ToNode": "b2000000000000000000000000000003",
+      "ToPort": "min"
+    },
+    {
+      "Id": "c00000000000000000000000000000b2",
+      "FromNode": "b2000000000000000000000000000002",
+      "FromPort": "point",
+      "ToNode": "b2000000000000000000000000000003",
+      "ToPort": "max"
+    },
+    {
+      "Id": "c00000000000000000000000000000b3",
+      "FromNode": "b2000000000000000000000000000004",
+      "FromPort": "point",
+      "ToNode": "b2000000000000000000000000000006",
+      "ToPort": "min"
+    },
+    {
+      "Id": "c00000000000000000000000000000b4",
+      "FromNode": "b2000000000000000000000000000005",
+      "FromPort": "point",
+      "ToNode": "b2000000000000000000000000000006",
+      "ToPort": "max"
+    },
+    {
+      "Id": "c00000000000000000000000000000b5",
+      "FromNode": "b2000000000000000000000000000003",
+      "FromPort": "boundingBox",
+      "ToNode": "b2000000000000000000000000000007",
+      "ToPort": "outer"
+    },
+    {
+      "Id": "c00000000000000000000000000000b6",
+      "FromNode": "b2000000000000000000000000000006",
+      "FromPort": "boundingBox",
+      "ToNode": "b2000000000000000000000000000007",
+      "ToPort": "inner"
+    },
+    {
+      "Id": "c00000000000000000000000000000b7",
+      "FromNode": "b2000000000000000000000000000007",
+      "FromPort": "gap",
+      "ToNode": "b200000000000000000000000000000a",
+      "ToPort": "value"
+    },
+    {
+      "Id": "c00000000000000000000000000000b8",
+      "FromNode": "b2000000000000000000000000000007",
+      "FromPort": "gap",
+      "ToNode": "b2000000000000000000000000000009",
+      "ToPort": "a"
+    },
+    {
+      "Id": "c00000000000000000000000000000b9",
+      "FromNode": "b2000000000000000000000000000008",
+      "FromPort": "value",
+      "ToNode": "b2000000000000000000000000000009",
+      "ToPort": "b"
+    },
+    {
+      "Id": "c00000000000000000000000000000ba",
+      "FromNode": "b2000000000000000000000000000009",
+      "FromPort": "result",
+      "ToNode": "b200000000000000000000000000000b",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "f0000000000000000000000000000001",
+      "Text": "FLOOR OPENINGS NEEDING HANDRAILS.  Equipment (a boiler, duct, pipe) drops through an opening in the slab and leaves a gap around it; if that gap is wide enough it is a fall hazard and needs a handrail.  This graph has two parts you can use together or on their own.",
+      "X": 0.0,
+      "Y": -140.0
+    },
+    {
+      "Id": "f0000000000000000000000000000002",
+      "Text": "PART 1 - Does the equipment already have a handrail beside it?  1) In Navisworks, SELECT the equipment you are checking.  2) Set the three search boxes so Search.ByPropertyContains finds your handrails/guardrails.  3) Set the trigger distance (document units - chain Units.Convert for m/ft).  Run: each 'true' in the Watch is a piece of equipment with NO handrail within that distance - i.e. one that still needs one.",
+      "X": 0.0,
+      "Y": 600.0
+    },
+    {
+      "Id": "f0000000000000000000000000000003",
+      "Text": "PART 2 - How wide is the gap around the equipment (the 'furthest', not the nearest, edge)?  BoundingBox.PlanGap compares the opening footprint (outer) with the equipment footprint (inner) and returns the WIDEST of the four side gaps - the biggest open strip, which is what determines the hazard.  Here it reports 0.8 and flags true against the 0.5 threshold.  In your model, replace the two BoundingBox.ByCorners with ModelItem.BoundingBox of the opening and the equipment (the bbox converts automatically).",
+      "X": 360.0,
+      "Y": 1320.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

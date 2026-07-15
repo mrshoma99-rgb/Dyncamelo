@@ -51,6 +51,93 @@ public static class DistanceNodes
         }
     }
 
+    /// <summary>For each item, the distance to the nearest of the target items.</summary>
+    /// <param name="items">The items to measure from (e.g. floor openings).</param>
+    /// <param name="targets">The items to measure to (e.g. handrails); empty means "no neighbour anywhere".</param>
+    /// <param name="method">"bbox" = fast bounding-box approximation, "mesh" = exact surface-to-surface (slower).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>One distance per item (document units); +∞ when there are no targets.</returns>
+    [NodeName("Proximity.NearestDistance")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" = fast, \"mesh\" = exact surfaces (slower on big sets).")]
+    [NodeSearchTags("proximity", "nearest", "closest", "distance", "neighbour", "near", "far", "within", "handrail")]
+    [return: NodeName("distances")]
+    public static List<double> NearestDistance(
+        IEnumerable<ModelItem> items,
+        IEnumerable<ModelItem> targets,
+        [NodeChoices("bbox", "mesh")]
+        string method = "bbox",
+        Document? document = null)
+    {
+        var itemList = RequireItems(items, "items");
+        var targetList = NavisValues.ToItemList(targets); // may be empty → +∞
+        var mode = (method ?? string.Empty).Trim().ToLowerInvariant();
+        if (mode.Length == 0)
+        {
+            mode = "bbox";
+        }
+
+        if (mode != "bbox" && mode != "mesh")
+        {
+            throw new ArgumentException(
+                "Unknown method '" + method + "'. Use \"bbox\" (fast) or \"mesh\" (exact surfaces).", nameof(method));
+        }
+
+        // Pre-box the targets once (bbox mode measures to each target individually,
+        // NOT to their combined box, so a spread-out target set stays correct).
+        var targetBoxes = new List<BoundingBox3D>(targetList.Count);
+        if (mode == "bbox")
+        {
+            foreach (var target in targetList)
+            {
+                var box = target.BoundingBox();
+                if (box != null && !box.IsEmpty)
+                {
+                    targetBoxes.Add(box);
+                }
+            }
+        }
+
+        var results = new List<double>(itemList.Count);
+        foreach (var item in itemList)
+        {
+            if (targetList.Count == 0)
+            {
+                results.Add(double.PositiveInfinity);
+                continue;
+            }
+
+            if (mode == "mesh")
+            {
+                // The clash minimum-clearance already returns the nearest across the set.
+                var clearance = MeshDistance(new List<ModelItem> { item }, targetList, document);
+                results.Add(clearance["distance"] is double d ? d : double.PositiveInfinity);
+                continue;
+            }
+
+            var itemBox = item.BoundingBox();
+            if (itemBox == null || itemBox.IsEmpty)
+            {
+                results.Add(double.PositiveInfinity);
+                continue;
+            }
+
+            var nearest = double.PositiveInfinity;
+            foreach (var targetBox in targetBoxes)
+            {
+                var distance = BoxDistanceBetween(itemBox, targetBox);
+                if (distance < nearest)
+                {
+                    nearest = distance;
+                }
+            }
+
+            results.Add(nearest);
+        }
+
+        return results;
+    }
+
     // ---------------------------------------------------------- Mesh tier
 
     private static Dictionary<string, object?> MeshDistance(
@@ -109,6 +196,15 @@ public static class DistanceNodes
             ["pointA"] = pointA,
             ["pointB"] = pointB,
         };
+    }
+
+    /// <summary>Shortest distance between two axis-aligned boxes (0 when they touch/overlap).</summary>
+    private static double BoxDistanceBetween(BoundingBox3D boxA, BoundingBox3D boxB)
+    {
+        ClosestCoordinates(boxA.Min.X, boxA.Max.X, boxB.Min.X, boxB.Max.X, out var ax, out var bx);
+        ClosestCoordinates(boxA.Min.Y, boxA.Max.Y, boxB.Min.Y, boxB.Max.Y, out var ay, out var by);
+        ClosestCoordinates(boxA.Min.Z, boxA.Max.Z, boxB.Min.Z, boxB.Max.Z, out var az, out var bz);
+        return new Point3D(ax, ay, az).DistanceTo(new Point3D(bx, by, bz));
     }
 
     /// <summary>The union bounding box of all items' boxes (throws when none has one).</summary>

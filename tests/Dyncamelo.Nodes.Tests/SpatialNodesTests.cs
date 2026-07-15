@@ -35,6 +35,32 @@ public class SpatialNodesTests
         Assert.Throws<ArgumentOutOfRangeException>(() => GeometryNodes.BoundingBoxScale(Box(0, 0, 0, 1, 1, 1), 0.0));
     }
 
+    // ------------------------------------------------- BoundingBox.PlanGap
+
+    [Fact]
+    public void PlanGap_ReturnsWidestSide_NotNarrowest()
+    {
+        // Opening 10×10; equipment offset to the left → wide strip on the +X side.
+        var opening = Box(0, 0, 0, 10, 10, 1);
+        var equipment = Box(1, 1, 0, 4, 9, 1); // gaps: -X=1, +X=6, -Y=1, +Y=1
+        Assert.Equal(6.0, GeometryNodes.BoundingBoxPlanGap(opening, equipment));
+    }
+
+    [Fact]
+    public void PlanGap_CenteredEquipment_IsHalfTheDifference()
+    {
+        var opening = Box(0, 0, 0, 10, 10, 1);
+        var equipment = Box(4, 4, 0, 6, 6, 1); // 2×2 centred → 4 on every side
+        Assert.Equal(4.0, GeometryNodes.BoundingBoxPlanGap(opening, equipment));
+    }
+
+    [Fact]
+    public void PlanGap_EquipmentFillsOpening_IsZero()
+    {
+        var box = Box(0, 0, 0, 10, 10, 1);
+        Assert.Equal(0.0, GeometryNodes.BoundingBoxPlanGap(box, box));
+    }
+
     // ------------------------------------------------- BoundingBox.Contains
 
     [Fact]
