@@ -87,6 +87,25 @@ public static class ModelItemNodes
         return RequireItem(item).Parent;
     }
 
+    /// <summary>The name of the model/file an item belongs to (the root of its tree).</summary>
+    /// <param name="item">The model item.</param>
+    /// <returns>The root ancestor's display name, e.g. "Structure.nwc".</returns>
+    [NodeName("ModelItem.ModelName")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model.")]
+    [NodeSearchTags("item", "model", "file", "source", "discipline", "root", "origin")]
+    [return: NodeName("modelName")]
+    public static string ModelName(ModelItem item)
+    {
+        var current = RequireItem(item);
+        while (current.Parent != null)
+        {
+            current = current.Parent;
+        }
+
+        return current.DisplayName ?? string.Empty;
+    }
+
     /// <summary>The chain of parents of a model item, up to its model root.</summary>
     /// <param name="item">The model item.</param>
     /// <param name="includeSelf">True to include the item itself.</param>

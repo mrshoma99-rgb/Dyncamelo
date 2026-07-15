@@ -109,6 +109,188 @@ public static class ClashNodes
         return RequireResult(result).Center;
     }
 
+    /// <summary>The crossing angle between the two clashing elements.</summary>
+    /// <param name="result">The clash result.</param>
+    /// <returns>The angle in degrees (0–90) between the two elements' overall directions.</returns>
+    [NodeName("ClashResult.Angle")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "The angle in degrees (0–90) between the two clashing elements, taken from each element's overall " +
+        "direction (its bounding-box diagonal). ~0° means they run parallel/together, ~90° means they cross " +
+        "perpendicular — so you can filter clashes by crossing angle (e.g. keep only ~90° crossings). Returns " +
+        "NaN when an element has no measurable direction (a point-like box).")]
+    [NodeSearchTags("clash", "angle", "degrees", "perpendicular", "crossing", "orientation", "direction")]
+    [return: NodeName("degrees")]
+    public static double Angle(ClashResult result)
+    {
+        var clashResult = RequireResult(result);
+        if (!TryElementDirection(clashResult.Item1, out var d1) ||
+            !TryElementDirection(clashResult.Item2, out var d2))
+        {
+            return double.NaN;
+        }
+
+        // Elements have no head/tail, so treat the direction as an undirected axis:
+        // |dot| collapses parallel/anti-parallel to 0° and perpendicular to 90°.
+        var dot = Math.Abs((d1.X * d2.X) + (d1.Y * d2.Y) + (d1.Z * d2.Z));
+        dot = Math.Max(0.0, Math.Min(1.0, dot));
+        return Math.Acos(dot) * (180.0 / Math.PI);
+    }
+
+    /// <summary>The size of the clash overlap region (its bounding-box volume).</summary>
+    /// <param name="result">The clash result.</param>
+    /// <returns>The clash bounding-box volume in document units³ (0 when unavailable).</returns>
+    [NodeName("ClashResult.Size")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("The size of the clash overlap region — its bounding-box volume in document units³. Filter out tiny grazing clashes and keep the significant ones. Pair with Units.Convert for readable units.")]
+    [NodeSearchTags("clash", "size", "volume", "extent", "significance", "big", "small", "filter")]
+    [return: NodeName("volume")]
+    public static double Size(ClashResult result)
+    {
+        var box = RequireResult(result).BoundingBox;
+        if (box == null)
+        {
+            return 0.0;
+        }
+
+        return Math.Abs(box.Max.X - box.Min.X) * Math.Abs(box.Max.Y - box.Min.Y) * Math.Abs(box.Max.Z - box.Min.Z);
+    }
+
+    /// <summary>How documented a clash result already is.</summary>
+    /// <param name="result">The clash result.</param>
+    /// <returns>Whether it has a saved viewpoint, redline markup, and its comment count.</returns>
+    [NodeName("ClashResult.Documentation")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("How documented a clash already is — whether it has a saved viewpoint, redline markup, and how many comments. Filter to the reviewed/annotated ones, or find the ones still needing attention (commentCount = 0).")]
+    [NodeSearchTags("clash", "comments", "viewpoint", "redline", "reviewed", "documented", "annotated", "filter")]
+    [MultiReturn("hasViewpoint", "hasRedlines", "commentCount")]
+    public static Dictionary<string, object?> Documentation(ClashResult result)
+    {
+        var clashResult = RequireResult(result);
+        return new Dictionary<string, object?>
+        {
+            ["hasViewpoint"] = clashResult.HasSavedViewpoint,
+            ["hasRedlines"] = clashResult.HasRedlines,
+            ["commentCount"] = clashResult.Comments?.Count ?? 0,
+        };
+    }
+
+    /// <summary>Keeps only the clash results with a given status.</summary>
+    /// <param name="results">The clash results (e.g. from ClashTest.Results).</param>
+    /// <param name="status">New, Active, Reviewed, Approved or Resolved.</param>
+    /// <returns>The matching results, input order preserved.</returns>
+    [NodeName("Clash.FilterByStatus")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("Keeps only the clash results with the given status (New, Active, Reviewed, Approved or Resolved) — the triage staple: e.g. drop the already-Approved ones and work the New ones.")]
+    [NodeSearchTags("clash", "filter", "status", "new", "active", "approved", "resolved", "triage")]
+    [return: NodeName("results")]
+    public static List<ClashResult> FilterByStatus(
+        IEnumerable<ClashResult> results,
+        [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")]
+        string status)
+    {
+        if (results == null)
+        {
+            throw new ArgumentNullException(nameof(results), "No clash results provided.");
+        }
+
+        var target = ParseResultStatus(status);
+        var matched = new List<ClashResult>();
+        foreach (var result in results)
+        {
+            if (result != null && result.Status == target)
+            {
+                matched.Add(result);
+            }
+        }
+
+        return matched;
+    }
+
+    /// <summary>Keeps only the clash results whose crossing angle falls in a range.</summary>
+    /// <param name="results">The clash results (e.g. from ClashTest.Results).</param>
+    /// <param name="minDegrees">Lowest crossing angle to keep (0 = parallel).</param>
+    /// <param name="maxDegrees">Highest crossing angle to keep (90 = perpendicular).</param>
+    /// <returns>The matching results, input order preserved (angle-less results are dropped).</returns>
+    [NodeName("Clash.FilterByAngle")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.")]
+    [NodeSearchTags("clash", "filter", "angle", "perpendicular", "parallel", "crossing", "degrees")]
+    [return: NodeName("results")]
+    public static List<ClashResult> FilterByAngle(
+        IEnumerable<ClashResult> results,
+        double minDegrees = 0.0,
+        double maxDegrees = 90.0)
+    {
+        if (results == null)
+        {
+            throw new ArgumentNullException(nameof(results), "No clash results provided.");
+        }
+
+        var matched = new List<ClashResult>();
+        foreach (var result in results)
+        {
+            if (result == null)
+            {
+                continue;
+            }
+
+            var angle = Angle(result);
+            if (!double.IsNaN(angle) && angle >= minDegrees && angle <= maxDegrees)
+            {
+                matched.Add(result);
+            }
+        }
+
+        return matched;
+    }
+
+    private static ClashResultStatus ParseResultStatus(string status)
+    {
+        switch ((status ?? string.Empty).Trim().ToLowerInvariant())
+        {
+            case "new": return ClashResultStatus.New;
+            case "active": return ClashResultStatus.Active;
+            case "reviewed": return ClashResultStatus.Reviewed;
+            case "approved": return ClashResultStatus.Approved;
+            case "resolved": return ClashResultStatus.Resolved;
+            default:
+                throw new ArgumentException(
+                    "Unknown clash status '" + status + "'. Use New, Active, Reviewed, Approved or Resolved.",
+                    nameof(status));
+        }
+    }
+
+    // A unit vector along an item's overall run, from its bounding-box diagonal —
+    // a good proxy for the long axis of a linear element (pipe, duct, beam), even
+    // a diagonal one. False when the box is degenerate (no direction to measure).
+    private static bool TryElementDirection(ModelItem item, out (double X, double Y, double Z) direction)
+    {
+        direction = (0.0, 0.0, 0.0);
+        if (item == null)
+        {
+            return false;
+        }
+
+        var box = item.BoundingBox(false);
+        if (box == null)
+        {
+            return false;
+        }
+
+        var dx = box.Max.X - box.Min.X;
+        var dy = box.Max.Y - box.Min.Y;
+        var dz = box.Max.Z - box.Min.Z;
+        var length = Math.Sqrt((dx * dx) + (dy * dy) + (dz * dz));
+        if (length < 1e-9)
+        {
+            return false;
+        }
+
+        direction = (dx / length, dy / length, dz / length);
+        return true;
+    }
+
     /// <summary>Finds a clash test by display name.</summary>
     /// <param name="name">The test's display name.</param>
     /// <param name="document">The document (defaults to the active document).</param>
