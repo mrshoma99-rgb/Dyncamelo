@@ -40,6 +40,9 @@ public class NodeDefinition
     /// <summary>Dot-separated library category path.</summary>
     public string Category { get; set; } = string.Empty;
 
+    /// <summary>Functional role (Create / Modify / Info) for library grouping and node tint.</summary>
+    public Dyncamelo.Core.Graph.NodeFunction Function { get; set; } = Dyncamelo.Core.Graph.NodeFunction.Modify;
+
     /// <summary>Description for the library browser and tooltips.</summary>
     public string Description { get; set; } = string.Empty;
 

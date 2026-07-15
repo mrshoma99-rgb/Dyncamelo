@@ -92,6 +92,15 @@
     <StreamGeometry x:Key="Dyc.Icon.Cat.String">F1 M290-160v-540H80v-100h520v100H390v540H290Zm360 0v-340H520v-100h360v100H750v340H650Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Cat.Favorites">F1 m323-245 157-94 157 95-42-178 138-120-182-16-71-168-71 167-182 16 138 120-42 178Zm-90 125 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-355Z</StreamGeometry>
 
+    <!-- Function-group symbols + tints: Create (＋, green), Modify (✎, amber), Info (ⓘ, blue).
+         Shown at a leaf category to split its nodes by what they do. -->
+    <SolidColorBrush x:Key="Dyc.FnCreateBrush" Color="#FF66BB6A" />
+    <SolidColorBrush x:Key="Dyc.FnModifyBrush" Color="#FFF0C66A" />
+    <SolidColorBrush x:Key="Dyc.FnInfoBrush" Color="#FF3AA0F0" />
+    <StreamGeometry x:Key="Dyc.Icon.FnCreate">F1 M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.FnModify">F1 M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T846-647L318-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.FnInfo">F1 M480-280q17 0 28.5-11.5T520-320v-160q0-17-11.5-28.5T480-520q-17 0-28.5 11.5T440-480v160q0 17 11.5 28.5T480-280Zm0-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z</StreamGeometry>
+
     <!-- Reusable toolbar icon: 13px, filled with the text colour, spaced before a label. -->
     <Style x:Key="Dyc.ToolIcon" TargetType="{x:Type Path}">
         <Setter Property="Stretch" Value="Uniform" />
@@ -1096,12 +1105,29 @@
                                            Opacity="0.85"
                                            Foreground="White"
                                            Text="{Binding LacingLabel}" />
+                                <!-- Function tint: Create (green) / Modify (amber) / Info (blue),
+                                     so what a node does is readable at a glance on the canvas. -->
+                                <Ellipse x:Name="FnDot"
+                                         DockPanel.Dock="Left"
+                                         Width="8" Height="8"
+                                         Margin="0,0,7,0"
+                                         VerticalAlignment="Center"
+                                         Fill="{StaticResource Dyc.FnModifyBrush}"
+                                         ToolTip="{Binding Function}" />
                                 <!-- Double-click the title to rename the placed node (commits to NodeViewModel.Title -> Model.Name). -->
                                 <views:EditableTextBlock FontWeight="SemiBold"
                                                          Foreground="White"
                                                          Text="{Binding Title, Mode=TwoWay}"
                                                          ToolTip="{Binding Description}" />
                             </DockPanel>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Function}" Value="Create">
+                                    <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnCreateBrush}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Function}" Value="Info">
+                                    <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnInfoBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </nodify:Node.HeaderTemplate>
                     <ContentControl Focusable="False"

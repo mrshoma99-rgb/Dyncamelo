@@ -64,6 +64,10 @@ public static class MathFixtures
     /// <summary>Choice-parameter fixture: a defaulted port with a fixed set of allowed values.</summary>
     public static string Pick([NodeChoices("Alpha", "Beta", "Gamma")] string option = "Alpha") => option;
 
+    /// <summary>Explicit-function fixture: overrides the name-based classifier.</summary>
+    [NodeFunction(NodeFunction.Info)]
+    public static double Peek(double x) => x;
+
     public static void Consume(object item)
     {
         // side-effect placeholder; void methods pass their first input through

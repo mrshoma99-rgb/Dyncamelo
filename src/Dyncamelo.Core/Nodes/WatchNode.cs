@@ -60,6 +60,9 @@ public class WatchNode : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override NodeFunction Function => NodeFunction.Info;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         var value = inputs.Length > 0 ? inputs[0] : null;

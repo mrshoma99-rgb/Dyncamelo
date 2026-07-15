@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Nodes;
 using Dyncamelo.Core.Tests.Fixtures;
@@ -68,6 +69,26 @@ public class LoaderTests
         Assert.True(step.HasDefault);
         Assert.Equal(1.0, step.DefaultValue);
         Assert.False(definition.Inputs.Single(p => p.Name == "x").HasDefault);
+    }
+
+    [Fact]
+    public void NodeFunction_Attribute_Overrides_NameHeuristic()
+    {
+        // Peek(x) would heuristically be Create-or-Modify, but the attribute wins.
+        Assert.Equal(NodeFunction.Info, ZT.Definition("Peek").Function);
+    }
+
+    [Fact]
+    public void NodeFunction_HeuristicsFromMethodName()
+    {
+        Assert.Equal(NodeFunction.Info, ZT.Definition("CountItems").Function);   // "Count…" reads
+        Assert.Equal(NodeFunction.Create, ZT.Definition("MakeList").Function);   // "Make…" produces
+    }
+
+    [Fact]
+    public void ZeroTouchNode_ReportsDefinitionFunction()
+    {
+        Assert.Equal(NodeFunction.Info, ZT.Node("Peek").Function);
     }
 
     [Fact]

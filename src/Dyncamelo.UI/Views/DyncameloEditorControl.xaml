@@ -613,6 +613,28 @@
                                     <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
                                         <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
                                     </DataTrigger>
+                                    <!-- Create / Modify / Info leaf-grouping headers: coloured glyph + label. -->
+                                    <DataTrigger Binding="{Binding IconKey}" Value="FnCreate">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnCreate}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnCreateBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnCreateBrush}" />
+                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="FnModify">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnModify}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnModifyBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnModifyBrush}" />
+                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="FnInfo">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnInfo}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnInfoBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnInfoBrush}" />
+                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                    </DataTrigger>
                                 </HierarchicalDataTemplate.Triggers>
                             </HierarchicalDataTemplate>
                         </TreeView.Resources>

@@ -249,10 +249,12 @@ public static class AssemblyNodeLoader
         var signature = GetFunctionSignature(method);
         var assemblyName = type.Assembly.GetName().Name ?? string.Empty;
 
+        var category = ResolveCategory(method, type, assemblyName);
         var definition = new NodeDefinition(signature, assemblyName, method)
         {
             Name = method.GetCustomAttribute<NodeNameAttribute>()?.Name ?? type.Name + "." + method.Name,
-            Category = ResolveCategory(method, type, assemblyName),
+            Category = category,
+            Function = ResolveFunction(method, category),
             Description = method.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? type.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? string.Empty,
@@ -283,6 +285,83 @@ public static class AssemblyNodeLoader
         }
 
         return string.IsNullOrEmpty(ns) ? type.Name : ns + "." + type.Name;
+    }
+
+    // Guesses a node's functional role (Create / Modify / Info) from its method
+    // name and category, so the whole library is grouped without hand-tagging
+    // every node. A [NodeFunction] attribute overrides this. Rules mirror the
+    // user-facing definition: Info reads, Create produces new data/elements,
+    // Modify changes things or has a side-effect (the catch-all).
+    private static Dyncamelo.Core.Graph.NodeFunction ResolveFunction(MethodInfo method, string category)
+    {
+        var explicitFunction = method.GetCustomAttribute<NodeFunctionAttribute>();
+        if (explicitFunction != null)
+        {
+            return explicitFunction.Function;
+        }
+
+        var name = method.Name;
+
+        // Info — reads/returns data, changes nothing.
+        if (StartsWithAny(name, "Get", "Is", "Are", "Has", "Can", "Find", "Search", "Nearest", "Closest", "Count")
+            || EqualsAny(name, "Name", "Value", "Length", "Area", "Volume", "Distance", "Center",
+                "BoundingBox", "Properties", "Property", "Parent", "Children", "Ancestor", "Ancestors",
+                "Descendants", "Folder", "Level", "DisplayName", "Category", "First", "Last", "Sum", "Average",
+                "Min", "Max", "Contains", "IndexOf"))
+        {
+            return Dyncamelo.Core.Graph.NodeFunction.Info;
+        }
+
+        // Modify — an explicit action or side-effect on existing things/the scene.
+        if (StartsWithAny(name, "Set", "Override", "Isolate", "Hide", "Show", "Move", "Rename", "Sort",
+            "Delete", "Remove", "Reset", "Apply", "Zoom", "Save", "Export", "Write", "Ghost", "Highlight",
+            "Transform", "Update", "Replace", "Clear", "Enable", "Disable", "Add", "Append", "Insert",
+            "Select", "Focus", "Rotate", "Scale", "Translate", "Offset", "Color", "Paint"))
+        {
+            return Dyncamelo.Core.Graph.NodeFunction.Modify;
+        }
+
+        // Create — a factory/constructor that produces a new element or value.
+        if (StartsWithAny(name, "By", "Create", "From", "New", "Make", "Build", "Generate", "Of"))
+        {
+            return Dyncamelo.Core.Graph.NodeFunction.Create;
+        }
+
+        // Default by category family: the pure-data packs (Math/List/String/...)
+        // compute new values → Create; everything else acts on the model → Modify.
+        if (StartsWithAny(category, "Math", "List", "String", "Logic", "Boolean", "Color", "Geometry",
+            "DateTime", "Range", "Conversion", "Text", "Number"))
+        {
+            return Dyncamelo.Core.Graph.NodeFunction.Create;
+        }
+
+        return Dyncamelo.Core.Graph.NodeFunction.Modify;
+    }
+
+    private static bool StartsWithAny(string value, params string[] prefixes)
+    {
+        foreach (var prefix in prefixes)
+        {
+            if (value.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool EqualsAny(string value, params string[] candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            if (string.Equals(value, candidate, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static PortDescriptor CreateInputDescriptor(ParameterInfo parameter)

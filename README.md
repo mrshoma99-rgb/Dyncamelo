@@ -23,6 +23,12 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
+## What's new in v0.11 — a library you can read at a glance
+
+- **Create / Modify / Info grouping** — at the last level of every category the node library now splits nodes into three groups — **Create** (＋ green, makes something new), **Modify** (✎ amber, changes existing things), **Info** (ⓘ blue, reads data) — each with its own symbol, so you find the right node faster. The category tree above is unchanged. Every placed node also carries a matching coloured dot on the canvas, so what a node does stays obvious where you work.
+- **Saved-viewpoint organizing nodes** — `Viewpoints.SortFolder` (alphabetical, no more drag-and-drop), `SavedViewpoint.Duplicate`, `Viewpoints.DuplicateFolder`, `Viewpoints.RenameFolder`, and `SavedViewpoint.CopyOverrides` (copy one view's colour/ghosting onto another, keeping its camera).
+- **Run profiling** — a slow run now names the node that ate the time (e.g. "slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)"), and a busy indicator shows the graph is working rather than frozen.
+
 ## What's new in v0.10 — per-item workflows
 
 - **Universal loops** — a real loop construct: drop **`Loop.Item`** and **`Loop.Collect`** on the canvas and everything wired between them runs **once per item, in order**, built from the ordinary nodes. Generate a viewpoint per room, recolour per system, export per level — no special "action" nodes required.

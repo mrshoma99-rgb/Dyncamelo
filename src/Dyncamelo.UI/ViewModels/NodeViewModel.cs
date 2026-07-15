@@ -91,6 +91,9 @@ public class NodeViewModel : CanvasItemViewModel
     /// <summary>Node description (header tooltip).</summary>
     public string Description => Model.Description;
 
+    /// <summary>Functional role (Create / Modify / Info) — drives the node's tint dot.</summary>
+    public NodeFunction Function => Model.Function;
+
     /// <summary>Current execution state; drives the state border color.</summary>
     public NodeState State => Model.State;
 

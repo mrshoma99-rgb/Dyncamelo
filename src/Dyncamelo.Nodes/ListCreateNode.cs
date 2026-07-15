@@ -35,6 +35,9 @@ public class ListCreateNode : NodeModel
     /// <inheritdoc />
     public override string NodeType => TypeName;
 
+    /// <inheritdoc />
+    public override NodeFunction Function => NodeFunction.Create;
+
     /// <summary>Appends one item input port ("itemN") and dirties the node.</summary>
     /// <returns>The new port.</returns>
     public PortModel AddItemPort()

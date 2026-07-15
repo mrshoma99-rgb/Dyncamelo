@@ -33,7 +33,8 @@ public class LibraryEntryViewModel : ObservableObject
     /// <param name="description">Description shown under the name and in the tooltip.</param>
     /// <param name="searchTags">Extra search keywords.</param>
     /// <param name="signature">Input/output signature line for the tooltip.</param>
-    public LibraryEntryViewModel(string id, string name, string category, string description, IReadOnlyList<string> searchTags, string signature = "")
+    /// <param name="function">Functional role (Create / Modify / Info) for leaf grouping and the tint dot.</param>
+    public LibraryEntryViewModel(string id, string name, string category, string description, IReadOnlyList<string> searchTags, string signature = "", Dyncamelo.Core.Graph.NodeFunction function = Dyncamelo.Core.Graph.NodeFunction.Modify)
     {
         Id = id;
         Name = name;
@@ -41,6 +42,7 @@ public class LibraryEntryViewModel : ObservableObject
         Description = description;
         SearchTags = searchTags;
         Signature = signature;
+        Function = function;
 
         // The search index is built exactly once so typing in the search box
         // never lowercases or concatenates entry metadata again. Index and
@@ -61,6 +63,9 @@ public class LibraryEntryViewModel : ObservableObject
 
     /// <summary>Dot-separated category path.</summary>
     public string Category { get; }
+
+    /// <summary>Functional role (Create / Modify / Info) — groups the entry at its leaf and tints its dot.</summary>
+    public Dyncamelo.Core.Graph.NodeFunction Function { get; }
 
     /// <summary>Description shown under the name (when enabled) and in the tooltip.</summary>
     public string Description { get; }
@@ -161,8 +166,33 @@ public class LibraryCategoryViewModel : ObservableObject
         Children = new ObservableCollection<object>();
     }
 
+    /// <summary>
+    /// Creates a Create/Modify/Info grouping header shown at a leaf category, with
+    /// its function glyph. These divide a leaf's nodes by what they do; the tree
+    /// structure above is unchanged.
+    /// </summary>
+    /// <param name="function">The functional role this header groups.</param>
+    public static LibraryCategoryViewModel CreateFunctionGroup(Dyncamelo.Core.Graph.NodeFunction function)
+    {
+        var name = function switch
+        {
+            Dyncamelo.Core.Graph.NodeFunction.Create => "Create",
+            Dyncamelo.Core.Graph.NodeFunction.Info => "Info",
+            _ => "Modify",
+        };
+
+        return new LibraryCategoryViewModel(name, "Fn" + name)
+        {
+            IsFunctionGroup = true,
+            IsExpanded = true,
+        };
+    }
+
     /// <summary>Category segment name.</summary>
     public string Name { get; }
+
+    /// <summary>True when this is a Create/Modify/Info function-grouping header (not a real category).</summary>
+    public bool IsFunctionGroup { get; private set; }
 
     /// <summary>
     /// Icon key that selects the category glyph in the tree; set only for
@@ -363,7 +393,8 @@ public class LibraryViewModel : ObservableObject
                 definition.Category,
                 definition.Description,
                 definition.SearchTags,
-                FormatSignature(definition.Inputs, definition.Outputs)));
+                FormatSignature(definition.Inputs, definition.Outputs),
+                definition.Function));
         }
 
         // Hand-written node types carry their metadata on instances; create a
@@ -382,7 +413,8 @@ public class LibraryViewModel : ObservableObject
                 sample.Category,
                 sample.Description,
                 Array.Empty<string>(),
-                FormatSignature(sample.InPorts, sample.OutPorts)));
+                FormatSignature(sample.InPorts, sample.OutPorts),
+                sample.Function));
         }
 
         foreach (var entry in _allEntries)
@@ -649,6 +681,13 @@ public class LibraryViewModel : ObservableObject
             category.Children.Add(entry);
         }
 
+        // At each leaf, split the nodes into Create / Modify / Info headers so it
+        // is obvious what each does. The category tree above is untouched.
+        foreach (var root in roots.Values)
+        {
+            GroupLeafEntriesByFunction(root);
+        }
+
         // The pinned favourites section always sits at the top, expanded.
         var favorites = ordered
             .Where(e => e.IsFavorite)
@@ -668,6 +707,91 @@ public class LibraryViewModel : ObservableObject
         foreach (var root in roots.Values.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase))
         {
             RootItems.Add(root);
+        }
+    }
+
+    // The fixed order the function headers appear in at a leaf.
+    private static readonly Dyncamelo.Core.Graph.NodeFunction[] FunctionOrder =
+    {
+        Dyncamelo.Core.Graph.NodeFunction.Create,
+        Dyncamelo.Core.Graph.NodeFunction.Modify,
+        Dyncamelo.Core.Graph.NodeFunction.Info,
+    };
+
+    /// <summary>
+    /// Recursively replaces a category's direct node entries with Create / Modify /
+    /// Info sub-headers — but only where a leaf actually mixes ≥2 functions, so a
+    /// single-purpose folder stays a flat list. Sub-categories are grouped too,
+    /// then kept ahead of the function headers.
+    /// </summary>
+    private static void GroupLeafEntriesByFunction(LibraryCategoryViewModel category)
+    {
+        var subCategories = new List<LibraryCategoryViewModel>();
+        var entries = new List<LibraryEntryViewModel>();
+        foreach (var child in category.Children)
+        {
+            if (child is LibraryCategoryViewModel sub)
+            {
+                subCategories.Add(sub);
+            }
+            else if (child is LibraryEntryViewModel entry)
+            {
+                entries.Add(entry);
+            }
+        }
+
+        foreach (var sub in subCategories)
+        {
+            GroupLeafEntriesByFunction(sub);
+        }
+
+        if (entries.Count == 0)
+        {
+            return;
+        }
+
+        // Only split when there is something to split: a leaf whose nodes are all
+        // one function gets no header (it would just be noise).
+        bool mixed = false;
+        var firstFunction = entries[0].Function;
+        foreach (var entry in entries)
+        {
+            if (entry.Function != firstFunction)
+            {
+                mixed = true;
+                break;
+            }
+        }
+
+        if (!mixed)
+        {
+            return;
+        }
+
+        category.Children.Clear();
+        foreach (var sub in subCategories)
+        {
+            category.Children.Add(sub);
+        }
+
+        foreach (var function in FunctionOrder)
+        {
+            LibraryCategoryViewModel? group = null;
+            foreach (var entry in entries)
+            {
+                if (entry.Function != function)
+                {
+                    continue;
+                }
+
+                group ??= LibraryCategoryViewModel.CreateFunctionGroup(function);
+                group.Children.Add(entry);
+            }
+
+            if (group != null)
+            {
+                category.Children.Add(group);
+            }
         }
     }
 
@@ -796,13 +920,25 @@ public class LibraryViewModel : ObservableObject
             path.Add(current);
         }
 
-        if (!current.Children.Contains(entry))
+        if (current.Children.Contains(entry))
         {
-            return null;
+            path.Add(entry);
+            return path;
         }
 
-        path.Add(entry);
-        return path;
+        // At a mixed leaf the entry sits under a Create/Modify/Info header — add it.
+        foreach (var child in current.Children)
+        {
+            if (child is LibraryCategoryViewModel group && group.IsFunctionGroup &&
+                group.Children.Contains(entry))
+            {
+                path.Add(group);
+                path.Add(entry);
+                return path;
+            }
+        }
+
+        return null;
     }
 
     // ----- signatures ----------------------------------------------------------

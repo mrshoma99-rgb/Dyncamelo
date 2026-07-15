@@ -51,6 +51,9 @@ public class ZeroTouchNodeModel : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override NodeFunction Function => Definition.Function;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         object? returned;

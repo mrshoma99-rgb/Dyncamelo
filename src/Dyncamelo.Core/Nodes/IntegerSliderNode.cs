@@ -78,6 +78,9 @@ public class IntegerSliderNode : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override NodeFunction Function => NodeFunction.Create;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         return new object?[] { Value };

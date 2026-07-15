@@ -54,6 +54,14 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// <summary>Dot-separated library category path (e.g. "Math.Trig").</summary>
     public string Category { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Functional role (Create / Modify / Info) used to group the library and
+    /// tint the node. Defaults to <see cref="NodeFunction.Modify"/> (the catch-all
+    /// "acts on things" bucket); input/value nodes override to Create, read-only
+    /// nodes to Info, and zero-touch nodes report their definition's role.
+    /// </summary>
+    public virtual NodeFunction Function => NodeFunction.Modify;
+
     /// <summary>Description shown in the library browser and node tooltip.</summary>
     public string Description { get; set; } = string.Empty;
 

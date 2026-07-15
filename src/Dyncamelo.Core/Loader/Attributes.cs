@@ -73,6 +73,25 @@ public sealed class NodeSearchTagsAttribute : Attribute
 }
 
 /// <summary>
+/// Declares a node's functional role (Create / Modify / Info) explicitly,
+/// overriding the loader's name-based guess. Drives the library grouping and the
+/// node's canvas tint.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class NodeFunctionAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="function">The node's functional role.</param>
+    public NodeFunctionAttribute(Dyncamelo.Core.Graph.NodeFunction function)
+    {
+        Function = function;
+    }
+
+    /// <summary>The declared functional role.</summary>
+    public Dyncamelo.Core.Graph.NodeFunction Function { get; }
+}
+
+/// <summary>
 /// Declares a fixed set of allowed string values for a parameter, so the editor
 /// can offer a dropdown instead of a free-text box (e.g. selection-resolution
 /// levels, clash test types, export schemas). The values are the canonical
