@@ -339,6 +339,9 @@
         },
         {
           "Name": "viewpoints"
+        },
+        {
+          "Name": "report"
         }
       ],
       "Data": {}
@@ -373,6 +376,30 @@
       "Name": "Heat-map image path",
       "X": 1080.0,
       "Y": 400.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "1000000000000000000000000000000d",
+      "NodeType": "Watch",
+      "Name": "Diagnostic report",
+      "X": 1080.0,
+      "Y": 560.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -482,6 +509,13 @@
       "FromNode": "1000000000000000000000000000000a",
       "FromPort": "imagePath",
       "ToNode": "1000000000000000000000000000000c",
+      "ToPort": "value"
+    },
+    {
+      "Id": "2000000000000000000000000000000e",
+      "FromNode": "1000000000000000000000000000000a",
+      "FromPort": "report",
+      "ToNode": "1000000000000000000000000000000d",
       "ToPort": "value"
     }
   ],

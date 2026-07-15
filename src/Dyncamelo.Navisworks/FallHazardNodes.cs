@@ -30,12 +30,12 @@ public static class FallHazardNodes
     /// <param name="saveViewpoints">True to add one top-down saved viewpoint per flagged opening.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (bigger = larger image).</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The image path, the flagged-opening count, their widest gaps and centre points, and any saved viewpoints.</returns>
+    /// <returns>The image path, the flagged-opening count, their widest gaps and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the openings enclosed by floor, subtracts the equipment that plugs them, grades each remaining gap by its widest clear span, and writes a top-down PNG heat map (hot = middle of a big opening; equipment shows steel-blue). Openings whose widest gap ≥ minGap are flagged and get a saved viewpoint. Reads real mesh geometry so it sees true holes inside a slab and equipment passing through them. Keep the floor out of 'obstructions'. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab")]
-    [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints")]
+    [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
     public static Dictionary<string, object?> FloorOpeningMap(
         IEnumerable<ModelItem> floors,
         double level,
@@ -87,9 +87,11 @@ public static class FallHazardNodes
 
         var obstructionList = NavisValues.ToItemList(obstructions);
         var plugTriangles = new List<Tri2>();
+        var plugLeafCount = 0;
         if (obstructionList.Count > 0)
         {
             var plugLeaves = SelectSpanningLeaves(obstructionList, level, band, out _, out _, out _);
+            plugLeafCount = plugLeaves.Count;
             plugTriangles = GeometryReader
                 .ReadTrianglesInBand(plugLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
         }
@@ -123,6 +125,21 @@ public static class FallHazardNodes
             ? CreateViewpoints(doc, flagged, level, band, cellSize)
             : new List<SavedViewpoint>();
 
+        var hazardCells = 0;
+        foreach (var isHazard in result.Hazard)
+        {
+            if (isHazard)
+            {
+                hazardCells++;
+            }
+        }
+
+        var report = BuildReport(
+            level, band, cellSize, result,
+            floorTriangles.Count, floorLeaves.Count, floorMinZ, floorMaxZ,
+            plugTriangles.Count, plugLeafCount, obstructionList.Count,
+            flagged.Count, minGap, hazardCells);
+
         return new Dictionary<string, object?>
         {
             ["imagePath"] = path,
@@ -130,7 +147,29 @@ public static class FallHazardNodes
             ["widestGaps"] = widestGaps,
             ["centers"] = centers,
             ["viewpoints"] = viewpoints,
+            ["report"] = report,
         };
+    }
+
+    /// <summary>A one-line summary of what the analysis actually saw, for diagnosis.</summary>
+    private static string BuildReport(
+        double level, double band, double cellSize, FloorGapResult result,
+        int floorTriangles, int floorLeaves, double floorMinZ, double floorMaxZ,
+        int plugTriangles, int plugLeaves, int obstructionCount,
+        int flaggedCount, double minGap, int hazardCells)
+    {
+        string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+        var openArea = hazardCells * cellSize * cellSize;
+        var largest = result.Openings.Count > 0 ? result.Openings[0].WidestGap : 0.0;
+
+        return
+            "Level " + F(level) + " (±" + F(band) + "). " +
+            "Floor: " + floorTriangles + " triangles from " + floorLeaves + " geometry item(s), world Z " +
+            F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
+            "Equipment: " + plugTriangles + " triangles from " + plugLeaves + " of " + obstructionCount + " item(s). " +
+            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
+            "Openings found: " + result.Openings.Count + " (" + flaggedCount + " ≥ minGap " + F(minGap) + "), " +
+            "open area " + F(openArea) + ", largest gap " + F(largest) + ".";
     }
 
     private static string BuildEmptyFloorMessage(
