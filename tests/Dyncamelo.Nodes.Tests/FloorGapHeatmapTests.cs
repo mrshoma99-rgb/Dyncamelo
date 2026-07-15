@@ -126,6 +126,54 @@ public class FloorGapHeatmapTests
         Assert.InRange(result.Openings[0].WidestGap, 3.6, 4.4);
     }
 
+    // ------------------------------------------------------- Edge / handrail
+
+    [Fact]
+    public void AnalyzeEdges_WideVoidNoHandrail_AllEdgesDangerous()
+    {
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit: 0.5, tolerance: 0.3);
+
+        Assert.True(edges.DangerousLength > 0);         // 2 m gap ≫ 0.5 all round
+        Assert.Equal(0.0, edges.ProtectedLength);
+        Assert.Equal(0.0, edges.SafeLength);
+    }
+
+    [Fact]
+    public void AnalyzeEdges_LimitAboveGap_AllEdgesSafe()
+    {
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), limit: 3.0, tolerance: 0.3);
+
+        Assert.True(edges.SafeLength > 0);              // 2 m hole < 3 m limit
+        Assert.Equal(0.0, edges.DangerousLength);
+        Assert.Equal(0.0, edges.ProtectedLength);
+    }
+
+    [Fact]
+    public void AnalyzeEdges_HandrailProtectsOnlyItsSide()
+    {
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        // A rail projected along the hole's bottom edge (row centred at y=3.75), spanning its width.
+        var rail = Rect(4, 3.7, 6, 4.0).ToList();
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, rail, limit: 0.5, tolerance: 0.4);
+
+        Assert.True(edges.ProtectedLength > 0);         // the railed edge
+        Assert.True(edges.DangerousLength > 0);         // the other three sides
+    }
+
+    [Fact]
+    public void RenderEdgePng_ProducesAValidPng()
+    {
+        var result = FloorGapHeatmap.Analyze(0, 0, 10, 10, 0.5, DonutSlab(), Array.Empty<Tri2>(), minGap: 0.2);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, Array.Empty<Tri2>(), 0.5, 0.3);
+        var png = FloorGapHeatmap.RenderEdgePng(edges, 3);
+
+        var (w, h) = ReadPngSize(png);
+        Assert.Equal(result.Cols * 3, w);
+        Assert.Equal(result.Rows * 3, h);
+    }
+
     [Fact]
     public void Analyze_RejectsTooFineAGrid()
     {

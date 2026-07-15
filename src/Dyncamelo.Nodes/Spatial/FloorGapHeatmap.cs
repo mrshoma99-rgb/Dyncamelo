@@ -138,6 +138,53 @@ public sealed class FloorGapResult
     public IReadOnlyList<FloorOpening> Openings { get; }
 }
 
+/// <summary>How a floor edge cell facing a void is classified.</summary>
+public enum EdgeClass : byte
+{
+    /// <summary>Not a floor edge facing a void.</summary>
+    None = 0,
+
+    /// <summary>The gap across the void is under the limit — no handrail needed.</summary>
+    SafeGap = 1,
+
+    /// <summary>Over the limit, but a handrail runs along it within tolerance.</summary>
+    Protected = 2,
+
+    /// <summary>Over the limit and no handrail — needs one.</summary>
+    Dangerous = 3,
+}
+
+/// <summary>The result of classifying the floor edges of a <see cref="FloorGapResult"/>.</summary>
+public sealed class FloorEdgeResult
+{
+    /// <summary>Creates the result.</summary>
+    public FloorEdgeResult(
+        FloorGapResult baseResult, EdgeClass[] edges,
+        double dangerousLength, double protectedLength, double safeLength)
+    {
+        Base = baseResult;
+        Edges = edges;
+        DangerousLength = dangerousLength;
+        ProtectedLength = protectedLength;
+        SafeLength = safeLength;
+    }
+
+    /// <summary>The underlying floor/void analysis this edge pass sits on.</summary>
+    public FloorGapResult Base { get; }
+
+    /// <summary>Per-cell edge classification (row-major, same grid as <see cref="Base"/>).</summary>
+    public EdgeClass[] Edges { get; }
+
+    /// <summary>Approximate length of unprotected dangerous edge (world units).</summary>
+    public double DangerousLength { get; }
+
+    /// <summary>Approximate length of dangerous edge covered by a handrail (world units).</summary>
+    public double ProtectedLength { get; }
+
+    /// <summary>Approximate length of edge safe by gap alone (world units).</summary>
+    public double SafeLength { get; }
+}
+
 /// <summary>
 /// Pure, headless-testable core of the floor-opening fall-hazard heat map.
 /// Rasterises floor and obstruction triangles onto a plan grid, isolates the
@@ -212,6 +259,237 @@ public static class FloorGapHeatmap
 
         return new FloorGapResult(
             cols, rows, minX, minY, cellSize, floor, plug, hazard, clearance, maxClearance, openings);
+    }
+
+    // ----------------------------------------------------------- Edge / handrail
+
+    /// <summary>
+    /// Classifies each floor edge cell that faces a void. An edge is dangerous
+    /// when the gap straight across the void to the nearest solid (far floor edge
+    /// or equipment) is at least <paramref name="limit"/>; it is safe below that.
+    /// A dangerous edge becomes protected when a handrail (its geometry projected
+    /// onto the plane and rasterised) runs within <paramref name="tolerance"/> of it —
+    /// per cell, so a short handrail only covers the length it actually spans.
+    /// </summary>
+    /// <param name="result">The floor/void analysis to classify the edges of.</param>
+    /// <param name="handrailTriangles">Handrail geometry projected to the plane; may be empty.</param>
+    /// <param name="limit">A gap ≥ this across the void makes the facing edge a hazard.</param>
+    /// <param name="tolerance">A handrail within this distance of a dangerous edge protects it.</param>
+    /// <returns>The per-cell edge classification and the length in each class.</returns>
+    public static FloorEdgeResult AnalyzeEdges(
+        FloorGapResult result, IReadOnlyList<Tri2> handrailTriangles, double limit, double tolerance)
+    {
+        if (result == null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        var cols = result.Cols;
+        var rows = result.Rows;
+        var cellSize = result.CellSize;
+        var floor = result.Floor;
+        var plug = result.Plug;
+        var hazard = result.Hazard;
+        var count = cols * rows;
+
+        // Handrails, projected and rasterised, then a distance field from them.
+        var handrail = new bool[count];
+        if (handrailTriangles != null && handrailTriangles.Count > 0)
+        {
+            Rasterize(handrailTriangles, result.OriginX, result.OriginY, cellSize, cols, rows, handrail);
+        }
+
+        var handrailDistance = ChamferFromSeeds(handrail, cols, rows, cellSize);
+
+        var edges = new EdgeClass[count];
+        double dangerousLen = 0, protectedLen = 0, safeLen = 0;
+        var neighbourR = new[] { -1, 1, 0, 0 };
+        var neighbourC = new[] { 0, 0, -1, 1 };
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                var idx = r * cols + c;
+                if (!floor[idx])
+                {
+                    continue; // only floor cells can be an edge of the void
+                }
+
+                // The widest void the edge faces: march perpendicular into each
+                // adjacent void until the next solid, and take the largest span.
+                double gap = 0;
+                var facesVoid = false;
+                for (int d = 0; d < 4; d++)
+                {
+                    var nr = r + neighbourR[d];
+                    var nc = c + neighbourC[d];
+                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || !hazard[nr * cols + nc])
+                    {
+                        continue;
+                    }
+
+                    facesVoid = true;
+                    var steps = 0;
+                    int mr = nr, mc = nc;
+                    while (mr >= 0 && mr < rows && mc >= 0 && mc < cols && hazard[mr * cols + mc])
+                    {
+                        steps++;
+                        mr += neighbourR[d];
+                        mc += neighbourC[d];
+                    }
+
+                    var span = steps * cellSize;
+                    if (span > gap)
+                    {
+                        gap = span;
+                    }
+                }
+
+                if (!facesVoid)
+                {
+                    continue;
+                }
+
+                EdgeClass cls;
+                if (gap < limit)
+                {
+                    cls = EdgeClass.SafeGap;
+                    safeLen += cellSize;
+                }
+                else if (handrailDistance[idx] <= tolerance)
+                {
+                    cls = EdgeClass.Protected;
+                    protectedLen += cellSize;
+                }
+                else
+                {
+                    cls = EdgeClass.Dangerous;
+                    dangerousLen += cellSize;
+                }
+
+                edges[idx] = cls;
+            }
+        }
+
+        return new FloorEdgeResult(result, edges, dangerousLen, protectedLen, safeLen);
+    }
+
+    /// <summary>Two-pass chamfer distance (world units) to the nearest seed cell; +∞ when no seeds.</summary>
+    private static double[] ChamferFromSeeds(bool[] seeds, int cols, int rows, double cellSize)
+    {
+        var count = cols * rows;
+        var dist = new double[count];
+        const double big = 1e18;
+        var anySeed = false;
+        for (int i = 0; i < count; i++)
+        {
+            if (seeds[i]) { dist[i] = 0.0; anySeed = true; }
+            else { dist[i] = big; }
+        }
+
+        if (!anySeed)
+        {
+            for (int i = 0; i < count; i++) dist[i] = double.PositiveInfinity;
+            return dist;
+        }
+
+        const double d1 = 1.0;
+        var d2 = Math.Sqrt(2.0);
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                var idx = r * cols + c;
+                if (dist[idx] == 0.0) continue;
+                var best = dist[idx];
+                if (c > 0) best = Math.Min(best, dist[idx - 1] + d1);
+                if (r > 0) best = Math.Min(best, dist[idx - cols] + d1);
+                if (r > 0 && c > 0) best = Math.Min(best, dist[idx - cols - 1] + d2);
+                if (r > 0 && c < cols - 1) best = Math.Min(best, dist[idx - cols + 1] + d2);
+                dist[idx] = best;
+            }
+        }
+
+        for (int r = rows - 1; r >= 0; r--)
+        {
+            for (int c = cols - 1; c >= 0; c--)
+            {
+                var idx = r * cols + c;
+                if (dist[idx] == 0.0) continue;
+                var best = dist[idx];
+                if (c < cols - 1) best = Math.Min(best, dist[idx + 1] + d1);
+                if (r < rows - 1) best = Math.Min(best, dist[idx + cols] + d1);
+                if (r < rows - 1 && c < cols - 1) best = Math.Min(best, dist[idx + cols + 1] + d2);
+                if (r < rows - 1 && c > 0) best = Math.Min(best, dist[idx + cols - 1] + d2);
+                dist[idx] = best;
+            }
+        }
+
+        for (int i = 0; i < count; i++) dist[i] *= cellSize;
+        return dist;
+    }
+
+    /// <summary>
+    /// Renders the edge classification: floor dark, void faint, and edge cells in
+    /// green (safe), blue (handrail-protected) or red (dangerous, needs a handrail).
+    /// </summary>
+    /// <param name="edgeResult">The edge analysis to draw.</param>
+    /// <param name="pixelsPerCell">Image pixels per grid cell (≥1).</param>
+    /// <returns>The PNG bytes.</returns>
+    public static byte[] RenderEdgePng(FloorEdgeResult edgeResult, int pixelsPerCell = 4)
+    {
+        if (edgeResult == null)
+        {
+            throw new ArgumentNullException(nameof(edgeResult));
+        }
+
+        if (pixelsPerCell < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pixelsPerCell), "There must be at least one pixel per cell.");
+        }
+
+        var result = edgeResult.Base;
+        var cols = result.Cols;
+        var rows = result.Rows;
+        var width = cols * pixelsPerCell;
+        var height = rows * pixelsPerCell;
+        var rgba = new byte[width * height * 4];
+
+        for (int r = 0; r < rows; r++)
+        {
+            var pngRowBase = (rows - 1 - r) * pixelsPerCell;
+            for (int c = 0; c < cols; c++)
+            {
+                var idx = r * cols + c;
+                byte cr, cg, cb, ca;
+                switch (edgeResult.Edges[idx])
+                {
+                    case EdgeClass.Dangerous: cr = 220; cg = 40; cb = 40; ca = 255; break;
+                    case EdgeClass.Protected: cr = 60; cg = 140; cb = 220; ca = 255; break;
+                    case EdgeClass.SafeGap: cr = 70; cg = 180; cb = 90; ca = 255; break;
+                    default:
+                        if (result.Hazard[idx]) { cr = 44; cg = 46; cb = 58; ca = 255; }        // void
+                        else if (result.Plug[idx]) { cr = 96; cg = 100; cb = 108; ca = 255; }   // equipment
+                        else if (result.Floor[idx]) { cr = 60; cg = 62; cb = 68; ca = 255; }    // floor
+                        else { cr = 0; cg = 0; cb = 0; ca = 0; }                                // exterior
+                        break;
+                }
+
+                for (int py = 0; py < pixelsPerCell; py++)
+                {
+                    var rowStart = ((pngRowBase + py) * width + c * pixelsPerCell) * 4;
+                    for (int px = 0; px < pixelsPerCell; px++)
+                    {
+                        var o = rowStart + px * 4;
+                        rgba[o] = cr; rgba[o + 1] = cg; rgba[o + 2] = cb; rgba[o + 3] = ca;
+                    }
+                }
+            }
+        }
+
+        return PngWriter.Encode(width, height, rgba);
     }
 
     // ---------------------------------------------------------------- Rasterize

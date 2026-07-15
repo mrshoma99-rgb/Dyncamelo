@@ -172,6 +172,109 @@ public static class FallHazardNodes
             "open area " + F(openArea) + ", largest gap " + F(largest) + ".";
     }
 
+    /// <summary>Classifies each floor edge along a void as safe, handrail-protected, or dangerous.</summary>
+    /// <param name="floors">The floor/slab items to treat as safe ground.</param>
+    /// <param name="level">The elevation (world Z) of the plan to analyse.</param>
+    /// <param name="handrails">The handrail items — their geometry is projected flat onto the plan (posts and rails alike), so a handrail protects only the length it actually runs along an edge.</param>
+    /// <param name="obstructions">Equipment/ducts/pipes that plug openings; a floor edge facing one at less than the limit is safe. Optional.</param>
+    /// <param name="band">Vertical tolerance for deciding a floor/equipment element crosses the level.</param>
+    /// <param name="cellSize">Grid resolution in document units (smaller = finer, use a few times below the limit).</param>
+    /// <param name="limit">A floor edge whose gap across the void to the nearest solid is at least this needs a handrail (e.g. 0.2 = 20 cm).</param>
+    /// <param name="handrailTolerance">A handrail within this distance of a dangerous edge protects it.</param>
+    /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned).</param>
+    /// <param name="pixelsPerCell">Image pixels per grid cell.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The image path, the dangerous/protected/safe edge lengths, and a diagnostic report.</returns>
+    [NodeName("FallHazard.EdgeHandrailCheck")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
+    [NodeSearchTags("fall", "hazard", "edge", "handrail", "guardrail", "railing", "floor", "void", "opening", "safety", "protected", "perimeter")]
+    [MultiReturn("imagePath", "dangerousLength", "protectedLength", "safeLength", "report")]
+    public static Dictionary<string, object?> EdgeHandrailCheck(
+        IEnumerable<ModelItem> floors,
+        double level,
+        IEnumerable<ModelItem> handrails,
+        IEnumerable<ModelItem>? obstructions = null,
+        double band = 1.0,
+        double cellSize = 0.1,
+        double limit = 0.2,
+        double handrailTolerance = 0.3,
+        string? imagePath = null,
+        int pixelsPerCell = 6,
+        Document? document = null)
+    {
+        var floorList = NavisValues.ToItemList(floors);
+        if (floorList.Count == 0)
+        {
+            throw new ArgumentException("No floor items provided.", nameof(floors));
+        }
+
+        if (band <= 0.0) throw new ArgumentOutOfRangeException(nameof(band), "The band must be positive.");
+        if (cellSize <= 0.0) throw new ArgumentOutOfRangeException(nameof(cellSize), "The cell size must be positive.");
+        if (limit <= 0.0) throw new ArgumentOutOfRangeException(nameof(limit), "The limit must be positive.");
+        if (pixelsPerCell < 1) throw new ArgumentOutOfRangeException(nameof(pixelsPerCell), "There must be at least one pixel per cell.");
+
+        var doc = NavisworksContext.ResolveDocument(document);
+
+        var floorLeaves = SelectSpanningLeaves(floorList, level, band, out var floorMinZ, out var floorMaxZ, out var floorHasBox);
+        var floorTriangles = GeometryReader
+            .ReadTrianglesInBand(floorLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
+        if (floorTriangles.Count == 0)
+        {
+            throw new InvalidOperationException(
+                BuildEmptyFloorMessage(floorLeaves.Count, floorHasBox, floorMinZ, floorMaxZ, level, band));
+        }
+
+        var obstructionList = NavisValues.ToItemList(obstructions);
+        var plugTriangles = new List<Tri2>();
+        if (obstructionList.Count > 0)
+        {
+            var plugLeaves = SelectSpanningLeaves(obstructionList, level, band, out _, out _, out _);
+            plugTriangles = GeometryReader
+                .ReadTrianglesInBand(plugLeaves, double.NegativeInfinity, double.PositiveInfinity).Triangles;
+        }
+
+        // Handrails sit above the floor and don't cross the level, so read all of
+        // their geometry and let the projection to the plan (dropping Z) place it.
+        var handrailList = NavisValues.ToItemList(handrails);
+        var handrailTriangles = new List<Tri2>();
+        if (handrailList.Count > 0)
+        {
+            handrailTriangles = GeometryReader
+                .ReadTrianglesInBand(ModelItemNodes.GeometryLeaves(handrailList),
+                    double.NegativeInfinity, double.PositiveInfinity).Triangles;
+        }
+
+        Bounds(floorTriangles, out var minX, out var minY, out var maxX, out var maxY);
+        var pad = cellSize * 2.0;
+        var result = FloorGapHeatmap.Analyze(
+            minX - pad, minY - pad, maxX + pad, maxY + pad, cellSize, floorTriangles, plugTriangles, limit);
+        var edges = FloorGapHeatmap.AnalyzeEdges(result, handrailTriangles, limit, handrailTolerance);
+
+        var path = ResolveImagePath(imagePath, doc);
+        var png = FloorGapHeatmap.RenderEdgePng(edges, pixelsPerCell);
+        Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
+        File.WriteAllBytes(path, png);
+
+        string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+        var report =
+            "Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) + ", handrail tol " + F(handrailTolerance) + ". " +
+            "Floor: " + floorTriangles.Count + " triangles, world Z " + F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
+            "Handrails: " + handrailTriangles.Count + " triangles from " + handrailList.Count + " item(s). " +
+            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
+            "Edge length — dangerous " + F(edges.DangerousLength) + ", protected " + F(edges.ProtectedLength) +
+            ", safe " + F(edges.SafeLength) + ".";
+
+        return new Dictionary<string, object?>
+        {
+            ["imagePath"] = path,
+            ["dangerousLength"] = edges.DangerousLength,
+            ["protectedLength"] = edges.ProtectedLength,
+            ["safeLength"] = edges.SafeLength,
+            ["report"] = report,
+        };
+    }
+
     private static string BuildEmptyFloorMessage(
         int spanningLeafCount, bool hasBox, double minZ, double maxZ, double level, double band)
     {
