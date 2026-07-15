@@ -257,12 +257,27 @@ public static class FallHazardNodes
         File.WriteAllBytes(path, png);
 
         string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+        // Rasterised areas: comparing these against the real footprints shows at a
+        // glance whether the geometry read matches the model (e.g. an equipment
+        // plug smaller than the element widens the void ring and turns safe
+        // edges red).
+        var cellArea = cellSize * cellSize;
+        int plugCells = 0, voidCells = 0;
+        for (int i = 0; i < result.Plug.Length; i++)
+        {
+            if (result.Plug[i]) plugCells++;
+            if (result.Hazard[i]) voidCells++;
+        }
+
         var report =
             "v" + PluginVersion() + ". Level " + F(level) + " (±" + F(band) + "), limit " + F(limit) +
             ", handrail tol " + F(handrailTolerance) + ". " +
             "Floor: " + floorTriangles.Count + " triangles, world Z " + F(floorMinZ) + " to " + F(floorMaxZ) + ". " +
+            "Equipment: " + obstructionList.Count + " item(s), " + plugTriangles.Count + " triangles, plug area " +
+            F(plugCells * cellArea) + ". " +
             "Handrails: " + handrailList.Count + " item(s), " + handrailTriangles.Count + " triangles. " +
-            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ". " +
+            "Grid " + result.Cols + "×" + result.Rows + " @ " + F(cellSize) + ", void area " + F(voidCells * cellArea) + ". " +
             "Edge length — dangerous " + F(edges.DangerousLength) + ", protected " + F(edges.ProtectedLength) +
             ", safe " + F(edges.SafeLength) + ".";
 
