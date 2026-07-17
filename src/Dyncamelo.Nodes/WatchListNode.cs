@@ -19,6 +19,7 @@ public class WatchListNode : NodeModel
     public const string TypeName = "WatchList";
 
     private IReadOnlyList<string> _lines = new List<string>();
+    private IReadOnlyList<WatchListEntry> _entries = new List<WatchListEntry>();
     private double _viewWidth;
     private double _viewHeight;
 
@@ -46,6 +47,20 @@ public class WatchListNode : NodeModel
 
     /// <summary>All display lines joined with newlines.</summary>
     public string FormattedValue => string.Join("\n", _lines);
+
+    /// <summary>
+    /// Structured display rows (index + text) backing the editor's two-column
+    /// list view; the index cell is empty for non-list values.
+    /// </summary>
+    public IReadOnlyList<WatchListEntry> Entries
+    {
+        get => _entries;
+        private set
+        {
+            _entries = value;
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// User-chosen width of the display area (0 = automatic). Pure view state:
@@ -78,18 +93,25 @@ public class WatchListNode : NodeModel
     {
         var value = inputs.Length > 0 ? inputs[0] : null;
         var lines = new List<string>();
+        var entries = new List<WatchListEntry>();
         if (value is IList list && !(value is string))
         {
             for (int i = 0; i < list.Count; i++)
             {
-                lines.Add(i.ToString(CultureInfo.InvariantCulture) + " : " + TypeCoercion.FormatValue(list[i]));
+                var index = i.ToString(CultureInfo.InvariantCulture);
+                var text = TypeCoercion.FormatValue(list[i]);
+                lines.Add(index + " : " + text);
+                entries.Add(new WatchListEntry(index, text));
             }
         }
         else
         {
-            lines.Add(TypeCoercion.FormatValue(value));
+            var text = TypeCoercion.FormatValue(value);
+            lines.Add(text);
+            entries.Add(new WatchListEntry(string.Empty, text));
         }
 
+        Entries = entries;
         Lines = lines;
         return new object?[] { value };
     }
@@ -109,4 +131,26 @@ public class WatchListNode : NodeModel
         ViewWidth = data.Value<double?>("ViewWidth") ?? 0d;
         ViewHeight = data.Value<double?>("ViewHeight") ?? 0d;
     }
+}
+
+/// <summary>One display row of a <see cref="WatchListNode"/>: index cell + value text.</summary>
+public class WatchListEntry
+{
+    /// <summary>Creates a row.</summary>
+    /// <param name="index">Index cell text (empty for non-list values).</param>
+    /// <param name="text">Formatted value text.</param>
+    public WatchListEntry(string index, string text)
+    {
+        Index = index;
+        Text = text;
+    }
+
+    /// <summary>Index cell text (empty for non-list values).</summary>
+    public string Index { get; }
+
+    /// <summary>Formatted value text.</summary>
+    public string Text { get; }
+
+    /// <summary>True when the index cell renders (hides the gutter for non-list values).</summary>
+    public bool HasIndex => Index.Length > 0;
 }

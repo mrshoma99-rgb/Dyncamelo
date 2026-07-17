@@ -73,6 +73,10 @@ public class GraphEditorViewModel : ObservableObject
     private int _pasteGeneration;
     private string _doubleClickAction;
     private string _paletteId;
+    private bool _isQuickSearchOpen;
+    private string _quickSearchText = string.Empty;
+    private LibraryEntryViewModel? _quickSearchSelected;
+    private Point _quickSearchLocation;
 
     /// <summary>Creates the editor with an empty untitled graph.</summary>
     /// <param name="registry">Node registry (already populated by the host).</param>
@@ -126,6 +130,8 @@ public class GraphEditorViewModel : ObservableObject
         PickColorCommand = new RelayCommand<NodeModel>(PickColor);
         CaptureSelectionCommand = new RelayCommand<NodeModel>(CaptureSelection);
         ClearCapturedSelectionCommand = new RelayCommand<NodeModel>(ClearCapturedSelection);
+        QuickSearchResults = new ObservableCollection<LibraryEntryViewModel>();
+        CommitQuickSearchCommand = new RelayCommand<LibraryEntryViewModel>(entry => CommitQuickSearch(entry));
         RefreshSampleGraphs();
 
         // Settings-panel state: the double-click action and the colour palette.
@@ -429,6 +435,105 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Forgets the stored selection of a Captured Selection node.</summary>
     public ICommand ClearCapturedSelectionCommand { get; }
+
+    // ----- quick node search (Space bar) ---------------------------------------
+
+    /// <summary>True while the canvas quick-search popup is open.</summary>
+    public bool IsQuickSearchOpen
+    {
+        get => _isQuickSearchOpen;
+        set => SetProperty(ref _isQuickSearchOpen, value);
+    }
+
+    /// <summary>Search text of the quick-search popup; updates the results as you type.</summary>
+    public string QuickSearchText
+    {
+        get => _quickSearchText;
+        set
+        {
+            if (SetProperty(ref _quickSearchText, value ?? string.Empty))
+            {
+                RefreshQuickSearchResults();
+            }
+        }
+    }
+
+    /// <summary>Ranked quick-search hits (top 50).</summary>
+    public ObservableCollection<LibraryEntryViewModel> QuickSearchResults { get; }
+
+    /// <summary>The highlighted hit; Enter inserts it.</summary>
+    public LibraryEntryViewModel? QuickSearchSelected
+    {
+        get => _quickSearchSelected;
+        set => SetProperty(ref _quickSearchSelected, value);
+    }
+
+    /// <summary>Inserts the given (or highlighted) hit; bound to result clicks.</summary>
+    public ICommand CommitQuickSearchCommand { get; }
+
+    /// <summary>
+    /// Opens the quick-search popup; inserted nodes land at
+    /// <paramref name="insertLocation"/> (graph space).
+    /// </summary>
+    /// <param name="insertLocation">Graph-space location for the inserted node.</param>
+    public void OpenQuickSearch(Point insertLocation)
+    {
+        _quickSearchLocation = insertLocation;
+        QuickSearchText = string.Empty;
+        RefreshQuickSearchResults();
+        IsQuickSearchOpen = true;
+    }
+
+    /// <summary>Closes the popup without inserting anything.</summary>
+    public void CloseQuickSearch()
+    {
+        IsQuickSearchOpen = false;
+    }
+
+    /// <summary>
+    /// Inserts a hit at the location captured when the popup opened and closes
+    /// the popup. Falls back to the highlighted (or first) hit when
+    /// <paramref name="entry"/> is null.
+    /// </summary>
+    /// <param name="entry">The hit to insert, or null for the highlighted one.</param>
+    /// <returns>The inserted node's view model, or null when nothing was inserted.</returns>
+    public NodeViewModel? CommitQuickSearch(LibraryEntryViewModel? entry = null)
+    {
+        var chosen = entry ?? QuickSearchSelected ?? (QuickSearchResults.Count > 0 ? QuickSearchResults[0] : null);
+        if (chosen == null)
+        {
+            return null;
+        }
+
+        IsQuickSearchOpen = false;
+        return AddNode(chosen.Id, _quickSearchLocation);
+    }
+
+    /// <summary>Moves the highlight down (+1) or up (-1) through the results, wrapping.</summary>
+    /// <param name="delta">+1 for down, -1 for up.</param>
+    public void MoveQuickSearchSelection(int delta)
+    {
+        if (QuickSearchResults.Count == 0)
+        {
+            return;
+        }
+
+        int count = QuickSearchResults.Count;
+        int index = QuickSearchSelected != null ? QuickSearchResults.IndexOf(QuickSearchSelected) : (delta > 0 ? -1 : 0);
+        index = ((index + delta) % count + count) % count;
+        QuickSearchSelected = QuickSearchResults[index];
+    }
+
+    private void RefreshQuickSearchResults()
+    {
+        QuickSearchResults.Clear();
+        foreach (var hit in Library.QuickSearch(_quickSearchText, 50))
+        {
+            QuickSearchResults.Add(hit);
+        }
+
+        QuickSearchSelected = QuickSearchResults.Count > 0 ? QuickSearchResults[0] : null;
+    }
 
     /// <summary>
     /// Creates a node from a library id (zero-touch definition id or node type

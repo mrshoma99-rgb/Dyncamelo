@@ -117,21 +117,107 @@ public partial class DyncameloEditorControl : UserControl
 
     private void OnControlPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        bool typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+
+        // Space over the canvas opens the quick node search (Dynamo-style):
+        // type to filter, Enter inserts at the spot the cursor was on.
+        if (!typing &&
+            e.Key == Key.Space &&
+            Keyboard.Modifiers == ModifierKeys.None &&
+            ViewModel != null &&
+            !ViewModel.IsQuickSearchOpen &&
+            Editor.IsMouseOver)
+        {
+            // MouseLocation is the cursor in graph space, maintained by Nodify.
+            ViewModel.OpenQuickSearch(Editor.MouseLocation);
+            e.Handled = true;
+            Dispatcher.BeginInvoke(
+                new System.Action(() =>
+                {
+                    QuickSearchBox.Focus();
+                    QuickSearchBox.SelectAll();
+                }),
+                System.Windows.Threading.DispatcherPriority.Input);
+            return;
+        }
+
+        if (!typing)
+        {
+            return;
+        }
+
         // Ctrl+D (duplicate), Ctrl+G (group) and F5 (run) are not consumed by
         // TextBox editing (unlike Ctrl+C/Ctrl+V), so they would bubble up to
         // the UserControl's KeyBindings while the user types in an inline
         // TextBox (string/number/note/group-title/search) — and since clicking
         // into a node's TextBox also selects that node, they would silently
         // duplicate/group it mid-edit. Swallow them while a text box has focus.
-        if (!(Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase))
-        {
-            return;
-        }
-
         bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
         if ((ctrl && (e.Key == Key.D || e.Key == Key.G)) || e.Key == Key.F5)
         {
             e.Handled = true;
+        }
+    }
+
+    // ----- quick node search (Space) -------------------------------------------
+
+    private void OnQuickSearchBoxKeyDown(object sender, KeyEventArgs e)
+    {
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                ViewModel.CloseQuickSearch();
+                Editor.Focus();
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                ViewModel.CommitQuickSearch();
+                Editor.Focus();
+                e.Handled = true;
+                break;
+            case Key.Down:
+                ViewModel.MoveQuickSearchSelection(1);
+                ScrollQuickSearchSelectionIntoView();
+                e.Handled = true;
+                break;
+            case Key.Up:
+                ViewModel.MoveQuickSearchSelection(-1);
+                ScrollQuickSearchSelectionIntoView();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void ScrollQuickSearchSelectionIntoView()
+    {
+        if (QuickSearchList.SelectedItem != null)
+        {
+            QuickSearchList.ScrollIntoView(QuickSearchList.SelectedItem);
+        }
+    }
+
+    private void OnQuickSearchListClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ViewModel != null &&
+            (e.OriginalSource as FrameworkElement)?.DataContext is LibraryEntryViewModel entry)
+        {
+            ViewModel.CommitQuickSearch(entry);
+            Editor.Focus();
+            e.Handled = true;
+        }
+    }
+
+    private void OnQuickSearchFocusChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        // Clicking anywhere else (canvas, toolbar, library) dismisses the popup.
+        if (!(bool)e.NewValue && ViewModel != null && ViewModel.IsQuickSearchOpen)
+        {
+            ViewModel.CloseQuickSearch();
         }
     }
 

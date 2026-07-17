@@ -26,6 +26,7 @@ public static class NodeLibrary
 
         registry.RegisterNodeType(ListCreateNode.TypeName, () => new ListCreateNode());
         registry.RegisterNodeType(WatchListNode.TypeName, () => new WatchListNode());
+        registry.RegisterNodeType(WatchImageNode.TypeName, () => new WatchImageNode());
         registry.RegisterNodeType(ColorPickerNode.TypeName, () => new ColorPickerNode());
         return registry.RegisterAssembly(typeof(NodeLibrary).Assembly);
     }

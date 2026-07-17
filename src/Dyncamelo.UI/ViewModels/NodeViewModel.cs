@@ -33,6 +33,9 @@ public class NodeViewModel : CanvasItemViewModel
     private bool _showPreview = true;
     private string _previewText = string.Empty;
     private string _watchCountText = string.Empty;
+    private bool _hasMorePreview;
+    private bool _isPreviewExpanded;
+    private string _expandedPreviewText = string.Empty;
     private double _localWatchWidth;
     private double _localWatchHeight;
 
@@ -64,6 +67,7 @@ public class NodeViewModel : CanvasItemViewModel
         SetLacingCommand = new RelayCommand<string>(SetLacing);
         BrowseFileCommand = new RelayCommand(BrowseFile, () => Model is FilePathNode);
         FindInLibraryCommand = new RelayCommand(() => _owner.FindInLibrary(this));
+        TogglePreviewExpandCommand = new RelayCommand(TogglePreviewExpand, () => _hasMorePreview);
 
         HeaderBrush = GetCategoryBrush(model.Category);
         SetLocationFromModel(new Point(model.X, model.Y));
@@ -159,6 +163,48 @@ public class NodeViewModel : CanvasItemViewModel
         _showPreview &&
         _previewText.Length > 0 &&
         (Model.State == NodeState.Executed || Model.State == NodeState.Warning);
+
+    /// <summary>
+    /// True when the preview summary truncates a list — the bubble becomes
+    /// clickable and expands to the full item list.
+    /// </summary>
+    public bool HasMorePreview
+    {
+        get => _hasMorePreview;
+        private set
+        {
+            if (SetProperty(ref _hasMorePreview, value))
+            {
+                OnPropertyChanged(nameof(ShowExpandHint));
+            }
+        }
+    }
+
+    /// <summary>True while the preview bubble shows the full item list.</summary>
+    public bool IsPreviewExpanded
+    {
+        get => _isPreviewExpanded;
+        private set
+        {
+            if (SetProperty(ref _isPreviewExpanded, value))
+            {
+                OnPropertyChanged(nameof(ShowExpandHint));
+            }
+        }
+    }
+
+    /// <summary>True when the "click to show all" hint line renders.</summary>
+    public bool ShowExpandHint => _hasMorePreview && !_isPreviewExpanded;
+
+    /// <summary>Full (line-per-item) rendering of the outputs, built when expanding.</summary>
+    public string ExpandedPreviewText
+    {
+        get => _expandedPreviewText;
+        private set => SetProperty(ref _expandedPreviewText, value);
+    }
+
+    /// <summary>Expands/collapses the preview bubble's full item list.</summary>
+    public ICommand TogglePreviewExpandCommand { get; }
 
     /// <summary>
     /// Item-count line for watch displays ("List — 42 items"); empty for
@@ -490,10 +536,83 @@ public class NodeViewModel : CanvasItemViewModel
 
         PreviewText = preview;
 
+        // Fresh values invalidate any expanded view; it rebuilds on next expand.
+        IsPreviewExpanded = false;
+        ExpandedPreviewText = string.Empty;
+        bool hasMore = false;
+        foreach (var port in outputs)
+        {
+            if (port.Value is IList portList && !(port.Value is string) && portList.Count > 3)
+            {
+                hasMore = true;
+                break;
+            }
+        }
+
+        HasMorePreview = hasMore;
+
         var firstValue = outputs.Count > 0 ? outputs[0].Value : null;
         WatchCountText = firstValue is IList list && !(firstValue is string)
             ? "List — " + list.Count.ToString(CultureInfo.InvariantCulture) + (list.Count == 1 ? " item" : " items")
             : string.Empty;
+    }
+
+    private void TogglePreviewExpand()
+    {
+        if (_isPreviewExpanded)
+        {
+            IsPreviewExpanded = false;
+            return;
+        }
+
+        if (_expandedPreviewText.Length == 0)
+        {
+            ExpandedPreviewText = BuildExpandedPreviewText(Model.OutPorts);
+        }
+
+        IsPreviewExpanded = true;
+    }
+
+    /// <summary>
+    /// Renders every output in full — one line per list item — capped at
+    /// <c>MaxExpandedLines</c> lines so a 100k-item list cannot stall the UI.
+    /// </summary>
+    private static string BuildExpandedPreviewText(IReadOnlyList<PortModel> outputs)
+    {
+        const int MaxExpandedLines = 500;
+        var lines = new List<string>();
+        foreach (var port in outputs)
+        {
+            if (outputs.Count > 1)
+            {
+                lines.Add(port.Name + ":");
+            }
+
+            if (port.Value is IList list && !(port.Value is string))
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (lines.Count >= MaxExpandedLines)
+                    {
+                        lines.Add("… " + (list.Count - i).ToString(CultureInfo.InvariantCulture) + " more items");
+                        return string.Join(Environment.NewLine, lines);
+                    }
+
+                    lines.Add(i.ToString(CultureInfo.InvariantCulture) + " : " + TypeCoercion.FormatValue(list[i]));
+                }
+            }
+            else
+            {
+                lines.Add(TypeCoercion.FormatValue(port.Value));
+            }
+
+            if (lines.Count >= MaxExpandedLines)
+            {
+                break;
+            }
+        }
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     private static string SummarizeValue(object? value)

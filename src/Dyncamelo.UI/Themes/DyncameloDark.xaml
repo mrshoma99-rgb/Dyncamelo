@@ -53,6 +53,7 @@
     <views:NodeBodyTemplateSelector x:Key="Dyc.NodeBodySelector" />
     <views:ColorChannelsToBrushConverter x:Key="Dyc.ColorChannelsToBrush" />
     <views:AutoSizeLimitConverter x:Key="Dyc.AutoSizeLimit" />
+    <views:ImagePathToSourceConverter x:Key="Dyc.ImagePathToSource" />
     <BooleanToVisibilityConverter x:Key="Dyc.BoolToVisibility" />
 
     <!-- ===== Material Symbols icon geometries (Apache-2.0, google/material-design-icons) ===== -->
@@ -831,11 +832,55 @@
                  Text="{Binding Value}" />
     </DataTemplate>
 
+    <!-- Boolean input as a proper switch: a rounded track whose thumb slides
+         right and fills with the accent colour when true, plus a True/False
+         state label. Clicking anywhere on the row toggles. -->
     <DataTemplate x:Key="NodeBody.BooleanToggle">
-        <CheckBox Margin="6,4"
-                  Foreground="{StaticResource Dyc.TextBrush}"
-                  IsChecked="{Binding Value}"
-                  Content="{Binding Value}" />
+        <CheckBox Margin="8,6"
+                  MinWidth="96"
+                  Cursor="Hand"
+                  IsChecked="{Binding Value}">
+            <CheckBox.Template>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Track"
+                                Width="34" Height="18"
+                                CornerRadius="9"
+                                VerticalAlignment="Center"
+                                Background="{StaticResource Dyc.InputBackgroundBrush}"
+                                BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                                BorderThickness="1">
+                            <Ellipse x:Name="Thumb"
+                                     Width="12" Height="12"
+                                     Margin="2,0"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Center"
+                                     Fill="{StaticResource Dyc.SubtleTextBrush}" />
+                        </Border>
+                        <TextBlock x:Name="StateText"
+                                   Text="False"
+                                   Margin="8,0,0,0"
+                                   MinWidth="32"
+                                   VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Thumb" Property="Fill" Value="White" />
+                            <Setter TargetName="StateText" Property="Text" Value="True" />
+                            <Setter TargetName="StateText" Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </CheckBox.Template>
+        </CheckBox>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.FilePath">
@@ -934,20 +979,74 @@
                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
                        Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
                        Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
-            <TextBox x:Name="WatchListBox"
-                     Grid.Row="1"
-                     Style="{StaticResource Dyc.TextBox}"
-                     MinWidth="140"
-                     MinHeight="24"
-                     Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                     Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                     MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
-                     MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=220}"
-                     FontFamily="Consolas"
-                     FontSize="11"
-                     IsReadOnly="True"
-                     VerticalScrollBarVisibility="Auto"
-                     Text="{Binding FormattedValue, Mode=OneWay}" />
+            <!-- Two-column rows: a right-aligned index gutter with a separator
+                 rule, then the value. A retemplated ListBox supplies scrolling
+                 AND row virtualization (an ItemsControl in a ScrollViewer
+                 would realize every row of a 100k-item list). -->
+            <Border x:Name="WatchListBox"
+                    Grid.Row="1"
+                    Background="{StaticResource Dyc.InputBackgroundBrush}"
+                    BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="6,3"
+                    MinWidth="140"
+                    MinHeight="24"
+                    Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                    Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                    MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
+                    MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=220}">
+                <ListBox ItemsSource="{Binding Entries}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{StaticResource Dyc.TextBrush}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0"
+                                        BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                                        BorderThickness="0,0,1,0"
+                                        Padding="0,0,6,0"
+                                        Margin="0,0,6,0"
+                                        Visibility="{Binding HasIndex, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <TextBlock Text="{Binding Index}"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               MinWidth="22"
+                                               TextAlignment="Right"
+                                               Foreground="{StaticResource Dyc.AccentBrush}" />
+                                </Border>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Text}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           Foreground="{StaticResource Dyc.TextBrush}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
             <views:SizeGripThumb Grid.Row="2"
                                  HorizontalAlignment="Right"
                                  Width="14"
@@ -1059,6 +1158,90 @@
         </StackPanel>
     </DataTemplate>
 
+    <!-- Watch Image: renders the picture at the incoming file path inline.
+         The (path, version) MultiBinding reloads the bitmap when a run
+         overwrites the same file; the size grip resizes like the Watch nodes. -->
+    <DataTemplate x:Key="NodeBody.WatchImageNode">
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0"
+                    Background="{StaticResource Dyc.InputBackgroundBrush}"
+                    BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="3">
+                <Grid>
+                    <Image x:Name="WatchImageBox"
+                           Stretch="Uniform"
+                           MinWidth="160"
+                           MinHeight="60"
+                           Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                           Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
+                           MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=320}"
+                           MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=260}"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Source>
+                            <MultiBinding Converter="{StaticResource Dyc.ImagePathToSource}">
+                                <Binding Path="ImagePath" />
+                                <Binding Path="ImageVersion" />
+                            </MultiBinding>
+                        </Image.Source>
+                    </Image>
+                    <TextBlock x:Name="NoImageHint"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="12,20"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               MaxWidth="200"
+                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Text="Wire an image path in and run — the picture shows here."
+                               Visibility="Collapsed" />
+                </Grid>
+            </Border>
+            <TextBlock Grid.Row="1"
+                       Margin="1,3,1,0"
+                       FontSize="10"
+                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       TextTrimming="CharacterEllipsis"
+                       MaxWidth="320"
+                       Text="{Binding FileName}"
+                       ToolTip="{Binding ImagePath}"
+                       Visibility="{Binding HasImage, Converter={StaticResource Dyc.BoolToVisibility}}" />
+            <views:SizeGripThumb Grid.Row="2"
+                                 HorizontalAlignment="Right"
+                                 Width="14"
+                                 Height="12"
+                                 Margin="0,2,0,0"
+                                 ToolTip="Drag to resize"
+                                 TargetElement="{Binding ElementName=WatchImageBox}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 MinTargetWidth="160"
+                                 MinTargetHeight="60">
+                <views:SizeGripThumb.Template>
+                    <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
+                        <Grid Background="Transparent">
+                            <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
+                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  StrokeThickness="1.5" />
+                        </Grid>
+                    </ControlTemplate>
+                </views:SizeGripThumb.Template>
+            </views:SizeGripThumb>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding HasImage}" Value="False">
+                <Setter TargetName="NoImageHint" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
     <!-- ===== Canvas item templates (implicit, picked by view-model type) ===== -->
     <DataTemplate DataType="{x:Type vm:NodeViewModel}">
         <StackPanel>
@@ -1158,7 +1341,9 @@
                 </nodify:Node>
             </Border>
             <!-- Dynamo-style value preview bubble (global toolbar toggle +
-                 per-node "Show Preview" pin; renders after a run). -->
+                 per-node "Show Preview" pin; renders after a run). When the
+                 summary truncates a list, clicking the bubble swaps in the
+                 full, scrollable item list; clicking again collapses. -->
             <Border x:Name="PreviewBubble"
                     Margin="8,4,8,0"
                     HorizontalAlignment="Center"
@@ -1169,15 +1354,49 @@
                     Background="{StaticResource Dyc.PanelBrush}"
                     BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
                     Visibility="{Binding IsPreviewVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
-                <TextBlock FontSize="10"
-                           FontFamily="Consolas"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                           TextWrapping="Wrap"
-                           Text="{Binding PreviewText}"
-                           ToolTip="{Binding PreviewText}" />
+                <Border.InputBindings>
+                    <MouseBinding Gesture="LeftClick" Command="{Binding TogglePreviewExpandCommand}" />
+                </Border.InputBindings>
+                <StackPanel>
+                    <TextBlock x:Name="PreviewSummary"
+                               FontSize="10"
+                               FontFamily="Consolas"
+                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               TextWrapping="Wrap"
+                               Text="{Binding PreviewText}"
+                               ToolTip="{Binding PreviewText}" />
+                    <TextBox FontSize="10"
+                             FontFamily="Consolas"
+                             Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             MaxHeight="240"
+                             VerticalScrollBarVisibility="Auto"
+                             Text="{Binding ExpandedPreviewText, Mode=OneWay}"
+                             Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <TextBlock FontSize="9"
+                               Margin="0,2,0,0"
+                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Text="▸ click to show all items"
+                               Visibility="{Binding ShowExpandHint, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <TextBlock FontSize="9"
+                               Margin="0,2,0,0"
+                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Text="▾ click to collapse"
+                               Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                </StackPanel>
             </Border>
         </StackPanel>
         <DataTemplate.Triggers>
+            <!-- The expanded item list replaces the one-line summary. -->
+            <DataTrigger Binding="{Binding IsPreviewExpanded}" Value="True">
+                <Setter TargetName="PreviewSummary" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding HasMorePreview}" Value="True">
+                <Setter TargetName="PreviewBubble" Property="Cursor" Value="Hand" />
+            </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Warning">
                 <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.WarningBrush}" />
             </DataTrigger>

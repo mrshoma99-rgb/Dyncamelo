@@ -516,6 +516,42 @@ public class LibraryViewModel : ObservableObject
 
     // ----- searching -----------------------------------------------------------
 
+    /// <summary>
+    /// Ranks the library against a search text and returns the best hits,
+    /// without touching the panel's own search state. Used by the canvas
+    /// quick-search popup (Space bar).
+    /// </summary>
+    /// <param name="searchText">Raw search text (empty returns no hits).</param>
+    /// <param name="maxResults">Cap on the number of hits returned.</param>
+    public List<LibraryEntryViewModel> QuickSearch(string searchText, int maxResults)
+    {
+        var results = new List<LibraryEntryViewModel>();
+        var tokens = LibrarySearchText.Tokenize(searchText);
+        if (tokens.Length == 0 || maxResults <= 0)
+        {
+            return results;
+        }
+
+        var hits = new List<KeyValuePair<int, LibraryEntryViewModel>>();
+        foreach (var entry in _allEntries)
+        {
+            int rank = entry.MatchRank(tokens);
+            if (rank >= 0)
+            {
+                hits.Add(new KeyValuePair<int, LibraryEntryViewModel>(rank, entry));
+            }
+        }
+
+        hits.Sort(CompareHits);
+        int shown = Math.Min(hits.Count, maxResults);
+        for (int i = 0; i < shown; i++)
+        {
+            results.Add(hits[i].Value);
+        }
+
+        return results;
+    }
+
     private void OnSearchTimerTick(object? sender, EventArgs e)
     {
         _searchTimer.Stop();

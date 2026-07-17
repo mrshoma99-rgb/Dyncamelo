@@ -757,6 +757,115 @@
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
 
+            <!-- Quick node search (Space over the canvas): type, ↑/↓ to pick,
+                 Enter inserts at the spot the cursor was on when it opened. -->
+            <Border Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="0,42,0,0"
+                    Width="380"
+                    Background="{StaticResource Dyc.PanelBrush}"
+                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="8"
+                    Panel.ZIndex="900"
+                    Visibility="{Binding IsQuickSearchOpen, Converter={StaticResource Dyc.BoolToVisibility}}"
+                    IsKeyboardFocusWithinChanged="OnQuickSearchFocusChanged">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top">
+                        <TextBox x:Name="QuickSearchBox"
+                                 FontSize="13"
+                                 Style="{StaticResource Dyc.TextBox}"
+                                 Padding="26,4,8,4"
+                                 Text="{Binding QuickSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 PreviewKeyDown="OnQuickSearchBoxKeyDown" />
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              HorizontalAlignment="Left" VerticalAlignment="Center"
+                              Margin="7,0,0,0"
+                              IsHitTestVisible="False"
+                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.Search}" />
+                    </Grid>
+                    <TextBlock DockPanel.Dock="Top"
+                               Margin="2,5,2,3"
+                               FontSize="10"
+                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Text="↑↓ choose · Enter inserts the node · Esc closes" />
+                    <ListBox x:Name="QuickSearchList"
+                             MaxHeight="300"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             FontSize="13"
+                             Foreground="{StaticResource Dyc.TextBrush}"
+                             ItemsSource="{Binding QuickSearchResults}"
+                             SelectedItem="{Binding QuickSearchSelected, Mode=TwoWay}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             PreviewMouseLeftButtonUp="OnQuickSearchListClick">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Padding" Value="6,3" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <Border x:Name="Chrome"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    BorderThickness="1,0,0,0"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel ToolTipService.ShowDuration="30000"
+                                            ToolTipService.InitialShowDelay="400">
+                                    <StackPanel.ToolTip>
+                                        <ToolTip MaxWidth="380">
+                                            <StackPanel Margin="2">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding Description}"
+                                                           Margin="0,6,0,0"
+                                                           TextWrapping="Wrap"
+                                                           Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                <TextBlock Text="{Binding Signature}"
+                                                           Margin="0,6,0,0"
+                                                           FontStyle="Italic"
+                                                           Opacity="0.85"
+                                                           TextWrapping="Wrap"
+                                                           Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </StackPanel.ToolTip>
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Category}"
+                                               FontSize="10"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
             <!-- Busy overlay over the canvas. Graph runs are synchronous on the UI
                  thread (Navisworks nodes must run on the host's main thread), so
                  this appears just before the thread blocks to signal "working",

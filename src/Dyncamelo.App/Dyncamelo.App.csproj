@@ -74,6 +74,9 @@
     <ItemGroup>
       <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.App.dll;$(TargetDir)Dyncamelo.App.pdb" />
       <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.Core.dll;$(TargetDir)Dyncamelo.Nodes.dll;$(TargetDir)Dyncamelo.Navisworks.dll;$(TargetDir)Dyncamelo.UI.dll" />
+      <!-- XML documentation files ride along: the node loader reads them at
+           run time to give zero-touch ports their tooltip descriptions. -->
+      <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.Core.xml;$(TargetDir)Dyncamelo.Nodes.xml;$(TargetDir)Dyncamelo.Navisworks.xml" />
       <PluginLayoutFiles Include="$(TargetDir)Nodify.dll;$(TargetDir)Newtonsoft.Json.dll" />
       <!-- Vendored BIMCamel IFC exporter engine (copied local via Dyncamelo.Navisworks' Private reference)
            — powers the Export.ToIfc nodes; must ship beside the plugin DLLs. Keep in sync with release.yml. -->

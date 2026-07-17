@@ -249,6 +249,11 @@ public static class AssemblyNodeLoader
         var signature = GetFunctionSignature(method);
         var assemblyName = type.Assembly.GetName().Name ?? string.Empty;
 
+        // XML documentation shipped next to the assembly supplies port
+        // descriptions (and a summary fallback) for free — every node pack in
+        // this solution compiles with GenerateDocumentationFile on.
+        var docs = XmlDocumentation.ForMethod(method);
+
         var category = ResolveCategory(method, type, assemblyName);
         var name = method.GetCustomAttribute<NodeNameAttribute>()?.Name ?? type.Name + "." + method.Name;
         var definition = new NodeDefinition(signature, assemblyName, method)
@@ -258,14 +263,15 @@ public static class AssemblyNodeLoader
             Function = ResolveFunction(method, name, category),
             Description = method.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? type.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
+                ?? docs?.Summary
                 ?? string.Empty,
             SearchTags = method.GetCustomAttribute<NodeSearchTagsAttribute>()?.Tags ?? Array.Empty<string>(),
             Aliases = method.GetCustomAttribute<NodeAliasesAttribute>()?.Aliases ?? Array.Empty<string>(),
-            Inputs = method.GetParameters().Select(CreateInputDescriptor).ToList(),
+            Inputs = method.GetParameters().Select(p => CreateInputDescriptor(p, docs)).ToList(),
         };
 
         definition.MultiReturnKeys = ResolveMultiReturnKeys(method);
-        definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys);
+        definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys, docs);
         return definition;
     }
 
@@ -383,9 +389,15 @@ public static class AssemblyNodeLoader
         return false;
     }
 
-    private static PortDescriptor CreateInputDescriptor(ParameterInfo parameter)
+    private static PortDescriptor CreateInputDescriptor(ParameterInfo parameter, XmlDocumentation.MemberDoc? docs)
     {
         var descriptor = new PortDescriptor(parameter.Name ?? "arg", parameter.ParameterType);
+
+        if (docs != null && parameter.Name != null &&
+            docs.Parameters.TryGetValue(parameter.Name, out var paramDoc))
+        {
+            descriptor.Description = paramDoc;
+        }
 
         var choices = parameter.GetCustomAttribute<NodeChoicesAttribute>()?.Choices;
         if (choices != null && choices.Length > 0)
@@ -448,7 +460,8 @@ public static class AssemblyNodeLoader
         return attribute.Keys;
     }
 
-    private static IReadOnlyList<PortDescriptor> CreateOutputDescriptors(MethodInfo method, IReadOnlyList<string>? multiReturnKeys)
+    private static IReadOnlyList<PortDescriptor> CreateOutputDescriptors(
+        MethodInfo method, IReadOnlyList<string>? multiReturnKeys, XmlDocumentation.MemberDoc? docs)
     {
         if (multiReturnKeys != null)
         {
@@ -464,7 +477,10 @@ public static class AssemblyNodeLoader
         }
 
         var name = method.ReturnParameter?.GetCustomAttribute<NodeNameAttribute>()?.Name ?? "result";
-        return new List<PortDescriptor> { new PortDescriptor(name, method.ReturnType) };
+        return new List<PortDescriptor>
+        {
+            new PortDescriptor(name, method.ReturnType) { Description = docs?.Returns ?? string.Empty },
+        };
     }
 
     private static string GetMangledTypeName(Type type)
