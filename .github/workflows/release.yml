@@ -185,6 +185,9 @@ jobs:
           Compress-Archive -Path "staging/*" -DestinationPath $zip
           $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "$zip.sha256" -Value "$hash  $zip" -NoNewline
+          # Stable-named checksum to pair with the stable-named zip, so
+          # releases/latest/download/Dyncamelo-navisworks.zip.sha256 always resolves.
+          Set-Content -Path "Dyncamelo-navisworks.zip.sha256" -Value "$hash  Dyncamelo-navisworks.zip" -NoNewline
           $setupHash = (Get-FileHash "DyncameloSetup.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path "DyncameloSetup.exe.sha256" -Value "$setupHash  DyncameloSetup.exe" -NoNewline
           Add-Content -Path $env:GITHUB_ENV -Value "ZIP=$zip"
@@ -224,7 +227,8 @@ jobs:
           Set-Content -Path notes.md -Value $notes
           # Stable-named copy so releases/latest/download/<name> URLs never change.
           Copy-Item $env:ZIP "Dyncamelo-navisworks.zip"
-          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" "Dyncamelo-navisworks.zip" `
+          gh release create $env:VERSION $env:ZIP "$env:ZIP.sha256" `
+            "Dyncamelo-navisworks.zip" "Dyncamelo-navisworks.zip.sha256" `
             "DyncameloSetup.exe" "DyncameloSetup.exe.sha256" `
             --target $env:GITHUB_SHA `
             --title "Dyncamelo $env:VERSION (Navisworks 2024-2026)" `
@@ -251,12 +255,12 @@ jobs:
           path: relay/
           retention-days: 7
 
-      # Optional full automation: if a fine-grained PAT with contents:write on
-      # mrshoma99-rgb/bimcamel is stored as the SITE_REPO_TOKEN secret, every
-      # release updates the website's static download asset automatically
-      # (bimcamel.com/downloads/Dyncamelo-navisworks.zip). Without the
-      # secret this step is skipped and the site asset is updated manually
-      # from the relay artifact.
+      # Optional: the website's download buttons now link straight to
+      # releases/latest/download/... on this (public) repo, so this step is no
+      # longer needed for the binaries. It still refreshes the site's metadata
+      # (dyncamelo-latest.json, dyncamelo-nodes.json node catalog) when a
+      # fine-grained PAT with contents:write on mrshoma99-rgb/bimcamel is
+      # stored as the SITE_REPO_TOKEN secret; without the secret it skips.
       - name: Update website download asset (bimcamel repo)
         if: always() && env.VERSION != ''
         env:
