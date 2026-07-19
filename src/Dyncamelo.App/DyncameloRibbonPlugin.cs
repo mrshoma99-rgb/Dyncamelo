@@ -22,8 +22,10 @@ namespace Dyncamelo.App;
     ToolTip = "Open the Dyncamelo node editor panel")]
 [Command("ID_Button_DyncameloAbout",
     DisplayName = "About",
-    Icon = "Resources\\info_16.png",
-    LargeIcon = "Resources\\info_32.png",
+    // The camel logo, same as the IFC exporter's About button — every BIMCamel
+    // tool uses the brand mark for About (camel_*.png already ships in Resources).
+    Icon = "Resources\\camel_16.png",
+    LargeIcon = "Resources\\camel_32.png",
     ToolTip = "About Dyncamelo")]
 public class DyncameloRibbonPlugin : CommandHandlerPlugin
 {
