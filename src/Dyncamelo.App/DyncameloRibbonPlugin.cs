@@ -50,6 +50,8 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
                     "viewpoints, clash, TimeLiner and more — no code.\n\n" +
                     "Visit bimcamel.com for guides, the node library and updates:\n" +
                     "https://www.bimcamel.com/plugins/dyncamelo\n\n" +
+                    "Also from BIMCamel: the free IFC Exporter plug-in (fast Navisworks → IFC):\n" +
+                    "https://www.bimcamel.com/Export-Navisworks-to-Ifc\n\n" +
                     "Version " + versionText + "   ·   Part of the BIMCamel toolset");
                 return 0;
             }

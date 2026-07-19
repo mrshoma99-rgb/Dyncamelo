@@ -57,6 +57,10 @@ public class DyncameloDockPanePlugin : DockPanePlugin
             Dock = DockStyle.Fill,
         };
         host.CreateControl();
+
+        // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists.
+        UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action));
+
         return host;
     }
 

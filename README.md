@@ -55,6 +55,16 @@ Earlier waves: v0.4 instant library search & curated samples, v0.3 "plugin parit
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
 - **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
+## Part of the BIMCamel toolset
+
+- **[BIMCamel IFC Exporter](https://github.com/mrshoma99-rgb/bimcamel-ifc-exporter)** — free, fast
+  **Navisworks → IFC** export (IFC4 / IFC2x3): streaming engine, geometry instancing, property
+  sets, classifications and georeferencing. Website:
+  [bimcamel.com/Export-Navisworks-to-Ifc](https://www.bimcamel.com/Export-Navisworks-to-Ifc).
+  Both plug-ins install the same way and share the **BIMCamel** ribbon tab when installed together.
+- **[bimcamel.com](https://www.bimcamel.com)** — browser-based IFC tools (validate, compare,
+  upgrade / downgrade schema…).
+
 ## Architecture at a glance
 
 ```mermaid
