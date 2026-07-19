@@ -33,26 +33,15 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
     /// <inheritdoc />
     public override int ExecuteCommand(string commandId, params string[] parameters)
     {
+        RibbonTabMerger.Install(); // idempotent fallback if the startup plugin didn't load
+
         try
         {
             if (commandId == "ID_Button_DyncameloAbout")
             {
-                // Version comes from the assembly (stamped by Directory.Build.props),
-                // never a hard-coded string — Major.Minor.Build, e.g. "0.5.1".
-                var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                var versionText = version == null
-                    ? "dev"
-                    : version.Major + "." + version.Minor + "." + version.Build;
-
-                ShowInfo(
-                    "Dyncamelo — visual programming for Autodesk Navisworks.\n\n" +
-                    "Wire nodes on a canvas to automate selection, properties, search, " +
-                    "viewpoints, clash, TimeLiner and more — no code.\n\n" +
-                    "Visit bimcamel.com for guides, the node library and updates:\n" +
-                    "https://www.bimcamel.com/plugins/dyncamelo\n\n" +
-                    "Also from BIMCamel: the free IFC Exporter plug-in (fast Navisworks → IFC):\n" +
-                    "https://www.bimcamel.com/Export-Navisworks-to-Ifc\n\n" +
-                    "Version " + versionText + "   ·   Part of the BIMCamel toolset");
+                // The shared BIMCamel About window (same design as the IFC exporter's and the
+                // installer); version comes from the assembly, stamped by Directory.Build.props.
+                AboutDialog.Show();
                 return 0;
             }
 
@@ -111,10 +100,4 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
             message, "Dyncamelo",
             System.Windows.Forms.MessageBoxButtons.OK,
             System.Windows.Forms.MessageBoxIcon.Warning);
-
-    private static void ShowInfo(string message) =>
-        System.Windows.Forms.MessageBox.Show(
-            message, "Dyncamelo",
-            System.Windows.Forms.MessageBoxButtons.OK,
-            System.Windows.Forms.MessageBoxIcon.Information);
 }
