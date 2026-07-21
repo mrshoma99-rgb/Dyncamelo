@@ -2,7 +2,7 @@
   "Dyncamelo": {
     "FormatVersion": 1,
     "MinReaderVersion": 1,
-    "AppVersion": "0.10.0"
+    "AppVersion": "0.19.0"
   },
   "Uuid": "2f29a036da854a8a81c3698c4e2a7792",
   "Name": "Isolated Viewpoints (Loop)",
@@ -342,6 +342,53 @@
         }
       ],
       "Data": {}
+    },
+    {
+      "Id": "4c1de6a2b95f4f27a4b8f0d3c2a91e57",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Then@object,object,object,object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Flow.Then",
+      "X": 850.0,
+      "Y": 170.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after2",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after3",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
     }
   ],
   "Connectors": [
@@ -395,13 +442,6 @@
       "ToPort": "items"
     },
     {
-      "Id": "4d82525b25ab447391f970020eaf7acb",
-      "FromNode": "1b84fac0a93b4405b8ad1659ca54fa6e",
-      "FromPort": "name",
-      "ToNode": "9695eb5a84854dc0a1d7a7910cd442b6",
-      "ToPort": "name"
-    },
-    {
       "Id": "92f25673bacc48939b83799f75267f79",
       "FromNode": "b779259eabec4ca9bc629bb9bd056341",
       "FromPort": "loop",
@@ -421,6 +461,27 @@
       "FromPort": "results",
       "ToNode": "39111b59fafd436e995ad2e78ab5a46d",
       "ToPort": "value"
+    },
+    {
+      "Id": "5a0e12c33f0a4b60a2b3c4d5e6f70801",
+      "FromNode": "1b84fac0a93b4405b8ad1659ca54fa6e",
+      "FromPort": "name",
+      "ToNode": "4c1de6a2b95f4f27a4b8f0d3c2a91e57",
+      "ToPort": "value"
+    },
+    {
+      "Id": "5a0e12c33f0a4b60a2b3c4d5e6f70802",
+      "FromNode": "bcae90d9cfaf42708306fd5e74ccf477",
+      "FromPort": "done",
+      "ToNode": "4c1de6a2b95f4f27a4b8f0d3c2a91e57",
+      "ToPort": "after"
+    },
+    {
+      "Id": "5a0e12c33f0a4b60a2b3c4d5e6f70803",
+      "FromNode": "4c1de6a2b95f4f27a4b8f0d3c2a91e57",
+      "FromPort": "value",
+      "ToNode": "9695eb5a84854dc0a1d7a7910cd442b6",
+      "ToPort": "name"
     }
   ],
   "Notes": [
@@ -432,7 +493,7 @@
     },
     {
       "Id": "146e9661cb0240d1b028f54eea7c7765",
-      "Text": "Per item: isolate it, zoom to it, then save a viewpoint named after it (with the isolation baked in). Loop.Collect gathers one viewpoint per item. Body nodes run in dependency order, then top-to-bottom \u2014 chain them (isolate -> zoom) where the data allows to pin the sequence.",
+      "Text": "Per item: isolate it, zoom to it, THEN save a viewpoint named after it (with the isolation baked in). Ordering: a node is only guaranteed to run after the nodes it takes data from. The isolate -> zoom chain rides the items pass-through, and Flow.Then makes the save wait for the zoom's 'done' \u2014 wire side-effects together like this to pin their order. Independent leftovers run top-to-bottom, left-to-right as placed on the canvas.",
       "X": 720,
       "Y": 260
     }

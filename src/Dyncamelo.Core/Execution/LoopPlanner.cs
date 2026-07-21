@@ -40,23 +40,6 @@ internal sealed class LoopRegion
         yield return Collect;
     }
 
-    /// <summary>Lowest creation index across the region, for deterministic scheduling.</summary>
-    public int MinCreationIndex
-    {
-        get
-        {
-            int min = Item.CreationIndex;
-            foreach (var node in AllNodes())
-            {
-                if (node.CreationIndex < min)
-                {
-                    min = node.CreationIndex;
-                }
-            }
-
-            return min;
-        }
-    }
 }
 
 /// <summary>The loops discovered in a graph, plus any structural problems found.</summary>
@@ -232,7 +215,11 @@ internal static class LoopPlanner
         }
     }
 
-    /// <summary>Kahn's algorithm over the body subset, counting only intra-body edges, tie-broken by creation index.</summary>
+    /// <summary>
+    /// Kahn's algorithm over the body subset, counting only intra-body edges,
+    /// tie-broken by canvas position (<see cref="ExecutionOrder"/>) so
+    /// independent side-effect nodes run in the order they appear on screen.
+    /// </summary>
     private static List<NodeModel> TopologicalOrder(GraphModel graph, HashSet<NodeModel> nodes)
     {
         var inDegree = nodes.ToDictionary(n => n, _ => 0);
@@ -252,7 +239,7 @@ internal static class LoopPlanner
             var next = ready[0];
             foreach (var candidate in ready)
             {
-                if (candidate.CreationIndex < next.CreationIndex)
+                if (ExecutionOrder.Compare(candidate, next) < 0)
                 {
                     next = candidate;
                 }
@@ -275,7 +262,7 @@ internal static class LoopPlanner
         // Any leftover (cycle within the body — shouldn't happen for a valid DAG) is appended deterministically.
         if (order.Count != nodes.Count)
         {
-            foreach (var node in nodes.OrderBy(n => n.CreationIndex))
+            foreach (var node in nodes.OrderBy(n => n, Comparer<NodeModel>.Create(ExecutionOrder.Compare)))
             {
                 if (!order.Contains(node))
                 {

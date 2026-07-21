@@ -356,10 +356,10 @@ public class GraphEngine
 
     /// <summary>
     /// Orders execution units — standalone nodes and whole loop regions — in
-    /// dependency order (Kahn's algorithm, tie-broken by creation index). A region
-    /// collapses to a single unit so its external inputs run before it and its
-    /// results feed downstream after it. Reduces to a plain node topological sort
-    /// when the graph has no loops.
+    /// dependency order (Kahn's algorithm, tie-broken by canvas position via
+    /// <see cref="ExecutionOrder"/>). A region collapses to a single unit so its
+    /// external inputs run before it and its results feed downstream after it.
+    /// Reduces to a plain node topological sort when the graph has no loops.
     /// </summary>
     private static List<object> OrderUnits(GraphModel graph, LoopPlan plan)
     {
@@ -389,7 +389,7 @@ public class GraphEngine
             var next = ready[0];
             foreach (var candidate in ready)
             {
-                if (UnitIndex(candidate) < UnitIndex(next))
+                if (ExecutionOrder.Compare(UnitNode(candidate), UnitNode(next)) < 0)
                 {
                     next = candidate;
                 }
@@ -417,8 +417,9 @@ public class GraphEngine
         return order;
     }
 
-    private static int UnitIndex(object unit) =>
-        unit is LoopRegion region ? region.MinCreationIndex : ((NodeModel)unit).CreationIndex;
+    /// <summary>A unit's representative for ordering: a region ranks where its item boundary sits.</summary>
+    private static NodeModel UnitNode(object unit) =>
+        unit is LoopRegion region ? region.Item : (NodeModel)unit;
 
     /// <summary>Frozen nodes plus everything transitively downstream of them.</summary>
     private static HashSet<NodeModel> CollectFrozenSet(GraphModel graph)
