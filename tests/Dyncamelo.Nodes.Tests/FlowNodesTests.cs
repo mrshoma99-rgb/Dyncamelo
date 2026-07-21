@@ -62,7 +62,7 @@ public class FlowNodesTests
     }
 
     [Fact]
-    public void Then_ForcesSideEffectOrder_EvenAgainstCanvasPosition()
+    public void Then_ForcesSideEffectOrder_AgainstTheEnginesTieBreak()
     {
         var registry = NodeRegistry.CreateDefault();
         NodeLibrary.RegisterAll(registry);
@@ -70,21 +70,20 @@ public class FlowNodesTests
         var log = new List<string>();
         var graph = new GraphModel();
 
-        var source = new RecordingNode(log, "Source") { X = 0, Y = 0 };
+        var source = new RecordingNode(log, "Source");
         graph.AddNode(source);
 
-        // The prerequisite sits at the BOTTOM of the canvas; the consumer at
-        // the top. Canvas order alone would run the consumer first — the
-        // Flow.Then wire must override it.
-        var prerequisite = new RecordingNode(log, "Section") { X = 100, Y = 1000 };
-        var consumer = new RecordingNode(log, "Save") { X = 400, Y = 0 };
-        graph.AddNode(prerequisite);
+        // Adversarial creation order: the save-side chain (consumer, then the
+        // Then node) is created BEFORE the prerequisite, so the engine's
+        // creation-index tie-break alone would run the save first. The
+        // Flow.Then 'after' wire must turn the ordering into a hard data
+        // dependency that wins regardless.
+        var consumer = new RecordingNode(log, "Save");
         graph.AddNode(consumer);
-
         var then = registry.CreateZeroTouchNode("Dyncamelo.Nodes.FlowNodes.Then@object,object,object,object")!;
-        then.X = 250;
-        then.Y = 0;
         graph.AddNode(then);
+        var prerequisite = new RecordingNode(log, "Section");
+        graph.AddNode(prerequisite);
 
         Assert.True(graph.Connect(source.OutPorts[0], prerequisite.InPorts[0]).Success);
         Assert.True(graph.Connect(source.OutPorts[0], then.InPorts[0]).Success);          // value

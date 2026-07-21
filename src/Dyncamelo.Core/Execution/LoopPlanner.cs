@@ -40,6 +40,23 @@ internal sealed class LoopRegion
         yield return Collect;
     }
 
+    /// <summary>Lowest creation index across the region, for deterministic scheduling.</summary>
+    public int MinCreationIndex
+    {
+        get
+        {
+            int min = Item.CreationIndex;
+            foreach (var node in AllNodes())
+            {
+                if (node.CreationIndex < min)
+                {
+                    min = node.CreationIndex;
+                }
+            }
+
+            return min;
+        }
+    }
 }
 
 /// <summary>The loops discovered in a graph, plus any structural problems found.</summary>
@@ -217,8 +234,10 @@ internal static class LoopPlanner
 
     /// <summary>
     /// Kahn's algorithm over the body subset, counting only intra-body edges,
-    /// tie-broken by canvas position (<see cref="ExecutionOrder"/>) so
-    /// independent side-effect nodes run in the order they appear on screen.
+    /// tie-broken by creation index. Ties between independent body nodes are
+    /// arbitrary but stable — the order of unwired side-effect nodes is NOT a
+    /// contract (same policy as Grasshopper/Dynamo); pin it with a data
+    /// dependency (chain pass-through outputs, or Flow.Then).
     /// </summary>
     private static List<NodeModel> TopologicalOrder(GraphModel graph, HashSet<NodeModel> nodes)
     {
@@ -239,7 +258,7 @@ internal static class LoopPlanner
             var next = ready[0];
             foreach (var candidate in ready)
             {
-                if (ExecutionOrder.Compare(candidate, next) < 0)
+                if (candidate.CreationIndex < next.CreationIndex)
                 {
                     next = candidate;
                 }
@@ -262,7 +281,7 @@ internal static class LoopPlanner
         // Any leftover (cycle within the body — shouldn't happen for a valid DAG) is appended deterministically.
         if (order.Count != nodes.Count)
         {
-            foreach (var node in nodes.OrderBy(n => n, Comparer<NodeModel>.Create(ExecutionOrder.Compare)))
+            foreach (var node in nodes.OrderBy(n => n.CreationIndex))
             {
                 if (!order.Contains(node))
                 {

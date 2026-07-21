@@ -356,10 +356,14 @@ public class GraphEngine
 
     /// <summary>
     /// Orders execution units — standalone nodes and whole loop regions — in
-    /// dependency order (Kahn's algorithm, tie-broken by canvas position via
-    /// <see cref="ExecutionOrder"/>). A region collapses to a single unit so its
-    /// external inputs run before it and its results feed downstream after it.
-    /// Reduces to a plain node topological sort when the graph has no loops.
+    /// dependency order (Kahn's algorithm). Ties between independent units are
+    /// broken by creation index: arbitrary but stable, the same policy as
+    /// Grasshopper's document order and Dynamo's unspecified branch order.
+    /// Users who need a specific side-effect order express it as a data
+    /// dependency (chain pass-through outputs, or Flow.Then). A region
+    /// collapses to a single unit so its external inputs run before it and its
+    /// results feed downstream after it. Reduces to a plain node topological
+    /// sort when the graph has no loops.
     /// </summary>
     private static List<object> OrderUnits(GraphModel graph, LoopPlan plan)
     {
@@ -389,7 +393,7 @@ public class GraphEngine
             var next = ready[0];
             foreach (var candidate in ready)
             {
-                if (ExecutionOrder.Compare(UnitNode(candidate), UnitNode(next)) < 0)
+                if (UnitIndex(candidate) < UnitIndex(next))
                 {
                     next = candidate;
                 }
@@ -417,9 +421,8 @@ public class GraphEngine
         return order;
     }
 
-    /// <summary>A unit's representative for ordering: a region ranks where its item boundary sits.</summary>
-    private static NodeModel UnitNode(object unit) =>
-        unit is LoopRegion region ? region.Item : (NodeModel)unit;
+    private static int UnitIndex(object unit) =>
+        unit is LoopRegion region ? region.MinCreationIndex : ((NodeModel)unit).CreationIndex;
 
     /// <summary>Frozen nodes plus everything transitively downstream of them.</summary>
     private static HashSet<NodeModel> CollectFrozenSet(GraphModel graph)

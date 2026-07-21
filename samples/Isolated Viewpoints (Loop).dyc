@@ -493,7 +493,7 @@
     },
     {
       "Id": "146e9661cb0240d1b028f54eea7c7765",
-      "Text": "Per item: isolate it, zoom to it, THEN save a viewpoint named after it (with the isolation baked in). Ordering: a node is only guaranteed to run after the nodes it takes data from. The isolate -> zoom chain rides the items pass-through, and Flow.Then makes the save wait for the zoom's 'done' \u2014 wire side-effects together like this to pin their order. Independent leftovers run top-to-bottom, left-to-right as placed on the canvas.",
+      "Text": "Per item: isolate it, zoom to it, THEN save a viewpoint named after it (with the isolation baked in). Ordering rule: a node is only guaranteed to run after the nodes it takes data from \u2014 between unwired side-effect nodes the engine picks an arbitrary (stable) order you should never rely on, same as Dynamo/Grasshopper. Pin the order with data: chain pass-through outputs (isolate -> zoom here), or wire a 'done' output into Flow.Then's 'after' like the save does below.",
       "X": 720,
       "Y": 260
     }
