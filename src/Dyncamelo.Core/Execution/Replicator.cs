@@ -33,26 +33,48 @@ internal static class Replicator
         var declaredRanks = new int[node.InPorts.Count];
         var minimumRanks = new int[node.InPorts.Count];
         var declaredTypes = new Type[node.InPorts.Count];
+        bool flatten = false;
         for (int i = 0; i < node.InPorts.Count; i++)
         {
-            declaredTypes[i] = node.InPorts[i].DeclaredType;
-            declaredRanks[i] = GetEffectiveRank(node.InPorts[i]);
+            var port = node.InPorts[i];
+            declaredTypes[i] = port.DeclaredType;
+            declaredRanks[i] = GetEffectiveRank(port);
             minimumRanks[i] = GetMinimumRank(declaredTypes[i]);
+
+            // Dynamo semantics: with levels active, the outer (replicated)
+            // structure flattens into one list unless "keep list structure"
+            // is ticked. Ports without levels keep today's nesting untouched.
+            flatten |= HasActiveLevels(port) && !port.KeepListStructure;
         }
 
         var lacing = node.Lacing == LacingMode.Auto ? LacingMode.Shortest : node.Lacing;
-        return Invoke(node, args, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount);
+        var outputs = Invoke(node, args, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out _);
+        return outputs;
     }
 
     /// <summary>
-    /// Declared rank of an input port. All rank decisions route through here so
-    /// List@Level can later override rank inference as a purely local change.
+    /// Rank of the chunk an input port consumes. Levels (Dynamo's List@Level)
+    /// override the declared-type inference: levels count from the INNERMOST
+    /// of the incoming list — L1 = individual items (rank 0), L2 = lists of
+    /// items (rank 1), … — so a port keeps targeting the same depth even when
+    /// upstream nesting changes. Also lets object-typed ports (which never
+    /// replicate by default) replicate at a chosen depth.
     /// </summary>
     /// <param name="port">The input port.</param>
     internal static int GetEffectiveRank(PortModel port)
     {
-        // Future: if (port.UseLevels) { ... interpret port.Level ... }
+        if (HasActiveLevels(port))
+        {
+            return port.Level - 1;
+        }
+
         return GetDeclaredRank(port.DeclaredType);
+    }
+
+    /// <summary>True when the port's List@Level setting is on and valid.</summary>
+    internal static bool HasActiveLevels(PortModel port)
+    {
+        return port.UseLevels && port.Level >= 1;
     }
 
     /// <summary>
@@ -132,7 +154,9 @@ internal static class Replicator
         int[] minimumRanks,
         LacingMode lacing,
         EvaluationContext context,
-        int outCount)
+        int outCount,
+        bool flatten,
+        out bool didReplicate)
     {
         // Which arguments still carry excess rank at this nesting level?
         var replicated = new List<int>();
@@ -148,9 +172,11 @@ internal static class Replicator
 
         if (replicated.Count == 0)
         {
+            didReplicate = false;
             return InvokeScalar(node, args, declaredTypes, minimumRanks, context, outCount);
         }
 
+        didReplicate = true;
         var accumulators = NewAccumulators(outCount);
 
         if (lacing == LacingMode.CrossProduct)
@@ -162,7 +188,8 @@ internal static class Replicator
             {
                 var child = (object?[])args.Clone();
                 child[replicated[0]] = element;
-                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount));
+                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out var childReplicated);
+                Collect(accumulators, childOutputs, splice: flatten && childReplicated);
             }
         }
         else
@@ -192,7 +219,8 @@ internal static class Replicator
                     child[index] = list[elementIndex];
                 }
 
-                Collect(accumulators, Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount));
+                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out var childReplicated);
+                Collect(accumulators, childOutputs, splice: flatten && childReplicated);
             }
         }
 
@@ -272,11 +300,26 @@ internal static class Replicator
         return accumulators;
     }
 
-    private static void Collect(List<object?>[] accumulators, object?[] childOutputs)
+    /// <summary>
+    /// Adds one replication step's outputs to the accumulators. With
+    /// <paramref name="splice"/> (levels active, "keep list structure" off) a
+    /// child that itself replicated has its result list merged element-wise
+    /// instead of nested — collapsing all replication levels into one flat
+    /// list, per Dynamo's List@Level default.
+    /// </summary>
+    private static void Collect(List<object?>[] accumulators, object?[] childOutputs, bool splice = false)
     {
         for (int j = 0; j < accumulators.Length; j++)
         {
-            accumulators[j].Add(j < childOutputs.Length ? childOutputs[j] : null);
+            var value = j < childOutputs.Length ? childOutputs[j] : null;
+            if (splice && value is List<object?> nested)
+            {
+                accumulators[j].AddRange(nested);
+            }
+            else
+            {
+                accumulators[j].Add(value);
+            }
         }
     }
 }

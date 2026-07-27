@@ -28,6 +28,7 @@ public class ConnectorViewModel : ObservableObject
         DisconnectCommand = new RelayCommand(
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
+        SetLevelCommand = new RelayCommand<string>(SetLevel);
     }
 
     /// <summary>Owning node view model.</summary>
@@ -72,6 +73,83 @@ public class ConnectorViewModel : ObservableObject
 
     /// <summary>Removes every wire touching this port (context menu "Disconnect").</summary>
     public ICommand DisconnectCommand { get; }
+
+    // ----- List@Level (Dynamo's @L) --------------------------------------------
+
+    /// <summary>
+    /// Whether this input consumes the incoming list at a chosen level
+    /// (counted from the innermost) instead of its declared rank. Enabling
+    /// defaults to @L2 — "feed me the lists of items" — the most common use.
+    /// </summary>
+    public bool UseLevels
+    {
+        get => Port.UseLevels;
+        set
+        {
+            Port.SetLevels(value, value && Port.Level < 1 ? 2 : Port.Level, Port.KeepListStructure);
+            RaiseLevelsChanged();
+        }
+    }
+
+    /// <summary>The active level (1 = items, 2 = lists of items, …; -1 = off).</summary>
+    public int Level => Port.Level;
+
+    /// <summary>
+    /// With levels on: true preserves the incoming nesting in the output,
+    /// false (the Dynamo default) flattens the replicated levels into one list.
+    /// </summary>
+    public bool KeepListStructure
+    {
+        get => Port.KeepListStructure;
+        set
+        {
+            Port.SetLevels(Port.UseLevels, Port.Level, value);
+            RaiseLevelsChanged();
+        }
+    }
+
+    /// <summary>Selects the level from a menu parameter ("1".."4"); turns levels on.</summary>
+    public ICommand SetLevelCommand { get; }
+
+    /// <summary>Badge text next to the port name ("@L2"), empty while levels are off.</summary>
+    public string LevelLabel => Port.UseLevels && Port.Level >= 1 ? "@L" + Port.Level : string.Empty;
+
+    /// <summary>True when the level badge renders.</summary>
+    public bool HasLevels => LevelLabel.Length > 0;
+
+    /// <summary>True when the active level is 1 (menu check mark).</summary>
+    public bool IsLevel1 => Port.UseLevels && Port.Level == 1;
+
+    /// <summary>True when the active level is 2 (menu check mark).</summary>
+    public bool IsLevel2 => Port.UseLevels && Port.Level == 2;
+
+    /// <summary>True when the active level is 3 (menu check mark).</summary>
+    public bool IsLevel3 => Port.UseLevels && Port.Level == 3;
+
+    /// <summary>True when the active level is 4 (menu check mark).</summary>
+    public bool IsLevel4 => Port.UseLevels && Port.Level == 4;
+
+    private void SetLevel(string? parameter)
+    {
+        if (parameter != null && int.TryParse(parameter, out var level) && level >= 1)
+        {
+            Port.SetLevels(useLevels: true, level, Port.KeepListStructure);
+            RaiseLevelsChanged();
+        }
+    }
+
+    private void RaiseLevelsChanged()
+    {
+        OnPropertyChanged(nameof(UseLevels));
+        OnPropertyChanged(nameof(Level));
+        OnPropertyChanged(nameof(KeepListStructure));
+        OnPropertyChanged(nameof(LevelLabel));
+        OnPropertyChanged(nameof(HasLevels));
+        OnPropertyChanged(nameof(IsLevel1));
+        OnPropertyChanged(nameof(IsLevel2));
+        OnPropertyChanged(nameof(IsLevel3));
+        OnPropertyChanged(nameof(IsLevel4));
+    }
 
     /// <summary>Graph-space position of the connector dot; written by the view.</summary>
     public Point Anchor

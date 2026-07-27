@@ -618,6 +618,31 @@
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                    <Separator />
+                    <!-- Dynamo's List@Level: pick which depth of a nested list
+                         this input consumes (L1 = innermost items). -->
+                    <MenuItem Header="List Levels">
+                        <MenuItem Header="Use Levels"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding UseLevels}" />
+                        <Separator />
+                        <MenuItem Header="@L1 — items"
+                                  Command="{Binding SetLevelCommand}" CommandParameter="1"
+                                  IsChecked="{Binding IsLevel1, Mode=OneWay}" />
+                        <MenuItem Header="@L2 — lists of items"
+                                  Command="{Binding SetLevelCommand}" CommandParameter="2"
+                                  IsChecked="{Binding IsLevel2, Mode=OneWay}" />
+                        <MenuItem Header="@L3"
+                                  Command="{Binding SetLevelCommand}" CommandParameter="3"
+                                  IsChecked="{Binding IsLevel3, Mode=OneWay}" />
+                        <MenuItem Header="@L4"
+                                  Command="{Binding SetLevelCommand}" CommandParameter="4"
+                                  IsChecked="{Binding IsLevel4, Mode=OneWay}" />
+                        <Separator />
+                        <MenuItem Header="Keep list structure"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding KeepListStructure}" />
+                    </MenuItem>
                 </ContextMenu>
             </Setter.Value>
         </Setter>
@@ -629,6 +654,15 @@
                                    Foreground="{StaticResource Dyc.TextBrush}"
                                    FontSize="11"
                                    VerticalAlignment="Center" />
+                        <!-- List@Level badge (right-click the port to change). -->
+                        <TextBlock Text="{Binding LevelLabel}"
+                                   Margin="4,0,0,0"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource Dyc.AccentBrush}"
+                                   ToolTip="This input consumes the incoming list at this level (right-click the port to change). Counted from the innermost: @L1 = items, @L2 = lists of items."
+                                   Visibility="{Binding HasLevels, Converter={StaticResource Dyc.BoolToVisibility}}" />
                         <!-- Inline dropdown for unconnected choice ports (selection
                              levels, clash types, ...); collapsed for every other port. -->
                         <ComboBox Style="{StaticResource Dyc.ComboBox}"

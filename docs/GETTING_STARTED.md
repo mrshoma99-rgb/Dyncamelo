@@ -138,6 +138,15 @@ When a node receives lists on more than one input, its **lacing** setting (right
 | **Longest** | Pair index-by-index, reuse the last item of the shorter list | `[11, 22, 23]` |
 | **Cross-Product** | Every combination (nested result) | `[[11,21,31],[12,22,32]]` |
 
+### List Levels (@L) — choosing what an input consumes
+
+With **nested** lists (groups of groups — e.g. `Proximity.Cluster`'s ladder groups) you sometimes need to tell an input *which depth* to work at. Right-click any **input port → List Levels** (Dynamo users: this is `@L`, with the same rules):
+
+- Levels count **from the innermost**: `@L1` = the individual items, `@L2` = the lists of items, and so on — so the target stays correct even when upstream nesting changes.
+- The node then runs once per chunk at that level; an active port shows an **@L2** badge next to its name.
+- **Keep list structure** (off by default, matching Dynamo) controls the output shape: off flattens the outer levels into one list, on preserves the incoming nesting.
+- Ports that normally swallow a whole list (many Navisworks item inputs) can be *made* to replicate this way — e.g. `@L2` on `ModelItem.CombinedBoundingBox` gives one combined box per group without a loop.
+
 Rules of thumb: parallel lists that belong together (names + item-lists) → **Shortest**; one list against one constant "list of one" → **Longest**; "try everything against everything" (e.g. all colors × all searches) → **Cross-Product**. A small badge on the node shows non-default lacing.
 
 Inputs that already *expect* a list (like `CSV.WriteToFile → rows`) absorb the list whole instead of replicating — port tooltips tell you which kind you are looking at.

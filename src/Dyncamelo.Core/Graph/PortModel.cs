@@ -126,14 +126,42 @@ public class PortModel : INotifyPropertyChanged
         Owner.MarkDirty();
     }
 
-    /// <summary>Reserved for List@Level support (-1 = off). Persisted, not yet interpreted.</summary>
+    /// <summary>
+    /// List@Level target (-1 = off): which level of the incoming nested list
+    /// this port consumes, counted from the INNERMOST — 1 = individual items,
+    /// 2 = lists of items, … Active only while <see cref="UseLevels"/> is on.
+    /// </summary>
     public int Level { get; set; }
 
-    /// <summary>Reserved for List@Level support. Persisted, not yet interpreted.</summary>
+    /// <summary>Enables List@Level on this input (Dynamo's @L feature).</summary>
     public bool UseLevels { get; set; }
 
-    /// <summary>Reserved for List@Level support. Persisted, not yet interpreted.</summary>
+    /// <summary>
+    /// With levels active: true preserves the incoming nesting in the output;
+    /// false (Dynamo's default) flattens the replicated levels into one list.
+    /// </summary>
     public bool KeepListStructure { get; set; }
+
+    /// <summary>
+    /// Sets the List@Level configuration in one step, dirtying the owner so
+    /// the next run applies it (no-op when nothing changes).
+    /// </summary>
+    /// <param name="useLevels">Whether levels are active.</param>
+    /// <param name="level">Target level, counted from the innermost (1-based; -1 = off).</param>
+    /// <param name="keepListStructure">True preserves nesting; false flattens (Dynamo default).</param>
+    public void SetLevels(bool useLevels, int level, bool keepListStructure)
+    {
+        if (UseLevels == useLevels && Level == level && KeepListStructure == keepListStructure)
+        {
+            return;
+        }
+
+        UseLevels = useLevels;
+        Level = level;
+        KeepListStructure = keepListStructure;
+        OnPropertyChanged(nameof(UseLevels));
+        Owner.MarkDirty();
+    }
 
     /// <summary>
     /// Cached value. For output ports this is the last computed result and the
