@@ -1,6 +1,6 @@
 {
- "version": "v0.23.0",
- "count": 314,
+ "version": "v0.23.1",
+ "count": 316,
  "categories": [
   {
    "name": "Annotation",
@@ -28,7 +28,7 @@
   },
   {
    "name": "Geometry",
-   "count": 12
+   "count": 13
   },
   {
    "name": "Input",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 16
+   "count": 17
   },
   {
    "name": "Navisworks.Properties",
@@ -1594,6 +1594,37 @@
     }
    ],
    "returns": "Dictionary with \"sizeX\", \"sizeY\", \"sizeZ\", \"min\" and \"max\"."
+  },
+  {
+   "name": "BoundingBox.Union",
+   "category": "Geometry",
+   "description": "ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.",
+   "tags": [
+    "union",
+    "combine",
+    "fit",
+    "merge",
+    "enclose",
+    "multiple",
+    "all",
+    "extents",
+    "aabb"
+   ],
+   "inputs": [
+    {
+     "name": "geometry",
+     "type": "any[]",
+     "description": "Boxes and/or points to enclose (lists nest freely; at least one required)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The bounding box fitting all inputs."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "Point.ByCoordinates",
@@ -7692,7 +7723,7 @@
   {
    "name": "ModelItem.BoundingBox",
    "category": "Navisworks.ModelItem",
-   "description": "The axis-aligned bounding box of a model item, in document units.",
+   "description": "The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox.",
    "tags": [
     "item",
     "boundingbox",
@@ -7779,6 +7810,43 @@
     }
    ],
    "returns": "The internal and localized class names (layer/group/geometry detection)."
+  },
+  {
+   "name": "ModelItem.CombinedBoundingBox",
+   "category": "Navisworks.ModelItem",
+   "description": "ONE bounding box fitting all the given items together (per-group when wired a list of groups) — frame a whole cluster for a section box or zoom. For one box per item use ModelItem.BoundingBox.",
+   "tags": [
+    "boundingbox",
+    "combined",
+    "union",
+    "group",
+    "fit",
+    "all",
+    "extents",
+    "cluster",
+    "bbox"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to enclose."
+    },
+    {
+     "name": "ignoreHidden",
+     "type": "boolean",
+     "description": "True to exclude hidden geometry from the box.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox3D",
+     "description": "The combined axis-aligned bounding box, in document units."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "ModelItem.CommonAncestor",

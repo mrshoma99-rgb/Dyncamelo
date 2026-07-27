@@ -67,12 +67,50 @@ public static class ModelItemNodes
     /// <param name="ignoreHidden">True to exclude hidden geometry from the box.</param>
     /// <returns>The item's bounding box, in document units.</returns>
     [NodeName("ModelItem.BoundingBox")]
-    [NodeDescription("The axis-aligned bounding box of a model item, in document units.")]
+    [NodeDescription("The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox.")]
     [NodeSearchTags("item", "boundingbox", "bounds", "extents", "bbox")]
     [return: NodeName("boundingBox")]
     public static BoundingBox3D BoundingBox(ModelItem item, bool ignoreHidden = false)
     {
         return RequireItem(item).BoundingBox(ignoreHidden);
+    }
+
+    /// <summary>
+    /// One bounding box that fits ALL the given items together — frame a whole
+    /// cluster (a ladder from Proximity.Cluster) for a section box or zoom.
+    /// Unlike ModelItem.BoundingBox (which laces into one box per item), the
+    /// list is consumed whole; wire a list of groups and lacing gives one
+    /// combined box per group.
+    /// </summary>
+    /// <param name="items">The model items to enclose.</param>
+    /// <param name="ignoreHidden">True to exclude hidden geometry from the box.</param>
+    /// <returns>The combined axis-aligned bounding box, in document units.</returns>
+    [NodeName("ModelItem.CombinedBoundingBox")]
+    [NodeDescription("ONE bounding box fitting all the given items together (per-group when wired a list of groups) — frame a whole cluster for a section box or zoom. For one box per item use ModelItem.BoundingBox.")]
+    [NodeSearchTags("boundingbox", "combined", "union", "group", "fit", "all", "extents", "cluster", "bbox")]
+    [return: NodeName("boundingBox")]
+    public static BoundingBox3D CombinedBoundingBox(IEnumerable<ModelItem> items, bool ignoreHidden = false)
+    {
+        var list = NavisValues.ToItemList(items);
+        if (list.Count == 0)
+        {
+            throw new ArgumentException("No model items provided.", nameof(items));
+        }
+
+        BoundingBox3D? combined = null;
+        foreach (var item in list)
+        {
+            var box = item.BoundingBox(ignoreHidden);
+            if (box == null || box.IsEmpty)
+            {
+                continue;
+            }
+
+            combined = combined == null ? box : combined.Extend(box);
+        }
+
+        return combined ?? throw new InvalidOperationException(
+            "None of the " + list.Count + " item(s) has a geometry bounding box.");
     }
 
     /// <summary>The parent of a model item.</summary>

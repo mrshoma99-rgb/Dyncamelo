@@ -70,6 +70,122 @@ public static class GeometryNodes
         return new DyncameloBoundingBox(min, max);
     }
 
+    /// <summary>
+    /// One bounding box that fits everything you give it: boxes, points,
+    /// [x, y, z] number triples, or any nesting of those in lists — the
+    /// geometric union. Navisworks boxes/points are accepted through the
+    /// registered converters.
+    /// </summary>
+    /// <param name="geometry">Boxes and/or points to enclose (lists nest freely; at least one required).</param>
+    /// <returns>The bounding box fitting all inputs.</returns>
+    [NodeName("BoundingBox.Union")]
+    [return: NodeName("boundingBox")]
+    [NodeDescription("ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.")]
+    [NodeSearchTags("union", "combine", "fit", "merge", "enclose", "multiple", "all", "extents", "aabb")]
+    public static DyncameloBoundingBox BoundingBoxUnion(IList<object?> geometry)
+    {
+        if (geometry == null || geometry.Count == 0)
+        {
+            throw new ArgumentException("BoundingBox.Union needs at least one box or point.", nameof(geometry));
+        }
+
+        double minX = double.PositiveInfinity, minY = double.PositiveInfinity, minZ = double.PositiveInfinity;
+        double maxX = double.NegativeInfinity, maxY = double.NegativeInfinity, maxZ = double.NegativeInfinity;
+        bool any = false;
+
+        void ExtendPoint(double x, double y, double z)
+        {
+            any = true;
+            minX = Math.Min(minX, x); minY = Math.Min(minY, y); minZ = Math.Min(minZ, z);
+            maxX = Math.Max(maxX, x); maxY = Math.Max(maxY, y); maxZ = Math.Max(maxZ, z);
+        }
+
+        void Add(object? value)
+        {
+            switch (value)
+            {
+                case null:
+                    return;
+                case DyncameloBoundingBox box:
+                    ExtendPoint(box.Min.X, box.Min.Y, box.Min.Z);
+                    ExtendPoint(box.Max.X, box.Max.Y, box.Max.Z);
+                    return;
+                case DyncameloPoint point:
+                    ExtendPoint(point.X, point.Y, point.Z);
+                    return;
+                case System.Collections.IList list when !(value is string):
+                    // Three plain numbers form a point; anything else nests.
+                    if (list.Count == 3 &&
+                        TryNumber(list[0], out var x) && TryNumber(list[1], out var y) && TryNumber(list[2], out var z))
+                    {
+                        ExtendPoint(x, y, z);
+                        return;
+                    }
+
+                    foreach (var element in list)
+                    {
+                        Add(element);
+                    }
+
+                    return;
+                default:
+                    // Foreign box/point types (Navisworks) come through the
+                    // registered type converters.
+                    if (Core.Types.TypeCoercion.TryCoerce(value, typeof(DyncameloBoundingBox), out var asBox) &&
+                        asBox is DyncameloBoundingBox coercedBox)
+                    {
+                        Add(coercedBox);
+                        return;
+                    }
+
+                    if (Core.Types.TypeCoercion.TryCoerce(value, typeof(DyncameloPoint), out var asPoint) &&
+                        asPoint is DyncameloPoint coercedPoint)
+                    {
+                        Add(coercedPoint);
+                        return;
+                    }
+
+                    throw new ArgumentException(
+                        "BoundingBox.Union cannot read a " + value.GetType().Name +
+                        " — wire bounding boxes, points, or [x, y, z] number lists.");
+            }
+        }
+
+        foreach (var entry in geometry)
+        {
+            Add(entry);
+        }
+
+        if (!any)
+        {
+            throw new ArgumentException("BoundingBox.Union found no usable boxes or points in the input.", nameof(geometry));
+        }
+
+        return new DyncameloBoundingBox(
+            new DyncameloPoint(minX, minY, minZ),
+            new DyncameloPoint(maxX, maxY, maxZ));
+    }
+
+    private static bool TryNumber(object? value, out double number)
+    {
+        switch (value)
+        {
+            case double d:
+                number = d;
+                return true;
+            case IConvertible convertible when !(value is string):
+                number = convertible.ToDouble(System.Globalization.CultureInfo.InvariantCulture);
+                return true;
+            case string text:
+                return double.TryParse(
+                    text, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out number);
+            default:
+                number = 0;
+                return false;
+        }
+    }
+
     /// <summary>Geometric center of a bounding box.</summary>
     /// <param name="boundingBox">The bounding box.</param>
     /// <returns>The center point.</returns>
