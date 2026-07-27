@@ -33,6 +33,7 @@ public class SampleGraphFileTests
         "Isolated Viewpoints (Loop).dyc",
         "Isolated Viewpoints per Item.dyc",
         "QTO Rollup by Category.dyc",
+        "Section Box Viewpoints per Group.dyc",
         "Spotlight Viewpoints per Item.dyc",
         "csv-roundtrip.dyc",
         "hello-math.dyc",
