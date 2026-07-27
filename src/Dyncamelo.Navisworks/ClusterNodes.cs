@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Navisworks.Api;
+using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
 using Dyncamelo.Nodes.Spatial;
