@@ -27,6 +27,87 @@ public static class AppearanceNodes
         return list;
     }
 
+    /// <summary>
+    /// Colors items by a value each carries: equal values get equal colors,
+    /// distinct values get visually distinct ones. Wire the items and their
+    /// parameter values (index-aligned — from the property nodes, a takeoff,
+    /// or Proximity.Cluster's numbers) and every group is painted in one go,
+    /// with a value/color legend returned for reports.
+    /// </summary>
+    /// <param name="items">The model items to recolor.</param>
+    /// <param name="values">One value per item (index-aligned; a single value colors everything alike).</param>
+    /// <param name="colors">Optional palette: colors or "#RRGGBB" strings, used in first-appearance order and cycled.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The recolored items, the distinct values with their colors (index-aligned legend), and a report.</returns>
+    [NodeName("Appearance.ColorByValues")]
+    [NodeDescription(
+        "Colors items by their parameter value: equal values share a color, distinct values get visually distinct " +
+        "ones (or your own palette, cycled). Wire property values, takeoff data or Proximity.Cluster numbers as " +
+        "the values; returns a uniqueValues/uniqueColors legend for reports. Permanent override — undoable.")]
+    [NodeSearchTags("appearance", "color", "by", "value", "parameter", "property", "categorical", "legend", "paint", "group")]
+    [MultiReturn("modelItems", "uniqueValues", "uniqueColors", "report")]
+    public static Dictionary<string, object?> ColorByValues(
+        IEnumerable<ModelItem> items,
+        IList<object?> values,
+        IList<object?>? colors = null,
+        Document? document = null)
+    {
+        var list = RequireItems(items);
+        if (values == null || values.Count == 0)
+        {
+            throw new ArgumentException("No values provided — wire one value per item.", nameof(values));
+        }
+
+        if (values.Count != list.Count && values.Count != 1)
+        {
+            throw new ArgumentException(
+                "Got " + list.Count + " item(s) but " + values.Count + " value(s) — wire one value per item " +
+                "(or a single value to color everything alike).", nameof(values));
+        }
+
+        // One value per item (broadcast a single value across all items).
+        var perItem = new List<object?>(list.Count);
+        for (int i = 0; i < list.Count; i++)
+        {
+            perItem.Add(values.Count == 1 ? values[0] : values[i]);
+        }
+
+        var mapping = Dyncamelo.Nodes.ColorNodes.ByValues(perItem, colors);
+        var itemColors = (List<Dyncamelo.Nodes.DyncameloColor>)mapping["colors"]!;
+        var uniqueValues = (List<object?>)mapping["uniqueValues"]!;
+        var uniqueColors = (List<Dyncamelo.Nodes.DyncameloColor>)mapping["uniqueColors"]!;
+
+        // Paint one group per distinct color, not one call per item.
+        var doc = NavisworksContext.ResolveDocument(document);
+        for (int u = 0; u < uniqueColors.Count; u++)
+        {
+            var group = new List<ModelItem>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (ReferenceEquals(itemColors[i], uniqueColors[u]))
+                {
+                    group.Add(list[i]);
+                }
+            }
+
+            if (group.Count > 0)
+            {
+                doc.Models.OverridePermanentColor(group, NavisValues.ToNavisColor(uniqueColors[u]));
+            }
+        }
+
+        var report = "Colored " + list.Count + " item(s) in " + uniqueValues.Count + " group(s)" +
+                     (colors != null && colors.Count > 0 ? " using the supplied palette (cycled)." : ".");
+
+        return new Dictionary<string, object?>
+        {
+            { "modelItems", list },
+            { "uniqueValues", uniqueValues },
+            { "uniqueColors", uniqueColors },
+            { "report", report },
+        };
+    }
+
     /// <summary>Overrides the transparency of model items.</summary>
     /// <param name="items">The model items to change.</param>
     /// <param name="transparency">0 = fully opaque, 1 = fully transparent.</param>
