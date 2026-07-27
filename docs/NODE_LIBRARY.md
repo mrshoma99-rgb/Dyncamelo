@@ -1,6 +1,16 @@
 # Dyncamelo Node Library
 
-This catalog defines the complete planned node library for Dyncamelo, the visual programming environment for Autodesk Navisworks 2024. It is the **product-design source of truth** for node names, ports, behavior, and the exact Navisworks API surface each node wraps. Implementations follow this document; deviations require updating it (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+This catalog defines the complete planned node library for Dyncamelo, the visual programming environment for Autodesk Navisworks 2024–2026. It is the **product-design source of truth** for node names, ports, behavior, and the exact Navisworks API surface each node wraps. Implementations follow this document; deviations require updating it (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+
+> **Always-current inventory:** the shipped library has grown well past these
+> hand-written tables — **314 nodes across 37 categories** as of v0.23. The
+> machine-generated [dyncamelo-nodes.json](dyncamelo-nodes.json) (rebuilt from
+> source by `tools/generate_node_catalog.py`) inventories every node with its
+> ports, defaults and descriptions, and is browsable at
+> [bimcamel.com/plugins/dyncamelo/nodes](https://www.bimcamel.com/plugins/dyncamelo/nodes).
+> The tables below stay authoritative for design conventions and the API
+> mapping of the core set; recent waves are summarized per release in
+> [WHATS_NEW_0.23.md](WHATS_NEW_0.23.md).
 
 Related reading: [ARCHITECTURE.md](ARCHITECTURE.md) for engine semantics (replication, coercion, states) and [EXTENDING.md](EXTENDING.md) for authoring your own nodes.
 
@@ -8,7 +18,7 @@ Related reading: [ARCHITECTURE.md](ARCHITECTURE.md) for engine semantics (replic
 
 - [Design conventions](#design-conventions) and [tiers](#tiers)
 - General library: [Input](#input) · [Output](#output) · [Math](#math) · [Logic](#logic) · [String](#string) · [List](#list) · [Dictionary](#dictionary) · [Color](#color) · [DateTime](#datetime) · [File](#file) · [Geometry](#geometry)
-- Navisworks library: [Application](#navisworksapplication) · [Document](#navisworksdocument) · [Model](#navisworksmodel) · [ModelItem](#navisworksmodelitem) · [Transform](#navisworkstransform) · [Geometry](#navisworksgeometry) · [Properties](#navisworksproperties) · [Search](#navisworkssearch) · [Selection](#navisworksselection) · [SelectionSets](#navisworksselectionsets) · [Appearance](#navisworksappearance) · [Viewpoints](#navisworksviewpoints) · [Comments](#navisworkscomments) · [Camera](#navisworkscamera) · [Clash](#navisworksclash) · [Grids](#navisworksgrids) · [TimeLiner](#navisworkstimeliner) · [Exchange](#navisworksexchange) · [Export](#navisworksexport) · [Units](#navisworksunits) · [Coordination (v0.2)](#coordination-v02-workflow-nodes) · [Plugin parity (v0.3)](#plugin-parity-v03-workflow-nodes)
+- Navisworks library: [Application](#navisworksapplication) · [Document](#navisworksdocument) · [Model](#navisworksmodel) · [ModelItem](#navisworksmodelitem) · [Transform](#navisworkstransform) · [Geometry](#navisworksgeometry) · [Properties](#navisworksproperties) · [Search](#navisworkssearch) · [Selection](#navisworksselection) · [SelectionSets](#navisworksselectionsets) · [Appearance](#navisworksappearance) · [Viewpoints](#navisworksviewpoints) · [Comments](#navisworkscomments) · [Camera](#navisworkscamera) · [Clash](#navisworksclash) · [Grids](#navisworksgrids) · [TimeLiner](#navisworkstimeliner) · [Exchange](#navisworksexchange) · [Export](#navisworksexport) · [Units](#navisworksunits) · [Analysis (v0.12+)](#navisworksanalysis-v012) · [Markup (v0.21)](#navisworksmarkup-v021-experimental) · [Coordination (v0.2)](#coordination-v02-workflow-nodes) · [Plugin parity (v0.3)](#plugin-parity-v03-workflow-nodes)
 - [Future platform nodes](#future-platform-nodes-v10-backlog-not-counted-per-category) · [Reference workflows](#reference-workflows-what-the-mvp-set-must-support-end-to-end) · [Tier totals](#tier-totals)
 
 ## Design conventions
@@ -54,7 +64,8 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
 | Watch | Output | value: object | value: object (pass-through) | Shows the incoming value inline on the node; passes it through. | NodeModel (Core) | MVP |
-| Watch List | Output | list: List&lt;object&gt; | list: List&lt;object&gt; (pass-through) | Scrollable, index-annotated view of a list (nested lists expandable). | NodeModel (Core) | MVP |
+| Watch List | Output | list: List&lt;object&gt; | list: List&lt;object&gt; (pass-through) | Scrollable view of a list with a dedicated index gutter column (virtualized for huge lists). | NodeModel (Core) | MVP |
+| Watch Image | Output | imagePath: string | imagePath (pass-through) | Renders the image at the incoming path inline on the canvas (resizable; reloads when a run overwrites the file) — pairs with the FallHazard heat maps. | NodeModel (Dyncamelo.Nodes) | Implemented (v0.18) |
 | Note | Output | — (inline text) | — | Free-floating canvas annotation; not executed. | NodeModel (Core) | MVP |
 | Panel | Output | text: string | — | Large resizable text panel pinned to canvas; live-updates each run (report preview). | NodeModel (Core) | Beta |
 
@@ -156,6 +167,10 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Color.FromHex | Color | hex: string | color: Color | Parse "#RRGGBB" / "#AARRGGBB". | pure C# parse | Implemented (v0.2) |
 | Color.Components | Color | color: Color | red: int, green: int, blue: int, alpha: int | Deconstruct channels. | [MultiReturn] | Implemented (v0.2) |
 | Color.Lerp | Color | start: Color, end: Color, t: double | color: Color | Interpolate between two colors (t 0–1); with Math.MapRange builds value-driven gradients. | pure C# | Implemented (v0.2) |
+| Color.Random | Color | seed: int = 0 | color: Color | Pseudo-random color, stable per seed (re-runs never repaint); change the seed for another. | pure C# (golden-angle HSV) | Implemented (v0.23) |
+| Color.RandomList | Color | count: int, seed: int = 0 | colors: List&lt;Color&gt; | N visually distinct pseudo-random colors (golden-angle hues), stable per seed. | pure C# | Implemented (v0.23) |
+| Color.Gradient | Color | count: int, start: Color = blue, end: Color = red | colors: List&lt;Color&gt; | N colors evenly blended between two colors, endpoints included. | pure C# lerp | Implemented (v0.23) |
+| Color.ByValues | Color | values: List&lt;object&gt;, colors: List&lt;Color&gt; = null | colors: List&lt;Color&gt;, uniqueValues: List&lt;object&gt;, uniqueColors: List&lt;Color&gt; | One color per value, equal values sharing a color, with a legend; optional own palette (cycled). Pairs with Appearance.ColorByValues. | pure C# / [MultiReturn] | Implemented (v0.23) |
 
 ## DateTime
 
@@ -360,6 +375,7 @@ New in v0.3. All transforms are **permanent overrides** (the 2024 API has no tem
 | SavedViewpoint.MoveToFolder | Navisworks.Viewpoints | viewpoint: SavedViewpoint (or name), folder: FolderItem (or name), document: Document | viewpoint | Move a stored viewpoint into a folder (already-in-folder is a no-op, so re-runs are clean). | `DocumentSavedViewpoints.Move(GroupItem, int, GroupItem, int)` | Implemented (v0.3) |
 | SavedViewpoint.Folder | Navisworks.Viewpoints | viewpoint: SavedViewpoint (or name), document: Document | folderPath: string ("A/B"; "" at top level), folder: FolderItem | Read a viewpoint's containing folder — drives folder-based status workflows (Clashtrix-style status-from-subfolder sync). | walk `SavedItem.Parent` to `RootItem` / [MultiReturn] | Implemented (v0.3) |
 | Viewpoint.SetSectionBox | Navisworks.Viewpoints | boundingBox: BoundingBox, enabled: bool = true, document: Document | done: bool | Apply a section box around a region on the current view (Sectioning &gt; Box, scriptable) — chain ModelItem.BoundingBox for clash close-ups. enabled=false turns sectioning off. | `Viewpoint.InternalClipPlanes` (`LcOaClipPlaneSet.SetBox/SetMode(eMODE_BOX)/SetEnabled`) on a viewpoint copy + `CurrentViewpoint.CopyFrom` — pure .NET, no COM | Implemented (v0.3) |
+| Viewpoint.VisibleItems | Navisworks.Viewpoints | items: items/set/set-name, viewpoint: SavedViewpoint/name/empty = current, fullyInside: bool = false, document: Document | visibleItems, outsideItems, mask: List&lt;bool&gt;, containsAny: bool, report: string | Which of the given items the viewpoint can see (bounding box vs camera frustum, perspective + orthographic). Framing test: occlusion and the viewpoint's hide overrides are not evaluated. | `SavedViewpoint.Viewpoint` (Position/Rotation/HeightField/AspectRatio) → pure frustum core (Dyncamelo.Nodes.Spatial.ViewFrustum) | Implemented (v0.20) |
 
 ## Navisworks.Comments
 
@@ -458,6 +474,33 @@ New in v0.3 — vendor-neutral issue exchange via **BCF 2.1** files (.bcfzip). C
 | Units.Convert | Navisworks.Units | value: double, fromUnits: string, toUnits: string | value: double | Convert a length value between unit systems (QTO normalization: model units → project units). | `Autodesk.Navisworks.Api.UnitConversion.ScaleFactor(Units from, Units to)` × value | Implemented (v0.1) |
 | Units.ScaleFactor | Navisworks.Units | fromUnits: string, toUnits: string | factor: double | Raw multiplier between two unit systems (apply to areas/volumes by squaring/cubing). | `UnitConversion.ScaleFactor(Units, Units)` | Implemented (v0.1) |
 | Units.All | Navisworks.Units | — | names: List&lt;string&gt; | Valid unit names accepted by the convert nodes. | `Enum.GetNames(typeof(Autodesk.Navisworks.Api.Units))` | Implemented (v0.2) |
+
+## Navisworks.Analysis (v0.12+)
+
+Spatial and safety analysis on the real model geometry. The raster/geometry cores (`FloorGapHeatmap`, `ViewFrustum`, `BoxClusterer`) live Navisworks-free in `Dyncamelo.Nodes.Spatial` and are fully unit-tested headless; the nodes read triangles through the COM bridge (`InwOaFragment3.GenerateSimplePrimitives`) or bounding boxes and feed the cores.
+
+| Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
+|---|---|---|---|---|---|---|
+| FallHazard.FloorOpeningMap | Navisworks.Analysis | floors, level, obstructions = null, band, cellSize, minGap, units = "document", imagePath, saveViewpoints, pixelsPerCell, showOverage, lowColor, highColor, document | imagePath, openingCount, widestGaps, centers, viewpoints, report | Whole-floor fall-hazard heat map: rasterises the floor/equipment mesh at a level, finds enclosed openings, grades each by widest clear span. Limit-pivoting gradient (custom colours), printed gap-over-limit labels, one saved viewpoint per flagged opening. | COM triangle read → `FloorGapHeatmap.Analyze` → PNG writer + `SavedViewpoints.AddCopy` | Implemented (v0.12–0.17) |
+| FallHazard.EdgeHandrailCheck | Navisworks.Analysis | floors, level, handrails, obstructions = null, band, cellSize, limit, handrailTolerance, minPassage, units, imagePath, pixelsPerCell, showOverage, dangerousColor, protectedColor, safeColor, document | imagePath, dangerousLength, protectedLength, safeLength, report | Classifies every floor edge around a void as dangerous / protected / safe: safe when the gap is under the limit OR a handrail runs along it (real length-along-edge coverage); minPassage reclassifies human-impassable runs; custom colours + printed overages. | COM triangle read → `FloorGapHeatmap.AnalyzeEdges` | Implemented (v0.13–0.16) |
+| Proximity.Cluster | Navisworks.Analysis | items, tolerance = 0.01, units = "document", method = "bbox"/"mesh", propertyName = "", tabName, document | groups, clusterNumbers, clusterCount, sizes, report | Groups touching geometry into logical elements (gap ≤ tolerance, chained). "mesh" confirms every connection with the Clash engine's exact clearance; propertyName stamps each item's number as a searchable custom property. | `ModelItem.BoundingBox` → `BoxClusterer` (union-find + sweep); mesh: `DocumentClash.TryCalculateMinimumClearance` | Implemented (v0.22) |
+| Distance.BetweenItems | Navisworks.Analysis | itemsA, itemsB, method = "mesh"/"bbox", document | distance, pointA, pointB | Shortest distance between two selections with witness points ("mesh" = exact surfaces via the Clash engine). | `DocumentClash.TryCalculateMinimumClearance` / box math | Implemented (v0.11) |
+| Proximity.NearestDistance | Navisworks.Analysis | items, targets, method = "bbox"/"mesh", document | distances: List&lt;double&gt; | Per item, the distance to the nearest target (+∞ when no targets) — flags openings with no handrail nearby. | per-item clearance / box distance | Implemented (v0.11) |
+| Clash.AngleBetweenItems | Navisworks.Analysis | result: ClashResult, document | angle and axes of the two clashing elements | Angle between two clashing elements (routing/penetration checks). | item geometry axes | Implemented (v0.11) |
+
+## Navisworks.Markup (v0.21, EXPERIMENTAL)
+
+Redline markups on saved viewpoints via the **hidden-but-public** Navisworks API surface (`SavedViewpoint.EditRedlines()` + `Autodesk.Navisworks.Api.Interop.LcOpRedline*` — shipped by Autodesk, hidden from IntelliSense, undocumented; behaviour may differ between releases). Coordinates are the viewpoint's 2D markup space — draw one markup by hand and read it with `Markup.List` to calibrate. Real numbered tags (Find Tags panel) have no public API; `Markup.AddNumberTag` is the substitute.
+
+| Node | Category | Inputs (name: type) | Outputs | Description | Tier |
+|---|---|---|---|---|---|
+| Markup.AddText | Navisworks.Markup | viewpoint (or name), text, x, y, color = null, thickness = 2, document | viewpoint | Text redline at a point. | Implemented (v0.21) |
+| Markup.AddLine / Markup.AddArrow | Navisworks.Markup | viewpoint, x1, y1, x2, y2, color, thickness, document | viewpoint | Line / arrow between two points. | Implemented (v0.21) |
+| Markup.AddEllipse | Navisworks.Markup | viewpoint, x1, y1, x2, y2, color, thickness, document | viewpoint | Ellipse fitted corner-to-corner. | Implemented (v0.21) |
+| Markup.AddCloud | Navisworks.Markup | viewpoint, points ([x,y] pairs or flat list), color, thickness, document | viewpoint | Revision cloud through the points. | Implemented (v0.21) |
+| Markup.AddNumberTag | Navisworks.Markup | viewpoint, number, x, y, radius = 0.08, comment = "", color, thickness, document | viewpoint | Circled number + optional comment on the viewpoint — the tag substitute. | Implemented (v0.21) |
+| Markup.List | Navisworks.Markup | viewpoint, document | count, types, texts, positions | Reads markups back — the coordinate-calibration reference. | Implemented (v0.21) |
+| Markup.Clear | Navisworks.Markup | viewpoint, document | viewpoint | Removes every markup from the viewpoint. | Implemented (v0.21) |
 
 ## Coordination (v0.2 workflow nodes)
 

@@ -1,6 +1,6 @@
 {
- "version": "v0.10.1",
- "count": 284,
+ "version": "v0.23.0",
+ "count": 314,
  "categories": [
   {
    "name": "Annotation",
@@ -8,7 +8,7 @@
   },
   {
    "name": "Color",
-   "count": 5
+   "count": 9
   },
   {
    "name": "DateTime",
@@ -28,7 +28,7 @@
   },
   {
    "name": "Geometry",
-   "count": 11
+   "count": 12
   },
   {
    "name": "Input",
@@ -45,6 +45,10 @@
   {
    "name": "Math",
    "count": 15
+  },
+  {
+   "name": "Navisworks.Analysis",
+   "count": 5
   },
   {
    "name": "Navisworks.Appearance",
@@ -64,7 +68,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 28
+   "count": 33
   },
   {
    "name": "Navisworks.Comments",
@@ -83,12 +87,12 @@
    "count": 12
   },
   {
-   "name": "Navisworks.Geometry",
-   "count": 1
-  },
-  {
    "name": "Navisworks.Grids",
    "count": 3
+  },
+  {
+   "name": "Navisworks.Markup",
+   "count": 8
   },
   {
    "name": "Navisworks.Model",
@@ -96,7 +100,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 15
+   "count": 16
   },
   {
    "name": "Navisworks.Properties",
@@ -132,7 +136,7 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 13
+   "count": 19
   },
   {
    "name": "String",
@@ -140,7 +144,7 @@
   },
   {
    "name": "Workflow",
-   "count": 3
+   "count": 4
   },
   {
    "name": "Workflow.Actions",
@@ -224,6 +228,53 @@
    "returns": ""
   },
   {
+   "name": "Color.ByValues",
+   "category": "Color",
+   "description": "One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled).",
+   "tags": [
+    "color",
+    "by",
+    "value",
+    "parameter",
+    "property",
+    "categorical",
+    "legend",
+    "map",
+    "group"
+   ],
+   "inputs": [
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "One value per element (property values, numbers, names, ...)."
+    },
+    {
+     "name": "colors",
+     "type": "any[]",
+     "description": "Optional palette: colors or \"#RRGGBB\" strings, used in order and cycled.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "colors",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "uniqueValues",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "uniqueColors",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "A color per input value, and the distinct values with their colors (index-aligned legend)."
+  },
+  {
    "name": "Color.Components",
    "category": "Color",
    "description": "Splits a color into its red, green, blue and alpha channels (0-255).",
@@ -291,6 +342,48 @@
    "returns": ""
   },
   {
+   "name": "Color.Gradient",
+   "category": "Color",
+   "description": "A list of N colors evenly blended between two colors (endpoints included; defaults blue to red) — for heat-map style legends and value ramps.",
+   "tags": [
+    "gradient",
+    "ramp",
+    "blend",
+    "range",
+    "between",
+    "interpolate",
+    "list",
+    "series"
+   ],
+   "inputs": [
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many colors to generate (at least 1)."
+    },
+    {
+     "name": "start",
+     "type": "Color",
+     "description": "First color of the gradient (empty = blue).",
+     "default": "null"
+    },
+    {
+     "name": "end",
+     "type": "Color",
+     "description": "Last color of the gradient (empty = red).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "colors",
+     "type": "Color[]",
+     "description": "The gradient colors, start to end."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Color.Lerp",
    "category": "Color",
    "description": "Interpolates between two colors (t clamped to 0-1).",
@@ -322,6 +415,67 @@
      "name": "color",
      "type": "Color",
      "description": "The interpolated color."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.Random",
+   "category": "Color",
+   "description": "A pseudo-random color, stable per seed: the same seed always gives the same color (re-runs stay consistent); change the seed for another one.",
+   "tags": [
+    "random",
+    "seed",
+    "generate",
+    "any"
+   ],
+   "inputs": [
+    {
+     "name": "seed",
+     "type": "integer",
+     "description": "Any number; each seed maps to one fixed color.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.RandomList",
+   "category": "Color",
+   "description": "A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed — ideal for coloring N groups apart.",
+   "tags": [
+    "random",
+    "list",
+    "palette",
+    "distinct",
+    "generate",
+    "series"
+   ],
+   "inputs": [
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many colors to generate (at least 1)."
+    },
+    {
+     "name": "seed",
+     "type": "integer",
+     "description": "Any number; each seed yields one fixed sequence.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "colors",
+     "type": "Color[]",
+     "description": "The colors."
     }
    ],
    "returns": ""
@@ -1321,6 +1475,41 @@
      "name": "intersects",
      "type": "boolean",
      "description": "True when the boxes overlap or touch."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.PlanGap",
+   "category": "Geometry",
+   "description": "The widest strip of open floor between an inner box (equipment) and the outer box (opening) in plan — the 'space between the equipment and the opening edge'. Returns the largest of the four horizontal side gaps; 0 when the equipment reaches every edge. Threshold it to flag openings that need a handrail.",
+   "tags": [
+    "gap",
+    "clearance",
+    "opening",
+    "edge",
+    "plan",
+    "space",
+    "perimeter",
+    "handrail"
+   ],
+   "inputs": [
+    {
+     "name": "outer",
+     "type": "BoundingBox",
+     "description": "The opening's bounding box."
+    },
+    {
+     "name": "inner",
+     "type": "BoundingBox",
+     "description": "The equipment's bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "gap",
+     "type": "number",
+     "description": "The largest horizontal clear gap, in the same units as the boxes."
     }
    ],
    "returns": ""
@@ -3001,6 +3190,491 @@
    "returns": ""
   },
   {
+   "name": "Distance.BetweenItems",
+   "category": "Navisworks.Analysis",
+   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.",
+   "tags": [
+    "distance",
+    "clearance",
+    "closest",
+    "shortest",
+    "measure",
+    "between",
+    "gap"
+   ],
+   "inputs": [
+    {
+     "name": "itemsA",
+     "type": "ModelItem[]",
+     "description": "The first selection."
+    },
+    {
+     "name": "itemsB",
+     "type": "ModelItem[]",
+     "description": "The second selection."
+    },
+    {
+     "name": "method",
+     "type": "string",
+     "description": "\"mesh\" = exact surface-to-surface (Clash engine; slower on huge selections), \"bbox\" = fast bounding-box approximation.",
+     "default": "\"mesh\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "distance",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "pointA",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "pointB",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The distance (document units; 0 when touching/intersecting) and the closest point on each selection."
+  },
+  {
+   "name": "FallHazard.EdgeHandrailCheck",
+   "category": "Navisworks.Analysis",
+   "description": "Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it — override any of the three colours with the colour inputs. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. A dangerous stretch shorter than 'minPassage' also counts as safe (a person cannot fit through the break). Turn on 'showOverage' to print how far each dangerous run exceeds the limit on the image, ready for reports. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.",
+   "tags": [
+    "fall",
+    "hazard",
+    "edge",
+    "handrail",
+    "guardrail",
+    "railing",
+    "floor",
+    "void",
+    "opening",
+    "safety",
+    "protected",
+    "perimeter",
+    "color",
+    "label",
+    "report"
+   ],
+   "inputs": [
+    {
+     "name": "floors",
+     "type": "ModelItem[]",
+     "description": "The floor/slab items to treat as safe ground."
+    },
+    {
+     "name": "level",
+     "type": "number",
+     "description": "The elevation (world Z) of the plan to analyse."
+    },
+    {
+     "name": "handrails",
+     "type": "ModelItem[]",
+     "description": "The handrail items. Everything in the selection tree under what you pick is read (pick the railing elements or a group above them to get the whole railings); their geometry is projected flat onto the plan (posts and rails alike), so a handrail protects only the length it actually runs along an edge."
+    },
+    {
+     "name": "obstructions",
+     "type": "ModelItem[]",
+     "description": "Equipment/ducts/pipes that plug openings; a floor edge facing one at less than the limit is safe. Optional.",
+     "default": "null"
+    },
+    {
+     "name": "band",
+     "type": "number",
+     "description": "Vertical tolerance for deciding a floor/equipment element crosses the level.",
+     "default": "1.0"
+    },
+    {
+     "name": "cellSize",
+     "type": "number",
+     "description": "Grid resolution in document units (smaller = finer, use a few times below the limit).",
+     "default": "0.1"
+    },
+    {
+     "name": "limit",
+     "type": "number",
+     "description": "A floor edge needs a handrail when the void it faces is locally at least this wide (e.g. 0.2 = 20 cm, document units) — a narrower gap cannot be fallen through however long it runs.",
+     "default": "0.2"
+    },
+    {
+     "name": "handrailTolerance",
+     "type": "number",
+     "description": "A handrail within this distance of a dangerous edge protects it.",
+     "default": "0.3"
+    },
+    {
+     "name": "minPassage",
+     "type": "number",
+     "description": "A dangerous stretch of edge shorter than this counts as safe — a person cannot fit through so small a break in the protection (e.g. between two handrails, or a handrail and an obstacle). 0 disables.",
+     "default": "0.0"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "The unit every number on this node is in (\"Meters\", \"Millimeters\", \"Feet\", …). \"document\" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.",
+     "default": "\"document\""
+    },
+    {
+     "name": "imagePath",
+     "type": "string",
+     "description": "Where to write the PNG (empty = a temp file; the path is returned).",
+     "default": "null"
+    },
+    {
+     "name": "pixelsPerCell",
+     "type": "integer",
+     "description": "Image pixels per grid cell.",
+     "default": "6"
+    },
+    {
+     "name": "showOverage",
+     "type": "boolean",
+     "description": "True to print, at each dangerous run, how far its gap exceeds the limit (e.g. \"+0.35\", in the chosen units) — for plans that go into reports.",
+     "default": "false"
+    },
+    {
+     "name": "dangerousColor",
+     "type": "any",
+     "description": "Colour for dangerous edges (a Color, \"#RRGGBB\" or [r,g,b]); empty = the default red.",
+     "default": "null"
+    },
+    {
+     "name": "protectedColor",
+     "type": "any",
+     "description": "Colour for handrail-protected edges; empty = the default blue.",
+     "default": "null"
+    },
+    {
+     "name": "safeColor",
+     "type": "any",
+     "description": "Colour for safe edges; empty = the default green.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "imagePath",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "dangerousLength",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "protectedLength",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "safeLength",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The image path, the dangerous/protected/safe edge lengths (in the chosen units), and a diagnostic report."
+  },
+  {
+   "name": "FallHazard.FloorOpeningMap",
+   "category": "Navisworks.Analysis",
+   "description": "Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.",
+   "tags": [
+    "fall",
+    "hazard",
+    "opening",
+    "hole",
+    "floor",
+    "handrail",
+    "heatmap",
+    "heat map",
+    "gap",
+    "safety",
+    "plan",
+    "grid",
+    "slab",
+    "color",
+    "gradient",
+    "label",
+    "report"
+   ],
+   "inputs": [
+    {
+     "name": "floors",
+     "type": "ModelItem[]",
+     "description": "The floor/slab items to treat as safe ground (e.g. a search for floor elements)."
+    },
+    {
+     "name": "level",
+     "type": "number",
+     "description": "The elevation (world Z) of the plan to analyse."
+    },
+    {
+     "name": "obstructions",
+     "type": "ModelItem[]",
+     "description": "Equipment, ducts and pipes that plug openings — where these sit, there is no fall hazard. Optional.",
+     "default": "null"
+    },
+    {
+     "name": "band",
+     "type": "number",
+     "description": "Vertical tolerance for deciding an element crosses the level: an element counts when its bounding box reaches within this of the level. Its full silhouette is then read, so this need not match the slab thickness.",
+     "default": "1.0"
+    },
+    {
+     "name": "cellSize",
+     "type": "number",
+     "description": "Grid resolution in document units (smaller = finer and slower).",
+     "default": "0.25"
+    },
+    {
+     "name": "minGap",
+     "type": "number",
+     "description": "The handrail limit as a distance from the nearest floor edge or obstacle (e.g. 0.2 = 20 cm): a void point farther than this from any solid is a hazard. It is the heat-map pivot — cells below it read cool, at it yellow, above it red — and openings that contain such a point are flagged.",
+     "default": "0.2"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "The unit every number on this node is in (\"Meters\", \"Millimeters\", \"Feet\", …). \"document\" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.",
+     "default": "\"document\""
+    },
+    {
+     "name": "imagePath",
+     "type": "string",
+     "description": "Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).",
+     "default": "null"
+    },
+    {
+     "name": "saveViewpoints",
+     "type": "boolean",
+     "description": "True to add one top-down saved viewpoint per flagged opening.",
+     "default": "true"
+    },
+    {
+     "name": "pixelsPerCell",
+     "type": "integer",
+     "description": "How many image pixels each grid cell spans (bigger = larger image).",
+     "default": "6"
+    },
+    {
+     "name": "showOverage",
+     "type": "boolean",
+     "description": "True to print, at each flagged opening, how far its widest gap exceeds the limit (e.g. \"+0.35\", in the chosen units) — for plans that go into reports.",
+     "default": "false"
+    },
+    {
+     "name": "lowColor",
+     "type": "any",
+     "description": "Gradient colour for the safe end (gap → 0; a Color, \"#RRGGBB\" or [r,g,b]); empty = the default multi-colour ramp.",
+     "default": "null"
+    },
+    {
+     "name": "highColor",
+     "type": "any",
+     "description": "Gradient colour for the worst hazard (≥ 2× the limit); empty = the default multi-colour ramp.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "imagePath",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "openingCount",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "widestGaps",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "centers",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "viewpoints",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The image path, the flagged-opening count, their widest gaps (in the chosen units) and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size)."
+  },
+  {
+   "name": "Proximity.Cluster",
+   "category": "Navisworks.Analysis",
+   "description": "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set propertyName to also stamp every item with its cluster number as a searchable custom property.",
+   "tags": [
+    "cluster",
+    "group",
+    "touching",
+    "connected",
+    "proximity",
+    "ladder",
+    "assembly",
+    "clump",
+    "component",
+    "mesh",
+    "precise"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The geometry items to group (e.g. all ladder shapes)."
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "Maximum gap that still counts as touching; 0 requires contact. Must be smaller than the space between separate elements.",
+     "default": "0.01"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the tolerance: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
+    },
+    {
+     "name": "method",
+     "type": "string",
+     "description": "\"bbox\" = fast bounding-box test; \"mesh\" = precise — box candidates are confirmed with the Clash engine's exact surface-to-surface clearance, so fat boxes (diagonal members) can no longer bridge separate elements.",
+     "default": "\"bbox\""
+    },
+    {
+     "name": "propertyName",
+     "type": "string",
+     "description": "When set (e.g. \"Ladder Number\"), each item gets its cluster number written as this custom property.",
+     "default": "\"\""
+    },
+    {
+     "name": "tabName",
+     "type": "string",
+     "description": "Custom property tab that receives the number.",
+     "default": "\"Dyncamelo Data\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "groups",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "clusterNumbers",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "clusterCount",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "sizes",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Item groups (one list per cluster), each input item's 1-based cluster number (0 = no geometry), cluster count and sizes, and a diagnostic report."
+  },
+  {
+   "name": "Proximity.NearestDistance",
+   "category": "Navisworks.Analysis",
+   "description": "For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" = fast, \"mesh\" = exact surfaces (slower on big sets).",
+   "tags": [
+    "proximity",
+    "nearest",
+    "closest",
+    "distance",
+    "neighbour",
+    "near",
+    "far",
+    "within",
+    "handrail"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The items to measure from (e.g. floor openings)."
+    },
+    {
+     "name": "targets",
+     "type": "ModelItem[]",
+     "description": "The items to measure to (e.g. handrails); empty means \"no neighbour anywhere\"."
+    },
+    {
+     "name": "method",
+     "type": "string",
+     "description": "\"bbox\" = fast bounding-box approximation, \"mesh\" = exact surface-to-surface (slower).",
+     "default": "\"bbox\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "distances",
+     "type": "number[]",
+     "description": "One distance per item (document units); +∞ when there are no targets."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Appearance.ColorByValues",
    "category": "Navisworks.Appearance",
    "description": "One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.",
@@ -3792,6 +4466,82 @@
    "returns": "Result dictionaries per bucket plus a counts dictionary."
   },
   {
+   "name": "Clash.FilterByAngle",
+   "category": "Navisworks.Clash",
+   "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.",
+   "tags": [
+    "clash",
+    "filter",
+    "angle",
+    "perpendicular",
+    "parallel",
+    "crossing",
+    "degrees"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "minDegrees",
+     "type": "number",
+     "description": "Lowest crossing angle to keep (0 = parallel).",
+     "default": "0.0"
+    },
+    {
+     "name": "maxDegrees",
+     "type": "number",
+     "description": "Highest crossing angle to keep (90 = perpendicular).",
+     "default": "90.0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved (angle-less results are dropped)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.FilterByStatus",
+   "category": "Navisworks.Clash",
+   "description": "Keeps only the clash results with the given status (New, Active, Reviewed, Approved or Resolved) — the triage staple: e.g. drop the already-Approved ones and work the New ones.",
+   "tags": [
+    "clash",
+    "filter",
+    "status",
+    "new",
+    "active",
+    "approved",
+    "resolved",
+    "triage"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "status",
+     "type": "string",
+     "description": "New, Active, Reviewed, Approved or Resolved."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Clash.GroupResultsByGridIntersection",
    "category": "Navisworks.Clash",
    "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).",
@@ -4203,6 +4953,35 @@
    "returns": ""
   },
   {
+   "name": "ClashResult.Angle",
+   "category": "Navisworks.Clash",
+   "description": "The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal). ~0° means they run parallel/together, ~90° means they cross perpendicular — so you can filter clashes by crossing angle (e.g. keep only ~90° crossings). Returns NaN when an element has no measurable direction (a point-like box).",
+   "tags": [
+    "clash",
+    "angle",
+    "degrees",
+    "perpendicular",
+    "crossing",
+    "orientation",
+    "direction"
+   ],
+   "inputs": [
+    {
+     "name": "result",
+     "type": "ClashResult",
+     "description": "The clash result."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "degrees",
+     "type": "number",
+     "description": "The angle in degrees (0–90) between the two elements' overall directions."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ClashResult.Assign",
    "category": "Navisworks.Clash",
    "description": "Assigns a clash result to a person or trade — bulk assignment via lacing.",
@@ -4309,6 +5088,46 @@
     }
    ],
    "returns": "Index-aligned comment texts, authors, statuses and creation dates."
+  },
+  {
+   "name": "ClashResult.Documentation",
+   "category": "Navisworks.Clash",
+   "description": "How documented a clash already is — whether it has a saved viewpoint, redline markup, and how many comments. Filter to the reviewed/annotated ones, or find the ones still needing attention (commentCount = 0).",
+   "tags": [
+    "clash",
+    "comments",
+    "viewpoint",
+    "redline",
+    "reviewed",
+    "documented",
+    "annotated",
+    "filter"
+   ],
+   "inputs": [
+    {
+     "name": "result",
+     "type": "ClashResult",
+     "description": "The clash result."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "hasViewpoint",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "hasRedlines",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "commentCount",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Whether it has a saved viewpoint, redline markup, and its comment count."
   },
   {
    "name": "ClashResult.Info",
@@ -4558,6 +5377,36 @@
      "name": "result",
      "type": "ClashResult",
      "description": "The result (pass-through). Lace over result lists for bulk triage."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ClashResult.Size",
+   "category": "Navisworks.Clash",
+   "description": "The size of the clash overlap region — its bounding-box volume in document units³. Filter out tiny grazing clashes and keep the significant ones. Pair with Units.Convert for readable units.",
+   "tags": [
+    "clash",
+    "size",
+    "volume",
+    "extent",
+    "significance",
+    "big",
+    "small",
+    "filter"
+   ],
+   "inputs": [
+    {
+     "name": "result",
+     "type": "ClashResult",
+     "description": "The clash result."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "volume",
+     "type": "number",
+     "description": "The clash bounding-box volume in document units³ (0 when unavailable)."
     }
    ],
    "returns": ""
@@ -6059,62 +6908,6 @@
    "returns": ""
   },
   {
-   "name": "Distance.BetweenItems",
-   "category": "Navisworks.Geometry",
-   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.",
-   "tags": [
-    "distance",
-    "clearance",
-    "closest",
-    "shortest",
-    "measure",
-    "between",
-    "gap"
-   ],
-   "inputs": [
-    {
-     "name": "itemsA",
-     "type": "ModelItem[]",
-     "description": "The first selection."
-    },
-    {
-     "name": "itemsB",
-     "type": "ModelItem[]",
-     "description": "The second selection."
-    },
-    {
-     "name": "method",
-     "type": "string",
-     "description": "\"mesh\" = exact surface-to-surface (Clash engine; slower on huge selections), \"bbox\" = fast bounding-box approximation.",
-     "default": "\"mesh\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "distance",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "pointA",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "pointB",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "The distance (document units; 0 when touching/intersecting) and the closest point on each selection."
-  },
-  {
    "name": "Grids.ClosestIntersection",
    "category": "Navisworks.Grids",
    "description": "The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.",
@@ -6248,6 +7041,473 @@
     }
    ],
    "returns": "Level names, their elevations (document units) and the GridLevel objects, in grid-system order."
+  },
+  {
+   "name": "Markup.AddArrow",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "arrow",
+    "pointer",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "x1",
+     "type": "number",
+     "description": "Markup-space X of the arrow tail."
+    },
+    {
+     "name": "y1",
+     "type": "number",
+     "description": "Markup-space Y of the arrow tail."
+    },
+    {
+     "name": "x2",
+     "type": "number",
+     "description": "Markup-space X of the arrow head."
+    },
+    {
+     "name": "y2",
+     "type": "number",
+     "description": "Markup-space Y of the arrow head."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddCloud",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.",
+   "tags": [
+    "markup",
+    "redline",
+    "cloud",
+    "revision",
+    "revcloud",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "points",
+     "type": "any[]",
+     "description": "Cloud outline: a list of [x, y] pairs, or a flat list x1, y1, x2, y2, … (3+ points)."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddEllipse",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "ellipse",
+    "circle",
+    "ring",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "x1",
+     "type": "number",
+     "description": "Markup-space X of the first box corner."
+    },
+    {
+     "name": "y1",
+     "type": "number",
+     "description": "Markup-space Y of the first box corner."
+    },
+    {
+     "name": "x2",
+     "type": "number",
+     "description": "Markup-space X of the opposite corner."
+    },
+    {
+     "name": "y2",
+     "type": "number",
+     "description": "Markup-space Y of the opposite corner."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddLine",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "line",
+    "draw",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "x1",
+     "type": "number",
+     "description": "Markup-space X of the start point."
+    },
+    {
+     "name": "y1",
+     "type": "number",
+     "description": "Markup-space Y of the start point."
+    },
+    {
+     "name": "x2",
+     "type": "number",
+     "description": "Markup-space X of the end point."
+    },
+    {
+     "name": "y2",
+     "type": "number",
+     "description": "Markup-space Y of the end point."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddNumberTag",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "tag",
+    "number",
+    "bubble",
+    "comment",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "number",
+     "type": "integer",
+     "description": "The tag number to draw."
+    },
+    {
+     "name": "x",
+     "type": "number",
+     "description": "Markup-space X of the tag centre."
+    },
+    {
+     "name": "y",
+     "type": "number",
+     "description": "Markup-space Y of the tag centre."
+    },
+    {
+     "name": "radius",
+     "type": "number",
+     "description": "Circle radius in markup-space units.",
+     "default": "0.08"
+    },
+    {
+     "name": "comment",
+     "type": "string",
+     "description": "Optional comment attached to the viewpoint (shows in the Comments panel).",
+     "default": "\"\""
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddText",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "text",
+    "annotate",
+    "label",
+    "viewpoint",
+    "tag"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to draw."
+    },
+    {
+     "name": "x",
+     "type": "number",
+     "description": "Markup-space X of the text anchor (0 = view centre)."
+    },
+    {
+     "name": "y",
+     "type": "number",
+     "description": "Markup-space Y of the text anchor (0 = view centre)."
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.Clear",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API).",
+   "tags": [
+    "markup",
+    "redline",
+    "clear",
+    "delete",
+    "remove",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.List",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.",
+   "tags": [
+    "markup",
+    "redline",
+    "list",
+    "read",
+    "count",
+    "calibrate",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "types",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "texts",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "positions",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Markup count, per-markup type names, texts (empty for shapes) and anchor positions as [x, y] — the calibration reference for the Add nodes."
   },
   {
    "name": "Model.FileName",
@@ -6706,6 +7966,35 @@
      "name": "isHidden",
      "type": "boolean",
      "description": "True when the item is hidden."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ModelItem.ModelName",
+   "category": "Navisworks.ModelItem",
+   "description": "The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model.",
+   "tags": [
+    "item",
+    "model",
+    "file",
+    "source",
+    "discipline",
+    "root",
+    "origin"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "modelName",
+     "type": "string",
+     "description": "The root ancestor's display name, e.g. \"Structure.nwc\"."
     }
    ],
    "returns": ""
@@ -9007,6 +10296,48 @@
    "returns": ""
   },
   {
+   "name": "SavedViewpoint.CopyOverrides",
+   "category": "Navisworks.Viewpoints",
+   "description": "Copies the appearance the way one saved view looks — its colour, transparency and hidden-item overrides — onto another saved view, WITHOUT changing that view's camera. Apply one view's highlighting scheme to many others in one graph. Both views must have their overrides baked in (Viewpoint.SaveWithOverrides).",
+   "tags": [
+    "viewpoint",
+    "view",
+    "override",
+    "appearance",
+    "copy",
+    "color",
+    "transparency",
+    "hidden",
+    "apply"
+   ],
+   "inputs": [
+    {
+     "name": "fromViewpoint",
+     "type": "any",
+     "description": "The viewpoint whose colour/transparency/hidden overrides to copy (or its name)."
+    },
+    {
+     "name": "toViewpoint",
+     "type": "any",
+     "description": "The viewpoint to update — keeps its own camera, gains the source's look (or its name)."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The updated target viewpoint."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "SavedViewpoint.Delete",
    "category": "Navisworks.Viewpoints",
    "description": "Deletes a saved viewpoint by name (searches folders too). Returns false when absent — safe for clean re-runs of batch generation.",
@@ -9035,6 +10366,45 @@
      "name": "deleted",
      "type": "boolean",
      "description": "True when a viewpoint was deleted; false when no viewpoint has that name."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SavedViewpoint.Duplicate",
+   "category": "Navisworks.Viewpoints",
+   "description": "Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given.",
+   "tags": [
+    "viewpoint",
+    "view",
+    "duplicate",
+    "copy",
+    "clone"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint, or its display name."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "Name for the copy (null uses \"<name> copy\").",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The new stored viewpoint copy."
     }
    ],
    "returns": ""
@@ -9298,6 +10668,75 @@
    "returns": ""
   },
   {
+   "name": "Viewpoint.VisibleItems",
+   "category": "Navisworks.Viewpoints",
+   "description": "Checks which of the given items a viewpoint can see (bounding box vs the camera frustum). Feed it a list of items, a selection/search set, a set name or one item; the viewpoint input accepts a saved viewpoint, a viewpoint name, or nothing for the current view. Note: this is a framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.",
+   "tags": [
+    "viewpoint",
+    "visible",
+    "contains",
+    "frustum",
+    "camera",
+    "view",
+    "sees",
+    "inview",
+    "mask"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "any",
+     "description": "What to test: a list of model items, a single item, a saved selection/search set, or a set name."
+    },
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The viewpoint to test against: a saved viewpoint, a viewpoint name, or empty for the CURRENT view.",
+     "default": "null"
+    },
+    {
+     "name": "fullyInside",
+     "type": "boolean",
+     "description": "True requires an item's whole bounding box inside the view; false (default) counts partly visible items.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "visibleItems",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "outsideItems",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "mask",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "containsAny",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "visibleItems / outsideItems split, a boolean mask over the input order, whether anything is visible, and a diagnostic report."
+  },
+  {
    "name": "Viewpoints.All",
    "category": "Navisworks.Viewpoints",
    "description": "All saved viewpoints in a document, including those inside folders.",
@@ -9365,6 +10804,45 @@
    "returns": ""
   },
   {
+   "name": "Viewpoints.DuplicateFolder",
+   "category": "Navisworks.Viewpoints",
+   "description": "Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "duplicate",
+    "copy",
+    "clone",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The source folder, or its name."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "Name for the new folder."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The new stored folder."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Viewpoints.FromClashResults",
    "category": "Navisworks.Viewpoints",
    "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.",
@@ -9400,6 +10878,86 @@
      "name": "viewpoints",
      "type": "SavedViewpoint[]",
      "description": "The stored viewpoints, one per result, named after the result."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Viewpoints.RenameFolder",
+   "category": "Navisworks.Viewpoints",
+   "description": "Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "rename",
+    "name",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder (e.g. from Viewpoints.CreateFolder), or its current name."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "The new folder name."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The renamed stored folder (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Viewpoints.SortFolder",
+   "category": "Navisworks.Viewpoints",
+   "description": "Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "sort",
+    "alphabetical",
+    "order",
+    "organize",
+    "arrange"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder to sort, or its name; null/empty sorts the top level.",
+     "default": "null"
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True to also sort every nested folder.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The sorted folder (null when the top level was sorted)."
     }
    ],
    "returns": ""
@@ -9818,6 +11376,52 @@
      "name": "result",
      "type": "string",
      "description": "The trimmed string."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Flow.Then",
+   "category": "Workflow",
+   "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).",
+   "tags": [
+    "sequence",
+    "order",
+    "passthrough",
+    "wait",
+    "after",
+    "chain",
+    "depend"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to pass through unchanged."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Wire any output of the node that must run first (its value is ignored)."
+    },
+    {
+     "name": "after2",
+     "type": "any",
+     "description": "Optional second node that must run first.",
+     "default": "null"
+    },
+    {
+     "name": "after3",
+     "type": "any",
+     "description": "Optional third node that must run first.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value input, unchanged."
     }
    ],
    "returns": ""

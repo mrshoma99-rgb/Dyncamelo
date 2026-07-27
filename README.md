@@ -2,9 +2,8 @@
 
 **Dynamo-style visual programming for Autodesk Navisworks.**
 
-<!-- Badges: enabled once CI workflows land in .github/workflows -->
-[![Build](https://img.shields.io/badge/build-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
-[![Tests](https://img.shields.io/badge/tests-pending-lightgrey)](https://github.com/mrshoma99-rgb/dyncamelo/actions)
+[![Build](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml)
+[![Release](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml)
 [![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
 [![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
@@ -23,25 +22,17 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 ---
 
-## What's new in v0.11 — a library you can read at a glance
+## What's new in v0.12–v0.23 — site safety & spatial analysis
 
-- **Create / Modify / Info grouping** — at the last level of every category the node library now splits nodes into three groups — **Create** (＋ green, makes something new), **Modify** (✎ amber, changes existing things), **Info** (ⓘ blue, reads data) — each with its own symbol, so you find the right node faster. The category tree above is unchanged. Every placed node also carries a matching coloured dot on the canvas, so what a node does stays obvious where you work.
-- **Saved-viewpoint organizing nodes** — `Viewpoints.SortFolder` (alphabetical, no more drag-and-drop), `SavedViewpoint.Duplicate`, `Viewpoints.DuplicateFolder`, `Viewpoints.RenameFolder`, and `SavedViewpoint.CopyOverrides` (copy one view's colour/ghosting onto another, keeping its camera).
-- **Run profiling** — a slow run now names the node that ate the time (e.g. "slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)"), and a busy indicator shows the graph is working rather than frozen.
+- **Fall-hazard analysis suite** — `FallHazard.FloorOpeningMap` renders a whole-floor heat map of openings from the real model mesh (limit-pivoting gradient, user colours, printed gap-over-limit labels, one saved viewpoint per flagged opening), and `FallHazard.EdgeHandrailCheck` classifies every edge around a void as **dangerous / protected / safe** — with real handrail length-along-edge coverage, a min-passage rule, user colours and printed overages for reports. Both take a **`units`** input so metre inputs stay honest in feet-based documents.
+- **Spatial clustering** — `Proximity.Cluster` groups touching geometry into logical elements (a ladder made of loose shapes becomes ladder #1, #2, …), stamps each item's number as a searchable custom property in the same run, and has a precise `mesh` mode that confirms every connection with the Clash engine's exact clearance.
+- **Viewpoint intelligence & markups** — `Viewpoint.VisibleItems` answers "does this view actually show these elements?" (camera-frustum test, flexible set/list/name inputs); the experimental `Markup.*` nodes draw text, arrows, ellipses, clouds and numbered tag substitutes onto saved viewpoints via the hidden Navisworks redline API.
+- **Color toolkit** — seeded `Color.Random` / `Color.RandomList` (stable across re-runs, golden-angle distinct), `Color.Gradient` between two colors, and `Color.ByValues` + `Appearance.ColorByValues` for one-node color-coding by parameter value with a legend.
+- **Ordering, the industry way** — `Flow.Then` pins the execution order of side-effect nodes as a real data dependency (the Dynamo Passthrough pattern); a Captured Selection node snapshots the live selection and replays it every run.
+- **Editor quality of life** — Space-bar quick node search at the cursor, port tooltips generated from the API docs on all **314 nodes**, an inline **Watch Image** node for the analysis PNGs, an index gutter on Watch List, click-to-expand preview bubbles, a proper Boolean switch, and Create/Modify/Info grouping with symbols throughout the library.
+- **One BIMCamel ribbon** — a single tab shared with the IFC exporter, unified About window, and an update check when the editor opens.
 
-## What's new in v0.10 — per-item workflows
-
-- **Universal loops** — a real loop construct: drop **`Loop.Item`** and **`Loop.Collect`** on the canvas and everything wired between them runs **once per item, in order**, built from the ordinary nodes. Generate a viewpoint per room, recolour per system, export per level — no special "action" nodes required.
-- **Per-item viewpoints that keep their look** — `Viewpoint.SaveWithOverrides` captures the camera **and** the current isolation/colour into each saved view (Navisworks runtime overrides), so recalling a view restores exactly what it showed. Temporary highlight/ghost nodes (`Appearance.OverrideColorTemporary`, `Action.Highlight`/`Action.Ghost`) make "spotlight each element in its own view" a handful of nodes.
-- **Reified actions + `Workflow.ForEach`** — the earlier per-item mechanism (`Action.Isolate` / `ZoomTo` / `SaveViewpoint`) still ships alongside the loop region.
-- **Live element preview** — select a node and its output elements highlight in the Navisworks scene (toggle in settings), so you can see exactly what a node collected or produced — the same feedback loop Dynamo gives you.
-- **Inline choice dropdowns** — inputs that accept one of a fixed set of values (selection-resolution levels, clash test types, IFC schema, comment status, distance method) now offer a themed dropdown right on the port instead of a free-text box.
-- **Colour picker & editable slider step** — the Color Picker node opens a proper HSV dialog, and the number/integer sliders expose an editable step field.
-- **Navisworks 2024, 2025 & 2026** — one multi-year bundle and installer.
-- **Graphical installer** — `DyncameloSetup.exe` (per-user, no admin rights) with a BIMCamel-themed UI; installs the ribbon add-in and an Add/Remove Programs entry.
-- **280+ nodes** and growing — including IFC export, quick geometry/selection-tree utilities (bounding-box scaling, object-ancestor), and camera projection / field-of-view.
-
-Earlier waves: v0.4 instant library search & curated samples, v0.3 "plugin parity" (50 nodes: custom property tabs, Excel, BCF 2.1, clash management, transforms, grids, document lifecycle), v0.2 editor quality-of-life — see the changelogs under [docs/](docs/).
+Full details in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
 
 ## Features
 
@@ -49,8 +40,9 @@ Earlier waves: v0.4 instant library search & curated samples, v0.3 "plugin parit
 - **Real dataflow engine** — eager evaluation, topological execution, and dirty propagation: change one slider and only its downstream nodes re-run. Manual and Automatic run modes.
 - **Replication ("lacing")** — feed a list into a scalar input and the node maps over it, exactly like Dynamo: Shortest by default, Longest and Cross-Product per node.
 - **Robust by design** — a failing node surfaces a per-node Warning/Error state; it never crashes the graph run or Navisworks.
-- **Per-item workflows** — a universal loop (`Loop.Item` → body → `Loop.Collect`) runs any nodes once per item, in order, so stateful "isolate → zoom → save viewpoint → next" jobs work with the real nodes, not just pure data mapping.
-- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides (permanent and viewpoint-scoped), transforms, saved viewpoints, IFC export, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (280+ nodes).
+- **Per-item workflows** — a universal loop (`Loop.Item` → body → `Loop.Collect`) runs any nodes once per item, in order, so stateful "isolate → zoom → save viewpoint → next" jobs work with the real nodes, not just pure data mapping. `Flow.Then` pins side-effect order explicitly when two writes must happen in sequence.
+- **Spatial & safety analysis** — fall-hazard heat maps and edge/handrail classification straight from the model mesh, touching-geometry clustering with custom-property stamping, camera-frustum visibility tests, and exact clash-engine distances.
+- **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides (permanent and viewpoint-scoped), transforms, saved viewpoints (incl. experimental redline markups), IFC export, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (**314 nodes across 37 categories**, machine-inventoried in [docs/dyncamelo-nodes.json](docs/dyncamelo-nodes.json)).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
 - **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
