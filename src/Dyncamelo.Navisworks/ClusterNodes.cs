@@ -26,22 +26,27 @@ public static class ClusterNodes
     /// <param name="items">The geometry items to group (e.g. all ladder shapes).</param>
     /// <param name="tolerance">Maximum gap that still counts as touching; 0 requires contact. Must be smaller than the space between separate elements.</param>
     /// <param name="units">Unit of the tolerance: "document" uses the file's internal unit (often feet!), or name the unit your number is in.</param>
+    /// <param name="method">"bbox" = fast bounding-box test; "mesh" = precise — box candidates are confirmed with the Clash engine's exact surface-to-surface clearance, so fat boxes (diagonal members) can no longer bridge separate elements.</param>
     /// <param name="propertyName">When set (e.g. "Ladder Number"), each item gets its cluster number written as this custom property.</param>
     /// <param name="tabName">Custom property tab that receives the number.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Item groups (one list per cluster), each input item's 1-based cluster number (0 = no geometry), cluster count and sizes, and a diagnostic report.</returns>
     [NodeName("Proximity.Cluster")]
     [NodeDescription(
-        "Groups items into clusters of touching geometry (bounding-box gap <= tolerance, chained) — turns loose " +
-        "shapes into logical elements, e.g. numbering each ladder. Set propertyName to also stamp every item with " +
-        "its cluster number as a searchable custom property.")]
-    [NodeSearchTags("cluster", "group", "touching", "connected", "proximity", "ladder", "assembly", "clump", "component")]
+        "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into " +
+        "logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" " +
+        "confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set " +
+        "propertyName to also stamp every item with its cluster number as a searchable custom property.")]
+    [NodeSearchTags("cluster", "group", "touching", "connected", "proximity", "ladder", "assembly", "clump", "component", "mesh", "precise")]
+    [NodeAliases("Dyncamelo.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,Autodesk.Navisworks.Api.Document")]
     [MultiReturn("groups", "clusterNumbers", "clusterCount", "sizes", "report")]
     public static Dictionary<string, object?> Cluster(
         IEnumerable<ModelItem> items,
         double tolerance = 0.01,
         [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
         string units = "document",
+        [NodeChoices("bbox", "mesh")]
+        string method = "bbox",
         string propertyName = "",
         string tabName = "Dyncamelo Data",
         Document? document = null)
@@ -72,7 +77,51 @@ public static class ClusterNodes
             }
         }
 
-        var ids = BoxClusterer.Cluster(boxes, worldTolerance);
+        var mode = (method ?? string.Empty).Trim().ToLowerInvariant();
+        if (mode.Length == 0)
+        {
+            mode = "bbox";
+        }
+
+        if (mode != "bbox" && mode != "mesh")
+        {
+            throw new ArgumentException(
+                "Unknown method '" + method + "'. Use \"bbox\" (fast boxes) or \"mesh\" (exact surfaces via the Clash engine).",
+                nameof(method));
+        }
+
+        int meshTests = 0;
+        int meshFailures = 0;
+        Func<int, int, bool>? verifyTouch = null;
+        if (mode == "mesh")
+        {
+            var clash = doc.GetClash()
+                ?? throw new InvalidOperationException(
+                    "The Clash engine is not available in this Navisworks edition — use method = \"bbox\" instead.");
+
+            // The box test becomes a candidate prefilter; every candidate pair
+            // (not already connected) is confirmed with the exact surface-to-
+            // surface clearance. The epsilon absorbs float dust on perfectly
+            // abutting faces when the tolerance is 0.
+            verifyTouch = (i, j) =>
+            {
+                meshTests++;
+                var a = NavisValues.ToItemCollection(new List<ModelItem> { list[i] });
+                var b = NavisValues.ToItemCollection(new List<ModelItem> { list[j] });
+                if (!clash.TryCalculateMinimumClearance(a, b, false, out var clearance) ||
+                    clearance?.ClosestPointOnSelection1 == null ||
+                    clearance.ClosestPointOnSelection2 == null)
+                {
+                    meshFailures++;
+                    return false;
+                }
+
+                return clearance.ClosestPointOnSelection1.DistanceTo(clearance.ClosestPointOnSelection2)
+                    <= worldTolerance + 1e-9;
+            };
+        }
+
+        var ids = BoxClusterer.Cluster(boxes, worldTolerance, verifyTouch);
 
         int clusterCount = 0;
         foreach (var id in ids)
@@ -131,6 +180,13 @@ public static class ClusterNodes
             ", tolerance " + tolerance.ToString("0.###", CultureInfo.InvariantCulture) + " " + unitsLabel +
             (Math.Abs(scale - 1.0) > 1e-9
                 ? " (= " + worldTolerance.ToString("0.###", CultureInfo.InvariantCulture) + " document units)"
+                : string.Empty) +
+            ", method " + mode +
+            (mode == "mesh"
+                ? " (" + meshTests.ToString(CultureInfo.InvariantCulture) + " exact clearance test(s)" +
+                  (meshFailures > 0
+                      ? ", " + meshFailures.ToString(CultureInfo.InvariantCulture) + " pair(s) unverifiable and kept apart"
+                      : string.Empty) + ")"
                 : string.Empty) + "." +
             (noGeometry > 0
                 ? " " + noGeometry.ToString(CultureInfo.InvariantCulture) + " item(s) had no geometry box (cluster number 0)."

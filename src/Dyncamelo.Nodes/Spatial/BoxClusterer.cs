@@ -22,8 +22,18 @@ public static class BoxClusterer
     /// </summary>
     /// <param name="boxes">One box per element: [minX, minY, minZ, maxX, maxY, maxZ], or null for "no geometry".</param>
     /// <param name="tolerance">Maximum face-to-face gap (world units) that still counts as touching; 0 requires contact/overlap.</param>
+    /// <param name="verifyTouch">
+    /// Optional exact-touch confirmation for a candidate pair (indices into
+    /// <paramref name="boxes"/>): the box test is then only a prefilter, and a
+    /// pair joins a cluster ONLY when this returns true. Never invoked for
+    /// pairs already connected through earlier confirmations, so expensive
+    /// checks (mesh clearance) run as few times as possible.
+    /// </param>
     /// <returns>Cluster id per input index (-1 for boxless entries).</returns>
-    public static int[] Cluster(IReadOnlyList<double[]?> boxes, double tolerance)
+    public static int[] Cluster(
+        IReadOnlyList<double[]?> boxes,
+        double tolerance,
+        Func<int, int, bool>? verifyTouch = null)
     {
         int count = boxes.Count;
         var parent = new int[count];
@@ -68,7 +78,14 @@ public static class BoxClusterer
                 if (b[1] <= a[4] + tol && a[1] <= b[4] + tol &&
                     b[2] <= a[5] + tol && a[2] <= b[5] + tol)
                 {
-                    Union(parent, i, j);
+                    if (verifyTouch == null)
+                    {
+                        Union(parent, i, j);
+                    }
+                    else if (Find(parent, i) != Find(parent, j) && verifyTouch(i, j))
+                    {
+                        Union(parent, i, j);
+                    }
                 }
             }
         }

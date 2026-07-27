@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Dyncamelo.Nodes.Spatial;
 using Xunit;
@@ -85,6 +86,51 @@ public class BoxClustererTests
         };
 
         Assert.Equal(new[] { 0, -1, -1, -1, 0 }, BoxClusterer.Cluster(boxes, 0));
+    }
+
+    [Fact]
+    public void Verifier_RejectedPair_KeepsClustersApart()
+    {
+        // Boxes 1 and 2 overlap (fat-box bridge), but the exact check says the
+        // meshes never touch — the clusters must stay separate.
+        var boxes = new List<double[]?> { Box(0, 0, 0), Box(0.5, 0, 0), };
+        var ids = BoxClusterer.Cluster(boxes, 0, (i, j) => false);
+        Assert.Equal(new[] { 0, 1 }, ids);
+    }
+
+    [Fact]
+    public void Verifier_ConfirmedChain_StillClusters()
+    {
+        var boxes = new List<double[]?> { Box(0, 0, 0), Box(1, 0, 0), Box(2, 0, 0), Box(10, 0, 0) };
+        var ids = BoxClusterer.Cluster(boxes, 0, (i, j) => true);
+        Assert.Equal(new[] { 0, 0, 0, 1 }, ids);
+    }
+
+    [Fact]
+    public void Verifier_SelectiveRejection_SplitsExactlyWhereItSays()
+    {
+        // Three boxes in a row; the exact check confirms 0-1 but refutes 1-2.
+        var boxes = new List<double[]?> { Box(0, 0, 0), Box(1, 0, 0), Box(2, 0, 0) };
+        var ids = BoxClusterer.Cluster(boxes, 0, (i, j) => !(Math.Min(i, j) == 1 && Math.Max(i, j) == 2));
+        Assert.Equal(new[] { 0, 0, 1 }, ids);
+    }
+
+    [Fact]
+    public void Verifier_IsSkipped_ForPairsAlreadyConnected()
+    {
+        // All three boxes mutually overlap: after 0-1 and 0-2 join, the 1-2
+        // candidate is already connected — the expensive check must not run.
+        var boxes = new List<double[]?>
+        {
+            new[] { 0.0, 0, 0, 2, 1, 1 },
+            new[] { 1.0, 0, 0, 3, 1, 1 },
+            new[] { 2.0, 0, 0, 4, 1, 1 },
+        };
+
+        int calls = 0;
+        var ids = BoxClusterer.Cluster(boxes, 0, (i, j) => { calls++; return true; });
+        Assert.Equal(new[] { 0, 0, 0 }, ids);
+        Assert.Equal(2, calls);
     }
 
     [Fact]
