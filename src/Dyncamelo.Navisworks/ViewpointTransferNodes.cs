@@ -25,7 +25,7 @@ namespace Dyncamelo.Navisworks;
 public static class ViewpointTransferNodes
 {
     /// <summary>Exports saved viewpoints to a portable package file.</summary>
-    /// <param name="filePath">Where to write the package (a .json file, e.g. from a File Path node).</param>
+    /// <param name="filePath">Where to write the package: a .json file path, or a folder (a dyncamelo-viewpoints.json is created inside). Relative paths land in Documents.</param>
     /// <param name="viewpoints">What to export: nothing = every saved viewpoint; or a viewpoint, a folder, a name (viewpoint first, then folder), or a list of these.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path, how many viewpoints it holds, and a summary report.</returns>
@@ -42,10 +42,8 @@ public static class ViewpointTransferNodes
         object? viewpoints = null,
         Document? document = null)
     {
-        if (string.IsNullOrEmpty(filePath))
-        {
-            throw new ArgumentException("No file path provided.", nameof(filePath));
-        }
+        filePath = ViewpointPackagePaths.ResolveForWrite(
+            filePath, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
 
         var doc = NavisworksContext.ResolveDocument(document);
         var tree = doc.SavedViewpoints;
@@ -75,13 +73,25 @@ public static class ViewpointTransferNodes
             package.Views.Add(view);
         }
 
-        var directory = Path.GetDirectoryName(filePath);
-        if (!string.IsNullOrEmpty(directory))
+        try
         {
-            Directory.CreateDirectory(directory);
-        }
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-        File.WriteAllText(filePath, package.ToJson(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            File.WriteAllText(filePath, package.ToJson(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || ex is System.Security.SecurityException)
+        {
+            throw new InvalidOperationException(
+                "Windows denied writing to '" + filePath + "'. Typical causes: the folder needs admin " +
+                "rights (Program Files, a drive root), or Windows Security's Controlled Folder Access is " +
+                "blocking Navisworks from Documents/Desktop. Point filePath at a writable folder (e.g. " +
+                "C:\\Temp\\" + ViewpointPackagePaths.DefaultFileName + "), or allow Navisworks under " +
+                "Controlled Folder Access.");
+        }
 
         var report = new StringBuilder();
         report.AppendLine("Exported " + package.Views.Count + " viewpoint(s) to " + filePath);
@@ -107,7 +117,7 @@ public static class ViewpointTransferNodes
     }
 
     /// <summary>Imports viewpoints from a package file into the current model.</summary>
-    /// <param name="filePath">The package file written by Viewpoints.ExportFile.</param>
+    /// <param name="filePath">The package file written by Viewpoints.ExportFile (or the folder containing its dyncamelo-viewpoints.json).</param>
     /// <param name="folderName">Put every imported view under this folder ("A/B" nests); null/empty recreates each view's original folders.</param>
     /// <param name="overwrite">True replaces a same-named viewpoint in the same folder; false always adds.</param>
     /// <param name="document">The document (defaults to the active document).</param>
@@ -125,18 +135,27 @@ public static class ViewpointTransferNodes
         bool overwrite = true,
         Document? document = null)
     {
-        if (string.IsNullOrEmpty(filePath))
-        {
-            throw new ArgumentException("No file path provided.", nameof(filePath));
-        }
-
+        filePath = ViewpointPackagePaths.ResolveForRead(
+            filePath, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         if (!File.Exists(filePath))
         {
             throw new FileNotFoundException("The file '" + filePath + "' does not exist.", filePath);
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
-        var package = ViewpointPackageFile.Parse(File.ReadAllText(filePath));
+        string json;
+        try
+        {
+            json = File.ReadAllText(filePath);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || ex is System.Security.SecurityException)
+        {
+            throw new InvalidOperationException(
+                "Windows denied reading '" + filePath + "'. Check the file's permissions, or copy it " +
+                "to a folder like C:\\Temp and point filePath there.");
+        }
+
+        var package = ViewpointPackageFile.Parse(json);
         if (package.Views.Count == 0)
         {
             throw new InvalidOperationException("The package '" + filePath + "' contains no viewpoints.");

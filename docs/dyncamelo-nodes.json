@@ -1,5 +1,5 @@
 {
- "version": "v0.25.1",
+ "version": "v0.26.0",
  "count": 319,
  "categories": [
   {
@@ -10934,7 +10934,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Where to write the package (a .json file, e.g. from a File Path node)."
+     "description": "Where to write the package: a .json file path, or a folder (a dyncamelo-viewpoints.json is created inside). Relative paths land in Documents."
     },
     {
      "name": "viewpoints",
@@ -11026,7 +11026,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The package file written by Viewpoints.ExportFile."
+     "description": "The package file written by Viewpoints.ExportFile (or the folder containing its dyncamelo-viewpoints.json)."
     },
     {
      "name": "folderName",
