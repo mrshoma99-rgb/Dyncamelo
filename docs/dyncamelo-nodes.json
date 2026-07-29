@@ -1,6 +1,6 @@
 {
- "version": "v0.23.1",
- "count": 316,
+ "version": "v0.25.1",
+ "count": 319,
  "categories": [
   {
    "name": "Annotation",
@@ -136,7 +136,11 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 19
+   "count": 21
+  },
+  {
+   "name": "Portable.ViewpointPackageFile",
+   "count": 1
   },
   {
    "name": "String",
@@ -10911,6 +10915,60 @@
    "returns": ""
   },
   {
+   "name": "Viewpoints.ExportFile",
+   "category": "Navisworks.Viewpoints",
+   "description": "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave viewpoints empty to export them all, or wire specific viewpoints, folders or names. Element overrides are not carried (they only exist relative to the source model's items).",
+   "tags": [
+    "viewpoints",
+    "export",
+    "transfer",
+    "copy",
+    "between",
+    "models",
+    "package",
+    "camera",
+    "section",
+    "box"
+   ],
+   "inputs": [
+    {
+     "name": "filePath",
+     "type": "string",
+     "description": "Where to write the package (a .json file, e.g. from a File Path node)."
+    },
+    {
+     "name": "viewpoints",
+     "type": "any",
+     "description": "What to export: nothing = every saved viewpoint; or a viewpoint, a folder, a name (viewpoint first, then folder), or a list of these.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "filePath",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The written file path, how many viewpoints it holds, and a summary report."
+  },
+  {
    "name": "Viewpoints.FromClashResults",
    "category": "Navisworks.Viewpoints",
    "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.",
@@ -10949,6 +11007,64 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "Viewpoints.ImportFile",
+   "category": "Navisworks.Viewpoints",
+   "description": "Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box and folder structure. Positions are converted automatically when the source model used different units. Re-runs update same-named views instead of duplicating (overwrite).",
+   "tags": [
+    "viewpoints",
+    "import",
+    "transfer",
+    "copy",
+    "between",
+    "models",
+    "package",
+    "restore"
+   ],
+   "inputs": [
+    {
+     "name": "filePath",
+     "type": "string",
+     "description": "The package file written by Viewpoints.ExportFile."
+    },
+    {
+     "name": "folderName",
+     "type": "string",
+     "description": "Put every imported view under this folder (\"A/B\" nests); null/empty recreates each view's original folders.",
+     "default": "null"
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True replaces a same-named viewpoint in the same folder; false always adds.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoints",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "report",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The stored viewpoints, how many were imported, and a summary report."
   },
   {
    "name": "Viewpoints.RenameFolder",
@@ -11026,6 +11142,27 @@
      "name": "folder",
      "type": "FolderItem",
      "description": "The sorted folder (null when the top level was sorted)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ViewpointPackageFile.Parse",
+   "category": "Portable.ViewpointPackageFile",
+   "description": "Parses a package from JSON with node-friendly errors: malformed text and files written by a newer Dyncamelo both fail with a message that says what to do, never a raw serializer stack trace.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "json",
+     "type": "string",
+     "description": ""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "ViewpointPackageFile",
+     "description": ""
     }
    ],
    "returns": ""
