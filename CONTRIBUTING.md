@@ -2,7 +2,7 @@
 
 Thanks for your interest in Dyncamelo! This document explains how to set up a development environment, the coding conventions the project enforces, and how to get a change merged.
 
-Dyncamelo is proprietary software (see [LICENSE](LICENSE)). By submitting a contribution you assign to the project owner (BIMCamel) all rights in the contribution, and you confirm you are entitled to do so.
+Dyncamelo is source-available under the Apache License 2.0 with the Commons Clause (see [LICENSE](LICENSE)) — free to use, including commercially; only selling it or products built from it is reserved to BIMCamel. By submitting a contribution you assign to the project owner (BIMCamel) all rights in the contribution and you confirm you are entitled to do so — this is what lets BIMCamel keep the whole work under one license (including granting commercial licenses) without chasing per-file permissions later.
 
 ## Ways to contribute
 

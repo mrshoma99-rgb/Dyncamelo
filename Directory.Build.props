@@ -8,11 +8,11 @@
 
     <!-- Assembly version, read at runtime by the About box (DyncameloRibbonPlugin).
          Bump this in lockstep with dist/RELEASE_VERSION on every release. -->
-    <Version>0.26.1</Version>
+    <Version>0.26.2</Version>
     <Authors>BIMCamel</Authors>
     <Company>BIMCamel</Company>
     <Product>Dyncamelo</Product>
-    <Copyright>Copyright (c) 2026 BIMCamel. All rights reserved.</Copyright>
+    <Copyright>Copyright (c) 2026 BIMCamel. Licensed under Apache 2.0 with the Commons Clause.</Copyright>
     <RepositoryUrl>https://github.com/mrshoma99-rgb/dyncamelo</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 

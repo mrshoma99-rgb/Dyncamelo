@@ -4,12 +4,12 @@
 
 [![Build](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml)
 [![Release](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml)
-[![License: Proprietary](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
+[![License: Apache 2.0 + Commons Clause](https://img.shields.io/badge/license-Apache%202.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
 [![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
-> ## ⚠️ Proprietary software — public, but **not open source**
-> This repository is public so you can browse the code and download official releases. Dyncamelo is **© 2026 BIMCamel — all rights reserved**. No license is granted to use, copy, modify, merge, publish, distribute, sublicense, or sell any part of this software, in source or binary form, except as expressly permitted in writing by BIMCamel. Being able to read the source here does **not** grant any such rights. See [LICENSE](LICENSE).
+> ## Source-available — free to use, not to sell
+> Dyncamelo is licensed under **Apache 2.0 with the Commons Clause** (see [LICENSE](LICENSE)). In plain words: **use it freely — at home or at work, companies included** — read the source, modify it, contribute, and share it for free. What you may **not** do is *sell* it: selling Dyncamelo itself, or a product or service whose value derives substantially from it, requires a written agreement with BIMCamel. (Because of the selling restriction this is "source-available" rather than OSI-certified open source.)
 
 Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024, 2025 & 2026**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
 
@@ -45,7 +45,7 @@ Full details in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves:
 - **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides (permanent and viewpoint-scoped), transforms, saved viewpoints (incl. experimental redline markups), IFC export, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the full [node catalog](docs/NODE_LIBRARY.md) (**314 nodes across 37 categories**, machine-inventoried in [docs/dyncamelo-nodes.json](docs/dyncamelo-nodes.json)).
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
-- **Proprietary** — © 2026 BIMCamel, all rights reserved. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
+- **Source-available** — Apache 2.0 + Commons Clause: free to use, including commercially at work; only *selling* Dyncamelo or products built from it is reserved to BIMCamel. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
 ## Part of the BIMCamel toolset
 
@@ -156,10 +156,10 @@ Full milestone breakdown with exit criteria and risks: [docs/IMPLEMENTATION_PLAN
 
 ## Feedback
 
-Dyncamelo is proprietary software developed by BIMCamel; the source is public for transparency and distribution, **not** for outside contribution, and external pull requests are not accepted. Bug reports and feature requests are welcome — please open a [GitHub issue](https://github.com/mrshoma99-rgb/dyncamelo/issues) or reach us at [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo).
+Dyncamelo is developed by BIMCamel and is open to the community: bug reports, feature requests and pull requests are all welcome. Open a [GitHub issue](https://github.com/mrshoma99-rgb/dyncamelo/issues), read [CONTRIBUTING.md](CONTRIBUTING.md) before sending a PR, or reach us at [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo).
 
 ## License
 
-Dyncamelo is **proprietary software** — Copyright (c) 2026 BIMCamel, all rights reserved (see [LICENSE](LICENSE)). This repository being public does not grant any license to use, copy, modify, or redistribute the source or binaries; all rights are reserved except where BIMCamel grants them in writing. Releases up to v0.1.1 were MIT-licensed; that grant remains valid only for copies obtained while it was in effect. Third-party components ship under their own licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Dyncamelo is **source-available** under the **Apache License 2.0 with the Commons Clause** (see [LICENSE](LICENSE)): you may use it freely — personally and professionally, companies included — modify it, and redistribute it for free, but the right to **sell** the software, or any product or service whose value derives substantially from it, is reserved to BIMCamel (contact us for a commercial agreement). Licensing history: releases up to v0.1.1 were MIT-licensed and v0.1.2–v0.26.1 were proprietary; each grant applies to copies obtained while it was in effect. Third-party components ship under their own licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit, and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at runtime the API is provided by your licensed Navisworks installation.
