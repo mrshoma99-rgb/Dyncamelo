@@ -267,52 +267,7 @@ public static class ClashEditNodes
     /// <summary>Resolves a "test or name" input to the STORED clash test.</summary>
     private static ClashTest ResolveStoredTest(DocumentClash clash, object? test)
     {
-        switch (test)
-        {
-            case null:
-                throw new ArgumentNullException(nameof(test), "No clash test provided.");
-            case string name:
-                if (string.IsNullOrEmpty(name))
-                {
-                    throw new ArgumentException("No clash test name provided.", nameof(test));
-                }
-
-                return NavisValues.FindSavedItemByName<ClashTest>(clash.TestsData.Tests, name)
-                    ?? throw new InvalidOperationException(
-                        "No clash test named '" + name + "' exists in the document.");
-            case ClashTest clashTest:
-                if (clashTest.IsReadOnly)
-                {
-                    return clashTest; // already the stored instance
-                }
-
-                // A detached copy — re-locate the stored original by Guid/name.
-                var byGuid = clashTest.Guid != Guid.Empty
-                    ? FindTestByGuid(clash.TestsData.Tests, clashTest.Guid)
-                    : null;
-                return byGuid
-                    ?? NavisValues.FindSavedItemByName<ClashTest>(clash.TestsData.Tests, clashTest.DisplayName)
-                    ?? throw new InvalidOperationException(
-                        "The clash test '" + clashTest.DisplayName + "' is not stored in this document. " +
-                        "Wire a test from Clash.Tests, ClashTest.ByName or ClashTest.Create.");
-            default:
-                throw new ArgumentException(
-                    "Cannot interpret a value of type '" + test.GetType().Name +
-                    "' as a clash test. Wire the test itself or its display name.", nameof(test));
-        }
-    }
-
-    private static ClashTest? FindTestByGuid(IEnumerable<SavedItem> items, Guid guid)
-    {
-        foreach (var test in NavisValues.FlattenSavedItems<ClashTest>(items))
-        {
-            if (test.Guid == guid)
-            {
-                return test;
-            }
-        }
-
-        return null;
+        return ClashHelpers.ResolveStoredTest(clash, test);
     }
 
     private static CommentStatus ParseCommentStatus(string? status)

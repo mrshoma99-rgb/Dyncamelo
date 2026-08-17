@@ -1,6 +1,6 @@
 {
- "version": "v0.26.0",
- "count": 319,
+ "version": "v0.26.2",
+ "count": 327,
  "categories": [
   {
    "name": "Annotation",
@@ -68,7 +68,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 33
+   "count": 41
   },
   {
    "name": "Navisworks.Comments",
@@ -4542,6 +4542,49 @@
    "returns": ""
   },
   {
+   "name": "Clash.FilterByOrientation",
+   "category": "Navisworks.Clash",
+   "description": "Keeps only the clashes between elements of the given box shapes, matched in either order — shape1=run + shape2=wall keeps pipes through walls, run/riser + slab keeps pipes through floors; Clash.FilterByAngle alone cannot tell those apart (both cross at ~90°). Shapes are ClashResult.Orientation's: slab, wall, riser, run, block, or any.",
+   "tags": [
+    "clash",
+    "filter",
+    "orientation",
+    "wall",
+    "floor",
+    "slab",
+    "pipe",
+    "shape",
+    "crossing"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "shape1",
+     "type": "string",
+     "description": "Required shape of one element: any, slab, wall, riser, run or block.",
+     "default": "\"any\""
+    },
+    {
+     "name": "shape2",
+     "type": "string",
+     "description": "Required shape of the other element (the pair is matched in either order).",
+     "default": "\"any\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved (results without geometry are dropped)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Clash.FilterByStatus",
    "category": "Navisworks.Clash",
    "description": "Keeps only the clash results with the given status (New, Active, Reviewed, Approved or Resolved) — the triage staple: e.g. drop the already-Approved ones and work the New ones.",
@@ -4575,6 +4618,72 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "Clash.GroupResults",
+   "category": "Navisworks.Clash",
+   "description": "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping rule, not a built-in one: filter results any way you like, then group what came out. Results already in other groups are left alone (skipped) unless moveExisting is true, which pulls them into this group. An existing same-named group is extended; re-runs are clean.",
+   "tags": [
+    "clash",
+    "group",
+    "results",
+    "move",
+    "triage",
+    "bucket",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results to group (from ClashTest.Results, Clash.FilterBy*, ...). All must belong to the same test."
+    },
+    {
+     "name": "groupName",
+     "type": "string",
+     "description": "The group's display name — an existing same-named group is extended, otherwise one is created."
+    },
+    {
+     "name": "moveExisting",
+     "type": "boolean",
+     "description": "True pulls results that already sit in OTHER groups into this one; false leaves them where they are (they are counted as skipped).",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "test",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "group",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "added",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "moved",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "skipped",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The test, the stored group, and how many results were added, moved and skipped."
   },
   {
    "name": "Clash.GroupResultsByGridIntersection",
@@ -4868,6 +4977,38 @@
    "returns": "The written path and the number of results captured."
   },
   {
+   "name": "Clash.Status",
+   "category": "Navisworks.Clash",
+   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.",
+   "tags": [
+    "clash",
+    "status",
+    "dropdown",
+    "choice",
+    "new",
+    "active",
+    "reviewed",
+    "approved",
+    "resolved"
+   ],
+   "inputs": [
+    {
+     "name": "status",
+     "type": "string",
+     "description": "New, Active, Reviewed, Approved or Resolved.",
+     "default": "\"New\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "type": "string",
+     "description": "The chosen status text."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Clash.SummaryTable",
    "category": "Navisworks.Clash",
    "description": "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.",
@@ -4934,6 +5075,61 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "ClashGroup.ByName",
+   "category": "Navisworks.Clash",
+   "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.",
+   "tags": [
+    "clash",
+    "group",
+    "name",
+    "fetch",
+    "results",
+    "status",
+    "lookup"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "any",
+     "description": "The clash test, or its display name."
+    },
+    {
+     "name": "groupName",
+     "type": "string",
+     "description": "The group's display name inside that test."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "group",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "results",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "status",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The group, the results inside it, the group's own status, and the result count."
   },
   {
    "name": "ClashResult.AddComment",
@@ -5165,6 +5361,66 @@
    "returns": "Whether it has a saved viewpoint, redline markup, and its comment count."
   },
   {
+   "name": "ClashResult.Focus",
+   "category": "Navisworks.Clash",
+   "description": "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and optionally selects the elements. Wire one result, or a list to frame a whole group together. Follow with Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back.",
+   "tags": [
+    "clash",
+    "focus",
+    "isolate",
+    "zoom",
+    "view",
+    "show",
+    "frame",
+    "select"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash result(s) to focus — one, or a list to frame together."
+    },
+    {
+     "name": "isolate",
+     "type": "boolean",
+     "description": "True hides everything except the clashing elements (Appearance.ShowAll undoes it).",
+     "default": "true"
+    },
+    {
+     "name": "zoom",
+     "type": "boolean",
+     "description": "True zooms the camera to the clashing elements.",
+     "default": "true"
+    },
+    {
+     "name": "select",
+     "type": "boolean",
+     "description": "True also selects the elements (fills the Selection window).",
+     "default": "false"
+    },
+    {
+     "name": "paddingFactor",
+     "type": "number",
+     "description": "Zoom padding: 1 = tight framing, larger = more context.",
+     "default": "1.5"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The clashing model items (pass-through for chaining, e.g. into Flow.Then or a viewpoint save)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ClashResult.Info",
    "category": "Navisworks.Clash",
    "description": "Name, status, distance, description, assignee and creation time of a clash result.",
@@ -5247,6 +5503,59 @@
     }
    ],
    "returns": "The clashing items."
+  },
+  {
+   "name": "ClashResult.Orientation",
+   "category": "Navisworks.Clash",
+   "description": "ClashResult.Angle with world context: the crossing angle PLUS each element's bounding-box shape — \"slab\" (thin horizontal), \"wall\" (thin upright), \"riser\" (long vertical), \"run\" (long horizontal) or \"block\" — and its slope from horizontal (0–90°). This is what tells a pipe through a wall (run + wall) from a pipe through a floor (run/riser + slab) when the crossing angle alone is 90° in both cases. Box-based: a strongly diagonal linear element can read as planar; \"none\" means the element has no measurable box.",
+   "tags": [
+    "clash",
+    "orientation",
+    "angle",
+    "wall",
+    "floor",
+    "slab",
+    "pipe",
+    "shape",
+    "slope",
+    "vertical",
+    "horizontal"
+   ],
+   "inputs": [
+    {
+     "name": "result",
+     "type": "ClashResult",
+     "description": "The clash result."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "degrees",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "shape1",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "shape2",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "slope1",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "slope2",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The crossing angle, each element's box shape (slab/wall/riser/run/block, \"none\" without geometry) and its slope from horizontal (0–90°)."
   },
   {
    "name": "ClashResult.Rename",
@@ -5574,6 +5883,56 @@
    "returns": ""
   },
   {
+   "name": "ClashTest.Groups",
+   "category": "Navisworks.Clash",
+   "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.",
+   "tags": [
+    "clash",
+    "test",
+    "groups",
+    "list",
+    "names",
+    "statuses",
+    "overview"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "any",
+     "description": "The clash test, or its display name."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "groups",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "names",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "statuses",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The groups with their names, statuses and result counts, index-aligned."
+  },
+  {
    "name": "ClashTest.Info",
    "category": "Navisworks.Clash",
    "description": "Name, status, type, tolerance, last run time and result count of a clash test.",
@@ -5624,6 +5983,33 @@
     }
    ],
    "returns": "Name, status, type, tolerance, last-run time and result count."
+  },
+  {
+   "name": "ClashTest.Name",
+   "category": "Navisworks.Clash",
+   "description": "The display name of a clash test — the one-output companion of ClashTest.Info for wiring names into reports, group lookups and file paths.",
+   "tags": [
+    "clash",
+    "test",
+    "name",
+    "display",
+    "title"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The clash test."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The test's display name."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "ClashTest.Rename",
