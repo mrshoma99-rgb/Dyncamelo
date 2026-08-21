@@ -1,6 +1,6 @@
 {
- "version": "v0.27.0",
- "count": 330,
+ "version": "v0.28.0",
+ "count": 331,
  "categories": [
   {
    "name": "Annotation",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 17
+   "count": 18
   },
   {
    "name": "Navisworks.Properties",
@@ -8171,6 +8171,73 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "ModelItem.AncestorNameMatches",
+   "category": "Navisworks.ModelItem",
+   "description": "Walks an item's ancestor chain (nearest first) and tests each name against the text: contains / starts with / ends with, or their \"doesn't\" negations — true when NO ancestor matches. The branch-membership filter: is this item under the \"Steel\" branch, inside a file starting with \"ARCH-\", NOT under anything ending in \"-DEMO\"? Lace over item lists for the bool mask (List.FilterByBoolMask), and the matching ancestor itself comes out too. Names are matched as the tree shows them (class name when unnamed), case-insensitive unless caseSensitive.",
+   "tags": [
+    "item",
+    "ancestor",
+    "name",
+    "contains",
+    "starts",
+    "ends",
+    "branch",
+    "under",
+    "tree",
+    "hierarchy",
+    "filter",
+    "check"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item whose ancestor chain to test."
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to look for in the ancestor names."
+    },
+    {
+     "name": "mode",
+     "type": "string",
+     "description": "contains, doesn't contain, starts with, doesn't start with, ends with or doesn't end with. The \"doesn't\" modes are true when NO ancestor matches.",
+     "default": "\"contains\""
+    },
+    {
+     "name": "includeSelf",
+     "type": "boolean",
+     "description": "True also tests the item's own name, not just its ancestors'.",
+     "default": "false"
+    },
+    {
+     "name": "caseSensitive",
+     "type": "boolean",
+     "description": "True matches exact casing; false (default) ignores case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matches",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "ancestor",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "ancestorName",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Whether the condition holds, plus the nearest matching ancestor and its name (null/\"\" when nothing matched — always so for the \"doesn't\" modes when they hold)."
   },
   {
    "name": "ModelItem.Ancestors",

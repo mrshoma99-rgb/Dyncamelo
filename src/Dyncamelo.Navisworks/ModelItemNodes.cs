@@ -158,6 +158,107 @@ public static class ModelItemNodes
         return NavisValues.ToItemList(includeSelf ? modelItem.AncestorsAndSelf : modelItem.Ancestors);
     }
 
+    /// <summary>Tests the names of an item's ancestors against a text condition.</summary>
+    /// <param name="item">The model item whose ancestor chain to test.</param>
+    /// <param name="text">The text to look for in the ancestor names.</param>
+    /// <param name="mode">contains, doesn't contain, starts with, doesn't start with, ends with or doesn't end with. The "doesn't" modes are true when NO ancestor matches.</param>
+    /// <param name="includeSelf">True also tests the item's own name, not just its ancestors'.</param>
+    /// <param name="caseSensitive">True matches exact casing; false (default) ignores case.</param>
+    /// <returns>Whether the condition holds, plus the nearest matching ancestor and its name (null/"" when nothing matched — always so for the "doesn't" modes when they hold).</returns>
+    [NodeName("ModelItem.AncestorNameMatches")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "Walks an item's ancestor chain (nearest first) and tests each name against the text: contains / " +
+        "starts with / ends with, or their \"doesn't\" negations — true when NO ancestor matches. The " +
+        "branch-membership filter: is this item under the \"Steel\" branch, inside a file starting with " +
+        "\"ARCH-\", NOT under anything ending in \"-DEMO\"? Lace over item lists for the bool mask " +
+        "(List.FilterByBoolMask), and the matching ancestor itself comes out too. Names are matched as " +
+        "the tree shows them (class name when unnamed), case-insensitive unless caseSensitive.")]
+    [NodeSearchTags("item", "ancestor", "name", "contains", "starts", "ends", "branch", "under", "tree", "hierarchy", "filter", "check")]
+    [MultiReturn("matches", "ancestor", "ancestorName")]
+    public static Dictionary<string, object?> AncestorNameMatches(
+        ModelItem item,
+        string text,
+        [NodeChoices("contains", "doesn't contain", "starts with", "doesn't start with", "ends with", "doesn't end with")]
+        string mode = "contains",
+        bool includeSelf = false,
+        bool caseSensitive = false)
+    {
+        var modelItem = RequireItem(item);
+        if (string.IsNullOrEmpty(text))
+        {
+            throw new ArgumentException("No text to look for provided.", nameof(text));
+        }
+
+        ParseNameMode(mode, out var negated, out var kind);
+        var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        ModelItem? matched = null;
+        var start = includeSelf ? modelItem : modelItem.Parent;
+        for (var current = start; current != null; current = current.Parent)
+        {
+            // Same name source as ModelItem.DisplayName: what the tree shows.
+            var name = current.DisplayName;
+            if (string.IsNullOrEmpty(name))
+            {
+                name = current.ClassDisplayName ?? string.Empty;
+            }
+
+            if (NameMatches(name, text, kind, comparison))
+            {
+                matched = current;
+                break;
+            }
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["matches"] = negated ? matched == null : matched != null,
+            ["ancestor"] = matched,
+            ["ancestorName"] = matched == null ? string.Empty : DisplayName(matched),
+        };
+    }
+
+    private static void ParseNameMode(string? mode, out bool negated, out char kind)
+    {
+        var normalized = (mode ?? string.Empty).Trim().ToLowerInvariant().Replace("'", string.Empty);
+        negated = normalized.StartsWith("doesnt ", StringComparison.Ordinal);
+        if (negated)
+        {
+            normalized = normalized.Substring("doesnt ".Length);
+        }
+
+        switch (normalized)
+        {
+            case "contains":
+            case "contain":
+                kind = 'c';
+                return;
+            case "starts with":
+            case "start with":
+                kind = 's';
+                return;
+            case "ends with":
+            case "end with":
+                kind = 'e';
+                return;
+            default:
+                throw new ArgumentException(
+                    "Unknown mode '" + mode + "'. Use contains, doesn't contain, starts with, " +
+                    "doesn't start with, ends with or doesn't end with.", nameof(mode));
+        }
+    }
+
+    private static bool NameMatches(string name, string text, char kind, StringComparison comparison)
+    {
+        switch (kind)
+        {
+            case 's': return name.StartsWith(text, comparison);
+            case 'e': return name.EndsWith(text, comparison);
+            default: return name.IndexOf(text, comparison) >= 0;
+        }
+    }
+
     /// <summary>The whole object/element a model item belongs to.</summary>
     /// <param name="item">The model item (often a geometry leaf deep in the tree).</param>
     /// <returns>The nearest ancestor flagged as a composite object (the "element" in the tree); the item itself when it is already an object.</returns>
