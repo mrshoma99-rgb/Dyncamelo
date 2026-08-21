@@ -47,6 +47,11 @@ public static class MathFixtures
 
     public static double Fail(double x) => throw new InvalidOperationException("boom");
 
+    public static string Shout(string text) => text.ToUpperInvariant() + "!";
+
+    public static double ReciprocalStrict(double x) =>
+        x == 0.0 ? throw new InvalidOperationException("division by zero") : 1.0 / x;
+
     [NodeCategory("Custom.Category")]
     public static int Answer() => 42;
 

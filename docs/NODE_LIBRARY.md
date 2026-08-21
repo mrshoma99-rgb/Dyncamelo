@@ -97,6 +97,8 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | And | Logic | a: bool, b: bool | result: bool | Logical AND. | C# `&&` | MVP |
 | Or | Logic | a: bool, b: bool | result: bool | Logical OR. | C# `\|\|` | MVP |
 | Not | Logic | value: bool | result: bool | Logical negation. | C# `!` | MVP |
+| IsNull | Logic | value: object | isNull: bool | True when the value is null; with @L1 on the input it masks a whole list element-wise for List.FilterByBoolMask. | C# `== null` | Implemented (v0.28) |
+| IsNullOrEmpty | Logic | value: object | isEmpty: bool | True for null, "", an empty list or an empty dictionary — the "did anything come out?" guard. @L1 tests elements instead of the list itself. | C# type switch | Implemented (v0.28) |
 | Equals | Logic | a: object, b: object | equal: bool | Value equality with numeric/string coercion. | Object.Equals + coercion | MVP |
 | GreaterThan | Logic | a: double, b: double | result: bool | a &gt; b. | C# `>` | MVP |
 | LessThan | Logic | a: double, b: double | result: bool | a &lt; b. | C# `<` | MVP |
@@ -131,6 +133,7 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | List.Count | List | list: List&lt;object&gt; | count: int | Number of items. | ICollection.Count | MVP |
 | List.FirstItem | List | list: List&lt;object&gt; | item: object | First item; warns on empty. | LINQ FirstOrDefault | MVP |
 | List.Flatten | List | list: List&lt;object&gt;, depth: int = -1 | list: List&lt;object&gt; | Flatten nested lists (-1 = completely). | recursive C# | MVP |
+| List.Clean | List | list: List&lt;object&gt;, removeEmptyLists: bool = true | list: List&lt;object&gt; | Remove null elements at every nesting level (optionally also sublists left empty) — the mop-up after laced calls that emitted nulls. Dynamo's List.Clean. | recursive C# | Implemented (v0.28) |
 | List.FilterByBoolMask | List | list: List&lt;object&gt;, mask: List&lt;bool&gt; | in: List&lt;object&gt;, out: List&lt;object&gt; | Split list by a parallel true/false mask — the core filter idiom. | LINQ / [MultiReturn] | MVP |
 | List.Range | List | start: double, end: double, step: double = 1 | list: List&lt;double&gt; | Numeric range (inclusive start, ≤ end). | iterator C# | MVP |
 | List.Sort | List | list: List&lt;object&gt; | sorted: List&lt;object&gt; | Sort ascending (numeric or ordinal-string comparison). | List.Sort + Comparer | MVP |

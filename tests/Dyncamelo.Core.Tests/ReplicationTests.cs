@@ -238,7 +238,7 @@ public class ReplicationTests
         var result = AsList(sqrt.OutPorts[0].Value);
         Assert.Equal(new List<object?> { 2.0, null, 3.0 }, result);
         Assert.Equal(NodeState.Warning, sqrt.State);
-        Assert.Contains("Null value", sqrt.StateMessage);
+        Assert.Contains("null element", sqrt.StateMessage);
     }
 
     [Fact]

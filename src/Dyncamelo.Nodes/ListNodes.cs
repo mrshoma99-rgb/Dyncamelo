@@ -459,6 +459,54 @@ public static class ListNodes
         return -1;
     }
 
+    /// <summary>
+    /// Removes null elements from a list, descending into nested lists so a
+    /// list-of-lists comes back with every level cleaned.
+    /// </summary>
+    /// <param name="list">The list to clean (nested lists are cleaned recursively).</param>
+    /// <param name="removeEmptyLists">True also drops sublists that are (or become) empty; false keeps them as empty lists.</param>
+    /// <returns>The cleaned list.</returns>
+    [NodeName("List.Clean")]
+    [return: NodeName("list")]
+    [NodeDescription(
+        "Removes null elements from a list, at every nesting level — the mop-up after laced calls that " +
+        "emitted nulls for missing elements (a yellow node badge points here). removeEmptyLists also " +
+        "drops sublists left empty. Dynamo users: same idea as List.Clean.")]
+    [NodeSearchTags("clean", "null", "remove", "nulls", "compact", "purge", "empty", "filter")]
+    public static IList<object?> Clean(IList<object?> list, bool removeEmptyLists = true)
+    {
+        RequireList(list, "List.Clean");
+        return CleanInto(list, removeEmptyLists);
+    }
+
+    private static List<object?> CleanInto(IEnumerable source, bool removeEmptyLists)
+    {
+        var output = new List<object?>();
+        foreach (var element in source)
+        {
+            if (element == null)
+            {
+                continue;
+            }
+
+            if (element is IList nested && !(element is string))
+            {
+                var cleaned = CleanInto(nested, removeEmptyLists);
+                if (removeEmptyLists && cleaned.Count == 0)
+                {
+                    continue;
+                }
+
+                output.Add(cleaned);
+                continue;
+            }
+
+            output.Add(element);
+        }
+
+        return output;
+    }
+
     private static void RequireParallelKeys(IList<object?>? list, IList<object?>? keys, string nodeName)
     {
         RequireList(list, nodeName);

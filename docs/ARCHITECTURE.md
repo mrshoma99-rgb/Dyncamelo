@@ -117,6 +117,12 @@ Replication is what makes a scalar node work on lists without a loop node.
 
 - **Coercion** applies per invocation: numeric widening (`int → double`), `IConvertible` conversions, `object` accepts anything. Coercion failure → node Warning/Error per case, never a crash.
 
+- **Null propagation (Dynamo semantics, since v0.28)** — during replication, per-element trouble never sinks the node:
+  - a **null element** of a laced list maps to a **null result** at that position — the node method is never invoked for it, the other elements still compute;
+  - a **per-element exception** (or per-element coercion failure) likewise becomes a null result;
+  - each kind is reported as **one aggregated Warning** ("N of M laced calls …" + the first error text), so a thousand bad elements cannot flood the badge. `List.Clean` strips the nulls downstream; `IsNull` builds a filter mask.
+  - A **single, non-replicated call** keeps today's fail-fast contract: a thrown exception errors the node (red), and nulls on non-laced inputs (unwired optionals) flow through unchanged.
+
 ## 5. Zero-touch node loading
 
 A node library is a plain assembly. The loader reflects over it and turns attributed `public static` methods into node definitions:

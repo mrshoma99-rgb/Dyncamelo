@@ -52,6 +52,48 @@ public static class LogicNodes
         return a || b;
     }
 
+    /// <summary>Whether a value is null.</summary>
+    /// <param name="value">The value to test. To test each element of a list, set this input's List Levels to @L1.</param>
+    /// <returns>True when the value is null.</returns>
+    [NodeName("IsNull")]
+    [NodeDescription(
+        "True when the value is null — with @L1 on the input it tests a whole list element-wise, giving " +
+        "the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). The input port " +
+        "is untyped, so a list arrives whole unless levels are set.")]
+    [NodeSearchTags("null", "is", "check", "missing", "empty", "mask", "test")]
+    [return: NodeName("isNull")]
+    public static bool IsNull(object? value)
+    {
+        return value == null;
+    }
+
+    /// <summary>Whether a value is null or empty.</summary>
+    /// <param name="value">The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1.</param>
+    /// <returns>True when the value is null or empty.</returns>
+    [NodeName("IsNullOrEmpty")]
+    [NodeDescription(
+        "True when the value is null, an empty string, an empty list or an empty dictionary — the guard " +
+        "for \"did anything come out?\" checks before If branches. NOTE: wired to a list directly it " +
+        "tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead.")]
+    [NodeSearchTags("null", "empty", "is", "check", "blank", "missing", "guard", "test")]
+    [return: NodeName("isEmpty")]
+    public static bool IsNullOrEmpty(object? value)
+    {
+        switch (value)
+        {
+            case null:
+                return true;
+            case string text:
+                return text.Length == 0;
+            case System.Collections.IDictionary dictionary:
+                return dictionary.Count == 0;
+            case System.Collections.ICollection collection:
+                return collection.Count == 0;
+            default:
+                return false;
+        }
+    }
+
     /// <summary>Logical negation of a boolean.</summary>
     /// <param name="value">The value to negate.</param>
     /// <returns>True when the input is false.</returns>

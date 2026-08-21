@@ -1,6 +1,6 @@
 {
- "version": "v0.26.2",
- "count": 327,
+ "version": "v0.27.0",
+ "count": 330,
  "categories": [
   {
    "name": "Annotation",
@@ -36,11 +36,11 @@
   },
   {
    "name": "List",
-   "count": 19
+   "count": 20
   },
   {
    "name": "Logic",
-   "count": 9
+   "count": 11
   },
   {
    "name": "Math",
@@ -1947,6 +1947,42 @@
    "returns": ""
   },
   {
+   "name": "List.Clean",
+   "category": "List",
+   "description": "Removes null elements from a list, at every nesting level — the mop-up after laced calls that emitted nulls for missing elements (a yellow node badge points here). removeEmptyLists also drops sublists left empty. Dynamo users: same idea as List.Clean.",
+   "tags": [
+    "clean",
+    "null",
+    "remove",
+    "nulls",
+    "compact",
+    "purge",
+    "empty",
+    "filter"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to clean (nested lists are cleaned recursively)."
+    },
+    {
+     "name": "removeEmptyLists",
+     "type": "boolean",
+     "description": "True also drops sublists that are (or become) empty; false keeps them as empty lists.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The cleaned list."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Contains",
    "category": "List",
    "description": "Tests whether a list contains a value (numbers compare by value regardless of numeric type).",
@@ -2647,6 +2683,65 @@
      "name": "result",
      "type": "any",
      "description": "Either trueValue or falseValue."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IsNull",
+   "category": "Logic",
+   "description": "True when the value is null — with @L1 on the input it tests a whole list element-wise, giving the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). The input port is untyped, so a list arrives whole unless levels are set.",
+   "tags": [
+    "null",
+    "is",
+    "check",
+    "missing",
+    "empty",
+    "mask",
+    "test"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to test. To test each element of a list, set this input's List Levels to @L1."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isNull",
+     "type": "boolean",
+     "description": "True when the value is null."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IsNullOrEmpty",
+   "category": "Logic",
+   "description": "True when the value is null, an empty string, an empty list or an empty dictionary — the guard for \"did anything come out?\" checks before If branches. NOTE: wired to a list directly it tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead.",
+   "tags": [
+    "null",
+    "empty",
+    "is",
+    "check",
+    "blank",
+    "missing",
+    "guard",
+    "test"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isEmpty",
+     "type": "boolean",
+     "description": "True when the value is null or empty."
     }
    ],
    "returns": ""

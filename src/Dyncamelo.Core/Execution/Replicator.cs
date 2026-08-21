@@ -48,8 +48,55 @@ internal static class Replicator
         }
 
         var lacing = node.Lacing == LacingMode.Auto ? LacingMode.Shortest : node.Lacing;
-        var outputs = Invoke(node, args, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out _);
+        var stats = new ReplicationStats();
+        var outputs = Invoke(
+            node, args, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten,
+            new bool[node.InPorts.Count], stats, out _);
+        ReportStats(node, stats);
         return outputs;
+    }
+
+    /// <summary>
+    /// Aggregated per-element trouble during one replicated execution. Null
+    /// elements and per-element failures produce null results plus ONE summary
+    /// warning each (Dynamo's null-propagation semantics) instead of failing
+    /// the whole node — a single message, not one per element, so a thousand
+    /// nulls cannot flood the badge.
+    /// </summary>
+    private sealed class ReplicationStats
+    {
+        public int Calls;
+        public int NullSkipped;
+        public int Failed;
+        public int CoercionFailed;
+        public string? FirstError;
+        public string? FirstCoercionMessage;
+    }
+
+    private static void ReportStats(NodeModel node, ReplicationStats stats)
+    {
+        if (stats.NullSkipped > 0)
+        {
+            node.AddMessage(
+                MessageSeverity.Warning,
+                stats.NullSkipped + " of " + stats.Calls + " laced calls received a null element and returned null. " +
+                "List.Clean strips nulls from the input; IsNull builds a filter mask.");
+        }
+
+        if (stats.CoercionFailed > 0)
+        {
+            node.AddMessage(
+                MessageSeverity.Warning,
+                stats.CoercionFailed + " of " + stats.Calls + " laced calls could not convert their element and returned null. " +
+                "First: " + stats.FirstCoercionMessage);
+        }
+
+        if (stats.Failed > 0)
+        {
+            node.AddMessage(
+                MessageSeverity.Warning,
+                stats.Failed + " of " + stats.Calls + " laced calls failed and returned null. First error: " + stats.FirstError);
+        }
     }
 
     /// <summary>
@@ -156,6 +203,8 @@ internal static class Replicator
         EvaluationContext context,
         int outCount,
         bool flatten,
+        bool[] elementBound,
+        ReplicationStats stats,
         out bool didReplicate)
     {
         // Which arguments still carry excess rank at this nesting level?
@@ -173,11 +222,19 @@ internal static class Replicator
         if (replicated.Count == 0)
         {
             didReplicate = false;
-            return InvokeScalar(node, args, declaredTypes, minimumRanks, context, outCount);
+            return InvokeScalar(node, args, declaredTypes, minimumRanks, context, outCount, elementBound, stats);
         }
 
         didReplicate = true;
         var accumulators = NewAccumulators(outCount);
+
+        // Values drawn from these lists are per-element data: a null among them
+        // maps to a null result at the leaf instead of reaching the node.
+        var childBound = (bool[])elementBound.Clone();
+        foreach (var index in replicated)
+        {
+            childBound[index] = true;
+        }
 
         if (lacing == LacingMode.CrossProduct)
         {
@@ -188,7 +245,7 @@ internal static class Replicator
             {
                 var child = (object?[])args.Clone();
                 child[replicated[0]] = element;
-                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out var childReplicated);
+                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, childBound, stats, out var childReplicated);
                 Collect(accumulators, childOutputs, splice: flatten && childReplicated);
             }
         }
@@ -219,7 +276,7 @@ internal static class Replicator
                     child[index] = list[elementIndex];
                 }
 
-                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, out var childReplicated);
+                var childOutputs = Invoke(node, child, declaredTypes, declaredRanks, minimumRanks, lacing, context, outCount, flatten, childBound, stats, out var childReplicated);
                 Collect(accumulators, childOutputs, splice: flatten && childReplicated);
             }
         }
@@ -239,8 +296,21 @@ internal static class Replicator
         Type[] declaredTypes,
         int[] minimumRanks,
         EvaluationContext context,
-        int outCount)
+        int outCount,
+        bool[] elementBound,
+        ReplicationStats stats)
     {
+        bool insideReplication = false;
+        foreach (var bound in elementBound)
+        {
+            insideReplication |= bound;
+        }
+
+        if (insideReplication)
+        {
+            stats.Calls++;
+        }
+
         var call = new object?[args.Length];
         for (int i = 0; i < args.Length; i++)
         {
@@ -248,6 +318,17 @@ internal static class Replicator
             var value = args[i];
             if (value == null)
             {
+                // Dynamo semantics: a null ELEMENT of a laced list maps to a
+                // null result for that position — the node never sees it, the
+                // other elements still compute, and one summary warning is
+                // reported at the end. Nulls on non-laced inputs (unwired
+                // optionals and the like) keep flowing through unchanged.
+                if (elementBound[i])
+                {
+                    stats.NullSkipped++;
+                    return new object?[outCount];
+                }
+
                 if (declared.IsValueType && Nullable.GetUnderlyingType(declared) == null)
                 {
                     node.AddMessage(MessageSeverity.Warning, "Null value passed to input '" + node.InPorts[i].Name + "'.");
@@ -269,17 +350,50 @@ internal static class Replicator
 
             if (!TypeCoercion.TryCoerce(value, declared, out var coerced))
             {
-                node.AddMessage(
-                    MessageSeverity.Warning,
+                var message =
                     "Cannot convert value of type '" + reportedType.Name + "' to '" + declared.Name +
-                    "' for input '" + node.InPorts[i].Name + "'.");
+                    "' for input '" + node.InPorts[i].Name + "'.";
+                if (insideReplication)
+                {
+                    stats.CoercionFailed++;
+                    stats.FirstCoercionMessage ??= message;
+                }
+                else
+                {
+                    node.AddMessage(MessageSeverity.Warning, message);
+                }
+
                 return new object?[outCount];
             }
 
             call[i] = coerced;
         }
 
-        var outputs = node.Evaluate(call, context) ?? new object?[outCount];
+        object?[]? outputs;
+        if (insideReplication)
+        {
+            // One bad element must not sink the other thousand: a per-element
+            // failure becomes a null result plus one summary warning. A single
+            // (non-laced) call keeps failing loudly via the engine's catch.
+            try
+            {
+                outputs = node.Evaluate(call, context);
+            }
+            catch (Exception ex) when (!(ex is OperationCanceledException) &&
+                                       !(ex is OutOfMemoryException) &&
+                                       !(ex is StackOverflowException))
+            {
+                stats.Failed++;
+                stats.FirstError ??= ex.Message;
+                return new object?[outCount];
+            }
+        }
+        else
+        {
+            outputs = node.Evaluate(call, context);
+        }
+
+        outputs ??= new object?[outCount];
         var normalized = new object?[outCount];
         for (int j = 0; j < outCount; j++)
         {
