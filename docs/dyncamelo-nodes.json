@@ -1,6 +1,6 @@
 {
- "version": "v0.28.0",
- "count": 331,
+ "version": "v0.29.0",
+ "count": 335,
  "categories": [
   {
    "name": "Annotation",
@@ -68,7 +68,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 41
+   "count": 45
   },
   {
    "name": "Navisworks.Comments",
@@ -4596,6 +4596,42 @@
    "returns": "Result dictionaries per bucket plus a counts dictionary."
   },
   {
+   "name": "Clash.Deduplicate",
+   "category": "Navisworks.Clash",
+   "description": "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or mirrored across an A-vs-B and B-vs-A test matrix, count once. Pairs are unordered and matched by stable item identity (InstanceGuid, else tree path); the first result in input order is the representative, the rest come out on duplicates. 400 raw results, 60 real issues.",
+   "tags": [
+    "clash",
+    "deduplicate",
+    "duplicates",
+    "unique",
+    "pair",
+    "mirror",
+    "matrix",
+    "noise",
+    "merge"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results — from one test, or several (mirrored A-vs-B / B-vs-A test pairs dedupe too)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "duplicates",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The first result of each unique unordered item pair, and the duplicates that were dropped."
+  },
+  {
    "name": "Clash.FilterByAngle",
    "category": "Navisworks.Clash",
    "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.",
@@ -4632,6 +4668,132 @@
      "name": "results",
      "type": "ClashResult[]",
      "description": "The matching results, input order preserved (angle-less results are dropped)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.FilterByDepth",
+   "category": "Navisworks.Clash",
+   "description": "Keeps clashes whose penetration depth falls in a range, in the unit you name — minDepth 0.025 with units Meters drops every grazing clash shallower than 25 mm, the #1 noise reducer. Depth is positive for overlaps (hard clashes); clearance-test results carry their gap as a NEGATIVE depth, so a range like -1..0 keeps clearance violations instead.",
+   "tags": [
+    "clash",
+    "filter",
+    "depth",
+    "penetration",
+    "distance",
+    "grazing",
+    "significant",
+    "units",
+    "tolerance"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "minDepth",
+     "type": "number",
+     "description": "Smallest penetration depth to keep. Positive = overlap; clearance-test gaps read as negative depths.",
+     "default": "0.0"
+    },
+    {
+     "name": "maxDepth",
+     "type": "number",
+     "description": "Largest penetration depth to keep (default: unlimited).",
+     "default": "PositiveInfinity"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the depth numbers: \"document\" uses the file's internal unit (often feet!), or name the unit your numbers are in.",
+     "default": "\"document\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.FilterByItemProperty",
+   "category": "Navisworks.Clash",
+   "description": "Keeps clashes whose two items' PROPERTY values match a pair of texts, in either order — the semantic clash rule: category \"Element\", property \"Category\", value1 \"Pipe\", value2 \"Wall\" keeps pipe-vs-wall clashes whichever side the pipe landed on. An empty value matches anything (one-sided rules). Looks up the property on the item and, by default, its ancestors — clash items are often bare geometry while the data lives on the element above. The geometric sibling is Clash.FilterByOrientation.",
+   "tags": [
+    "clash",
+    "filter",
+    "property",
+    "category",
+    "discipline",
+    "pair",
+    "pipe",
+    "wall",
+    "rule",
+    "semantic"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "category",
+     "type": "string",
+     "description": "The property category (tab) name, as the Properties window shows it (e.g. \"Element\", \"Item\")."
+    },
+    {
+     "name": "property",
+     "type": "string",
+     "description": "The property name inside that category (e.g. \"Category\", \"System\")."
+    },
+    {
+     "name": "value1",
+     "type": "string",
+     "description": "Text one item's property value must match. Empty = any."
+    },
+    {
+     "name": "value2",
+     "type": "string",
+     "description": "Text the other item's property value must match (either order). Empty = any.",
+     "default": "\"\""
+    },
+    {
+     "name": "mode",
+     "type": "string",
+     "description": "How the texts must match: contains, equals, starts with or ends with.",
+     "default": "\"contains\""
+    },
+    {
+     "name": "searchAncestors",
+     "type": "boolean",
+     "description": "True (default) also reads the property from the item's ancestors when the item itself lacks it — clash items are often geometry leaves while the data sits on the element or file above.",
+     "default": "true"
+    },
+    {
+     "name": "caseSensitive",
+     "type": "boolean",
+     "description": "True matches exact casing; false (default) ignores case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved."
     }
    ],
    "returns": ""
@@ -4675,6 +4837,60 @@
      "name": "results",
      "type": "ClashResult[]",
      "description": "The matching results, input order preserved (results without geometry are dropped)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.FilterBySet",
+   "category": "Navisworks.Clash",
+   "description": "Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) — sets are the coordination scope language: \"only my package\", \"only against the existing building\". invert turns it into the classic ignore-list: drop every clash touching the \"Accepted penetrations\" set. An item counts as in the set when itself OR any ancestor is a member, matching how Navisworks selections include descendants.",
+   "tags": [
+    "clash",
+    "filter",
+    "set",
+    "selection",
+    "search",
+    "scope",
+    "ignore",
+    "exclude",
+    "membership"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
+    },
+    {
+     "name": "set",
+     "type": "any",
+     "description": "The set to test against: a selection/search set, its name, or a list of model items."
+    },
+    {
+     "name": "which",
+     "type": "string",
+     "description": "Which items must be in the set: either, both, item1 or item2.",
+     "default": "\"either\""
+    },
+    {
+     "name": "invert",
+     "type": "boolean",
+     "description": "True keeps the results that do NOT satisfy the test — the ignore-list mode.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The matching results, input order preserved."
     }
    ],
    "returns": ""
