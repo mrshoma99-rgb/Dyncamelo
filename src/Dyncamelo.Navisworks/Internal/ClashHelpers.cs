@@ -130,6 +130,34 @@ internal static class ClashHelpers
             string.Join(", ", Enum.GetNames(typeof(ClashResultStatus))) + ".", nameof(status));
     }
 
+    /// <summary>
+    /// Parses one or several clash result statuses from a comma/semicolon
+    /// separated text ("New", "New,Active") — the multi-select form every
+    /// status input accepts.
+    /// </summary>
+    internal static HashSet<ClashResultStatus> ParseResultStatuses(string? status)
+    {
+        var statuses = new HashSet<ClashResultStatus>();
+        foreach (var part in (status ?? string.Empty).Split(',', ';'))
+        {
+            var trimmed = part.Trim();
+            if (trimmed.Length > 0)
+            {
+                statuses.Add(ParseResultStatus(trimmed));
+            }
+        }
+
+        if (statuses.Count == 0)
+        {
+            throw new ArgumentException(
+                "No clash status provided. Use one of: " +
+                string.Join(", ", Enum.GetNames(typeof(ClashResultStatus))) +
+                " — or several separated by commas (\"New,Active\").", nameof(status));
+        }
+
+        return statuses;
+    }
+
     /// <summary>Parses a clash test type name (Hard/HardConservative/Clearance/Duplicate/Custom).</summary>
     internal static ClashTestType ParseTestType(string? testType)
     {

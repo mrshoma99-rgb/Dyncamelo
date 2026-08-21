@@ -175,14 +175,14 @@ public static class ClashNodes
         };
     }
 
-    /// <summary>Keeps only the clash results with a given status.</summary>
+    /// <summary>Keeps only the clash results with the given status(es).</summary>
     /// <param name="results">The clash results (e.g. from ClashTest.Results).</param>
-    /// <param name="status">New, Active, Reviewed, Approved or Resolved.</param>
+    /// <param name="status">One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several ("New,Active"; Clash.Statuses builds this from toggles).</param>
     /// <returns>The matching results, input order preserved.</returns>
     [NodeName("Clash.FilterByStatus")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Keeps only the clash results with the given status (New, Active, Reviewed, Approved or Resolved) — the triage staple: e.g. drop the already-Approved ones and work the New ones.")]
-    [NodeSearchTags("clash", "filter", "status", "new", "active", "approved", "resolved", "triage")]
+    [NodeDescription("Keeps only the clash results with the given status(es) — pick one from the dropdown, or wire several comma-separated (\"New,Active\"; the Clash.Statuses node builds that from toggles). The triage staple: drop the already-Approved ones and work the rest.")]
+    [NodeSearchTags("clash", "filter", "status", "statuses", "new", "active", "approved", "resolved", "triage", "multiple")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByStatus(
         IEnumerable<ClashResult> results,
@@ -194,11 +194,11 @@ public static class ClashNodes
             throw new ArgumentNullException(nameof(results), "No clash results provided.");
         }
 
-        var target = ParseResultStatus(status);
+        var wanted = ClashHelpers.ParseResultStatuses(status);
         var matched = new List<ClashResult>();
         foreach (var result in results)
         {
-            if (result != null && result.Status == target)
+            if (result != null && wanted.Contains(result.Status))
             {
                 matched.Add(result);
             }
@@ -417,16 +417,16 @@ public static class ClashNodes
 
     /// <summary>Filters a test's results by status.</summary>
     /// <param name="test">The clash test.</param>
-    /// <param name="status">One of: New, Active, Reviewed, Approved, Resolved.</param>
-    /// <returns>The results with that status (grouped results are flattened).</returns>
+    /// <param name="status">One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several ("New,Active"; Clash.Statuses builds this from toggles).</param>
+    /// <returns>The results with any of those statuses (grouped results are flattened).</returns>
     [NodeName("ClashTest.ResultsByStatus")]
-    [NodeDescription("The results of a test that have the given status (New/Active/Reviewed/Approved/Resolved).")]
-    [NodeSearchTags("clash", "results", "status", "filter", "triage")]
+    [NodeDescription("The results of a test that have the given status(es) — one, or several comma-separated (\"New,Active\"; wire Clash.Statuses to pick with toggles).")]
+    [NodeSearchTags("clash", "results", "status", "statuses", "filter", "triage", "multiple")]
     [return: NodeName("results")]
     public static List<ClashResult> ResultsByStatus(ClashTest test, string status)
     {
-        var wanted = ClashHelpers.ParseResultStatus(status);
-        return ClashHelpers.FlattenResults(RequireTest(test)).FindAll(r => r.Status == wanted);
+        var wanted = ClashHelpers.ParseResultStatuses(status);
+        return ClashHelpers.FlattenResults(RequireTest(test)).FindAll(r => wanted.Contains(r.Status));
     }
 
     /// <summary>Sets the status of a clash result.</summary>

@@ -219,6 +219,87 @@ public static class ModelItemNodes
         };
     }
 
+    /// <summary>Tests a property of an item's ancestors against a text condition.</summary>
+    /// <param name="item">The model item whose ancestor chain to test.</param>
+    /// <param name="category">The property category (tab) name, as the Properties window shows it (e.g. "Element", "Item").</param>
+    /// <param name="property">The property name inside that category (e.g. "Name", "Type", "Source File").</param>
+    /// <param name="text">The text to look for in the ancestors' property values.</param>
+    /// <param name="mode">contains, doesn't contain, starts with, doesn't start with, ends with or doesn't end with. The "doesn't" modes are true when NO ancestor matches.</param>
+    /// <param name="includeSelf">True also tests the item's own property, not just its ancestors'.</param>
+    /// <param name="caseSensitive">True matches exact casing; false (default) ignores case.</param>
+    /// <returns>Whether the condition holds, plus the nearest matching ancestor and its property value (null/"" when nothing matched — always so for the "doesn't" modes when they hold).</returns>
+    [NodeName("ModelItem.AncestorPropertyMatches")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "The general form of ModelItem.AncestorNameMatches: walks an item's ancestor chain (nearest " +
+        "first) and tests ANY property you name — category + property as the Properties window shows " +
+        "them — against the text: contains / starts with / ends with or their \"doesn't\" negations " +
+        "(true when NO ancestor matches). \"Is this item inside a branch whose Source File contains " +
+        "STEEL?\", \"under a level whose Name starts with B?\" Ancestors without the property simply " +
+        "don't match. Lace over item lists for a List.FilterByBoolMask mask.")]
+    [NodeSearchTags("item", "ancestor", "property", "contains", "starts", "ends", "branch", "under", "tree", "hierarchy", "filter", "check", "category")]
+    [MultiReturn("matches", "ancestor", "value")]
+    public static Dictionary<string, object?> AncestorPropertyMatches(
+        ModelItem item,
+        string category,
+        string property,
+        string text,
+        [NodeChoices("contains", "doesn't contain", "starts with", "doesn't start with", "ends with", "doesn't end with")]
+        string mode = "contains",
+        bool includeSelf = false,
+        bool caseSensitive = false)
+    {
+        var modelItem = RequireItem(item);
+        if (string.IsNullOrEmpty(category))
+        {
+            throw new ArgumentException("No property category name provided.", nameof(category));
+        }
+
+        if (string.IsNullOrEmpty(property))
+        {
+            throw new ArgumentException("No property name provided.", nameof(property));
+        }
+
+        if (string.IsNullOrEmpty(text))
+        {
+            throw new ArgumentException("No text to look for provided.", nameof(text));
+        }
+
+        ParseNameMode(mode, out var negated, out var kind);
+        var comparison = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        ModelItem? matched = null;
+        string matchedValue = string.Empty;
+        var start = includeSelf ? modelItem : modelItem.Parent;
+        for (var current = start; current != null; current = current.Parent)
+        {
+            var found = current.PropertyCategories.FindPropertyByDisplayName(category, property)
+                ?? current.PropertyCategories.FindPropertyByName(category, property);
+            if (found == null)
+            {
+                continue; // this ancestor has no such property — it cannot match
+            }
+
+            var value = NavisValues.ToClrObject(found.Value);
+            var valueText = value == null
+                ? string.Empty
+                : Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+            if (NameMatches(valueText, text, kind, comparison))
+            {
+                matched = current;
+                matchedValue = valueText;
+                break;
+            }
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["matches"] = negated ? matched == null : matched != null,
+            ["ancestor"] = matched,
+            ["value"] = matchedValue,
+        };
+    }
+
     private static void ParseNameMode(string? mode, out bool negated, out char kind)
     {
         var normalized = (mode ?? string.Empty).Trim().ToLowerInvariant().Replace("'", string.Empty);

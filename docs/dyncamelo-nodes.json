@@ -1,6 +1,6 @@
 {
- "version": "v0.29.0",
- "count": 335,
+ "version": "v0.30.0",
+ "count": 361,
  "categories": [
   {
    "name": "Annotation",
@@ -36,7 +36,7 @@
   },
   {
    "name": "List",
-   "count": 20
+   "count": 44
   },
   {
    "name": "Logic",
@@ -68,7 +68,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 45
+   "count": 46
   },
   {
    "name": "Navisworks.Comments",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 18
+   "count": 19
   },
   {
    "name": "Navisworks.Properties",
@@ -1947,6 +1947,161 @@
    "returns": ""
   },
   {
+   "name": "List.AddItemToFront",
+   "category": "List",
+   "description": "Returns a new list with the value prepended — the front-side twin of List.AddItemToEnd.",
+   "tags": [
+    "add",
+    "prepend",
+    "front",
+    "first",
+    "push"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to extend."
+    },
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The value to prepend."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A new list with the element first."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.AllIndicesOf",
+   "category": "List",
+   "description": "Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.",
+   "tags": [
+    "indices",
+    "index",
+    "all",
+    "occurrences",
+    "find",
+    "positions",
+    "where"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to search."
+    },
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The value to look for (value equality, like List.IndexOf)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "indices",
+     "type": "integer[]",
+     "description": "The zero-based indices of every occurrence (empty when absent)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.AllTrue",
+   "category": "List",
+   "description": "True when EVERY element of the list is true — collapse a mask into one verdict (an empty list gives false; nulls count as not-true).",
+   "tags": [
+    "all",
+    "true",
+    "every",
+    "and",
+    "mask",
+    "verdict"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The booleans to test (nulls and non-booleans count as not-true)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "allTrue",
+     "type": "boolean",
+     "description": "True when every element is true (and the list is not empty)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.AnyTrue",
+   "category": "List",
+   "description": "True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node (nulls count as not-true).",
+   "tags": [
+    "any",
+    "true",
+    "some",
+    "or",
+    "mask",
+    "exists"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The booleans to test (nulls and non-booleans count as not-true)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "anyTrue",
+     "type": "boolean",
+     "description": "True when at least one element is true."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Chop",
+   "category": "List",
+   "description": "Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).",
+   "tags": [
+    "chop",
+    "split",
+    "partition",
+    "chunk",
+    "sublists",
+    "group"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to chop."
+    },
+    {
+     "name": "lengths",
+     "type": "any[]",
+     "description": "Sublist length(s): one number chops evenly; a list of numbers is applied in sequence and repeats until the list is used up."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "lists",
+     "type": "any[]",
+     "description": "The sublists (the last one may be shorter)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Clean",
    "category": "List",
    "description": "Removes null elements from a list, at every nesting level — the mop-up after laced calls that emitted nulls for missing elements (a yellow node badge points here). removeEmptyLists also drops sublists left empty. Dynamo users: same idea as List.Clean.",
@@ -2038,6 +2193,39 @@
    "returns": ""
   },
   {
+   "name": "List.CountTrue",
+   "category": "List",
+   "description": "Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).",
+   "tags": [
+    "count",
+    "true",
+    "false",
+    "mask",
+    "tally",
+    "how many"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The booleans to count (nulls and non-booleans count as not-true)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "trueCount",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "falseCount",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The true and not-true counts."
+  },
+  {
    "name": "List.Create",
    "category": "List",
    "description": "Builds a list from the wired item inputs.",
@@ -2058,6 +2246,71 @@
    ],
    "returns": "",
    "interactive": true
+  },
+  {
+   "name": "List.Cycle",
+   "category": "List",
+   "description": "Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]).",
+   "tags": [
+    "cycle",
+    "repeat",
+    "tile",
+    "loop",
+    "duplicate"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to repeat."
+    },
+    {
+     "name": "amount",
+     "type": "integer",
+     "description": "How many copies to chain (≥ 0)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list repeated end-to-end."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.DropItems",
+   "category": "List",
+   "description": "Drops elements from the start of the list — or from the END with a negative amount (Dynamo behavior). Dropping more than the length gives an empty list.",
+   "tags": [
+    "drop",
+    "skip",
+    "remove",
+    "trim",
+    "start",
+    "end"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to shorten."
+    },
+    {
+     "name": "amount",
+     "type": "integer",
+     "description": "How many elements to drop: positive from the start, negative from the end."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The shortened list (empty when the amount exceeds the length)."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "List.FilterByBoolMask",
@@ -2248,6 +2501,42 @@
    "returns": ""
   },
   {
+   "name": "List.Insert",
+   "category": "List",
+   "description": "Returns a new list with the value inserted at the index (0 = front; the list's length = append; negative counts from the end).",
+   "tags": [
+    "insert",
+    "add",
+    "index",
+    "position"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to edit."
+    },
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The value to insert."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "Zero-based position for the new element (0 = front, Count = end; negative counts from the end)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A new list with the element inserted."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Join",
    "category": "List",
    "description": "Concatenates two lists into one.",
@@ -2279,6 +2568,38 @@
    "returns": ""
   },
   {
+   "name": "List.LastIndexOf",
+   "category": "List",
+   "description": "The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf.",
+   "tags": [
+    "index",
+    "last",
+    "find",
+    "position",
+    "reverse"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to search."
+    },
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The value to look for (value equality)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The zero-based index of the last occurrence, or -1 when absent."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.LastItem",
    "category": "List",
    "description": "Returns the last element of a list.",
@@ -2299,6 +2620,91 @@
      "name": "item",
      "type": "any",
      "description": "The last element."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.MaximumItem",
+   "category": "List",
+   "description": "The largest element of a list (numbers, texts or dates; nulls are ignored).",
+   "tags": [
+    "maximum",
+    "max",
+    "largest",
+    "biggest",
+    "highest"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to scan (must not be empty; nulls are ignored)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The maximum element."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.MinimumItem",
+   "category": "List",
+   "description": "The smallest element of a list (numbers, texts or dates; nulls are ignored).",
+   "tags": [
+    "minimum",
+    "min",
+    "smallest",
+    "lowest"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to scan (must not be empty; nulls are ignored)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The minimum element."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.OfRepeatedItem",
+   "category": "List",
+   "description": "A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing.",
+   "tags": [
+    "repeat",
+    "repeated",
+    "fill",
+    "constant",
+    "duplicate"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The value to repeat."
+    },
+    {
+     "name": "amount",
+     "type": "integer",
+     "description": "How many copies (≥ 0)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The repeated-value list."
     }
    ],
    "returns": ""
@@ -2370,6 +2776,103 @@
    "returns": ""
   },
   {
+   "name": "List.ReplaceItemAtIndex",
+   "category": "List",
+   "description": "Returns a new list with the element at the index replaced (negative indexes count from the end).",
+   "tags": [
+    "replace",
+    "item",
+    "index",
+    "set",
+    "edit"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to edit."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "Zero-based index; negative values count from the end."
+    },
+    {
+     "name": "item",
+     "type": "any",
+     "description": "The replacement value."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A new list with the element replaced."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.ReplaceNulls",
+   "category": "List",
+   "description": "Replaces every null element with a substitute value, at every nesting level — keeps list lengths and alignment intact where List.Clean would shift them. The gap-filler for laced calls that emitted nulls (0 for math, \"n/a\" for reports).",
+   "tags": [
+    "replace",
+    "null",
+    "nulls",
+    "substitute",
+    "default",
+    "fill",
+    "patch"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to patch (nested lists are patched recursively)."
+    },
+    {
+     "name": "substitute",
+     "type": "any",
+     "description": "The value to put where a null sits (e.g. 0, \"\" or \"n/a\")."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The patched list, same shape as the input."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.RestOfItems",
+   "category": "List",
+   "description": "Everything but the first element — pairs with List.FirstItem for head/tail processing.",
+   "tags": [
+    "rest",
+    "tail",
+    "skip",
+    "first"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to read from (must not be empty)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list without its first element."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Reverse",
    "category": "List",
    "description": "Returns the list in reverse order.",
@@ -2390,6 +2893,181 @@
      "name": "reversed",
      "type": "any[]",
      "description": "A new list in reverse order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.SetDifference",
+   "category": "List",
+   "description": "The distinct elements of the FIRST list that are NOT in the second (value equality) — subtract an ignore-list from a result set.",
+   "tags": [
+    "difference",
+    "set",
+    "subtract",
+    "except",
+    "remove",
+    "without"
+   ],
+   "inputs": [
+    {
+     "name": "list1",
+     "type": "any[]",
+     "description": "The list to start from."
+    },
+    {
+     "name": "list2",
+     "type": "any[]",
+     "description": "The elements to remove."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The difference, ordered as in the first list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.SetIntersection",
+   "category": "List",
+   "description": "The distinct elements present in BOTH lists (value equality, ordered as in the first) — what two searches/sets have in common.",
+   "tags": [
+    "intersection",
+    "set",
+    "common",
+    "both",
+    "and",
+    "overlap"
+   ],
+   "inputs": [
+    {
+     "name": "list1",
+     "type": "any[]",
+     "description": "The first list."
+    },
+    {
+     "name": "list2",
+     "type": "any[]",
+     "description": "The second list."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The intersection, ordered as in the first list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.SetUnion",
+   "category": "List",
+   "description": "The distinct elements present in EITHER list (value equality, first-seen order) — combine two item sets without duplicates.",
+   "tags": [
+    "union",
+    "set",
+    "combine",
+    "merge",
+    "distinct",
+    "or"
+   ],
+   "inputs": [
+    {
+     "name": "list1",
+     "type": "any[]",
+     "description": "The first list."
+    },
+    {
+     "name": "list2",
+     "type": "any[]",
+     "description": "The second list."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The union, first-seen order, duplicates removed."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.ShiftIndices",
+   "category": "List",
+   "description": "Rotates the list: +1 moves every element one place towards the end and wraps the last to the front ([a,b,c] → [c,a,b]); negative rotates the other way.",
+   "tags": [
+    "shift",
+    "rotate",
+    "wrap",
+    "offset",
+    "roll"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to rotate."
+    },
+    {
+     "name": "amount",
+     "type": "integer",
+     "description": "Positive moves elements towards the end (the last wraps to the front); negative the other way."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The rotated list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Slice",
+   "category": "List",
+   "description": "A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element. Negative start/end count from the end, Python-style.",
+   "tags": [
+    "slice",
+    "range",
+    "sub",
+    "subset",
+    "portion",
+    "between"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to read from."
+    },
+    {
+     "name": "start",
+     "type": "integer",
+     "description": "First index of the range (inclusive; negative counts from the end)."
+    },
+    {
+     "name": "end",
+     "type": "integer",
+     "description": "End of the range (exclusive; negative counts from the end)."
+    },
+    {
+     "name": "step",
+     "type": "integer",
+     "description": "Take every step-th element of the range (≥ 1).",
+     "default": "1"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The sub-list."
     }
    ],
    "returns": ""
@@ -2454,6 +3132,107 @@
     }
    ],
    "returns": "Dictionary with \"sorted\" elements and the \"sortedKeys\"."
+  },
+  {
+   "name": "List.TakeEveryNthItem",
+   "category": "List",
+   "description": "Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).",
+   "tags": [
+    "every",
+    "nth",
+    "sample",
+    "skip",
+    "thin",
+    "step"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to sample."
+    },
+    {
+     "name": "n",
+     "type": "integer",
+     "description": "Take every n-th element (≥ 1)."
+    },
+    {
+     "name": "offset",
+     "type": "integer",
+     "description": "Elements to skip before the first take.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The sampled elements."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.TakeItems",
+   "category": "List",
+   "description": "Takes elements from the start of the list — or from the END with a negative amount (Dynamo behavior). Taking more than the length gives the whole list.",
+   "tags": [
+    "take",
+    "first",
+    "head",
+    "keep",
+    "start",
+    "end"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to read from."
+    },
+    {
+     "name": "amount",
+     "type": "integer",
+     "description": "How many elements to keep: positive from the start, negative from the end."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The taken elements (the whole list when the amount exceeds the length)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Transpose",
+   "category": "List",
+   "description": "Swaps rows and columns of a list of lists — the table pivot for Excel/CSV data and property grids. Shorter rows pad with nulls so the result stays rectangular (Dynamo behavior); List.Clean or List.ReplaceNulls deal with the padding.",
+   "tags": [
+    "transpose",
+    "rows",
+    "columns",
+    "pivot",
+    "swap",
+    "table",
+    "matrix"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list of rows."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "lists",
+     "type": "any[]",
+     "description": "The transposed list; shorter rows are padded with nulls so the result is rectangular (Dynamo behavior)."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "List.UniqueItems",
@@ -4898,16 +5677,18 @@
   {
    "name": "Clash.FilterByStatus",
    "category": "Navisworks.Clash",
-   "description": "Keeps only the clash results with the given status (New, Active, Reviewed, Approved or Resolved) — the triage staple: e.g. drop the already-Approved ones and work the New ones.",
+   "description": "Keeps only the clash results with the given status(es) — pick one from the dropdown, or wire several comma-separated (\"New,Active\"; the Clash.Statuses node builds that from toggles). The triage staple: drop the already-Approved ones and work the rest.",
    "tags": [
     "clash",
     "filter",
     "status",
+    "statuses",
     "new",
     "active",
     "approved",
     "resolved",
-    "triage"
+    "triage",
+    "multiple"
    ],
    "inputs": [
     {
@@ -4918,7 +5699,7 @@
     {
      "name": "status",
      "type": "string",
-     "description": "New, Active, Reviewed, Approved or Resolved."
+     "description": "One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several (\"New,Active\"; Clash.Statuses builds this from toggles)."
     }
    ],
    "outputs": [
@@ -5315,6 +6096,64 @@
      "name": "status",
      "type": "string",
      "description": "The chosen status text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.Statuses",
+   "category": "Navisworks.Clash",
+   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
+   "tags": [
+    "clash",
+    "status",
+    "statuses",
+    "multiple",
+    "select",
+    "toggle",
+    "new",
+    "active",
+    "reviewed",
+    "approved",
+    "resolved"
+   ],
+   "inputs": [
+    {
+     "name": "newStatus",
+     "type": "boolean",
+     "description": "Include New results.",
+     "default": "true"
+    },
+    {
+     "name": "active",
+     "type": "boolean",
+     "description": "Include Active results.",
+     "default": "false"
+    },
+    {
+     "name": "reviewed",
+     "type": "boolean",
+     "description": "Include Reviewed results.",
+     "default": "false"
+    },
+    {
+     "name": "approved",
+     "type": "boolean",
+     "description": "Include Approved results.",
+     "default": "false"
+    },
+    {
+     "name": "resolved",
+     "type": "boolean",
+     "description": "Include Resolved results.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "statuses",
+     "type": "string",
+     "description": "The picked statuses as comma-separated text (e.g. \"New,Active\") — the form every status input accepts."
     }
    ],
    "returns": ""
@@ -6388,13 +7227,15 @@
   {
    "name": "ClashTest.ResultsByStatus",
    "category": "Navisworks.Clash",
-   "description": "The results of a test that have the given status (New/Active/Reviewed/Approved/Resolved).",
+   "description": "The results of a test that have the given status(es) — one, or several comma-separated (\"New,Active\"; wire Clash.Statuses to pick with toggles).",
    "tags": [
     "clash",
     "results",
     "status",
+    "statuses",
     "filter",
-    "triage"
+    "triage",
+    "multiple"
    ],
    "inputs": [
     {
@@ -6405,14 +7246,14 @@
     {
      "name": "status",
      "type": "string",
-     "description": "One of: New, Active, Reviewed, Approved, Resolved."
+     "description": "One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several (\"New,Active\"; Clash.Statuses builds this from toggles)."
     }
    ],
    "outputs": [
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The results with that status (grouped results are flattened)."
+     "description": "The results with any of those statuses (grouped results are flattened)."
     }
    ],
    "returns": ""
@@ -8454,6 +9295,84 @@
     }
    ],
    "returns": "Whether the condition holds, plus the nearest matching ancestor and its name (null/\"\" when nothing matched — always so for the \"doesn't\" modes when they hold)."
+  },
+  {
+   "name": "ModelItem.AncestorPropertyMatches",
+   "category": "Navisworks.ModelItem",
+   "description": "The general form of ModelItem.AncestorNameMatches: walks an item's ancestor chain (nearest first) and tests ANY property you name — category + property as the Properties window shows them — against the text: contains / starts with / ends with or their \"doesn't\" negations (true when NO ancestor matches). \"Is this item inside a branch whose Source File contains STEEL?\", \"under a level whose Name starts with B?\" Ancestors without the property simply don't match. Lace over item lists for a List.FilterByBoolMask mask.",
+   "tags": [
+    "item",
+    "ancestor",
+    "property",
+    "contains",
+    "starts",
+    "ends",
+    "branch",
+    "under",
+    "tree",
+    "hierarchy",
+    "filter",
+    "check",
+    "category"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item whose ancestor chain to test."
+    },
+    {
+     "name": "category",
+     "type": "string",
+     "description": "The property category (tab) name, as the Properties window shows it (e.g. \"Element\", \"Item\")."
+    },
+    {
+     "name": "property",
+     "type": "string",
+     "description": "The property name inside that category (e.g. \"Name\", \"Type\", \"Source File\")."
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to look for in the ancestors' property values."
+    },
+    {
+     "name": "mode",
+     "type": "string",
+     "description": "contains, doesn't contain, starts with, doesn't start with, ends with or doesn't end with. The \"doesn't\" modes are true when NO ancestor matches.",
+     "default": "\"contains\""
+    },
+    {
+     "name": "includeSelf",
+     "type": "boolean",
+     "description": "True also tests the item's own property, not just its ancestors'.",
+     "default": "false"
+    },
+    {
+     "name": "caseSensitive",
+     "type": "boolean",
+     "description": "True matches exact casing; false (default) ignores case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matches",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "ancestor",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "value",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Whether the condition holds, plus the nearest matching ancestor and its property value (null/\"\" when nothing matched — always so for the \"doesn't\" modes when they hold)."
   },
   {
    "name": "ModelItem.Ancestors",

@@ -383,6 +383,63 @@ public static class ClashTriageNodes
         return ClashHelpers.ParseResultStatus(status).ToString();
     }
 
+    /// <summary>Several clash statuses, picked with toggles.</summary>
+    /// <param name="newStatus">Include New results.</param>
+    /// <param name="active">Include Active results.</param>
+    /// <param name="reviewed">Include Reviewed results.</param>
+    /// <param name="approved">Include Approved results.</param>
+    /// <param name="resolved">Include Resolved results.</param>
+    /// <returns>The picked statuses as comma-separated text (e.g. "New,Active") — the form every status input accepts.</returns>
+    [NodeName("Clash.Statuses")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
+    [NodeDescription(
+        "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and " +
+        "ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. " +
+        "Outputs comma-separated text (\"New,Active\"), which every status input accepts.")]
+    [NodeSearchTags("clash", "status", "statuses", "multiple", "select", "toggle", "new", "active", "reviewed", "approved", "resolved")]
+    [return: NodeName("statuses")]
+    public static string Statuses(
+        bool newStatus = true,
+        bool active = false,
+        bool reviewed = false,
+        bool approved = false,
+        bool resolved = false)
+    {
+        var picked = new List<string>();
+        if (newStatus)
+        {
+            picked.Add("New");
+        }
+
+        if (active)
+        {
+            picked.Add("Active");
+        }
+
+        if (reviewed)
+        {
+            picked.Add("Reviewed");
+        }
+
+        if (approved)
+        {
+            picked.Add("Approved");
+        }
+
+        if (resolved)
+        {
+            picked.Add("Resolved");
+        }
+
+        if (picked.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "No status toggled on — switch on at least one of New/Active/Reviewed/Approved/Resolved.");
+        }
+
+        return string.Join(",", picked);
+    }
+
     /// <summary>Focuses the view on clash results: isolate, zoom, optionally select.</summary>
     /// <param name="results">The clash result(s) to focus — one, or a list to frame together.</param>
     /// <param name="isolate">True hides everything except the clashing elements (Appearance.ShowAll undoes it).</param>
