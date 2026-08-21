@@ -49,15 +49,18 @@ public static class ClashTriageNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
-        var stored = OwningStoredTest(resultList[0]);
+        // Canonicalize onto the document's stored instance — parent-walks hand
+        // out a fresh wrapper object per call, so identity, never references.
+        var stored = ClashHelpers.ResolveStoredTest(clash, OwningStoredTest(resultList[0]));
         var wanted = new HashSet<string>(StringComparer.Ordinal);
         foreach (var result in resultList)
         {
-            if (!ReferenceEquals(OwningStoredTest(result), stored))
+            var owner = OwningStoredTest(result);
+            if (!SameTest(owner, stored))
             {
                 throw new ArgumentException(
                     "The results span more than one clash test ('" + stored.DisplayName +
-                    "' and '" + OwningStoredTest(result).DisplayName +
+                    "' and '" + owner.DisplayName +
                     "') — group one test's results at a time.", nameof(results));
             }
 
@@ -538,6 +541,27 @@ public static class ClashTriageNodes
         throw new ArgumentException(
             "The clash result '" + result.DisplayName + "' is not attached to a stored test — " +
             "wire results straight from ClashTest.Results (or a filter of them), not detached copies.");
+    }
+
+    /// <summary>
+    /// Whether two test wrappers denote the SAME stored test. The Navisworks
+    /// API returns a fresh wrapper object per Parent access, so reference
+    /// equality is meaningless across walks — compare by Guid (name as the
+    /// last resort when a format assigns no Guids).
+    /// </summary>
+    private static bool SameTest(ClashTest a, ClashTest b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        if (a.Guid != Guid.Empty || b.Guid != Guid.Empty)
+        {
+            return a.Guid == b.Guid;
+        }
+
+        return string.Equals(a.DisplayName, b.DisplayName, StringComparison.Ordinal);
     }
 
     /// <summary>A stable identity for matching a result between a stored test and its copy.</summary>
