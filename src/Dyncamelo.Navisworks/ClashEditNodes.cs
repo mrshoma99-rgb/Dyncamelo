@@ -380,10 +380,12 @@ public static class ClashEditNodes
             copy.Children.Add(result);
         }
 
-        clash.TestsData.TestsEditTestFromCopy(stored, copy);
+        // TestsEditTestFromCopy ignores the children tree — the tree must be
+        // committed with TestsReplaceWithCopy (see ClashHelpers.CommitTestTree).
+        var refreshed = ClashHelpers.CommitTestTree(doc, clash, stored, copy, "Group clash results");
         return new Dictionary<string, object?>
         {
-            ["test"] = stored,
+            ["test"] = refreshed,
             ["groupCount"] = groupCount,
         };
     }

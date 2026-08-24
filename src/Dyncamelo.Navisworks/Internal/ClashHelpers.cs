@@ -85,6 +85,87 @@ internal static class ClashHelpers
         }
     }
 
+    /// <summary>
+    /// Commits a rebuilt clash-test tree (results and result groups) back into
+    /// the document.
+    ///
+    /// The commit MUST go through <c>TestsReplaceWithCopy</c>:
+    /// <c>TestsEditTestFromCopy</c> applies only the test's own settings
+    /// (selections, tolerance, type) and silently ignores the children, so
+    /// regrouping through it reports success while the Clash Detective tree
+    /// stays untouched. Wrapped in a document transaction so a regroup is one
+    /// undo step, matching Navisworks' own grouping commands.
+    /// </summary>
+    /// <param name="doc">The document owning the clash data.</param>
+    /// <param name="clash">The Clash Detective document part.</param>
+    /// <param name="stored">The stored test being replaced.</param>
+    /// <param name="editedCopy">The detached copy carrying the desired tree.</param>
+    /// <param name="undoLabel">Label for the undo entry.</param>
+    /// <returns>The stored test after the commit (re-located; the old wrapper is disposed).</returns>
+    internal static ClashTest CommitTestTree(
+        Document doc, DocumentClash clash, ClashTest stored, ClashTest editedCopy, string undoLabel)
+    {
+        var index = IndexOfTest(clash, stored);
+        if (index < 0)
+        {
+            throw new InvalidOperationException(
+                "The clash test '" + stored.DisplayName + "' is no longer in the document — it may have been " +
+                "deleted or renamed while the graph ran.");
+        }
+
+        var guid = stored.Guid;
+        var name = stored.DisplayName;
+        using (var transaction = doc.BeginTransaction(undoLabel))
+        {
+            clash.TestsData.TestsReplaceWithCopy(index, editedCopy);
+            transaction.Commit();
+        }
+
+        // ReplaceWithCopy disposes the previous instance — hand back the new one.
+        return FindStoredTest(clash, guid, name)
+            ?? throw new InvalidOperationException(
+                "The clash test '" + name + "' could not be found after the edit was committed.");
+    }
+
+    /// <summary>Position of a stored test among the top-level tests, by identity (-1 when absent).</summary>
+    internal static int IndexOfTest(DocumentClash clash, ClashTest test)
+    {
+        var tests = clash.TestsData.Tests;
+        for (int i = 0; i < tests.Count; i++)
+        {
+            if (!(tests[i] is ClashTest candidate))
+            {
+                continue;
+            }
+
+            if (ReferenceEquals(candidate, test) ||
+                (test.Guid != Guid.Empty && candidate.Guid == test.Guid) ||
+                (test.Guid == Guid.Empty && string.Equals(candidate.DisplayName, test.DisplayName, StringComparison.Ordinal)))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Re-locates a stored test after an edit by Guid, then name — edits can
+    /// invalidate previously handed-out wrappers. Null when the test is gone.
+    /// </summary>
+    internal static ClashTest? FindStoredTest(DocumentClash clash, Guid guid, string? name)
+    {
+        var byGuid = guid != Guid.Empty ? FindTestByGuid(clash.TestsData.Tests, guid) : null;
+        if (byGuid != null)
+        {
+            return byGuid;
+        }
+
+        return string.IsNullOrEmpty(name)
+            ? null
+            : NavisValues.FindSavedItemByName<ClashTest>(clash.TestsData.Tests, name!);
+    }
+
     private static ClashTest? FindTestByGuid(IEnumerable<SavedItem> items, Guid guid)
     {
         foreach (var test in NavisValues.FlattenSavedItems<ClashTest>(items))

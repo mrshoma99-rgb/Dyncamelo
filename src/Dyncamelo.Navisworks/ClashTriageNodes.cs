@@ -52,7 +52,13 @@ public static class ClashTriageNodes
         // Canonicalize onto the document's stored instance — parent-walks hand
         // out a fresh wrapper object per call, so identity, never references.
         var stored = ClashHelpers.ResolveStoredTest(clash, OwningStoredTest(resultList[0]));
-        var wanted = new HashSet<string>(StringComparer.Ordinal);
+
+        // Wanted results are matched into the test COPY by Guid OR display
+        // name — CreateCopy is not guaranteed to preserve result Guids, and a
+        // Guid-only match then silently matches nothing (empty group, null
+        // output). Either key hitting counts.
+        var wantedGuids = new HashSet<Guid>();
+        var wantedNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (var result in resultList)
         {
             var owner = OwningStoredTest(result);
@@ -64,8 +70,20 @@ public static class ClashTriageNodes
                     "') — group one test's results at a time.", nameof(results));
             }
 
-            wanted.Add(ResultKey(result));
+            if (result.Guid != Guid.Empty)
+            {
+                wantedGuids.Add(result.Guid);
+            }
+
+            if (!string.IsNullOrEmpty(result.DisplayName))
+            {
+                wantedNames.Add(result.DisplayName);
+            }
         }
+
+        bool IsWanted(ClashResult candidate) =>
+            (candidate.Guid != Guid.Empty && wantedGuids.Contains(candidate.Guid)) ||
+            (!string.IsNullOrEmpty(candidate.DisplayName) && wantedNames.Contains(candidate.DisplayName));
 
         // Rebuild the tree on a copy and commit in one edit (the established
         // TestsEditTestFromCopy path). Untouched groups are carried over as
@@ -82,7 +100,7 @@ public static class ClashTriageNodes
             {
                 case ClashResult loose:
                     var looseCopy = (ClashResult)loose.CreateCopy();
-                    if (wanted.Contains(ResultKey(loose)))
+                    if (IsWanted(loose))
                     {
                         targetChildren.Add(looseCopy);
                         added++;
@@ -118,7 +136,7 @@ public static class ClashTriageNodes
                             continue;
                         }
 
-                        if (wanted.Contains(ResultKey(memberResult)))
+                        if (IsWanted(memberResult))
                         {
                             if (moveExisting)
                             {
@@ -149,6 +167,19 @@ public static class ClashTriageNodes
             }
         }
 
+        // Committing an empty group is pointless (Navisworks may discard it) —
+        // fail with the reason instead of returning a silent null group.
+        if (targetChildren.Count == 0)
+        {
+            throw new InvalidOperationException(
+                skipped > 0
+                    ? "None of the " + resultList.Count + " result(s) could be placed in group '" + groupName +
+                      "' — " + skipped + " already sit in other groups. Set moveExisting to true to pull them in."
+                    : "None of the " + resultList.Count + " result(s) were found in test '" + stored.DisplayName +
+                      "' — were they deleted, or are they from an older run? Re-fetch them with ClashTest.Results " +
+                      "and wire straight into this node.");
+        }
+
         var target = new ClashResultGroup { DisplayName = groupName };
         foreach (var member in targetChildren)
         {
@@ -170,12 +201,23 @@ public static class ClashTriageNodes
             copy.Children.Add(item);
         }
 
-        clash.TestsData.TestsEditTestFromCopy(stored, copy);
+        var storedName = stored.DisplayName;
+        var refreshed = ClashHelpers.CommitTestTree(doc, clash, stored, copy, "Group clash results");
+
+        // Verify the commit actually landed rather than reporting a silent null.
+        var storedGroup = FindGroup(refreshed, groupName);
+        if (storedGroup == null)
+        {
+            throw new InvalidOperationException(
+                "The group '" + groupName + "' is not in test '" + storedName + "' after the edit (added " +
+                added + ", moved " + moved + ", skipped " + skipped + " of " + resultList.Count +
+                " result(s)) — the commit did not stick. Check Clash Detective and report what you see there.");
+        }
 
         return new Dictionary<string, object?>
         {
-            ["test"] = stored,
-            ["group"] = FindGroup(stored, groupName),
+            ["test"] = refreshed,
+            ["group"] = storedGroup,
             ["added"] = added,
             ["moved"] = moved,
             ["skipped"] = skipped,
@@ -562,14 +604,6 @@ public static class ClashTriageNodes
         }
 
         return string.Equals(a.DisplayName, b.DisplayName, StringComparison.Ordinal);
-    }
-
-    /// <summary>A stable identity for matching a result between a stored test and its copy.</summary>
-    private static string ResultKey(ClashResult result)
-    {
-        return result.Guid != Guid.Empty
-            ? "g:" + result.Guid.ToString("N")
-            : "n:" + result.DisplayName;
     }
 
     private static ClashResultGroup? FindGroup(ClashTest test, string groupName)
