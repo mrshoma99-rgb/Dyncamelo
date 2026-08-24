@@ -329,7 +329,16 @@ public static class ClashEditNodes
         Document? document,
         Func<List<ClashResult>, List<KeyValuePair<string, List<ClashResult>>>> partition)
     {
-        var stored = ClashHelpers.RequireStoredTest(test);
+        ClashTest stored;
+        try
+        {
+            stored = ClashHelpers.RequireStoredTest(test);
+        }
+        catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
+        {
+            throw ClashHelpers.StaleInputError("clash test", ex);
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 

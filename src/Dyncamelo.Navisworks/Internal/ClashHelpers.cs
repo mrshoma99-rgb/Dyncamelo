@@ -127,6 +127,26 @@ internal static class ClashHelpers
                 "The clash test '" + name + "' could not be found after the edit was committed.");
     }
 
+    /// <summary>
+    /// Whether an exception is Navisworks' disposed-native-handle failure —
+    /// what a wrapper cached from before a tree-replacing edit throws.
+    /// </summary>
+    internal static bool IsDisposed(Exception ex)
+    {
+        return ex is ObjectDisposedException ||
+               (ex.Message != null && ex.Message.IndexOf("Disposed", StringComparison.OrdinalIgnoreCase) >= 0);
+    }
+
+    /// <summary>The standard "your wired clash items are stale" error.</summary>
+    internal static InvalidOperationException StaleInputError(string what, Exception inner)
+    {
+        return new InvalidOperationException(
+            "The wired " + what + " are stale — Navisworks disposed them when the clash tree was last " +
+            "edited (a previous run of this graph, or an earlier grouping node in it). Re-fetch them " +
+            "between edits: wire ClashTest.ByName (by name, not a cached test) into this node, and use " +
+            "Flow.Then to order it after any earlier grouping edit.", inner);
+    }
+
     /// <summary>Position of a stored test among the top-level tests, by identity (-1 when absent).</summary>
     internal static int IndexOfTest(DocumentClash clash, ClashTest test)
     {
