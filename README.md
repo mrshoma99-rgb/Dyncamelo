@@ -8,6 +8,17 @@
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
 [![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
+> ## Part of CamelWorks
+> Dyncamelo ships inside **[CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin)**,
+> which installs it alongside the coordination, data and delivery apps and the
+> [BIMCamel IFC exporter](https://github.com/mrshoma99-rgb/bimcamel-ifc-exporter) — one installer,
+> one **BIMCamel** ribbon tab. CamelWorks' *Automate ▸ Graphs* tab runs a `.dyc` graph against the
+> open document without opening this editor, and opens this editor when one needs changing.
+>
+> **Install [CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin/releases/latest)
+> to get all three.** Dyncamelo on its own, from this repository's releases, works exactly as it
+> always has — the bundles sit side by side and share the ribbon tab either way.
+
 > ## Source-available — free to use, not to sell
 > Dyncamelo is licensed under **Apache 2.0 with the Commons Clause** (see [LICENSE](LICENSE)). In plain words: **use it freely — at home or at work, companies included** — read the source, modify it, contribute, and share it for free. What you may **not** do is *sell* it: selling Dyncamelo itself, or a product or service whose value derives substantially from it, requires a written agreement with BIMCamel. (Because of the selling restriction this is "source-available" rather than OSI-certified open source.)
 
@@ -49,6 +60,11 @@ Full details in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves:
 
 ## Part of the BIMCamel toolset
 
+- **[CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin)** — the coordination,
+  data and delivery suite: clash, issues, model audit, revision compare, properties, quantities,
+  sets, exports and the site tools. **It ships Dyncamelo and the IFC exporter inside its own
+  installer**, so one download puts all three on one ribbon tab, and its Automate ▸ Graphs tab runs
+  Dyncamelo graphs without opening the editor.
 - **[BIMCamel IFC Exporter](https://github.com/mrshoma99-rgb/bimcamel-ifc-exporter)** — free, fast
   **Navisworks → IFC** export (IFC4 / IFC2x3): streaming engine, geometry instancing, property
   sets, classifications and georeferencing. Website:
