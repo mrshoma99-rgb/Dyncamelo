@@ -147,6 +147,59 @@ public class GraphLayoutTests
         }
     }
 
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(0.0)]
+    [InlineData(-5.0)]
+    public void UnusableSizes_NeverProduceNonFinitePositions(double badSize)
+    {
+        // An auto-sized node reports NaN, and Math.Max(240, NaN) is NaN — the
+        // crash that took Navisworks down when Ctrl+L met an un-resized node.
+        var items = new[]
+        {
+            new GraphLayout.LayoutItem("a", badSize, badSize),
+            Item("b"),
+        };
+
+        var placed = GraphLayout.Arrange(items, new[] { ((object)"a", (object)"b") }, 0, 0);
+
+        Assert.Equal(2, placed.Count);
+        foreach (var position in placed.Values)
+        {
+            Assert.False(double.IsNaN(position.X) || double.IsInfinity(position.X));
+            Assert.False(double.IsNaN(position.Y) || double.IsInfinity(position.Y));
+        }
+    }
+
+    [Theory]
+    [InlineData(double.NaN, 0.0)]
+    [InlineData(0.0, double.NaN)]
+    [InlineData(double.NegativeInfinity, double.PositiveInfinity)]
+    public void UnusableAnchor_FallsBackToTheOrigin(double originX, double originY)
+    {
+        var placed = GraphLayout.Arrange(new[] { Item("a"), Item("b") },
+                                         new List<(object, object)>(), originX, originY);
+
+        foreach (var position in placed.Values)
+        {
+            Assert.False(double.IsNaN(position.X) || double.IsInfinity(position.X));
+            Assert.False(double.IsNaN(position.Y) || double.IsInfinity(position.Y));
+        }
+    }
+
+    [Fact]
+    public void UnusableGaps_AreTreatedAsZero_NotPropagated()
+    {
+        var placed = GraphLayout.Arrange(new[] { Item("a"), Item("b") },
+                                         new List<(object, object)>(), 0, 0,
+                                         columnGap: double.NaN, rowGap: double.NaN);
+
+        Assert.Equal(0, placed["a"].X);
+        Assert.Equal(0, placed["b"].X);
+        Assert.False(double.IsNaN(placed["b"].Y));
+    }
+
     [Fact]
     public void EmptySelection_ReturnsNothing()
     {

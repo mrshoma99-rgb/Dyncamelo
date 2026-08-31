@@ -1179,32 +1179,59 @@ public class GraphEditorViewModel : ObservableObject
         }
 
         var placed = GraphLayout.Arrange(items, edges, left, (top + bottom) / 2.0);
+        int moved = 0;
         foreach (var node in selected)
         {
-            if (placed.TryGetValue(node.Model, out var position))
+            // A non-finite position would throw out of the canvas layout pass
+            // rather than land anywhere, so it is dropped instead of assigned.
+            if (placed.TryGetValue(node.Model, out var position) &&
+                IsUsableCoordinate(position.X) && IsUsableCoordinate(position.Y))
             {
                 node.Location = new Point(position.X, position.Y);
+                moved++;
             }
         }
 
-        StatusMessage = "Arranged " + selected.Count + " nodes.";
+        StatusMessage = "Arranged " + moved + " nodes.";
     }
 
     /// <summary>
-    /// Canvas width of a node. Only Watch-style nodes carry a real size, so the
-    /// rest use a generous constant — the layout only needs enough room to
-    /// guarantee no overlap, not pixel accuracy.
+    /// Canvas width of a node. Only a node the user has resized reports a real
+    /// size — the rest answer NaN, WPF's "size automatically" — so those fall
+    /// back to a generous constant. The layout needs enough room to guarantee
+    /// no overlap, not pixel accuracy.
     /// </summary>
     private static double EstimateWidth(NodeViewModel node)
     {
-        return Math.Max(240.0, node.WatchWidth);
+        const double Default = 240.0;
+        var measured = node.WatchWidth;
+        return IsUsableSize(measured) ? Math.Max(Default, measured) : Default;
     }
 
-    /// <summary>Canvas height of a node: title bar plus a row per port, or its real size when it has one.</summary>
+    /// <summary>Canvas height of a node: title bar plus a row per port, or its real size when it reports one.</summary>
     private static double EstimateHeight(NodeViewModel node)
     {
         var rows = Math.Max(node.Model.InPorts.Count, node.Model.OutPorts.Count);
-        return Math.Max(70.0 + (rows * 26.0), node.WatchHeight);
+        var estimate = 70.0 + (rows * 26.0);
+        var measured = node.WatchHeight;
+        return IsUsableSize(measured) ? Math.Max(estimate, measured) : estimate;
+    }
+
+    /// <summary>
+    /// Whether a reported size is a real number to lay out with. An auto-sized
+    /// node reports NaN, and Math.Max(240, NaN) is NaN, not 240 — left
+    /// unchecked that NaN reaches the canvas as a node position and WPF throws
+    /// NotFiniteNumberException, taking Navisworks down with it.
+    /// </summary>
+    private static bool IsUsableSize(double size)
+    {
+        return !double.IsNaN(size) && !double.IsInfinity(size) && size > 0;
+    }
+
+    /// <summary>Whether a computed canvas coordinate is safe to assign (finite).</summary>
+    private static bool IsUsableCoordinate(double value)
+    {
+        return !double.IsNaN(value) && !double.IsInfinity(value);
     }
 
     private List<NodeModel> GetSelectedNodeModels()

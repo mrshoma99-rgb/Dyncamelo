@@ -21,8 +21,16 @@ public static class GraphLayout
         public LayoutItem(object key, double width, double height)
         {
             Key = key;
-            Width = width <= 0 ? 1 : width;
-            Height = height <= 0 ? 1 : height;
+            Width = Usable(width);
+            Height = Usable(height);
+        }
+
+        // NaN is how WPF spells "size automatically", and every NaN comparison
+        // is false — so a plain "<= 0" guard lets it through, and one NaN then
+        // poisons every coordinate downstream.
+        private static double Usable(double size)
+        {
+            return double.IsNaN(size) || double.IsInfinity(size) || size <= 0 ? 1 : size;
         }
 
         /// <summary>Caller's identity for the node.</summary>
@@ -63,6 +71,27 @@ public static class GraphLayout
         if (items.Count == 0)
         {
             return result;
+        }
+
+        // An unusable anchor would place every node at NaN just as surely.
+        if (double.IsNaN(originX) || double.IsInfinity(originX))
+        {
+            originX = 0;
+        }
+
+        if (double.IsNaN(originY) || double.IsInfinity(originY))
+        {
+            originY = 0;
+        }
+
+        if (double.IsNaN(columnGap) || double.IsInfinity(columnGap) || columnGap < 0)
+        {
+            columnGap = 0;
+        }
+
+        if (double.IsNaN(rowGap) || double.IsInfinity(rowGap) || rowGap < 0)
+        {
+            rowGap = 0;
         }
 
         var index = new Dictionary<object, int>();

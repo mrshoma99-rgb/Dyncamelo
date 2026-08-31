@@ -207,6 +207,15 @@ public static class AppearanceNodes
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
 
+        // Isolate means "show ONLY these", from whatever state the model is in,
+        // so the previous hidden state is cleared first. Without that, a second
+        // isolate stacks on the first: Invert yields branch-level items, so a
+        // branch hidden whole on the earlier pass stays hidden, and un-hiding
+        // this pass's items cannot bring back a hidden ancestor. In a loop that
+        // shows up as the first viewpoint being right and every later one
+        // coming out empty.
+        doc.Models.ResetAllHidden();
+
         var inverted = NavisValues.ToItemCollection(list);
         inverted.Invert(doc); // in place: now everything EXCEPT the items
         doc.Models.SetHidden(inverted, true);
