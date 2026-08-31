@@ -24,6 +24,7 @@
         <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopySelectionCommand}" />
         <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
         <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
+        <KeyBinding Key="L" Modifiers="Control" Command="{Binding ArrangeSelectionCommand}" />
         <KeyBinding Key="F5" Command="{Binding RunCommand}" />
     </UserControl.InputBindings>
 
@@ -747,6 +748,9 @@
                         <MenuItem Header="Group Selection"
                                   InputGestureText="Ctrl+G"
                                   Command="{Binding PlacementTarget.DataContext.GroupSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="Arrange Selection"
+                                  InputGestureText="Ctrl+L"
+                                  Command="{Binding PlacementTarget.DataContext.ArrangeSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <Separator />
                         <MenuItem Header="Run"
                                   Command="{Binding PlacementTarget.DataContext.RunCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />

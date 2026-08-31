@@ -123,6 +123,7 @@ public class GraphEditorViewModel : ObservableObject
         CopySelectionCommand = new RelayCommand(CopySelection);
         PasteCommand = new RelayCommand(Paste, () => _clipboardFragment != null);
         GroupSelectionCommand = new RelayCommand(GroupSelection);
+        ArrangeSelectionCommand = new RelayCommand(ArrangeSelection);
         OpenRecentFileCommand = new RelayCommand<string>(OpenRecentFile);
         OpenSampleCommand = new RelayCommand<SampleGraphViewModel>(OpenSample);
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
@@ -405,6 +406,9 @@ public class GraphEditorViewModel : ObservableObject
 
     /// <summary>Duplicates the selected nodes including wires between them (Ctrl+D).</summary>
     public ICommand DuplicateSelectionCommand { get; }
+
+    /// <summary>Tidies the selected nodes into non-overlapping dependency columns (Ctrl+L).</summary>
+    public ICommand ArrangeSelectionCommand { get; }
 
     /// <summary>Copies the selected nodes and the wires among them to the in-memory clipboard (Ctrl+C).</summary>
     public ICommand CopySelectionCommand { get; }
@@ -1121,6 +1125,86 @@ public class GraphEditorViewModel : ObservableObject
                 _graph.Groups.Remove(group.Model);
             }
         }
+    }
+
+    /// <summary>
+    /// Lays the selected nodes out left to right in dependency columns so they
+    /// stop overlapping and the wires read in the direction the data flows.
+    /// The block stays where it is (anchored on the selection's own centre),
+    /// and stacking order follows the nodes' current vertical order, so the
+    /// arrangement stays recognisable rather than jumping somewhere new.
+    /// </summary>
+    private void ArrangeSelection()
+    {
+        var selected = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (selected.Count < 2)
+        {
+            StatusMessage = "Select two or more nodes to arrange.";
+            return;
+        }
+
+        // Current vertical order (then horizontal) decides how nodes stack
+        // inside a column — the user's reading order survives the tidy-up.
+        selected.Sort((left, right) =>
+        {
+            int byY = left.Model.Y.CompareTo(right.Model.Y);
+            return byY != 0 ? byY : left.Model.X.CompareTo(right.Model.X);
+        });
+
+        var items = new List<GraphLayout.LayoutItem>(selected.Count);
+        foreach (var node in selected)
+        {
+            items.Add(new GraphLayout.LayoutItem(node.Model, EstimateWidth(node), EstimateHeight(node)));
+        }
+
+        var models = new HashSet<NodeModel>(selected.Select(n => n.Model));
+        var edges = new List<(object From, object To)>();
+        foreach (var connection in _graph.Connections)
+        {
+            var from = connection.Source.Owner;
+            var to = connection.Target.Owner;
+            if (models.Contains(from) && models.Contains(to))
+            {
+                edges.Add((from, to));
+            }
+        }
+
+        // Anchor on the selection's current bounds so the block does not move.
+        double left = double.MaxValue, top = double.MaxValue, bottom = double.MinValue;
+        foreach (var node in selected)
+        {
+            left = Math.Min(left, node.Model.X);
+            top = Math.Min(top, node.Model.Y);
+            bottom = Math.Max(bottom, node.Model.Y + EstimateHeight(node));
+        }
+
+        var placed = GraphLayout.Arrange(items, edges, left, (top + bottom) / 2.0);
+        foreach (var node in selected)
+        {
+            if (placed.TryGetValue(node.Model, out var position))
+            {
+                node.Location = new Point(position.X, position.Y);
+            }
+        }
+
+        StatusMessage = "Arranged " + selected.Count + " nodes.";
+    }
+
+    /// <summary>
+    /// Canvas width of a node. Only Watch-style nodes carry a real size, so the
+    /// rest use a generous constant — the layout only needs enough room to
+    /// guarantee no overlap, not pixel accuracy.
+    /// </summary>
+    private static double EstimateWidth(NodeViewModel node)
+    {
+        return Math.Max(240.0, node.WatchWidth);
+    }
+
+    /// <summary>Canvas height of a node: title bar plus a row per port, or its real size when it has one.</summary>
+    private static double EstimateHeight(NodeViewModel node)
+    {
+        var rows = Math.Max(node.Model.InPorts.Count, node.Model.OutPorts.Count);
+        return Math.Max(70.0 + (rows * 26.0), node.WatchHeight);
     }
 
     private List<NodeModel> GetSelectedNodeModels()

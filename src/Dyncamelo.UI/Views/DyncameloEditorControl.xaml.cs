@@ -19,6 +19,28 @@ public partial class DyncameloEditorControl : UserControl
     private Point _libraryDragStart;
     private LibraryEntryViewModel? _libraryDragEntry;
 
+    /// <summary>
+    /// Nodify animates the viewport whenever a descendant raises
+    /// <see cref="FrameworkElement.RequestBringIntoViewEvent"/>. WPF raises it
+    /// on its own when focus moves — most visibly when a focused node is
+    /// deleted and focus lands on a neighbour — so the canvas would drift after
+    /// every delete. Suppressing the event where it leaves a node container
+    /// keeps the viewport exactly where the user parked it; panning stays
+    /// entirely manual (middle-drag, wheel, Fit to Screen).
+    /// </summary>
+    static DyncameloEditorControl()
+    {
+        EventManager.RegisterClassHandler(
+            typeof(ItemContainer),
+            RequestBringIntoViewEvent,
+            new RequestBringIntoViewEventHandler(OnContainerRequestBringIntoView));
+    }
+
+    private static void OnContainerRequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+    {
+        e.Handled = true;
+    }
+
     /// <summary>Creates the control. Assign <see cref="ViewModel"/> before showing it.</summary>
     public DyncameloEditorControl()
     {

@@ -74,6 +74,7 @@ A few editor shortcuts worth knowing from day one:
 - **Hover any port** for a tooltip that says what to connect: name, type, required/optional with its default, and a description of the input (generated from the API documentation for all 314 nodes).
 - **Value previews** appear under each node after a run (toggle with **Preview** in the toolbar). When a preview truncates a list ("… N more"), click the bubble to expand the full scrollable list; click again to collapse. Wire an image path into a **Watch Image** node to see pictures (like the fall-hazard heat maps) inline on the canvas.
 - **Right-click a node → Find in Library** jumps to its library entry; double-click a node's title to rename it.
+- **Ctrl+L** tidies the selected nodes into non-overlapping left-to-right dependency columns (also on the canvas right-click menu as **Arrange Selection**) — the fastest way to untangle a graph that grew organically.
 
 ## 4. Your first graph: color all concrete red
 
