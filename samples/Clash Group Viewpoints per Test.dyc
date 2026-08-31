@@ -2,7 +2,7 @@
   "Dyncamelo": {
     "FormatVersion": 1,
     "MinReaderVersion": 1,
-    "AppVersion": "0.32.0"
+    "AppVersion": "0.33.3"
   },
   "Uuid": "6b1f0c9a7d2e4f1885c3a90e77d41b02",
   "Name": "Clash Group Viewpoints per Test",
@@ -624,6 +624,42 @@
         }
       ],
       "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000009001",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.ResetTemporary@object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.ResetTemporary",
+      "X": 180.0,
+      "Y": -160.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "after",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "done"
+        },
+        {
+          "Name": "after"
+        }
+      ],
+      "Data": {}
     }
   ],
   "Connectors": [
@@ -643,15 +679,15 @@
     },
     {
       "Id": "80000000000000000000000000000003",
-      "FromNode": "70000000000000000000000000000003",
-      "FromPort": "results",
+      "FromNode": "70000000000000000000000000009001",
+      "FromPort": "after",
       "ToNode": "70000000000000000000000000000004",
       "ToPort": "results"
     },
     {
       "Id": "80000000000000000000000000000004",
-      "FromNode": "70000000000000000000000000000003",
-      "FromPort": "results",
+      "FromNode": "70000000000000000000000000009001",
+      "FromPort": "after",
       "ToNode": "70000000000000000000000000000005",
       "ToPort": "result"
     },
@@ -773,6 +809,13 @@
       "FromPort": "results",
       "ToNode": "70000000000000000000000000000017",
       "ToPort": "value"
+    },
+    {
+      "Id": "80000000000000000000000000009001",
+      "FromNode": "70000000000000000000000000000003",
+      "FromPort": "results",
+      "ToNode": "70000000000000000000000000009001",
+      "ToPort": "after"
     }
   ],
   "Notes": [
@@ -799,6 +842,14 @@
       "Y": 330,
       "Width": 620,
       "Height": 130
+    },
+    {
+      "Id": "90000000000000000000000000009001",
+      "Text": "PERFORMANCE: the reset runs FIRST each iteration, so every viewpoint captures only its own group's colours. Without it the temporary overrides pile up and each save has to snapshot every earlier group's colouring too \u2014 the run gets slower with every group. The 'after' input is what puts the node inside the loop: a node with no inputs depends on nothing and would run once, outside it.",
+      "X": -80,
+      "Y": -330,
+      "Width": 640,
+      "Height": 120
     }
   ],
   "Groups": [],

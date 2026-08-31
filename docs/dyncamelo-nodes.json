@@ -1,5 +1,5 @@
 {
- "version": "v0.32.0",
+ "version": "v0.33.2",
  "count": 363,
  "categories": [
   {
@@ -4919,7 +4919,7 @@
   {
    "name": "Appearance.ResetTemporary",
    "category": "Navisworks.Appearance",
-   "description": "Clears every TEMPORARY color/transparency override in the model — a clean slate before highlighting the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints.",
+   "description": "Clears every TEMPORARY color/transparency override in the model — a clean slate before highlighting the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints. Wire anything into 'after' to place this INSIDE a loop: without an input the node has nothing to depend on, so it runs once outside the loop body. Per iteration it keeps each saved viewpoint carrying only its own highlighting instead of every earlier iteration's as well.",
    "tags": [
     "appearance",
     "reset",
@@ -4927,9 +4927,16 @@
     "clear",
     "clean",
     "runtime",
-    "highlight"
+    "highlight",
+    "loop"
    ],
    "inputs": [
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, passed straight back out. Its only job is to give this node an input, so it can sit inside a loop body and run once per iteration — a node with no inputs depends on nothing and runs once, outside the loop.",
+     "default": "null"
+    },
     {
      "name": "document",
      "type": "Document",
@@ -4940,11 +4947,16 @@
    "outputs": [
     {
      "name": "done",
-     "type": "boolean",
-     "description": "True when the temporary overrides were cleared."
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": ""
     }
    ],
-   "returns": ""
+   "returns": "True once the temporary overrides are cleared, plus whatever was wired into \"after\" — chain that onward to run the rest of the iteration after the reset."
   },
   {
    "name": "Appearance.Show",

@@ -616,6 +616,7 @@ public static class ClashTriageNodes
         Document? document = null)
     {
         var resultList = MaterializeResults(results);
+        var doc = NavisworksContext.ResolveDocument(document);
         var items = new List<ModelItem>();
         var seen = new HashSet<ModelItem>();
         foreach (var result in resultList)
@@ -631,11 +632,14 @@ public static class ClashTriageNodes
                 "Re-run the test (ClashTest.Run) against the current model.");
         }
 
-        // A clash can name a composite element (a Revit family instance, an IFC
-        // container) whose own node carries no geometry. Isolating and framing
-        // one of those shows nothing, so resolve to the geometry-bearing
-        // descendants whenever the wired items have no geometry themselves.
-        var framed = ResolveGeometry(items);
+        // The clash's own items are used as-is: a ModelItem's bounding box and
+        // its hidden state both already cover its descendants, so a composite
+        // element frames and isolates correctly without any tree walking.
+        // Walking descendants up front costs a full subtree enumeration per
+        // clash item per group, which is what turns a slow run into a frozen
+        // one on a federated model. The walk below is the fallback, taken only
+        // when framing genuinely finds nothing.
+        var framed = items;
 
         if (isolate)
         {
@@ -647,9 +651,28 @@ public static class ClashTriageNodes
             SelectionNodes.SetCurrent(framed, document);
         }
 
-        if (zoom)
+        if (zoom && !CameraNodes.TryFrameItems(doc, framed, paddingFactor))
         {
-            CameraNodes.ZoomToItems(framed, paddingFactor, document);
+            // Nothing to frame: the clash named container nodes whose geometry
+            // lives further down. Pay for the descendant walk now — only here,
+            // where it is the difference between a view and an empty one.
+            framed = ResolveGeometry(items);
+            if (isolate)
+            {
+                AppearanceNodes.Isolate(framed, document);
+            }
+
+            if (select)
+            {
+                SelectionNodes.SetCurrent(framed, document);
+            }
+
+            if (!CameraNodes.TryFrameItems(doc, framed, paddingFactor))
+            {
+                throw new InvalidOperationException(
+                    "The clash result(s) carry no geometry to frame — their items are container nodes " +
+                    "with nothing underneath. Re-run the clash test so its results point at current geometry.");
+            }
         }
 
         return framed;

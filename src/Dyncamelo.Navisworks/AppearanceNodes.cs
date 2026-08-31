@@ -119,19 +119,28 @@ public static class AppearanceNodes
     }
 
     /// <summary>Clears every temporary (viewpoint-scoped) color/transparency override in the model.</summary>
+    /// <param name="after">Anything at all, passed straight back out. Its only job is to give this node an input, so it can sit inside a loop body and run once per iteration — a node with no inputs depends on nothing and runs once, outside the loop.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>True when the temporary overrides were cleared.</returns>
+    /// <returns>True once the temporary overrides are cleared, plus whatever was wired into "after" — chain that onward to run the rest of the iteration after the reset.</returns>
     [NodeName("Appearance.ResetTemporary")]
     [NodeDescription(
         "Clears every TEMPORARY color/transparency override in the model — a clean slate before highlighting " +
-        "the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints.")]
-    [NodeSearchTags("appearance", "reset", "temporary", "clear", "clean", "runtime", "highlight")]
-    [return: NodeName("done")]
-    public static bool ResetTemporary(Document? document = null)
+        "the next item. Does not touch permanent overrides (Appearance.OverrideColor) or already-saved viewpoints. " +
+        "Wire anything into 'after' to place this INSIDE a loop: without an input the node has nothing to depend " +
+        "on, so it runs once outside the loop body. Per iteration it keeps each saved viewpoint carrying only its " +
+        "own highlighting instead of every earlier iteration's as well.")]
+    [NodeSearchTags("appearance", "reset", "temporary", "clear", "clean", "runtime", "highlight", "loop")]
+    [NodeAliases("Dyncamelo.Navisworks.AppearanceNodes.ResetTemporary@Autodesk.Navisworks.Api.Document")]
+    [MultiReturn("done", "after")]
+    public static Dictionary<string, object?> ResetTemporary(object? after = null, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.ResetAllTemporaryMaterials();
-        return true;
+        return new Dictionary<string, object?>
+        {
+            ["done"] = true,
+            ["after"] = after,
+        };
     }
 
     /// <summary>Hides model items in the viewport.</summary>
