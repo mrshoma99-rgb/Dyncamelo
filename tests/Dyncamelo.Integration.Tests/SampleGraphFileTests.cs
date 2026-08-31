@@ -24,6 +24,7 @@ public class SampleGraphFileTests
     private static readonly string[] ExpectedSamples =
     {
         "Bulk Selection Sets from Values.dyc",
+        "Clash Group Viewpoints per Test.dyc",
         "Clash Triage and BCF Export.dyc",
         "Color Elements by Property.dyc",
         "Export Properties to Excel.dyc",

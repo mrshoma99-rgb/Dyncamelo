@@ -289,6 +289,100 @@ public static class ClashTriageNodes
         };
     }
 
+    /// <summary>Every result group of every clash test in the document.</summary>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>One flat list of every group, with each group's name, its test's name and its result count (index-aligned).</returns>
+    [NodeName("Clash.AllGroups")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "Every result group of every clash test in the document, as ONE flat list — the whole-project " +
+        "entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each " +
+        "iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups " +
+        "per test (which needs List@Level to iterate). Tests without groups contribute nothing.")]
+    [NodeSearchTags("clash", "groups", "all", "project", "every", "tests", "flat", "loop", "batch")]
+    [MultiReturn("groups", "names", "testNames", "counts")]
+    public static Dictionary<string, object?> AllGroups(Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var clash = ClashHelpers.RequireClash(doc);
+
+        var groups = new List<ClashResultGroup>();
+        var names = new List<string>();
+        var testNames = new List<string>();
+        var counts = new List<int>();
+        foreach (var test in NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests))
+        {
+            foreach (var child in test.Children)
+            {
+                if (child is ClashResultGroup group)
+                {
+                    groups.Add(group);
+                    names.Add(group.DisplayName ?? string.Empty);
+                    testNames.Add(test.DisplayName ?? string.Empty);
+                    counts.Add(GroupMembers(group).Count);
+                }
+            }
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["groups"] = groups,
+            ["names"] = names,
+            ["testNames"] = testNames,
+            ["counts"] = counts,
+        };
+    }
+
+    /// <summary>Opens up a clash result group: its results, name, status and owning test.</summary>
+    /// <param name="group">The result group (e.g. from ClashTest.Groups).</param>
+    /// <returns>The results inside it, its name and status, how many results it holds, and the test it belongs to (object and name).</returns>
+    [NodeName("ClashGroup.Info")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "Everything about a clash result group, straight from the group object — the results inside, its " +
+        "name and status, and the TEST it belongs to (object and name). This is what makes whole-project " +
+        "group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to " +
+        "this node, and every iteration knows its results, its group name and its test name without " +
+        "parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.")]
+    [NodeSearchTags("clash", "group", "info", "results", "name", "status", "test", "parent", "loop")]
+    [MultiReturn("results", "name", "status", "count", "test", "testName")]
+    public static Dictionary<string, object?> GroupInfo(ClashResultGroup group)
+    {
+        if (group == null)
+        {
+            throw new ArgumentNullException(nameof(group), "No clash result group provided. Wire one from ClashTest.Groups.");
+        }
+
+        List<ClashResult> members;
+        ClashTest? test = null;
+        try
+        {
+            members = GroupMembers(group);
+            for (SavedItem? current = group.Parent; current != null; current = current.Parent)
+            {
+                if (current is ClashTest owner)
+                {
+                    test = owner;
+                    break;
+                }
+            }
+        }
+        catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
+        {
+            throw ClashHelpers.StaleInputError("clash result groups", ex);
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["results"] = members,
+            ["name"] = group.DisplayName ?? string.Empty,
+            ["status"] = group.Status.ToString(),
+            ["count"] = members.Count,
+            ["test"] = test,
+            ["testName"] = test?.DisplayName ?? string.Empty,
+        };
+    }
+
     /// <summary>All result groups of a clash test.</summary>
     /// <param name="test">The clash test, or its display name.</param>
     /// <param name="document">The document (defaults to the active document).</param>

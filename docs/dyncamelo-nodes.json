@@ -1,6 +1,6 @@
 {
- "version": "v0.31.2",
- "count": 361,
+ "version": "v0.31.3",
+ "count": 363,
  "categories": [
   {
    "name": "Annotation",
@@ -68,7 +68,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 46
+   "count": 48
   },
   {
    "name": "Navisworks.Comments",
@@ -5325,6 +5325,53 @@
    "returns": ""
   },
   {
+   "name": "Clash.AllGroups",
+   "category": "Navisworks.Clash",
+   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (which needs List@Level to iterate). Tests without groups contribute nothing.",
+   "tags": [
+    "clash",
+    "groups",
+    "all",
+    "project",
+    "every",
+    "tests",
+    "flat",
+    "loop",
+    "batch"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "groups",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "names",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "testNames",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "One flat list of every group, with each group's name, its test's name and its result count (index-aligned)."
+  },
+  {
    "name": "Clash.CompareSnapshots",
    "category": "Navisworks.Clash",
    "description": "Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) — the weekly delta report no plugin does via live API. Pure file IO: needs no open model.",
@@ -6280,6 +6327,62 @@
     }
    ],
    "returns": "The group, the results inside it, the group's own status, and the result count."
+  },
+  {
+   "name": "ClashGroup.Info",
+   "category": "Navisworks.Clash",
+   "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.",
+   "tags": [
+    "clash",
+    "group",
+    "info",
+    "results",
+    "name",
+    "status",
+    "test",
+    "parent",
+    "loop"
+   ],
+   "inputs": [
+    {
+     "name": "group",
+     "type": "ClashResultGroup",
+     "description": "The result group (e.g. from ClashTest.Groups)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "name",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "status",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "test",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "testName",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The results inside it, its name and status, how many results it holds, and the test it belongs to (object and name)."
   },
   {
    "name": "ClashResult.AddComment",
