@@ -631,22 +631,72 @@ public static class ClashTriageNodes
                 "Re-run the test (ClashTest.Run) against the current model.");
         }
 
+        // A clash can name a composite element (a Revit family instance, an IFC
+        // container) whose own node carries no geometry. Isolating and framing
+        // one of those shows nothing, so resolve to the geometry-bearing
+        // descendants whenever the wired items have no geometry themselves.
+        var framed = ResolveGeometry(items);
+
         if (isolate)
         {
-            AppearanceNodes.Isolate(items, document);
+            AppearanceNodes.Isolate(framed, document);
         }
 
         if (select)
         {
-            SelectionNodes.SetCurrent(items, document);
+            SelectionNodes.SetCurrent(framed, document);
         }
 
         if (zoom)
         {
-            CameraNodes.ZoomToItems(items, paddingFactor, document);
+            CameraNodes.ZoomToItems(framed, paddingFactor, document);
         }
 
-        return items;
+        return framed;
+    }
+
+    /// <summary>
+    /// The geometry-bearing form of a clash's items: the items themselves when
+    /// they carry geometry, otherwise their geometry-bearing descendants. Items
+    /// with nothing underneath are kept as-is so the caller still reports the
+    /// honest "no geometry" error rather than an empty list.
+    /// </summary>
+    private static List<ModelItem> ResolveGeometry(List<ModelItem> items)
+    {
+        var resolved = new List<ModelItem>(items.Count);
+        var seen = new HashSet<ModelItem>();
+        foreach (var item in items)
+        {
+            if (item.HasGeometry)
+            {
+                if (seen.Add(item))
+                {
+                    resolved.Add(item);
+                }
+
+                continue;
+            }
+
+            bool found = false;
+            foreach (var descendant in item.Descendants)
+            {
+                if (descendant.HasGeometry)
+                {
+                    found = true;
+                    if (seen.Add(descendant))
+                    {
+                        resolved.Add(descendant);
+                    }
+                }
+            }
+
+            if (!found && seen.Add(item))
+            {
+                resolved.Add(item);
+            }
+        }
+
+        return resolved;
     }
 
     // ------------------------------------------------------------ privates

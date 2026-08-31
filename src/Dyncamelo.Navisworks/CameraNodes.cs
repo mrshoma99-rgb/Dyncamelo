@@ -90,11 +90,22 @@ public static class CameraNodes
 
         var doc = NavisworksContext.ResolveDocument(document);
         var collection = NavisValues.ToItemCollection(items);
+
+        // Visible geometry first, then the hidden-inclusive box: "zoom to these
+        // items" is an instruction, not a question, and Navisworks' own Zoom to
+        // Selection frames hidden items too. Only an item set with no geometry
+        // anywhere is a genuine failure.
         var box = collection.BoundingBox(true);
         if (box == null || box.IsEmpty)
         {
+            box = collection.BoundingBox(false);
+        }
+
+        if (box == null || box.IsEmpty)
+        {
             throw new InvalidOperationException(
-                "The items have no visible geometry to zoom to. Wire geometry-bearing items (see ModelItem.GeometryLeaves).");
+                "The items carry no geometry to zoom to — they are container/grouping nodes. " +
+                "Wire geometry-bearing items (ModelItem.GeometryLeaves resolves containers to theirs).");
         }
 
         var padded = PadBox(box, paddingFactor);
