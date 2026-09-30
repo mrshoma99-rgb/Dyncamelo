@@ -1,6 +1,8 @@
 using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Dyncamelo.UI.Views;
 using Xunit;
 
@@ -8,6 +10,10 @@ namespace Dyncamelo.UI.Tests;
 
 public class ThemeAndWireTests
 {
+    // Shape.RenderedGeometry is empty until a render pass; the defining geometry is what WPF draws.
+    internal static Geometry Define(DycWire wire) =>
+        (Geometry)typeof(Shape).GetProperty("DefiningGeometry", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(wire)!;
+
     [Fact]
     public void ThemeLoadsAndExposesTheRowLayoutResources()
     {
@@ -37,8 +43,7 @@ public class ThemeAndWireTests
         StaHost.Run(() =>
         {
             var wire = new DycWire { Source = new Point(10, 10), Target = new Point(310, 110), Stroke = Brushes.White, StrokeThickness = 2 };
-            wire.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            var bounds = wire.RenderedGeometry.Bounds;
+            var bounds = Define(wire).Bounds;
             Assert.False(bounds.IsEmpty);
             Assert.True(bounds.Width >= 290 && bounds.Height >= 90, "bounds " + bounds);
         });
@@ -50,8 +55,8 @@ public class ThemeAndWireTests
         StaHost.Run(() =>
         {
             var wire = new DycWire { Source = new Point(0, 0), Target = new Point(200, 0), IsLowDetail = true, Stroke = Brushes.White };
-            wire.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            var bounds = wire.RenderedGeometry.Bounds;
+            var bounds = Define(wire).Bounds;
+            Assert.False(bounds.IsEmpty);
             Assert.True(bounds.Height < 0.5, "straight line should be flat, got " + bounds);
         });
     }
@@ -63,9 +68,7 @@ public class ThemeAndWireTests
         {
             var plain = new DycWire { Source = new Point(0, 0), Target = new Point(300, 0), Stroke = Brushes.White };
             var muted = new DycWire { Source = new Point(0, 0), Target = new Point(300, 0), IsMuted = true, Stroke = Brushes.White };
-            plain.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            muted.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            Assert.True(muted.RenderedGeometry.Bounds.Height > plain.RenderedGeometry.Bounds.Height + 6);
+            Assert.True(Define(muted).Bounds.Height > Define(plain).Bounds.Height + 6);
         });
     }
 
@@ -75,8 +78,7 @@ public class ThemeAndWireTests
         StaHost.Run(() =>
         {
             var wire = new DycWire { Source = new Point(double.NaN, 0), Target = new Point(10, double.PositiveInfinity), Stroke = Brushes.White };
-            wire.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            Assert.NotNull(wire.RenderedGeometry);
+            Assert.NotNull(Define(wire));
         });
     }
 

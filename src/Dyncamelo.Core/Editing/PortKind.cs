@@ -434,6 +434,12 @@ public static class PortKinds
             name = name.Substring(0, tick);
         }
 
+        // Dyncamelo's own value types (DyncameloColor, DyncameloPoint, …) are named like their Navisworks counterparts.
+        if (name.Length > 9 && name.StartsWith("Dyncamelo", StringComparison.Ordinal))
+        {
+            name = name.Substring(9);
+        }
+
         if (ByTypeName.TryGetValue(name, out var family))
         {
             return family;

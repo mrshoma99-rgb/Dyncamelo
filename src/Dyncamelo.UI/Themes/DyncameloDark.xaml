@@ -1384,7 +1384,8 @@
          A node is a stack of rows: header, outputs (socket on the right edge),
          the node's own body, inputs (socket on the left edge, label and inline
          editor beside it), foldable panels, and a "+N hidden" chip. Sockets
-         straddle the card edge; the card sits inside a 7px margin so the
+         straddle the card edge (centre on the card outline, 9px in from the
+         item container: 7px margin + 2px state border); the card sits inside that margin so the
          overflowing half of each socket stays inside the item container.
          ================================================================== -->
 
@@ -1538,7 +1539,7 @@
                                Style="{StaticResource Dyc.Socket.Output}"
                                HorizontalAlignment="Right"
                                VerticalAlignment="Center"
-                               Margin="0,0,-7,0" />
+                               Margin="0,0,-9,0" />
         </Grid>
     </DataTemplate>
 
@@ -1548,7 +1549,7 @@
                               Style="{StaticResource Dyc.Socket.Input}"
                               HorizontalAlignment="Left"
                               VerticalAlignment="Center"
-                              Margin="-7,0,0,0" />
+                              Margin="-9,0,0,0" />
             <StackPanel Orientation="Horizontal"
                         Margin="14,0,10,0"
                         VerticalAlignment="Center"

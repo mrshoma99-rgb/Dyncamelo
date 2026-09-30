@@ -114,8 +114,9 @@ public class NodeLayoutTests
     {
         var size = node.Size;
         Assert.True(size.Width > 100 && size.Height > 30, what + ": node not measured, size " + size);
-        var expectedX = rightEdge ? node.Location.X + size.Width - 7 : node.Location.X + 7;
-        Assert.True(Math.Abs(anchor.X - expectedX) <= 3, what + ": anchor.X " + anchor.X + " expected ~" + expectedX);
+        // Sockets are centred on the visible card outline: 7px item margin + 2px state border.
+        var expectedX = rightEdge ? node.Location.X + size.Width - 9 : node.Location.X + 9;
+        Assert.True(Math.Abs(anchor.X - expectedX) <= 2.5, what + ": anchor.X " + anchor.X + " expected ~" + expectedX);
         Assert.True(anchor.Y >= node.Location.Y - 1 && anchor.Y <= node.Location.Y + size.Height + 1,
             what + ": anchor.Y " + anchor.Y + " outside " + node.Location.Y + ".." + (node.Location.Y + size.Height));
     }
@@ -132,6 +133,39 @@ public class NodeLayoutTests
             // Outputs are listed above inputs (Blender order), so the output sits higher than a's inputs would.
             Assert.True(rig.Wire.Source.Anchor.Y < rig.A.Location.Y + rig.A.Size.Height / 2);
         });
+    }
+
+    [Fact]
+    public void TheLiveWireIsDrawnBetweenTheSockets()
+    {
+        using var rig = Build();
+        StaHost.Run(() =>
+        {
+            var wire = FindDescendants<DycWire>(rig.Window).Single();
+            var bounds = ThemeAndWireTests.Define(wire).Bounds;
+            Assert.False(bounds.IsEmpty, "live wire has no geometry");
+            Assert.True(Math.Abs(bounds.Left - rig.Wire.Source.Anchor.X) < 2 && Math.Abs(bounds.Right - rig.Wire.Target.Anchor.X) < 2,
+                "wire spans " + bounds + " but sockets are at " + rig.Wire.Source.Anchor + " -> " + rig.Wire.Target.Anchor);
+        });
+    }
+
+    private static System.Collections.Generic.List<T> FindDescendants<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        var found = new System.Collections.Generic.List<T>();
+        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            if (child is T match)
+            {
+                found.Add(match);
+            }
+
+            found.AddRange(FindDescendants<T>(child));
+        }
+
+        return found;
     }
 
     [Fact]
