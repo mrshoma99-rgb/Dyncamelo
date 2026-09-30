@@ -78,6 +78,8 @@
     <StreamGeometry x:Key="Dyc.Icon.Rename">F1 M180-180h44l472-471-44-44-472 471v44Zm-60 60v-128l575-574q8-8 19-12.5t23-4.5q11 0 22 4.5t20 12.5l44 44q9 9 13 20t4 22q0 11-4.5 22.5T823-694L248-120H120Zm659-617-41-41 41 41Zm-105 64-22-22 44 44-22-22Z</StreamGeometry>
     <!-- Lightning bolt = "auto / live re-run" (clearer than the refresh-loop glyph). -->
     <StreamGeometry x:Key="Dyc.Icon.Auto">F1 M11,21 L11,13 L6,13 L13,3 L13,11 L18,11 Z</StreamGeometry>
+    <!-- Open a node group: a box with an arrow leaving it. -->
+    <StreamGeometry x:Key="Dyc.Icon.OpenGroup">F1 M19,19 L5,19 L5,5 L12,5 L12,3 L5,3 C3.89,3 3,3.9 3,5 L3,19 C3,20.1 3.89,21 5,21 L19,21 C20.1,21 21,20.1 21,19 L21,12 L19,12 Z M14,3 L14,5 L17.59,5 L7.76,14.83 L9.17,16.24 L19,6.41 L19,10 L21,10 L21,3 Z</StreamGeometry>
     <!-- Minimap: a frame with the visible area inside it. -->
     <StreamGeometry x:Key="Dyc.Icon.Map">F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z M8,8 L14,8 L14,13 L8,13 Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Preview">F1 M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 240q113 0 207.5-59.5T832-500q-50-121-144.5-180.5T480-740q-113 0-207.5 59.5T128-500q50 121 144.5 180.5T480-260Z</StreamGeometry>
@@ -783,6 +785,33 @@
                                   IsCheckable="True"
                                   IsChecked="{Binding KeepListStructure}" />
                     </MenuItem>
+                    <Separator Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Rename Socket…" Command="{Binding RenameSocketCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Remove Socket" Command="{Binding RemoveSocketCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Move Up" Command="{Binding MoveSocketUpCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Move Down" Command="{Binding MoveSocketDownCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Socket Type" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <MenuItem Header="Any" Command="{Binding SetSocketKindCommand}" CommandParameter="" />
+                        <MenuItem Header="Number" Command="{Binding SetSocketKindCommand}" CommandParameter="number" />
+                        <MenuItem Header="Integer" Command="{Binding SetSocketKindCommand}" CommandParameter="integer" />
+                        <MenuItem Header="Boolean" Command="{Binding SetSocketKindCommand}" CommandParameter="boolean" />
+                        <MenuItem Header="Text" Command="{Binding SetSocketKindCommand}" CommandParameter="text" />
+                        <MenuItem Header="Colour" Command="{Binding SetSocketKindCommand}" CommandParameter="colour" />
+                        <MenuItem Header="Geometry" Command="{Binding SetSocketKindCommand}" CommandParameter="geometry" />
+                        <MenuItem Header="Model item" Command="{Binding SetSocketKindCommand}" CommandParameter="item" />
+                        <MenuItem Header="Selection" Command="{Binding SetSocketKindCommand}" CommandParameter="selection" />
+                        <MenuItem Header="Viewpoint" Command="{Binding SetSocketKindCommand}" CommandParameter="viewpoint" />
+                        <Separator />
+                        <MenuItem Header="Number list" Command="{Binding SetSocketKindCommand}" CommandParameter="number*" />
+                        <MenuItem Header="Integer list" Command="{Binding SetSocketKindCommand}" CommandParameter="integer*" />
+                        <MenuItem Header="Boolean list" Command="{Binding SetSocketKindCommand}" CommandParameter="boolean*" />
+                        <MenuItem Header="Text list" Command="{Binding SetSocketKindCommand}" CommandParameter="text*" />
+                        <MenuItem Header="Colour list" Command="{Binding SetSocketKindCommand}" CommandParameter="colour*" />
+                        <MenuItem Header="Geometry list" Command="{Binding SetSocketKindCommand}" CommandParameter="geometry*" />
+                        <MenuItem Header="Model item list" Command="{Binding SetSocketKindCommand}" CommandParameter="item*" />
+                        <MenuItem Header="Selection list" Command="{Binding SetSocketKindCommand}" CommandParameter="selection*" />
+                        <MenuItem Header="Viewpoint list" Command="{Binding SetSocketKindCommand}" CommandParameter="viewpoint*" />
+                    </MenuItem>
                 </ContextMenu>
             </Setter.Value>
         </Setter>
@@ -832,6 +861,33 @@
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                    <Separator Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Rename Socket…" Command="{Binding RenameSocketCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Remove Socket" Command="{Binding RemoveSocketCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Move Up" Command="{Binding MoveSocketUpCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Move Down" Command="{Binding MoveSocketDownCommand}" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <MenuItem Header="Socket Type" Visibility="{Binding IsGroupSocket, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <MenuItem Header="Any" Command="{Binding SetSocketKindCommand}" CommandParameter="" />
+                        <MenuItem Header="Number" Command="{Binding SetSocketKindCommand}" CommandParameter="number" />
+                        <MenuItem Header="Integer" Command="{Binding SetSocketKindCommand}" CommandParameter="integer" />
+                        <MenuItem Header="Boolean" Command="{Binding SetSocketKindCommand}" CommandParameter="boolean" />
+                        <MenuItem Header="Text" Command="{Binding SetSocketKindCommand}" CommandParameter="text" />
+                        <MenuItem Header="Colour" Command="{Binding SetSocketKindCommand}" CommandParameter="colour" />
+                        <MenuItem Header="Geometry" Command="{Binding SetSocketKindCommand}" CommandParameter="geometry" />
+                        <MenuItem Header="Model item" Command="{Binding SetSocketKindCommand}" CommandParameter="item" />
+                        <MenuItem Header="Selection" Command="{Binding SetSocketKindCommand}" CommandParameter="selection" />
+                        <MenuItem Header="Viewpoint" Command="{Binding SetSocketKindCommand}" CommandParameter="viewpoint" />
+                        <Separator />
+                        <MenuItem Header="Number list" Command="{Binding SetSocketKindCommand}" CommandParameter="number*" />
+                        <MenuItem Header="Integer list" Command="{Binding SetSocketKindCommand}" CommandParameter="integer*" />
+                        <MenuItem Header="Boolean list" Command="{Binding SetSocketKindCommand}" CommandParameter="boolean*" />
+                        <MenuItem Header="Text list" Command="{Binding SetSocketKindCommand}" CommandParameter="text*" />
+                        <MenuItem Header="Colour list" Command="{Binding SetSocketKindCommand}" CommandParameter="colour*" />
+                        <MenuItem Header="Geometry list" Command="{Binding SetSocketKindCommand}" CommandParameter="geometry*" />
+                        <MenuItem Header="Model item list" Command="{Binding SetSocketKindCommand}" CommandParameter="item*" />
+                        <MenuItem Header="Selection list" Command="{Binding SetSocketKindCommand}" CommandParameter="selection*" />
+                        <MenuItem Header="Viewpoint list" Command="{Binding SetSocketKindCommand}" CommandParameter="viewpoint*" />
+                    </MenuItem>
                 </ContextMenu>
             </Setter.Value>
         </Setter>
@@ -1335,6 +1391,16 @@
                                       ToolTip="A channel (0-255). Drag, click to type, or double-click to reset." />
             </Grid>
         </StackPanel>
+    </DataTemplate>
+
+    <!-- Group Input / Group Output: one button adds a socket to the group's interface; right-click a socket to rename, retype, move or remove it. -->
+    <DataTemplate x:Key="NodeBody.GroupInterface">
+        <Button Style="{StaticResource Dyc.SmallButton}"
+                Margin="4,2"
+                HorizontalAlignment="Stretch"
+                Content="{Binding DataContext.AddSocketLabel, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                ToolTip="Add a socket to this node group's interface"
+                Command="{Binding DataContext.AddGroupSocketCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}" />
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.CapturedSelectionNode">
@@ -2137,6 +2203,16 @@
                             </MenuItem>
                             <Separator />
                             <MenuItem Header="Find in Library" Command="{Binding FindInLibraryCommand}" />
+                            <Separator Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            <MenuItem Header="Open Node Group" InputGestureText="Tab" Command="{Binding EnterGroupCommand}"
+                                      Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            <MenuItem Header="Ungroup" InputGestureText="Ctrl+Alt+U" Command="{Binding UngroupCommand}"
+                                      Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            <MenuItem Header="Rename Node Group…" Command="{Binding RenameGroupCommand}"
+                                      Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            <MenuItem Header="Make Single User" Command="{Binding MakeSingleUserCommand}"
+                                      ToolTip="Give this instance its own copy of the group, so editing it no longer changes the other instances."
+                                      Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
                         </ContextMenu>
                     </Border.ContextMenu>
                     <Border Background="{DynamicResource Dyc.NodeBodyBrush}"
@@ -2156,6 +2232,15 @@
                                             Command="{Binding ToggleCollapseCommand}"
                                             ToolTip="Collapse / expand (H)">
                                         <TextBlock x:Name="Chevron" Text="▾" FontSize="11" Foreground="White" />
+                                    </Button>
+                                    <Button x:Name="EnterGroupButton"
+                                            DockPanel.Dock="Right"
+                                            Style="{StaticResource Dyc.NodeChevronButton}"
+                                            Margin="6,0,0,0"
+                                            Command="{Binding EnterGroupCommand}"
+                                            Visibility="Collapsed"
+                                            ToolTip="Open this node group to edit it (Tab)">
+                                        <Path Width="12" Height="12" Stretch="Uniform" Fill="White" Data="{StaticResource Dyc.Icon.OpenGroup}" />
                                     </Button>
                                     <TextBlock x:Name="MuteBadge"
                                                DockPanel.Dock="Right"
@@ -2254,6 +2339,9 @@
         <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding IsCollapsed}" Value="True">
                 <Setter TargetName="Chevron" Property="Text" Value="▸" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsGroupInstance}" Value="True">
+                <Setter TargetName="EnterGroupButton" Property="Visibility" Value="Visible" />
             </DataTrigger>
             <DataTrigger Binding="{Binding IsMuted}" Value="True">
                 <Setter TargetName="MuteBadge" Property="Visibility" Value="Visible" />

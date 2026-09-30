@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Dyncamelo.Core.Editing;
+using Dyncamelo.Core.Groups;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Nodes;
@@ -79,14 +80,56 @@ public class NodeViewModel : CanvasItemViewModel
         ToggleFreezeCommand = new RelayCommand(() => _owner.ToggleFreeze(this));
         ToggleHideUnusedCommand = new RelayCommand(() => _owner.ToggleHideUnused(this));
         ResetWidthCommand = new RelayCommand(() => Model.Ui.Width = null);
+        EnterGroupCommand = new RelayCommand(() => _owner.EnterGroup(this), () => Model is GroupInstanceNode instance && instance.Definition != null);
+        AddGroupSocketCommand = new RelayCommand(() => _owner.AddGroupSocket(this), () => Model is GroupBoundNode && !(Model is GroupInstanceNode));
+        UngroupCommand = new RelayCommand(() => _owner.UngroupNode(this), () => Model is GroupInstanceNode);
+        MakeSingleUserCommand = new RelayCommand(() => _owner.MakeNodeGroupSingleUser(this), () => Model is GroupInstanceNode);
+        RenameGroupCommand = new RelayCommand(() => _owner.RenameNodeGroup(this), () => Model is GroupInstanceNode);
 
         HeaderBrush = GetCategoryBrush(model.Category);
         SetLocationFromModel(new Point(model.X, model.Y));
         SyncPorts();
         UpdateValueDisplay();
         model.PropertyChanged += OnModelPropertyChanged;
+        model.PortsChanged += OnModelPortsChanged;
         model.Ui.PropertyChanged += OnUiChanged;
         _owner.PropertyChanged += OnOwnerChanged;
+    }
+
+    // ----- node groups --------------------------------------------------------
+
+    /// <summary>True for an instance of a node group (drawn with an "edit group" button).</summary>
+    public bool IsGroupInstance => Model is GroupInstanceNode;
+
+    /// <summary>True for the Group Input / Group Output node inside a group (its sockets can be added, renamed and removed).</summary>
+    public bool IsGroupInterface => Model is GroupBoundNode && !(Model is GroupInstanceNode);
+
+    /// <summary>Name of the group an instance runs; empty for other nodes.</summary>
+    public string GroupName => (Model as GroupInstanceNode)?.Definition?.Name ?? string.Empty;
+
+    /// <summary>Opens the group this instance runs for editing (Tab).</summary>
+    public ICommand EnterGroupCommand { get; }
+
+    /// <summary>On a Group Input / Group Output node: adds a socket to the group's interface.</summary>
+    public ICommand AddGroupSocketCommand { get; }
+
+    /// <summary>Replaces this instance with a copy of the nodes in its group.</summary>
+    public ICommand UngroupCommand { get; }
+
+    /// <summary>Gives this instance its own copy of the group.</summary>
+    public ICommand MakeSingleUserCommand { get; }
+
+    /// <summary>Renames the group this instance runs.</summary>
+    public ICommand RenameGroupCommand { get; }
+
+    /// <summary>"Add input" / "Add output": the label of the button on a Group Input / Group Output node.</summary>
+    public string AddSocketLabel => Model is GroupInputNode ? "+ Add input" : "+ Add output";
+
+    // A node group's interface changed: connectors follow the ports (added, removed, renamed, reordered).
+    private void OnModelPortsChanged(object? sender, EventArgs e)
+    {
+        SyncPorts();
+        _owner.RefreshConnectedFlags();
     }
 
     // ----- row layout ---------------------------------------------------------
@@ -98,7 +141,7 @@ public class NodeViewModel : CanvasItemViewModel
     public bool IsReroute => Model is RerouteNode;
 
     /// <summary>True when the node has its own body row (input, slider, watch… nodes; not zero-touch nodes or reroutes).</summary>
-    public bool HasBody => !(Model is ZeroTouchNodeModel) && !(Model is RerouteNode);
+    public bool HasBody => !(Model is ZeroTouchNodeModel) && !(Model is RerouteNode) && !(Model is GroupInstanceNode);
 
 
     /// <summary>True at the overview zoom level: nodes shrink to their header.</summary>
@@ -537,6 +580,7 @@ public class NodeViewModel : CanvasItemViewModel
     public void Detach()
     {
         Model.PropertyChanged -= OnModelPropertyChanged;
+        Model.PortsChanged -= OnModelPortsChanged;
         Model.Ui.PropertyChanged -= OnUiChanged;
         _owner.PropertyChanged -= OnOwnerChanged;
         foreach (var port in _watchedInputPorts)
@@ -609,6 +653,25 @@ public class NodeViewModel : CanvasItemViewModel
             if (!present)
             {
                 connectors.Add(new ConnectorViewModel(this, ports[i]));
+            }
+        }
+
+        // A node group's sockets can be reordered: keep the connectors in the ports' order.
+        for (int i = 0; i < ports.Count; i++)
+        {
+            int at = -1;
+            for (int j = i; j < connectors.Count; j++)
+            {
+                if (connectors[j].Port == ports[i])
+                {
+                    at = j;
+                    break;
+                }
+            }
+
+            if (at > i)
+            {
+                connectors.Move(at, i);
             }
         }
     }
@@ -1019,6 +1082,8 @@ public class NodeViewModel : CanvasItemViewModel
                 return CreateFrozenBrush("#FF15803D");
             case "Units":
                 return CreateFrozenBrush("#FF525F7A");
+            case "Node Groups":
+                return CreateFrozenBrush("#FF7C3AED");
             default:
                 return DefaultHeaderBrush;
         }

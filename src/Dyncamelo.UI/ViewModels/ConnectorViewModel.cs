@@ -20,7 +20,7 @@ public class ConnectorViewModel : ObservableObject
 {
     private Point _anchor;
     private bool _isConnected;
-    private readonly PortKind _declaredKind;
+    private PortKind _declaredKind;
     private PortKind _kind;
     private double _socketOpacity = 1d;
 
@@ -64,8 +64,62 @@ public class ConnectorViewModel : ObservableObject
             case nameof(PortModel.UseLevels):
                 RaiseLevelsChanged();
                 break;
+            case nameof(PortModel.Name):
+            case nameof(PortModel.KindHint):
+                RefreshFromPort();
+                break;
         }
     }
+
+    /// <summary>
+    /// Re-reads everything derived from the port's name and kind hint — the label, colour, shape and inline editor — after a
+    /// node group's socket was renamed or retyped.
+    /// </summary>
+    public void RefreshFromPort()
+    {
+        _declaredKind = PortKinds.FromPort(Port);
+        _kind = _declaredKind;
+        EditorKind = PortEditors.Resolve(Port);
+        NumberSpec = EditorKind == PortEditorKind.Number ? NumberEditSpec.FromPort(Port) : null;
+        foreach (var name in new[]
+        {
+            nameof(Title), nameof(ToolTip), nameof(Kind), nameof(Family), nameof(Depth), nameof(FamilyBrush), nameof(SocketGlyph),
+            nameof(SocketGeometry), nameof(KindText), nameof(EditorKind), nameof(NumberSpec), nameof(ShowEditor), nameof(ShowPlainLabel),
+            nameof(NumberMin), nameof(NumberMax), nameof(NumberSoftMin), nameof(NumberSoftMax), nameof(NumberStep), nameof(NumberIsInteger),
+            nameof(NumberUnit), nameof(NumberValue),
+        })
+        {
+            OnPropertyChanged(name);
+        }
+
+        RaiseValueChanged();
+    }
+
+    // ----- sockets of a node group's interface nodes ------------------------------------------
+
+    private ICommand? _renameSocketCommand;
+    private ICommand? _removeSocketCommand;
+    private ICommand? _moveSocketUpCommand;
+    private ICommand? _moveSocketDownCommand;
+    private ICommand? _setSocketKindCommand;
+
+    /// <summary>True for a socket of a Group Input / Group Output node: it can be renamed, retyped, moved and removed.</summary>
+    public bool IsGroupSocket => Port.Owner is Dyncamelo.Core.Groups.GroupInputNode || Port.Owner is Dyncamelo.Core.Groups.GroupOutputNode;
+
+    /// <summary>Asks for a new name for this group socket.</summary>
+    public ICommand RenameSocketCommand => _renameSocketCommand ??= new RelayCommand(() => Node.Owner.RenameGroupSocket(this), () => IsGroupSocket);
+
+    /// <summary>Removes this group socket and the wires on it.</summary>
+    public ICommand RemoveSocketCommand => _removeSocketCommand ??= new RelayCommand(() => Node.Owner.RemoveGroupSocket(this), () => IsGroupSocket);
+
+    /// <summary>Moves this group socket one place up.</summary>
+    public ICommand MoveSocketUpCommand => _moveSocketUpCommand ??= new RelayCommand(() => Node.Owner.MoveGroupSocket(this, -1), () => IsGroupSocket);
+
+    /// <summary>Moves this group socket one place down.</summary>
+    public ICommand MoveSocketDownCommand => _moveSocketDownCommand ??= new RelayCommand(() => Node.Owner.MoveGroupSocket(this, 1), () => IsGroupSocket);
+
+    /// <summary>Sets the kind of this group socket (parameter: "number", "text*", "" for any).</summary>
+    public ICommand SetSocketKindCommand => _setSocketKindCommand ??= new RelayCommand<string>(kind => Node.Owner.SetGroupSocketKind(this, kind), _ => IsGroupSocket);
 
     /// <summary>Owning node view model.</summary>
     public NodeViewModel Node { get; }
@@ -260,10 +314,10 @@ public class ConnectorViewModel : ObservableObject
     // ----- inline editors (unwired inputs edit their own value) ------------------
 
     /// <summary>The inline editor this input gets while unwired (none for wire-only types).</summary>
-    public PortEditorKind EditorKind { get; }
+    public PortEditorKind EditorKind { get; private set; }
 
     /// <summary>Range, step and unit of a number editor; null for other editors.</summary>
-    public NumberEditSpec? NumberSpec { get; }
+    public NumberEditSpec? NumberSpec { get; private set; }
 
     /// <summary>True while an editor should be shown: the input has one and no wire feeds it.</summary>
     public bool ShowEditor => EditorKind != PortEditorKind.None && !_isConnected;

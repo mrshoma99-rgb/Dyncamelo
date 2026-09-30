@@ -253,6 +253,7 @@ public class LibraryViewModel : ObservableObject
     public const int MaxSearchResults = 200;
 
     private readonly NodeRegistry _registry;
+    private Dyncamelo.Core.Groups.NodeGroupLibrary? _nodeGroups;
     private readonly UiSettingsService? _settings;
     private readonly List<LibraryEntryViewModel> _allEntries = new List<LibraryEntryViewModel>();
 
@@ -420,6 +421,22 @@ public class LibraryViewModel : ObservableObject
                 sample.Function));
         }
 
+        // The document's own node groups are listed too, so an instance is added like any other node.
+        if (_nodeGroups != null)
+        {
+            foreach (var group in _nodeGroups.Groups)
+            {
+                _allEntries.Add(new LibraryEntryViewModel(
+                    GraphEditorViewModel.GroupLibraryPrefix + group.Id.ToString("N"),
+                    group.Name,
+                    "Node Groups",
+                    group.Description.Length > 0 ? group.Description : "A node group: " + group.Inputs.Count + " input(s), " + group.Outputs.Count + " output(s).",
+                    new[] { "group", "custom", "subgraph" },
+                    FormatGroupSignature(group),
+                    Dyncamelo.Core.Graph.NodeFunction.Modify));
+            }
+        }
+
         foreach (var entry in _allEntries)
         {
             if (_settings != null)
@@ -436,6 +453,22 @@ public class LibraryViewModel : ObservableObject
             _searchTimer.Stop();
             ApplySearch();
         }
+    }
+
+    /// <summary>Lists the groups of a document in the library (under "Node Groups"); null removes them.</summary>
+    /// <param name="groups">The document's group library.</param>
+    public void SetNodeGroups(Dyncamelo.Core.Groups.NodeGroupLibrary? groups)
+    {
+        _nodeGroups = groups;
+        Refresh();
+    }
+
+    private static string FormatGroupSignature(Dyncamelo.Core.Groups.NodeGroup group)
+    {
+        string Side(System.Collections.Generic.IReadOnlyList<Dyncamelo.Core.Groups.GroupSocket> sockets) =>
+            string.Join(", ", sockets.Select(s => s.Name + ": " + (s.Kind.Length == 0 ? "any" : s.Kind)));
+
+        return Side(group.Inputs) + " \u2192 " + Side(group.Outputs);
     }
 
     /// <summary>Clears the selection highlight everywhere in the library (tree and results).</summary>

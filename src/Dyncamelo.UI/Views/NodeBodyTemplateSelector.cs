@@ -49,6 +49,10 @@ public class NodeBodyTemplateSelector : DataTemplateSelector
                 return "NodeBody.Watch";
             case MissingNodeModel _:
                 return "NodeBody.Missing";
+            case Dyncamelo.Core.Groups.GroupInputNode _:
+                return "NodeBody.GroupInterface";
+            case Dyncamelo.Core.Groups.GroupOutputNode _:
+                return "NodeBody.GroupInterface";
             case null:
                 return "NodeBody.Empty";
             default:

@@ -60,6 +60,15 @@ public static class UiGuide
         sb.Append("* A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).\n");
         sb.Append("* Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.\n\n");
 
+        sb.Append("## Node groups\n\n");
+        sb.Append("A **node group** is a reusable piece of graph — a few nodes that do one job, with their own inputs and outputs — stored in the file. Use it as often as you like; edit it once.\n\n");
+        sb.Append("* **Make one:** select nodes and choose *Node Groups ▸ Make Node Group* (`Ctrl+Alt+G`). The wires that crossed the selection become the group's inputs and outputs, and an **instance** takes the selection's place, so the graph computes exactly what it did.\n");
+        sb.Append("* **Open one:** select an instance and press `Tab` (or click the arrow in its header). The canvas shows the group's nodes between a **Group Input** and a **Group Output** node, and the bar above the canvas shows where you are; `Shift+Tab` (or *Close group*) goes back. Running while a group is open still runs the whole graph, so an edit shows its effect at once. Each level keeps its own Undo history.\n");
+        sb.Append("* **Edit the interface:** inside a group, *+ Add input* / *+ Add output* on the Group Input / Group Output node adds a socket, and right-clicking a socket renames, retypes, moves or removes it (wires on a removed socket go too, everywhere the group is used, and come back on undo). Sockets pass whole values, so a list travels through as one list. Giving a socket a type colours it and, on instances, gives it an inline editor.\n");
+        sb.Append("* **Instances share the group:** editing the group changes every instance. *Make Node Group Single User* gives one instance its own copy; *Ungroup* (`Ctrl+Alt+U`) puts a copy of the group's nodes in place of an instance. The group stays in the file until you use *Delete Unused Node Groups*.\n");
+        sb.Append("* Groups can hold other groups but never themselves. The library lists the file's groups under **Node Groups**, so an instance is added like any node; copying an instance into another file brings its group along. Older versions of Dyncamelo refuse a file with node groups rather than silently dropping them.\n");
+        sb.Append("* The progress text names the group path (`Outer ▸ Inner ▸ node`), and `Esc` cancels from inside a group too.\n\n");
+
         sb.Append("## Running and stopping\n\n");
         sb.Append("* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.\n");
         sb.Append("* While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.\n");

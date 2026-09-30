@@ -70,7 +70,7 @@ public sealed class CommandInfo
 public static class CommandCatalog
 {
     /// <summary>The menu groups, in display order.</summary>
-    public static readonly IReadOnlyList<string> Categories = new[] { "File", "Edit", "View", "Graph", "Node", "Wires", "Help" };
+    public static readonly IReadOnlyList<string> Categories = new[] { "File", "Edit", "View", "Graph", "Node", "Node Groups", "Wires", "Help" };
 
     /// <summary>All commands, in menu order.</summary>
     public static readonly IReadOnlyList<CommandInfo> All = new List<CommandInfo>
@@ -121,6 +121,15 @@ public static class CommandCatalog
         new CommandInfo("node.resetinputs", "Reset Inputs to Default", "Node", null, keywords: "clear values defaults"),
         new CommandInfo("node.insertonwire", "Insert Into Selected Wire", "Node", null, keywords: "splice between"),
         new CommandInfo("node.autoconnect", "Connect Selected Nodes", "Node", "F", keywords: "auto link chain make links"),
+        new CommandInfo("group.make", "Make Node Group", "Node Groups", "Ctrl+Alt+G", keywords: "subgraph custom node macro collapse selection reusable"),
+        new CommandInfo("group.ungroup", "Ungroup Node Group", "Node Groups", "Ctrl+Alt+U", keywords: "inline explode dissolve break apart"),
+        new CommandInfo("group.edit", "Open / Close Node Group", "Node Groups", "Tab", keywords: "enter edit inside exit"),
+        new CommandInfo("group.exit", "Close Node Group", "Node Groups", "Shift+Tab", keywords: "leave back up level return"),
+        new CommandInfo("group.rename", "Rename Node Group…", "Node Groups", null, keywords: "name title"),
+        new CommandInfo("group.singleuser", "Make Node Group Single User", "Node Groups", null, keywords: "copy unique duplicate definition separate"),
+        new CommandInfo("group.addinput", "Add Group Input Socket", "Node Groups", null, keywords: "interface parameter"),
+        new CommandInfo("group.addoutput", "Add Group Output Socket", "Node Groups", null, keywords: "interface result"),
+        new CommandInfo("group.purge", "Delete Unused Node Groups", "Node Groups", null, keywords: "clean remove orphan"),
         new CommandInfo("wire.mute", "Mute / Unmute Selected Wires", "Wires", null, keywords: "bypass disable ignore"),
         new CommandInfo("wire.swap", "Swap Links", "Wires", null, keywords: "exchange two wires"),
         new CommandInfo("wire.earlier", "Move Wire Earlier", "Wires", null, keywords: "order first up multi-input sequence"),

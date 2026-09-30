@@ -65,6 +65,12 @@ public partial class GraphEditorViewModel
 
     private NodeModel? SearchTemplate(string libraryId)
     {
+        // A node group's sockets can change, so its template is never cached.
+        if (libraryId.StartsWith(GroupLibraryPrefix, StringComparison.Ordinal))
+        {
+            return CreateNodeFromLibrary(libraryId, out _);
+        }
+
         if (!_searchTemplates.TryGetValue(libraryId, out var template))
         {
             try

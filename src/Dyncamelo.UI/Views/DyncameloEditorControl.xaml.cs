@@ -296,6 +296,15 @@ public partial class DyncameloEditorControl : UserControl
             case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
             case "node.mute": return vm.ToggleMuteSelectedCommand;
             case "node.freeze": return vm.ToggleFreezeSelectedCommand;
+            case "group.make": return vm.MakeGroupCommand;
+            case "group.ungroup": return vm.UngroupNodeGroupCommand;
+            case "group.edit": return vm.ToggleGroupEditCommand;
+            case "group.exit": return vm.ExitGroupCommand;
+            case "group.rename": return vm.RenameNodeGroupCommand;
+            case "group.singleuser": return vm.MakeSingleUserCommand;
+            case "group.addinput": return vm.AddGroupInputCommand;
+            case "group.addoutput": return vm.AddGroupOutputCommand;
+            case "group.purge": return vm.PurgeNodeGroupsCommand;
             case "node.autoconnect": return vm.AutoConnectCommand;
             case "node.resetinputs": return vm.ResetSelectedInputsCommand;
             case "node.insertonwire": return vm.InsertIntoSelectedWireCommand;
@@ -426,6 +435,7 @@ public partial class DyncameloEditorControl : UserControl
             oldViewModel.Library.EntryRevealRequested -= OnLibraryEntryRevealRequested;
             oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
             oldViewModel.KeymapChanged -= OnKeymapChanged;
+            oldViewModel.GroupNavigated -= OnGroupNavigated;
         }
 
         if (e.NewValue is GraphEditorViewModel newViewModel)
@@ -433,6 +443,7 @@ public partial class DyncameloEditorControl : UserControl
             newViewModel.Library.EntryRevealRequested += OnLibraryEntryRevealRequested;
             newViewModel.PropertyChanged += OnViewModelPropertyChanged;
             newViewModel.KeymapChanged += OnKeymapChanged;
+            newViewModel.GroupNavigated += OnGroupNavigated;
             newViewModel.CommandResolver = id => ResolveCommand(newViewModel, id);
             newViewModel.CommandTarget = Editor;
             newViewModel.PointerLocation = () => Editor.MouseLocation;
@@ -443,6 +454,31 @@ public partial class DyncameloEditorControl : UserControl
             BuildHeaderMenu(newViewModel);
             ApplyGrid(newViewModel.ShowGrid);
             ApplyLibraryVisibility(newViewModel.IsLibraryVisible);
+        }
+    }
+
+    // Opening a node group shows its body fitted to the canvas; closing it puts the view back where it was.
+    private readonly System.Collections.Generic.Stack<(Point Location, double Zoom)> _viewStack = new System.Collections.Generic.Stack<(Point, double)>();
+
+    private void OnGroupNavigated(object? sender, GroupNavigationEventArgs e)
+    {
+        if (e.Entered)
+        {
+            _viewStack.Push((Editor.ViewportLocation, Editor.ViewportZoom));
+            Dispatcher.BeginInvoke(
+                new System.Action(() => EditorCommands.FitToScreen.Execute(null, Editor)),
+                System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+        else if (_viewStack.Count > 0)
+        {
+            var view = _viewStack.Pop();
+            Dispatcher.BeginInvoke(
+                new System.Action(() =>
+                {
+                    Editor.ViewportZoom = view.Zoom;
+                    Editor.ViewportLocation = view.Location;
+                }),
+                System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }
 

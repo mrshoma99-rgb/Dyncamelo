@@ -111,7 +111,20 @@ public class PortModel : INotifyPropertyChanged
     public bool IsMultiInput { get; internal set; }
 
     /// <summary>Explicit kind string ("viewpoint*"), or empty. Static; see <c>PortKinds</c>.</summary>
-    public string KindHint { get; internal set; } = string.Empty;
+    public string KindHint
+    {
+        get => _kindHint;
+        internal set
+        {
+            if (!string.Equals(_kindHint, value, StringComparison.Ordinal))
+            {
+                _kindHint = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private string _kindHint = string.Empty;
 
     /// <summary>
     /// True when the user chose to hide this (unconnected) port on the node.

@@ -63,7 +63,8 @@ public partial class GraphEditorViewModel : ObservableObject
     private readonly IPreviewService _preview;
     private bool _previewSelection;
     private bool _isRunning;
-    private readonly UndoManager _undo = new UndoManager();
+    private readonly UndoManager _documentUndo = new UndoManager();
+    private UndoManager _undo;
     private GraphRecorder? _recorder;
     private UndoTransaction? _dragTransaction;
     private bool _hasRunThisGraph;
@@ -144,12 +145,8 @@ public partial class GraphEditorViewModel : ObservableObject
                 _dragTransaction = null;
             }
         });
-        _undo.Changed += (sender, args) =>
-        {
-            OnPropertyChanged(nameof(UndoTooltip));
-            OnPropertyChanged(nameof(RedoTooltip));
-            CommandManager.InvalidateRequerySuggested();
-        };
+        _undo = _documentUndo;
+        _undo.Changed += OnUndoChanged;
 
         ToggleCollapseSelectedCommand = new RelayCommand(() => ToggleCollapse(null));
         ToggleMuteSelectedCommand = new RelayCommand(() => ToggleMute(null));
@@ -205,6 +202,8 @@ public partial class GraphEditorViewModel : ObservableObject
 
         _graph = new GraphModel { Name = "Untitled" };
         AttachGraph(_graph);
+        InitNodeGroups();
+        WatchNodeGroups(_graph.NodeGroups);
     }
 
     /// <summary>The node registry used to create nodes and resolve .dyc files.</summary>
@@ -273,7 +272,8 @@ public partial class GraphEditorViewModel : ObservableObject
     {
         get
         {
-            var name = _graph.Name.Length > 0 ? _graph.Name : "Untitled";
+            var document = DocumentGraph;
+            var name = document.Name.Length > 0 ? document.Name : "Untitled";
             return _currentFilePath == null ? name : name + " — " + System.IO.Path.GetFileName(_currentFilePath);
         }
     }
@@ -361,13 +361,13 @@ public partial class GraphEditorViewModel : ObservableObject
     /// </summary>
     public bool IsAutoRun
     {
-        get => _graph.RunType == RunType.Automatic;
+        get => DocumentGraph.RunType == RunType.Automatic;
         set
         {
             var runType = value ? RunType.Automatic : RunType.Manual;
-            if (_graph.RunType != runType)
+            if (DocumentGraph.RunType != runType)
             {
-                _graph.RunType = runType;
+                DocumentGraph.RunType = runType;
                 OnPropertyChanged();
                 if (value)
                 {
@@ -831,10 +831,10 @@ public partial class GraphEditorViewModel : ObservableObject
     /// <returns>The created node's view model, or null when the id is unknown.</returns>
     public NodeViewModel? AddNode(string libraryId, Point location)
     {
-        NodeModel? node = Registry.CreateZeroTouchNode(libraryId) ?? Registry.CreateNode(libraryId);
+        var node = CreateNodeFromLibrary(libraryId, out var problem);
         if (node == null)
         {
-            StatusMessage = "Unknown node '" + libraryId + "'.";
+            StatusMessage = problem ?? "Unknown node '" + libraryId + "'.";
             return null;
         }
 
@@ -881,9 +881,12 @@ public partial class GraphEditorViewModel : ObservableObject
     /// </summary>
     public void InvalidateAllNodes()
     {
-        foreach (var node in _graph.Nodes.ToList())
+        foreach (var graph in DocumentGraph.NodeGroups.AllGraphs().ToList())
         {
-            node.MarkDirty();
+            foreach (var node in graph.Nodes.ToList())
+            {
+                node.MarkDirty();
+            }
         }
     }
 
@@ -953,8 +956,10 @@ public partial class GraphEditorViewModel : ObservableObject
         }
 
         DetachGraph();
+        ResetGroupNavigation();
         _graph = graph;
         AttachGraph(graph);
+        WatchNodeGroups(graph.NodeGroups);
         CurrentFilePath = filePath;
         OnPropertyChanged(nameof(Graph));
         OnPropertyChanged(nameof(Title));
@@ -1003,7 +1008,7 @@ public partial class GraphEditorViewModel : ObservableObject
                 ConfigureRunContext(context, cancellation);
                 using (_undo.Suspend())
                 {
-                    result = _engine.Run(_graph, context);
+                    result = _engine.Run(DocumentGraph, context);
                 }
 
                 _hasRunThisGraph = true;
@@ -1110,7 +1115,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
     // ----- graph attachment -------------------------------------------------
 
-    private void AttachGraph(GraphModel graph)
+    private void AttachGraph(GraphModel graph, bool resetHistory = true)
     {
         // Populate view models first, then subscribe, so pre-existing content
         // (a freshly deserialized file) is not added twice.
@@ -1149,7 +1154,11 @@ public partial class GraphEditorViewModel : ObservableObject
 
         _dragTransaction?.Dispose();
         _dragTransaction = null;
-        _undo.Clear();
+        if (resetHistory)
+        {
+            _undo.Clear();
+        }
+
         _hasRunThisGraph = false;
         _recorder = new GraphRecorder(graph, _undo);
     }
@@ -1564,6 +1573,12 @@ public partial class GraphEditorViewModel : ObservableObject
         {
             if (item is NodeViewModel node)
             {
+                if (node.Model is Dyncamelo.Core.Groups.GroupInputNode || node.Model is Dyncamelo.Core.Groups.GroupOutputNode)
+                {
+                    StatusMessage = "A node group's Group Input and Group Output cannot be deleted.";
+                    continue;
+                }
+
                 // A reroute is only a bend in a wire: deleting it keeps the data flowing.
                 if (node.Model is Dyncamelo.Core.Nodes.RerouteNode && DeleteReconnectsReroutes)
                 {
@@ -1735,7 +1750,11 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private List<NodeModel> GetSelectedNodeModels()
     {
-        return SelectedItems.OfType<NodeViewModel>().Select(n => n.Model).ToList();
+        // A group's Group Input / Group Output belong to it: they are never copied, cut or duplicated.
+        return SelectedItems.OfType<NodeViewModel>()
+            .Select(n => n.Model)
+            .Where(m => !(m is Dyncamelo.Core.Groups.GroupInputNode) && !(m is Dyncamelo.Core.Groups.GroupOutputNode))
+            .ToList();
     }
 
     private void CopySelection()
@@ -1868,7 +1887,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void NewGraph()
     {
-        if (_graph.Nodes.Count > 0 &&
+        if (DocumentGraph.Nodes.Count > 0 &&
             !Dialogs.Confirm("Discard the current graph and start a new one?", "New Graph"))
         {
             return;
@@ -2053,7 +2072,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
         // Unlike Ctrl+O there is no file dialog to back out of, so guard
         // against silently discarding work (same prompt style as New).
-        if (_graph.Nodes.Count > 0 &&
+        if (DocumentGraph.Nodes.Count > 0 &&
             !Dialogs.Confirm("Discard the current graph and open sample '" + sample.Name + "'?", "Open Sample"))
         {
             return;
@@ -2136,9 +2155,9 @@ public partial class GraphEditorViewModel : ObservableObject
             // Keep the graph name in sync with the file name when it tracked it
             // (SaveTo names an untitled graph after its file); leave a custom
             // graph name alone. Either way the Title refreshes below.
-            if (string.Equals(_graph.Name, current, StringComparison.Ordinal))
+            if (string.Equals(DocumentGraph.Name, current, StringComparison.Ordinal))
             {
-                _graph.Name = System.IO.Path.GetFileNameWithoutExtension(newPath);
+                DocumentGraph.Name = System.IO.Path.GetFileNameWithoutExtension(newPath);
             }
 
             CurrentFilePath = newPath;   // setter refreshes Title
@@ -2175,7 +2194,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void SaveGraphAs()
     {
-        var defaultName = (_graph.Name.Length > 0 ? _graph.Name : "graph") + ".dyc";
+        var defaultName = (DocumentGraph.Name.Length > 0 ? DocumentGraph.Name : "graph") + ".dyc";
         var path = Dialogs.ShowSaveFile(FileFilter, "Save Dyncamelo Graph", defaultName);
         if (path != null)
         {
@@ -2187,13 +2206,13 @@ public partial class GraphEditorViewModel : ObservableObject
     {
         try
         {
-            if (_graph.Name.Length == 0 || _graph.Name == "Untitled")
+            if (DocumentGraph.Name.Length == 0 || DocumentGraph.Name == "Untitled")
             {
-                _graph.Name = System.IO.Path.GetFileNameWithoutExtension(path);
+                DocumentGraph.Name = System.IO.Path.GetFileNameWithoutExtension(path);
             }
 
             var serializer = new GraphSerializer(Registry);
-            serializer.SaveToFile(_graph, path);
+            serializer.SaveToFile(DocumentGraph, path);
             CurrentFilePath = path;
             OnPropertyChanged(nameof(Title));
             StatusMessage = "Saved " + System.IO.Path.GetFileName(path) + ".";

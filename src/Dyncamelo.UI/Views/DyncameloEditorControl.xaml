@@ -599,6 +599,57 @@
                       Data="{StaticResource Dyc.Icon.ChevronRight}" />
             </Button>
 
+            <!-- Where you are while a node group is open: Graph > Group > Inner, each step a way back; Shift+Tab closes the group. -->
+            <Border Grid.Column="2"
+                    Panel.ZIndex="860"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="26,10,0,0"
+                    Padding="6,3"
+                    CornerRadius="6"
+                    BorderThickness="1"
+                    Background="{DynamicResource Dyc.OverlayBrush}"
+                    BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
+                    Visibility="{Binding IsInsideGroup, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <StackPanel Orientation="Horizontal">
+                    <ItemsControl ItemsSource="{Binding Breadcrumb}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="Step"
+                                            Style="{StaticResource Dyc.SmallButton}"
+                                            Content="{Binding Title}"
+                                            Command="{Binding NavigateCommand}"
+                                            ToolTip="Go back to this level" />
+                                    <TextBlock x:Name="Arrow"
+                                               Text="▸"
+                                               Margin="4,0"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                                </StackPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter TargetName="Step" Property="FontWeight" Value="Bold" />
+                                        <Setter TargetName="Step" Property="ToolTip" Value="The node group you are editing" />
+                                        <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Style="{StaticResource Dyc.SmallButton}"
+                            Margin="8,0,0,0"
+                            Content="Close group"
+                            ToolTip="Close this node group and go back (Shift+Tab)"
+                            Command="{Binding ExitGroupCommand}" />
+                </StackPanel>
+            </Border>
+
             <!-- Minimap (Ctrl+M): the whole graph at a glance; drag the frame to pan, wheel to zoom.
                  Automatic from 40 nodes, or on/off in Settings and the View menu. -->
             <nodify:Minimap x:Name="MiniMap"
