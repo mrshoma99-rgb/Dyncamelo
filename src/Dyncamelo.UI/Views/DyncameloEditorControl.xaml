@@ -293,6 +293,13 @@
                                 <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
                                               HorizontalAlignment="Left"
                                               Margin="0,8,0,0"
+                                              Content="Live evaluation while scrubbing"
+                                              ToolTip="Re-run the graph while dragging a number field. Off (default): the graph runs once when you release, which is safer for graphs that call Navisworks."
+                                              IsChecked="{Binding LiveScrubEvaluation}" />
+
+                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
+                                              HorizontalAlignment="Left"
+                                              Margin="0,8,0,0"
                                               Content="Highlight selected node in Navisworks"
                                               ToolTip="Select the model items a node outputs in the Navisworks viewport when you click the node. Overwrites the live selection, so turn off if you use Selection.Current."
                                               IsChecked="{Binding PreviewSelection}" />

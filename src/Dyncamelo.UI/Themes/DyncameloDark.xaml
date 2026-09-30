@@ -1454,6 +1454,7 @@
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                    <MenuItem Header="Reset to Default" Command="{Binding ResetCommand}" InputGestureText="Backspace over a field" />
                     <Separator />
                     <MenuItem Header="List Levels">
                         <MenuItem Header="Use Levels"
@@ -1526,6 +1527,255 @@
         </Setter>
     </Style>
 
+    <!-- ===== Inline input editors (an unwired input is its own editor) ===== -->
+    <Style TargetType="{x:Type views:ScrubNumberBox}">
+        <Setter Property="FieldBrush" Value="{StaticResource Dyc.InputBackgroundBrush}" />
+        <Setter Property="HoverBrush" Value="{StaticResource Dyc.HoverBrush}" />
+        <Setter Property="FillBrush" Value="{StaticResource Dyc.AccentBrush}" />
+        <Setter Property="TextBrush" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="SubtleBrush" Value="{StaticResource Dyc.SubtleTextBrush}" />
+        <Setter Property="AccentBrush" Value="{StaticResource Dyc.AccentBrush}" />
+        <Setter Property="ErrorBrush" Value="{StaticResource Dyc.ErrorBrush}" />
+    </Style>
+
+    <Style x:Key="Dyc.NodeCheckBox" TargetType="{x:Type CheckBox}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Border x:Name="Box"
+                            Width="30" Height="16"
+                            CornerRadius="8"
+                            Background="{StaticResource Dyc.InputBackgroundBrush}"
+                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            BorderThickness="1">
+                        <Ellipse x:Name="Knob"
+                                 Width="10" Height="10"
+                                 HorizontalAlignment="Left"
+                                 Margin="3,0,0,0"
+                                 Fill="{StaticResource Dyc.SubtleTextBrush}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+                            <Setter TargetName="Knob" Property="Fill" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Segmented buttons for two or three short choices (no popup needed). -->
+    <Style x:Key="Dyc.SegmentedListBox" TargetType="{x:Type ListBox}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Focusable" Value="False" />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                <Border x:Name="Seg"
+                                        Height="20"
+                                        Margin="0,0,1,0"
+                                        Background="{StaticResource Dyc.InputBackgroundBrush}"
+                                        CornerRadius="3">
+                                    <TextBlock Text="{Binding}"
+                                               FontSize="11"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Seg" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Seg" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DataTemplate x:Key="Editor.Number">
+        <views:ScrubNumberBox Label="{Binding Title}"
+                              Value="{Binding NumberValue, Mode=TwoWay}"
+                              Minimum="{Binding NumberMin}"
+                              Maximum="{Binding NumberMax}"
+                              SoftMinimum="{Binding NumberSoftMin}"
+                              SoftMaximum="{Binding NumberSoftMax}"
+                              Step="{Binding NumberStep}"
+                              IsInteger="{Binding NumberIsInteger}"
+                              Unit="{Binding NumberUnit}"
+                              IsModified="{Binding IsModified}"
+                              IsUnset="{Binding IsUnset}"
+                              ResetCommand="{Binding ResetCommand}"
+                              LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                              ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Toggle">
+        <CheckBox Style="{StaticResource Dyc.NodeCheckBox}" IsChecked="{Binding BoolValue, Mode=TwoWay}" ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Dropdown">
+        <ComboBox Style="{StaticResource Dyc.ComboBox}"
+                  Height="20"
+                  MinWidth="96"
+                  ItemsSource="{Binding Choices}"
+                  SelectedItem="{Binding SelectedChoice, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Segmented">
+        <ListBox Style="{StaticResource Dyc.SegmentedListBox}"
+                 ItemsSource="{Binding Choices}"
+                 SelectedItem="{Binding SelectedChoice, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Text">
+        <TextBox Style="{StaticResource Dyc.TextBox}"
+                 Height="20"
+                 MinWidth="60"
+                 FontSize="11"
+                 Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                 ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Colour">
+        <Button Command="{Binding PickColorCommand}" Height="20" Cursor="Hand" ToolTip="Pick a colour" Focusable="False">
+            <Button.Template>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border x:Name="Swatch"
+                                CornerRadius="4"
+                                BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                                BorderThickness="1"
+                                Background="{Binding ColourBrush}" />
+                        <TextBlock x:Name="Hint"
+                                   Text="pick colour"
+                                   FontSize="10"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                   Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding ColourHex}" Value="">
+                            <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Swatch" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+    </DataTemplate>
+
+    <DataTemplate x:Key="Editor.Path">
+        <DockPanel>
+            <Button DockPanel.Dock="Right"
+                    Content="…"
+                    Width="22" Height="20"
+                    Margin="3,0,0,0"
+                    Focusable="False"
+                    Command="{Binding BrowseCommand}"
+                    Style="{StaticResource Dyc.SmallButton}"
+                    ToolTip="Browse" />
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     Height="20"
+                     FontSize="11"
+                     Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                     ToolTip="{Binding TextValue}" />
+        </DockPanel>
+    </DataTemplate>
+
+    <!-- Hosts the right editor for a row's connector; collapsed (and never instantiated) when there is none or a wire feeds the input. -->
+    <Style x:Key="Dyc.EditorHost" TargetType="{x:Type ContentControl}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Visibility" Value="Collapsed" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Number" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Number}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Toggle" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Toggle}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Text" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Text}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Colour" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Colour}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Path" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Path}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <DataTrigger Binding="{Binding Connector.ShowDropdownChoices}" Value="True">
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Dropdown}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Connector.ShowSegmentedChoices}" Value="True">
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Segmented}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <DataTemplate x:Key="Row.Output">
         <Grid MinHeight="{Binding RowMinHeight}" Height="{Binding RowHeight}">
             <TextBlock Text="{Binding Connector.Title}"
@@ -1550,29 +1800,33 @@
                               HorizontalAlignment="Left"
                               VerticalAlignment="Center"
                               Margin="-9,0,0,0" />
-            <StackPanel Orientation="Horizontal"
-                        Margin="14,0,10,0"
-                        VerticalAlignment="Center"
-                        Visibility="{Binding ShowContent, Converter={StaticResource Dyc.BoolToVisibility}}">
-                <TextBlock Text="{Binding Connector.Title}"
-                           FontSize="11"
-                           VerticalAlignment="Center"
-                           Foreground="{StaticResource Dyc.TextBrush}" />
-                <TextBlock Text="{Binding Connector.LevelLabel}"
-                           Margin="4,0,0,0"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           Foreground="{StaticResource Dyc.AccentBrush}"
-                           ToolTip="This input consumes the incoming list at this level (right-click the socket to change)."
-                           Visibility="{Binding Connector.HasLevels, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                <ComboBox Style="{StaticResource Dyc.ComboBox}"
-                          Margin="6,0,0,0"
-                          MinWidth="96"
-                          ItemsSource="{Binding Connector.Choices}"
-                          SelectedItem="{Binding Connector.SelectedChoice, Mode=TwoWay}"
-                          Visibility="{Binding Connector.ShowChoiceEditor, Converter={StaticResource Dyc.BoolToVisibility}}" />
-            </StackPanel>
+            <Grid Margin="14,1,10,1"
+                  VerticalAlignment="Center"
+                  Visibility="{Binding ShowContent, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Connector.Title}"
+                               Margin="0,0,8,0"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource Dyc.TextBrush}"
+                               Visibility="{Binding Connector.ShowPlainLabel, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <TextBlock Text="{Binding Connector.LevelLabel}"
+                               Margin="0,0,6,0"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               ToolTip="This input consumes the incoming list at this level (right-click the socket to change)."
+                               Visibility="{Binding Connector.HasLevels, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                </StackPanel>
+                <ContentControl Grid.Column="1"
+                                Style="{StaticResource Dyc.EditorHost}"
+                                Content="{Binding Connector}" />
+            </Grid>
         </Grid>
     </DataTemplate>
 

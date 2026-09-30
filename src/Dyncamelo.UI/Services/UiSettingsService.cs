@@ -23,6 +23,7 @@ public class UiSettingsService
     private bool _previewSelection;
     private string _paletteId = "DyncameloDark";
     private bool _classicNodeLayout;
+    private bool _liveScrubEvaluation;
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
     public UiSettingsService()
@@ -110,6 +111,20 @@ public class UiSettingsService
         if (_classicNodeLayout != classic)
         {
             _classicNodeLayout = classic;
+            Save();
+        }
+    }
+
+    /// <summary>True to commit number fields while dragging (re-running the graph live) instead of on release (default false).</summary>
+    public bool LiveScrubEvaluation => _liveScrubEvaluation;
+
+    /// <summary>Persists the live-scrub choice.</summary>
+    /// <param name="live">True to evaluate while scrubbing.</param>
+    public void SetLiveScrubEvaluation(bool live)
+    {
+        if (_liveScrubEvaluation != live)
+        {
+            _liveScrubEvaluation = live;
             Save();
         }
     }
@@ -206,6 +221,7 @@ public class UiSettingsService
                 PreviewSelection = _previewSelection,
                 PaletteId = _paletteId,
                 ClassicNodeLayout = _classicNodeLayout,
+                LiveScrubEvaluation = _liveScrubEvaluation,
             };
 
             // Write-to-temp-then-replace so a crash (or a concurrent reader in
@@ -259,6 +275,7 @@ public class UiSettingsService
         _previewSelection = false;
         _paletteId = "DyncameloDark";
         _classicNodeLayout = false;
+        _liveScrubEvaluation = false;
         if (data == null)
         {
             return;
@@ -269,6 +286,7 @@ public class UiSettingsService
         _previewSelection = data.PreviewSelection ?? false;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
         _classicNodeLayout = data.ClassicNodeLayout ?? false;
+        _liveScrubEvaluation = data.LiveScrubEvaluation ?? false;
 
         if (data.FavoriteNodeIds != null)
         {
@@ -374,5 +392,8 @@ public class UiSettingsService
 
         [JsonProperty("classicNodeLayout")]
         public bool? ClassicNodeLayout { get; set; }
+
+        [JsonProperty("liveScrubEvaluation")]
+        public bool? LiveScrubEvaluation { get; set; }
     }
 }

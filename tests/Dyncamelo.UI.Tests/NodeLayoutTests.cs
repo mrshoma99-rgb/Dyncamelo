@@ -32,6 +32,35 @@ public sealed class SumNode : NodeModel
         new object?[] { Convert.ToDouble(inputs[0] ?? 0d) + Convert.ToDouble(inputs[1] ?? 0d) };
 }
 
+/// <summary>Named like Dyncamelo.Nodes' colour type so the port is classified as a colour.</summary>
+public sealed class DyncameloColor
+{
+}
+
+/// <summary>One input of every editor kind.</summary>
+public sealed class EditorsNode : NodeModel
+{
+    public EditorsNode()
+    {
+        Name = "Editors";
+        Category = "Test";
+        AddInput("amount", typeof(double), 2.5);
+        AddInput("flag", typeof(bool), false);
+        AddInput("label", typeof(string), "hello");
+        AddInput("tint", typeof(DyncameloColor), null);
+        AddInput("outputPath", typeof(string), "");
+        var few = AddInput("mode", typeof(string), "A");
+        few.Choices = new[] { "A", "B" };
+        var many = AddInput("kind", typeof(string), "One");
+        many.Choices = new[] { "One", "Two", "Three", "Four", "Five" };
+        AddOutput("result", typeof(double));
+    }
+
+    public override string NodeType => "TestEditors";
+
+    public override object?[] Evaluate(object?[] inputs, EvaluationContext context) => new object?[] { 1d };
+}
+
 internal sealed class StubDialogs : IDialogService
 {
     public string? ShowOpenFile(string filter, string title) => null;
@@ -78,6 +107,7 @@ public class NodeLayoutTests
         {
             var registry = NodeRegistry.CreateDefault();
             registry.RegisterNodeType("TestSum", () => new SumNode());
+            registry.RegisterNodeType("TestEditors", () => new EditorsNode());
             var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
             rig.Vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
 
@@ -273,5 +303,105 @@ public class NodeLayoutTests
             Assert.True(rr.Size.Width > 20 && rr.Size.Height > 10, "reroute size " + rr.Size);
             Assert.True(wire.Target.Anchor.X >= rr.Location.X && wire.Target.Anchor.X <= rr.Location.X + rr.Size.Width);
         });
+    }
+
+    // ----- Phase 3: inline editors ---------------------------------------------------
+
+    [Fact]
+    public void UnwiredNumberInputsGetAScrubFieldAndWiredOnesDoNot()
+    {
+        using var rig = Build();
+        StaHost.Run(() =>
+        {
+            // a: 3 unwired number inputs; b: input "a" is wired, so 2 remain.
+            var fields = FindDescendants<ScrubNumberBox>(rig.Window);
+            Assert.Equal(5, fields.Count);
+        });
+    }
+
+    [Fact]
+    public void EditingAFieldPinsTheValueAndUndoRestoresIt()
+    {
+        using var rig = Build();
+        StaHost.Run(() =>
+        {
+            var port = rig.B.Model.InPorts[1]; // "b", default 2
+            var field = FindDescendants<ScrubNumberBox>(rig.Window).First(f => f.Label == "b" && f.Value == 2d && ReferenceEquals(f.DataContext, rig.B.Rows.First(r => r.Connector?.Port == port).Connector));
+            Assert.False(port.HasUserValue);
+
+            Assert.True(field.CommitText("2*3+1"));
+            Assert.Equal(7d, port.UserValue);
+            Assert.True(rig.B.Rows.First(r => r.Connector?.Port == port).Connector!.IsModified);
+
+            rig.Vm.UndoCommand.Execute(null);
+            Assert.False(port.HasUserValue);
+            Assert.Equal(2d, field.Value);
+        });
+    }
+
+    [Fact]
+    public void BadTextIsRejectedAndSteppingRespectsTheRange()
+    {
+        using var rig = Build();
+        StaHost.Run(() =>
+        {
+            var field = FindDescendants<ScrubNumberBox>(rig.Window).First();
+            var before = field.Value;
+            Assert.False(field.CommitText("abc"));
+            Assert.True(field.IsInvalid);
+            Assert.Equal(before, field.Value);
+            Assert.True(field.CommitText("4"));
+            Assert.False(field.IsInvalid);
+            field.StepValue(1);
+            Assert.Equal(4.1, field.Value, 6); // default 1.0..3.0 magnitude => 0.01/0.1 steps; see ScrubMath
+        });
+    }
+
+    [Fact]
+    public void ConnectingAnInputHidesItsEditor()
+    {
+        using var rig = Build();
+        var before = 0;
+        StaHost.Run(() =>
+        {
+            before = FindDescendants<ScrubNumberBox>(rig.Window).Count;
+            var graph = rig.Vm.Graph;
+            var src = graph.Nodes.OfType<SumNode>().First(n => n.X == 100);
+            Assert.True(graph.Connect(src.OutPorts[0], rig.B.Model.InPorts[1]).Success);
+        });
+        StaHost.Flush();
+        StaHost.Run(() => Assert.Equal(before - 1, FindDescendants<ScrubNumberBox>(rig.Window).Count));
+    }
+
+    [Fact]
+    public void EveryEditorKindIsRenderedForItsPort()
+    {
+        var rig = new Rig();
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            registry.RegisterNodeType("TestEditors", () => new EditorsNode());
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            rig.Vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
+            rig.Vm.Graph.AddNode(new EditorsNode { X = 100, Y = 100 });
+            rig.Window = new Window { Width = 1400, Height = 900, Content = new DyncameloEditorControl { ViewModel = rig.Vm }, ShowInTaskbar = false, ShowActivated = false, WindowStyle = WindowStyle.None };
+            rig.Window.Show();
+        });
+        StaHost.Flush();
+        using (rig)
+        {
+            StaHost.Run(() =>
+            {
+                Assert.Single(FindDescendants<ScrubNumberBox>(rig.Window));                       // amount
+                Assert.Single(FindDescendants<System.Windows.Controls.CheckBox>(rig.Window));      // flag
+                Assert.Equal(2, FindDescendants<System.Windows.Controls.TextBox>(rig.Window).Count); // label + outputPath
+                Assert.Single(FindDescendants<System.Windows.Controls.ListBox>(rig.Window));       // mode (segmented)
+                Assert.Single(FindDescendants<System.Windows.Controls.ComboBox>(rig.Window));      // kind (dropdown)
+                var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
+                var tint = node.Inputs.Single(c => c.Port.Name == "tint");
+                Assert.Equal(Dyncamelo.Core.Editing.PortEditorKind.Colour, tint.EditorKind);
+                Assert.Equal(Dyncamelo.Core.Editing.PortEditorKind.Path, node.Inputs.Single(c => c.Port.Name == "outputPath").EditorKind);
+            });
+        }
     }
 }

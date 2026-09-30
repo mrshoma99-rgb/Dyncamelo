@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Dyncamelo.Core.Tests" />
+    <InternalsVisibleTo Include="Dyncamelo.UI.Tests" />
   </ItemGroup>
 
 </Project>

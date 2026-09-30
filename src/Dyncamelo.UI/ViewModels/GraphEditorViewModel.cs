@@ -454,6 +454,20 @@ public class GraphEditorViewModel : ObservableObject
         }
     }
 
+    /// <summary>True to re-run the graph while a number field is being scrubbed (Settings); off = commit on release.</summary>
+    public bool LiveScrubEvaluation
+    {
+        get => _settings.LiveScrubEvaluation;
+        set
+        {
+            if (_settings.LiveScrubEvaluation != value)
+            {
+                _settings.SetLiveScrubEvaluation(value);
+                OnPropertyChanged();
+            }
+        }
+    }
+
     /// <summary>True when nodes use the row layout (the inverse of <see cref="ClassicNodeLayout"/>).</summary>
     public bool UseRowLayout => !_settings.ClassicNodeLayout;
 

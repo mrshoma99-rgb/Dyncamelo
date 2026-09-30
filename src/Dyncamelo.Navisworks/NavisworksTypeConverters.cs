@@ -36,6 +36,16 @@ public static class NavisworksTypeConverters
                 return NwColor.FromByteRGB(color.R, color.G, color.B);
             });
 
+        // Inline colour swatches store "#AARRGGBB" strings; Navisworks colour ports accept them too.
+        TypeCoercion.RegisterConverter(
+            typeof(string),
+            typeof(NwColor),
+            value =>
+            {
+                var color = ColorNodes.FromHex((string)value);
+                return NwColor.FromByteRGB(color.R, color.G, color.B);
+            });
+
         TypeCoercion.RegisterConverter(
             typeof(System.Drawing.Color),
             typeof(NwColor),

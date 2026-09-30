@@ -280,6 +280,14 @@ public partial class DyncameloEditorControl : UserControl
             return;
         }
 
+        // Hover shortcuts of the number field under the pointer: Ctrl+C / Ctrl+V copy and paste
+        // its value, Backspace resets it, "-" negates it.
+        if (!typing && ScrubNumberBox.Hovered is ScrubNumberBox hovered && hovered.HandleHoverKey(e))
+        {
+            e.Handled = true;
+            return;
+        }
+
         // Single-key node shortcuts (H collapse, M mute) apply only when no text box has
         // focus; as InputBindings they would swallow the letters being typed.
         if (!typing && Keyboard.Modifiers == ModifierKeys.None && ViewModel != null && Editor.IsKeyboardFocusWithin)

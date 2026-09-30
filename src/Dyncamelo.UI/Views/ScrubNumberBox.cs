@@ -652,17 +652,9 @@ public sealed class ScrubNumberBox : Decorator
             Child = null;
             _editor = null;
 
-            if (commit)
+            if (commit && !CommitText(text))
             {
-                if (ScrubMath.TryParse(text, Spec, out var parsed))
-                {
-                    CommitValue(parsed);
-                }
-                else if (!string.IsNullOrWhiteSpace(text))
-                {
-                    _invalid = true;
-                    ok = false;
-                }
+                ok = false;
             }
 
             if (IsKeyboardFocusWithin || IsKeyboardFocused)
@@ -678,6 +670,35 @@ public sealed class ScrubNumberBox : Decorator
 
         return ok;
     }
+
+    /// <summary>
+    /// Applies typed text (numbers or arithmetic). Empty text is ignored (true);
+    /// unparseable text flags the field with the error outline and returns false.
+    /// </summary>
+    public bool CommitText(string? text)
+    {
+        if (ScrubMath.TryParse(text, Spec, out var parsed))
+        {
+            _invalid = false;
+            CommitValue(parsed);
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return true;
+        }
+
+        _invalid = true;
+        InvalidateVisual();
+        return false;
+    }
+
+    /// <summary>True after rejected input, until the next successful edit.</summary>
+    public bool IsInvalid => _invalid;
+
+    /// <summary>Steps the value one increment up (<paramref name="direction"/> &gt; 0) or down; <paramref name="fine"/> uses a tenth of the step.</summary>
+    public void StepValue(int direction, bool fine = false) => StepBy(direction, fine);
 
     private void StepBy(int direction, bool fine)
     {
