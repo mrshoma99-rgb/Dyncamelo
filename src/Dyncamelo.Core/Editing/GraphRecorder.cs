@@ -51,6 +51,11 @@ public sealed class GraphRecorder : IDisposable
             TrackObject(group, null);
         }
 
+        foreach (var bookmark in graph.Bookmarks)
+        {
+            TrackObject(bookmark, null);
+        }
+
         graph.NodeAdded += OnNodeAdded;
         graph.NodeRemoved += OnNodeRemoved;
         graph.ConnectionAdded += OnConnectionAdded;
@@ -58,6 +63,7 @@ public sealed class GraphRecorder : IDisposable
         graph.ConnectionMuteChanged += OnConnectionMuteChanged;
         graph.Notes.CollectionChanged += OnNotesChanged;
         graph.Groups.CollectionChanged += OnGroupsChanged;
+        graph.Bookmarks.CollectionChanged += OnBookmarksChanged;
     }
 
     /// <summary>Stops recording and detaches every handler.</summary>
@@ -76,6 +82,7 @@ public sealed class GraphRecorder : IDisposable
         _graph.ConnectionMuteChanged -= OnConnectionMuteChanged;
         _graph.Notes.CollectionChanged -= OnNotesChanged;
         _graph.Groups.CollectionChanged -= OnGroupsChanged;
+        _graph.Bookmarks.CollectionChanged -= OnBookmarksChanged;
         foreach (var t in _tracked.Values.ToList())
         {
             t.Detach();
@@ -112,6 +119,9 @@ public sealed class GraphRecorder : IDisposable
 
     private void OnGroupsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
         OnCollectionChanged(_graph.Groups, e);
+
+    private void OnBookmarksChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        OnCollectionChanged(_graph.Bookmarks, e);
 
     private void OnCollectionChanged<T>(System.Collections.ObjectModel.ObservableCollection<T> list, NotifyCollectionChangedEventArgs e)
         where T : class

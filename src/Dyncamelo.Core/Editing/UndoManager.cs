@@ -157,6 +157,35 @@ public sealed class UndoManager
     /// <summary>True while a transaction is open.</summary>
     public bool InTransaction => _depth > 0;
 
+    /// <summary>The labels of the undoable items, oldest first (the last one is what Undo would revert).</summary>
+    public IReadOnlyList<string> UndoLabels => _undo.Select(step => step.Label).ToList();
+
+    /// <summary>The labels of the redoable items in the order Redo would re-apply them (the next one first).</summary>
+    public IReadOnlyList<string> RedoLabels => _redo.Select(step => step.Label).Reverse().ToList();
+
+    /// <summary>
+    /// Moves through the history until exactly <paramref name="undoCount"/> items are undoable: undoing when that is fewer than
+    /// now, redoing when it is more. 0 is the state the history starts from.
+    /// </summary>
+    /// <param name="undoCount">The wanted <see cref="UndoCount"/>, from 0 to UndoCount + RedoCount.</param>
+    /// <returns>How many items were undone (negative) or redone (positive).</returns>
+    public int JumpTo(int undoCount)
+    {
+        undoCount = Math.Max(0, Math.Min(undoCount, _undo.Count + _redo.Count));
+        var moved = 0;
+        while (_undo.Count > undoCount && Undo() != null)
+        {
+            moved--;
+        }
+
+        while (_undo.Count < undoCount && Redo() != null)
+        {
+            moved++;
+        }
+
+        return moved;
+    }
+
     /// <summary>
     /// Opens a transaction: everything recorded until it is disposed becomes one
     /// undo item named <paramref name="label"/>. Transactions nest; only the

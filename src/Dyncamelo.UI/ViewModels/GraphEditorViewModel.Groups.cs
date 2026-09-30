@@ -111,6 +111,14 @@ public partial class GraphEditorViewModel
         OnPropertyChanged(nameof(UndoTooltip));
         OnPropertyChanged(nameof(RedoTooltip));
         CommandManager.InvalidateRequerySuggested();
+        if (sender is UndoManager)
+        {
+            NoteChange();
+            if (_infoPanel == InfoPanel.History)
+            {
+                RefreshInfoPanel();
+            }
+        }
     }
 
     // Each level keeps its own undo history, so Ctrl+Z inside a group never reaches into the graph outside it.
@@ -218,6 +226,11 @@ public partial class GraphEditorViewModel
         OnPropertyChanged(nameof(IsAutoRun));
         RebuildBreadcrumb();
         UpdateRunStatistics(null);
+        if (_infoPanel != InfoPanel.None)
+        {
+            RefreshInfoPanel();
+        }
+
         GroupNavigated?.Invoke(this, new GroupNavigationEventArgs(entered, _levels.Count));
     }
 

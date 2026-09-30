@@ -30,6 +30,8 @@ internal sealed class NamingDialogs : IDialogService
 
     public bool Confirm(string message, string title) => true;
 
+    public SaveChoice AskSaveChanges(string message, string title) => SaveChoice.DontSave;
+
     public void ShowError(string message, string title)
     {
     }
@@ -206,6 +208,37 @@ public class NodeGroupUiTests
             Assert.True(chain.Vm.IsInsideGroup);
             Assert.Equal(15.0, chain.Result);        // (1 + 2 = 3) + 10 = 13, then c adds 2
             Assert.Contains("Run finished", chain.Vm.StatusMessage);
+        });
+    }
+
+    [Fact]
+    public void OpeningAGroupIsNotAChangeButEditingInsideItMakesTheDocumentModified()
+    {
+        StaHost.Run(() =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "dyc-groupdirty-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder);
+            try
+            {
+                var chain = BuildChain(new ScriptedDialogs { SavePath = Path.Combine(folder, "plan.dyc") });
+                MakeGroupOfB(chain);
+                chain.Vm.SaveCommand.Execute(null);
+                Assert.False(chain.Vm.IsModified);
+
+                chain.Vm.ToggleGroupEditCommand.Execute(null);
+                Assert.True(chain.Vm.IsInsideGroup);
+                Assert.False(chain.Vm.IsModified);
+
+                chain.Vm.Graph.AddNode(new SumNode { X = 900, Y = 0 });
+
+                Assert.True(chain.Vm.IsModified);
+                chain.Vm.ExitGroupCommand.Execute(null);
+                Assert.Contains("*", chain.Vm.Title);
+            }
+            finally
+            {
+                Directory.Delete(folder, true);
+            }
         });
     }
 

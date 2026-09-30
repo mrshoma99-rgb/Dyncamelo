@@ -40,6 +40,36 @@ public class GraphEngine
     /// <exception cref="InvalidOperationException">A run is already in progress (reentrancy guard).</exception>
     public RunResult Run(GraphModel graph, EvaluationContext? context = null)
     {
+        return RunCore(graph, context, null);
+    }
+
+    /// <summary>
+    /// Like <see cref="Run"/>, but only executes the dirty nodes that the <paramref name="targets"/> depend on (and the
+    /// targets themselves). Everything else stays exactly as it was — still dirty, with its previous outputs — so the next
+    /// ordinary run picks it up.
+    /// </summary>
+    /// <param name="graph">The graph to run.</param>
+    /// <param name="targets">The nodes to bring up to date.</param>
+    /// <param name="context">Ambient services and cancellation. Optional.</param>
+    /// <returns>A summary of what executed.</returns>
+    public RunResult RunUpTo(GraphModel graph, IEnumerable<NodeModel> targets, EvaluationContext? context = null)
+    {
+        if (graph == null)
+        {
+            throw new ArgumentNullException(nameof(graph));
+        }
+
+        if (targets == null)
+        {
+            throw new ArgumentNullException(nameof(targets));
+        }
+
+        var scope = new HashSet<NodeModel>(Dyncamelo.Core.Editing.GraphOps.Upstream(graph, targets.Where(t => t.Graph == graph)));
+        return RunCore(graph, context, scope);
+    }
+
+    private RunResult RunCore(GraphModel graph, EvaluationContext? context, HashSet<NodeModel>? scope)
+    {
         if (graph == null)
         {
             throw new ArgumentNullException(nameof(graph));
@@ -63,14 +93,14 @@ public class GraphEngine
             var plan = LoopPlanner.Plan(graph);
             var frozen = CollectFrozenSet(graph);
             var units = OrderUnits(graph, plan);
-            planned = units.Count(unit => WillRun(unit, frozen));
+            planned = units.Count(unit => WillRun(unit, frozen, scope));
             var done = 0;
 
             try
             {
                 foreach (var unit in units)
                 {
-                    if (!WillRun(unit, frozen))
+                    if (!WillRun(unit, frozen, scope))
                     {
                         continue;
                     }
@@ -122,15 +152,16 @@ public class GraphEngine
         return timings;
     }
 
-    private static bool WillRun(object unit, HashSet<NodeModel> frozen)
+    private static bool WillRun(object unit, HashSet<NodeModel> frozen, HashSet<NodeModel>? scope)
     {
         if (unit is LoopRegion region)
         {
-            return !region.AllNodes().Any(n => frozen.Contains(n)) && region.AllNodes().Any(n => n.IsDirty);
+            return !region.AllNodes().Any(n => frozen.Contains(n)) && region.AllNodes().Any(n => n.IsDirty) &&
+                   (scope == null || region.AllNodes().Any(scope.Contains));
         }
 
         var node = (NodeModel)unit;
-        return !frozen.Contains(node) && node.IsDirty;
+        return !frozen.Contains(node) && node.IsDirty && (scope == null || scope.Contains(node));
     }
 
     private static string UnitName(object unit) =>

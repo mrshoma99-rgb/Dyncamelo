@@ -204,6 +204,11 @@ public partial class GraphEditorViewModel : ObservableObject
         AttachGraph(_graph);
         InitNodeGroups();
         WatchNodeGroups(_graph.NodeGroups);
+
+        // Building the empty graph counted as edits; a new editor has nothing unsaved.
+        _savedChangeCount = _changeCount;
+        _autosavedChangeCount = _changeCount;
+        RefreshHint();
     }
 
     /// <summary>The node registry used to create nodes and resolve .dyc files.</summary>
@@ -273,7 +278,7 @@ public partial class GraphEditorViewModel : ObservableObject
         get
         {
             var document = DocumentGraph;
-            var name = document.Name.Length > 0 ? document.Name : "Untitled";
+            var name = (document.Name.Length > 0 ? document.Name : "Untitled") + (IsModified ? "*" : string.Empty);
             return _currentFilePath == null ? name : name + " — " + System.IO.Path.GetFileName(_currentFilePath);
         }
     }
@@ -295,7 +300,13 @@ public partial class GraphEditorViewModel : ObservableObject
     public bool IsRunning
     {
         get => _isRunning;
-        private set => SetProperty(ref _isRunning, value);
+        private set
+        {
+            if (SetProperty(ref _isRunning, value))
+            {
+                RefreshHint();
+            }
+        }
     }
 
     /// <summary>Wall-clock duration of the last run in milliseconds.</summary>
@@ -315,6 +326,7 @@ public partial class GraphEditorViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(IsMinimapVisible));
                 OnPropertyChanged(nameof(MinimapTooltip));
+                RefreshHint();
             }
         }
     }
@@ -965,6 +977,7 @@ public partial class GraphEditorViewModel : ObservableObject
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(IsAutoRun));
         UpdateRunStatistics(null);
+        MarkSaved();
         if (IsAutoRun)
         {
             ScheduleAutoRun();
@@ -983,7 +996,8 @@ public partial class GraphEditorViewModel : ObservableObject
     /// debounced auto-run passes <c>false</c> to stay silent.
     /// </summary>
     /// <param name="interactive">True for an explicit run (Run button / open / F5).</param>
-    private void RunGraph(bool interactive)
+    /// <param name="upTo">When given, only these nodes and what they depend on are brought up to date.</param>
+    private void RunGraph(bool interactive, IReadOnlyCollection<NodeModel>? upTo = null)
     {
         _autoRunTimer.Stop();
         if (_engine.IsRunning)
@@ -1008,7 +1022,7 @@ public partial class GraphEditorViewModel : ObservableObject
                 ConfigureRunContext(context, cancellation);
                 using (_undo.Suspend())
                 {
-                    result = _engine.Run(DocumentGraph, context);
+                    result = upTo == null ? _engine.Run(DocumentGraph, context) : _engine.RunUpTo(DocumentGraph, upTo, context);
                 }
 
                 _hasRunThisGraph = true;
@@ -1029,6 +1043,15 @@ public partial class GraphEditorViewModel : ObservableObject
         }
 
         UpdateRunStatistics(result);
+        if (upTo != null && !result.Cancelled)
+        {
+            var waiting = DocumentGraph.Nodes.Count(n => n.IsDirty && !n.IsFrozen);
+            StatusMessage = "Ran up to " + string.Join(", ", upTo.Select(t => "'" + t.Name + "'")) + ": " +
+                            result.ExecutedNodes.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s) executed in " +
+                            LastRunMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ms" +
+                            (waiting > 0 ? "; " + waiting.ToString(System.Globalization.CultureInfo.InvariantCulture) + " after it still waiting for Run." : ".");
+        }
+
         RefreshPreview(); // the selected node's outputs just changed
     }
 
@@ -1148,6 +1171,7 @@ public partial class GraphEditorViewModel : ObservableObject
         graph.PropertyChanged += OnGraphPropertyChanged;
         graph.Notes.CollectionChanged += OnNotesChanged;
         graph.Groups.CollectionChanged += OnGroupsChanged;
+        graph.Bookmarks.CollectionChanged += OnBookmarksChanged;
 
         RefreshConnectedFlags();
         NodeCount = graph.Nodes.Count;
@@ -1177,6 +1201,7 @@ public partial class GraphEditorViewModel : ObservableObject
         _graph.PropertyChanged -= OnGraphPropertyChanged;
         _graph.Notes.CollectionChanged -= OnNotesChanged;
         _graph.Groups.CollectionChanged -= OnGroupsChanged;
+        _graph.Bookmarks.CollectionChanged -= OnBookmarksChanged;
 
         foreach (var item in Items)
         {
@@ -1268,6 +1293,7 @@ public partial class GraphEditorViewModel : ObservableObject
     private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         RefreshPreview();
+        RefreshHint();
     }
 
     /// <summary>
@@ -1394,10 +1420,12 @@ public partial class GraphEditorViewModel : ObservableObject
         if (e.PropertyName == nameof(GraphModel.RunType))
         {
             OnPropertyChanged(nameof(IsAutoRun));
+            NoteChange();
         }
         else if (e.PropertyName == nameof(GraphModel.Name))
         {
             OnPropertyChanged(nameof(Title));
+            NoteChange();
         }
     }
 
@@ -1887,8 +1915,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void NewGraph()
     {
-        if (DocumentGraph.Nodes.Count > 0 &&
-            !Dialogs.Confirm("Discard the current graph and start a new one?", "New Graph"))
+        if (!ConfirmCloseDocument("New Graph"))
         {
             return;
         }
@@ -1900,7 +1927,7 @@ public partial class GraphEditorViewModel : ObservableObject
     private void OpenGraph()
     {
         var path = Dialogs.ShowOpenFile(FileFilter, "Open Dyncamelo Graph");
-        if (path != null)
+        if (path != null && ConfirmCloseDocument("Open Graph"))
         {
             OpenFromPath(path);
         }
@@ -1921,7 +1948,10 @@ public partial class GraphEditorViewModel : ObservableObject
             return;
         }
 
-        OpenFromPath(path!);
+        if (ConfirmCloseDocument("Open Graph"))
+        {
+            OpenFromPath(path!);
+        }
     }
 
     /// <summary>Opens a .dyc file from an explicit path (toolbar recents, host shell).</summary>
@@ -2071,9 +2101,8 @@ public partial class GraphEditorViewModel : ObservableObject
         }
 
         // Unlike Ctrl+O there is no file dialog to back out of, so guard
-        // against silently discarding work (same prompt style as New).
-        if (DocumentGraph.Nodes.Count > 0 &&
-            !Dialogs.Confirm("Discard the current graph and open sample '" + sample.Name + "'?", "Open Sample"))
+        // against silently discarding work (same prompt as New).
+        if (!ConfirmCloseDocument("Open Sample"))
         {
             return;
         }
@@ -2214,6 +2243,7 @@ public partial class GraphEditorViewModel : ObservableObject
             var serializer = new GraphSerializer(Registry);
             serializer.SaveToFile(DocumentGraph, path);
             CurrentFilePath = path;
+            MarkSaved();
             OnPropertyChanged(nameof(Title));
             StatusMessage = "Saved " + System.IO.Path.GetFileName(path) + ".";
             RecordRecentFile(path);
@@ -2268,6 +2298,8 @@ public partial class GraphEditorViewModel : ObservableObject
         ErrorCount = errors;
         WarningCount = warnings;
         NodeCount = _graph.Nodes.Count;
+        RefreshProblems();
+        RefreshHint();
 
         if (result != null)
         {

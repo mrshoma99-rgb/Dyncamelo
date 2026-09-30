@@ -69,6 +69,8 @@ internal sealed class StubDialogs : IDialogService
 
     public bool Confirm(string message, string title) => true;
 
+    public SaveChoice AskSaveChanges(string message, string title) => SaveChoice.DontSave;
+
     public void ShowError(string message, string title)
     {
     }

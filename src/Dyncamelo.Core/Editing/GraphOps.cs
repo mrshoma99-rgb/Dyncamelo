@@ -6,6 +6,22 @@ using Dyncamelo.Core.Graph;
 
 namespace Dyncamelo.Core.Editing;
 
+/// <summary>A direction on the canvas.</summary>
+public enum NavDirection
+{
+    /// <summary>Towards smaller X.</summary>
+    Left,
+
+    /// <summary>Towards larger X.</summary>
+    Right,
+
+    /// <summary>Towards smaller Y.</summary>
+    Up,
+
+    /// <summary>Towards larger Y.</summary>
+    Down,
+}
+
 /// <summary>
 /// The wiring edits behind the rope-style gestures: insert a node on a wire,
 /// delete a node and keep the data flowing, connect a selection in a chain,
@@ -442,6 +458,62 @@ public static class GraphOps
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The node to go to when an arrow key is pressed: the nearest one lying in that direction from <paramref name="from"/>,
+    /// preferring nodes straight ahead over nodes far off to the side. With no current node the top-left one is returned.
+    /// </summary>
+    /// <param name="nodes">The nodes on the canvas.</param>
+    /// <param name="from">The node the user is on, or null.</param>
+    /// <param name="direction">Where to go.</param>
+    /// <returns>The node to select, or null when there is nothing in that direction.</returns>
+    public static NodeModel? Nearest(IEnumerable<NodeModel> nodes, NodeModel? from, NavDirection direction)
+    {
+        if (nodes == null)
+        {
+            throw new ArgumentNullException(nameof(nodes));
+        }
+
+        if (from == null)
+        {
+            return nodes.OrderBy(n => n.X).ThenBy(n => n.Y).FirstOrDefault();
+        }
+
+        NodeModel? best = null;
+        var bestCost = double.MaxValue;
+        foreach (var node in nodes)
+        {
+            if (ReferenceEquals(node, from))
+            {
+                continue;
+            }
+
+            var dx = node.X - from.X;
+            var dy = node.Y - from.Y;
+            double along, across;
+            switch (direction)
+            {
+                case NavDirection.Right: along = dx; across = dy; break;
+                case NavDirection.Left: along = -dx; across = dy; break;
+                case NavDirection.Down: along = dy; across = dx; break;
+                default: along = -dy; across = dx; break;
+            }
+
+            if (along <= 1d)
+            {
+                continue;
+            }
+
+            var cost = along + (2d * Math.Abs(across));
+            if (cost < bestCost)
+            {
+                bestCost = cost;
+                best = node;
+            }
+        }
+
+        return best;
     }
 
     /// <summary>The nodes that feed the seeds, directly or indirectly (seeds included).</summary>

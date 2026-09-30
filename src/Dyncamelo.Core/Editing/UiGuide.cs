@@ -10,6 +10,9 @@ namespace Dyncamelo.Core.Editing;
 /// </summary>
 public static class UiGuide
 {
+    // A command's default shortcut in code style, read from the catalogue so the prose cannot name a stale key.
+    private static string K(string commandId) => "`" + (CommandCatalog.Find(commandId)?.Shortcut ?? "unassigned") + "`";
+
     /// <summary>The guide as Markdown (LF line endings).</summary>
     public static string Build()
     {
@@ -73,6 +76,24 @@ public static class UiGuide
         sb.Append("* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.\n");
         sb.Append("* While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.\n");
         sb.Append("* The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.\n\n");
+
+        sb.Append("## Keeping your work safe\n\n");
+        sb.Append("* A `*` after the graph name in the header means there are **unsaved changes**. Saving removes it; undoing back to the saved state keeps it, to be on the safe side.\n");
+        sb.Append("* **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask *Save / Don't Save / Cancel* when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.\n");
+        sb.Append("* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\\Dyncamelo\\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, Dyncamelo offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.\n");
+        sb.Append("* Drag a `.dyc` file from Explorer onto the canvas to open it.\n\n");
+
+        sb.Append("## Finding your way\n\n");
+        sb.Append("* **Problems.** The *Warnings* and *Errors* counts in the status bar are buttons: click them (or press ").Append(K("view.problems")).Append(") to list every node that failed or warned in the last run, errors first. Click a row to select that node and bring it into view. ");
+        sb.Append(K("graph.nextproblem")).Append(" and ").Append(K("graph.prevproblem")).Append(" step through them from wherever you are, and the status bar says which one you are on.\n");
+        sb.Append("* **Why didn't this run?** Select a node and press ").Append(K("node.explain")).Append(": the status bar explains in words whether the node is frozen, sits after a frozen node, is muted, failed (and with what), is waiting for an input, or is just waiting for the next Run — naming the node responsible when it is another one.\n");
+        sb.Append("* **Run up to a node.** ").Append(K("graph.runtohere")).Append(" runs only the selected nodes and what they depend on, then stops. Everything after them keeps its previous results and stays pending, so the next ordinary **Run** finishes the job. Useful while building a graph whose later steps are slow. Inside a node group it runs up to the group instance.\n");
+        sb.Append("* **Undo history.** ").Append(K("edit.history")).Append(" lists every step of the current graph (or the node group you are editing). Click a step to go back or forward to exactly that point; steps you undid are shown dimmed until you make a new edit.\n");
+        sb.Append("* **Bookmarks.** ").Append(K("view.addbookmark")).Append(" names the current view (position and zoom) and saves it **in the graph file**; ").Append(K("view.bookmarks")).Append(" lists them — click one to go there, the ✕ removes it. Good for touring a large graph (*inputs*, *filters*, *export*).\n");
+        sb.Append("* **Find a node by name.** ").Append(K("graph.findnode")).Append(" opens the command palette on the nodes of this canvas (it starts with `@`; typing plain text in the palette finds nodes too). `Enter` selects the node and scrolls to it.\n");
+        sb.Append("* **Frame and arrows.** ").Append(K("view.frameselected")).Append(" zooms to the selection. The arrow keys (").Append(K("edit.navleft")).Append(", ").Append(K("edit.navright")).Append(", ").Append(K("edit.navup")).Append(", ").Append(K("edit.navdown")).Append(") move the selection to the nearest node in that direction, so a graph can be toured without the mouse; they only act when the canvas has the keyboard.\n");
+        sb.Append("* **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.\n");
+        sb.Append("* **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas lists the ways to add the first node. Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.\n\n");
 
         sb.Append("## Commands and shortcuts\n\n");
         sb.Append("Default shortcuts. **Canvas** commands only act when the canvas has the keyboard (so typing in a box never triggers them); **Everywhere** commands also work while a text box has focus.\n\n");

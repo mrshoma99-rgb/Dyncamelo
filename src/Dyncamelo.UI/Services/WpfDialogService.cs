@@ -41,6 +41,17 @@ public class WpfDialogService : IDialogService
     }
 
     /// <inheritdoc />
+    public SaveChoice AskSaveChanges(string message, string title)
+    {
+        switch (MessageBox.Show(message, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question))
+        {
+            case MessageBoxResult.Yes: return SaveChoice.Save;
+            case MessageBoxResult.No: return SaveChoice.DontSave;
+            default: return SaveChoice.Cancel;
+        }
+    }
+
+    /// <inheritdoc />
     public void ShowError(string message, string title)
     {
         MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);

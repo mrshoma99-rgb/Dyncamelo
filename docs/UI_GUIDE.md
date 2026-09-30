@@ -78,6 +78,25 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.
 * The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.
 
+## Keeping your work safe
+
+* A `*` after the graph name in the header means there are **unsaved changes**. Saving removes it; undoing back to the saved state keeps it, to be on the safe side.
+* **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask *Save / Don't Save / Cancel* when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
+* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\Dyncamelo\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, Dyncamelo offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
+* Drag a `.dyc` file from Explorer onto the canvas to open it.
+
+## Finding your way
+
+* **Problems.** The *Warnings* and *Errors* counts in the status bar are buttons: click them (or press `Ctrl+Shift+E`) to list every node that failed or warned in the last run, errors first. Click a row to select that node and bring it into view. `F8` and `Shift+F8` step through them from wherever you are, and the status bar says which one you are on.
+* **Why didn't this run?** Select a node and press `I`: the status bar explains in words whether the node is frozen, sits after a frozen node, is muted, failed (and with what), is waiting for an input, or is just waiting for the next Run — naming the node responsible when it is another one.
+* **Run up to a node.** `Shift+F5` runs only the selected nodes and what they depend on, then stops. Everything after them keeps its previous results and stays pending, so the next ordinary **Run** finishes the job. Useful while building a graph whose later steps are slow. Inside a node group it runs up to the group instance.
+* **Undo history.** `Ctrl+Shift+H` lists every step of the current graph (or the node group you are editing). Click a step to go back or forward to exactly that point; steps you undid are shown dimmed until you make a new edit.
+* **Bookmarks.** `Ctrl+K` names the current view (position and zoom) and saves it **in the graph file**; `Ctrl+Shift+K` lists them — click one to go there, the ✕ removes it. Good for touring a large graph (*inputs*, *filters*, *export*).
+* **Find a node by name.** `Ctrl+F` opens the command palette on the nodes of this canvas (it starts with `@`; typing plain text in the palette finds nodes too). `Enter` selects the node and scrolls to it.
+* **Frame and arrows.** `Shift+F` zooms to the selection. The arrow keys (`Left`, `Right`, `Up`, `Down`) move the selection to the nearest node in that direction, so a graph can be toured without the mouse; they only act when the canvas has the keyboard.
+* **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.
+* **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas lists the ways to add the first node. Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
+
 ## Commands and shortcuts
 
 Default shortcuts. **Canvas** commands only act when the canvas has the keyboard (so typing in a box never triggers them); **Everywhere** commands also work while a text box has focus.
@@ -107,6 +126,11 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Select Downstream | `L` | Canvas |
 | Select Upstream | `Shift+L` | Canvas |
 | Select Similar | `Shift+G` | Canvas |
+| Select Node to the Left | `Left` | Canvas |
+| Select Node to the Right | `Right` | Canvas |
+| Select Node Above | `Up` | Canvas |
+| Select Node Below | `Down` | Canvas |
+| Undo History… | `Ctrl+Shift+H` | Canvas |
 
 ### View
 
@@ -117,6 +141,10 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Zoom Out | — | Canvas |
 | Minimap *(toggle)* | `Ctrl+M` | Canvas |
 | Node Library Panel *(toggle)* | `Ctrl+B` | Canvas |
+| Frame Selected | `Shift+F` | Canvas |
+| Problems List | `Ctrl+Shift+E` | Canvas |
+| Canvas Bookmarks… | `Ctrl+Shift+K` | Canvas |
+| Bookmark This View… | `Ctrl+K` | Canvas |
 | Reset Node Width | — | Canvas |
 | Collapse All Nodes | — | Canvas |
 | Expand All Nodes | — | Canvas |
@@ -129,6 +157,10 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Command | Shortcut | Works |
 |---|---|---|
 | Run | `F5` | Everywhere |
+| Run Up to Selected Node | `Shift+F5` | Everywhere |
+| Go to Next Problem | `F8` | Everywhere |
+| Go to Previous Problem | `Shift+F8` | Everywhere |
+| Find Node on Canvas… | `Ctrl+F` | Canvas |
 | Auto-Run *(toggle)* | — | Canvas |
 | Rename Graph | `F2` | Canvas |
 | Add Note | — | Canvas |
@@ -147,6 +179,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Hide / Show Unused Sockets | `Ctrl+H` | Canvas |
 | Mute / Unmute | `M` | Canvas |
 | Freeze / Unfreeze | `Shift+M` | Canvas |
+| Why Didn't This Run? | `I` | Canvas |
 | Reset Inputs to Default | — | Canvas |
 | Insert Into Selected Wire | — | Canvas |
 | Connect Selected Nodes | `F` | Canvas |
@@ -189,6 +222,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Gesture | How |
 |---|---|
 | Stop a running graph | Esc (the run halts before the next node and continues from there next time) |
+| Open a graph | Drag a .dyc file from Explorer onto the canvas |
 | Pan the canvas | Right or middle mouse drag |
 | Zoom | Mouse wheel |
 | Search for a node here | Space over the canvas |
@@ -225,6 +259,9 @@ The **colour palette** of the whole editor is chosen here too.
 | Node library panel | On / Off | On | Show the node library on the left of the canvas. It can also be hidden with the arrow in its header and brought back with the tab at the canvas edge. |
 | Descriptions in the library | On / Off | On | Show a description line under each node in the library panel. |
 | Value previews under nodes | On / Off | On | Show a preview bubble with the result under each node after a run. |
+| Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Make everything in the Dyncamelo window smaller or larger, for high-resolution screens or a small pane. |
+| Hints in the status bar | On / Off | On | Show a line of suggestions at the bottom that follows what you are doing: the keys for the selected nodes, what a dragged wire will do. |
+| Hints on an empty canvas | On / Off | On | Show the ways to add a first node while the canvas is empty. |
 
 ### Canvas
 
@@ -246,6 +283,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Make room when inserting on a wire | On / Off | On | Nodes downstream move right when a node is dropped onto a wire. |
 | Deleting a reroute keeps the wire | On / Off | On | Removing a reroute dot joins the wire back up instead of deleting it. |
 | Esc cancels a running graph | On / Off | On | Pressing Esc while a run is in progress stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
+| Autosave unsaved work | On / Off | On | Keep a copy of a graph with unsaved changes once a minute, and offer it back if Navisworks closed or crashed before you saved. The copy is deleted when you save. |
 | Highlight selected node in Navisworks | On / Off | Off | Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current. |
 | Double-click empty canvas | Insert a String node / Insert a Number node / Add a note / Do nothing | Insert a String node | What double-clicking the empty canvas does. |
 

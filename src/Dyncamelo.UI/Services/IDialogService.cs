@@ -1,5 +1,18 @@
 namespace Dyncamelo.UI.Services;
 
+/// <summary>The answer to "save your changes first?".</summary>
+public enum SaveChoice
+{
+    /// <summary>Save, then carry on.</summary>
+    Save,
+
+    /// <summary>Carry on and lose the unsaved changes.</summary>
+    DontSave,
+
+    /// <summary>Do not carry on.</summary>
+    Cancel,
+}
+
 /// <summary>
 /// UI dialogs abstracted away from view models so they stay testable and the
 /// host (Navisworks dock pane, future sandbox) can substitute its own dialogs.
@@ -24,6 +37,12 @@ public interface IDialogService
     /// <param name="title">Dialog caption.</param>
     /// <returns>True when the user confirmed.</returns>
     bool Confirm(string message, string title);
+
+    /// <summary>Asks whether to save unsaved changes before something replaces them (Save / Don't Save / Cancel).</summary>
+    /// <param name="message">Question text.</param>
+    /// <param name="title">Dialog caption.</param>
+    /// <returns>What the user chose; closing the dialog counts as cancel.</returns>
+    SaveChoice AskSaveChanges(string message, string title);
 
     /// <summary>Shows an error message box.</summary>
     /// <param name="message">Error text.</param>

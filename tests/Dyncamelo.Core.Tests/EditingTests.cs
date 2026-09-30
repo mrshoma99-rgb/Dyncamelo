@@ -786,7 +786,7 @@ public class CommandCatalogTests
     {
         var shortcuts = CommandCatalog.All.SelectMany(c => new[] { c.Shortcut, c.Alternate }).Where(s => s != null).Select(s => s!).ToList();
         Assert.Equal(shortcuts.Count, shortcuts.Select(s => s.ToUpperInvariant()).Distinct().Count());
-        Assert.All(shortcuts, s => Assert.Matches("^((Ctrl|Alt|Shift)\\+)*([A-Z0-9]|F([1-9]|1[0-2])|Delete|Space|Home|Tab)$", s));
+        Assert.All(shortcuts, s => Assert.Matches("^((Ctrl|Alt|Shift)\\+)*([A-Z0-9]|F([1-9]|1[0-2])|Delete|Space|Home|Tab|Left|Right|Up|Down)$", s));
     }
 
     [Fact]

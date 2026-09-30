@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -163,9 +164,51 @@ public class ConnectorViewModel : ObservableObject
                 text += "\n" + Port.Description;
             }
 
+            var current = CurrentValueText();
+            if (current != null)
+            {
+                text += "\n" + current;
+            }
+
             return text;
         }
     }
+
+    // What the socket holds right now: an output's last result, or what the wire into an input delivers. Read when the
+    // tooltip is about to show (RefreshToolTip), so it costs nothing while the graph runs.
+    private string? CurrentValueText()
+    {
+        if (!IsInput)
+        {
+            if (Port.Owner.State == NodeState.Error)
+            {
+                return "no value — the node failed";
+            }
+
+            return Port.Value == null && Port.Owner.State == NodeState.Idle
+                ? null
+                : "value: " + ValueSummary.Describe(Port.Value);
+        }
+
+        var graph = Port.Owner.Graph;
+        if (graph == null)
+        {
+            return null;
+        }
+
+        var sources = graph.Connections.Where(c => c.Target == Port && !c.IsMuted).Select(c => c.Source).ToList();
+        if (sources.Count == 0)
+        {
+            return null;
+        }
+
+        return sources.Count == 1
+            ? "receives: " + ValueSummary.Describe(sources[0].Value)
+            : "receives " + sources.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " values, one per wire";
+    }
+
+    /// <summary>Re-reads the tooltip (the value line changes with every run); called as the pointer enters the socket.</summary>
+    public void RefreshToolTip() => OnPropertyChanged(nameof(ToolTip));
 
     // ----- type language: colour = family, shape = structure -------------------
 

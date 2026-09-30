@@ -47,6 +47,7 @@ public static class HelpContent
     public static readonly IReadOnlyList<HelpLine> Gestures = new[]
     {
         new HelpLine("Stop a running graph", "Esc (the run halts before the next node and continues from there next time)"),
+        new HelpLine("Open a graph", "Drag a .dyc file from Explorer onto the canvas"),
         new HelpLine("Pan the canvas", "Right or middle mouse drag"),
         new HelpLine("Zoom", "Mouse wheel"),
         new HelpLine("Search for a node here", "Space over the canvas"),

@@ -28,6 +28,7 @@ public class GraphModel : INotifyPropertyChanged
         Uuid = Guid.NewGuid();
         Notes = new ObservableCollection<NoteModel>();
         Groups = new ObservableCollection<GroupModel>();
+        Bookmarks = new ObservableCollection<BookmarkModel>();
         NodeGroups = new Dyncamelo.Core.Groups.NodeGroupLibrary(this);
     }
 
@@ -86,6 +87,9 @@ public class GraphModel : INotifyPropertyChanged
 
     /// <summary>Canvas groups (annotation rectangles, no execution semantics).</summary>
     public ObservableCollection<GroupModel> Groups { get; }
+
+    /// <summary>Saved views of the canvas, in the order they were made.</summary>
+    public ObservableCollection<BookmarkModel> Bookmarks { get; }
 
     /// <summary>Raised after a node is added.</summary>
     public event EventHandler<NodeEventArgs>? NodeAdded;

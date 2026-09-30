@@ -14,7 +14,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <DockPanel Background="{DynamicResource Dyc.PanelBrush}">
+    <DockPanel x:Name="LayoutRoot" Background="{DynamicResource Dyc.PanelBrush}">
 
         <!-- ===== Brand bar (BIMCamel identity) — the blue gradient header carries
              the logo in a black chip so its baked-in black background reads as an
@@ -129,18 +129,38 @@
                 BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="8,3">
-            <DockPanel>
+            <DockPanel x:Name="StatusBar" SizeChanged="OnStatusBarSizeChanged">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="Nodes: " />
                     <TextBlock Foreground="{DynamicResource Dyc.TextBrush}" Text="{Binding NodeCount}" />
-                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Warnings: " />
-                    <TextBlock Foreground="{DynamicResource Dyc.WarningBrush}" Text="{Binding WarningCount}" />
-                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Errors: " />
-                    <TextBlock Foreground="{DynamicResource Dyc.ErrorBrush}" Text="{Binding ErrorCount}" />
+
+                    <!-- Clicking the counts opens the problems list; F8 walks through the problems. -->
+                    <Border Background="Transparent"
+                            Cursor="Hand"
+                            ToolTip="{Binding ProblemsTooltip}">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding ToggleProblemsCommand}" />
+                        </Border.InputBindings>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Warnings: " />
+                            <TextBlock Foreground="{DynamicResource Dyc.WarningBrush}" Text="{Binding WarningCount}" />
+                            <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Errors: " />
+                            <TextBlock Foreground="{DynamicResource Dyc.ErrorBrush}" Text="{Binding ErrorCount}" />
+                        </StackPanel>
+                    </Border>
+
                     <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Last run: " />
                     <TextBlock Foreground="{DynamicResource Dyc.TextBrush}" Text="{Binding LastRunMilliseconds}" />
                     <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text=" ms" />
                 </StackPanel>
+                <TextBlock x:Name="HintLabel"
+                           DockPanel.Dock="Right"
+                           Margin="0,0,18,0"
+                           FontStyle="Italic"
+                           Opacity="0.8"
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           Text="{Binding HintText}" />
                 <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                            TextTrimming="CharacterEllipsis"
                            Text="{Binding StatusMessage}" />
@@ -516,6 +536,7 @@
                                  GridCellSize="{Binding GridCellSize}"
                                  AllowDrop="True"
                                  Drop="OnEditorDrop"
+                                 DragOver="OnEditorDragOver"
                                  PreviewMouseDown="OnEditorPreviewMouseDown">
 
                 <nodify:NodifyEditor.Background>
@@ -1037,7 +1058,7 @@
                                Margin="2,5,2,3"
                                FontSize="10"
                                Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                               Text="Type a command or a setting · ↑↓ choose · Enter runs · Esc closes" />
+                               Text="Type a command, a setting or a node name (@ for nodes only) · ↑↓ choose · Enter runs · Esc closes" />
                     <ListBox x:Name="PaletteList"
                              MaxHeight="360"
                              Background="Transparent"
@@ -1224,6 +1245,155 @@
                     </ListBox>
                 </DockPanel>
             </Border>
+
+            <!-- Side panel (Ctrl+Shift+E problems, Ctrl+Shift+H undo history, Ctrl+Shift+K bookmarks): click a row to go there. -->
+            <Border Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,14,14"
+                    Width="340"
+                    MaxHeight="340"
+                    Background="{DynamicResource Dyc.PanelBrush}"
+                    BorderBrush="{DynamicResource Dyc.AccentBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="8"
+                    Panel.ZIndex="940"
+                    Visibility="{Binding IsInfoPanelOpen, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource Dyc.SmallButton}"
+                                Content="✕"
+                                ToolTip="Close"
+                                Command="{Binding CloseInfoPanelCommand}" />
+                        <TextBlock Text="{Binding InfoPanelTitle}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Dyc.TextBrush}" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding InfoPanelEmptyText}"
+                               Margin="2,4"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                               Visibility="{Binding IsInfoPanelEmpty, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <ListBox x:Name="InfoPanelList"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             FontSize="12"
+                             Foreground="{DynamicResource Dyc.TextBrush}"
+                             ItemsSource="{Binding InfoPanelItems}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             PreviewMouseLeftButtonUp="OnInfoPanelItemClick">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                                <Setter Property="Padding" Value="6,3" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Focusable" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <Border x:Name="Chrome"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    BorderThickness="2,0,0,0"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse x:Name="Marker"
+                                             Width="8" Height="8"
+                                             Margin="0,5,8,0"
+                                             VerticalAlignment="Top"
+                                             Fill="{DynamicResource Dyc.SubtleTextBrush}" />
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock x:Name="RowTitle" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Detail}"
+                                                   FontSize="10.5"
+                                                   TextWrapping="Wrap"
+                                                   MaxHeight="44"
+                                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                                   Visibility="{Binding HasDetail, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="2"
+                                            Style="{StaticResource Dyc.SmallButton}"
+                                            Content="✕"
+                                            ToolTip="Remove"
+                                            VerticalAlignment="Top"
+                                            Command="{Binding RemoveCommand}"
+                                            Visibility="{Binding CanRemove, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Kind}" Value="Error">
+                                        <Setter TargetName="Marker" Property="Fill" Value="{DynamicResource Dyc.ErrorBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="Warning">
+                                        <Setter TargetName="Marker" Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="Step">
+                                        <Setter TargetName="Marker" Property="Fill" Value="{DynamicResource Dyc.TextBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="Bookmark">
+                                        <Setter TargetName="Marker" Property="Fill" Value="{DynamicResource Dyc.AccentBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="Future">
+                                        <Setter TargetName="Marker" Property="Fill" Value="Transparent" />
+                                        <Setter TargetName="Marker" Property="Stroke" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+                                        <Setter TargetName="RowTitle" Property="Opacity" Value="0.6" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Getting started: shown in the middle of an empty canvas, never in the way of clicks. -->
+            <StackPanel Grid.Column="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="False"
+                        Visibility="{Binding IsEmptyCanvasHintVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <TextBlock Text="An empty canvas"
+                           HorizontalAlignment="Center"
+                           FontSize="18"
+                           Opacity="0.55"
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                <ItemsControl ItemsSource="{Binding EmptyCanvasHintLines}" Margin="0,8,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,2"
+                                       FontSize="13"
+                                       Opacity="0.55"
+                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
 
             <!-- Busy overlay over the canvas. Graph runs are synchronous on the UI
                  thread (Navisworks nodes must run on the host's main thread), so

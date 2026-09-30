@@ -66,7 +66,7 @@ public class KeymapGlobalRuleTests
         Assert.Contains("typed into text boxes", keymap.Validate("graph.run", "K"));
         Assert.Contains("typed into text boxes", keymap.Validate("graph.run", "Shift+K"));
         Assert.Null(keymap.Validate("graph.run", "F9"));
-        Assert.Null(keymap.Validate("graph.run", "Ctrl+K"));
+        Assert.Null(keymap.Validate("graph.run", "Ctrl+J"));
         Assert.Null(keymap.Validate("graph.run", "Alt+K"));
     }
 

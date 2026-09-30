@@ -46,6 +46,18 @@ public static class SettingKeys
 
     /// <summary>Esc cancels a running graph.</summary>
     public const string EscCancels = "escCancels";
+
+    /// <summary>Keep an autosaved copy of a graph with unsaved changes.</summary>
+    public const string Autosave = "autosave";
+
+    /// <summary>Show the hint line in the status bar.</summary>
+    public const string StatusHints = "statusHints";
+
+    /// <summary>Show getting-started hints on an empty canvas.</summary>
+    public const string EmptyHints = "emptyHints";
+
+    /// <summary>Window scale in percent.</summary>
+    public const string UiScale = "uiScale";
 }
 
 /// <summary>
@@ -64,7 +76,8 @@ public partial class GraphEditorViewModel
         nameof(MinimapMode), nameof(IsMinimapVisible), nameof(MinimapTooltip), nameof(NodeDensity), nameof(RowBaseHeight), nameof(StraightWires),
         nameof(WireLowDetail), nameof(ColourBlindGlyphs), nameof(HideUnusedByDefault), nameof(ScrubSpeed), nameof(ScrubPixelsPerStep),
         nameof(SnapToGrid), nameof(GridCellSize), nameof(AutoOffsetOnInsert), nameof(DeleteReconnectsReroutes), nameof(ShowGrid),
-        nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden), nameof(EscCancelsRun),
+        nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden), nameof(EscCancelsRun), nameof(IsAutosaveEnabled),
+        nameof(ShowStatusHints), nameof(ShowEmptyCanvasHints), nameof(UiScale), nameof(UiScaleFactor),
     };
 
     /// <summary>Minimap mode: "auto", "on" or "off".</summary>

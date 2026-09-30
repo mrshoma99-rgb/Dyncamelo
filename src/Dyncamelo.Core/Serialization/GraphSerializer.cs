@@ -381,18 +381,45 @@ public class GraphSerializer
                 graph.Groups.Add(group);
             }
         }
+
+        // "Bookmarks" is additive too: older applications ignore it.
+        if (root["Bookmarks"] is JArray bookmarks)
+        {
+            foreach (var token in bookmarks.OfType<JObject>())
+            {
+                var bookmark = new BookmarkModel
+                {
+                    Name = token.Value<string>("Name") ?? "Bookmark",
+                    X = token.Value<double?>("X") ?? 0d,
+                    Y = token.Value<double?>("Y") ?? 0d,
+                    Zoom = token.Value<double?>("Zoom") ?? 1d,
+                };
+                if (TryParseGuid(token.Value<string>("Id"), out var bookmarkId))
+                {
+                    bookmark.Id = bookmarkId;
+                }
+
+                graph.Bookmarks.Add(bookmark);
+            }
+        }
     }
 
     // The content every graph has, for a document and for the body of a node group alike.
     private static JObject SerializeBody(GraphModel graph)
     {
-        return new JObject
+        var body = new JObject
         {
             ["Nodes"] = new JArray(graph.Nodes.Select(SerializeNode)),
             ["Connectors"] = new JArray(graph.Connections.Select(SerializeConnection)),
             ["Notes"] = new JArray(graph.Notes.Select(SerializeNote)),
             ["Groups"] = new JArray(graph.Groups.Select(SerializeGroup)),
         };
+        if (graph.Bookmarks.Count > 0)
+        {
+            body["Bookmarks"] = new JArray(graph.Bookmarks.Select(SerializeBookmark));
+        }
+
+        return body;
     }
 
     private static void CollectGroups(NodeGroup group, List<NodeGroup> into)
@@ -620,6 +647,18 @@ public class GraphSerializer
             ["Text"] = note.Text,
             ["X"] = note.X,
             ["Y"] = note.Y,
+        };
+    }
+
+    private static JObject SerializeBookmark(BookmarkModel bookmark)
+    {
+        return new JObject
+        {
+            ["Id"] = bookmark.Id.ToString("N"),
+            ["Name"] = bookmark.Name,
+            ["X"] = bookmark.X,
+            ["Y"] = bookmark.Y,
+            ["Zoom"] = bookmark.Zoom,
         };
     }
 

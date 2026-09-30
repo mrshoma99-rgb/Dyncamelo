@@ -59,6 +59,9 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         {
             Child = editor,
             Dock = DockStyle.Fill,
+
+            // WinForms only forwards drag-and-drop from Explorer (a .dyc dropped on the canvas) when the host allows it.
+            AllowDrop = true,
         };
         host.CreateControl();
 
@@ -79,6 +82,17 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         SubscribeDocumentEvents(null);
         _keyGuard?.Dispose();
         _keyGuard = null;
+
+        // Closing the pane cannot ask questions: unsaved work is left as an autosave and offered at the next start.
+        try
+        {
+            _viewModel?.EndSession();
+        }
+        catch (Exception)
+        {
+            // Shutting down must never fail because of a full disk or a locked folder.
+        }
+
         _viewModel = null;
         pane.Dispose();
     }

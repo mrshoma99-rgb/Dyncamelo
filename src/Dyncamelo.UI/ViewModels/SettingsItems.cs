@@ -11,8 +11,9 @@ namespace Dyncamelo.UI.ViewModels;
 public sealed class PaletteEntry
 {
     /// <summary>Creates an entry.</summary>
-    public PaletteEntry(string id, string title, string category, string shortcut, bool isSetting)
+    public PaletteEntry(string id, string title, string category, string shortcut, bool isSetting, Dyncamelo.Core.Graph.NodeModel? node = null)
     {
+        Node = node;
         Id = id;
         Title = title;
         Category = category;
@@ -34,6 +35,12 @@ public sealed class PaletteEntry
 
     /// <summary>True when the entry opens a preference instead of running a command.</summary>
     public bool IsSetting { get; }
+
+    /// <summary>The node on the canvas this entry goes to, or null for commands and preferences.</summary>
+    public Dyncamelo.Core.Graph.NodeModel? Node { get; }
+
+    /// <summary>True when the entry selects a node on the canvas.</summary>
+    public bool IsNode => Node != null;
 
     /// <summary>True when there is a shortcut to show.</summary>
     public bool HasShortcut => Shortcut.Length > 0;

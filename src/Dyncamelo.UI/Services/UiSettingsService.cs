@@ -431,6 +431,15 @@ public class UiSettingsService
     public static string DefaultDirectory =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dyncamelo");
 
+    /// <summary>
+    /// The folder of autosaved copies (%APPDATA%\Dyncamelo\recovery). A service made on an explicit settings file keeps its
+    /// autosaves beside it, so tests and side-by-side installs never see each other's.
+    /// </summary>
+    public string RecoveryDirectory =>
+        string.Equals(_settingsPath, GetDefaultSettingsPath(), StringComparison.OrdinalIgnoreCase)
+            ? Path.Combine(DefaultDirectory, "recovery")
+            : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(_settingsPath)) ?? string.Empty, Path.GetFileNameWithoutExtension(_settingsPath) + "-recovery");
+
     private static string GetDefaultSettingsPath() => Path.Combine(DefaultDirectory, "ui-settings.json");
 
     private static bool AddIfMissing(List<string> list, string value)

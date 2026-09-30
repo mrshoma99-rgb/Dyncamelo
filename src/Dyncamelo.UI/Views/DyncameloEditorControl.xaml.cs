@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -36,6 +37,19 @@ public partial class DyncameloEditorControl : UserControl
     static DyncameloEditorControl()
     {
         NodifyEditor.AutoPanOnNodeFocus = false;
+
+        // A socket's tooltip shows the value it holds now, which changes with every run. Re-read it as the pointer enters
+        // (the tooltip itself only appears after its show delay, so the fresh text is in place by then).
+        EventManager.RegisterClassHandler(typeof(NodeInput), Mouse.MouseEnterEvent, new MouseEventHandler(OnSocketMouseEnter));
+        EventManager.RegisterClassHandler(typeof(NodeOutput), Mouse.MouseEnterEvent, new MouseEventHandler(OnSocketMouseEnter));
+    }
+
+    private static void OnSocketMouseEnter(object sender, MouseEventArgs e)
+    {
+        if (sender is FrameworkElement element && element.DataContext is ConnectorViewModel connector)
+        {
+            connector.RefreshToolTip();
+        }
     }
 
     /// <summary>Creates the control. Assign <see cref="ViewModel"/> before showing it.</summary>
@@ -287,6 +301,20 @@ public partial class DyncameloEditorControl : UserControl
             case "edit.selectdownstream": return vm.SelectDownstreamCommand;
             case "edit.selectupstream": return vm.SelectUpstreamCommand;
             case "edit.selectsimilar": return vm.SelectSimilarCommand;
+            case "edit.navleft": return vm.NavigateLeftCommand;
+            case "edit.navright": return vm.NavigateRightCommand;
+            case "edit.navup": return vm.NavigateUpCommand;
+            case "edit.navdown": return vm.NavigateDownCommand;
+            case "edit.history": return vm.ToggleHistoryCommand;
+            case "view.frameselected": return vm.FrameSelectedCommand;
+            case "view.problems": return vm.ToggleProblemsCommand;
+            case "view.bookmarks": return vm.ToggleBookmarksCommand;
+            case "view.addbookmark": return vm.AddBookmarkCommand;
+            case "graph.runtohere": return vm.RunToHereCommand;
+            case "graph.nextproblem": return vm.NextProblemCommand;
+            case "graph.prevproblem": return vm.PreviousProblemCommand;
+            case "graph.findnode": return vm.FindNodeCommand;
+            case "node.explain": return vm.ExplainSelectedCommand;
             case "view.fit": return EditorCommands.FitToScreen;
             case "view.zoomin": return EditorCommands.ZoomIn;
             case "view.zoomout": return EditorCommands.ZoomOut;
@@ -436,6 +464,7 @@ public partial class DyncameloEditorControl : UserControl
             oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
             oldViewModel.KeymapChanged -= OnKeymapChanged;
             oldViewModel.GroupNavigated -= OnGroupNavigated;
+            oldViewModel.RevealRequested -= OnRevealRequested;
         }
 
         if (e.NewValue is GraphEditorViewModel newViewModel)
@@ -444,17 +473,104 @@ public partial class DyncameloEditorControl : UserControl
             newViewModel.PropertyChanged += OnViewModelPropertyChanged;
             newViewModel.KeymapChanged += OnKeymapChanged;
             newViewModel.GroupNavigated += OnGroupNavigated;
+            newViewModel.RevealRequested += OnRevealRequested;
+            newViewModel.ViewProvider = () => new ViewSnapshot(ViewportCenter, Editor.ViewportZoom);
             newViewModel.CommandResolver = id => ResolveCommand(newViewModel, id);
             newViewModel.CommandTarget = Editor;
             newViewModel.PointerLocation = () => Editor.MouseLocation;
             newViewModel.RenderPump = PumpRender;
+            // Once the window is up: start the autosave timer and offer the graph of a session that died unsaved.
+            Dispatcher.BeginInvoke(
+                new System.Action(() =>
+                {
+                    newViewModel.StartAutosave();
+                    newViewModel.OfferRecovery();
+                }),
+                System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             // Apply the persisted palette once the view model is attached.
             ApplyPalette(newViewModel.PaletteId);
             RebuildKeyRouter(newViewModel);
             BuildHeaderMenu(newViewModel);
             ApplyGrid(newViewModel.ShowGrid);
             ApplyLibraryVisibility(newViewModel.IsLibraryVisible);
+            ApplyUiScale(newViewModel.UiScaleFactor);
+            UpdateHintVisibility();
         }
+    }
+
+    // ----- revealing parts of the canvas -------------------------------------------------------
+
+    // The most the canvas zooms in when framing a few small things (a single node should not fill the screen).
+    private const double FrameMaxZoom = 1.25d;
+
+    private void OnRevealRequested(object? sender, RevealEventArgs e)
+    {
+        if (e.Zoom < 0d)
+        {
+            // Frame: fit the rectangle, but never closer than a comfortable size.
+            Editor.FitToScreen(e.Bounds);
+            if (Editor.ViewportZoom > FrameMaxZoom)
+            {
+                Editor.ViewportZoom = FrameMaxZoom;
+                Editor.BringIntoView(e.Bounds);
+            }
+
+            return;
+        }
+
+        if (e.Zoom > 0d)
+        {
+            Editor.ViewportZoom = e.Zoom;
+        }
+
+        var view = new Rect(Editor.ViewportLocation, Editor.ViewportSize);
+        var inside = view.Contains(e.Bounds.TopLeft) && view.Contains(e.Bounds.BottomRight);
+        if (e.AlwaysCenter || !inside)
+        {
+            Editor.BringIntoView(e.Bounds);
+        }
+    }
+
+    // A list row was clicked (not its remove button): go there.
+    private void OnInfoPanelItemClick(object sender, MouseButtonEventArgs e)
+    {
+        var source = e.OriginalSource as DependencyObject;
+        while (source != null && !ReferenceEquals(source, InfoPanelList))
+        {
+            if (source is System.Windows.Controls.Primitives.ButtonBase)
+            {
+                return;     // the remove button handles its own click
+            }
+
+            if (source is ListBoxItem item && item.DataContext is PanelItemViewModel row)
+            {
+                row.ActivateCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            source = source is Visual || source is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(source)
+                : LogicalTreeHelper.GetParent(source);
+        }
+    }
+
+    // ----- window scale and the hint line -------------------------------------------------------
+
+    private void ApplyUiScale(double factor)
+    {
+        LayoutRoot.LayoutTransform = Math.Abs(factor - 1d) < 0.001d ? Transform.Identity : new ScaleTransform(factor, factor);
+    }
+
+    private void OnStatusBarSizeChanged(object sender, SizeChangedEventArgs e) => UpdateHintVisibility();
+
+    // The hint goes first when the pane is narrow: the run figures and the status message matter more.
+    private void UpdateHintVisibility()
+    {
+        var room = StatusBar.ActualWidth - 560d;
+        var wanted = ViewModel?.ShowStatusHints ?? true;
+        HintLabel.Visibility = wanted && room >= 120d ? Visibility.Visible : Visibility.Collapsed;
+        HintLabel.MaxWidth = Math.Max(0d, Math.Min(room, 520d));
     }
 
     // Opening a node group shows its body fitted to the canvas; closing it puts the view back where it was.
@@ -508,6 +624,14 @@ public partial class DyncameloEditorControl : UserControl
         else if (e.PropertyName == nameof(GraphEditorViewModel.IsLibraryVisible) && ViewModel != null)
         {
             ApplyLibraryVisibility(ViewModel.IsLibraryVisible);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.UiScaleFactor) && ViewModel != null)
+        {
+            ApplyUiScale(ViewModel.UiScaleFactor);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.ShowStatusHints))
+        {
+            UpdateHintVisibility();
         }
         else if (e.PropertyName == nameof(GraphEditorViewModel.ShowGrid) && ViewModel != null)
         {
@@ -1108,9 +1232,40 @@ public partial class DyncameloEditorControl : UserControl
         return ReferenceEquals(current, Editor);
     }
 
+    // Files dragged in from Explorer: a .dyc graph is opened (after asking about unsaved changes).
+    private static string[] DroppedFiles(DragEventArgs e) =>
+        e.Data.GetDataPresent(DataFormats.FileDrop) && e.Data.GetData(DataFormats.FileDrop) is string[] files ? files : new string[0];
+
+    private void OnEditorDragOver(object sender, DragEventArgs e)
+    {
+        if (DroppedFiles(e).Any(f => f.EndsWith(".dyc", System.StringComparison.OrdinalIgnoreCase)))
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+    }
+
     private void OnEditorDrop(object sender, DragEventArgs e)
     {
-        if (ViewModel == null || !e.Data.GetDataPresent(DragDataFormat))
+        if (ViewModel == null)
+        {
+            return;
+        }
+
+        var files = DroppedFiles(e);
+        if (files.Length > 0)
+        {
+            e.Handled = true;
+
+            // Opening shows dialogs; leave the drag-and-drop loop first so the source window is released.
+            var viewModel = ViewModel;
+            Dispatcher.BeginInvoke(
+                new System.Action(() => viewModel.OpenDroppedFiles(files)),
+                System.Windows.Threading.DispatcherPriority.Background);
+            return;
+        }
+
+        if (!e.Data.GetDataPresent(DragDataFormat))
         {
             return;
         }

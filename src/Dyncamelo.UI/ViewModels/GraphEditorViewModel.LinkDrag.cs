@@ -56,6 +56,11 @@ public partial class GraphEditorViewModel
 
     private void OnPendingConnectionChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(PendingConnectionViewModel.IsVisible))
+        {
+            RefreshHint();
+        }
+
         if (e.PropertyName != nameof(PendingConnectionViewModel.IsVisible) || PendingConnection.IsVisible)
         {
             return;

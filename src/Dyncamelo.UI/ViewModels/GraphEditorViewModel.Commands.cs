@@ -112,10 +112,12 @@ public partial class GraphEditorViewModel
             OnPropertyChanged(nameof(RedoTooltip));
             OnPropertyChanged(nameof(RunTooltip));
             OnPropertyChanged(nameof(MinimapTooltip));
+            OnPropertyChanged(nameof(ProblemsTooltip));
             if (_isPaletteOpen)
             {
                 RefreshPalette();
             }
+            RefreshHint();
             KeymapChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -249,12 +251,13 @@ public partial class GraphEditorViewModel
     public ICommand RunPaletteEntryCommand => _runPaletteEntryCommand ??= new RelayCommand<PaletteEntry>(entry => RunPaletteEntry(entry));
 
     /// <summary>Opens the palette with an empty search.</summary>
-    public void OpenPalette()
+    /// <param name="initialQuery">Text to start with ("@" lists the nodes on the canvas).</param>
+    public void OpenPalette(string initialQuery = "")
     {
         CloseQuickSearch();
         IsHelpOpen = false;
         IsSettingsOpen = false;
-        _paletteQuery = string.Empty;
+        _paletteQuery = initialQuery ?? string.Empty;
         OnPropertyChanged(nameof(PaletteQuery));
         if (_isPaletteOpen)
         {
@@ -297,6 +300,11 @@ public partial class GraphEditorViewModel
         }
 
         ClosePalette();
+        if (entry.IsNode)
+        {
+            return GoToNode(entry.Node!);
+        }
+
         if (entry.IsSetting)
         {
             var setting = SettingsCatalog.Find(entry.Id);
@@ -311,13 +319,25 @@ public partial class GraphEditorViewModel
     {
         var commands = CommandCatalog.All.Where(c => c.Id != "help.palette" && IsRunnable(c.Id));
         var entries = new List<PaletteEntry>();
-        foreach (var info in CommandSearch.Rank(_paletteQuery, commands))
+
+        // "@name" looks for nodes on the canvas only; plain text finds them along with commands and preferences.
+        var nodesOnly = _paletteQuery.StartsWith(NodeSearchPrefix, StringComparison.Ordinal);
+        if (nodesOnly)
         {
-            entries.Add(new PaletteEntry(info.Id, info.Title, info.Category, _keymap.ShortcutOf(info.Id) ?? string.Empty, false));
+            entries.AddRange(NodeEntries(_paletteQuery));
+        }
+        else
+        {
+            foreach (var info in CommandSearch.Rank(_paletteQuery, commands))
+            {
+                entries.Add(new PaletteEntry(info.Id, info.Title, info.Category, _keymap.ShortcutOf(info.Id) ?? string.Empty, false));
+            }
+
+            entries.AddRange(NodeEntries(_paletteQuery).Take(8));
         }
 
         // Preferences are found the same way, and only when something was typed (the empty list is commands only).
-        if (_paletteQuery.Trim().Length > 0)
+        if (!nodesOnly && _paletteQuery.Trim().Length > 0)
         {
             foreach (var setting in SettingsCatalog.Search(_paletteQuery).Take(8))
             {
@@ -532,6 +552,10 @@ public partial class GraphEditorViewModel
             case "autoOffset": return AutoOffsetOnInsert;
             case "deleteReconnectsReroutes": return DeleteReconnectsReroutes;
             case "escCancels": return EscCancelsRun;
+            case "autosave": return IsAutosaveEnabled;
+            case "uiScale": return UiScale;
+            case "statusHints": return ShowStatusHints;
+            case "emptyHints": return ShowEmptyCanvasHints;
             case "previewSelection": return PreviewSelection;
             case "doubleClick": return DoubleClickAction;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));
@@ -558,6 +582,10 @@ public partial class GraphEditorViewModel
             case "autoOffset": AutoOffsetOnInsert = (bool)value; break;
             case "deleteReconnectsReroutes": DeleteReconnectsReroutes = (bool)value; break;
             case "escCancels": EscCancelsRun = (bool)value; break;
+            case "autosave": IsAutosaveEnabled = (bool)value; break;
+            case "uiScale": UiScale = (string)value; break;
+            case "statusHints": ShowStatusHints = (bool)value; break;
+            case "emptyHints": ShowEmptyCanvasHints = (bool)value; break;
             case "previewSelection": PreviewSelection = (bool)value; break;
             case "doubleClick": DoubleClickAction = (string)value; break;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));
