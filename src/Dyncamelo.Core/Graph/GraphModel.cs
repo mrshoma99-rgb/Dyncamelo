@@ -149,7 +149,7 @@ public class GraphModel : INotifyPropertyChanged
     /// Puts a previously removed wire back (undo/redo), keeping the same
     /// <see cref="ConnectionModel"/> instance so its identity and mute state
     /// survive. Fails silently (returns false) when an endpoint is gone or the
-    /// input is already wired.
+    /// single input is already wired (a multi-input port takes any number of wires).
     /// </summary>
     /// <param name="connection">A connection that was removed from this graph.</param>
     /// <returns>True when the wire was restored.</returns>
@@ -164,19 +164,13 @@ public class GraphModel : INotifyPropertyChanged
             connection.SourceNode.Graph != this || connection.TargetNode.Graph != this ||
             !connection.SourceNode.OutPorts.Contains(connection.Source) ||
             !connection.TargetNode.InPorts.Contains(connection.Target) ||
-            FindConnectionInto(connection.Target) != null ||
+            !CanAcceptAnother(connection.Source, connection.Target) ||
             IsReachable(connection.TargetNode, connection.SourceNode))
         {
             return false;
         }
 
-        var at = _connections.Count;
-        while (at > 0 && _connections[at - 1].Sequence > connection.Sequence)
-        {
-            at--;
-        }
-
-        _connections.Insert(at, connection);
+        InsertBySequence(connection);
         connection.Target.UsingDefaultValue = false;
         ConnectionAdded?.Invoke(this, new ConnectionEventArgs(connection));
         MarkDirty(connection.TargetNode);
@@ -214,13 +208,19 @@ public class GraphModel : INotifyPropertyChanged
 
     /// <summary>
     /// Connects an output port to an input port. Validates directions, membership,
-    /// loose type compatibility and acyclicity. An existing connection into the
-    /// target port is replaced (an input accepts at most one wire).
+    /// loose type compatibility and acyclicity. An existing connection into a
+    /// single-wire target port is replaced; a multi-input port
+    /// (<see cref="PortModel.IsMultiInput"/>) keeps its wires and gains another,
+    /// unless that very output is already wired into it.
     /// </summary>
     /// <param name="source">Output port.</param>
     /// <param name="target">Input port.</param>
+    /// <param name="sequence">
+    /// Creation order to give the wire instead of "last" — lets an edit that replaces a wire keep its place among
+    /// the other wires of a multi-input port. Must not be in use by another live wire.
+    /// </param>
     /// <returns>A result carrying either the created connection or a failure reason.</returns>
-    public ConnectionResult Connect(PortModel source, PortModel target)
+    public ConnectionResult Connect(PortModel source, PortModel target, int? sequence = null)
     {
         if (source == null || target == null)
         {
@@ -253,14 +253,30 @@ public class GraphModel : INotifyPropertyChanged
             return ConnectionResult.Fail("The connection would create a cycle.");
         }
 
-        var existing = FindConnectionInto(target);
-        if (existing != null)
+        if (target.IsMultiInput)
         {
-            RemoveConnectionCore(existing, dirtyTarget: false);
+            if (_connections.Any(c => c.Target == target && c.Source == source))
+            {
+                return ConnectionResult.Fail("That output is already connected to this input.");
+            }
+        }
+        else
+        {
+            var existing = FindConnectionInto(target);
+            if (existing != null)
+            {
+                RemoveConnectionCore(existing, dirtyTarget: false);
+            }
         }
 
-        var connection = new ConnectionModel(source, target) { Sequence = _nextConnectionSequence++ };
-        _connections.Add(connection);
+        var order = sequence ?? _nextConnectionSequence;
+        if (order >= _nextConnectionSequence)
+        {
+            _nextConnectionSequence = order + 1;
+        }
+
+        var connection = new ConnectionModel(source, target) { Sequence = order };
+        InsertBySequence(connection);
         target.UsingDefaultValue = false;
         ConnectionAdded?.Invoke(this, new ConnectionEventArgs(connection));
         MarkDirty(target.Owner);
@@ -306,11 +322,21 @@ public class GraphModel : INotifyPropertyChanged
         MarkDirty(connection.TargetNode);
     }
 
-    /// <summary>Returns the single connection feeding an input port, or null.</summary>
+    /// <summary>
+    /// Returns the connection feeding an input port, or null. For a multi-input port this is the
+    /// first wire; use <see cref="FindConnectionsInto"/> to get them all.
+    /// </summary>
     /// <param name="input">An input port.</param>
     public ConnectionModel? FindConnectionInto(PortModel input)
     {
         return _connections.FirstOrDefault(c => c.Target == input);
+    }
+
+    /// <summary>Returns every connection feeding an input port, in the order they were made.</summary>
+    /// <param name="input">An input port.</param>
+    public IReadOnlyList<ConnectionModel> FindConnectionsInto(PortModel input)
+    {
+        return _connections.Where(c => c.Target == input).ToList();
     }
 
     /// <summary>Returns all connections leaving an output port.</summary>
@@ -372,7 +398,7 @@ public class GraphModel : INotifyPropertyChanged
     {
         _connections.Remove(connection);
         var target = connection.Target;
-        if (target.HasDefault)
+        if (target.HasDefault && FindConnectionInto(target) == null)
         {
             target.UsingDefaultValue = true;
         }
@@ -382,6 +408,26 @@ public class GraphModel : INotifyPropertyChanged
         {
             MarkDirty(connection.TargetNode);
         }
+    }
+
+    // A single-wire input is free only while nothing feeds it; a multi-input port also refuses a second wire from the same output.
+    private bool CanAcceptAnother(PortModel source, PortModel target)
+    {
+        return target.IsMultiInput
+            ? !_connections.Any(c => c.Target == target && c.Source == source)
+            : FindConnectionInto(target) == null;
+    }
+
+    // _connections is kept in creation order, so a restored or re-ordered wire returns to its slot.
+    private void InsertBySequence(ConnectionModel connection)
+    {
+        var at = _connections.Count;
+        while (at > 0 && _connections[at - 1].Sequence > connection.Sequence)
+        {
+            at--;
+        }
+
+        _connections.Insert(at, connection);
     }
 
     /// <summary>True when <paramref name="to"/> is reachable from <paramref name="from"/> following connections downstream.</summary>

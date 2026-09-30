@@ -41,6 +41,7 @@ public class ZeroTouchNodeModel : NodeModel
             port.Panel = input.Panel;
             port.PanelDefaultOpen = input.PanelDefaultOpen;
             port.KindHint = input.Kind;
+            port.IsMultiInput = input.MultiInput;
         }
 
         foreach (var output in definition.Outputs)

@@ -190,7 +190,7 @@ public partial class GraphEditorViewModel
             foreach (var wire in wires)
             {
                 var a = wire.Source.Anchor;
-                var b = wire.Target.Anchor;
+                var b = wire.TargetAnchor;
                 if (InsertRerouteOnWire(wire, new Point((a.X + b.X) / 2d, (a.Y + b.Y) / 2d)) != null)
                 {
                     added++;
@@ -445,6 +445,8 @@ public partial class GraphEditorViewModel
     private ICommand? _resetInputsCommand;
     private ICommand? _insertIntoWireCommand;
     private ICommand? _swapLinksCommand;
+    private ICommand? _wiresEarlierCommand;
+    private ICommand? _wiresLaterCommand;
 
     /// <summary>Copies the selection and deletes it (Ctrl+X).</summary>
     public ICommand CutSelectionCommand => _cutCommand ??= new RelayCommand(CutSelection);
@@ -551,6 +553,51 @@ public partial class GraphEditorViewModel
         {
             StatusMessage = "That node cannot be inserted into that wire (it needs no wires of its own and matching sockets).";
         }
+    }
+
+    /// <summary>Moves the selected wires one place earlier in the order of their multi-input socket.</summary>
+    public ICommand MoveSelectedWiresEarlierCommand => _wiresEarlierCommand ??= new RelayCommand(() => MoveSelectedWires(-1));
+
+    /// <summary>Moves the selected wires one place later in the order of their multi-input socket.</summary>
+    public ICommand MoveSelectedWiresLaterCommand => _wiresLaterCommand ??= new RelayCommand(() => MoveSelectedWires(1));
+
+    /// <summary>
+    /// Moves each selected wire that feeds a multi-input socket by <paramref name="delta"/> places in that socket's order
+    /// (negative = earlier). The moved wires stay selected so the command can be repeated.
+    /// </summary>
+    public void MoveSelectedWires(int delta)
+    {
+        var wires = SelectedConnections.Where(c => c.Target.IsMultiInput).ToList();
+        if (wires.Count == 0)
+        {
+            StatusMessage = "Select a wire that feeds a multi-input socket first.";
+            return;
+        }
+
+        // Nudging earlier goes top-first, later goes bottom-first, so wires never leap over each other.
+        wires = (delta < 0 ? wires.OrderBy(c => c.Slot) : wires.OrderByDescending(c => c.Slot)).ToList();
+        var remade = new List<ConnectionModel>();
+        using (_undo.Begin(delta < 0 ? "Move wire earlier" : "Move wire later"))
+        {
+            foreach (var wire in wires)
+            {
+                var current = _graph.FindConnectionsInto(wire.Model.Target).ToList().IndexOf(wire.Model);
+                var moved = current < 0 ? null : GraphOps.MoveWire(_graph, wire.Model, current + delta);
+                remade.Add(moved ?? wire.Model);
+            }
+        }
+
+        SelectedConnections.Clear();
+        foreach (var model in remade)
+        {
+            var viewModel = Connections.FirstOrDefault(c => c.Model == model);
+            if (viewModel != null)
+            {
+                SelectedConnections.Add(viewModel);
+            }
+        }
+
+        StatusMessage = "Moved the wire" + (wires.Count == 1 ? string.Empty : "s") + (delta < 0 ? " earlier." : " later.");
     }
 
     /// <summary>Swaps where two selected wires end.</summary>

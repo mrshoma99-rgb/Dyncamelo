@@ -93,7 +93,11 @@ public sealed class NodeRowViewModel : ObservableObject
     public double RowHeight => Collapsed ? 0d : double.NaN;
 
     /// <summary>Minimum height matching <see cref="RowHeight"/>.</summary>
-    public double RowMinHeight => Collapsed ? 0d : Node.Owner.RowBaseHeight;
+    public double RowMinHeight => Collapsed
+        ? 0d
+        : Connector != null && Connector.IsMultiInput
+            ? System.Math.Max(Node.Owner.RowBaseHeight, Connector.PillHeight + 4d)
+            : Node.Owner.RowBaseHeight;
 
     /// <summary>True when the label and editors should be shown (sockets always stay laid out).</summary>
     public bool ShowContent => !Collapsed;

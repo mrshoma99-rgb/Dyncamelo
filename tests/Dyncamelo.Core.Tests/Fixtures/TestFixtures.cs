@@ -31,6 +31,15 @@ public static class MathFixtures
 
     public static int CountItems(IList<object> items) => items.Count;
 
+    /// <summary>A multi-input list port: any number of wires arrive as one list.</summary>
+    public static double SumAll([MultiInput] IList<double> values) => values.Sum();
+
+    /// <summary>Returns what the multi-input port received, so tests can see order and shape.</summary>
+    public static List<object> Gather([MultiInput] IList<object> items) => items.ToList();
+
+    /// <summary>Same, but the parameter is not list-typed so the attribute must be ignored.</summary>
+    public static double NotAList([MultiInput] double value) => value;
+
     public static List<string> DictKeys(IDictionary<string, object> dict) => dict.Keys.ToList();
 
     public static List<double> MakeList(double a, double b, double c) => new List<double> { a, b, c };

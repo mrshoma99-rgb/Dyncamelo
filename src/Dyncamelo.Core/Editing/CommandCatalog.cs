@@ -121,6 +121,8 @@ public static class CommandCatalog
         new CommandInfo("node.autoconnect", "Connect Selected Nodes", "Node", "F", keywords: "auto link chain make links"),
         new CommandInfo("wire.mute", "Mute / Unmute Selected Wires", "Wires", null, keywords: "bypass disable ignore"),
         new CommandInfo("wire.swap", "Swap Links", "Wires", null, keywords: "exchange two wires"),
+        new CommandInfo("wire.earlier", "Move Wire Earlier", "Wires", null, keywords: "order first up multi-input sequence"),
+        new CommandInfo("wire.later", "Move Wire Later", "Wires", null, keywords: "order last down multi-input sequence"),
         new CommandInfo("wire.reroute", "Add Reroute to Selected Wires", "Wires", null, keywords: "knot dot bend"),
         new CommandInfo("wire.disconnect", "Disconnect Selected Wires", "Wires", null, keywords: "cut remove unlink"),
         new CommandInfo("help.palette", "Command Palette…", "Help", "Ctrl+Shift+P", CommandScope.Global, keywords: "search run any command"),

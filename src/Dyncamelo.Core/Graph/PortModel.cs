@@ -92,6 +92,14 @@ public class PortModel : INotifyPropertyChanged
     /// <summary>Whether this port's panel starts open. Static.</summary>
     public bool PanelDefaultOpen { get; internal set; }
 
+    /// <summary>
+    /// True when the input accepts any number of wires. With none it behaves as unconnected; with one, that wire's
+    /// value arrives unchanged (so a graph made before the port became multi-input runs identically); with two or more,
+    /// the values are combined into one list in the order the wires were made (see <c>MultiInput.Combine</c>).
+    /// Only list-typed inputs can be multi-input. Static (not serialized).
+    /// </summary>
+    public bool IsMultiInput { get; internal set; }
+
     /// <summary>Explicit kind string ("viewpoint*"), or empty. Static; see <c>PortKinds</c>.</summary>
     public string KindHint { get; internal set; } = string.Empty;
 

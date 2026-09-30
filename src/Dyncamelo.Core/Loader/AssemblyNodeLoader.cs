@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Dyncamelo.Core.Types;
 
 namespace Dyncamelo.Core.Loader;
 
@@ -427,6 +428,10 @@ public static class AssemblyNodeLoader
         {
             descriptor.Kind = kinds[0];
         }
+
+        // Only a list-typed parameter can take several wires; on anything else the attribute is ignored.
+        descriptor.MultiInput = parameter.GetCustomAttribute<MultiInputAttribute>() != null &&
+                                TypeCoercion.IsListType(parameter.ParameterType);
 
         if (parameter.IsOptional)
         {

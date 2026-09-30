@@ -29,7 +29,7 @@ public static class ExportNodes
     [NodeSearchTags("export", "csv", "qto", "takeoff", "report", "excel")]
     [return: NodeName("filePath")]
     public static string ToCsv(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         string filePath,
         string? categoryName = null,
         IEnumerable<string>? propertyNames = null)

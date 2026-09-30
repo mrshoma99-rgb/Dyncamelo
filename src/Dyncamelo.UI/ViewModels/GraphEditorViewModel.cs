@@ -856,9 +856,21 @@ public partial class GraphEditorViewModel : ObservableObject
         }
     }
 
-    /// <summary>Re-computes every connector's IsConnected flag from the graph model.</summary>
+    /// <summary>
+    /// Re-computes every connector's IsConnected flag (and, for multi-input sockets, wire count and each wire's slot)
+    /// from the graph model.
+    /// </summary>
     public void RefreshConnectedFlags()
     {
+        // One pass over the wires instead of a scan per port.
+        var into = _graph.Connections.ToLookup(c => c.Target);
+        var sources = new HashSet<PortModel>(_graph.Connections.Select(c => c.Source));
+        var wireViewModels = new Dictionary<ConnectionModel, ConnectionViewModel>();
+        foreach (var wireViewModel in Connections)
+        {
+            wireViewModels[wireViewModel.Model] = wireViewModel;
+        }
+
         foreach (var item in Items)
         {
             if (!(item is NodeViewModel node))
@@ -868,12 +880,21 @@ public partial class GraphEditorViewModel : ObservableObject
 
             foreach (var connector in node.Inputs)
             {
-                var wire = _graph.FindConnectionInto(connector.Port);
-                connector.IsConnected = wire != null;
-                if (wire != null)
+                var wires = into[connector.Port].ToList();
+                connector.WireCount = wires.Count;
+                connector.IsConnected = wires.Count > 0;
+                for (var slot = 0; slot < wires.Count; slot++)
+                {
+                    if (wireViewModels.TryGetValue(wires[slot], out var wireViewModel))
+                    {
+                        wireViewModel.SetSlot(slot, wires.Count);
+                    }
+                }
+
+                if (wires.Count > 0)
                 {
                     // An untyped input (reroute, "any") takes the colour of what feeds it.
-                    var upstream = FindNodeViewModel(wire.SourceNode)?.FindConnector(wire.Source);
+                    var upstream = FindNodeViewModel(wires[0].SourceNode)?.FindConnector(wires[0].Source);
                     if (upstream != null)
                     {
                         connector.InheritKind(upstream.Kind);
@@ -883,7 +904,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
             foreach (var connector in node.Outputs)
             {
-                connector.IsConnected = _graph.FindConnectionsFrom(connector.Port).Any();
+                connector.IsConnected = sources.Contains(connector.Port);
             }
 
             node.RebuildRows();
@@ -1351,8 +1372,8 @@ public partial class GraphEditorViewModel : ObservableObject
 
         if (connector.IsInput)
         {
-            var connection = _graph.FindConnectionInto(connector.Port);
-            if (connection != null)
+            // A multi-input socket takes all of its wires off at once, like an output does.
+            foreach (var connection in _graph.FindConnectionsInto(connector.Port))
             {
                 _graph.Disconnect(connection);
             }

@@ -63,7 +63,7 @@ public static class DistanceNodes
     [NodeSearchTags("proximity", "nearest", "closest", "distance", "neighbour", "near", "far", "within", "handrail")]
     [return: NodeName("distances")]
     public static List<double> NearestDistance(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         IEnumerable<ModelItem> targets,
         [NodeChoices("bbox", "mesh")]
         string method = "bbox",

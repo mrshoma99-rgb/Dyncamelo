@@ -56,6 +56,24 @@ public static class PortBrushes
         return map;
     }
 
+    private static readonly Dictionary<int, Geometry> Pills = new Dictionary<int, Geometry>();
+
+    /// <summary>
+    /// The frozen pill of a multi-input socket, 8.8 wide and <paramref name="height"/> tall (rounded to whole pixels):
+    /// one elongated socket that several wires land on.
+    /// </summary>
+    public static Geometry Pill(double height)
+    {
+        var key = (int)System.Math.Round(System.Math.Max(14d, height));
+        if (!Pills.TryGetValue(key, out var pill))
+        {
+            pill = Freeze(new RectangleGeometry(new Rect(0.6, 0.6, 8.8, key - 1.2), 4.4, 4.4));
+            Pills[key] = pill;
+        }
+
+        return pill;
+    }
+
     private static Geometry BuildNested()
     {
         var group = new GeometryGroup { FillRule = FillRule.EvenOdd };

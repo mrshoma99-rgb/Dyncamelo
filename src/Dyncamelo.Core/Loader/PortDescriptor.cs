@@ -49,4 +49,7 @@ public class PortDescriptor
 
     /// <summary>Explicit kind string from <see cref="PortKindsAttribute"/>, or empty.</summary>
     public string Kind { get; set; } = string.Empty;
+
+    /// <summary>True when the parameter is marked <see cref="MultiInputAttribute"/> (and is list-typed): it accepts many wires.</summary>
+    public bool MultiInput { get; set; }
 }

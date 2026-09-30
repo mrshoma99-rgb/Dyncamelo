@@ -93,7 +93,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: applies a TEMPORARY transparency to the given items (wire the whole found set) so the highlighted item reads against a faded context. Captured per viewpoint. Put before Action.Highlight; reset each item with Action.ResetTemporaryAppearance.")]
     [NodeSearchTags("action", "ghost", "fade", "transparency", "temporary", "workflow", "foreach", "context")]
     [return: NodeName("action")]
-    public static IWorkflowAction Ghost(IEnumerable<ModelItem> items, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.85) => new GhostAction(items, transparency);
+    public static IWorkflowAction Ghost([MultiInput] IEnumerable<ModelItem> items, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.85) => new GhostAction(items, transparency);
 
     /// <summary>Builds an action that clears every temporary appearance override (a per-item clean slate).</summary>
     /// <returns>A reset-temporary-appearance action for Workflow.ForEach.</returns>

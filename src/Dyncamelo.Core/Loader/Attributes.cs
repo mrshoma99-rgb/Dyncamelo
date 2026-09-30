@@ -267,3 +267,16 @@ public sealed class PortKindsAttribute : Attribute
     /// <summary>The kind strings, in port order.</summary>
     public string[] Kinds { get; }
 }
+
+/// <summary>
+/// Makes a list-typed parameter a multi-input socket: the editor lets any number of wires connect to it, drawn as
+/// one pill-shaped socket, and the node receives their values combined into one list. Behaviour is exact for the
+/// old single-wire case — with one wire the value arrives untouched (nesting and replication included), so adding
+/// the attribute to an existing parameter never changes a saved graph; with two or more, list-valued wires
+/// contribute their elements and other wires contribute themselves, in the order the wires were made. Ignored on
+/// parameters that are not list-typed. Purely advisory: never changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class MultiInputAttribute : Attribute
+{
+}

@@ -42,7 +42,7 @@ public static class ClusterNodes
     [NodeAliases("Dyncamelo.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,Autodesk.Navisworks.Api.Document")]
     [MultiReturn("groups", "clusterNumbers", "clusterCount", "sizes", "report")]
     public static Dictionary<string, object?> Cluster(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,
         [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
         string units = "document",

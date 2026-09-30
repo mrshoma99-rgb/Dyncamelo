@@ -35,7 +35,8 @@ public static class GraphOps
     /// <summary>
     /// The best input of <paramref name="node"/> for a wire leaving <paramref name="output"/>:
     /// exact before convertible before loose; among equals, required inputs before optional,
-    /// then declaration order. Inputs already wired are skipped when <paramref name="freeOnly"/>.
+    /// then declaration order. Inputs already wired are skipped when <paramref name="freeOnly"/> — except multi-input
+    /// ports, which stay available (unless this very output is already wired into them) but rank behind a free single input.
     /// </summary>
     public static PortModel? BestInputFor(GraphModel graph, PortModel output, NodeModel node, bool freeOnly, int worstAcceptable = 2)
     {
@@ -44,7 +45,8 @@ public static class GraphOps
         for (var i = 0; i < node.InPorts.Count; i++)
         {
             var input = node.InPorts[i];
-            if (freeOnly && graph.FindConnectionInto(input) != null)
+            var wired = graph.FindConnectionsInto(input);
+            if (freeOnly && wired.Count > 0 && (!input.IsMultiInput || wired.Any(c => c.Source == output)))
             {
                 continue;
             }
@@ -55,8 +57,8 @@ public static class GraphOps
                 continue;
             }
 
-            // Required inputs (no default) win ties, then earlier ports.
-            var score = rank * 1000 + (input.HasDefault ? 100 : 0) + i;
+            // Required inputs (no default) win ties, then earlier ports; a multi-input that already has wires comes after a free one.
+            var score = rank * 1000 + (input.HasDefault ? 100 : 0) + (input.IsMultiInput && wired.Count > 0 ? 50 : 0) + i;
             if (score < bestScore)
             {
                 bestScore = score;
@@ -134,11 +136,23 @@ public static class GraphOps
             return false;
         }
 
-        // Connecting into the target replaces the original wire (an input takes one wire).
-        var second = graph.Connect(output!, target);
+        // Connecting into a single-wire target replaces the original wire. A multi-input target keeps it, so the
+        // original is removed and the new wire takes its place in the order.
+        var multi = target.IsMultiInput;
+        if (multi)
+        {
+            graph.Disconnect(wire);
+        }
+
+        var second = graph.Connect(output!, target, multi ? wire.Sequence : (int?)null);
         if (!second.Success)
         {
             graph.Disconnect(first.Connection!);
+            if (multi)
+            {
+                graph.ReinsertConnection(wire);
+            }
+
             return false;
         }
 
@@ -156,7 +170,7 @@ public static class GraphOps
     {
         var bridged = 0;
         var pairs = MutePassThrough.Pair(node);
-        var plan = new List<(PortModel Source, PortModel Target)>();
+        var plan = new List<(PortModel Source, PortModel Target, int Order, PortModel First, int Offset)>();
         for (var j = 0; j < pairs.Length; j++)
         {
             if (pairs[j] < 0)
@@ -164,24 +178,49 @@ public static class GraphOps
                 continue;
             }
 
-            var feeding = graph.FindConnectionInto(node.InPorts[pairs[j]]);
-            if (feeding == null)
+            // A multi-input can be fed by several wires; each of them is bridged to each place the output went.
+            var feeding = graph.FindConnectionsInto(node.InPorts[pairs[j]]);
+            if (feeding.Count == 0)
             {
                 continue;
             }
 
             foreach (var outgoing in graph.FindConnectionsFrom(node.OutPorts[j]))
             {
-                plan.Add((feeding.Source, outgoing.Target));
+                for (var f = 0; f < feeding.Count; f++)
+                {
+                    // The first bridged wire takes the place of the outgoing one in a multi-input target's order,
+                    // and the others follow it there.
+                    plan.Add((feeding[f].Source, outgoing.Target, f == 0 ? outgoing.Sequence : -1, feeding[0].Source, f));
+                }
             }
         }
 
         graph.RemoveNode(node);
-        foreach (var (source, target) in plan)
+        var made = new List<(PortModel Source, PortModel Target, PortModel First, int Offset)>();
+        foreach (var (source, target, order, first, offset) in plan)
         {
-            if (graph.FindConnectionInto(target) == null && graph.Connect(source, target).Success)
+            if ((target.IsMultiInput || graph.FindConnectionInto(target) == null) &&
+                graph.Connect(source, target, target.IsMultiInput && order >= 0 ? order : (int?)null).Success)
             {
                 bridged++;
+                made.Add((source, target, first, offset));
+            }
+        }
+
+        foreach (var (source, target, first, offset) in made)
+        {
+            if (offset == 0 || !target.IsMultiInput)
+            {
+                continue;
+            }
+
+            var wires = graph.FindConnectionsInto(target).ToList();
+            var head = wires.FindIndex(w => w.Source == first);
+            var wire = wires.Find(w => w.Source == source);
+            if (head >= 0 && wire != null)
+            {
+                MoveWire(graph, wire, head + offset);
             }
         }
 
@@ -205,15 +244,23 @@ public static class GraphOps
         var targetX = first.Target;
         var sourceB = second.Source;
         var targetY = second.Target;
-        if (targetX == targetY || sourceA == sourceB)
+        var orderA = first.Sequence;
+        var orderB = second.Sequence;
+        if (sourceA == sourceB)
+        {
+            return false;
+        }
+
+        // Two wires into the same multi-input socket: swapping them swaps their place in the order.
+        if (targetX == targetY && !targetX.IsMultiInput)
         {
             return false;
         }
 
         graph.Disconnect(first);
         graph.Disconnect(second);
-        var a = graph.Connect(sourceA, targetY);
-        var b = a.Success ? graph.Connect(sourceB, targetX) : a;
+        var a = graph.Connect(sourceA, targetY, orderB);
+        var b = a.Success ? graph.Connect(sourceB, targetX, orderA) : a;
         if (a.Success && b.Success)
         {
             return true;
@@ -225,9 +272,68 @@ public static class GraphOps
             graph.Disconnect(a.Connection);
         }
 
-        graph.Connect(sourceA, targetX);
-        graph.Connect(sourceB, targetY);
+        graph.Connect(sourceA, targetX, orderA);
+        graph.Connect(sourceB, targetY, orderB);
         return false;
+    }
+
+    // ----- wire order (multi-input) ------------------------------------------------------------
+
+    /// <summary>
+    /// Moves a wire to another place in the order of the wires feeding its multi-input socket (0 = first).
+    /// The wires between the two places are re-made in their new order; a muted wire stays muted.
+    /// Returns the re-made wire, or null (changing nothing) when the input is not multi-input or the wire is already there.
+    /// </summary>
+    public static ConnectionModel? MoveWire(GraphModel graph, ConnectionModel wire, int newIndex)
+    {
+        var port = wire.Target;
+        var wires = graph.FindConnectionsInto(port);
+        var from = wires.ToList().IndexOf(wire);
+        if (!port.IsMultiInput || from < 0)
+        {
+            return null;
+        }
+
+        newIndex = Math.Max(0, Math.Min(wires.Count - 1, newIndex));
+        if (newIndex == from)
+        {
+            return null;
+        }
+
+        var low = Math.Min(from, newIndex);
+        var high = Math.Max(from, newIndex);
+        var places = wires.Select(w => w.Sequence).ToList();        // ascending: the places in the order
+        var order = wires.ToList();
+        order.RemoveAt(from);
+        order.Insert(newIndex, wire);
+
+        foreach (var moved in wires.Skip(low).Take(high - low + 1))
+        {
+            graph.Disconnect(moved);
+        }
+
+        ConnectionModel? remade = null;
+        for (var i = low; i <= high; i++)
+        {
+            var old = order[i];
+            var made = graph.Connect(old.Source, port, places[i]);
+            if (!made.Success)
+            {
+                continue;
+            }
+
+            if (old.IsMuted)
+            {
+                graph.SetConnectionMuted(made.Connection!, true);
+            }
+
+            if (old == wire)
+            {
+                remade = made.Connection;
+            }
+        }
+
+        return remade;
     }
 
     // ----- auto-connect --------------------------------------------------------------------

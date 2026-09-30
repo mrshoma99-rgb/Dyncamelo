@@ -98,6 +98,12 @@ public class ConnectorViewModel : ObservableObject
                     : "\nrequired";
             }
 
+            if (IsMultiInput)
+            {
+                text += "\naccepts any number of wires (" + _wireCount.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                        " connected), combined in the order they were made";
+            }
+
             if (Port.Description.Length > 0)
             {
                 text += "\n" + Port.Description;
@@ -127,8 +133,56 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Re-raises <see cref="SocketGlyph"/> after the preference changed.</summary>
     public void RefreshGlyph() => OnPropertyChanged(nameof(SocketGlyph));
 
-    /// <summary>Shared frozen 10×10 glyph for the structure.</summary>
-    public Geometry SocketGeometry => PortBrushes.Glyph(_kind.Depth);
+    /// <summary>Shared frozen glyph for the structure: 10×10, or a pill as tall as the wires it carries for a multi-input.</summary>
+    public Geometry SocketGeometry => IsMultiInput ? PortBrushes.Pill(PillHeight) : PortBrushes.Glyph(_kind.Depth);
+
+    // ----- multi-input: one pill, many wires --------------------------------------------
+
+    /// <summary>Vertical distance, in pixels, between the points where neighbouring wires land on a multi-input pill.</summary>
+    public const double SlotSpacing = 9d;
+
+    private int _wireCount;
+
+    /// <summary>True for an input that accepts any number of wires.</summary>
+    public bool IsMultiInput => IsInput && Port.IsMultiInput;
+
+    /// <summary>Number of wires feeding this input; maintained by the editor view model.</summary>
+    public int WireCount
+    {
+        get => _wireCount;
+        set
+        {
+            if (SetProperty(ref _wireCount, value))
+            {
+                OnPropertyChanged(nameof(PillHeight));
+                OnPropertyChanged(nameof(SocketHeight));
+                OnPropertyChanged(nameof(SocketGeometry));
+                OnPropertyChanged(nameof(ToolTip));
+                Node.RefreshRowHeight(this);
+            }
+        }
+    }
+
+    /// <summary>Height of the multi-input pill: room for one landing point per wire, never smaller than an ordinary socket.</summary>
+    public double PillHeight => System.Math.Max(14d, (System.Math.Max(_wireCount, 1) - 1) * SlotSpacing + 14d);
+
+    /// <summary>Height of the socket element: the pill for a multi-input, else 14.</summary>
+    public double SocketHeight => IsMultiInput ? PillHeight : 14d;
+
+    /// <summary>Vertical offset from the socket's centre of the landing point of wire number <paramref name="index"/> of <paramref name="count"/>.</summary>
+    public static double SlotOffset(int index, int count) => count <= 1 ? 0d : (index - (count - 1) / 2d) * SlotSpacing;
+
+    /// <summary>The wire slot nearest to a graph-space Y coordinate (0 when there is at most one wire).</summary>
+    public int SlotAt(double graphY)
+    {
+        if (_wireCount <= 1)
+        {
+            return 0;
+        }
+
+        var slot = (int)System.Math.Round((graphY - _anchor.Y) / SlotSpacing + (_wireCount - 1) / 2d);
+        return System.Math.Max(0, System.Math.Min(_wireCount - 1, slot));
+    }
 
     /// <summary>True for an optional, unwired input: drawn as a hollow ring.</summary>
     public bool IsHollow => IsOptional && !_isConnected;
@@ -169,6 +223,11 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Adopts an upstream port's kind (an untyped input takes the colour of what feeds it).</summary>
     public void InheritKind(PortKind upstream)
     {
+        if (IsMultiInput)
+        {
+            return;     // several wires may disagree; a multi-input keeps its declared kind
+        }
+
         if (_declaredKind.Family != PortFamily.Any && _declaredKind.Depth != PortDepth.Unknown)
         {
             return;

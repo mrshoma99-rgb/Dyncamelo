@@ -257,6 +257,25 @@ public abstract class NodeModel : INotifyPropertyChanged
         return port;
     }
 
+    /// <summary>
+    /// Declares a multi-input port: it accepts any number of wires and receives their values as one list
+    /// (see <see cref="PortModel.IsMultiInput"/>). Call from the subclass constructor.
+    /// </summary>
+    /// <param name="name">Port name, unique among the node's inputs.</param>
+    /// <param name="declaredType">A list type such as <c>IList&lt;object&gt;</c> or <c>IEnumerable&lt;double&gt;</c>.</param>
+    /// <param name="description">Optional tooltip.</param>
+    protected PortModel AddMultiInput(string name, Type declaredType, string? description = null)
+    {
+        if (!Dyncamelo.Core.Types.TypeCoercion.IsListType(declaredType))
+        {
+            throw new ArgumentException("A multi-input port must be list-typed, not '" + declaredType.Name + "'.", nameof(declaredType));
+        }
+
+        var port = AddInput(name, declaredType, description);
+        port.IsMultiInput = true;
+        return port;
+    }
+
     /// <summary>Declares an output port. Call from the subclass constructor.</summary>
     /// <param name="name">Port name, unique among the node's outputs.</param>
     /// <param name="declaredType">Declared CLR type (use <see cref="object"/> when unknown).</param>

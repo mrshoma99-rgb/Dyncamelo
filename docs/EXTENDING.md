@@ -253,6 +253,7 @@ The editor builds a node's rows from your method signature, so most nodes need n
 | `[NodeRange(0, 100, SoftMin = 0, SoftMax = 10, Step = 0.5, Unit = "mm")] double gap` | The field clamps to 0–100, its drag range is 0–10, it steps by 0.5 and prints `mm` after the value. |
 | `[NodeChoices("Model", "Object", "Face")] string level` | A dropdown instead of a free text box — or a segmented switcher when there are two or three short values (24 characters in all). |
 | `[NodePanel("Advanced")] double tolerance = 0.01` | The input sits in a foldable *Advanced* panel (`DefaultOpen = true` starts it expanded). |
+| `[MultiInput] IEnumerable<ModelItem> items` (any list-typed parameter) | A **multi-input** pill: any number of wires connect to it. One wire arrives untouched — so adding the attribute to an existing parameter never changes a saved graph — and two or more arrive combined into one list, in the order the wires were made (list-valued wires contribute their elements, other values themselves, nulls nothing). Ignored on parameters that are not list-typed. |
 | `[PortKinds("viewpoint*")]` on an `object` parameter, or `[PortKinds("text*", "integer")]` on a `[MultiReturn]` method | The socket takes the colour and shape of that kind: a family name (`number`, `integer`, `boolean`, `text`, `datetime`, `colour`, `geometry`, `item`, `selection`, `viewpoint`, `clash`, `document`, `data`, `file`, `action`), then `*` for a list or `**` for a list of lists. |
 | `ModelItem`, `List<ModelItem>` or `ModelItemCollection` parameter | A **model-element picker**: *Use selection* takes the current Navisworks selection, clicking the value re-selects it, ✕ clears it. |
 | `bool`, `Color`, `DateTime`, enums | A checkbox, a colour swatch, a text field holding an ISO date, and a dropdown (or segmented switcher) of the enum's names. |
@@ -264,4 +265,6 @@ Guidelines:
 - Prefer `[NodeChoices]` to documenting "one of A, B, C" in the description.
 - Keep the *main* inputs unpaneled and move rare options into one `[NodePanel("Advanced")]`; the node stays short and the panel is one click away.
 - Use `[PortKinds]` whenever you return `object` from a `[MultiReturn]` method, so the wires downstream are coloured correctly and the editor can filter the node search when a wire is dropped on the canvas.
+- Mark a list parameter `[MultiInput]` when a caller would reasonably want to feed it from several places — "these items, and those, and the current selection". Do not use it on a list whose *nesting* matters (a list of lists that should replicate the node once per sublist): with several wires the outer level is concatenated, so each wire's sublists merge into one list of sublists.
+- In a hand-written `NodeModel`, declare the port with `AddMultiInput(name, typeof(IList<object>))` in the constructor.
 - Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).

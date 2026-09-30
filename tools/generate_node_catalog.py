@@ -396,7 +396,8 @@ def parse_method(
     docs = parse_xml_docs(doc_lines)
     inputs = []
     for p in split_top_level(params_text):
-        p = re.sub(r"^\[[^\]]*\]\s*", "", p)  # parameter attributes
+        multi_input = "[MultiInput]" in p
+        p = re.sub(r"^(?:\[[^\]]*\]\s*)+", "", p)  # parameter attributes
         default = None
         if "=" in p:
             p, default = (x.strip() for x in p.split("=", 1))
@@ -411,6 +412,8 @@ def parse_method(
         }
         if default is not None:
             entry["default"] = friendly_default(default)
+        if multi_input:
+            entry["multiInput"] = True
         inputs.append(entry)
 
     multi = attr_strings(attr_block, "MultiReturn")

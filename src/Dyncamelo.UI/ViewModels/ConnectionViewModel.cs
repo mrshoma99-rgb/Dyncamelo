@@ -9,7 +9,7 @@ namespace Dyncamelo.UI.ViewModels;
 
 /// <summary>
 /// Wraps one <see cref="ConnectionModel"/> wire. The Nodify connection shape
-/// binds its endpoints to <c>Source.Anchor</c>/<c>Target.Anchor</c>. Wires are
+/// binds its endpoints to <c>Source.Anchor</c>/<see cref="TargetAnchor"/>. Wires are
 /// click-selectable (<see cref="IsSelected"/>) and removable via Delete or the
 /// context menu.
 /// </summary>
@@ -18,6 +18,8 @@ public class ConnectionViewModel : ObservableObject
     private bool _isSelected;
     private bool _isInsertTarget;
     private bool _isHidden;
+    private int _slot;
+    private int _slotCount = 1;
 
     /// <summary>Creates the wrapper.</summary>
     /// <param name="owner">The editor that owns this wire.</param>
@@ -62,8 +64,44 @@ public class ConnectionViewModel : ObservableObject
     public void RefreshMuted() => OnPropertyChanged(nameof(IsMuted));
 
 
+    /// <summary>This wire's place among the wires of its input, top to bottom (0 for an ordinary input).</summary>
+    public int Slot => _slot;
+
+    /// <summary>
+    /// Where the wire lands on its input socket: the socket's anchor, moved up or down to this wire's slot when the
+    /// input takes many wires, so they fan out along the pill instead of piling up on one point.
+    /// </summary>
+    public System.Windows.Point TargetAnchor
+    {
+        get
+        {
+            var anchor = Target.Anchor;
+            return _slotCount <= 1 ? anchor : new System.Windows.Point(anchor.X, anchor.Y + ConnectorViewModel.SlotOffset(_slot, _slotCount));
+        }
+    }
+
+    /// <summary>Sets this wire's place among the <paramref name="count"/> wires of its input.</summary>
+    public void SetSlot(int slot, int count)
+    {
+        if (_slot == slot && _slotCount == count)
+        {
+            return;
+        }
+
+        _slot = slot;
+        _slotCount = count;
+        OnPropertyChanged(nameof(Slot));
+        OnPropertyChanged(nameof(TargetAnchor));
+    }
+
     private void OnEndpointChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(ConnectorViewModel.Anchor) && ReferenceEquals(sender, Target))
+        {
+            OnPropertyChanged(nameof(TargetAnchor));
+            return;
+        }
+
         if (e.PropertyName == nameof(ConnectorViewModel.Kind))
         {
             OnPropertyChanged(nameof(FamilyBrush));

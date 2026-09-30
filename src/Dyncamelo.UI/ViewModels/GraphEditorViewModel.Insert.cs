@@ -47,7 +47,7 @@ public partial class GraphEditorViewModel
 
             // Cheap reject: the curve stays inside the box of its four control points.
             var start = wire.Source.Anchor;
-            var end = wire.Target.Anchor;
+            var end = wire.TargetAnchor;
             var (c1, c2) = WireGeometry.ControlPoints(start, end);
             var hull = new Rect(start, end);
             hull.Union(c1);

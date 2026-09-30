@@ -270,6 +270,8 @@ public partial class DyncameloEditorControl : UserControl
             case "node.resetinputs": return vm.ResetSelectedInputsCommand;
             case "node.insertonwire": return vm.InsertIntoSelectedWireCommand;
             case "wire.swap": return vm.SwapSelectedLinksCommand;
+            case "wire.earlier": return vm.MoveSelectedWiresEarlierCommand;
+            case "wire.later": return vm.MoveSelectedWiresLaterCommand;
             case "view.minimap": return vm.ToggleMinimapCommand;
             case "view.resetwidth": return vm.ResetSelectedWidthCommand;
             case "help.guide": return _guideCommand ??= new RelayCommand(OpenGuide);
@@ -402,6 +404,7 @@ public partial class DyncameloEditorControl : UserControl
             newViewModel.KeymapChanged += OnKeymapChanged;
             newViewModel.CommandResolver = id => ResolveCommand(newViewModel, id);
             newViewModel.CommandTarget = Editor;
+            newViewModel.PointerLocation = () => Editor.MouseLocation;
             // Apply the persisted palette once the view model is attached.
             ApplyPalette(newViewModel.PaletteId);
             RebuildKeyRouter(newViewModel);

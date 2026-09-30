@@ -30,7 +30,7 @@ public static class TransformNodes
     [NodeDescription("Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again.")]
     [NodeSearchTags("item", "translate", "move", "offset", "transform", "shift")]
     [return: NodeName("items")]
-    public static List<ModelItem> Translate(IEnumerable<ModelItem> items, object vector, Document? document = null)
+    public static List<ModelItem> Translate([MultiInput] IEnumerable<ModelItem> items, object vector, Document? document = null)
     {
         var list = RequireItems(items);
         var delta = TransformHelpers.Translation(ToVector3D(vector));
@@ -51,7 +51,7 @@ public static class TransformNodes
     [NodeSearchTags("item", "rotate", "rotation", "axis", "angle", "degrees", "transform")]
     [return: NodeName("items")]
     public static List<ModelItem> RotateAboutAxis(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         object origin,
         object axis,
         double degrees,
@@ -74,7 +74,7 @@ public static class TransformNodes
     [NodeDescription("Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent.")]
     [NodeSearchTags("item", "transform", "matrix", "set", "override", "scale", "mirror")]
     [return: NodeName("items")]
-    public static List<ModelItem> SetTransform(IEnumerable<ModelItem> items, object matrix, Document? document = null)
+    public static List<ModelItem> SetTransform([MultiInput] IEnumerable<ModelItem> items, object matrix, Document? document = null)
     {
         var list = RequireItems(items);
         var transform = TransformHelpers.FromMatrixValue(matrix);

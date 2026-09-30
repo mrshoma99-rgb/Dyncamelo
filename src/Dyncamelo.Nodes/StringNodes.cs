@@ -32,7 +32,7 @@ public static class StringNodes
     [NodeName("String.Join")]
     [NodeDescription("Joins the elements of a list into a single string with a separator.")]
     [NodeSearchTags("concatenate", "combine", "delimiter")]
-    public static string Join(string separator, IList<object?> list)
+    public static string Join(string separator, [MultiInput] IList<object?> list)
     {
         if (list == null)
         {

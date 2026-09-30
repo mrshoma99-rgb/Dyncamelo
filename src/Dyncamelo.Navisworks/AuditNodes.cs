@@ -79,7 +79,7 @@ public static class AuditNodes
     [NodeSearchTags("audit", "duplicate", "geometry", "double", "export", "qa")]
     [MultiReturn("items1", "items2", "count")]
     public static Dictionary<string, object?> DuplicateItems(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.001,
         Document? document = null)
     {

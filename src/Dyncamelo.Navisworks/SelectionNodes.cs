@@ -37,7 +37,7 @@ public static class SelectionNodes
     [NodeDescription("Replaces the interactive Navisworks selection with the given items.")]
     [NodeSearchTags("selection", "select", "set", "highlight")]
     [return: NodeName("items")]
-    public static List<ModelItem> SetCurrent(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> SetCurrent([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         if (items == null)
         {
@@ -74,7 +74,7 @@ public static class SelectionNodes
     [NodeDescription("Adds items to the existing Navisworks selection (union) and returns the result.")]
     [NodeSearchTags("selection", "add", "union", "append", "extend")]
     [return: NodeName("items")]
-    public static List<ModelItem> AddToCurrent(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> AddToCurrent([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         if (items == null)
         {

@@ -29,7 +29,7 @@ public static class CustomPropertyNodes
     [NodeSearchTags("property", "custom", "set", "write", "user", "tab", "parameter", "smartproperties", "stamp")]
     [return: NodeName("modelItems")]
     public static List<ModelItem> SetCustom(
-        IEnumerable<ModelItem> modelItems,
+        [MultiInput] IEnumerable<ModelItem> modelItems,
         IEnumerable<string> names,
         IEnumerable<object?> values,
         string tabName = "Dyncamelo Data",
@@ -64,7 +64,7 @@ public static class CustomPropertyNodes
     [NodeSearchTags("property", "custom", "remove", "delete", "tab", "clean", "user")]
     [MultiReturn("modelItems", "removedCount")]
     public static Dictionary<string, object?> RemoveCustomTab(
-        IEnumerable<ModelItem> modelItems,
+        [MultiInput] IEnumerable<ModelItem> modelItems,
         string tabName)
     {
         var items = NavisValues.ToItemList(modelItems);
@@ -104,7 +104,7 @@ public static class CustomPropertyNodes
     [NodeSearchTags("property", "custom", "rename", "tab", "user")]
     [return: NodeName("modelItems")]
     public static List<ModelItem> RenameCustomTab(
-        IEnumerable<ModelItem> modelItems,
+        [MultiInput] IEnumerable<ModelItem> modelItems,
         string tabName,
         string newTabName)
     {

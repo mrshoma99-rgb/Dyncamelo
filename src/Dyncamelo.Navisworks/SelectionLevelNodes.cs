@@ -39,7 +39,7 @@ public static class SelectionLevelNodes
     [NodeSearchTags("selection", "resolve", "resolution", "level", "file", "layer", "first object", "last object", "last unique", "geometry", "parent", "ancestor")]
     [return: NodeName("items")]
     public static List<ModelItem> Resolve(
-        IEnumerable<ModelItem> modelItems,
+        [MultiInput] IEnumerable<ModelItem> modelItems,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string level = "LastObject")
     {

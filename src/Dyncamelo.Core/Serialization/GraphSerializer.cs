@@ -598,6 +598,13 @@ public class GraphSerializer
             return;
         }
 
+        // A placeholder for an unresolved node cannot know which inputs were multi-input; a second wire into the same
+        // input in the file says this one was, so keep both instead of letting the later wire replace the earlier.
+        if (toNode is MissingNodeModel && !toPort.IsMultiInput && graph.FindConnectionInto(toPort) != null)
+        {
+            toPort.IsMultiInput = true;
+        }
+
         var result = graph.Connect(fromPort, toPort);
         if (result.Success && restoreId && TryParseGuid(json.Value<string>("Id"), out var connectionId))
         {

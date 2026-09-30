@@ -765,7 +765,7 @@
     <DataTemplate x:Key="Dyc.Wire.Blender">
         <views:DycWire nodify:BaseConnection.IsSelectable="True"
                        Source="{Binding Source.Anchor}"
-                       Target="{Binding Target.Anchor}"
+                       Target="{Binding TargetAnchor}"
                        IsMuted="{Binding IsMuted}"
                        IsLowDetail="{Binding DataContext.WireLowDetail, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}">
             <views:DycWire.Style>
@@ -1352,12 +1352,14 @@
     <!-- The socket glyph: colour = data family, shape = structure. Filled when
          wired or required, a hollow ring when optional and unwired. -->
     <ControlTemplate x:Key="Dyc.SocketTemplate" TargetType="{x:Type Control}">
-        <Grid Width="14" Height="14" Background="Transparent" SnapsToDevicePixels="True">
-            <Ellipse x:Name="HoverRing"
-                     Width="14" Height="14"
-                     Stroke="{StaticResource Dyc.AccentBrush}"
-                     StrokeThickness="1.5"
-                     Visibility="Collapsed" />
+        <!-- Height follows the socket: 14 normally, as tall as the wires it carries for a multi-input pill. -->
+        <Grid Width="14" Height="{Binding SocketHeight}" Background="Transparent" SnapsToDevicePixels="True">
+            <Border x:Name="HoverRing"
+                    Width="14"
+                    CornerRadius="7"
+                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    BorderThickness="1.5"
+                    Visibility="Collapsed" />
             <Path x:Name="Filled"
                   Data="{Binding SocketGeometry}"
                   Fill="{Binding FamilyBrush}"

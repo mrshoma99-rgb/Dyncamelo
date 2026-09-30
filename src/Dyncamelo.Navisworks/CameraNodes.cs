@@ -76,7 +76,7 @@ public static class CameraNodes
     [NodeDescription("Frames the given items in the current view (per-item close-ups, screenshot staging).")]
     [NodeSearchTags("camera", "zoom", "frame", "fit", "items", "focus")]
     [return: NodeName("done")]
-    public static bool ZoomToItems(IEnumerable<ModelItem> items, [NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5, Document? document = null)
+    public static bool ZoomToItems([MultiInput] IEnumerable<ModelItem> items, [NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5, Document? document = null)
     {
         if (items == null)
         {

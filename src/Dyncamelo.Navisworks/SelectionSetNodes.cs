@@ -72,7 +72,7 @@ public static class SelectionSetNodes
     [NodeDescription("Creates a saved selection set from the given items. An existing top-level set with the same name is replaced.")]
     [NodeSearchTags("selection", "set", "create", "save", "new")]
     [return: NodeName("selectionSet")]
-    public static SelectionSet Create(string name, IEnumerable<ModelItem> items, Document? document = null)
+    public static SelectionSet Create(string name, [MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         if (string.IsNullOrEmpty(name))
         {

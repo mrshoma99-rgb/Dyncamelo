@@ -238,7 +238,7 @@ public static class SearchNodes
     [NodeAliases("Dyncamelo.Navisworks.SearchNodes.InItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,object,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> InItems(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         string categoryName,
         string propertyName,
         object value,

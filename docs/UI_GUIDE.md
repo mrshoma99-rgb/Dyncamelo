@@ -55,6 +55,7 @@ Socket colour names the kind of data. With **Type letters in sockets** turned on
 | File | `#A9865B` | `P` |
 | Action | `#F47AA5` | `A` |
 
+* A **pill** — an elongated socket — is a **multi-input**: connect as many wires to it as you like. With one wire it behaves exactly like an ordinary input; with several, the node receives everything they carry combined into one list, in the order the wires were made (wires carrying lists contribute their elements). The wires fan out along the pill, one landing point each, and the node's row grows to fit them. Drag from the pill to take off the wire under the pointer; drop a picked-up wire back on the pill at another slot to reorder, or use **Move Wire Earlier / Later** on a selected wire. Any input marked `[MultiInput]` (see the authoring guide) is drawn this way — for example the item lists of the Appearance, Selection and Export nodes, and **List.Merge**.
 * A **dashed wire** feeds a list into a single-value input: the node runs once per item (replication).
 * A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).
 * Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.
@@ -136,6 +137,8 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 |---|---|---|
 | Mute / Unmute Selected Wires | — | Canvas |
 | Swap Links | — | Canvas |
+| Move Wire Earlier | — | Canvas |
+| Move Wire Later | — | Canvas |
 | Add Reroute to Selected Wires | — | Canvas |
 | Disconnect Selected Wires | — | Canvas |
 
@@ -158,6 +161,9 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Connect a socket to a new node | Drag a wire onto empty canvas |
 | Insert a node into a wire | Drag the node onto the wire |
 | Add a reroute | Double-click a wire |
+| Connect many wires to one socket | A pill-shaped socket takes any number of wires |
+| Take one wire off a pill | Drag from the pill; the wire under the pointer comes off |
+| Reorder the wires of a pill | Drop a picked-up wire back on the pill at the slot you want |
 | Move a link to another input | Drag from a connected input |
 | Swap two links | Drop a picked-up link on an occupied input with Shift held |
 | Cut wires | Alt+Shift+drag across them |

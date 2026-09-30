@@ -23,7 +23,7 @@ public static class TakeoffNodes
     [NodeSearchTags("takeoff", "qto", "quantity", "sum", "group", "rollup", "pivot")]
     [MultiReturn("keys", "sums", "counts")]
     public static Dictionary<string, object?> SumPropertyByGroup(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         string groupCategoryName,
         string groupPropertyName,
         string valueCategoryName,

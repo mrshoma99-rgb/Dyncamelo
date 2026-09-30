@@ -349,6 +349,26 @@ public static class ListNodes
     }
 
     /// <summary>
+    /// Concatenates any number of lists into one. The input is a multi-input socket: wire as many lists (or single
+    /// values) as you like, in the order you want them.
+    /// </summary>
+    /// <param name="lists">Every list wired to the socket; list-valued wires contribute their elements, other values themselves.</param>
+    /// <returns>A new list with the elements of all the wires, in wire order.</returns>
+    [NodeName("List.Merge")]
+    [return: NodeName("list")]
+    [NodeDescription("Concatenates any number of lists into one — a multi-input socket: connect as many wires as you like, in the order you want them.")]
+    [NodeSearchTags("concat", "combine", "join", "append", "many", "multi")]
+    public static IList<object?> Merge([MultiInput] IList<object?> lists)
+    {
+        if (lists == null)
+        {
+            throw new ArgumentNullException(nameof(lists), "List.Merge requires at least one list. Wire a list into the 'lists' input.");
+        }
+
+        return new List<object?>(lists);
+    }
+
+    /// <summary>
     /// Removes the element at an index (negative indexes count from the end).
     /// Returns a new list; the input is not modified.
     /// </summary>
@@ -980,7 +1000,7 @@ public static class ListNodes
     [return: NodeName("allTrue")]
     [NodeDescription("True when EVERY element of the list is true — collapse a mask into one verdict (an empty list gives false; nulls count as not-true).")]
     [NodeSearchTags("all", "true", "every", "and", "mask", "verdict")]
-    public static bool AllTrue(IList<object?> list)
+    public static bool AllTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.AllTrue");
         if (list.Count == 0)
@@ -1006,7 +1026,7 @@ public static class ListNodes
     [return: NodeName("anyTrue")]
     [NodeDescription("True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node (nulls count as not-true).")]
     [NodeSearchTags("any", "true", "some", "or", "mask", "exists")]
-    public static bool AnyTrue(IList<object?> list)
+    public static bool AnyTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.AnyTrue");
         foreach (var element in list)
@@ -1027,7 +1047,7 @@ public static class ListNodes
     [MultiReturn("trueCount", "falseCount")]
     [NodeDescription("Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).")]
     [NodeSearchTags("count", "true", "false", "mask", "tally", "how many")]
-    public static Dictionary<string, object> CountTrue(IList<object?> list)
+    public static Dictionary<string, object> CountTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.CountTrue");
         int trueCount = 0;

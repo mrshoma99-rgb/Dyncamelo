@@ -49,7 +49,7 @@ public static class IfcExportNodes
     [NodeSearchTags("export", "ifc", "openbim", "bim", "qto", "ifc4", "ifc2x3", "bimcamel")]
     [MultiReturn("filePath", "fileCount", "elementCount", "triangleCount", "fileSizeKb")]
     public static Dictionary<string, object?> ToIfc(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         string filePath,
         [NodeChoices("IFC4", "IFC2X3")]
         string schema = "IFC4",

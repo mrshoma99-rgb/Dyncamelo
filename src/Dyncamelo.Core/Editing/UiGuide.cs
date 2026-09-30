@@ -54,7 +54,8 @@ public static class UiGuide
             sb.Append("| ").Append(family).Append(" | `").Append(PortKindPalette.Hex(family)).Append("` | ").Append(glyph.Length == 0 ? "—" : "`" + glyph + "`").Append(" |\n");
         }
 
-        sb.Append("\n* A **dashed wire** feeds a list into a single-value input: the node runs once per item (replication).\n");
+        sb.Append("\n* A **pill** — an elongated socket — is a **multi-input**: connect as many wires to it as you like. With one wire it behaves exactly like an ordinary input; with several, the node receives everything they carry combined into one list, in the order the wires were made (wires carrying lists contribute their elements). The wires fan out along the pill, one landing point each, and the node's row grows to fit them. Drag from the pill to take off the wire under the pointer; drop a picked-up wire back on the pill at another slot to reorder, or use **Move Wire Earlier / Later** on a selected wire. Any input marked `[MultiInput]` (see the authoring guide) is drawn this way — for example the item lists of the Appearance, Selection and Export nodes, and **List.Merge**.\n");
+        sb.Append("* A **dashed wire** feeds a list into a single-value input: the node runs once per item (replication).\n");
         sb.Append("* A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).\n");
         sb.Append("* Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.\n\n");
 

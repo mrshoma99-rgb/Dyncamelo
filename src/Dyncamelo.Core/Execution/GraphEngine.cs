@@ -161,26 +161,19 @@ public class GraphEngine
         for (int i = 0; i < node.InPorts.Count; i++)
         {
             var port = node.InPorts[i];
-            var connection = graph.FindConnectionInto(port);
-            var wireMuted = false;
-            if (connection != null && connection.IsMuted)
+            var wired = MultiInput.Gather(graph, port, out var wiredValue, out var failed, out var wireMuted);
+            if (failed)
             {
-                // A muted wire is invisible to evaluation: fall through to the
-                // pinned value / default exactly as if it were unconnected.
-                // (Connect() switched UsingDefaultValue off, so a muted wire
-                // must be allowed to use the default explicitly.)
-                connection = null;
-                wireMuted = true;
+                upstreamFailed = true;
             }
 
-            if (connection != null)
+            // A muted wire is invisible to evaluation: fall through to the
+            // pinned value / default exactly as if it were unconnected.
+            // (Connect() switched UsingDefaultValue off, so a muted wire
+            // must be allowed to use the default explicitly.)
+            if (wired)
             {
-                if (connection.SourceNode.State == NodeState.Error)
-                {
-                    upstreamFailed = true;
-                }
-
-                inputs[i] = connection.Source.Value;
+                inputs[i] = wiredValue;
             }
             else if (port.HasUserValue)
             {
@@ -323,10 +316,10 @@ public class GraphEngine
     /// <summary>Reads one input port's current value: the wired source value, else its default, else null.</summary>
     private static object? ReadPortValue(GraphModel graph, PortModel port)
     {
-        var connection = graph.FindConnectionInto(port);
-        if (connection != null && !connection.IsMuted)
+        var wired = MultiInput.Gather(graph, port, out var wiredValue, out _, out var mutedOnly);
+        if (wired)
         {
-            return connection.Source.Value;
+            return wiredValue;
         }
 
         if (port.HasUserValue)
@@ -334,7 +327,7 @@ public class GraphEngine
             return port.UserValue;
         }
 
-        return port.HasDefault && (port.UsingDefaultValue || connection != null) ? port.DefaultValue : null;
+        return port.HasDefault && (port.UsingDefaultValue || mutedOnly) ? port.DefaultValue : null;
     }
 
     /// <summary>Materializes a loop's item source into an indexable list (a scalar becomes a single item).</summary>

@@ -1,6 +1,6 @@
 {
- "version": "v0.33.3",
- "count": 364,
+ "version": "v0.39.0",
+ "count": 366,
  "categories": [
   {
    "name": "Annotation",
@@ -36,7 +36,7 @@
   },
   {
    "name": "List",
-   "count": 44
+   "count": 45
   },
   {
    "name": "Logic",
@@ -145,6 +145,10 @@
   {
    "name": "String",
    "count": 14
+  },
+  {
+   "name": "Utility",
+   "count": 1
   },
   {
    "name": "Workflow",
@@ -2028,7 +2032,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to test (nulls and non-booleans count as not-true)."
+     "description": "The booleans to test (nulls and non-booleans count as not-true).",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -2056,7 +2061,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to test (nulls and non-booleans count as not-true)."
+     "description": "The booleans to test (nulls and non-booleans count as not-true).",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -2208,7 +2214,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to count (nulls and non-booleans count as not-true)."
+     "description": "The booleans to count (nulls and non-booleans count as not-true).",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -2647,6 +2654,35 @@
      "name": "item",
      "type": "any",
      "description": "The maximum element."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Merge",
+   "category": "List",
+   "description": "Concatenates any number of lists into one — a multi-input socket: connect as many wires as you like, in the order you want them.",
+   "tags": [
+    "concat",
+    "combine",
+    "join",
+    "append",
+    "many",
+    "multi"
+   ],
+   "inputs": [
+    {
+     "name": "lists",
+     "type": "any[]",
+     "description": "Every list wired to the socket; list-valued wires contribute their elements, other values themselves.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A new list with the elements of all the wires, in wire order."
     }
    ],
    "returns": ""
@@ -4467,7 +4503,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The geometry items to group (e.g. all ladder shapes)."
+     "description": "The geometry items to group (e.g. all ladder shapes).",
+     "multiInput": true
     },
     {
      "name": "tolerance",
@@ -4554,7 +4591,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The items to measure from (e.g. floor openings)."
+     "description": "The items to measure from (e.g. floor openings).",
+     "multiInput": true
     },
     {
      "name": "targets",
@@ -4600,7 +4638,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to color."
+     "description": "The model items to color.",
+     "multiInput": true
     },
     {
      "name": "values",
@@ -4648,7 +4687,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to hide."
+     "description": "The model items to hide.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -4681,7 +4721,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to isolate."
+     "description": "The model items to isolate.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -4714,7 +4755,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to recolor."
+     "description": "The model items to recolor.",
+     "multiInput": true
     },
     {
      "name": "color",
@@ -4754,7 +4796,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to recolor."
+     "description": "The model items to recolor.",
+     "multiInput": true
     },
     {
      "name": "color",
@@ -4792,7 +4835,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to change."
+     "description": "The model items to change.",
+     "multiInput": true
     },
     {
      "name": "transparency",
@@ -4832,7 +4876,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to change."
+     "description": "The model items to change.",
+     "multiInput": true
     },
     {
      "name": "transparency",
@@ -4870,7 +4915,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to reset."
+     "description": "The model items to reset.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -4972,7 +5018,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to show."
+     "description": "The model items to show.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -5061,7 +5108,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to audit."
+     "description": "The model items to audit.",
+     "multiInput": true
     },
     {
      "name": "tolerance",
@@ -5312,7 +5360,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to frame."
+     "description": "The model items to frame.",
+     "multiInput": true
     },
     {
      "name": "paddingFactor",
@@ -8369,7 +8418,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to export (one row each)."
+     "description": "The model items to export (one row each).",
+     "multiInput": true
     },
     {
      "name": "filePath",
@@ -8416,7 +8466,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to export (resolved to leaf geometry, like the exporter's scope)."
+     "description": "The model items to export (resolved to leaf geometry, like the exporter's scope).",
+     "multiInput": true
     },
     {
      "name": "filePath",
@@ -9632,7 +9683,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to enclose."
+     "description": "The model items to enclose.",
+     "multiInput": true
     },
     {
      "name": "ignoreHidden",
@@ -9669,7 +9721,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items (e.g. a multi-selection)."
+     "description": "The model items (e.g. a multi-selection).",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -9749,7 +9802,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to flatten."
+     "description": "The model items to flatten.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -10179,7 +10233,8 @@
     {
      "name": "modelItems",
      "type": "ModelItem[]",
-     "description": "The model items to clean."
+     "description": "The model items to clean.",
+     "multiInput": true
     },
     {
      "name": "tabName",
@@ -10216,7 +10271,8 @@
     {
      "name": "modelItems",
      "type": "ModelItem[]",
-     "description": "The model items whose tab to rename."
+     "description": "The model items whose tab to rename.",
+     "multiInput": true
     },
     {
      "name": "tabName",
@@ -10257,7 +10313,8 @@
     {
      "name": "modelItems",
      "type": "ModelItem[]",
-     "description": "The model items to stamp."
+     "description": "The model items to stamp.",
+     "multiInput": true
     },
     {
      "name": "names",
@@ -10710,7 +10767,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The items (and their descendants) to search within."
+     "description": "The items (and their descendants) to search within.",
+     "multiInput": true
     },
     {
      "name": "categoryName",
@@ -10764,7 +10822,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to add."
+     "description": "The model items to add.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -10865,7 +10924,8 @@
     {
      "name": "modelItems",
      "type": "ModelItem[]",
-     "description": "The model items to resolve."
+     "description": "The model items to resolve.",
+     "multiInput": true
     },
     {
      "name": "level",
@@ -10924,7 +10984,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to select."
+     "description": "The model items to select.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -10994,7 +11055,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to store."
+     "description": "The model items to store.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -11365,7 +11427,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to roll up."
+     "description": "The model items to roll up.",
+     "multiInput": true
     },
     {
      "name": "groupCategoryName",
@@ -11871,7 +11934,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to rotate."
+     "description": "The model items to rotate.",
+     "multiInput": true
     },
     {
      "name": "origin",
@@ -11921,7 +11985,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to transform."
+     "description": "The model items to transform.",
+     "multiInput": true
     },
     {
      "name": "matrix",
@@ -11960,7 +12025,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to move."
+     "description": "The model items to move.",
+     "multiInput": true
     },
     {
      "name": "vector",
@@ -13169,7 +13235,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The values to join; non-strings are formatted invariantly."
+     "description": "The values to join; non-strings are formatted invariantly.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -13442,6 +13509,28 @@
    "returns": ""
   },
   {
+   "name": "Reroute",
+   "category": "Utility",
+   "description": "A wire waypoint that passes its value through unchanged.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "in",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "out",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
    "name": "Flow.Then",
    "category": "Workflow",
    "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).",
@@ -13605,7 +13694,8 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight)."
+     "description": "The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight).",
+     "multiInput": true
     },
     {
      "name": "transparency",

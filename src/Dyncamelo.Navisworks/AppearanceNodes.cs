@@ -19,7 +19,7 @@ public static class AppearanceNodes
     [NodeDescription("Overrides the color of model items (a permanent override: saved with the file and undoable).")]
     [NodeSearchTags("appearance", "color", "override", "paint", "tint")]
     [return: NodeName("items")]
-    public static List<ModelItem> OverrideColor(IEnumerable<ModelItem> items, object color, Document? document = null)
+    public static List<ModelItem> OverrideColor([MultiInput] IEnumerable<ModelItem> items, object color, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -37,7 +37,7 @@ public static class AppearanceNodes
     [NodeSearchTags("appearance", "transparency", "override", "ghost", "opacity")]
     [return: NodeName("items")]
     public static List<ModelItem> OverrideTransparency(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1, Step = 0.05)] double transparency,
         Document? document = null)
     {
@@ -61,7 +61,7 @@ public static class AppearanceNodes
     [NodeDescription("Removes permanent color and transparency overrides from model items, restoring their original materials.")]
     [NodeSearchTags("appearance", "reset", "restore", "original", "materials")]
     [return: NodeName("items")]
-    public static List<ModelItem> Reset(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> Reset([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -81,7 +81,7 @@ public static class AppearanceNodes
         "bakes into each saved view, so every viewpoint keeps its own coloring. Clear with Appearance.ResetTemporary.")]
     [NodeSearchTags("appearance", "color", "temporary", "highlight", "viewpoint", "override", "runtime")]
     [return: NodeName("items")]
-    public static List<ModelItem> OverrideColorTemporary(IEnumerable<ModelItem> items, object color, Document? document = null)
+    public static List<ModelItem> OverrideColorTemporary([MultiInput] IEnumerable<ModelItem> items, object color, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -102,7 +102,7 @@ public static class AppearanceNodes
     [NodeSearchTags("appearance", "transparency", "temporary", "ghost", "fade", "viewpoint", "runtime")]
     [return: NodeName("items")]
     public static List<ModelItem> OverrideTransparencyTemporary(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1, Step = 0.05)] double transparency,
         Document? document = null)
     {
@@ -151,7 +151,7 @@ public static class AppearanceNodes
     [NodeDescription("Hides model items in the viewport.")]
     [NodeSearchTags("appearance", "hide", "hidden", "invisible")]
     [return: NodeName("items")]
-    public static List<ModelItem> Hide(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> Hide([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -167,7 +167,7 @@ public static class AppearanceNodes
     [NodeDescription("Shows (un-hides) model items in the viewport.")]
     [NodeSearchTags("appearance", "show", "unhide", "visible")]
     [return: NodeName("items")]
-    public static List<ModelItem> Show(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> Show([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -211,7 +211,7 @@ public static class AppearanceNodes
     [NodeDescription("Shows only these items and hides everything else (undo with Appearance.ShowAll).")]
     [NodeSearchTags("appearance", "isolate", "only", "hide", "focus")]
     [return: NodeName("items")]
-    public static List<ModelItem> Isolate(IEnumerable<ModelItem> items, Document? document = null)
+    public static List<ModelItem> Isolate([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -243,7 +243,7 @@ public static class AppearanceNodes
     [NodeSearchTags("appearance", "color", "values", "legend", "heatmap", "code", "byvalue")]
     [MultiReturn("items", "legend")]
     public static Dictionary<string, object?> ColorByValues(
-        IEnumerable<ModelItem> items,
+        [MultiInput] IEnumerable<ModelItem> items,
         IEnumerable<object?> values,
         IEnumerable<object>? palette = null,
         Document? document = null)

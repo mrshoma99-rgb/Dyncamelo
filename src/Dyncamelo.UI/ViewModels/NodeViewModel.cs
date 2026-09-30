@@ -609,6 +609,19 @@ public class NodeViewModel : CanvasItemViewModel
         }
     }
 
+    /// <summary>A multi-input's pill grew or shrank with its wire count: its row makes room.</summary>
+    /// <param name="connector">The input whose wire count changed.</param>
+    public void RefreshRowHeight(ConnectorViewModel connector)
+    {
+        foreach (var row in Rows)
+        {
+            if (ReferenceEquals(row.Connector, connector))
+            {
+                row.RaiseHeight();
+            }
+        }
+    }
+
     private void AddPort()
     {
         if (_addPortMethod == null)

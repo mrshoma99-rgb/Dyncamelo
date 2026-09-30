@@ -77,6 +77,7 @@ A few editor shortcuts worth knowing from day one:
 - **Right-click a node → Find in Library** jumps to its library entry; double-click a node's title to rename it.
 - **Ctrl+L** tidies the selected nodes into left-to-right layers (also on the canvas right-click menu as **Arrange Selection**), and **Ctrl+Shift+L** does the whole graph — the fastest way to untangle a graph that grew organically. It uses the layered layout that keeps wire crossings to a minimum; if that layout is unavailable it falls back to simple columns and the status line says so.
 - **Ctrl+Shift+P** opens the **command palette**: type a word of any command (or setting) and press Enter. **F1** lists every shortcut; **Settings** (the gear) has sections for appearance, canvas and editing options and lets you rebind any shortcut. The whole editor is described in the [editor guide](UI_GUIDE.md).
+- **Pill-shaped sockets** take **many wires**: drop several searches (or the current selection and a saved set) onto one item-list input — for example on **Appearance.OverrideColor** — and the node works on all of them together, in the order you connected them.
 - **Home** fits the graph in view and **Ctrl+M** shows a minimap (it appears on its own from 40 nodes).
 
 ## 4. Your first graph: color all concrete red

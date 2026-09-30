@@ -20,6 +20,9 @@ public partial class GraphEditorViewModel
     /// <summary>Whether the link being moved should swap with the wire already on the target input (Shift held); replaceable for tests.</summary>
     public Func<bool> IsSwapRequested { get; set; } = () => (Keyboard.Modifiers & ModifierKeys.Shift) != 0;
 
+    /// <summary>The pointer's position in graph space (the view supplies it); picks which wire a multi-input drag takes and where a dropped wire lands.</summary>
+    public Func<System.Windows.Point>? PointerLocation { get; set; }
+
     /// <summary>The link picked up from a connected input while it is being dragged, or null.</summary>
     public ConnectionViewModel? MovingLink => _movingLink;
 
@@ -35,7 +38,10 @@ public partial class GraphEditorViewModel
         var origin = connector;
         if (connector.IsInput && connector.IsConnected)
         {
-            var wire = Connections.FirstOrDefault(c => c.Target == connector);
+            // A multi-input carries several wires: the one under the pointer is the one that comes off.
+            var wires = Connections.Where(c => c.Target == connector).OrderBy(c => c.Slot).ToList();
+            var pointer = PointerLocation?.Invoke() ?? connector.Anchor;
+            var wire = wires.Count == 0 ? null : wires[Math.Min(wires.Count - 1, connector.SlotAt(pointer.Y))];
             if (wire != null)
             {
                 _movingLink = wire;
@@ -87,6 +93,19 @@ public partial class GraphEditorViewModel
         var oldInput = wire.Target;
         if (target == oldInput)
         {
+            // Dropped back on its own multi-input: the wire takes the slot it was dropped at.
+            if (oldInput.IsMultiInput && oldInput.WireCount > 1)
+            {
+                var slot = oldInput.SlotAt((PointerLocation?.Invoke() ?? oldInput.Anchor).Y);
+                using (_undo.Begin("Reorder wires"))
+                {
+                    if (GraphOps.MoveWire(_graph, wire.Model, slot) != null)
+                    {
+                        StatusMessage = "Moved the wire to position " + (slot + 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + ".";
+                    }
+                }
+            }
+
             return;
         }
 
@@ -115,7 +134,8 @@ public partial class GraphEditorViewModel
         var swap = IsSwapRequested();
         using (_undo.Begin(swap ? "Swap links" : "Move link"))
         {
-            var displaced = _graph.FindConnectionInto(target.Port);
+            // A multi-input takes another wire; only a single-wire input has one to displace.
+            var displaced = target.Port.IsMultiInput ? null : _graph.FindConnectionInto(target.Port);
             var displacedSource = displaced?.Source;
             var result = _graph.Connect(origin.Port, target.Port);
             if (!result.Success)

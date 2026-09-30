@@ -89,7 +89,7 @@ public static class ModelItemNodes
     [NodeDescription("ONE bounding box fitting all the given items together (per-group when wired a list of groups) — frame a whole cluster for a section box or zoom. For one box per item use ModelItem.BoundingBox.")]
     [NodeSearchTags("boundingbox", "combined", "union", "group", "fit", "all", "extents", "cluster", "bbox")]
     [return: NodeName("boundingBox")]
-    public static BoundingBox3D CombinedBoundingBox(IEnumerable<ModelItem> items, bool ignoreHidden = false)
+    public static BoundingBox3D CombinedBoundingBox([MultiInput] IEnumerable<ModelItem> items, bool ignoreHidden = false)
     {
         var list = NavisValues.ToItemList(items);
         if (list.Count == 0)
@@ -360,7 +360,7 @@ public static class ModelItemNodes
     [NodeDescription("The deepest common ancestor of the given items in the selection tree — the smallest branch (room, level, block, model) that contains them all. Null when they share no ancestor.")]
     [NodeSearchTags("item", "common", "ancestor", "shared", "parent", "tree", "lca", "branch", "container")]
     [return: NodeName("ancestor")]
-    public static ModelItem? CommonAncestor(IEnumerable<ModelItem> items)
+    public static ModelItem? CommonAncestor([MultiInput] IEnumerable<ModelItem> items)
     {
         if (items == null)
         {
@@ -458,7 +458,7 @@ public static class ModelItemNodes
     [NodeDescription("Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want).")]
     [NodeSearchTags("item", "geometry", "leaves", "flatten", "descendants")]
     [return: NodeName("leaves")]
-    public static List<ModelItem> GeometryLeaves(IEnumerable<ModelItem> items)
+    public static List<ModelItem> GeometryLeaves([MultiInput] IEnumerable<ModelItem> items)
     {
         if (items == null)
         {
