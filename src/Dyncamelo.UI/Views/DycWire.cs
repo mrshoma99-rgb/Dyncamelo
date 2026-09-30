@@ -35,6 +35,9 @@ public sealed class DycWire : BaseConnection
         SourceOffsetProperty.OverrideMetadata(typeof(DycWire), new FrameworkPropertyMetadata(new Size(0d, 0d), FrameworkPropertyMetadataOptions.AffectsRender));
         TargetOffsetProperty.OverrideMetadata(typeof(DycWire), new FrameworkPropertyMetadata(new Size(0d, 0d), FrameworkPropertyMetadataOptions.AffectsRender));
 
+        // Nodify draws an arrowhead at the target by default; Blender-style noodles have none.
+        ArrowSizeProperty.OverrideMetadata(typeof(DycWire), new FrameworkPropertyMetadata(new Size(0d, 0d), FrameworkPropertyMetadataOptions.AffectsRender));
+
         // Nodify's cutting tool only slices wire types it knows about.
         NodifyEditor.CuttingConnectionTypes.Add(typeof(DycWire));
     }
