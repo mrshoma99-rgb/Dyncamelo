@@ -801,3 +801,161 @@ public class CommandCatalogTests
         Assert.Null(CommandCatalog.Find("nope.nope"));
     }
 }
+
+public class RowPlannerTests
+{
+    private static Func<PortModel, bool> None => p => false;
+
+    private static string Sig(IEnumerable<PlannedRow> rows) =>
+        string.Join(" ", rows.Select(r => r.Key + (r.ZeroHeight ? "!" : string.Empty)));
+
+    [Fact]
+    public void OrdersOutputsBodyInputsPanelsThenSummary()
+    {
+        var node = new ZeroTouchNodeModel(AssemblyNodeLoader.LoadType(typeof(EditorMetaFixtures)).Single(d => d.Method.Name == "Scaled"));
+        var rows = RowPlanner.Plan(node, None, hasBody: false);
+        // one output; percent + season ungrouped; "Advanced" panel (default open via extra) then its two members.
+        Assert.Equal("o:result i:percent i:season p:Advanced i:extra i:count", Sig(rows));
+        Assert.True(rows.Single(r => r.Kind == RowKind.PanelHeader).IsOpen);
+    }
+
+    [Fact]
+    public void BodyRowSitsBetweenOutputsAndInputs()
+    {
+        var node = new WatchNode();
+        var rows = RowPlanner.Plan(node, None, hasBody: true);
+        Assert.Equal(new[] { RowKind.Output, RowKind.Body, RowKind.Input }, rows.Select(r => r.Kind).ToArray());
+    }
+
+    [Fact]
+    public void ClosedPanelKeepsWiredPortsAsZeroHeightRows()
+    {
+        var def = AssemblyNodeLoader.LoadType(typeof(EditorMetaFixtures)).Single(d => d.Method.Name == "Scaled");
+        var node = new ZeroTouchNodeModel(def);
+        RowPlanner.SetPanelOpen(node, "Advanced", defaultOpen: true, open: false);
+        var wired = node.InPorts.Single(p => p.Name == "count");
+
+        var rows = RowPlanner.Plan(node, p => p == wired, hasBody: false);
+
+        Assert.Equal("o:result i:percent i:season p:Advanced i:count!", Sig(rows));
+        Assert.False(rows.Single(r => r.Kind == RowKind.PanelHeader).IsOpen);
+    }
+
+    [Fact]
+    public void PanelOpenStateRecordsOnlyTheDeviationFromDefault()
+    {
+        var node = new RerouteNode();
+        RowPlanner.SetPanelOpen(node, "A", defaultOpen: false, open: true);
+        Assert.Contains("A", node.Ui.OpenPanels);
+        Assert.True(RowPlanner.IsPanelOpen(node, "A", false));
+        RowPlanner.SetPanelOpen(node, "A", defaultOpen: false, open: false);
+        Assert.True(node.Ui.IsDefault);
+        RowPlanner.SetPanelOpen(node, "B", defaultOpen: true, open: false);
+        Assert.Contains("B", node.Ui.ClosedPanels);
+        Assert.False(RowPlanner.IsPanelOpen(node, "B", true));
+        RowPlanner.SetPanelOpen(node, "B", defaultOpen: true, open: true);
+        Assert.True(node.Ui.IsDefault);
+    }
+
+    [Fact]
+    public void HideUnusedHidesOptionalInputsAndUnwiredOutputsButNeverWiredOrPinned()
+    {
+        var node = ZT.Node("AddStep"); // x required, step optional
+        node.Ui.HideUnused = true;
+        var rows = RowPlanner.Plan(node, None, hasBody: false);
+        Assert.Equal("i:x hidden", Sig(rows)); // output hidden, optional step hidden, required x stays
+        Assert.Equal(2, rows.Single(r => r.Kind == RowKind.HiddenSummary).Count);
+
+        node.InPorts[1].SetUserValue(2d);
+        rows = RowPlanner.Plan(node, None, hasBody: false);
+        Assert.Contains(rows, r => r.Key == "i:step");
+
+        rows = RowPlanner.Plan(node, p => p == node.OutPorts[0], hasBody: false);
+        Assert.Contains(rows, r => r.Key == "o:result");
+    }
+
+    [Fact]
+    public void UserHiddenPortDisappearsUnlessWired()
+    {
+        var node = ZT.Node("AddStep");
+        node.InPorts[1].IsHidden = true;
+        Assert.DoesNotContain(RowPlanner.Plan(node, None, false), r => r.Key == "i:step");
+        Assert.Contains(RowPlanner.Plan(node, p => p == node.InPorts[1], false), r => r.Key == "i:step");
+    }
+
+    [Fact]
+    public void ExplicitShowEverythingBeatsTheDocumentRule()
+    {
+        var doc = new PortModel(new RerouteNode(), "document", typeof(Fixtures.Fake.Document), PortDirection.Input) { HasDefault = true };
+        Assert.True(RowPlanner.IsHidden(new RerouteNode(), doc, connected: false));
+        var shown = new RerouteNode();
+        shown.Ui.HideUnused = false;
+        Assert.False(RowPlanner.IsHidden(shown, doc, connected: false));
+        Assert.False(RowPlanner.IsHidden(new RerouteNode(), doc, connected: true));
+    }
+
+    [Fact]
+    public void CollapsedNodeKeepsOnlyWiredSocketsAsZeroHeightRows()
+    {
+        var node = ZT.Node("AddStep");
+        node.Ui.Collapsed = true;
+        var rows = RowPlanner.Plan(node, p => p == node.InPorts[0] || p == node.OutPorts[0], hasBody: true);
+        Assert.Equal("o:result! i:x!", Sig(rows));
+        Assert.Empty(RowPlanner.Plan(node, None, hasBody: true));
+    }
+
+    [Fact]
+    public void PlanIsDeterministic()
+    {
+        var node = ZT.Node("AddStep");
+        Assert.Equal(Sig(RowPlanner.Plan(node, None, true)), Sig(RowPlanner.Plan(node, None, true)));
+    }
+}
+
+public class LodTests
+{
+    [Theory]
+    [InlineData(LodLevel.Full, 1.0, LodLevel.Full)]
+    [InlineData(LodLevel.Full, 0.56, LodLevel.Full)]      // hysteresis: stays Full until below 0.55
+    [InlineData(LodLevel.Full, 0.50, LodLevel.Compact)]
+    [InlineData(LodLevel.Full, 0.10, LodLevel.Overview)]
+    [InlineData(LodLevel.Compact, 0.58, LodLevel.Compact)] // needs 0.60 to re-enter Full
+    [InlineData(LodLevel.Compact, 0.60, LodLevel.Full)]
+    [InlineData(LodLevel.Compact, 0.29, LodLevel.Overview)]
+    [InlineData(LodLevel.Overview, 0.31, LodLevel.Overview)] // needs 0.33 to leave
+    [InlineData(LodLevel.Overview, 0.33, LodLevel.Compact)]
+    [InlineData(LodLevel.Overview, 0.90, LodLevel.Full)]
+    public void NextAppliesHysteresis(LodLevel current, double zoom, LodLevel expected)
+    {
+        Assert.Equal(expected, Lod.Next(current, zoom));
+    }
+
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(0.0)]
+    [InlineData(-1.0)]
+    public void InvalidZoomKeepsTheCurrentLevel(double zoom)
+    {
+        Assert.Equal(LodLevel.Compact, Lod.Next(LodLevel.Compact, zoom));
+    }
+
+    [Fact]
+    public void SweepingTheZoomNeverFlickersAtABoundary()
+    {
+        var level = LodLevel.Full;
+        var changes = 0;
+        for (var z = 1.2; z > 0.05; z -= 0.005)
+        {
+            var next = Lod.Next(level, z);
+            if (next != level)
+            {
+                changes++;
+            }
+
+            level = next;
+        }
+
+        Assert.Equal(2, changes); // Full -> Compact -> Overview, exactly once each
+    }
+}

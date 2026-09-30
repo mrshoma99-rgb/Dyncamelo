@@ -1,4 +1,7 @@
+using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Media;
+using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.UI.Mvvm;
 
@@ -25,6 +28,61 @@ public class ConnectionViewModel : ObservableObject
         Source = source;
         Target = target;
         DisconnectCommand = new RelayCommand(() => owner.RemoveConnectionCommand.Execute(this));
+        _owner = owner;
+        source.PropertyChanged += OnEndpointChanged;
+        target.PropertyChanged += OnEndpointChanged;
+        owner.PropertyChanged += OnOwnerChanged;
+    }
+
+    private readonly GraphEditorViewModel _owner;
+
+    /// <summary>Stops listening to the endpoints and the editor (called when the wire is removed).</summary>
+    public void Detach()
+    {
+        Source.PropertyChanged -= OnEndpointChanged;
+        Target.PropertyChanged -= OnEndpointChanged;
+        _owner.PropertyChanged -= OnOwnerChanged;
+    }
+
+    /// <summary>Wire colour: the family of the port it leaves.</summary>
+    public Brush FamilyBrush => Source.FamilyBrush;
+
+    /// <summary>
+    /// True when the wire feeds a list into a single-item input and the engine will
+    /// replicate the node over it — drawn dashed so automatic replication is visible.
+    /// </summary>
+    public bool IsReplicating =>
+        Source.Depth != PortDepth.Item && Source.Depth != PortDepth.Unknown && Target.Depth == PortDepth.Item &&
+        !Target.Port.UseLevels;
+
+    /// <summary>True when the wire is muted (ignored by evaluation).</summary>
+    public bool IsMuted => Model.IsMuted;
+
+    /// <summary>Re-raises <see cref="IsMuted"/> after the model flag changed.</summary>
+    public void RefreshMuted() => OnPropertyChanged(nameof(IsMuted));
+
+    /// <summary>True when the editor uses the row node layout (wires use the row-layout wire style).</summary>
+    public bool UseRowLayout => _owner.UseRowLayout;
+
+    private void OnEndpointChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ConnectorViewModel.Kind))
+        {
+            OnPropertyChanged(nameof(FamilyBrush));
+            OnPropertyChanged(nameof(IsReplicating));
+        }
+        else if (e.PropertyName == nameof(ConnectorViewModel.Depth))
+        {
+            OnPropertyChanged(nameof(IsReplicating));
+        }
+    }
+
+    private void OnOwnerChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GraphEditorViewModel.UseRowLayout))
+        {
+            OnPropertyChanged(nameof(UseRowLayout));
+        }
     }
 
     /// <summary>The wrapped Core connection.</summary>

@@ -65,6 +65,8 @@ public class GraphEditorViewModel : ObservableObject
     private GraphRecorder? _recorder;
     private UndoTransaction? _dragTransaction;
     private bool _hasRunThisGraph;
+    private LodLevel _lodLevel = LodLevel.Full;
+    private double _viewportZoom = 1d;
 
     private GraphModel _graph;
     private string? _currentFilePath;
@@ -136,6 +138,12 @@ public class GraphEditorViewModel : ObservableObject
             OnPropertyChanged(nameof(RedoTooltip));
             CommandManager.InvalidateRequerySuggested();
         };
+
+        ToggleCollapseSelectedCommand = new RelayCommand(() => ToggleCollapse(null));
+        ToggleMuteSelectedCommand = new RelayCommand(() => ToggleMute(null));
+        ToggleHideUnusedSelectedCommand = new RelayCommand(() => ToggleHideUnused(null));
+        CollapseAllCommand = new RelayCommand(() => SetAllCollapsed(true));
+        ExpandAllCommand = new RelayCommand(() => SetAllCollapsed(false));
 
         RunCommand = new RelayCommand(RunGraph);
         NewCommand = new RelayCommand(NewGraph);
@@ -429,6 +437,149 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Deletes the selected nodes, notes, groups and wires (Delete key).</summary>
     public ICommand DeleteSelectionCommand { get; }
 
+    // ----- node layout, level of detail, node-level toggles ----------------------
+
+    /// <summary>True to draw nodes with the classic side-by-side layout (Settings). Persisted.</summary>
+    public bool ClassicNodeLayout
+    {
+        get => _settings.ClassicNodeLayout;
+        set
+        {
+            if (_settings.ClassicNodeLayout != value)
+            {
+                _settings.SetClassicNodeLayout(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(UseRowLayout));
+            }
+        }
+    }
+
+    /// <summary>True when nodes use the row layout (the inverse of <see cref="ClassicNodeLayout"/>).</summary>
+    public bool UseRowLayout => !_settings.ClassicNodeLayout;
+
+    /// <summary>Canvas level of detail, derived from the zoom with hysteresis.</summary>
+    public LodLevel LodLevel
+    {
+        get => _lodLevel;
+        private set
+        {
+            if (SetProperty(ref _lodLevel, value))
+            {
+                OnPropertyChanged(nameof(IsOverviewLod));
+            }
+        }
+    }
+
+    /// <summary>True at the overview level (wires draw as straight hairlines, nodes as headers).</summary>
+    public bool IsOverviewLod => _lodLevel == LodLevel.Overview;
+
+    /// <summary>Editor zoom, two-way bound to the canvas; drives <see cref="LodLevel"/>.</summary>
+    public double ViewportZoom
+    {
+        get => _viewportZoom;
+        set
+        {
+            if (SetProperty(ref _viewportZoom, value))
+            {
+                LodLevel = Lod.Next(_lodLevel, value);
+            }
+        }
+    }
+
+    /// <summary>Collapses/expands the selected nodes (H).</summary>
+    public ICommand ToggleCollapseSelectedCommand { get; }
+
+    /// <summary>Mutes/unmutes the selected nodes (M).</summary>
+    public ICommand ToggleMuteSelectedCommand { get; }
+
+    /// <summary>Hides/shows unused sockets on the selected nodes (Ctrl+H).</summary>
+    public ICommand ToggleHideUnusedSelectedCommand { get; }
+
+    /// <summary>Collapses every node.</summary>
+    public ICommand CollapseAllCommand { get; }
+
+    /// <summary>Expands every node.</summary>
+    public ICommand ExpandAllCommand { get; }
+
+    /// <summary>The nodes a node-level toggle applies to: the selection when the clicked node is part of it, else just that node.</summary>
+    private List<NodeViewModel> ToggleTargets(NodeViewModel? anchor)
+    {
+        var selected = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (anchor != null && !selected.Contains(anchor))
+        {
+            return new List<NodeViewModel> { anchor };
+        }
+
+        return selected;
+    }
+
+    internal void ToggleCollapse(NodeViewModel? anchor)
+    {
+        var targets = ToggleTargets(anchor);
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var collapse = targets.Any(n => !n.Model.Ui.Collapsed);
+        using (_undo.Begin(collapse ? "Collapse" : "Expand"))
+        {
+            foreach (var node in targets)
+            {
+                node.Model.Ui.Collapsed = collapse;
+            }
+        }
+    }
+
+    internal void ToggleMute(NodeViewModel? anchor)
+    {
+        var targets = ToggleTargets(anchor);
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var mute = targets.Any(n => !n.Model.IsMuted);
+        using (_undo.Begin(mute ? "Mute" : "Unmute"))
+        {
+            foreach (var node in targets)
+            {
+                node.Model.IsMuted = mute;
+            }
+        }
+
+        StatusMessage = (mute ? "Muted " : "Unmuted ") + targets.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
+    }
+
+    internal void ToggleHideUnused(NodeViewModel? anchor)
+    {
+        var targets = ToggleTargets(anchor);
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var hide = targets.Any(n => n.Model.Ui.HideUnused != true);
+        using (_undo.Begin(hide ? "Hide unused sockets" : "Show unused sockets"))
+        {
+            foreach (var node in targets)
+            {
+                node.Model.Ui.HideUnused = hide ? true : (bool?)null;
+            }
+        }
+    }
+
+    private void SetAllCollapsed(bool collapsed)
+    {
+        using (_undo.Begin(collapsed ? "Collapse all" : "Expand all"))
+        {
+            foreach (var node in _graph.Nodes)
+            {
+                node.Ui.Collapsed = collapsed;
+            }
+        }
+    }
+
     /// <summary>Undo/redo history of the open graph (graph edits only; never Navisworks changes).</summary>
     public UndoManager History => _undo;
 
@@ -662,13 +813,25 @@ public class GraphEditorViewModel : ObservableObject
 
             foreach (var connector in node.Inputs)
             {
-                connector.IsConnected = _graph.FindConnectionInto(connector.Port) != null;
+                var wire = _graph.FindConnectionInto(connector.Port);
+                connector.IsConnected = wire != null;
+                if (wire != null)
+                {
+                    // An untyped input (reroute, "any") takes the colour of what feeds it.
+                    var upstream = FindNodeViewModel(wire.SourceNode)?.FindConnector(wire.Source);
+                    if (upstream != null)
+                    {
+                        connector.InheritKind(upstream.Kind);
+                    }
+                }
             }
 
             foreach (var connector in node.Outputs)
             {
                 connector.IsConnected = _graph.FindConnectionsFrom(connector.Port).Any();
             }
+
+            node.RebuildRows();
         }
     }
 
@@ -847,6 +1010,11 @@ public class GraphEditorViewModel : ObservableObject
 
         SelectedItems.Clear();
         SelectedConnections.Clear();
+        foreach (var connection in Connections)
+        {
+            connection.Detach();
+        }
+
         Connections.Clear();
         Items.Clear();
     }
@@ -884,6 +1052,7 @@ public class GraphEditorViewModel : ObservableObject
         {
             if (Connections[i].Model == e.Connection)
             {
+                Connections[i].Detach();
                 SelectedConnections.Remove(Connections[i]);
                 Connections.RemoveAt(i);
             }

@@ -34,6 +34,11 @@ jobs:
       - name: Test Dyncamelo.Integration.Tests
         run: dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj -c Release --no-build --verbosity normal
 
+      # Real WPF: the editor control in an actual window on the runner's desktop
+      # (wire anchors, collapse, overview zoom, classic layout, reroutes).
+      - name: Test Dyncamelo.UI.Tests
+        run: dotnet test tests/Dyncamelo.UI.Tests/Dyncamelo.UI.Tests.csproj -c Release --no-build --verbosity normal
+
   linux:
     name: Linux (non-WPF projects)
     runs-on: ubuntu-latest

@@ -39,8 +39,11 @@ public sealed class NodeUiState : INotifyPropertyChanged
         set => Set(ref _hideUnused, value);
     }
 
-    /// <summary>Names of panels the user has expanded (overrides each panel's default).</summary>
+    /// <summary>Names of panels the user has expanded although they start closed.</summary>
     public HashSet<string> OpenPanels { get; } = new HashSet<string>();
+
+    /// <summary>Names of panels the user has closed although they start open.</summary>
+    public HashSet<string> ClosedPanels { get; } = new HashSet<string>();
 
     /// <summary>Raises change notification after <see cref="OpenPanels"/> was mutated.</summary>
     public void NotifyPanelsChanged() => OnPropertyChanged(nameof(OpenPanels));

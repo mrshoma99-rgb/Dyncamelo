@@ -22,6 +22,7 @@ public class UiSettingsService
     private string _doubleClickAction = "string";
     private bool _previewSelection;
     private string _paletteId = "DyncameloDark";
+    private bool _classicNodeLayout;
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
     public UiSettingsService()
@@ -95,6 +96,20 @@ public class UiSettingsService
         if (!string.IsNullOrEmpty(paletteId) && _paletteId != paletteId)
         {
             _paletteId = paletteId;
+            Save();
+        }
+    }
+
+    /// <summary>True to render nodes with the classic side-by-side layout instead of the row layout (default false).</summary>
+    public bool ClassicNodeLayout => _classicNodeLayout;
+
+    /// <summary>Persists the node layout choice.</summary>
+    /// <param name="classic">True for the classic layout.</param>
+    public void SetClassicNodeLayout(bool classic)
+    {
+        if (_classicNodeLayout != classic)
+        {
+            _classicNodeLayout = classic;
             Save();
         }
     }
@@ -190,6 +205,7 @@ public class UiSettingsService
                 DoubleClickAction = _doubleClickAction,
                 PreviewSelection = _previewSelection,
                 PaletteId = _paletteId,
+                ClassicNodeLayout = _classicNodeLayout,
             };
 
             // Write-to-temp-then-replace so a crash (or a concurrent reader in
@@ -242,6 +258,7 @@ public class UiSettingsService
         _doubleClickAction = "string";
         _previewSelection = false;
         _paletteId = "DyncameloDark";
+        _classicNodeLayout = false;
         if (data == null)
         {
             return;
@@ -251,6 +268,7 @@ public class UiSettingsService
         _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
         _previewSelection = data.PreviewSelection ?? false;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
+        _classicNodeLayout = data.ClassicNodeLayout ?? false;
 
         if (data.FavoriteNodeIds != null)
         {
@@ -353,5 +371,8 @@ public class UiSettingsService
 
         [JsonProperty("paletteId")]
         public string? PaletteId { get; set; }
+
+        [JsonProperty("classicNodeLayout")]
+        public bool? ClassicNodeLayout { get; set; }
     }
 }

@@ -85,6 +85,8 @@ public static class CommandCatalog
         new CommandInfo("view.fit", "Fit to Screen", "View", null, toolbar: true, keywords: "zoom all home"),
         new CommandInfo("view.zoomin", "Zoom In", "View", null, toolbar: true),
         new CommandInfo("view.zoomout", "Zoom Out", "View", null, toolbar: true),
+        new CommandInfo("view.collapseall", "Collapse All Nodes", "View", null, keywords: "fold minimize"),
+        new CommandInfo("view.expandall", "Expand All Nodes", "View", null, keywords: "unfold maximize"),
         new CommandInfo("view.hud", "Performance HUD", "View", "Ctrl+Shift+F12", CommandScope.Global, toggle: true, keywords: "fps diagnostics"),
 
         new CommandInfo("graph.run", "Run", "Graph", "F5", CommandScope.Global, toolbar: true, keywords: "execute evaluate"),
@@ -92,6 +94,9 @@ public static class CommandCatalog
         new CommandInfo("graph.addnote", "Add Note", "Graph", null, toolbar: true, keywords: "comment annotation"),
         new CommandInfo("graph.group", "Group Selection", "Graph", "Ctrl+G", keywords: "frame"),
         new CommandInfo("graph.arrange", "Arrange Selection", "Graph", "Ctrl+L", keywords: "layout align tidy"),
+        new CommandInfo("node.collapse", "Collapse / Expand", "Node", "H", keywords: "fold header minimize"),
+        new CommandInfo("node.hideunused", "Hide / Show Unused Sockets", "Node", "Ctrl+H", keywords: "sockets ports optional"),
+        new CommandInfo("node.mute", "Mute / Unmute", "Node", "M", keywords: "bypass disable pass through"),
         new CommandInfo("graph.addnode", "Add Node…", "Graph", "Space", keywords: "search quick library"),
     };
 

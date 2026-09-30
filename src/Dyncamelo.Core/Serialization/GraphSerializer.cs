@@ -633,6 +633,11 @@ public class GraphSerializer
             json["OpenPanels"] = new JArray(ui.OpenPanels.OrderBy(n => n, StringComparer.Ordinal));
         }
 
+        if (ui.ClosedPanels.Count > 0)
+        {
+            json["ClosedPanels"] = new JArray(ui.ClosedPanels.OrderBy(n => n, StringComparer.Ordinal));
+        }
+
         return json;
     }
 
@@ -654,6 +659,17 @@ public class GraphSerializer
                 if (!string.IsNullOrEmpty(name))
                 {
                     ui.OpenPanels.Add(name!);
+                }
+            }
+        }
+
+        if (json["ClosedPanels"] is JArray closed)
+        {
+            foreach (var name in closed.Values<string>())
+            {
+                if (!string.IsNullOrEmpty(name))
+                {
+                    ui.ClosedPanels.Add(name!);
                 }
             }
         }

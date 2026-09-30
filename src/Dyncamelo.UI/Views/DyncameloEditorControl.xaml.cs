@@ -107,6 +107,11 @@ public partial class DyncameloEditorControl : UserControl
             case "view.fit": return EditorCommands.FitToScreen;
             case "view.zoomin": return EditorCommands.ZoomIn;
             case "view.zoomout": return EditorCommands.ZoomOut;
+            case "view.collapseall": return vm.CollapseAllCommand;
+            case "view.expandall": return vm.ExpandAllCommand;
+            case "node.collapse": return vm.ToggleCollapseSelectedCommand;
+            case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
+            case "node.mute": return vm.ToggleMuteSelectedCommand;
             case "view.hud": return _hudCommand;
             case "graph.run": return vm.RunCommand;
             case "graph.rename": return vm.RenameCommand;
@@ -273,6 +278,25 @@ public partial class DyncameloEditorControl : UserControl
             _perfHud.Toggle();
             e.Handled = true;
             return;
+        }
+
+        // Single-key node shortcuts (H collapse, M mute) apply only when no text box has
+        // focus; as InputBindings they would swallow the letters being typed.
+        if (!typing && Keyboard.Modifiers == ModifierKeys.None && ViewModel != null && Editor.IsKeyboardFocusWithin)
+        {
+            if (e.Key == Key.H)
+            {
+                ViewModel.ToggleCollapseSelectedCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.M)
+            {
+                ViewModel.ToggleMuteSelectedCommand.Execute(null);
+                e.Handled = true;
+                return;
+            }
         }
 
         // Space over the canvas opens the quick node search (Dynamo-style):

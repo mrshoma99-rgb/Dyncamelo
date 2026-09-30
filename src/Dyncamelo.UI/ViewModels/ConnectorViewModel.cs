@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Types;
 using Dyncamelo.UI.Mvvm;
+using Dyncamelo.UI.Services;
 
 namespace Dyncamelo.UI.ViewModels;
 
@@ -17,6 +20,9 @@ public class ConnectorViewModel : ObservableObject
 {
     private Point _anchor;
     private bool _isConnected;
+    private readonly PortKind _declaredKind;
+    private PortKind _kind;
+    private double _socketOpacity = 1d;
 
     /// <summary>Creates the wrapper.</summary>
     /// <param name="node">Owning node view model.</param>
@@ -25,6 +31,8 @@ public class ConnectorViewModel : ObservableObject
     {
         Node = node;
         Port = port;
+        _declaredKind = PortKinds.FromPort(port);
+        _kind = _declaredKind;
         DisconnectCommand = new RelayCommand(
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
@@ -76,7 +84,7 @@ public class ConnectorViewModel : ObservableObject
     {
         get
         {
-            var text = Port.Name + " : " + FriendlyTypeName(Port.DeclaredType);
+            var text = Port.Name + " : " + FriendlyTypeName(Port.DeclaredType) + (_kind.Family == PortFamily.Any ? string.Empty : "  (" + KindText + ")");
             if (IsInput)
             {
                 text += Port.HasDefault
@@ -91,6 +99,87 @@ public class ConnectorViewModel : ObservableObject
 
             return text;
         }
+    }
+
+    // ----- type language: colour = family, shape = structure -------------------
+
+    /// <summary>The port's current kind: declared, or refined from its last value / upstream wire when the declaration says "any".</summary>
+    public PortKind Kind => _kind;
+
+    /// <summary>Colour family of the socket and of wires leaving it.</summary>
+    public PortFamily Family => _kind.Family;
+
+    /// <summary>Structure (item, list, nested list, unknown) — the socket's shape.</summary>
+    public PortDepth Depth => _kind.Depth;
+
+    /// <summary>Shared frozen brush for the family.</summary>
+    public Brush FamilyBrush => PortBrushes.For(_kind.Family);
+
+    /// <summary>Shared frozen 10×10 glyph for the structure.</summary>
+    public Geometry SocketGeometry => PortBrushes.Glyph(_kind.Depth);
+
+    /// <summary>True for an optional, unwired input: drawn as a hollow ring.</summary>
+    public bool IsHollow => IsOptional && !_isConnected;
+
+    /// <summary>Socket opacity: dimmed while a wire drag makes this socket a poor target.</summary>
+    public double SocketOpacity
+    {
+        get => _socketOpacity;
+        set => SetProperty(ref _socketOpacity, value);
+    }
+
+    /// <summary>Family and structure as text, for tooltips ("Viewpoint list").</summary>
+    public string KindText
+    {
+        get
+        {
+            var text = _kind.Family == PortFamily.Any ? "any" : _kind.Family.ToString().ToLowerInvariant();
+            switch (_kind.Depth)
+            {
+                case PortDepth.List: return text + " list";
+                case PortDepth.Nested: return text + " list of lists";
+                default: return text;
+            }
+        }
+    }
+
+    /// <summary>Re-reads the kind from the output's last value when the declaration is untyped.</summary>
+    public void RefreshObservedKind()
+    {
+        if (_declaredKind.Family != PortFamily.Any && _declaredKind.Depth != PortDepth.Unknown)
+        {
+            return;
+        }
+
+        SetKind(PortKinds.Observe(Port.Value, _declaredKind));
+    }
+
+    /// <summary>Adopts an upstream port's kind (an untyped input takes the colour of what feeds it).</summary>
+    public void InheritKind(PortKind upstream)
+    {
+        if (_declaredKind.Family != PortFamily.Any && _declaredKind.Depth != PortDepth.Unknown)
+        {
+            return;
+        }
+
+        SetKind(upstream.Family == PortFamily.Any && upstream.Depth == PortDepth.Unknown ? _declaredKind : upstream);
+    }
+
+    private void SetKind(PortKind kind)
+    {
+        if (_kind.Equals(kind))
+        {
+            return;
+        }
+
+        _kind = kind;
+        OnPropertyChanged(nameof(Kind));
+        OnPropertyChanged(nameof(Family));
+        OnPropertyChanged(nameof(Depth));
+        OnPropertyChanged(nameof(FamilyBrush));
+        OnPropertyChanged(nameof(SocketGeometry));
+        OnPropertyChanged(nameof(KindText));
+        OnPropertyChanged(nameof(ToolTip));
     }
 
     /// <summary>Removes every wire touching this port (context menu "Disconnect").</summary>
@@ -188,6 +277,7 @@ public class ConnectorViewModel : ObservableObject
         {
             if (SetProperty(ref _isConnected, value))
             {
+                OnPropertyChanged(nameof(IsHollow));
                 // A wire hides the inline choice editor and vice-versa.
                 OnPropertyChanged(nameof(ShowChoiceEditor));
                 OnPropertyChanged(nameof(SelectedChoice));

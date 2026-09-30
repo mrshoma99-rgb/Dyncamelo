@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Dyncamelo.Core.Editing;
+using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Nodes;
 using Dyncamelo.Core.Types;
@@ -38,6 +41,7 @@ public class NodeViewModel : CanvasItemViewModel
     private string _expandedPreviewText = string.Empty;
     private double _localWatchWidth;
     private double _localWatchHeight;
+    private readonly HashSet<PortModel> _watchedInputPorts = new HashSet<PortModel>();
 
     /// <summary>Creates the wrapper, builds connector view models and syncs the initial position.</summary>
     /// <param name="owner">The editor that owns this node.</param>
@@ -69,11 +73,186 @@ public class NodeViewModel : CanvasItemViewModel
         FindInLibraryCommand = new RelayCommand(() => _owner.FindInLibrary(this));
         TogglePreviewExpandCommand = new RelayCommand(TogglePreviewExpand, () => _hasMorePreview);
 
+        Rows = new ObservableCollection<NodeRowViewModel>();
+        ToggleCollapseCommand = new RelayCommand(() => _owner.ToggleCollapse(this));
+        ToggleMuteCommand = new RelayCommand(() => _owner.ToggleMute(this));
+        ToggleHideUnusedCommand = new RelayCommand(() => _owner.ToggleHideUnused(this));
+        ResetWidthCommand = new RelayCommand(() => Model.Ui.Width = null);
+
         HeaderBrush = GetCategoryBrush(model.Category);
         SetLocationFromModel(new Point(model.X, model.Y));
         SyncPorts();
         UpdateValueDisplay();
         model.PropertyChanged += OnModelPropertyChanged;
+        model.Ui.PropertyChanged += OnUiChanged;
+        _owner.PropertyChanged += OnOwnerChanged;
+    }
+
+    // ----- row layout ---------------------------------------------------------
+
+    /// <summary>The node's rows in the row layout, in display order.</summary>
+    public ObservableCollection<NodeRowViewModel> Rows { get; }
+
+    /// <summary>True for a wire waypoint, drawn as a tiny in/out pill instead of a card.</summary>
+    public bool IsReroute => Model is RerouteNode;
+
+    /// <summary>True when the node has its own body row (input, slider, watch… nodes; not zero-touch nodes or reroutes).</summary>
+    public bool HasBody => !(Model is ZeroTouchNodeModel) && !(Model is RerouteNode);
+
+    /// <summary>True when the editor draws nodes with the row layout.</summary>
+    public bool UseRowLayout => _owner.UseRowLayout;
+
+    /// <summary>True at the overview zoom level: nodes shrink to their header.</summary>
+    public bool IsOverview => _owner.LodLevel == LodLevel.Overview;
+
+    /// <summary>Collapses/expands the node (H).</summary>
+    public ICommand ToggleCollapseCommand { get; }
+
+    /// <summary>Mutes/unmutes the node (M).</summary>
+    public ICommand ToggleMuteCommand { get; }
+
+    /// <summary>Hides/shows the node's unused sockets (Ctrl+H).</summary>
+    public ICommand ToggleHideUnusedCommand { get; }
+
+    /// <summary>Returns the node to automatic width.</summary>
+    public ICommand ResetWidthCommand { get; }
+
+    /// <summary>True when the node is collapsed to its header.</summary>
+    public bool IsCollapsed => Model.Ui.Collapsed;
+
+    /// <summary>True when the node is muted (bypassed).</summary>
+    public bool IsMuted => Model.IsMuted;
+
+    /// <summary>User-set width, or NaN for automatic width.</summary>
+    public double NodeWidth
+    {
+        get => Model.Ui.Width ?? double.NaN;
+        set => Model.Ui.Width = double.IsNaN(value) ? (double?)null : value;
+    }
+
+    /// <summary>Recomputes the rows from the ports and presentation state; reuses row objects and touches the collection only when the sequence changed.</summary>
+    public void RebuildRows()
+    {
+        var plan = RowPlanner.Plan(Model, port => FindConnector(port)?.IsConnected ?? false, HasBody);
+        var old = new Dictionary<string, NodeRowViewModel>(StringComparer.Ordinal);
+        foreach (var row in Rows)
+        {
+            old[row.Key] = row;
+        }
+
+        var next = new List<NodeRowViewModel>(plan.Count);
+        foreach (var item in plan)
+        {
+            if (!old.TryGetValue(item.Key, out var row))
+            {
+                var connector = item.Port == null ? null : FindConnector(item.Port);
+                row = new NodeRowViewModel(this, item.Kind, item.Key, connector, item.Panel);
+            }
+
+            row.Apply(item);
+            next.Add(row);
+        }
+
+        var same = next.Count == Rows.Count;
+        for (var i = 0; same && i < next.Count; i++)
+        {
+            same = ReferenceEquals(next[i], Rows[i]);
+        }
+
+        if (same)
+        {
+            return;
+        }
+
+        Rows.Clear();
+        foreach (var row in next)
+        {
+            Rows.Add(row);
+        }
+    }
+
+    /// <summary>Shows every hidden port: turns hide-unused off and clears per-port hidden flags.</summary>
+    public void RevealHidden()
+    {
+        using (_owner.History.Begin("Show hidden sockets"))
+        {
+            Model.Ui.HideUnused = false;
+            foreach (var port in Model.InPorts)
+            {
+                port.IsHidden = false;
+            }
+
+            foreach (var port in Model.OutPorts)
+            {
+                port.IsHidden = false;
+            }
+        }
+    }
+
+    private void OnUiChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(NodeUiState.Width):
+                OnPropertyChanged(nameof(NodeWidth));
+                break;
+            case nameof(NodeUiState.Collapsed):
+                OnPropertyChanged(nameof(IsCollapsed));
+                RebuildRows();
+                break;
+            default:
+                RebuildRows();
+                break;
+        }
+    }
+
+    private void OnOwnerChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(GraphEditorViewModel.UseRowLayout):
+                OnPropertyChanged(nameof(UseRowLayout));
+                break;
+            case nameof(GraphEditorViewModel.LodLevel):
+                OnPropertyChanged(nameof(IsOverview));
+                foreach (var row in Rows)
+                {
+                    row.RaiseHeight();
+                }
+
+                break;
+        }
+    }
+
+    private void SyncInputSubscriptions()
+    {
+        foreach (var port in Model.InPorts)
+        {
+            if (_watchedInputPorts.Add(port))
+            {
+                port.PropertyChanged += OnInputPortChanged;
+            }
+        }
+
+        _watchedInputPorts.RemoveWhere(port =>
+        {
+            if (!Model.InPorts.Contains(port))
+            {
+                port.PropertyChanged -= OnInputPortChanged;
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private void OnInputPortChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Pinning a value or hiding a socket changes which rows the planner keeps.
+        if (e.PropertyName == nameof(PortModel.UserValue) || e.PropertyName == nameof(PortModel.IsHidden))
+        {
+            RebuildRows();
+        }
     }
 
     /// <summary>The editor that owns this node.</summary>
@@ -328,6 +507,8 @@ public class NodeViewModel : CanvasItemViewModel
         SyncPortCollection(Inputs, Model.InPorts);
         SyncPortCollection(Outputs, Model.OutPorts);
         SyncOutputSubscriptions();
+        SyncInputSubscriptions();
+        RebuildRows();
     }
 
     /// <summary>Re-raises <see cref="IsPreviewVisible"/> (e.g. after the global preview toggle changed).</summary>
@@ -340,6 +521,14 @@ public class NodeViewModel : CanvasItemViewModel
     public void Detach()
     {
         Model.PropertyChanged -= OnModelPropertyChanged;
+        Model.Ui.PropertyChanged -= OnUiChanged;
+        _owner.PropertyChanged -= OnOwnerChanged;
+        foreach (var port in _watchedInputPorts)
+        {
+            port.PropertyChanged -= OnInputPortChanged;
+        }
+
+        _watchedInputPorts.Clear();
         foreach (var connector in Inputs)
         {
             connector.Detach();
@@ -480,6 +669,9 @@ public class NodeViewModel : CanvasItemViewModel
             case nameof(NodeModel.IsFrozen):
                 OnPropertyChanged(nameof(IsFrozen));
                 break;
+            case nameof(NodeModel.IsMuted):
+                OnPropertyChanged(nameof(IsMuted));
+                break;
             case nameof(NodeModel.Lacing):
                 OnPropertyChanged(nameof(Lacing));
                 OnPropertyChanged(nameof(LacingLabel));
@@ -517,6 +709,11 @@ public class NodeViewModel : CanvasItemViewModel
     {
         if (e.PropertyName == nameof(PortModel.Value))
         {
+            if (sender is PortModel port)
+            {
+                FindConnector(port)?.RefreshObservedKind();
+            }
+
             UpdateValueDisplay();
         }
     }

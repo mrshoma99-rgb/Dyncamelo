@@ -26,6 +26,7 @@
         <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
         <KeyBinding Key="L" Modifiers="Control" Command="{Binding ArrangeSelectionCommand}" />
         <KeyBinding Key="F5" Command="{Binding RunCommand}" />
+        <KeyBinding Key="H" Modifiers="Control" Command="{Binding ToggleHideUnusedSelectedCommand}" />
         <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
         <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
         <KeyBinding Key="Z" Modifiers="Control+Shift" Command="{Binding RedoCommand}" />
@@ -281,6 +282,13 @@
                                               Content="Show node descriptions"
                                               ToolTip="Show a description line under each library node"
                                               IsChecked="{Binding Library.ShowDescriptions}" />
+
+                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
+                                              HorizontalAlignment="Left"
+                                              Margin="0,8,0,0"
+                                              Content="Classic node layout"
+                                              ToolTip="Draw nodes with the older side-by-side input/output columns instead of the row layout"
+                                              IsChecked="{Binding ClassicNodeLayout}" />
 
                                 <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
                                               HorizontalAlignment="Left"
@@ -707,6 +715,7 @@
                                  SelectedItems="{Binding SelectedItems}"
                                  SelectedConnections="{Binding SelectedConnections}"
                                  PendingConnection="{Binding PendingConnection}"
+                                 ViewportZoom="{Binding ViewportZoom, Mode=TwoWay}"
                                  ItemsDragStartedCommand="{Binding ItemsDragStartedCommand}"
                                  ItemsDragCompletedCommand="{Binding ItemsDragCompletedCommand}"
                                  PendingConnectionTemplate="{StaticResource Dyc.PendingConnectionTemplate}"
