@@ -111,6 +111,10 @@ public partial class GraphEditorViewModel
             OnPropertyChanged(nameof(UndoTooltip));
             OnPropertyChanged(nameof(RedoTooltip));
             OnPropertyChanged(nameof(RunTooltip));
+            if (_isPaletteOpen)
+            {
+                RefreshPalette();
+            }
             KeymapChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -251,7 +255,14 @@ public partial class GraphEditorViewModel
         IsSettingsOpen = false;
         _paletteQuery = string.Empty;
         OnPropertyChanged(nameof(PaletteQuery));
-        IsPaletteOpen = true;
+        if (_isPaletteOpen)
+        {
+            RefreshPalette();          // already open: start over with an empty search
+        }
+        else
+        {
+            IsPaletteOpen = true;      // refreshes on opening
+        }
     }
 
     /// <summary>Closes the palette.</summary>

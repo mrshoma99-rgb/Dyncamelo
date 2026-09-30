@@ -586,6 +586,44 @@ public class CommandSurfaceViewTests
         });
     }
 
+    private static List<T> Descendants<T>(System.Windows.DependencyObject root)
+        where T : System.Windows.DependencyObject
+    {
+        var found = new List<T>();
+        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            if (child is T match)
+            {
+                found.Add(match);
+            }
+
+            found.AddRange(Descendants<T>(child));
+        }
+
+        return found;
+    }
+
+    [Fact]
+    public void TheMinimapDrawsRectanglesNotCopiesOfTheNodes()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            host.Vm.Graph.AddNode(new SumNode { X = 10, Y = 10 });
+            host.Vm.MinimapMode = "on";
+        });
+        StaHost.Flush();
+        StaHost.Run(() =>
+        {
+            var mini = (Nodify.Minimap)host.Control.FindName("MiniMap");
+            Assert.NotEmpty(Descendants<Nodify.MinimapItem>(mini));
+            Assert.Empty(Descendants<ScrubNumberBox>(mini));                 // a node's editors live on the canvas only
+            Assert.Equal(3, Descendants<ScrubNumberBox>(host.Window).Count); // the node's own three number inputs
+        });
+    }
+
     [Fact]
     public void TheGridSettingSwitchesTheCanvasBackground()
     {

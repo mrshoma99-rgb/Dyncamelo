@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -67,14 +68,40 @@ internal static class StaHost
     /// <summary>Runs <paramref name="action"/> on the STA thread; exceptions propagate to the caller.</summary>
     public static void Run(Action action)
     {
-        // A test that blocks the dispatcher must fail with a message instead of hanging the whole run.
-        Dispatcher.Invoke(action, DispatcherPriority.Normal, System.Threading.CancellationToken.None, TimeSpan.FromSeconds(120));
+        Invoke(action, DispatcherPriority.Normal, TimeSpan.FromSeconds(120), "A UI test call");
     }
 
     /// <summary>Lets pending layout, binding and render work finish.</summary>
     public static void Flush()
     {
-        Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
-        Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+        Invoke(() => { }, DispatcherPriority.ApplicationIdle, TimeSpan.FromSeconds(60), "Waiting for the dispatcher to go idle");
+        Invoke(() => { }, DispatcherPriority.ApplicationIdle, TimeSpan.FromSeconds(60), "Waiting for the dispatcher to go idle");
+    }
+
+    // A blocked dispatcher, or one that never goes idle, must fail the test that caused it with a message —
+    // Dispatcher.Invoke with a timeout just returns, and the run then sits until the hang detector kills it.
+    private static void Invoke(Action action, DispatcherPriority priority, TimeSpan timeout, string what)
+    {
+        ExceptionDispatchInfo? error = null;
+        var operation = Dispatcher.BeginInvoke(priority, new Action(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                error = ExceptionDispatchInfo.Capture(ex);
+            }
+        }));
+
+        var status = operation.Wait(timeout);
+        if (status != DispatcherOperationStatus.Completed)
+        {
+            operation.Abort();
+            throw new TimeoutException(what + " did not finish within " + timeout.TotalSeconds + " s (" + status + "): the WPF dispatcher is blocked or never goes idle.");
+        }
+
+        error?.Throw();
     }
 }

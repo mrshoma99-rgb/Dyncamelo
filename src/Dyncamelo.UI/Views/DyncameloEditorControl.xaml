@@ -594,6 +594,15 @@
                 </nodify:Minimap.ViewportStyle>
                 <nodify:Minimap.ItemContainerStyle>
                     <Style TargetType="{x:Type nodify:MinimapItem}">
+                        <!-- Each item is drawn as a plain rectangle. Without this the item's content would be the whole
+                             node (the implicit NodeViewModel template), doubling every editor on the canvas. -->
+                        <Setter Property="ContentTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <Border />
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
                         <Setter Property="Location" Value="{Binding Location}" />
                         <Setter Property="Width" Value="{Binding Size.Width}" />
                         <Setter Property="Height" Value="{Binding Size.Height}" />
