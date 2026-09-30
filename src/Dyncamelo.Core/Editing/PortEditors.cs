@@ -274,11 +274,21 @@ public static class PortEditors
     /// <summary>True when the port has neither a pinned value nor a default (the field shows a placeholder).</summary>
     public static bool IsUnset(PortModel port) => !port.HasUserValue && (!port.HasDefault || port.DefaultValue == null);
 
-    /// <summary>Current numeric value (0 when unset or not numeric).</summary>
+    /// <summary>Current numeric value (0 when unset or not numeric). Infinite defaults (an unbounded "max") are returned as-is and shown as ∞.</summary>
     public static double GetNumber(PortModel port)
     {
         var current = Current(port);
-        return current != null && NumberEditSpec.TryToDouble(current, out var d) ? d : 0d;
+        if (current != null && NumberEditSpec.TryToDouble(current, out var d))
+        {
+            return d;
+        }
+
+        if (current is double inf && double.IsInfinity(inf))
+        {
+            return inf;
+        }
+
+        return 0d;
     }
 
     /// <summary>Pins a number typed to the port's own primitive type; equal to the default clears the pin.</summary>
@@ -286,6 +296,12 @@ public static class PortEditors
     {
         var spec = NumberEditSpec.FromPort(port);
         var normalised = ScrubMath.Normalize(value, spec, GetNumber(port));
+        if (port.HasDefault && port.DefaultValue is double defaultDouble && defaultDouble == normalised)
+        {
+            port.ClearUserValue();
+            return;
+        }
+
         if (port.HasDefault && port.DefaultValue != null && NumberEditSpec.TryToDouble(port.DefaultValue, out var def) && def == normalised)
         {
             port.ClearUserValue();

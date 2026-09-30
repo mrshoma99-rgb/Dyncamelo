@@ -280,3 +280,27 @@ namespace Dyncamelo.Core.Tests
         }
     }
 }
+
+namespace Dyncamelo.Core.Tests
+{
+    public class InfiniteDefaultTests
+    {
+        [Fact]
+        public void AnUnboundedMaximumShowsAsInfinityAndCanBeReplacedByATypedNumber()
+        {
+            var port = new PortModel(new ValueNode(), "maxDepth", typeof(double), PortDirection.Input)
+            {
+                HasDefault = true,
+                DefaultValue = double.PositiveInfinity,
+            };
+            Assert.True(double.IsPositiveInfinity(PortEditors.GetNumber(port)));
+            Assert.Equal("∞", NumberFormat.Format(PortEditors.GetNumber(port), 0.1));
+            Assert.Equal("-∞", NumberFormat.Format(double.NegativeInfinity, 0.1));
+
+            PortEditors.SetNumber(port, 12.5);
+            Assert.Equal(12.5, port.UserValue);
+            port.ClearUserValue();
+            Assert.True(double.IsPositiveInfinity(PortEditors.GetNumber(port)));
+        }
+    }
+}

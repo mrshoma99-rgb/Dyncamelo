@@ -44,7 +44,7 @@ public static class RedlineNodes
         double x,
         double y,
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         if (string.IsNullOrEmpty(text))
@@ -77,7 +77,7 @@ public static class RedlineNodes
         double x2,
         double y2,
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         return EditRedlines(viewpoint, document, list =>
@@ -105,7 +105,7 @@ public static class RedlineNodes
         double x2,
         double y2,
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         return EditRedlines(viewpoint, document, list =>
@@ -133,7 +133,7 @@ public static class RedlineNodes
         double x2,
         double y2,
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         return EditRedlines(viewpoint, document, list =>
@@ -155,7 +155,7 @@ public static class RedlineNodes
         object viewpoint,
         IList<object?> points,
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         var coords = ReadPointPairs(points);
@@ -204,7 +204,7 @@ public static class RedlineNodes
         double radius = 0.08,
         string comment = "",
         object? color = null,
-        int thickness = 2,
+        [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);

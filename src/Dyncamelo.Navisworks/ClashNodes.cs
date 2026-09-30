@@ -219,8 +219,8 @@ public static class ClashNodes
     [return: NodeName("results")]
     public static List<ClashResult> FilterByAngle(
         IEnumerable<ClashResult> results,
-        double minDegrees = 0.0,
-        double maxDegrees = 90.0)
+        [NodeRange(0, 180, Unit = "°")] double minDegrees = 0.0,
+        [NodeRange(0, 180, Unit = "°")] double maxDegrees = 90.0)
     {
         if (results == null)
         {
@@ -331,7 +331,7 @@ public static class ClashNodes
         IEnumerable<ModelItem> itemsB,
         [NodeChoices("Hard", "HardConservative", "Clearance", "Duplicate", "Custom")]
         string testType = "Hard",
-        double tolerance = 0.01,
+        [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,
         Document? document = null)
     {
         if (string.IsNullOrEmpty(name))
@@ -533,8 +533,8 @@ public static class ClashNodes
     public static string SaveImage(
         ClashResult result,
         string filePath,
-        int width = 1280,
-        int height = 720,
+        [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int width = 1280,
+        [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int height = 720,
         Document? document = null)
     {
         var clashResult = RequireResult(result);
@@ -595,7 +595,7 @@ public static class ClashNodes
     [MultiReturn("test", "groupCount")]
     public static Dictionary<string, object?> GroupResultsByProximity(
         ClashTest test,
-        double radius,
+        [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 10)] double radius,
         Document? document = null)
     {
         if (radius <= 0.0)

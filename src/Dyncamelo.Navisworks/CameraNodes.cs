@@ -76,7 +76,7 @@ public static class CameraNodes
     [NodeDescription("Frames the given items in the current view (per-item close-ups, screenshot staging).")]
     [NodeSearchTags("camera", "zoom", "frame", "fit", "items", "focus")]
     [return: NodeName("done")]
-    public static bool ZoomToItems(IEnumerable<ModelItem> items, double paddingFactor = 1.5, Document? document = null)
+    public static bool ZoomToItems(IEnumerable<ModelItem> items, [NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5, Document? document = null)
     {
         if (items == null)
         {
@@ -124,7 +124,7 @@ public static class CameraNodes
     [NodeDescription("Sets the camera's vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider.")]
     [NodeSearchTags("camera", "fov", "field of view", "lens", "zoom", "angle", "wide")]
     [return: NodeName("done")]
-    public static bool SetFieldOfView(double degrees, Document? document = null)
+    public static bool SetFieldOfView([NodeRange(1, 179, SoftMin = 10, SoftMax = 120, Unit = "°")] double degrees, Document? document = null)
     {
         if (degrees <= 0.0 || degrees >= 180.0)
         {

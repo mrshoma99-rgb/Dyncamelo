@@ -38,7 +38,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> OverrideTransparency(
         IEnumerable<ModelItem> items,
-        double transparency,
+        [NodeRange(0, 1, Step = 0.05)] double transparency,
         Document? document = null)
     {
         if (transparency < 0.0 || transparency > 1.0)
@@ -103,7 +103,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> OverrideTransparencyTemporary(
         IEnumerable<ModelItem> items,
-        double transparency,
+        [NodeRange(0, 1, Step = 0.05)] double transparency,
         Document? document = null)
     {
         if (transparency < 0.0 || transparency > 1.0)

@@ -612,7 +612,7 @@ public static class ClashTriageNodes
         bool isolate = true,
         bool zoom = true,
         bool select = false,
-        double paddingFactor = 1.5,
+        [NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5,
         Document? document = null)
     {
         var resultList = MaterializeResults(results);

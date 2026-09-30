@@ -41,6 +41,16 @@ public static class NumberFormat
     /// <summary>Formats a value with the step's precision, trimming trailing zeros, plus an optional unit.</summary>
     public static string Format(double value, double step, string? unit = null)
     {
+        if (double.IsPositiveInfinity(value))
+        {
+            return "∞";
+        }
+
+        if (double.IsNegativeInfinity(value))
+        {
+            return "-∞";
+        }
+
         var text = value.ToString("F" + Decimals(step).ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         if (text.IndexOf('.') >= 0)
         {

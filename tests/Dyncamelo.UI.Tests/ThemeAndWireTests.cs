@@ -67,16 +67,24 @@ public class ThemeAndWireTests
     }
 
     [Fact]
-    public void MutedWireAddsASecondFigureForTheTick()
+    public void MutedWireHasATickAcrossItsMiddleAndAPlainWireDoesNot()
     {
         StaHost.Run(() =>
         {
-            var plain = new DycWire { Source = new Point(0, 0), Target = new Point(300, 80), Stroke = Brushes.White };
-            var muted = new DycWire { Source = new Point(0, 0), Target = new Point(300, 80), IsMuted = true, Stroke = Brushes.White };
-            var plainFigures = Define(plain).GetFlattenedPathGeometry().Figures.Count;
-            var mutedFigures = Define(muted).GetFlattenedPathGeometry().Figures.Count;
-            Assert.Equal(1, plainFigures);
-            Assert.Equal(2, mutedFigures);
+            var source = new Point(0, 0);
+            var target = new Point(300, 80);
+            var plain = new DycWire { Source = source, Target = target, Stroke = Brushes.White };
+            var muted = new DycWire { Source = source, Target = target, IsMuted = true, Stroke = Brushes.White };
+
+            var (p1, p2) = DycWire.ControlPoints(source, target);
+            var mid = DycWire.Evaluate(source, p1, p2, target, 0.5);
+            var ahead = DycWire.Evaluate(source, p1, p2, target, 0.52);
+            var tangent = new Vector(ahead.X - mid.X, ahead.Y - mid.Y);
+            tangent.Normalize();
+            var probe = mid + new Vector(-tangent.Y, tangent.X) * 5d; // 5px off the curve, inside the tick
+
+            Assert.False(Define(plain).StrokeContains(Probe, probe), "plain wire should not reach " + probe);
+            Assert.True(Define(muted).StrokeContains(Probe, probe), "muted wire should have a tick through " + probe + " (mid " + mid + ")");
         });
     }
 

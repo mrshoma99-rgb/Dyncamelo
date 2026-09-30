@@ -43,7 +43,7 @@ public static class ClusterNodes
     [MultiReturn("groups", "clusterNumbers", "clusterCount", "sizes", "report")]
     public static Dictionary<string, object?> Cluster(
         IEnumerable<ModelItem> items,
-        double tolerance = 0.01,
+        [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,
         [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
         string units = "document",
         [NodeChoices("bbox", "mesh")]

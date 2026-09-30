@@ -88,7 +88,7 @@ public static class MathNodes
     [NodeName("Math.Round")]
     [NodeDescription("Rounds a number to the given number of decimal digits (midpoints round away from zero).")]
     [NodeSearchTags("round", "nearest")]
-    public static double Round(double number, int digits = 0)
+    public static double Round(double number, [NodeRange(0, 15)] int digits = 0)
     {
         return Math.Round(number, digits, MidpointRounding.AwayFromZero);
     }

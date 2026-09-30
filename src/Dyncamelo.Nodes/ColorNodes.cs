@@ -26,7 +26,11 @@ public static class ColorNodes
     [return: NodeName("color")]
     [NodeDescription("Creates a color from alpha, red, green and blue values (0-255).")]
     [NodeSearchTags("rgb", "argb", "rgba")]
-    public static DyncameloColor ByArgb(int a = 255, int r = 0, int g = 0, int b = 0)
+    public static DyncameloColor ByArgb(
+        [NodeRange(0, 255)] int a = 255,
+        [NodeRange(0, 255)] int r = 0,
+        [NodeRange(0, 255)] int g = 0,
+        [NodeRange(0, 255)] int b = 0)
     {
         return new DyncameloColor(a, r, g, b);
     }
@@ -105,7 +109,7 @@ public static class ColorNodes
     [return: NodeName("color")]
     [NodeDescription("Interpolates between two colors (t clamped to 0-1).")]
     [NodeSearchTags("interpolate", "blend", "gradient", "mix")]
-    public static DyncameloColor Lerp(DyncameloColor start, DyncameloColor end, double t)
+    public static DyncameloColor Lerp(DyncameloColor start, DyncameloColor end, [NodeRange(0, 1, Step = 0.05)] double t)
     {
         if (start == null)
         {

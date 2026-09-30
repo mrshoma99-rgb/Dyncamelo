@@ -41,7 +41,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: frames the current item in the view (Camera.ZoomToItems). Place before Save Viewpoint so each view is centred on its item.")]
     [NodeSearchTags("action", "zoom", "workflow", "foreach", "frame", "fit", "focus")]
     [return: NodeName("action")]
-    public static IWorkflowAction ZoomTo(double paddingFactor = 1.5) => new ZoomToAction(paddingFactor);
+    public static IWorkflowAction ZoomTo([NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5) => new ZoomToAction(paddingFactor);
 
     /// <summary>Builds an action that saves the current view as a named viewpoint.</summary>
     /// <param name="name">Viewpoint name; supports {name}, {index1}, {count} templating (default {name} = the item's name).</param>
@@ -83,7 +83,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: applies a TEMPORARY color to the current item so it stands out — captured per viewpoint by Action.SaveViewpoint, so each view keeps its own highlight. Pair with Action.Ghost to fade the rest.")]
     [NodeSearchTags("action", "highlight", "color", "temporary", "workflow", "foreach", "spotlight")]
     [return: NodeName("action")]
-    public static IWorkflowAction Highlight(object color, double transparency = 0.0) => new HighlightAction(color, transparency);
+    public static IWorkflowAction Highlight(object color, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.0) => new HighlightAction(color, transparency);
 
     /// <summary>Builds an action that ghosts (fades) a set of items with a temporary transparency.</summary>
     /// <param name="items">The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight).</param>
@@ -93,7 +93,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: applies a TEMPORARY transparency to the given items (wire the whole found set) so the highlighted item reads against a faded context. Captured per viewpoint. Put before Action.Highlight; reset each item with Action.ResetTemporaryAppearance.")]
     [NodeSearchTags("action", "ghost", "fade", "transparency", "temporary", "workflow", "foreach", "context")]
     [return: NodeName("action")]
-    public static IWorkflowAction Ghost(IEnumerable<ModelItem> items, double transparency = 0.85) => new GhostAction(items, transparency);
+    public static IWorkflowAction Ghost(IEnumerable<ModelItem> items, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.85) => new GhostAction(items, transparency);
 
     /// <summary>Builds an action that clears every temporary appearance override (a per-item clean slate).</summary>
     /// <returns>A reset-temporary-appearance action for Workflow.ForEach.</returns>

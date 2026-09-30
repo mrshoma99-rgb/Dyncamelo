@@ -80,7 +80,7 @@ public static class AuditNodes
     [MultiReturn("items1", "items2", "count")]
     public static Dictionary<string, object?> DuplicateItems(
         IEnumerable<ModelItem> items,
-        double tolerance = 0.001,
+        [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.001,
         Document? document = null)
     {
         if (items == null)

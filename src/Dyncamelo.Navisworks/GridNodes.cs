@@ -64,7 +64,7 @@ public static class GridNodes
     [NodeDescription("All grid intersections of the active grid system, per level — names like \"A-1\" with positions in document units. The API only answers closest-intersection queries, so intersections are discovered by sampling the model's bounding box and completing the line lattice; raise samples if a very dense grid comes back incomplete.")]
     [NodeSearchTags("grid", "intersection", "intersections", "gridline", "axis", "lattice")]
     [MultiReturn("names", "points", "levelNames")]
-    public static Dictionary<string, object?> Intersections(Document? document = null, int samples = 20)
+    public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 10000, SoftMin = 2, SoftMax = 100)] int samples = 20)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var system = ResolveActiveSystem(doc);

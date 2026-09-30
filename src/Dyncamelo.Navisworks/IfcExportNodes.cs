@@ -65,7 +65,7 @@ public static class IfcExportNodes
         IEnumerable<ParamMapRule>? parameterRules = null,
         IEnumerable<string>? categoryFilter = null,
         Dictionary<string, string>? classMap = null,
-        double splitMegabytes = 0,
+        [NodeRange(0, 100000)] double splitMegabytes = 0,
         bool validate = false,
         Document? document = null)
     {
@@ -179,7 +179,7 @@ public static class IfcExportNodes
         double eastings = 0,
         double northings = 0,
         double elevation = 0,
-        double rotationDegrees = 0,
+        [NodeRange(-360, 360, Unit = "°")] double rotationDegrees = 0,
         bool writeGeoref = true)
     {
         return new CoordOptions

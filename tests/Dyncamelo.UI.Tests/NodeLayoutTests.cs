@@ -392,11 +392,18 @@ public class NodeLayoutTests
         {
             StaHost.Run(() =>
             {
-                Assert.Single(FindDescendants<ScrubNumberBox>(rig.Window));                       // amount
-                Assert.Single(FindDescendants<System.Windows.Controls.CheckBox>(rig.Window));      // flag
-                Assert.Equal(2, FindDescendants<System.Windows.Controls.TextBox>(rig.Window).Count); // label + outputPath
-                Assert.Single(FindDescendants<System.Windows.Controls.ListBox>(rig.Window));       // mode (segmented)
-                Assert.Single(FindDescendants<System.Windows.Controls.ComboBox>(rig.Window));      // kind (dropdown)
+                // Count by the port each control edits, so template internals (a ComboBox hosts its own TextBox) never confuse it.
+                int Editors<T>(Func<Dyncamelo.UI.ViewModels.ConnectorViewModel, bool> forPort)
+                    where T : FrameworkElement =>
+                    FindDescendants<T>(rig.Window).Count(e => e.DataContext is Dyncamelo.UI.ViewModels.ConnectorViewModel c && forPort(c));
+
+                Assert.Equal(1, Editors<ScrubNumberBox>(c => c.Port.Name == "amount"));
+                Assert.Equal(1, Editors<System.Windows.Controls.CheckBox>(c => c.Port.Name == "flag"));
+                Assert.Equal(1, Editors<System.Windows.Controls.TextBox>(c => c.Port.Name == "label"));
+                Assert.Equal(1, Editors<System.Windows.Controls.TextBox>(c => c.Port.Name == "outputPath"));
+                Assert.Equal(1, Editors<System.Windows.Controls.ListBox>(c => c.Port.Name == "mode"));
+                Assert.Equal(1, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "kind"));
+                Assert.Equal(0, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "mode"));
                 var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
                 var tint = node.Inputs.Single(c => c.Port.Name == "tint");
                 Assert.Equal(Dyncamelo.Core.Editing.PortEditorKind.Colour, tint.EditorKind);

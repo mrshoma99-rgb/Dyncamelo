@@ -178,8 +178,8 @@ public static class ExportNodes
         string filePath,
         IEnumerable<ClashTest>? tests = null,
         bool includeImages = false,
-        int imageWidth = 320,
-        int imageHeight = 240,
+        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageWidth = 320,
+        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageHeight = 240,
         Document? document = null)
     {
         if (string.IsNullOrEmpty(filePath))
@@ -277,8 +277,8 @@ public static class ExportNodes
     [return: NodeName("filePath")]
     public static string ViewpointImage(
         string filePath,
-        int width = 1920,
-        int height = 1080,
+        [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int width = 1920,
+        [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int height = 1080,
         Document? document = null)
     {
         if (string.IsNullOrEmpty(filePath))
