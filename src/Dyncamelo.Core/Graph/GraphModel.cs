@@ -77,6 +77,9 @@ public class GraphModel : INotifyPropertyChanged
     /// <summary>Raised after a connection is removed.</summary>
     public event EventHandler<ConnectionEventArgs>? ConnectionRemoved;
 
+    /// <summary>Raised when a wire is muted or un-muted.</summary>
+    public event EventHandler<ConnectionEventArgs>? ConnectionMuteChanged;
+
     /// <summary>
     /// Raised on every dirty-marking mutation (add/remove/connect/disconnect/value change).
     /// The UI layer uses this as the trigger for debounced automatic runs.
@@ -299,6 +302,7 @@ public class GraphModel : INotifyPropertyChanged
         }
 
         connection.IsMuted = muted;
+        ConnectionMuteChanged?.Invoke(this, new ConnectionEventArgs(connection));
         MarkDirty(connection.TargetNode);
     }
 

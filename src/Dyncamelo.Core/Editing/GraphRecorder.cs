@@ -55,6 +55,7 @@ public sealed class GraphRecorder : IDisposable
         graph.NodeRemoved += OnNodeRemoved;
         graph.ConnectionAdded += OnConnectionAdded;
         graph.ConnectionRemoved += OnConnectionRemoved;
+        graph.ConnectionMuteChanged += OnConnectionMuteChanged;
         graph.Notes.CollectionChanged += OnNotesChanged;
         graph.Groups.CollectionChanged += OnGroupsChanged;
     }
@@ -72,6 +73,7 @@ public sealed class GraphRecorder : IDisposable
         _graph.NodeRemoved -= OnNodeRemoved;
         _graph.ConnectionAdded -= OnConnectionAdded;
         _graph.ConnectionRemoved -= OnConnectionRemoved;
+        _graph.ConnectionMuteChanged -= OnConnectionMuteChanged;
         _graph.Notes.CollectionChanged -= OnNotesChanged;
         _graph.Groups.CollectionChanged -= OnGroupsChanged;
         foreach (var t in _tracked.Values.ToList())
@@ -101,6 +103,9 @@ public sealed class GraphRecorder : IDisposable
 
     private void OnConnectionRemoved(object? sender, ConnectionEventArgs e) =>
         _undo.Record(new WireStep(_graph, e.Connection, added: false));
+
+    private void OnConnectionMuteChanged(object? sender, ConnectionEventArgs e) =>
+        _undo.Record(new WireMuteStep(_graph, e.Connection, e.Connection.IsMuted));
 
     private void OnNotesChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
         OnCollectionChanged(_graph.Notes, e);
@@ -408,6 +413,26 @@ public sealed class GraphRecorder : IDisposable
                 _graph.Disconnect(_connection);
             }
         }
+    }
+
+    private sealed class WireMuteStep : IUndoStep
+    {
+        private readonly GraphModel _graph;
+        private readonly ConnectionModel _connection;
+        private readonly bool _muted;
+
+        public WireMuteStep(GraphModel graph, ConnectionModel connection, bool muted)
+        {
+            _graph = graph;
+            _connection = connection;
+            _muted = muted;
+        }
+
+        public string Label => _muted ? "Mute wire" : "Unmute wire";
+
+        public void Undo() => _graph.SetConnectionMuted(_connection, !_muted);
+
+        public void Redo() => _graph.SetConnectionMuted(_connection, _muted);
     }
 
     private sealed class ListItemStep<T> : IUndoStep
