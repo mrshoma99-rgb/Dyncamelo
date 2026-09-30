@@ -192,6 +192,12 @@ public class GraphModel : INotifyPropertyChanged
             return false;
         }
 
+        // A wire that comes from another graph (a node moved into a node group) brings its own numbering; keep new wires after it.
+        if (connection.Sequence >= _nextConnectionSequence)
+        {
+            _nextConnectionSequence = connection.Sequence + 1;
+        }
+
         InsertBySequence(connection);
         connection.Target.UsingDefaultValue = false;
         ConnectionAdded?.Invoke(this, new ConnectionEventArgs(connection));
