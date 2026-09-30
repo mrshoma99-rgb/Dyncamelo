@@ -114,9 +114,8 @@ public partial class GraphEditorViewModel : ObservableObject
         SelectedConnections.CollectionChanged += OnSelectedConnectionsChanged;
         PendingConnection = new PendingConnectionViewModel();
 
-        StartConnectionCommand = new RelayCommand<ConnectorViewModel>(
-            _ => PendingConnection.IsVisible = true,
-            connector => connector != null && !(connector.IsInput && connector.IsConnected));
+        StartConnectionCommand = new RelayCommand<ConnectorViewModel>(BeginConnectionDrag, connector => connector != null);
+        PendingConnection.PropertyChanged += OnPendingConnectionChanged;
         CreateConnectionCommand = new RelayCommand<ConnectorViewModel>(CompletePendingConnection);
         DisconnectConnectorCommand = new RelayCommand<ConnectorViewModel>(DisconnectConnector);
         RemoveConnectionCommand = new RelayCommand<ConnectionViewModel>(RemoveConnection);
@@ -1291,6 +1290,13 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void CompletePendingConnection(ConnectorViewModel? target)
     {
+        ClearSocketDimming();
+        if (_movingLink != null)
+        {
+            CompleteMovedLink(target);
+            return;
+        }
+
         // A wire released on empty canvas asks what to connect to instead of vanishing.
         var dragged = PendingConnection.Source;
         if (target == null && PendingConnection.Target == null && dragged != null && !IsOverNode(PendingConnection.TargetLocation))
@@ -1364,9 +1370,24 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void RemoveConnection(ConnectionViewModel? connection)
     {
-        if (connection != null)
+        if (connection == null)
         {
-            _graph.Disconnect(connection.Model);
+            return;
+        }
+
+        // Nodify calls this once per wire the cutting line crossed. Holding Ctrl while cutting
+        // mutes the wires instead of removing them.
+        if (_cutTransaction != null && IsMuteCutRequested())
+        {
+            _graph.SetConnectionMuted(connection.Model, !connection.Model.IsMuted);
+            _cutWires++;
+            return;
+        }
+
+        _graph.Disconnect(connection.Model);
+        if (_cutTransaction != null)
+        {
+            _cutWires++;
         }
     }
 
@@ -1699,27 +1720,14 @@ public partial class GraphEditorViewModel : ObservableObject
             return;
         }
 
-        double left = double.MaxValue, top = double.MaxValue, right = double.MinValue, bottom = double.MinValue;
-        foreach (var item in members)
-        {
-            // Fall back to a nominal size when the view has not measured the item yet.
-            double width = item.Size.Width > 0 ? item.Size.Width : 160d;
-            double height = item.Size.Height > 0 ? item.Size.Height : 90d;
-            left = Math.Min(left, item.Location.X);
-            top = Math.Min(top, item.Location.Y);
-            right = Math.Max(right, item.Location.X + width);
-            bottom = Math.Max(bottom, item.Location.Y + height);
-        }
-
-        const double padding = 20d;
-        const double headerHeight = 42d;
+        var frame = GraphOps.FrameAround(members.Select(ItemRect))!.Value;
         var group = new GroupModel
         {
             Title = "Group",
-            X = left - padding,
-            Y = top - padding - headerHeight,
-            Width = right - left + padding * 2d,
-            Height = bottom - top + padding * 2d + headerHeight,
+            X = frame.X,
+            Y = frame.Y,
+            Width = frame.Width,
+            Height = frame.Height,
         };
         _graph.Groups.Add(group);
         StatusMessage = "Grouped " + members.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " item(s).";

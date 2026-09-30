@@ -135,6 +135,10 @@ public partial class DyncameloEditorControl : UserControl
                 {
                     AddFileSubmenus(vm, top);
                 }
+                else if (category == "Graph")
+                {
+                    AddFrameColorSubmenu(vm, top);
+                }
             });
     }
 
@@ -173,10 +177,28 @@ public partial class DyncameloEditorControl : UserControl
             case "graph.rename": return vm.RenameCommand;
             case "graph.addnote": return _addNoteCommand;
             case "graph.group": return vm.GroupSelectionCommand;
+            case "graph.fitframe": return vm.FitFrameCommand;
+            case "graph.ungroup": return vm.UngroupSelectedCommand;
             case "graph.arrange": return vm.ArrangeSelectionCommand;
             case "graph.addnode": return _addNodeCommand;
             default: return null;
         }
+    }
+
+    private static void AddFrameColorSubmenu(GraphEditorViewModel vm, MenuItem graph)
+    {
+        var colors = new MenuItem { Header = "Frame Colour" };
+        foreach (var color in GraphEditorViewModel.FrameColors)
+        {
+            colors.Items.Add(new MenuItem
+            {
+                Header = color.Key,
+                Command = vm.SetFrameColorCommand,
+                CommandParameter = color.Value,
+            });
+        }
+
+        graph.Items.Add(colors);
     }
 
     private void AddFileSubmenus(GraphEditorViewModel vm, MenuItem file)
@@ -619,6 +641,14 @@ public partial class DyncameloEditorControl : UserControl
 
     private void OnEditorMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (e.ClickCount == 2 && ViewModel != null && WireUnder(e.OriginalSource) is ConnectionViewModel wire)
+        {
+            // Double-click a wire to bend it with a reroute.
+            ViewModel.InsertRerouteOnWire(wire, Editor.MouseLocation);
+            e.Handled = true;
+            return;
+        }
+
         if (e.ClickCount != 2 || ViewModel == null || !IsEmptyCanvasHit(e.OriginalSource))
         {
             return;
@@ -650,6 +680,24 @@ public partial class DyncameloEditorControl : UserControl
 
                 return;
         }
+    }
+
+    private object? WireUnder(object originalSource)
+    {
+        var current = originalSource as DependencyObject;
+        while (current != null && !ReferenceEquals(current, Editor))
+        {
+            if (current is BaseConnection connection && connection.DataContext is ConnectionViewModel wire)
+            {
+                return wire;
+            }
+
+            current = current is Visual || current is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(current)
+                : LogicalTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 
     /// <summary>

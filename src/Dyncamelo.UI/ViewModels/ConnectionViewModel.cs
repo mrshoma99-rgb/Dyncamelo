@@ -17,6 +17,7 @@ public class ConnectionViewModel : ObservableObject
 {
     private bool _isSelected;
     private bool _isInsertTarget;
+    private bool _isHidden;
 
     /// <summary>Creates the wrapper.</summary>
     /// <param name="owner">The editor that owns this wire.</param>
@@ -100,6 +101,13 @@ public class ConnectionViewModel : ObservableObject
     {
         get => _isInsertTarget;
         set => SetProperty(ref _isInsertTarget, value);
+    }
+
+    /// <summary>True while the wire is picked up and being dragged elsewhere (drawn as the pending wire instead).</summary>
+    public bool IsHidden
+    {
+        get => _isHidden;
+        set => SetProperty(ref _isHidden, value);
     }
 
     /// <summary>True while the wire is part of the canvas selection.</summary>

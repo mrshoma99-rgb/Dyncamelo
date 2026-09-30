@@ -810,6 +810,9 @@
                             <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
                             <Setter Property="StrokeThickness" Value="3" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsHidden}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding IsInsertTarget}" Value="True">
                             <Setter Property="Stroke" Value="{StaticResource Dyc.TextBrush}" />
                             <Setter Property="StrokeThickness" Value="4.5" />
@@ -844,6 +847,7 @@
         <nodify:PendingConnection IsVisible="{Binding IsVisible}"
                                   Source="{Binding Source, Mode=OneWayToSource}"
                                   Target="{Binding Target, Mode=OneWayToSource}"
+                                  SourceAnchor="{Binding SourceLocation, Mode=TwoWay}"
                                   TargetAnchor="{Binding TargetLocation, Mode=OneWayToSource}"
                                   EnableSnapping="True"
                                   AllowOnlyConnectors="True"

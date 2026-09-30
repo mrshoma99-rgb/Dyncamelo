@@ -707,6 +707,8 @@
                                  ViewportZoom="{Binding ViewportZoom, Mode=TwoWay}"
                                  ItemsDragStartedCommand="{Binding ItemsDragStartedCommand}"
                                  ItemsDragCompletedCommand="{Binding ItemsDragCompletedCommand}"
+                                 CuttingStartedCommand="{Binding CuttingStartedCommand}"
+                                 CuttingCompletedCommand="{Binding CuttingCompletedCommand}"
                                  PendingConnectionTemplate="{StaticResource Dyc.PendingConnectionTemplate}"
                                  ConnectionTemplate="{StaticResource Dyc.ConnectionTemplate}"
                                  DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"

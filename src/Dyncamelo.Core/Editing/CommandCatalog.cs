@@ -102,6 +102,8 @@ public static class CommandCatalog
         new CommandInfo("graph.rename", "Rename Graph", "Graph", "F2"),
         new CommandInfo("graph.addnote", "Add Note", "Graph", null, toolbar: true, keywords: "comment annotation"),
         new CommandInfo("graph.group", "Group Selection", "Graph", "Ctrl+G", keywords: "frame"),
+        new CommandInfo("graph.fitframe", "Fit Frame to Contents", "Graph", "Ctrl+Shift+G", keywords: "group shrink wrap resize"),
+        new CommandInfo("graph.ungroup", "Ungroup", "Graph", "Ctrl+Shift+U", keywords: "frame remove group"),
         new CommandInfo("graph.arrange", "Arrange Selection", "Graph", "Ctrl+L", keywords: "layout align tidy"),
         new CommandInfo("node.collapse", "Collapse / Expand", "Node", "H", keywords: "fold header minimize"),
         new CommandInfo("node.hideunused", "Hide / Show Unused Sockets", "Node", "Ctrl+H", keywords: "sockets ports optional"),

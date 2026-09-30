@@ -246,6 +246,37 @@ public static class GraphOps
         return downstream.Select(n => new KeyValuePair<NodeModel, double>(n, n.X + shift)).ToList();
     }
 
+    // ----- frames ----------------------------------------------------------------------------------
+
+    /// <summary>Clear space between a frame's edge and the items it wraps.</summary>
+    public const double FramePadding = 20d;
+
+    /// <summary>Height of a frame's title bar, above the items.</summary>
+    public const double FrameHeader = 42d;
+
+    /// <summary>The frame rectangle (x, y, width, height) that wraps the given item rectangles, or null when there are none.</summary>
+    /// <param name="items">Item rectangles as (x, y, width, height).</param>
+    public static (double X, double Y, double Width, double Height)? FrameAround(IEnumerable<(double X, double Y, double Width, double Height)> items)
+    {
+        double left = double.MaxValue, top = double.MaxValue, right = double.MinValue, bottom = double.MinValue;
+        var any = false;
+        foreach (var item in items)
+        {
+            any = true;
+            left = Math.Min(left, item.X);
+            top = Math.Min(top, item.Y);
+            right = Math.Max(right, item.X + item.Width);
+            bottom = Math.Max(bottom, item.Y + item.Height);
+        }
+
+        if (!any)
+        {
+            return null;
+        }
+
+        return (left - FramePadding, top - FramePadding - FrameHeader, right - left + FramePadding * 2d, bottom - top + FramePadding * 2d + FrameHeader);
+    }
+
     // ----- following links -----------------------------------------------------------------------
 
     /// <summary>The nodes reachable downstream of the seeds (seeds included).</summary>
