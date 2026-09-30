@@ -1096,6 +1096,21 @@ Nothing from the study is left unassigned. The two items I *chose not to build* 
 
 ---
 
+## 15b. As built, Phases 1–4 (v0.36–v0.38)
+
+Recorded so the plan stays honest about what shipped and how it differs from the text above.
+
+* **Phase 1 (undo, menu bar):** as planned. Wire mute and the +/- input buttons are undoable (the latter puts the *same* port object back so restored wires stay valid).
+* **Phase 2 (row layout):** as planned; sockets sit on the left/right card edges (Q5). The wire is a custom `DycWire`; Nodify's stock offsets and arrowhead are overridden to zero.
+* **Phase 3 (inline editors):** as planned, except the **colour picker is an in-node popup, not the old modal dialog** — the dialog took Roamer down in a real session, and a popup is also what the design asked for (one control style). The dialog was deleted. `CrashGuard` now keeps any failing command or Dyncamelo UI handler from ending the host (log + status line).
+* **Body templates** (File Path, Watch sizing, +/- buttons) reached the node view model through a `nodify:Node` ancestor that the row layout does not have; they now look up the `ItemContainer`.
+* **Phase 4 (gestures):** delete-and-reconnect (Ctrl+Delete; reroutes dissolve on Delete), auto-connect (F), select downstream/upstream/similar (L / Shift+L / Shift+G), wire mute (M), reroute on double-click, insert-on-wire (drag or library drop), wire-drop filtered search, pick-up/move/swap links (plain drag from a connected input; Shift at the drop swaps; release on empty canvas removes), cut as one undo step (Ctrl at release mutes), frame fit/ungroup/colours, socket dimming, F1 help. Deviations: (1) insert-on-wire tests **sampled points on the Bézier** against the node rectangle instead of a WPF geometry hit-test (testable without a window); (2) the **150 ms tween of the auto-offset was not built** — nodes shift in one undoable step; (3) cutting keeps Nodify's **Alt+Shift+drag** gesture (Blender's Ctrl+right-drag conflicts with panning).
+* **Command surface:** `ShortcutRouter` replaced the hand-written key bindings; every shortcut, menu item and help line comes from `CommandCatalog`. The two header rows (menu bar and toolbar) were merged into one command bar; only Undo/Redo/Run/Auto/Previews/Settings keep buttons.
+* **Added after review (not in the original plan):** a model-element picker input for `ModelItem` / list / collection ports (use the Navisworks selection, click to re-select, clear), stored as model-tree paths and resolved by converters at run time; a folder chooser for Directory Path; drop-downs for `resolveTo`, clash status and numeric comparison.
+* **Still open:** Phase 5 (MSAGL arrange, minimap, command palette, shortcut rebinding, sectioned settings, generated UI guide, removing the classic layout), the vector compound editor and multi-input socket of §5.3b, and cursor wrapping while scrubbing.
+
+---
+
 ## 16. What I need from you (none of it blocks starting)
 
 1. **Approve the phase order** (foundations → undo → look → editors → gestures → polish), or tell me which visible phase you want first. Constraint: undo must precede gestures, and types/attributes must precede colours/editors.
