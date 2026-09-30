@@ -8,6 +8,7 @@ jobs:
   windows:
     name: Windows (full solution)
     runs-on: windows-latest
+    timeout-minutes: 25
     env:
       CI: "true"
     steps:
@@ -37,7 +38,8 @@ jobs:
       # Real WPF: the editor control in an actual window on the runner's desktop
       # (wire anchors, collapse, overview zoom, classic layout, reroutes).
       - name: Test Dyncamelo.UI.Tests
-        run: dotnet test tests/Dyncamelo.UI.Tests/Dyncamelo.UI.Tests.csproj -c Release --no-build --verbosity normal
+        # --blame-hang names the test that hangs (a stuck WPF dispatcher would otherwise hold the job for hours).
+        run: dotnet test tests/Dyncamelo.UI.Tests/Dyncamelo.UI.Tests.csproj -c Release --no-build --verbosity normal --blame-hang-timeout 4m --blame-hang-dump-type none
 
   linux:
     name: Linux (non-WPF projects)

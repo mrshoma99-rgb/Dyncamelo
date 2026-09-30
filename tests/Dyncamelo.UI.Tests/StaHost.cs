@@ -43,7 +43,8 @@ internal static class StaHost
     /// <summary>Runs <paramref name="action"/> on the STA thread; exceptions propagate to the caller.</summary>
     public static void Run(Action action)
     {
-        Dispatcher.Invoke(action);
+        // A test that blocks the dispatcher must fail with a message instead of hanging the whole run.
+        Dispatcher.Invoke(action, DispatcherPriority.Normal, System.Threading.CancellationToken.None, TimeSpan.FromSeconds(120));
     }
 
     /// <summary>Lets pending layout, binding and render work finish.</summary>
