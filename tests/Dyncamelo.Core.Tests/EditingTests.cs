@@ -394,6 +394,8 @@ public static class EditorMetaFixtures
         new Dictionary<string, object> { { "views", new List<object>() }, { "names", new List<object>() } };
 
     public static string Kinded([PortKinds("item*")] object items) => items?.ToString() ?? string.Empty;
+
+    public static string Painted([PortKinds("colour")] object color, object plain) => color?.ToString() ?? string.Empty;
 }
 
 public class EditorMetadataLoaderTests
@@ -433,6 +435,18 @@ public class EditorMetadataLoaderTests
     {
         var node = new ZeroTouchNodeModel(ZT.Definition("Pick"));
         Assert.Equal(new[] { "Alpha", "Beta", "Gamma" }, node.InPorts[0].Choices);
+    }
+
+    [Fact]
+    public void AnObjectInputTaggedColourGetsTheColourEditor()
+    {
+        var node = new ZeroTouchNodeModel(Defs.Single(d => d.Method.Name == "Painted"));
+        Assert.Equal(PortEditorKind.Colour, PortEditors.Resolve(node.InPorts[0]));
+        Assert.Equal(PortEditorKind.None, PortEditors.Resolve(node.InPorts[1]));
+
+        PortEditors.SetColour(node.InPorts[0], 255, 200, 30, 10);
+        Assert.Equal("#FFC81E0A", PortEditors.GetColourHex(node.InPorts[0]));
+        Assert.Equal("#FFC81E0A", node.InPorts[0].UserValue);
     }
 
     [Fact]
@@ -837,7 +851,7 @@ public class RowPlannerTests
     private static Func<PortModel, bool> None => p => false;
 
     private static string Sig(IEnumerable<PlannedRow> rows) =>
-        string.Join(" ", rows.Select(r => r.Key + (r.ZeroHeight ? "!" : string.Empty)));
+        string.Join(" ", rows.Select(r => r.Key + (r.ZeroHeight ? "!" : string.Empty) + (r.Compact ? "~" : string.Empty)));
 
     [Fact]
     public void OrdersOutputsBodyInputsPanelsThenSummary()
@@ -925,13 +939,29 @@ public class RowPlannerTests
     }
 
     [Fact]
-    public void CollapsedNodeKeepsOnlyWiredSocketsAsZeroHeightRows()
+    public void CollapsedNodeKeepsEverySocketAsASlimRow()
     {
         var node = ZT.Node("AddStep");
         node.Ui.Collapsed = true;
-        var rows = RowPlanner.Plan(node, p => p == node.InPorts[0] || p == node.OutPorts[0], hasBody: true);
-        Assert.Equal("o:result! i:x!", Sig(rows));
-        Assert.Empty(RowPlanner.Plan(node, None, hasBody: true));
+        var wired = RowPlanner.Plan(node, p => p == node.InPorts[0] || p == node.OutPorts[0], hasBody: true);
+        var unwired = RowPlanner.Plan(node, None, hasBody: true);
+
+        // No body, panel headers or hidden chip: just the sockets, outputs first, all slim rows (none zero-height).
+        Assert.All(wired, r => Assert.True(r.Compact && !r.ZeroHeight && (r.Kind == RowKind.Output || r.Kind == RowKind.Input)));
+        Assert.Equal(node.OutPorts.Count + node.InPorts.Count, unwired.Count);
+        Assert.Equal(Sig(wired), Sig(unwired));
+        Assert.StartsWith("o:result~ i:x~", Sig(unwired));
+    }
+
+    [Fact]
+    public void CollapsedNodeStillHonoursHiddenSockets()
+    {
+        var node = ZT.Node("AddStep");
+        var hiddenPort = node.InPorts[node.InPorts.Count - 1];
+        hiddenPort.IsHidden = true;
+        node.Ui.Collapsed = true;
+        Assert.DoesNotContain("i:" + hiddenPort.Name, Sig(RowPlanner.Plan(node, None, hasBody: false)));
+        Assert.Contains("i:" + hiddenPort.Name, Sig(RowPlanner.Plan(node, p => p == hiddenPort, hasBody: false)));
     }
 
     [Fact]

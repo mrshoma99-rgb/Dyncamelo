@@ -26,7 +26,7 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 
 ## Anatomy of a node
 
-* The **header** carries the node's name (double-click to rename) and its state colour; `H` collapses the node to its header.
+* The **header** carries the node's name (double-click to rename) and its state colour; `H` collapses the node to its header and a slim column of sockets on each edge, so it can still be wired.
 * **Rows** run top to bottom: outputs first as labels on the right, then inputs. An input row has a **socket** on the left and, when nothing is wired to it, an **inline editor** — a draggable number field, a checkbox, a text box, a dropdown or segmented switcher for named choices, a colour swatch, a file field with a `…` button, or a **model-element picker** that takes the current Navisworks selection.
 * A number field that differs from its default shows a dot at its left edge; **hover a field and press `Backspace`** to put the default back. `Ctrl+C` / `Ctrl+V` while hovering copies or pastes the value.
 * Optional inputs can be hidden while they are unconnected (**Hide / Show Unused Sockets**, `Ctrl+H`); nodes with an *Advanced* panel fold rarely-used inputs into it.
@@ -57,6 +57,7 @@ Socket colour names the kind of data. With **Type letters in sockets** turned on
 
 * A **pill** — an elongated socket — is a **multi-input**: connect as many wires to it as you like. With one wire it behaves exactly like an ordinary input; with several, the node receives everything they carry combined into one list, in the order the wires were made (wires carrying lists contribute their elements). The wires fan out along the pill, one landing point each, and the node's row grows to fit them. Drag from the pill to take off the wire under the pointer; drop a picked-up wire back on the pill at another slot to reorder, or use **Move Wire Earlier / Later** on a selected wire. Any input marked `[MultiInput]` (see the authoring guide) is drawn this way — for example the item lists of the Appearance, Selection and Export nodes, and **List.Merge**.
 * A **dashed wire** feeds a list into a single-value input: the node runs once per item (replication).
+* **Mute and Freeze** both stop a node from running, but they differ in what happens around it. A **muted** node (`M`, badge *MUTED*) is bypassed: each output passes the first input of a matching type straight through, the node counts as done, and everything downstream still runs on that passed-through data. A **frozen** node (`Shift+M`, badge *FROZEN*) is held: it **and everything downstream of it** are skipped by runs and keep the results from their last run, so a slow branch is not recomputed while you work elsewhere. Use *mute* to switch a step off inside a live chain (a filter, a recolour); use *freeze* to stop a whole branch from recomputing. Both are undoable and saved with the graph. A muted *wire* is different again: only that connection is ignored, and the input falls back to its own value.
 * A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).
 * Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.
 
@@ -128,6 +129,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Collapse / Expand | `H` | Canvas |
 | Hide / Show Unused Sockets | `Ctrl+H` | Canvas |
 | Mute / Unmute | `M` | Canvas |
+| Freeze / Unfreeze | `Shift+M` | Canvas |
 | Reset Inputs to Default | — | Canvas |
 | Insert Into Selected Wire | — | Canvas |
 | Connect Selected Nodes | `F` | Canvas |

@@ -471,7 +471,7 @@ public class CommandSurfaceTests
             var path = Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json");
             var vm = NewEditor(path);
             Assert.True(vm.IsLibraryVisible);
-            Resolver(vm, "view.library");
+            vm.CommandResolver = id => id == "view.library" ? vm.ToggleLibraryCommand : null;   // the real command, as the view supplies it
             Assert.True(vm.RunCommandById("view.library"));
             Assert.False(vm.IsLibraryVisible);
 
@@ -639,6 +639,93 @@ public class CommandSurfaceViewTests
             Assert.NotEmpty(Descendants<Nodify.MinimapItem>(mini));
             Assert.Empty(Descendants<ScrubNumberBox>(mini));                 // a node's editors live on the canvas only
             Assert.Equal(3, Descendants<ScrubNumberBox>(host.Window).Count); // the node's own three number inputs
+        });
+    }
+
+    [Fact]
+    public void CtrlMShowsAndHidesTheMinimapAndTheToolbarButtonFollows()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            host.Vm.Graph.AddNode(new SumNode { X = 10, Y = 10 });
+            var mini = (Nodify.Minimap)host.Control.FindName("MiniMap");
+            var button = (System.Windows.Controls.Primitives.ToggleButton)host.Control.FindName("MinimapButton");
+            Assert.Equal("auto", host.Vm.MinimapMode);
+            Assert.Equal(System.Windows.Visibility.Collapsed, mini.Visibility);      // a small graph: automatic = hidden
+            Assert.False(button.IsChecked);
+
+            host.Control.ModifierProvider = () => ModifierKeys.Control;
+            Assert.True(host.Control.WantsHostKey(Key.M));
+            Assert.True(host.Control.ProcessHostKey(Key.M));
+            Assert.Equal("on", host.Vm.MinimapMode);
+            Assert.Equal(System.Windows.Visibility.Visible, mini.Visibility);
+            Assert.True(button.IsChecked);
+
+            Assert.True(host.Control.ProcessHostKey(Key.M));
+            Assert.Equal(System.Windows.Visibility.Collapsed, mini.Visibility);
+            Assert.False(button.IsChecked);
+
+            // The button does the same through the command, and its tooltip names the shortcut.
+            Assert.Contains("Ctrl+M", (string)button.ToolTip);
+            button.Command.Execute(null);
+            Assert.Equal(System.Windows.Visibility.Visible, mini.Visibility);
+            Assert.StartsWith("Hide", (string)button.ToolTip);
+        });
+    }
+
+    [Fact]
+    public void TheMinimapActuallyPaintsTheNodesAndTheVisibleFrame()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            host.Vm.Graph.AddNode(new SumNode { X = 100, Y = 100 });
+            host.Vm.Graph.AddNode(new SumNode { X = 500, Y = 160 });
+            host.Vm.Graph.AddNode(new SumNode { X = 900, Y = 60 });
+            host.Vm.MinimapMode = "on";
+        });
+        StaHost.Flush();
+        StaHost.Flush();
+        StaHost.Run(() =>
+        {
+            var mini = (Nodify.Minimap)host.Control.FindName("MiniMap");
+            var item = ((System.Windows.Media.SolidColorBrush)host.Control.FindResource("Dyc.MinimapItemBrush")).Color;
+            var accent = ((System.Windows.Media.SolidColorBrush)host.Control.FindResource("Dyc.AccentBrush")).Color;
+
+            var width = (int)Math.Ceiling(mini.ActualWidth);
+            var height = (int)Math.Ceiling(mini.ActualHeight);
+            var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(Math.Max(width, 1), Math.Max(height, 1), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            bitmap.Render(mini);
+            var stride = Math.Max(width, 1) * 4;
+            var pixels = new byte[stride * Math.Max(height, 1)];
+            bitmap.CopyPixels(pixels, stride, 0);
+
+            int Near(System.Windows.Media.Color c, int tolerance)
+            {
+                var count = 0;
+                for (var i = 0; i + 3 < pixels.Length; i += 4)
+                {
+                    if (Math.Abs(pixels[i + 2] - c.R) <= tolerance && Math.Abs(pixels[i + 1] - c.G) <= tolerance && Math.Abs(pixels[i] - c.B) <= tolerance)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+
+            var items = Descendants<Nodify.MinimapItem>(mini);
+            var itemPixels = Near(item, 20);
+            var accentPixels = Near(accent, 20);
+            var detail = "minimap " + mini.ActualWidth + "x" + mini.ActualHeight + ", extent " + mini.Extent + ", viewport " + mini.ViewportLocation + " " + mini.ViewportSize +
+                         ", items [" + string.Join("; ", items.Select(i => i.Location + " " + i.ActualWidth + "x" + i.ActualHeight + " vis=" + i.IsVisible)) +
+                         "], item-coloured px " + itemPixels + ", accent px " + accentPixels;
+
+            Assert.Equal(3, items.Count);
+            Assert.True(items.All(i => i.ActualWidth > 2 && i.ActualHeight > 2), "every minimap item needs a size: " + detail);
+            Assert.True(itemPixels >= 150, "the node rectangles are not painted: " + detail);
+            Assert.True(accentPixels >= 40, "the visible-area frame is not painted: " + detail);
         });
     }
 

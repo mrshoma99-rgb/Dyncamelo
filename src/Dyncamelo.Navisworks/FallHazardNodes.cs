@@ -57,8 +57,8 @@ public static class FallHazardNodes
         bool saveViewpoints = true,
         [NodeRange(1, 64)] int pixelsPerCell = 6,
         bool showOverage = false,
-        object? lowColor = null,
-        object? highColor = null,
+        [PortKinds("colour")] object? lowColor = null,
+        [PortKinds("colour")] object? highColor = null,
         Document? document = null)
     {
         var floorList = NavisValues.ToItemList(floors);
@@ -245,9 +245,9 @@ public static class FallHazardNodes
         string? imagePath = null,
         [NodeRange(1, 64)] int pixelsPerCell = 6,
         bool showOverage = false,
-        object? dangerousColor = null,
-        object? protectedColor = null,
-        object? safeColor = null,
+        [PortKinds("colour")] object? dangerousColor = null,
+        [PortKinds("colour")] object? protectedColor = null,
+        [PortKinds("colour")] object? safeColor = null,
         Document? document = null)
     {
         var floorList = NavisValues.ToItemList(floors);

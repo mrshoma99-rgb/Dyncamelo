@@ -38,6 +38,12 @@ public sealed class PlannedRow
     /// </summary>
     public bool ZeroHeight { get; internal set; }
 
+    /// <summary>
+    /// True for the rows of a collapsed node: only the socket is drawn, in a slim row, so the node still shows
+    /// where its inputs and outputs are (as Blender's collapsed nodes do) without labels or editors.
+    /// </summary>
+    public bool Compact { get; internal set; }
+
     /// <summary>For panel headers: whether the panel is expanded.</summary>
     public bool IsOpen { get; internal set; }
 
@@ -71,8 +77,9 @@ public sealed class PlannedRow
 /// </summary>
 /// <remarks>
 /// Invariants: a connected port and a port with a pinned value are never
-/// hidden; a connected port that would be hidden (collapsed node, closed
-/// panel) keeps a zero-height row so its wire still has an anchor.
+/// hidden; a connected port that would be hidden (closed panel) keeps a
+/// zero-height row so its wire still has an anchor. A collapsed node keeps a
+/// slim socket-only row for every port it would show (outputs first, then inputs).
 /// </remarks>
 public static class RowPlanner
 {
@@ -98,14 +105,14 @@ public static class RowPlanner
 
         if (collapsed)
         {
-            foreach (var port in node.OutPorts.Where(isConnected))
+            foreach (var port in node.OutPorts.Where(p => !IsHidden(node, p, isConnected(p), hideUnusedDefault)))
             {
-                rows.Add(new PlannedRow { Kind = RowKind.Output, Port = port, ZeroHeight = true });
+                rows.Add(new PlannedRow { Kind = RowKind.Output, Port = port, Compact = true });
             }
 
-            foreach (var port in node.InPorts.Where(isConnected))
+            foreach (var port in node.InPorts.Where(p => !IsHidden(node, p, isConnected(p), hideUnusedDefault)))
             {
-                rows.Add(new PlannedRow { Kind = RowKind.Input, Port = port, ZeroHeight = true, Panel = port.Panel });
+                rows.Add(new PlannedRow { Kind = RowKind.Input, Port = port, Compact = true, Panel = port.Panel });
             }
 
             return rows;

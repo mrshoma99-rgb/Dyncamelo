@@ -111,6 +111,7 @@ public partial class GraphEditorViewModel
             OnPropertyChanged(nameof(UndoTooltip));
             OnPropertyChanged(nameof(RedoTooltip));
             OnPropertyChanged(nameof(RunTooltip));
+            OnPropertyChanged(nameof(MinimapTooltip));
             if (_isPaletteOpen)
             {
                 RefreshPalette();

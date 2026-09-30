@@ -43,7 +43,7 @@ public static class RedlineNodes
         string text,
         double x,
         double y,
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
@@ -76,7 +76,7 @@ public static class RedlineNodes
         double y1,
         double x2,
         double y2,
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
@@ -104,7 +104,7 @@ public static class RedlineNodes
         double y1,
         double x2,
         double y2,
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
@@ -132,7 +132,7 @@ public static class RedlineNodes
         double y1,
         double x2,
         double y2,
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
@@ -154,7 +154,7 @@ public static class RedlineNodes
     public static SavedViewpoint AddCloud(
         object viewpoint,
         IList<object?> points,
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {
@@ -203,7 +203,7 @@ public static class RedlineNodes
         double y,
         double radius = 0.08,
         string comment = "",
-        object? color = null,
+        [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
     {

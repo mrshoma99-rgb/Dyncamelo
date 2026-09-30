@@ -58,7 +58,7 @@ public partial class GraphEditorViewModel
 
     private static readonly IReadOnlyList<string> AllPreferenceProperties = new[]
     {
-        nameof(MinimapMode), nameof(IsMinimapVisible), nameof(NodeDensity), nameof(RowBaseHeight), nameof(StraightWires),
+        nameof(MinimapMode), nameof(IsMinimapVisible), nameof(MinimapTooltip), nameof(NodeDensity), nameof(RowBaseHeight), nameof(StraightWires),
         nameof(WireLowDetail), nameof(ColourBlindGlyphs), nameof(HideUnusedByDefault), nameof(ScrubSpeed), nameof(ScrubPixelsPerStep),
         nameof(SnapToGrid), nameof(GridCellSize), nameof(AutoOffsetOnInsert), nameof(DeleteReconnectsReroutes), nameof(ShowGrid),
         nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden),
@@ -68,7 +68,7 @@ public partial class GraphEditorViewModel
     public string MinimapMode
     {
         get => _settings.GetString(SettingKeys.Minimap, "auto");
-        set => SetPreference(SettingKeys.Minimap, value, "auto", nameof(MinimapMode), nameof(IsMinimapVisible));
+        set => SetPreference(SettingKeys.Minimap, value, "auto", nameof(MinimapMode), nameof(IsMinimapVisible), nameof(MinimapTooltip));
     }
 
     /// <summary>True when the minimap is shown.</summary>

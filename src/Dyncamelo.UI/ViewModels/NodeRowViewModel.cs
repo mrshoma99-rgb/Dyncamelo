@@ -13,7 +13,11 @@ namespace Dyncamelo.UI.ViewModels;
 /// </summary>
 public sealed class NodeRowViewModel : ObservableObject
 {
+    /// <summary>Height of the socket-only row of a collapsed node.</summary>
+    public const double CompactRowHeight = 13d;
+
     private bool _zeroHeight;
+    private bool _compact;
     private bool _isOpen;
     private int _count;
     private bool _panelDefaultOpen;
@@ -58,6 +62,19 @@ public sealed class NodeRowViewModel : ObservableObject
         }
     }
 
+    /// <summary>True for the socket-only rows of a collapsed node.</summary>
+    public bool Compact
+    {
+        get => _compact;
+        private set
+        {
+            if (SetProperty(ref _compact, value))
+            {
+                RaiseHeight();
+            }
+        }
+    }
+
     /// <summary>Panel headers: whether the panel is expanded.</summary>
     public bool IsOpen
     {
@@ -89,18 +106,22 @@ public sealed class NodeRowViewModel : ObservableObject
     /// <summary>Text of the hidden-ports chip.</summary>
     public string HiddenText => "+" + _count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " hidden";
 
-    /// <summary>Height to lay the row out with: 0 for anchor-only rows and in overview, else automatic.</summary>
-    public double RowHeight => Collapsed ? 0d : double.NaN;
+    /// <summary>Height to lay the row out with: 0 for anchor-only rows and in overview, a slim row for a collapsed node, else automatic.</summary>
+    public double RowHeight => Collapsed
+        ? 0d
+        : _compact && !IsPill ? CompactRowHeight : double.NaN;
 
     /// <summary>Minimum height matching <see cref="RowHeight"/>.</summary>
     public double RowMinHeight => Collapsed
         ? 0d
-        : Connector != null && Connector.IsMultiInput
-            ? System.Math.Max(Node.Owner.RowBaseHeight, Connector.PillHeight + 4d)
-            : Node.Owner.RowBaseHeight;
+        : _compact
+            ? IsPill ? Connector!.PillHeight + 2d : CompactRowHeight
+            : IsPill
+                ? System.Math.Max(Node.Owner.RowBaseHeight, Connector!.PillHeight + 4d)
+                : Node.Owner.RowBaseHeight;
 
-    /// <summary>True when the label and editors should be shown (sockets always stay laid out).</summary>
-    public bool ShowContent => !Collapsed;
+    /// <summary>True when the labels and editors should be shown (sockets always stay laid out).</summary>
+    public bool ShowContent => !Collapsed && !_compact;
 
     /// <summary>Expands or collapses a panel.</summary>
     public ICommand TogglePanelCommand { get; }
@@ -113,6 +134,7 @@ public sealed class NodeRowViewModel : ObservableObject
     {
         _panelDefaultOpen = plan.PanelDefaultOpen;
         ZeroHeight = plan.ZeroHeight;
+        Compact = plan.Compact;
         IsOpen = plan.IsOpen;
         Count = plan.Count;
     }
@@ -126,6 +148,8 @@ public sealed class NodeRowViewModel : ObservableObject
     }
 
     private bool Collapsed => _zeroHeight || Node.IsOverview;
+
+    private bool IsPill => Connector != null && Connector.IsMultiInput;
 
     private void TogglePanel()
     {

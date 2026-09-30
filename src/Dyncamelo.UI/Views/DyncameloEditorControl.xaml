@@ -93,6 +93,13 @@
                                   IsChecked="{Binding ShowNodePreviews}">
                         <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Preview}" />
                     </ToggleButton>
+                    <ToggleButton x:Name="MinimapButton"
+                                  Style="{StaticResource Dyc.ToolToggle}"
+                                  ToolTip="{Binding MinimapTooltip}"
+                                  Command="{Binding ToggleMinimapCommand}"
+                                  IsChecked="{Binding IsMinimapVisible, Mode=OneWay}">
+                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Map}" />
+                    </ToggleButton>
 
                     <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
 
@@ -625,7 +632,7 @@
                         <Setter Property="ContentTemplate">
                             <Setter.Value>
                                 <DataTemplate>
-                                    <Border />
+                                    <Border CornerRadius="2" Background="{DynamicResource Dyc.MinimapItemBrush}" />
                                 </DataTemplate>
                             </Setter.Value>
                         </Setter>

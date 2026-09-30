@@ -295,6 +295,7 @@ public partial class DyncameloEditorControl : UserControl
             case "node.collapse": return vm.ToggleCollapseSelectedCommand;
             case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
             case "node.mute": return vm.ToggleMuteSelectedCommand;
+            case "node.freeze": return vm.ToggleFreezeSelectedCommand;
             case "node.autoconnect": return vm.AutoConnectCommand;
             case "node.resetinputs": return vm.ResetSelectedInputsCommand;
             case "node.insertonwire": return vm.InsertIntoSelectedWireCommand;

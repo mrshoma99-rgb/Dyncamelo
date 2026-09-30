@@ -215,21 +215,42 @@ public class NodeLayoutTests
     }
 
     [Fact]
-    public void CollapsingKeepsWiresAttachedToTheHeaderEdge()
+    public void CollapsingKeepsEverySocketVisibleOnTheEdgesAsSlimRows()
     {
         using var rig = Build();
         StaHost.Run(() => rig.A.Model.Ui.Collapsed = true);
         StaHost.Flush();
         StaHost.Run(() =>
         {
-            Assert.True(rig.A.Size.Height < 80, "collapsed node should be short, got " + rig.A.Size.Height);
+            // One output and three inputs stay as slim socket-only rows: no labels, no editors, not zero-height.
+            Assert.Equal(4, rig.A.Rows.Count);
+            Assert.All(rig.A.Rows, r =>
+            {
+                Assert.True(r.Compact, "row " + r.Key + " should be a slim socket row");
+                Assert.False(r.ZeroHeight);
+                Assert.False(r.ShowContent);
+                Assert.Equal(NodeRowViewModel.CompactRowHeight, r.RowHeight);
+            });
+            Assert.True(rig.A.Size.Height < 110, "collapsed node should stay short, got " + rig.A.Size.Height);
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "collapsed output");
-            // Only the wired output stays as a zero-height row; unwired inputs are dropped.
-            Assert.All(rig.A.Rows, r => Assert.True(r.ZeroHeight));
+
+            // Each input has its own anchor on the left edge, one under another (not all stacked on one point).
+            var inputs = rig.A.Rows.Where(r => r.Kind == Dyncamelo.Core.Editing.RowKind.Input).Select(r => r.Connector!.Anchor).ToList();
+            Assert.Equal(3, inputs.Count);
+            foreach (var anchor in inputs)
+            {
+                AssertOnEdge(rig.A, anchor, rightEdge: false, "collapsed input");
+            }
+
+            Assert.Equal(3, inputs.Select(a => Math.Round(a.Y)).Distinct().Count());
         });
         StaHost.Run(() => rig.A.Model.Ui.Collapsed = false);
         StaHost.Flush();
-        StaHost.Run(() => AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "re-expanded output"));
+        StaHost.Run(() =>
+        {
+            Assert.All(rig.A.Rows.Where(r => r.Kind != Dyncamelo.Core.Editing.RowKind.Body), r => Assert.False(r.Compact));
+            AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "re-expanded output");
+        });
     }
 
     [Fact]

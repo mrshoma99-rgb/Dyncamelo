@@ -151,6 +151,7 @@ public partial class GraphEditorViewModel : ObservableObject
 
         ToggleCollapseSelectedCommand = new RelayCommand(() => ToggleCollapse(null));
         ToggleMuteSelectedCommand = new RelayCommand(() => ToggleMute(null));
+        ToggleFreezeSelectedCommand = new RelayCommand(() => ToggleFreeze(null));
         ToggleHideUnusedSelectedCommand = new RelayCommand(() => ToggleHideUnused(null));
         CollapseAllCommand = new RelayCommand(() => SetAllCollapsed(true));
         ExpandAllCommand = new RelayCommand(() => SetAllCollapsed(false));
@@ -311,6 +312,7 @@ public partial class GraphEditorViewModel : ObservableObject
             if (SetProperty(ref _nodeCount, value))
             {
                 OnPropertyChanged(nameof(IsMinimapVisible));
+                OnPropertyChanged(nameof(MinimapTooltip));
             }
         }
     }
@@ -506,6 +508,9 @@ public partial class GraphEditorViewModel : ObservableObject
     /// <summary>Mutes/unmutes the selected nodes (M).</summary>
     public ICommand ToggleMuteSelectedCommand { get; }
 
+    /// <summary>Freezes/unfreezes the selected nodes (Shift+M).</summary>
+    public ICommand ToggleFreezeSelectedCommand { get; }
+
     /// <summary>Hides/shows unused sockets on the selected nodes (Ctrl+H).</summary>
     public ICommand ToggleHideUnusedSelectedCommand { get; }
 
@@ -573,6 +578,27 @@ public partial class GraphEditorViewModel : ObservableObject
                         (wires.Count == 0 ? " node(s)." : targets.Count == 0 ? " wire(s)." : " item(s).");
     }
 
+    internal void ToggleFreeze(NodeViewModel? anchor)
+    {
+        var targets = ToggleTargets(anchor);
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        var freeze = targets.Any(n => !n.Model.IsFrozen);
+        using (_undo.Begin(freeze ? "Freeze" : "Unfreeze"))
+        {
+            foreach (var node in targets)
+            {
+                node.Model.IsFrozen = freeze;
+            }
+        }
+
+        StatusMessage = (freeze ? "Froze " : "Unfroze ") + targets.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                        " node(s)" + (freeze ? " — they and everything downstream keep their last results until unfrozen." : ".");
+    }
+
     internal void ToggleHideUnused(NodeViewModel? anchor)
     {
         var targets = ToggleTargets(anchor);
@@ -625,6 +651,9 @@ public partial class GraphEditorViewModel : ObservableObject
 
     /// <summary>Toolbar tooltip for Run, showing its current shortcut.</summary>
     public string RunTooltip => "Run the graph" + ShortcutSuffix("graph.run");
+
+    /// <summary>Toolbar tooltip for the minimap toggle, showing its current shortcut.</summary>
+    public string MinimapTooltip => (IsMinimapVisible ? "Hide the minimap" : "Show the minimap") + ShortcutSuffix("view.minimap");
 
     // " (Ctrl+Z)" for the shortcut in force, or nothing when the command is unbound.
     private string ShortcutSuffix(string commandId)

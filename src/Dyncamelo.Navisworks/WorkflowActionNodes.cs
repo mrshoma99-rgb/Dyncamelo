@@ -65,7 +65,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: overrides the current item's color (Appearance.OverrideColor).")]
     [NodeSearchTags("action", "color", "override", "workflow", "foreach", "paint", "tint")]
     [return: NodeName("action")]
-    public static IWorkflowAction OverrideColor(object color) => new OverrideColorAction(color);
+    public static IWorkflowAction OverrideColor([PortKinds("colour")] object color) => new OverrideColorAction(color);
 
     /// <summary>Builds an action that removes color/transparency overrides from the current item.</summary>
     /// <returns>A reset-appearance action for Workflow.ForEach.</returns>
@@ -83,7 +83,7 @@ public static class WorkflowActionNodes
     [NodeDescription("Per item: applies a TEMPORARY color to the current item so it stands out — captured per viewpoint by Action.SaveViewpoint, so each view keeps its own highlight. Pair with Action.Ghost to fade the rest.")]
     [NodeSearchTags("action", "highlight", "color", "temporary", "workflow", "foreach", "spotlight")]
     [return: NodeName("action")]
-    public static IWorkflowAction Highlight(object color, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.0) => new HighlightAction(color, transparency);
+    public static IWorkflowAction Highlight([PortKinds("colour")] object color, [NodeRange(0, 1, Step = 0.05)] double transparency = 0.0) => new HighlightAction(color, transparency);
 
     /// <summary>Builds an action that ghosts (fades) a set of items with a temporary transparency.</summary>
     /// <param name="items">The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight).</param>

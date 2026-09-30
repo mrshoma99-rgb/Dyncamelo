@@ -78,6 +78,8 @@
     <StreamGeometry x:Key="Dyc.Icon.Rename">F1 M180-180h44l472-471-44-44-472 471v44Zm-60 60v-128l575-574q8-8 19-12.5t23-4.5q11 0 22 4.5t20 12.5l44 44q9 9 13 20t4 22q0 11-4.5 22.5T823-694L248-120H120Zm659-617-41-41 41 41Zm-105 64-22-22 44 44-22-22Z</StreamGeometry>
     <!-- Lightning bolt = "auto / live re-run" (clearer than the refresh-loop glyph). -->
     <StreamGeometry x:Key="Dyc.Icon.Auto">F1 M11,21 L11,13 L6,13 L13,3 L13,11 L18,11 Z</StreamGeometry>
+    <!-- Minimap: a frame with the visible area inside it. -->
+    <StreamGeometry x:Key="Dyc.Icon.Map">F0 M3,4 L21,4 L21,20 L3,20 Z M5,6 L19,6 L19,18 L5,18 Z M8,8 L14,8 L14,13 L8,13 Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Preview">F1 M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 240q113 0 207.5-59.5T832-500q-50-121-144.5-180.5T480-740q-113 0-207.5 59.5T128-500q50 121 144.5 180.5T480-260Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Undo">F1 M12.5,8 C9.85,8 7.45,8.99 5.6,10.6 L2,7 L2,16 L11,16 L7.38,12.38 C8.77,11.22 10.54,10.5 12.5,10.5 C16.04,10.5 19.05,12.81 20.1,16 L22.47,15.22 C21.08,11.03 17.15,8 12.5,8 Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Redo">F1 M18.4,10.6 C16.55,8.99 14.15,8 11.5,8 C6.85,8 2.92,11.03 1.54,15.22 L3.9,16 C4.95,12.81 7.95,10.5 11.5,10.5 C13.45,10.5 15.23,11.22 16.62,12.38 L13,16 L22,16 L22,7 L18.4,10.6 Z</StreamGeometry>
@@ -140,7 +142,9 @@
     </Style>
     <!-- ===== Slim scroll bars in the palette. The stock Windows bar is a wide grey track with arrow buttons that clashes
          with the theme, and its gutter is what made menus look like they always had a scroll bar. The ScrollViewer still
-         decides whether a bar is needed; this only styles it (a thin thumb, no arrows, transparent track). ===== -->
+         decides whether a bar is needed; this only styles it (a thin thumb, no arrows, transparent track). Menu popups never
+         show a bar at all (VerticalScrollBarVisibility="Hidden": the wheel and arrow keys still scroll a menu taller than the
+         screen), because an Auto bar was measured as needed even when every item fit. ===== -->
     <Style x:Key="Dyc.ScrollTrackButton" TargetType="{x:Type RepeatButton}">
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="IsTabStop" Value="False" />
@@ -230,7 +234,7 @@
                             CornerRadius="6"
                             Padding="3"
                             SnapsToDevicePixels="True">
-                        <ScrollViewer CanContentScroll="True">
+                        <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
                             <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                         </ScrollViewer>
                     </Border>
@@ -298,7 +302,7 @@
                                         CornerRadius="6"
                                         Padding="3"
                                         SnapsToDevicePixels="True">
-                                    <ScrollViewer CanContentScroll="True">
+                                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                                     </ScrollViewer>
                                 </Border>
@@ -357,7 +361,7 @@
                                         Padding="3"
                                         MinWidth="230"
                                         SnapsToDevicePixels="True">
-                                    <ScrollViewer CanContentScroll="True">
+                                    <ScrollViewer CanContentScroll="True" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
                                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                                     </ScrollViewer>
                                 </Border>
@@ -1288,32 +1292,47 @@
         </StackPanel>
     </DataTemplate>
 
+    <!-- Colour Picker: the swatch opens the full picker; the four channels are scrub fields like every other number in a node. -->
     <DataTemplate x:Key="NodeBody.ColorPickerNode">
         <StackPanel Margin="4" MinWidth="180">
-            <views:ColorSwatchPicker Height="24"
+            <views:ColorSwatchPicker Height="26"
                                      A="{Binding A, Mode=TwoWay}"
                                      R="{Binding R, Mode=TwoWay}"
                                      G="{Binding G, Mode=TwoWay}"
                                      B="{Binding B, Mode=TwoWay}" />
-            <Grid Margin="0,4,0,0">
+            <Grid Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="A" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
-                <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding A}" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="R" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
-                <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding R}" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="G" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
-                <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding G}" />
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="B" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
-                <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding B}" />
+                <views:ScrubNumberBox Grid.Row="0" Grid.Column="0" Margin="0,0,2,2"
+                                      Label="R" Minimum="0" Maximum="255" Step="1" IsInteger="True"
+                                      Value="{Binding R, Mode=TwoWay}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="R channel (0-255). Drag, click to type, or double-click to reset." />
+                <views:ScrubNumberBox Grid.Row="0" Grid.Column="1" Margin="2,0,0,2"
+                                      Label="G" Minimum="0" Maximum="255" Step="1" IsInteger="True"
+                                      Value="{Binding G, Mode=TwoWay}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="G channel (0-255). Drag, click to type, or double-click to reset." />
+                <views:ScrubNumberBox Grid.Row="1" Grid.Column="0" Margin="0,0,2,2"
+                                      Label="B" Minimum="0" Maximum="255" Step="1" IsInteger="True"
+                                      Value="{Binding B, Mode=TwoWay}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="B channel (0-255). Drag, click to type, or double-click to reset." />
+                <views:ScrubNumberBox Grid.Row="1" Grid.Column="1" Margin="2,0,0,2"
+                                      Label="A" Minimum="0" Maximum="255" Step="1" IsInteger="True"
+                                      Value="{Binding A, Mode=TwoWay}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="A channel (0-255). Drag, click to type, or double-click to reset." />
             </Grid>
         </StackPanel>
     </DataTemplate>
@@ -2100,13 +2119,13 @@
                     <Border.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Collapse / Expand" InputGestureText="H" Command="{Binding ToggleCollapseCommand}" />
-                            <MenuItem Header="Mute / Unmute" InputGestureText="M" Command="{Binding ToggleMuteCommand}" />
+                            <MenuItem Header="Mute / Unmute" InputGestureText="M" Command="{Binding ToggleMuteCommand}"
+                                      ToolTip="Skip this node but keep the data flowing: each output passes the matching input straight through, and everything downstream still runs." />
                             <MenuItem Header="Hide / Show Unused Sockets" InputGestureText="Ctrl+H" Command="{Binding ToggleHideUnusedCommand}" />
                             <MenuItem Header="Reset Width" Command="{Binding ResetWidthCommand}" />
                             <Separator />
-                            <MenuItem Header="Freeze"
-                                      IsCheckable="True"
-                                      IsChecked="{Binding IsFrozen}" />
+                            <MenuItem Header="Freeze / Unfreeze" InputGestureText="Shift+M" Command="{Binding ToggleFreezeCommand}"
+                                      ToolTip="Stop this node and everything downstream of it from running. They keep their last results until unfrozen." />
                             <MenuItem Header="Show Preview"
                                       IsCheckable="True"
                                       IsChecked="{Binding ShowPreview}" />
@@ -2146,6 +2165,17 @@
                                                FontWeight="Bold"
                                                Foreground="White"
                                                Text="MUTED"
+                                               ToolTip="Muted: not run. Outputs pass the matching inputs straight through, so the graph carries on downstream (M)."
+                                               Visibility="Collapsed" />
+                                    <TextBlock x:Name="FrozenBadge"
+                                               DockPanel.Dock="Right"
+                                               Margin="6,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               Text="FROZEN"
+                                               ToolTip="Frozen: this node and everything downstream keep their last results and are skipped by runs (Shift+M)."
                                                Visibility="Collapsed" />
                                     <TextBlock DockPanel.Dock="Right"
                                                Margin="8,0,0,0"
@@ -2252,6 +2282,7 @@
                 <Setter TargetName="StateBorder" Property="ToolTip" Value="{Binding StateMessage}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding IsFrozen}" Value="True">
+                <Setter TargetName="FrozenBadge" Property="Visibility" Value="Visible" />
                 <Setter TargetName="StateBorder" Property="Opacity" Value="0.45" />
             </DataTrigger>
             <MultiDataTrigger>

@@ -117,6 +117,7 @@ public static class CommandCatalog
         new CommandInfo("node.collapse", "Collapse / Expand", "Node", "H", keywords: "fold header minimize"),
         new CommandInfo("node.hideunused", "Hide / Show Unused Sockets", "Node", "Ctrl+H", keywords: "sockets ports optional"),
         new CommandInfo("node.mute", "Mute / Unmute", "Node", "M", keywords: "bypass disable pass through wire"),
+        new CommandInfo("node.freeze", "Freeze / Unfreeze", "Node", "Shift+M", keywords: "lock hold stale skip stop downstream"),
         new CommandInfo("node.resetinputs", "Reset Inputs to Default", "Node", null, keywords: "clear values defaults"),
         new CommandInfo("node.insertonwire", "Insert Into Selected Wire", "Node", null, keywords: "splice between"),
         new CommandInfo("node.autoconnect", "Connect Selected Nodes", "Node", "F", keywords: "auto link chain make links"),

@@ -76,6 +76,7 @@ public class NodeViewModel : CanvasItemViewModel
         Rows = new ObservableCollection<NodeRowViewModel>();
         ToggleCollapseCommand = new RelayCommand(() => _owner.ToggleCollapse(this));
         ToggleMuteCommand = new RelayCommand(() => _owner.ToggleMute(this));
+        ToggleFreezeCommand = new RelayCommand(() => _owner.ToggleFreeze(this));
         ToggleHideUnusedCommand = new RelayCommand(() => _owner.ToggleHideUnused(this));
         ResetWidthCommand = new RelayCommand(() => Model.Ui.Width = null);
 
@@ -108,6 +109,9 @@ public class NodeViewModel : CanvasItemViewModel
 
     /// <summary>Mutes/unmutes the node (M).</summary>
     public ICommand ToggleMuteCommand { get; }
+
+    /// <summary>Freezes/unfreezes the node (Shift+M).</summary>
+    public ICommand ToggleFreezeCommand { get; }
 
     /// <summary>Hides/shows the node's unused sockets (Ctrl+H).</summary>
     public ICommand ToggleHideUnusedCommand { get; }

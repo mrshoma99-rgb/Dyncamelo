@@ -19,7 +19,7 @@ public static class AppearanceNodes
     [NodeDescription("Overrides the color of model items (a permanent override: saved with the file and undoable).")]
     [NodeSearchTags("appearance", "color", "override", "paint", "tint")]
     [return: NodeName("items")]
-    public static List<ModelItem> OverrideColor([MultiInput] IEnumerable<ModelItem> items, object color, Document? document = null)
+    public static List<ModelItem> OverrideColor([MultiInput] IEnumerable<ModelItem> items, [PortKinds("colour")] object color, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -81,7 +81,7 @@ public static class AppearanceNodes
         "bakes into each saved view, so every viewpoint keeps its own coloring. Clear with Appearance.ResetTemporary.")]
     [NodeSearchTags("appearance", "color", "temporary", "highlight", "viewpoint", "override", "runtime")]
     [return: NodeName("items")]
-    public static List<ModelItem> OverrideColorTemporary([MultiInput] IEnumerable<ModelItem> items, object color, Document? document = null)
+    public static List<ModelItem> OverrideColorTemporary([MultiInput] IEnumerable<ModelItem> items, [PortKinds("colour")] object color, Document? document = null)
     {
         var list = RequireItems(items);
         var doc = NavisworksContext.ResolveDocument(document);

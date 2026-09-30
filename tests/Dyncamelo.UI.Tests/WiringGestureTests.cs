@@ -163,6 +163,36 @@ public class WiringGestureTests
     }
 
     [Fact]
+    public void FreezeTogglesTheSelectedNodesAsOneUndoableStep()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 0);
+            var b = AddSum(vm, 300);
+            vm.History.Clear();
+            Select(vm, a, b);
+
+            vm.ToggleFreezeSelectedCommand.Execute(null);
+            Assert.True(a.IsFrozen && b.IsFrozen);
+            Assert.True(Vm(vm, a).IsFrozen);
+            Assert.False(Vm(vm, a).IsMuted);
+            Assert.Equal(1, vm.History.UndoCount);
+
+            vm.ToggleFreezeSelectedCommand.Execute(null);
+            Assert.False(a.IsFrozen || b.IsFrozen);
+
+            // The node's own menu item acts on that node alone, and freezing and muting are independent.
+            Select(vm, b);
+            Vm(vm, a).ToggleFreezeCommand.Execute(null);
+            Assert.True(a.IsFrozen);
+            Assert.False(b.IsFrozen);
+            Vm(vm, a).ToggleMuteCommand.Execute(null);
+            Assert.True(a.IsFrozen && a.IsMuted);
+        });
+    }
+
+    [Fact]
     public void RerouteOnSelectedWireSplitsItAndUndoes()
     {
         StaHost.Run(() =>
