@@ -45,30 +45,38 @@ public class ThemeAndWireTests
             var wire = new DycWire { Source = new Point(10, 10), Target = new Point(310, 110), Stroke = Brushes.White, StrokeThickness = 2 };
             var bounds = Define(wire).Bounds;
             Assert.False(bounds.IsEmpty);
-            Assert.True(bounds.Width >= 290 && bounds.Height >= 90, "bounds " + bounds);
+            Assert.True(Math.Abs(bounds.Left - 10) < 1 && Math.Abs(bounds.Right - 310) < 1, "horizontal span " + bounds);
+            Assert.True(Math.Abs(bounds.Top - 10) < 1 && Math.Abs(bounds.Bottom - 110) < 1, "vertical span " + bounds);
+        });
+    }
+
+    private static readonly Pen Probe = new Pen(Brushes.Black, 3);
+
+    [Fact]
+    public void CurvedWireLeavesTheStraightLineButLowDetailFollowsIt()
+    {
+        StaHost.Run(() =>
+        {
+            var curved = new DycWire { Source = new Point(0, 0), Target = new Point(200, 100), Stroke = Brushes.White };
+            var straight = new DycWire { Source = new Point(0, 0), Target = new Point(200, 100), IsLowDetail = true, Stroke = Brushes.White };
+            var quarter = new Point(50, 25); // on the straight segment, off the S-curve
+            Assert.True(Define(straight).StrokeContains(Probe, quarter), "low-detail wire should pass through " + quarter);
+            Assert.False(Define(curved).StrokeContains(Probe, quarter), "curved wire should not pass through " + quarter);
+            Assert.True(Define(curved).StrokeContains(Probe, new Point(100, 50)), "the S-curve is symmetric about the midpoint");
         });
     }
 
     [Fact]
-    public void LowDetailWireIsAStraightSegment()
+    public void MutedWireAddsASecondFigureForTheTick()
     {
         StaHost.Run(() =>
         {
-            var wire = new DycWire { Source = new Point(0, 0), Target = new Point(200, 0), IsLowDetail = true, Stroke = Brushes.White };
-            var bounds = Define(wire).Bounds;
-            Assert.False(bounds.IsEmpty);
-            Assert.True(bounds.Height < 0.5, "straight line should be flat, got " + bounds);
-        });
-    }
-
-    [Fact]
-    public void MutedWireAddsATickAcrossTheMiddle()
-    {
-        StaHost.Run(() =>
-        {
-            var plain = new DycWire { Source = new Point(0, 0), Target = new Point(300, 0), Stroke = Brushes.White };
-            var muted = new DycWire { Source = new Point(0, 0), Target = new Point(300, 0), IsMuted = true, Stroke = Brushes.White };
-            Assert.True(Define(muted).Bounds.Height > Define(plain).Bounds.Height + 6);
+            var plain = new DycWire { Source = new Point(0, 0), Target = new Point(300, 80), Stroke = Brushes.White };
+            var muted = new DycWire { Source = new Point(0, 0), Target = new Point(300, 80), IsMuted = true, Stroke = Brushes.White };
+            var plainFigures = Define(plain).GetFlattenedPathGeometry().Figures.Count;
+            var mutedFigures = Define(muted).GetFlattenedPathGeometry().Figures.Count;
+            Assert.Equal(1, plainFigures);
+            Assert.Equal(2, mutedFigures);
         });
     }
 

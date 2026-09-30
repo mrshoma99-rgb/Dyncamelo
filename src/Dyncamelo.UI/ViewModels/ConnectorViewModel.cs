@@ -33,6 +33,11 @@ public class ConnectorViewModel : ObservableObject
         Port = port;
         _declaredKind = PortKinds.FromPort(port);
         _kind = _declaredKind;
+        EditorKind = PortEditors.Resolve(port);
+        NumberSpec = EditorKind == PortEditorKind.Number ? NumberEditSpec.FromPort(port) : null;
+        ResetCommand = new RelayCommand(() => Port.ClearUserValue(), () => Port.HasUserValue);
+        PickColorCommand = new RelayCommand(PickColour);
+        BrowseCommand = new RelayCommand(BrowsePath);
         DisconnectCommand = new RelayCommand(
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
@@ -53,7 +58,7 @@ public class ConnectorViewModel : ObservableObject
         {
             case nameof(PortModel.UserValue):
             case nameof(PortModel.HasUserValue):
-                OnPropertyChanged(nameof(SelectedChoice));
+                RaiseValueChanged();
                 break;
             case nameof(PortModel.UseLevels):
                 RaiseLevelsChanged();
@@ -182,6 +187,149 @@ public class ConnectorViewModel : ObservableObject
         OnPropertyChanged(nameof(ToolTip));
     }
 
+    // ----- inline editors (unwired inputs edit their own value) ------------------
+
+    /// <summary>The inline editor this input gets while unwired (none for wire-only types).</summary>
+    public PortEditorKind EditorKind { get; }
+
+    /// <summary>Range, step and unit of a number editor; null for other editors.</summary>
+    public NumberEditSpec? NumberSpec { get; }
+
+    /// <summary>True while an editor should be shown: the input has one and no wire feeds it.</summary>
+    public bool ShowEditor => EditorKind != PortEditorKind.None && !_isConnected;
+
+    /// <summary>True when the label is drawn by the row (number fields draw their own label inside the field).</summary>
+    public bool ShowPlainLabel => !(ShowEditor && EditorKind == PortEditorKind.Number);
+
+    /// <summary>Hard minimum of the number editor.</summary>
+    public double NumberMin => NumberSpec?.Min ?? double.MinValue;
+
+    /// <summary>Hard maximum of the number editor.</summary>
+    public double NumberMax => NumberSpec?.Max ?? double.MaxValue;
+
+    /// <summary>Slider extent minimum (NaN when there is no finite range).</summary>
+    public double NumberSoftMin => NumberSpec?.SoftMin ?? double.NaN;
+
+    /// <summary>Slider extent maximum (NaN when there is no finite range).</summary>
+    public double NumberSoftMax => NumberSpec?.SoftMax ?? double.NaN;
+
+    /// <summary>Increment of the number editor.</summary>
+    public double NumberStep => NumberSpec?.Step ?? 1d;
+
+    /// <summary>True when the number editor is integer-only.</summary>
+    public bool NumberIsInteger => NumberSpec?.IsInteger ?? false;
+
+    /// <summary>Unit suffix of the number editor.</summary>
+    public string NumberUnit => NumberSpec?.Unit ?? string.Empty;
+
+    /// <summary>The number shown by the number editor; setting it pins the value (equal to the default clears the pin).</summary>
+    public double NumberValue
+    {
+        get => PortEditors.GetNumber(Port);
+        set => PortEditors.SetNumber(Port, value);
+    }
+
+    /// <summary>The boolean shown by the toggle editor.</summary>
+    public bool BoolValue
+    {
+        get => PortEditors.GetBool(Port);
+        set => PortEditors.SetBool(Port, value);
+    }
+
+    /// <summary>The text shown by the text and path editors.</summary>
+    public string TextValue
+    {
+        get => PortEditors.GetText(Port);
+        set => PortEditors.SetText(Port, value);
+    }
+
+    /// <summary>The colour as #AARRGGBB, or empty when unset.</summary>
+    public string ColourHex => PortEditors.GetColourHex(Port);
+
+    /// <summary>The colour as a brush for the swatch (transparent when unset).</summary>
+    public Brush ColourBrush
+    {
+        get
+        {
+            if (PortEditors.TryParseHex(PortEditors.GetColourHex(Port), out var a, out var r, out var g, out var b))
+            {
+                var brush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+                brush.Freeze();
+                return brush;
+            }
+
+            return Brushes.Transparent;
+        }
+    }
+
+    /// <summary>True when the input carries a pinned value (shown with a marker; reset returns to the default).</summary>
+    public bool IsModified => Port.HasUserValue;
+
+    /// <summary>True when the input has neither a pinned value nor a default (the field shows a placeholder).</summary>
+    public bool IsUnset => PortEditors.IsUnset(Port);
+
+    /// <summary>True for a drop-down choice editor.</summary>
+    public bool ShowDropdownChoices => ShowChoiceEditor && !PortEditors.UseSegmentedChoices(Port.Choices);
+
+    /// <summary>True for a segmented-button choice editor (few, short options).</summary>
+    public bool ShowSegmentedChoices => ShowChoiceEditor && PortEditors.UseSegmentedChoices(Port.Choices);
+
+    /// <summary>Returns the input to its default (clears the pinned value).</summary>
+    public ICommand ResetCommand { get; }
+
+    /// <summary>Opens the colour picker for a colour input.</summary>
+    public ICommand PickColorCommand { get; }
+
+    /// <summary>Opens a file (or folder) chooser for a path input.</summary>
+    public ICommand BrowseCommand { get; }
+
+    private void PickColour()
+    {
+        PortEditors.TryParseHex(PortEditors.GetColourHex(Port), out var a, out var r, out var g, out var b);
+        var picked = Node.Owner.Dialogs.PickColor(a, r, g, b);
+        if (picked.HasValue)
+        {
+            var c = picked.Value;
+            PortEditors.SetColour(Port, (byte)c.A, (byte)c.R, (byte)c.G, (byte)c.B);
+        }
+    }
+
+    private void BrowsePath()
+    {
+        var dialogs = Node.Owner.Dialogs;
+        string? chosen;
+        if (PortEditors.IsFolder(Port))
+        {
+            chosen = dialogs.Prompt("Folder path for '" + Port.Name + "':", "Choose folder", PortEditors.GetText(Port));
+        }
+        else
+        {
+            var name = Port.Name.ToLowerInvariant();
+            var isOutput = name.Contains("output") || name.Contains("save") || name.Contains("export") ||
+                           name.Contains("target") || name.Contains("destination");
+            chosen = isOutput
+                ? dialogs.ShowSaveFile("All files (*.*)|*.*", "Choose file for '" + Port.Name + "'", PortEditors.GetText(Port))
+                : dialogs.ShowOpenFile("All files (*.*)|*.*", "Choose file for '" + Port.Name + "'");
+        }
+
+        if (!string.IsNullOrEmpty(chosen))
+        {
+            PortEditors.SetText(Port, chosen);
+        }
+    }
+
+    private void RaiseValueChanged()
+    {
+        OnPropertyChanged(nameof(SelectedChoice));
+        OnPropertyChanged(nameof(NumberValue));
+        OnPropertyChanged(nameof(BoolValue));
+        OnPropertyChanged(nameof(TextValue));
+        OnPropertyChanged(nameof(ColourHex));
+        OnPropertyChanged(nameof(ColourBrush));
+        OnPropertyChanged(nameof(IsModified));
+        OnPropertyChanged(nameof(IsUnset));
+    }
+
     /// <summary>Removes every wire touching this port (context menu "Disconnect").</summary>
     public ICommand DisconnectCommand { get; }
 
@@ -278,8 +426,12 @@ public class ConnectorViewModel : ObservableObject
             if (SetProperty(ref _isConnected, value))
             {
                 OnPropertyChanged(nameof(IsHollow));
-                // A wire hides the inline choice editor and vice-versa.
+                // A wire hides the inline editor and vice-versa.
                 OnPropertyChanged(nameof(ShowChoiceEditor));
+                OnPropertyChanged(nameof(ShowDropdownChoices));
+                OnPropertyChanged(nameof(ShowSegmentedChoices));
+                OnPropertyChanged(nameof(ShowEditor));
+                OnPropertyChanged(nameof(ShowPlainLabel));
                 OnPropertyChanged(nameof(SelectedChoice));
             }
         }

@@ -30,6 +30,11 @@ public sealed class DycWire : BaseConnection
 
     static DycWire()
     {
+        // Nodify's default endpoint offset is 14px (half of its stock connector); our sockets are
+        // already centred on the edge, so the wire must end exactly at the anchor.
+        SourceOffsetProperty.OverrideMetadata(typeof(DycWire), new FrameworkPropertyMetadata(new Size(0d, 0d), FrameworkPropertyMetadataOptions.AffectsRender));
+        TargetOffsetProperty.OverrideMetadata(typeof(DycWire), new FrameworkPropertyMetadata(new Size(0d, 0d), FrameworkPropertyMetadataOptions.AffectsRender));
+
         // Nodify's cutting tool only slices wire types it knows about.
         NodifyEditor.CuttingConnectionTypes.Add(typeof(DycWire));
     }
