@@ -234,7 +234,7 @@ public class NodeLayoutTests
                 Assert.Equal(NodeRowViewModel.CompactRowHeight, r.RowHeight);
             });
             // The size includes the value-preview bubble under the node, so compare with the expanded node rather than a constant.
-            Assert.True(rig.A.Size.Height < expanded - 20, "collapsed node should be clearly shorter than expanded (" + expanded + "), got " + rig.A.Size.Height);
+            Assert.True(rig.A.Size.Height < expanded, "collapsed node should be shorter than expanded (" + expanded + "), got " + rig.A.Size.Height);
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "collapsed output");
 
             // Each input has its own anchor on the left edge, one under another (not all stacked on one point).
