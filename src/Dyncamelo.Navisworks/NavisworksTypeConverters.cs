@@ -60,7 +60,7 @@ public static class NavisworksTypeConverters
         TypeCoercion.RegisterConverter(
             typeof(string),
             typeof(Autodesk.Navisworks.Api.ModelItemCollection),
-            value => new Autodesk.Navisworks.Api.ModelItemCollection(NavisworksModelPicker.Resolve((string)value)));
+            value => Internal.NavisValues.ToItemCollection(NavisworksModelPicker.Resolve((string)value)));
 
         TypeCoercion.RegisterConverter(
             typeof(System.Drawing.Color),

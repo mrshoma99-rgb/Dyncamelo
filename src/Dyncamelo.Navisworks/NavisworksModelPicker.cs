@@ -65,7 +65,7 @@ public sealed class NavisworksModelPicker : IModelPicker
                 return false;
             }
 
-            doc.CurrentSelection.CopyFrom(new ModelItemCollection(items));
+            doc.CurrentSelection.CopyFrom(NavisValues.ToItemCollection(items));
             return true;
         }
         catch (Exception)

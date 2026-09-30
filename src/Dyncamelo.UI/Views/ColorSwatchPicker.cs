@@ -92,13 +92,14 @@ public sealed class ColorSwatchPicker : Grid
         _swatch.MouseLeftButtonUp += (_, e) =>
         {
             // A click on the swatch while the popup is open first closes it (click-away); do not reopen straight away.
-            if (!_popup.IsOpen && DateTime.UtcNow - _closedAt > TimeSpan.FromMilliseconds(250))
+            var popup = _popup!;
+            if (!popup.IsOpen && DateTime.UtcNow - _closedAt > TimeSpan.FromMilliseconds(250))
             {
-                _popup.IsOpen = true;
+                popup.IsOpen = true;
             }
             else
             {
-                _popup.IsOpen = false;
+                popup.IsOpen = false;
             }
 
             e.Handled = true;
