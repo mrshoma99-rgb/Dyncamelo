@@ -192,7 +192,10 @@
                     </Popup>
                 </StackPanel>
 
+                <!-- Not the window's main menu: Alt/F10 must stay with Navisworks (a WPF menu in menu mode
+                     grabs the keyboard and mouse of the whole host). -->
                 <Menu x:Name="HeaderMenu"
+                      IsMainMenu="False"
                       Background="Transparent"
                       Foreground="{StaticResource Dyc.TextBrush}"
                       VerticalAlignment="Center"

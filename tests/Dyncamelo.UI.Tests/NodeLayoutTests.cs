@@ -453,4 +453,26 @@ public class NodeLayoutTests
             });
         }
     }
+
+    [Fact]
+    public void AStaleMouseCaptureInsideTheEditorIsReleased()
+    {
+        var rig = Build();
+        using (rig)
+        {
+            StaHost.Run(() =>
+            {
+                var control = (DyncameloEditorControl)rig.Window.Content;
+                var editor = FindDescendants<Nodify.NodifyEditor>(rig.Window).Single();
+                if (!System.Windows.Input.Mouse.Capture(editor))
+                {
+                    return; // this desktop cannot grant capture; nothing to release
+                }
+
+                Assert.Same(editor, System.Windows.Input.Mouse.Captured);
+                control.ReleaseStaleMouseCapture();
+                Assert.NotSame(editor, System.Windows.Input.Mouse.Captured);
+            });
+        }
+    }
 }

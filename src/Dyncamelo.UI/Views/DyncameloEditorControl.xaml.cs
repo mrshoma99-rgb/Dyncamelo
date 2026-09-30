@@ -52,6 +52,17 @@ public partial class DyncameloEditorControl : UserControl
 
         PreviewKeyDown += OnControlPreviewKeyDown;
 
+        // The pane's own chrome (dragging or docking it) lives outside this control. A mouse capture that outlived
+        // its gesture would keep the host from receiving those clicks, so drop any stale one when the pointer leaves.
+        MouseLeave += (_, _) => ReleaseStaleMouseCapture();
+        IsKeyboardFocusWithinChanged += (_, e) =>
+        {
+            if (!(bool)e.NewValue)
+            {
+                ReleaseStaleMouseCapture();
+            }
+        };
+
         // While a node is dragged, light up the wire it would be inserted on.
         _insertTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Input)
         {
@@ -76,6 +87,32 @@ public partial class DyncameloEditorControl : UserControl
     }
 
     private readonly System.Windows.Threading.DispatcherTimer _insertTimer;
+
+    /// <summary>
+    /// Releases a mouse capture held by an element of this control when no mouse button is down and no menu is open
+    /// (a gesture that ended without releasing it). Captures inside popups belong to the popups and are left alone.
+    /// </summary>
+    public void ReleaseStaleMouseCapture()
+    {
+        if (Mouse.LeftButton != MouseButtonState.Released || Mouse.RightButton != MouseButtonState.Released ||
+            Mouse.MiddleButton != MouseButtonState.Released)
+        {
+            return;
+        }
+
+        foreach (var item in HeaderMenu.Items)
+        {
+            if (item is MenuItem menuItem && menuItem.IsSubmenuOpen)
+            {
+                return;
+            }
+        }
+
+        if (Mouse.Captured is Visual captured && IsAncestorOf(captured))
+        {
+            Mouse.Capture(null);
+        }
+    }
 
     private void OnEditorIsDraggingChanged(object? sender, System.EventArgs e)
     {

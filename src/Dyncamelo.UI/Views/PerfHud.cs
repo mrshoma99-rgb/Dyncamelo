@@ -175,7 +175,9 @@ public sealed class PerfHud : Border
                    "\nvisuals " + visuals.ToString(inv) +
                    "  nodes " + nodes.ToString(inv) +
                    "  wires " + wires.ToString(inv) +
-                   "  zoom " + zoom.ToString("F2", inv);
+                   "  zoom " + zoom.ToString("F2", inv) +
+                   "\ninput: mouse captured by " + (Mouse.Captured?.GetType().Name ?? "nothing") +
+                   ", keyboard focus on " + (Keyboard.FocusedElement?.GetType().Name ?? "nothing");
         _text.Text = line;
 
         var sb = new StringBuilder();
