@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
@@ -209,6 +210,146 @@ public class WiringGestureTests
             Select(vm, a);
             vm.SelectSimilarCommand.Execute(null);
             Assert.Equal(3, vm.SelectedItems.Count);
+        });
+    }
+}
+
+public class WireDropSearchTests
+{
+    private static GraphEditorViewModel NewEditor()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterNodeType("TestSum", () => new SumNode());
+        var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+        return new GraphEditorViewModel(registry, new StubDialogs(), settings);
+    }
+
+    private static NodeViewModel AddSum(GraphEditorViewModel vm, double x)
+    {
+        var node = new SumNode { X = x };
+        vm.Graph.AddNode(node);
+        return vm.Items.OfType<NodeViewModel>().Single(n => n.Model == node);
+    }
+
+    [Fact]
+    public void DraggingFromAnOutputOffersOnlyNodesThatCanTakeIt()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 0);
+            var source = a.Outputs[0];
+
+            vm.OpenQuickSearch(new Point(600, 100), source);
+
+            Assert.True(vm.IsQuickSearchOpen);
+            Assert.True(vm.HasQuickSearchContext);
+            Assert.Contains("accept", vm.QuickSearchContext);
+            Assert.Contains(vm.QuickSearchResults, r => r.Id == "TestSum");
+            // Input nodes have no sockets to receive a wire.
+            Assert.DoesNotContain(vm.QuickSearchResults, r => r.Id == NumberInputNode.TypeName);
+        });
+    }
+
+    [Fact]
+    public void DraggingFromAnInputOffersNodesThatProduceForIt()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 400);
+            var source = a.Inputs[0];
+
+            vm.OpenQuickSearch(new Point(300, 100), source);
+
+            Assert.Contains("produce", vm.QuickSearchContext);
+            Assert.Contains(vm.QuickSearchResults, r => r.Id == NumberInputNode.TypeName);
+            Assert.Contains(vm.QuickSearchResults, r => r.Id == "TestSum");
+        });
+    }
+
+    [Fact]
+    public void ChoosingAResultAddsAndConnectsInOneUndoStep()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 0);
+            vm.History.Clear();
+            vm.OpenQuickSearch(new Point(600, 100), a.Outputs[0]);
+            var entry = vm.QuickSearchResults.First(r => r.Id == "TestSum");
+
+            var added = vm.CommitQuickSearch(entry);
+
+            Assert.NotNull(added);
+            Assert.Equal(2, vm.Graph.Nodes.Count);
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(added!.Model.InPorts[0])!.SourceNode);
+            Assert.Equal(600, added.Model.X);
+            Assert.Equal(1, vm.History.UndoCount);
+            Assert.False(vm.HasQuickSearchContext);
+
+            vm.UndoCommand.Execute(null);
+            Assert.Single(vm.Graph.Nodes);
+            Assert.Empty(vm.Graph.Connections);
+        });
+    }
+
+    [Fact]
+    public void ANodeFeedingAnInputSitsLeftOfTheDropPoint()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 800);
+            vm.OpenQuickSearch(new Point(500, 100), a.Inputs[1]);
+            var entry = vm.QuickSearchResults.First(r => r.Id == NumberInputNode.TypeName);
+
+            var added = vm.CommitQuickSearch(entry)!;
+
+            Assert.True(added.Model.X < 500);
+            Assert.Same(added.Model, vm.Graph.FindConnectionInto(a.Model.InPorts[1])!.SourceNode);
+        });
+    }
+
+    [Fact]
+    public void ReleasingAWireOnEmptyCanvasOpensTheFilteredSearch()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 0);
+            vm.PendingConnection.Source = a.Outputs[0];
+            vm.PendingConnection.Target = null;
+            vm.PendingConnection.TargetLocation = new Point(700, 300);
+            vm.History.Clear();
+
+            vm.CreateConnectionCommand.Execute(null);
+
+            Assert.True(vm.IsQuickSearchOpen);
+            Assert.True(vm.HasQuickSearchContext);
+            Assert.Equal(0, vm.History.UndoCount);
+
+            vm.CloseQuickSearch();
+            Assert.False(vm.HasQuickSearchContext);
+            Assert.Empty(vm.Graph.Connections);
+        });
+    }
+
+    [Fact]
+    public void ReleasingAWireOnASocketStillConnects()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var a = AddSum(vm, 0);
+            var b = AddSum(vm, 400);
+            vm.PendingConnection.Source = a.Outputs[0];
+            vm.PendingConnection.Target = b.Inputs[0];
+
+            vm.CreateConnectionCommand.Execute(b.Inputs[0]);
+
+            Assert.False(vm.IsQuickSearchOpen);
+            Assert.Single(vm.Graph.Connections);
         });
     }
 }

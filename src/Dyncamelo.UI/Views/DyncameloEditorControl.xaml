@@ -807,6 +807,14 @@
                               Data="{StaticResource Dyc.Icon.Search}" />
                     </Grid>
                     <TextBlock DockPanel.Dock="Top"
+                               Margin="2,6,2,0"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{Binding QuickSearchContext}"
+                               Visibility="{Binding HasQuickSearchContext, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                    <TextBlock DockPanel.Dock="Top"
                                Margin="2,5,2,3"
                                FontSize="10"
                                Foreground="{StaticResource Dyc.SubtleTextBrush}"

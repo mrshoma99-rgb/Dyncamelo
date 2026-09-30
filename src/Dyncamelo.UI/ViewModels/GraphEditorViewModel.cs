@@ -84,6 +84,8 @@ public partial class GraphEditorViewModel : ObservableObject
     private string _quickSearchText = string.Empty;
     private LibraryEntryViewModel? _quickSearchSelected;
     private Point _quickSearchLocation;
+    private ConnectorViewModel? _quickSearchSource;
+    private string _quickSearchContext = string.Empty;
 
     /// <summary>Creates the editor with an empty untitled graph.</summary>
     /// <param name="registry">Node registry (already populated by the host).</param>
@@ -701,7 +703,20 @@ public partial class GraphEditorViewModel : ObservableObject
     /// <param name="insertLocation">Graph-space location for the inserted node.</param>
     public void OpenQuickSearch(Point insertLocation)
     {
+        OpenQuickSearch(insertLocation, null);
+    }
+
+    /// <summary>
+    /// Opens the popup for a wire dropped on empty canvas: only nodes that can connect to
+    /// <paramref name="source"/> are offered, and the chosen node is wired up when inserted.
+    /// </summary>
+    /// <param name="insertLocation">Graph-space location for the inserted node.</param>
+    /// <param name="source">The socket the wire was dragged from, or null for a plain search.</param>
+    public void OpenQuickSearch(Point insertLocation, ConnectorViewModel? source)
+    {
         _quickSearchLocation = insertLocation;
+        _quickSearchSource = source;
+        QuickSearchContext = source == null ? string.Empty : DescribeSearchSource(source);
         QuickSearchText = string.Empty;
         RefreshQuickSearchResults();
         IsQuickSearchOpen = true;
@@ -711,6 +726,8 @@ public partial class GraphEditorViewModel : ObservableObject
     public void CloseQuickSearch()
     {
         IsQuickSearchOpen = false;
+        _quickSearchSource = null;
+        QuickSearchContext = string.Empty;
     }
 
     /// <summary>
@@ -728,8 +745,19 @@ public partial class GraphEditorViewModel : ObservableObject
             return null;
         }
 
+        var source = _quickSearchSource;
         IsQuickSearchOpen = false;
-        return AddNode(chosen.Id, _quickSearchLocation);
+        _quickSearchSource = null;
+        QuickSearchContext = string.Empty;
+        if (source == null)
+        {
+            return AddNode(chosen.Id, _quickSearchLocation);
+        }
+
+        using (_undo.Begin("Add node and connect"))
+        {
+            return AddNodeConnectedTo(chosen.Id, _quickSearchLocation, source);
+        }
     }
 
     /// <summary>Moves the highlight down (+1) or up (-1) through the results, wrapping.</summary>
@@ -750,7 +778,7 @@ public partial class GraphEditorViewModel : ObservableObject
     private void RefreshQuickSearchResults()
     {
         QuickSearchResults.Clear();
-        foreach (var hit in Library.QuickSearch(_quickSearchText, 50))
+        foreach (var hit in FindQuickSearchHits(_quickSearchText, _quickSearchSource, 50))
         {
             QuickSearchResults.Add(hit);
         }
@@ -1255,6 +1283,15 @@ public partial class GraphEditorViewModel : ObservableObject
 
     private void CompletePendingConnection(ConnectorViewModel? target)
     {
+        // A wire released on empty canvas asks what to connect to instead of vanishing.
+        var dragged = PendingConnection.Source;
+        if (target == null && PendingConnection.Target == null && dragged != null && !IsOverNode(PendingConnection.TargetLocation))
+        {
+            PendingConnection.IsVisible = false;
+            OpenQuickSearch(PendingConnection.TargetLocation, dragged);
+            return;
+        }
+
         using (_undo.Begin("Connect"))
         {
             CompletePendingConnectionCore(target);

@@ -192,13 +192,6 @@ public partial class DyncameloEditorControl : UserControl
         }
 
         ViewModel.OpenQuickSearch(ViewportCenter);
-        Dispatcher.BeginInvoke(
-            new System.Action(() =>
-            {
-                QuickSearchBox.Focus();
-                QuickSearchBox.SelectAll();
-            }),
-            System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -230,6 +223,17 @@ public partial class DyncameloEditorControl : UserControl
             Dispatcher.BeginInvoke(
                 new System.Action(() => Editor.FitToScreen(null)),
                 System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.IsQuickSearchOpen) && ViewModel?.IsQuickSearchOpen == true)
+        {
+            // Whoever opened it (Space, menu, a dropped wire): put the caret in the search box.
+            Dispatcher.BeginInvoke(
+                new System.Action(() =>
+                {
+                    QuickSearchBox.Focus();
+                    QuickSearchBox.SelectAll();
+                }),
+                System.Windows.Threading.DispatcherPriority.Input);
         }
         else if (e.PropertyName == nameof(GraphEditorViewModel.PaletteId) && ViewModel != null)
         {
@@ -309,13 +313,6 @@ public partial class DyncameloEditorControl : UserControl
             // MouseLocation is the cursor in graph space, maintained by Nodify.
             ViewModel.OpenQuickSearch(Editor.MouseLocation);
             e.Handled = true;
-            Dispatcher.BeginInvoke(
-                new System.Action(() =>
-                {
-                    QuickSearchBox.Focus();
-                    QuickSearchBox.SelectAll();
-                }),
-                System.Windows.Threading.DispatcherPriority.Input);
             return;
         }
 

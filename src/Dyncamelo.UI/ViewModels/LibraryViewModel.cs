@@ -255,6 +255,9 @@ public class LibraryViewModel : ObservableObject
     private readonly NodeRegistry _registry;
     private readonly UiSettingsService? _settings;
     private readonly List<LibraryEntryViewModel> _allEntries = new List<LibraryEntryViewModel>();
+
+    /// <summary>Every searchable entry, in library order.</summary>
+    public IReadOnlyList<LibraryEntryViewModel> AllEntries => _allEntries;
     private readonly HashSet<string> _expandedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private readonly DispatcherTimer _searchTimer;
     private string _searchText = string.Empty;
