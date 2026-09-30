@@ -331,7 +331,7 @@ public class PlayerUiTests : IDisposable
 
             Assert.True(player.RunScript(path));
             Assert.Equal("Total", player.Outputs.Single().Label);
-            Assert.Equal("12", player.Outputs.Single().Text);
+            Assert.Equal("4", player.Outputs.Single().Text);   // the saved width, 2, plus the sum node's second input, 2
             Assert.False(player.RunScript(Path.Combine(Scripts, "missing.dyc")));
             Assert.Contains("does not exist", player.StatusText);
         });
