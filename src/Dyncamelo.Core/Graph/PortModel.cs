@@ -125,6 +125,26 @@ public class PortModel : INotifyPropertyChanged
     }
 
     private string _kindHint = string.Empty;
+    private bool _playerExposed;
+
+    /// <summary>
+    /// True when the Player offers this (unwired) input as a field of the script's form. Presentation only; persisted, never
+    /// affects evaluation.
+    /// </summary>
+    public bool PlayerExposed
+    {
+        get => _playerExposed;
+        set
+        {
+            if (_playerExposed == value)
+            {
+                return;
+            }
+
+            _playerExposed = value;
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// True when the user chose to hide this (unconnected) port on the node.

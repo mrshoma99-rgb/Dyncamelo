@@ -22,7 +22,7 @@ public sealed class GraphRecorder : IDisposable
 {
     private static readonly HashSet<string> NodeBaseProps = new HashSet<string>(StringComparer.Ordinal)
     {
-        nameof(NodeModel.Name), nameof(NodeModel.IsFrozen), nameof(NodeModel.IsMuted), nameof(NodeModel.Lacing),
+        nameof(NodeModel.Name), nameof(NodeModel.IsFrozen), nameof(NodeModel.IsMuted), nameof(NodeModel.Lacing), nameof(NodeModel.PlayerExposed),
     };
 
     private readonly GraphModel _graph;
@@ -299,6 +299,7 @@ public sealed class GraphRecorder : IDisposable
         private int _level;
         private bool _keep;
         private bool _hidden;
+        private bool _player;
 
         public PortTracked(GraphRecorder owner, PortModel port)
         {
@@ -319,6 +320,7 @@ public sealed class GraphRecorder : IDisposable
             _level = _port.Level;
             _keep = _port.KeepListStructure;
             _hidden = _port.IsHidden;
+            _player = _port.PlayerExposed;
         }
 
         private void OnChanged(object? sender, PropertyChangedEventArgs e)
@@ -343,6 +345,14 @@ public sealed class GraphRecorder : IDisposable
                     _useLevels = _port.UseLevels;
                     _level = _port.Level;
                     _keep = _port.KeepListStructure;
+                    break;
+                case nameof(PortModel.PlayerExposed):
+                    if (_player != _port.PlayerExposed)
+                    {
+                        _owner._undo.Record(new PropertyStep(_port, typeof(PortModel).GetProperty(nameof(PortModel.PlayerExposed))!, _player, _port.PlayerExposed));
+                    }
+
+                    _player = _port.PlayerExposed;
                     break;
                 case nameof(PortModel.IsHidden):
                     if (_hidden != _port.IsHidden)

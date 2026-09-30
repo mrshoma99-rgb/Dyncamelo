@@ -345,6 +345,12 @@ public class NodeViewModel : CanvasItemViewModel
     /// <summary>True when there is at least one diagnostic to show in the tooltip.</summary>
     public bool HasMessage => Model.StateMessage.Length > 0;
 
+    /// <summary>True when the author chose to show this node, or some of its inputs, in the Player (a marker in the header).</summary>
+    public bool InPlayer => Dyncamelo.Core.Player.PlayerExposure.HasExplicitChoice(Model);
+
+    /// <summary>Re-reads <see cref="InPlayer"/> after the node or one of its inputs was offered or withdrawn.</summary>
+    public void RaisePlayerBadge() => OnPropertyChanged(nameof(InPlayer));
+
     /// <summary>Freeze toggle: frozen nodes (and downstream) are skipped by runs.</summary>
     public bool IsFrozen
     {
@@ -843,6 +849,9 @@ public class NodeViewModel : CanvasItemViewModel
                 break;
             case nameof(NodeModel.IsFrozen):
                 OnPropertyChanged(nameof(IsFrozen));
+                break;
+            case nameof(NodeModel.PlayerExposed):
+                OnPropertyChanged(nameof(InPlayer));
                 break;
             case nameof(NodeModel.IsMuted):
                 OnPropertyChanged(nameof(IsMuted));

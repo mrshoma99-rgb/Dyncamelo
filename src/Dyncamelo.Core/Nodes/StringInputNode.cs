@@ -1,5 +1,6 @@
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
@@ -7,7 +8,7 @@ namespace Dyncamelo.Core.Nodes;
 /// <summary>
 /// A literal string typed by the user.
 /// </summary>
-public class StringInputNode : NodeModel
+public class StringInputNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "StringInput";
@@ -35,6 +36,10 @@ public class StringInputNode : NodeModel
             }
         }
     }
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(this, Name, typeof(string), Value, v => Value = v?.ToString() ?? string.Empty, null, "text");
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

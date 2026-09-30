@@ -10,7 +10,7 @@ namespace Dyncamelo.Core.Nodes;
 /// The input is declared as <see cref="object"/>, so lists arrive whole
 /// (no replication) and <see cref="FormattedValue"/> shows the full structure.
 /// </summary>
-public class WatchNode : NodeModel
+public class WatchNode : NodeModel, Dyncamelo.Core.Player.IPlayerOutputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "Watch";
@@ -35,6 +35,9 @@ public class WatchNode : NodeModel
         get => _formattedValue;
         private set => SetField(ref _formattedValue, value);
     }
+
+    /// <inheritdoc />
+    public string PlayerText => FormattedValue;
 
     /// <summary>
     /// User-chosen width of the display area (0 = automatic). Pure view state:

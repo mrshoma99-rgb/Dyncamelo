@@ -1,6 +1,8 @@
 using System;
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Editing;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Nodes;
@@ -9,7 +11,7 @@ namespace Dyncamelo.Nodes;
 /// An interactive color input: the UI binds a color swatch/picker to the
 /// channel properties; the node outputs the chosen <see cref="DyncameloColor"/>.
 /// </summary>
-public class ColorPickerNode : NodeModel
+public class ColorPickerNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "ColorPicker";
@@ -58,6 +60,26 @@ public class ColorPickerNode : NodeModel
 
     /// <summary>The currently chosen color.</summary>
     public DyncameloColor Value => new DyncameloColor(_a, _r, _g, _b);
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(
+            this,
+            Name,
+            typeof(string),
+            PortEditors.ToHex((byte)_a, (byte)_r, (byte)_g, (byte)_b),
+            value =>
+            {
+                if (PortEditors.TryParseHex(value as string, out var a, out var r, out var g, out var b))
+                {
+                    A = a;
+                    R = r;
+                    G = g;
+                    B = b;
+                }
+            },
+            null,
+            "colour");
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

@@ -760,6 +760,11 @@
             <Setter.Value>
                 <ContextMenu>
                     <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
+                    <MenuItem Header="Show in Player"
+                              Command="{Binding TogglePlayerCommand}"
+                              IsChecked="{Binding IsPlayerExposed, Mode=OneWay}"
+                              Visibility="{Binding CanBePlayerField, Converter={StaticResource Dyc.BoolToVisibility}}"
+                              ToolTip="Offer this input as a field of the Script Player's form, so the script can be run without the editor." />
                     <Separator />
                     <!-- Dynamo's List@Level: pick which depth of a nested list
                          this input consumes (L1 = innermost items). -->
@@ -2261,6 +2266,14 @@
                                                Text="MUTED"
                                                ToolTip="Muted: not run. Outputs pass the matching inputs straight through, so the graph carries on downstream (M)."
                                                Visibility="Collapsed" />
+                                    <TextBlock DockPanel.Dock="Right"
+                                               Margin="6,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="10"
+                                               Foreground="White"
+                                               Text="▶"
+                                               ToolTip="Shown in the Script Player: this node, or some of its inputs, is a field or a result of the script's form."
+                                               Visibility="{Binding InPlayer, Converter={StaticResource Dyc.BoolToVisibility}}" />
                                     <TextBlock x:Name="FrozenBadge"
                                                DockPanel.Dock="Right"
                                                Margin="6,0,0,0"

@@ -102,6 +102,20 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.
 * **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas lists the ways to add the first node. Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
 
+## The Script Player
+
+The **Player** runs a saved graph without opening the node editor: pick a script, fill in the values it asks for, press **Run**, read the results. It is a pane of its own (ribbon ▸ BIMCamel ▸ **Dyncamelo Player**, or *Open Script Player* in the View menu and the palette) and does not load the editor, so it opens fast and stays small.
+
+* **Where scripts live.** Every `.dyc` file under `Documents\Dyncamelo\Scripts` (subfolders included, up to four levels) is listed. **Script folders ▸ Add a folder…** adds more — a shared network folder, say; ✕ takes a folder off the list without touching the files. The list filters as you type and ↻ looks again.
+* **What a script asks for.** The *form* is built from the graph itself: every **input node** (Number, Sliders, Boolean, String, File / Folder path, Colour) becomes a field, and so does any node input you chose to show. The fields are the same editors as on the canvas — scrub a number, pick a colour, browse for a file. ↺ puts a field back to the value saved in the script, and the values you typed are remembered per script.
+* **What it shows.** After a run the Player lists the results: every **Watch** node (text, list and image watches) and any node you marked to show. Failed or warned nodes are listed underneath with the reason; **Copy** puts the results on the clipboard as text. `Esc` stops a running script, exactly as in the editor.
+* **Choosing what appears — in the editor.** `Ctrl+Alt+P` (*Show / Hide in Player*) toggles the selected nodes: an input or Watch node is shown unless you hide it, any other node is hidden unless you show it (its first result is then listed). *Show / Hide Unwired Inputs in Player* (palette, Node menu) offers a node's unconnected inputs as fields; the same choice is in a socket's right-click menu, and a shown node or input carries a small **▶** badge. *Script Description…* (Graph menu) sets the text shown under the script's name in the Player. All of this is saved in the `.dyc` file and is undoable.
+* **Edit and File.** *Edit* opens the script in the node editor (pane and file both); *File* shows it in Explorer.
+* **Safety.** A script that **changes the model** (a node that writes to the model or to disk: Appearance, Selection, Export…) says so above the form, and the first time you run it — and again whenever the file changes — Dyncamelo asks for confirmation. Scripts that only read are never asked about. The answer is remembered for that file as it is now; edit the script and the question comes back.
+* **Run Last.** The ribbon button **Run Last Script** repeats the most recent script with the values it was last run with; its tooltip names the script. With nothing to repeat it is disabled.
+* **From other tools.** The add-in plugin `Dyncamelo.Run.DYNC` runs a script by path: `Execute("C:\\Scripts\\audit.dyc")` — for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation.
+* **Limits.** Nodes inside node groups are not offered in the form (put the input at the top level); the list stops at 2000 scripts; a script that needs a node library that is not installed is listed with what is missing and cannot run.
+
 ## Commands and shortcuts
 
 Default shortcuts. **Canvas** commands only act when the canvas has the keyboard (so typing in a box never triggers them); **Everywhere** commands also work while a text box has focus.
@@ -156,6 +170,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Node Value Previews *(toggle)* | — | Canvas |
 | Settings… | — | Canvas |
 | Performance HUD *(toggle)* | `Ctrl+Shift+F12` | Everywhere |
+| Open Script Player | — | Canvas |
 
 ### Graph
 
@@ -168,6 +183,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Find Node on Canvas… | `Ctrl+F` | Canvas |
 | Auto-Run *(toggle)* | — | Canvas |
 | Rename Graph | `F2` | Canvas |
+| Script Description… | — | Canvas |
 | Add Note | — | Canvas |
 | Group Selection | `Ctrl+G` | Canvas |
 | Fit Frame to Contents | `Ctrl+Shift+G` | Canvas |
@@ -185,6 +201,8 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Mute / Unmute | `M` | Canvas |
 | Freeze / Unfreeze | `Shift+M` | Canvas |
 | Why Didn't This Run? | `I` | Canvas |
+| Show / Hide in Player | `Ctrl+Alt+P` | Canvas |
+| Show / Hide Unwired Inputs in Player | — | Canvas |
 | Reset Inputs to Default | — | Canvas |
 | Insert Into Selected Wire | — | Canvas |
 | Connect Selected Nodes | `F` | Canvas |
@@ -246,6 +264,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Change a number | Drag the field; Shift for fine steps, Ctrl to snap; the pointer wraps at the screen edge |
 | Paste a coordinate | Hover a number field, Ctrl+V with "1, 2, 3" on the clipboard fills it and the fields after it |
 | Pick a colour from the screen | The dropper in a colour popup; click anywhere, Esc cancels |
+| Offer an input in the Script Player | Right-click its socket ▸ Show in Player (a ▶ badge marks nodes the Player uses) |
 | Add a node group socket | Drop a wire on the Group Input or Group Output node itself |
 | Copy or paste a field's value | Hover it, then Ctrl+C / Ctrl+V |
 | Reset a field to its default | Hover it, then Backspace |

@@ -1,6 +1,7 @@
 using System;
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
@@ -8,7 +9,7 @@ namespace Dyncamelo.Core.Nodes;
 /// <summary>
 /// A floating-point slider with min/max/step. UI-agnostic: the view binds to the properties.
 /// </summary>
-public class NumberSliderNode : NodeModel
+public class NumberSliderNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "NumberSlider";
@@ -73,6 +74,12 @@ public class NumberSliderNode : NodeModel
         get => _step;
         set => SetField(ref _step, value);
     }
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(
+            this, Name, typeof(double), Value, v => Value = PlayerPorts.ToDouble(v),
+            new Dyncamelo.Core.Loader.NodeRangeAttribute(Min, Max) { Step = Step > 0d ? Step : double.NaN });
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

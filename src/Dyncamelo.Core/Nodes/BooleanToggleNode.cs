@@ -1,5 +1,6 @@
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
@@ -7,7 +8,7 @@ namespace Dyncamelo.Core.Nodes;
 /// <summary>
 /// A true/false toggle.
 /// </summary>
-public class BooleanToggleNode : NodeModel
+public class BooleanToggleNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "BooleanToggle";
@@ -35,6 +36,10 @@ public class BooleanToggleNode : NodeModel
             }
         }
     }
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(this, Name, typeof(bool), Value, v => Value = v is bool flag && flag);
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

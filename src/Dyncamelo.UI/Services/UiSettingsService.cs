@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,6 +22,10 @@ public class UiSettingsService
     private readonly List<string> _favoriteNodeIds = new List<string>();
     private readonly List<string> _recentFiles = new List<string>();
     private readonly List<string> _recentNodeIds = new List<string>();
+    private readonly List<string> _playerFolders = new List<string>();
+    private readonly Dictionary<string, string> _playerConfirmed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, JObject> _playerValues = new Dictionary<string, JObject>(StringComparer.OrdinalIgnoreCase);
+    private string _playerLastScript = string.Empty;
     private bool _showLibraryDescriptions = true;
     private string _doubleClickAction = "string";
     private bool _previewSelection;
@@ -45,6 +50,97 @@ public class UiSettingsService
 
     /// <summary>Library ids of the starred nodes, in the order they were starred.</summary>
     public IReadOnlyList<string> FavoriteNodeIds => _favoriteNodeIds;
+
+    // ----- the Script Player ----------------------------------------------------------------
+
+    /// <summary>The folder scripts are looked for in without being asked (Documents\Dyncamelo\Scripts).</summary>
+    public static string DefaultScriptsFolder =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Dyncamelo", "Scripts");
+
+    /// <summary>The scripts folders the user added, besides <see cref="DefaultScriptsFolder"/>.</summary>
+    public IReadOnlyList<string> PlayerFolders => _playerFolders;
+
+    /// <summary>Replaces the added scripts folders and saves.</summary>
+    /// <param name="folders">The folders to keep (blank and duplicate entries are dropped).</param>
+    public void SetPlayerFolders(IEnumerable<string> folders)
+    {
+        _playerFolders.Clear();
+        foreach (var folder in folders ?? new string[0])
+        {
+            var trimmed = (folder ?? string.Empty).Trim();
+            if (trimmed.Length > 0 && !ContainsEquals(_playerFolders, trimmed))
+            {
+                _playerFolders.Add(trimmed);
+            }
+        }
+
+        Save();
+    }
+
+    /// <summary>The script last run in the Player (empty if none).</summary>
+    public string PlayerLastScript => _playerLastScript;
+
+    /// <summary>Remembers the script last run.</summary>
+    /// <param name="path">Its full path.</param>
+    public void SetPlayerLastScript(string path)
+    {
+        if (!string.Equals(_playerLastScript, path, StringComparison.OrdinalIgnoreCase))
+        {
+            _playerLastScript = path ?? string.Empty;
+            Save();
+        }
+    }
+
+    /// <summary>The hash of the script as it was when the user last agreed to run it, or empty.</summary>
+    /// <param name="path">The script's full path.</param>
+    public string PlayerConfirmedHash(string path) =>
+        _playerConfirmed.TryGetValue(path, out var hash) ? hash : string.Empty;
+
+    /// <summary>Records that the user agreed to run the script as it is now.</summary>
+    /// <param name="path">The script's full path.</param>
+    /// <param name="hash">Its hash.</param>
+    public void SetPlayerConfirmed(string path, string hash)
+    {
+        _playerConfirmed[path] = hash;
+        Trim(_playerConfirmed, MaxPlayerMemory);
+        Save();
+    }
+
+    /// <summary>The values last used in the script's form, or null.</summary>
+    /// <param name="path">The script's full path.</param>
+    public JObject? PlayerValues(string path) =>
+        _playerValues.TryGetValue(path, out var values) ? (JObject)values.DeepClone() : null;
+
+    /// <summary>Remembers the values used in the script's form (an empty set forgets them).</summary>
+    /// <param name="path">The script's full path.</param>
+    /// <param name="values">The values by field key.</param>
+    public void SetPlayerValues(string path, JObject values)
+    {
+        if (values == null || values.Count == 0)
+        {
+            if (!_playerValues.Remove(path))
+            {
+                return;
+            }
+        }
+        else
+        {
+            _playerValues[path] = (JObject)values.DeepClone();
+            Trim(_playerValues, MaxPlayerMemory);
+        }
+
+        Save();
+    }
+
+    private const int MaxPlayerMemory = 300;
+
+    private static void Trim<T>(Dictionary<string, T> memory, int limit)
+    {
+        while (memory.Count > limit)
+        {
+            memory.Remove(memory.Keys.First());
+        }
+    }
 
     /// <summary>Library ids of the nodes added most recently, newest first (max 12).</summary>
     public IReadOnlyList<string> RecentNodeIds => _recentNodeIds;
@@ -332,6 +428,10 @@ public class UiSettingsService
                 FavoriteNodeIds = new List<string>(_favoriteNodeIds),
                 RecentFiles = new List<string>(_recentFiles),
                 RecentNodeIds = new List<string>(_recentNodeIds),
+                PlayerFolders = new List<string>(_playerFolders),
+                PlayerConfirmed = new Dictionary<string, string>(_playerConfirmed),
+                PlayerValues = new Dictionary<string, JObject>(_playerValues),
+                PlayerLastScript = _playerLastScript,
                 ShowLibraryDescriptions = _showLibraryDescriptions,
                 DoubleClickAction = _doubleClickAction,
                 PreviewSelection = _previewSelection,
@@ -388,6 +488,10 @@ public class UiSettingsService
         _favoriteNodeIds.Clear();
         _recentFiles.Clear();
         _recentNodeIds.Clear();
+        _playerFolders.Clear();
+        _playerConfirmed.Clear();
+        _playerValues.Clear();
+        _playerLastScript = string.Empty;
         _showLibraryDescriptions = true;
         _doubleClickAction = "string";
         _previewSelection = false;
@@ -449,6 +553,41 @@ public class UiSettingsService
                 }
             }
         }
+
+        if (data.PlayerFolders != null)
+        {
+            foreach (var folder in data.PlayerFolders)
+            {
+                if (!string.IsNullOrWhiteSpace(folder) && !ContainsEquals(_playerFolders, folder))
+                {
+                    _playerFolders.Add(folder);
+                }
+            }
+        }
+
+        if (data.PlayerConfirmed != null)
+        {
+            foreach (var pair in data.PlayerConfirmed)
+            {
+                if (!string.IsNullOrEmpty(pair.Key) && !string.IsNullOrEmpty(pair.Value))
+                {
+                    _playerConfirmed[pair.Key] = pair.Value;
+                }
+            }
+        }
+
+        if (data.PlayerValues != null)
+        {
+            foreach (var pair in data.PlayerValues)
+            {
+                if (!string.IsNullOrEmpty(pair.Key) && pair.Value != null)
+                {
+                    _playerValues[pair.Key] = pair.Value;
+                }
+            }
+        }
+
+        _playerLastScript = data.PlayerLastScript ?? string.Empty;
 
         if (data.RecentNodeIds != null)
         {
@@ -538,6 +677,18 @@ public class UiSettingsService
 
         [JsonProperty("recentFiles")]
         public List<string>? RecentFiles { get; set; }
+
+        [JsonProperty("playerFolders")]
+        public List<string>? PlayerFolders { get; set; }
+
+        [JsonProperty("playerConfirmed")]
+        public Dictionary<string, string>? PlayerConfirmed { get; set; }
+
+        [JsonProperty("playerValues")]
+        public Dictionary<string, JObject>? PlayerValues { get; set; }
+
+        [JsonProperty("playerLastScript")]
+        public string? PlayerLastScript { get; set; }
 
         [JsonProperty("recentNodeIds")]
         public List<string>? RecentNodeIds { get; set; }

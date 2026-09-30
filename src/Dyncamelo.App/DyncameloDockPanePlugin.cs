@@ -34,10 +34,12 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         // Publish the document provider for zero-touch nodes before anything runs.
         NavisworksContext.HostService = DyncameloHost.DocumentService;
 
-        _viewModel = new GraphEditorViewModel(DyncameloHost.Registry, preview: new NavisworksPreviewService())
+        _viewModel = new GraphEditorViewModel(DyncameloHost.Registry, settings: DyncameloHost.Settings, preview: new NavisworksPreviewService())
         {
             EvaluationContextFactory = DyncameloHost.CreateEvaluationContext,
         };
+        DyncameloHost.Editor = _viewModel;
+        _viewModel.OpenPlayerRequested += (_, _) => DyncameloPlayerDockPanePlugin.Show();
 
         var editor = new DyncameloEditorControl { ViewModel = _viewModel };
 
@@ -69,6 +71,14 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         _keyGuard?.Dispose();
         _keyGuard = new PaneKeyGuard(host, editor);
 
+        // A script the Player asked to edit before this pane existed.
+        var pending = DyncameloHost.PendingEditorPath;
+        DyncameloHost.PendingEditorPath = null;
+        if (pending != null)
+        {
+            editor.Dispatcher.BeginInvoke(new Action(() => _viewModel?.OpenDroppedFiles(new[] { pending })));
+        }
+
         // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists.
         UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action));
 
@@ -91,6 +101,11 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         catch (Exception)
         {
             // Shutting down must never fail because of a full disk or a locked folder.
+        }
+
+        if (ReferenceEquals(DyncameloHost.Editor, _viewModel))
+        {
+            DyncameloHost.Editor = null;
         }
 
         _viewModel = null;

@@ -63,8 +63,14 @@ public class GraphModel : INotifyPropertyChanged
         set => SetField(ref _name, value);
     }
 
-    /// <summary>Graph description.</summary>
-    public string Description { get; set; } = string.Empty;
+    /// <summary>Graph description (shown by the Player under the script's name).</summary>
+    public string Description
+    {
+        get => _description;
+        set => SetField(ref _description, value ?? string.Empty);
+    }
+
+    private string _description = string.Empty;
 
     /// <summary>
     /// How runs are triggered. The engine never reads this; it is a contract

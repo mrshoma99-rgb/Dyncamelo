@@ -21,6 +21,8 @@ internal static class DyncameloHost
     private static readonly object SyncRoot = new object();
     private static NodeRegistry? _registry;
     private static HostDocumentService? _documentService;
+    private static Dyncamelo.UI.Services.UiSettingsService? _settings;
+    private static Dyncamelo.UI.ViewModels.PlayerViewModel? _player;
 
     [ThreadStatic]
     private static bool _resolvingHostAssembly;
@@ -96,6 +98,63 @@ internal static class DyncameloHost
             }
         }
     }
+
+    /// <summary>
+    /// The one settings store of the session, shared by the editor and the Player. Two stores each holding their own copy
+    /// would overwrite each other's changes when they save.
+    /// </summary>
+    public static Dyncamelo.UI.Services.UiSettingsService Settings
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return _settings ?? (_settings = new Dyncamelo.UI.Services.UiSettingsService());
+            }
+        }
+    }
+
+    /// <summary>
+    /// The Script Player of the session. It lives here, not in its pane, so the ribbon can run the last script without the pane
+    /// having been opened yet.
+    /// </summary>
+    public static Dyncamelo.UI.ViewModels.PlayerViewModel Player
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return _player ?? (_player = CreatePlayer());
+            }
+        }
+    }
+
+    /// <summary>True once the Player exists (so a ribbon state check does not build it).</summary>
+    public static bool PlayerCreated
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                return _player != null;
+            }
+        }
+    }
+
+    private static Dyncamelo.UI.ViewModels.PlayerViewModel CreatePlayer()
+    {
+        NavisworksContext.HostService = DocumentService;
+        return new Dyncamelo.UI.ViewModels.PlayerViewModel(Registry, settings: Settings)
+        {
+            EvaluationContextFactory = CreateEvaluationContext,
+        };
+    }
+
+    /// <summary>The editor of the session, once its pane has been created (the Player hands scripts to it).</summary>
+    public static Dyncamelo.UI.ViewModels.GraphEditorViewModel? Editor { get; set; }
+
+    /// <summary>A script the Player asked to edit before the editor pane existed; the editor opens it as it starts.</summary>
+    public static string? PendingEditorPath { get; set; }
 
     /// <summary>The fully populated node registry (built lazily once per session).</summary>
     public static NodeRegistry Registry

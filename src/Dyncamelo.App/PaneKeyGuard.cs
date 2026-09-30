@@ -27,14 +27,14 @@ internal sealed class PaneKeyGuard : IDisposable
 
     private readonly HookProc _proc;
     private readonly Control _host;
-    private readonly DyncameloEditorControl _editor;
+    private readonly IHostKeyTarget _editor;
     private IntPtr _hook;
     private bool _busy;
 
     /// <summary>Installs the hook on the calling (UI) thread.</summary>
     /// <param name="host">The dock pane's control; focus inside it means the key is for Dyncamelo.</param>
     /// <param name="editor">The editor that gets first pick of the keys.</param>
-    public PaneKeyGuard(Control host, DyncameloEditorControl editor)
+    public PaneKeyGuard(Control host, IHostKeyTarget editor)
     {
         _host = host;
         _editor = editor;

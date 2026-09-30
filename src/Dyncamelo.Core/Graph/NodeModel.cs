@@ -119,6 +119,19 @@ public abstract class NodeModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Whether the Player (the script runner that works without the editor) shows this node: an input node as a field,
+    /// a Watch node or any other node as a result. Null follows the node's kind — input nodes and Watch nodes show,
+    /// others do not — true forces it on, false hides it. Presentation only; never affects evaluation.
+    /// </summary>
+    public bool? PlayerExposed
+    {
+        get => _playerExposed;
+        set => SetField(ref _playerExposed, value);
+    }
+
+    private bool? _playerExposed;
+
+    /// <summary>
     /// Muted nodes are not executed: each output passes through the first
     /// type-compatible input instead (see <c>MutePassThrough</c>), and the
     /// node reports Executed. Unlike <see cref="IsFrozen"/>, which keeps the

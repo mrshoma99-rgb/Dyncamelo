@@ -6,11 +6,31 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Dyncamelo.Core.Types;
 using Dyncamelo.UI.Mvvm;
 using Dyncamelo.UI.Services;
 
 namespace Dyncamelo.UI.ViewModels;
+
+/// <summary>What a connector needs from whoever shows it: the node editor, or the Script Player's form.</summary>
+public interface IConnectorHost
+{
+    /// <summary>True when sockets draw a type letter (the colour-blind aid).</summary>
+    bool ColourBlindGlyphs { get; }
+
+    /// <summary>Dialogs for browsing and confirming.</summary>
+    Dyncamelo.UI.Services.IDialogService Dialogs { get; }
+
+    /// <summary>The undo history that edits made through the connector are recorded in.</summary>
+    Dyncamelo.Core.Editing.UndoManager History { get; }
+
+    /// <summary>Shows a message to the user.</summary>
+    void ReportStatus(string message);
+
+    /// <summary>Shows a problem to the user.</summary>
+    void ReportProblem(string message);
+}
 
 /// <summary>
 /// Wraps one <see cref="PortModel"/> for the Nodify connector controls.
@@ -19,6 +39,7 @@ namespace Dyncamelo.UI.ViewModels;
 /// </summary>
 public class ConnectorViewModel : ObservableObject
 {
+    private readonly IConnectorHost? _host;
     private Point _anchor;
     private bool _isConnected;
     private PortKind _declaredKind;
@@ -29,8 +50,25 @@ public class ConnectorViewModel : ObservableObject
     /// <param name="node">Owning node view model.</param>
     /// <param name="port">The wrapped port.</param>
     public ConnectorViewModel(NodeViewModel node, PortModel port)
+        : this(node, port, null)
     {
-        Node = node;
+    }
+
+    /// <summary>
+    /// Creates a connector that belongs to no node on a canvas — the field of the Script Player's form. It has the same inline
+    /// editors, with the host taking the place of the editor for dialogs, messages and history.
+    /// </summary>
+    /// <param name="host">What the editors talk to.</param>
+    /// <param name="port">The port the editors work on.</param>
+    public ConnectorViewModel(IConnectorHost host, PortModel port)
+        : this(null, port, host)
+    {
+    }
+
+    private ConnectorViewModel(NodeViewModel? node, PortModel port, IConnectorHost? host)
+    {
+        Node = node!;
+        _host = host;
         Port = port;
         _declaredKind = PortKinds.FromPort(port);
         _kind = _declaredKind;
@@ -41,7 +79,7 @@ public class ConnectorViewModel : ObservableObject
         CaptureModelCommand = new RelayCommand(CaptureModel, () => ModelPickerHost.Current != null);
         RevealModelCommand = new RelayCommand(RevealModel, () => HasModelValue && ModelPickerHost.Current != null);
         DisconnectCommand = new RelayCommand(
-            () => Node.Owner.DisconnectConnectorCommand.Execute(this),
+            () => Node?.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
         SetLevelCommand = new RelayCommand<string>(SetLevel);
         Port.PropertyChanged += OnPortPropertyChanged;
@@ -64,6 +102,10 @@ public class ConnectorViewModel : ObservableObject
                 break;
             case nameof(PortModel.UseLevels):
                 RaiseLevelsChanged();
+                break;
+            case nameof(PortModel.PlayerExposed):
+                OnPropertyChanged(nameof(IsPlayerExposed));
+                Node?.RaisePlayerBadge();
                 break;
             case nameof(PortModel.Name):
             case nameof(PortModel.KindHint):
@@ -122,8 +164,21 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Sets the kind of this group socket (parameter: "number", "text*", "" for any).</summary>
     public ICommand SetSocketKindCommand => _setSocketKindCommand ??= new RelayCommand<string>(kind => Node.Owner.SetGroupSocketKind(this, kind), _ => IsGroupSocket);
 
-    /// <summary>Owning node view model.</summary>
+    /// <summary>True when the Player offers this input as a field of a script's form.</summary>
+    public bool IsPlayerExposed => Port.PlayerExposed;
+
+    /// <summary>True when this input could be a field of the Player's form: it has an editor and no wire.</summary>
+    public bool CanBePlayerField => IsInput && !_isConnected && PlayerExposure.CanOffer(Port);
+
+    private ICommand? _togglePlayerCommand;
+
+    /// <summary>Offers or withdraws this input in the Player (right-click ▸ Show in Player).</summary>
+    public ICommand TogglePlayerCommand => _togglePlayerCommand ??= new RelayCommand(() => Node.Owner.TogglePlayerInput(this));
+
+    /// <summary>Owning node view model (null for a field of the Script Player's form).</summary>
     public NodeViewModel Node { get; }
+
+    private IConnectorHost Host => _host ?? Node.Owner;
 
     /// <summary>The wrapped Core port.</summary>
     public PortModel Port { get; }
@@ -228,7 +283,7 @@ public class ConnectorViewModel : ObservableObject
     public void RefreshBrushes() => OnPropertyChanged(nameof(FamilyBrush));
 
     /// <summary>One letter naming the family, drawn in the socket when the colour-blind aid is on; otherwise empty.</summary>
-    public string SocketGlyph => Node.Owner.ColourBlindGlyphs ? PortKindPalette.Glyph(_kind.Family) : string.Empty;
+    public string SocketGlyph => Host.ColourBlindGlyphs ? PortKindPalette.Glyph(_kind.Family) : string.Empty;
 
     /// <summary>Re-raises <see cref="SocketGlyph"/> after the preference changed.</summary>
     public void RefreshGlyph() => OnPropertyChanged(nameof(SocketGlyph));
@@ -258,7 +313,7 @@ public class ConnectorViewModel : ObservableObject
                 OnPropertyChanged(nameof(SocketHeight));
                 OnPropertyChanged(nameof(SocketGeometry));
                 OnPropertyChanged(nameof(ToolTip));
-                Node.RefreshRowHeight(this);
+                Node?.RefreshRowHeight(this);
             }
         }
     }
@@ -403,7 +458,7 @@ public class ConnectorViewModel : ObservableObject
     /// <returns>True when two or more fields were filled (a single number is left to the ordinary paste).</returns>
     public bool TryPasteNumbers(string? text)
     {
-        var owner = Node.Owner;
+        var owner = Host;
         var inputs = Port.Owner.InPorts;
         var graph = Port.Owner.Graph;
         int filled;
@@ -497,12 +552,12 @@ public class ConnectorViewModel : ObservableObject
         var value = picker.CaptureSelection(single, out var count);
         if (value == null)
         {
-            Node.Owner.ReportProblem("Select something in Navisworks first, then use the picker.");
+            Host.ReportProblem("Select something in Navisworks first, then use the picker.");
             return;
         }
 
         Port.SetUserValue(value);
-        Node.Owner.ReportProblem(single && count > 1
+        Host.ReportProblem(single && count > 1
             ? "'" + Port.Name + "' takes one element: used the first of " + count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " selected."
             : "'" + Port.Name + "': picked " + Math.Max(count, 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + " element(s).");
     }
@@ -512,7 +567,7 @@ public class ConnectorViewModel : ObservableObject
         var stored = PortEditors.Current(Port) as string;
         if (ModelPickerHost.Current?.Reveal(stored) != true)
         {
-            Node.Owner.ReportProblem("The picked elements are no longer in the model.");
+            Host.ReportProblem("The picked elements are no longer in the model.");
         }
     }
 
@@ -552,7 +607,7 @@ public class ConnectorViewModel : ObservableObject
 
     private void BrowsePath()
     {
-        var dialogs = Node.Owner.Dialogs;
+        var dialogs = Host.Dialogs;
         string? chosen;
         if (PortEditors.IsFolder(Port))
         {
@@ -690,6 +745,7 @@ public class ConnectorViewModel : ObservableObject
                 OnPropertyChanged(nameof(ShowSegmentedChoices));
                 OnPropertyChanged(nameof(ShowEditor));
                 OnPropertyChanged(nameof(ShowPlainLabel));
+                OnPropertyChanged(nameof(CanBePlayerField));
                 OnPropertyChanged(nameof(SelectedChoice));
             }
         }

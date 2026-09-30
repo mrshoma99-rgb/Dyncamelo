@@ -1,5 +1,6 @@
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
@@ -7,7 +8,7 @@ namespace Dyncamelo.Core.Nodes;
 /// <summary>
 /// A file path chosen by the user (the UI shows a browse dialog; the model only holds the string).
 /// </summary>
-public class FilePathNode : NodeModel
+public class FilePathNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "FilePath";
@@ -35,6 +36,10 @@ public class FilePathNode : NodeModel
             }
         }
     }
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(this, Name, typeof(string), Path, v => Path = v?.ToString() ?? string.Empty, null, "file");
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

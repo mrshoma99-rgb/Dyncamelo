@@ -66,6 +66,7 @@ public static class HelpContent
         new HelpLine("Change a number", "Drag the field; Shift for fine steps, Ctrl to snap; the pointer wraps at the screen edge"),
         new HelpLine("Paste a coordinate", "Hover a number field, Ctrl+V with \"1, 2, 3\" on the clipboard fills it and the fields after it"),
         new HelpLine("Pick a colour from the screen", "The dropper in a colour popup; click anywhere, Esc cancels"),
+        new HelpLine("Offer an input in the Script Player", "Right-click its socket ▸ Show in Player (a ▶ badge marks nodes the Player uses)"),
         new HelpLine("Add a node group socket", "Drop a wire on the Group Input or Group Output node itself"),
         new HelpLine("Copy or paste a field's value", "Hover it, then Ctrl+C / Ctrl+V"),
         new HelpLine("Reset a field to its default", "Hover it, then Backspace"),

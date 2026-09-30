@@ -1,5 +1,6 @@
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Player;
 using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.Core.Nodes;
@@ -7,7 +8,7 @@ namespace Dyncamelo.Core.Nodes;
 /// <summary>
 /// A literal number typed by the user. UI-agnostic: the view binds to <see cref="Value"/>.
 /// </summary>
-public class NumberInputNode : NodeModel
+public class NumberInputNode : NodeModel, IPlayerInputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "NumberInput";
@@ -35,6 +36,10 @@ public class NumberInputNode : NodeModel
             }
         }
     }
+
+    /// <inheritdoc />
+    public PortModel CreatePlayerPort() =>
+        PlayerPorts.Create(this, Name, typeof(double), Value, v => Value = PlayerPorts.ToDouble(v));
 
     /// <inheritdoc />
     public override string NodeType => TypeName;

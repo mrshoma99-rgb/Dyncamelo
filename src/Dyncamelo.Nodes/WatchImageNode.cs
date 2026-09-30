@@ -11,7 +11,7 @@ namespace Dyncamelo.Nodes;
 /// export, ...) into it to see the result without opening the file. The path
 /// passes through unchanged so the chain can continue.
 /// </summary>
-public class WatchImageNode : NodeModel
+public class WatchImageNode : NodeModel, Dyncamelo.Core.Player.IPlayerOutputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "WatchImage";
@@ -30,6 +30,9 @@ public class WatchImageNode : NodeModel
         AddInput("imagePath", typeof(object), "Path of the image file to display.");
         AddOutput("imagePath", typeof(object), "The incoming path, passed through.");
     }
+
+    /// <inheritdoc />
+    public string PlayerText => ImagePath;
 
     /// <summary>Path of the image shown, or empty when there is nothing to show.</summary>
     public string ImagePath

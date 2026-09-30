@@ -53,7 +53,7 @@ public class SampleGraphViewModel
 /// The host supplies an <see cref="EvaluationContextFactory"/> to inject
 /// services (e.g. the Navisworks document provider) into each run.
 /// </summary>
-public partial class GraphEditorViewModel : ObservableObject
+public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 {
     private const string FileFilter = "Dyncamelo Graph (*.dyc)|*.dyc|All files (*.*)|*.*";
 
@@ -1443,6 +1443,10 @@ public partial class GraphEditorViewModel : ObservableObject
         else if (e.PropertyName == nameof(GraphModel.Name))
         {
             OnPropertyChanged(nameof(Title));
+            NoteChange();
+        }
+        else if (e.PropertyName == nameof(GraphModel.Description))
+        {
             NoteChange();
         }
     }

@@ -13,7 +13,7 @@ namespace Dyncamelo.Nodes;
 /// and passes the value through unchanged. Non-list values display as a
 /// single line. The input is untyped, so lists arrive whole.
 /// </summary>
-public class WatchListNode : NodeModel
+public class WatchListNode : NodeModel, Dyncamelo.Core.Player.IPlayerOutputNode
 {
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "WatchList";
@@ -47,6 +47,9 @@ public class WatchListNode : NodeModel
 
     /// <summary>All display lines joined with newlines.</summary>
     public string FormattedValue => string.Join("\n", _lines);
+
+    /// <inheritdoc />
+    public string PlayerText => FormattedValue;
 
     /// <summary>
     /// Structured display rows (index + text) backing the editor's two-column

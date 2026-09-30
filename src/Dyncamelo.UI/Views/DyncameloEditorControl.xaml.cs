@@ -15,7 +15,7 @@ namespace Dyncamelo.UI.Views;
 /// and status bar. Host-agnostic — the hosting layer sets <see cref="ViewModel"/>
 /// (or the DataContext) to a configured <see cref="GraphEditorViewModel"/>.
 /// </summary>
-public partial class DyncameloEditorControl : UserControl
+public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
 {
     private const string DragDataFormat = "Dyncamelo.LibraryEntryId";
 
@@ -324,6 +324,10 @@ public partial class DyncameloEditorControl : UserControl
             case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
             case "node.mute": return vm.ToggleMuteSelectedCommand;
             case "node.freeze": return vm.ToggleFreezeSelectedCommand;
+            case "node.player": return vm.TogglePlayerNodeCommand;
+            case "node.playerinputs": return vm.TogglePlayerInputsCommand;
+            case "graph.describe": return vm.DescribeGraphCommand;
+            case "view.player": return vm.OpenPlayerCommand;
             case "group.make": return vm.MakeGroupCommand;
             case "group.ungroup": return vm.UngroupNodeGroupCommand;
             case "group.edit": return vm.ToggleGroupEditCommand;

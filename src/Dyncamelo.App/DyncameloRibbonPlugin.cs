@@ -20,6 +20,16 @@ namespace Dyncamelo.App;
     Icon = "Resources\\dyncamelo_16.png",
     LargeIcon = "Resources\\dyncamelo_32.png",
     ToolTip = "Open the Dyncamelo node editor panel")]
+[Command("ID_Button_DyncameloPlayer",
+    DisplayName = "Player",
+    Icon = "Resources\\player_16.png",
+    LargeIcon = "Resources\\player_32.png",
+    ToolTip = "Run Dyncamelo scripts without opening the node editor")]
+[Command("ID_Button_DyncameloRunLast",
+    DisplayName = "Run Last",
+    Icon = "Resources\\runlast_16.png",
+    LargeIcon = "Resources\\runlast_32.png",
+    ToolTip = "Run the script you ran most recently in the Player")]
 [Command("ID_Button_DyncameloAbout",
     DisplayName = "About",
     // The camel logo, same as the IFC exporter's About button — every BIMCamel
@@ -39,6 +49,20 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
 
         try
         {
+            if (commandId == "ID_Button_DyncameloPlayer")
+            {
+                DyncameloPlayerDockPanePlugin.Show();
+                return 0;
+            }
+
+            if (commandId == "ID_Button_DyncameloRunLast")
+            {
+                // Show the pane first, so the progress and the results have somewhere to appear.
+                DyncameloPlayerDockPanePlugin.Show();
+                DyncameloHost.Player.RunLast();
+                return 0;
+            }
+
             if (commandId == "ID_Button_DyncameloAbout")
             {
                 // The shared BIMCamel About window (same design as the IFC exporter's and the
@@ -92,8 +116,17 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
     }
 
     /// <inheritdoc />
-    public override CommandState CanExecuteCommand(string commandId) =>
-        new CommandState { IsEnabled = true, IsVisible = true };
+    public override CommandState CanExecuteCommand(string commandId)
+    {
+        if (commandId == "ID_Button_DyncameloRunLast")
+        {
+            // Asked constantly by the ribbon: look at the settings only, never build the Player (and the node registry) for it.
+            var last = DyncameloHost.Settings.PlayerLastScript;
+            return new CommandState { IsEnabled = last.Length > 0 && System.IO.File.Exists(last), IsVisible = true };
+        }
+
+        return new CommandState { IsEnabled = true, IsVisible = true };
+    }
 
     // Navisworks swallows exceptions thrown from a command handler, so any failure
     // here would otherwise be invisible. Surface it to the user instead.

@@ -566,6 +566,11 @@ public class GraphSerializer
             json["Ui"] = SerializeUi(node.Ui);
         }
 
+        if (node.PlayerExposed.HasValue)
+        {
+            json["Player"] = node.PlayerExposed.Value;
+        }
+
         json["InputPorts"] = new JArray(node.InPorts.Select(SerializeInputPort));
         json["OutputPorts"] = new JArray(node.OutPorts.Select(p => new JObject
         {
@@ -589,6 +594,11 @@ public class GraphSerializer
         if (port.IsHidden)
         {
             json["Hidden"] = true;
+        }
+
+        if (port.PlayerExposed)
+        {
+            json["Player"] = true;
         }
 
         // Persist an inline value pinned by the editor (choice dropdowns). Only
@@ -758,6 +768,11 @@ public class GraphSerializer
             node.Lacing = lacing;
         }
 
+        if (json["Player"] is JValue playerFlag && playerFlag.Type == JTokenType.Boolean)
+        {
+            node.PlayerExposed = (bool)playerFlag.Value!;
+        }
+
         if (!(node is MissingNodeModel))
         {
             // Restore per-port persisted flags by port name.
@@ -789,6 +804,7 @@ public class GraphSerializer
                     port.UseLevels = portJson.Value<bool?>("UseLevels") ?? false;
                     port.KeepListStructure = portJson.Value<bool?>("KeepListStructure") ?? false;
                     port.IsHidden = portJson.Value<bool?>("Hidden") ?? false;
+                    port.PlayerExposed = portJson.Value<bool?>("Player") ?? false;
                 }
             }
         }

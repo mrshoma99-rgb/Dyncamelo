@@ -16,6 +16,7 @@ internal sealed class ScriptedDialogs : IDialogService
     public bool ConfirmAnswer = true;
     public string? SavePath;
     public string? PromptAnswer;
+    public string? FolderAnswer;
     public int SaveQuestions;
     public string? LastSaveQuestion;
     public int ConfirmQuestions;
@@ -44,7 +45,7 @@ internal sealed class ScriptedDialogs : IDialogService
 
     public string? Prompt(string message, string title, string defaultValue) => PromptAnswer;
 
-    public string? PickFolder(string title, string initialFolder) => null;
+    public string? PickFolder(string title, string initialFolder) => FolderAnswer;
 }
 
 /// <summary>Unsaved-work safety: the modified marker, the questions before work is replaced, autosave and recovery.</summary>
