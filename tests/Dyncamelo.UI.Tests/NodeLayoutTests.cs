@@ -475,4 +475,35 @@ public class NodeLayoutTests
             });
         }
     }
+
+    [Fact]
+    public void KeysTheHostWouldTakeAreClaimedAndRunByTheEditor()
+    {
+        var rig = Build();
+        using (rig)
+        {
+            StaHost.Run(() =>
+            {
+                var control = (DyncameloEditorControl)rig.Window.Content;
+                control.ModifierProvider = () => System.Windows.Input.ModifierKeys.Control;
+
+                // Navisworks binds Ctrl+Z / Ctrl+Y itself; while the pane has focus the editor must get them.
+                Assert.True(control.WantsHostKey(System.Windows.Input.Key.Z));
+                Assert.True(control.WantsHostKey(System.Windows.Input.Key.Y));
+                Assert.False(control.WantsHostKey(System.Windows.Input.Key.Q));
+
+                rig.A.Model.X += 25;
+                var before = rig.Vm.History.UndoCount;
+                var movedTo = rig.A.Model.X;
+
+                Assert.True(control.ProcessHostKey(System.Windows.Input.Key.Z));
+
+                Assert.Equal(before - 1, rig.Vm.History.UndoCount);
+                Assert.Equal(movedTo - 25, rig.A.Model.X);
+
+                Assert.True(control.ProcessHostKey(System.Windows.Input.Key.Y));
+                Assert.Equal(movedTo, rig.A.Model.X);
+            });
+        }
+    }
 }

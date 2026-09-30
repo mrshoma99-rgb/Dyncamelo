@@ -25,6 +25,7 @@ public class DyncameloDockPanePlugin : DockPanePlugin
     public const string PluginId = "Dyncamelo.DockPane.DYNC";
 
     private GraphEditorViewModel? _viewModel;
+    private PaneKeyGuard? _keyGuard;
     private Document? _subscribedDocument;
 
     /// <inheritdoc />
@@ -61,6 +62,10 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         };
         host.CreateControl();
 
+        // Navisworks binds Ctrl+Z, Ctrl+Y, Delete, F1 … itself; while the pane has the keyboard focus Dyncamelo's keys must win.
+        _keyGuard?.Dispose();
+        _keyGuard = new PaneKeyGuard(host, editor);
+
         // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists.
         UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action));
 
@@ -72,6 +77,8 @@ public class DyncameloDockPanePlugin : DockPanePlugin
     {
         NavisApplication.ActiveDocumentChanged -= OnActiveDocumentChanged;
         SubscribeDocumentEvents(null);
+        _keyGuard?.Dispose();
+        _keyGuard = null;
         _viewModel = null;
         pane.Dispose();
     }

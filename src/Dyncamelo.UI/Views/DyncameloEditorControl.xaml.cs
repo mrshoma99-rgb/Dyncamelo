@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -401,6 +402,77 @@ public partial class DyncameloEditorControl : UserControl
         }
     }
 
+    /// <summary>The modifier keys currently held; replaceable so tests can press Ctrl without a keyboard.</summary>
+    public Func<ModifierKeys> ModifierProvider { get; set; } = () => Keyboard.Modifiers;
+
+    private ModifierKeys Modifiers => ModifierProvider();
+
+    private static bool IsTextEditingKey(Key key) =>
+        key == Key.Z || key == Key.Y || key == Key.X || key == Key.C || key == Key.V || key == Key.A;
+
+    /// <summary>
+    /// True when a key pressed while this pane has the keyboard focus is Dyncamelo's to handle: one of its
+    /// shortcuts, a text-editing chord inside a text box (Ctrl+Z/Y/X/C/V/A edit the text, not the host's document),
+    /// or a hover key of a number field. The host uses this to decide whether to keep the key from its own
+    /// accelerators (Navisworks binds Ctrl+Z, Ctrl+Y, F1, Delete … and would otherwise act on its own document).
+    /// </summary>
+    public bool WantsHostKey(Key key)
+    {
+        if (ViewModel == null)
+        {
+            return false;
+        }
+
+        var modifiers = Modifiers;
+        var ctrl = (modifiers & ModifierKeys.Control) != 0;
+        var typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+        if (typing && ctrl && (IsTextEditingKey(key) || key == Key.D || key == Key.G))
+        {
+            return true;
+        }
+
+        if (!typing && ctrl && ScrubNumberBox.Hovered != null && (key == Key.C || key == Key.V))
+        {
+            return true;
+        }
+
+        return _router.Find(key, modifiers) != null;
+    }
+
+    /// <summary>
+    /// Runs a key the host was about to take through the normal WPF key path (the same handlers a key that reached
+    /// WPF directly would run) and reports whether it was consumed. A text-editing chord in a text box counts as
+    /// consumed even when the box has nothing to undo, so it never falls through to the host.
+    /// </summary>
+    /// <param name="key">The pressed key.</param>
+    /// <returns>True when the key must not be given to the host.</returns>
+    public bool ProcessHostKey(Key key)
+    {
+        var source = PresentationSource.FromVisual(this);
+        if (source == null)
+        {
+            return false;
+        }
+
+        var target = Keyboard.FocusedElement ?? this;
+        var preview = new KeyEventArgs(Keyboard.PrimaryDevice, source, Environment.TickCount, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent };
+        target.RaiseEvent(preview);
+        if (preview.Handled)
+        {
+            return true;
+        }
+
+        var down = new KeyEventArgs(Keyboard.PrimaryDevice, source, Environment.TickCount, key) { RoutedEvent = Keyboard.KeyDownEvent };
+        target.RaiseEvent(down);
+        if (down.Handled)
+        {
+            return true;
+        }
+
+        var typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+        return typing && (Modifiers & ModifierKeys.Control) != 0 && IsTextEditingKey(key);
+    }
+
     private void OnControlPreviewKeyDown(object sender, KeyEventArgs e)
     {
         bool typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
@@ -412,7 +484,7 @@ public partial class DyncameloEditorControl : UserControl
             return;
         }
 
-        if (e.Key == Key.F12 && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && _perfHud != null)
+        if (e.Key == Key.F12 && Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && _perfHud != null)
         {
             _perfHud.Toggle();
             e.Handled = true;
@@ -431,7 +503,7 @@ public partial class DyncameloEditorControl : UserControl
         // type to filter, Enter inserts at the spot the cursor was on.
         if (!typing &&
             e.Key == Key.Space &&
-            Keyboard.Modifiers == ModifierKeys.None &&
+            Modifiers == ModifierKeys.None &&
             ViewModel != null &&
             !ViewModel.IsQuickSearchOpen &&
             Editor.IsMouseOver)
@@ -449,7 +521,7 @@ public partial class DyncameloEditorControl : UserControl
         // duplicate/group it mid-edit. Swallow them while a text box has focus.
         if (typing)
         {
-            bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+            bool ctrl = (Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
             if ((ctrl && (e.Key == Key.D || e.Key == Key.G)) || e.Key == Key.F5)
             {
                 e.Handled = true;
@@ -461,7 +533,7 @@ public partial class DyncameloEditorControl : UserControl
         if (ViewModel != null &&
             _router.TryDispatch(
                 e.Key == Key.System ? e.SystemKey : e.Key,
-                Keyboard.Modifiers,
+                Modifiers,
                 typing,
                 Editor.IsKeyboardFocusWithin,
                 id => ResolveCommand(ViewModel, id),
