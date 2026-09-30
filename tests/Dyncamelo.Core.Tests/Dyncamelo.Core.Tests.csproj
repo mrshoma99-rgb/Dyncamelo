@@ -9,8 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
-    <!-- Spike S7: proves the layered-layout engine loads and runs (used for Arrange in a later phase). -->
-    <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

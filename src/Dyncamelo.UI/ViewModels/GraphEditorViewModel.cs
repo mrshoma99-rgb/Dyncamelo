@@ -1487,21 +1487,46 @@ public partial class GraphEditorViewModel : ObservableObject
             return;
         }
 
+        ArrangeNodes(selected);
+    }
+
+    /// <summary>Arranges every node of the graph left to right (Ctrl+Shift+L).</summary>
+    public void ArrangeAll()
+    {
+        var all = Items.OfType<NodeViewModel>().ToList();
+        if (all.Count < 2)
+        {
+            StatusMessage = "Nothing to arrange.";
+            return;
+        }
+
+        using (_undo.Begin("Arrange all"))
+        {
+            ArrangeNodes(all);
+        }
+    }
+
+    /// <summary>
+    /// Lays the nodes out with the layered engine (or the built-in column layout when it cannot run), keeping the
+    /// block where it was: same left edge, same vertical centre.
+    /// </summary>
+    private void ArrangeNodes(List<NodeViewModel> nodes)
+    {
         // Current vertical order (then horizontal) decides how nodes stack
         // inside a column — the user's reading order survives the tidy-up.
-        selected.Sort((left, right) =>
+        nodes.Sort((left, right) =>
         {
             int byY = left.Model.Y.CompareTo(right.Model.Y);
             return byY != 0 ? byY : left.Model.X.CompareTo(right.Model.X);
         });
 
-        var items = new List<GraphLayout.LayoutItem>(selected.Count);
-        foreach (var node in selected)
+        var items = new List<GraphLayout.LayoutItem>(nodes.Count);
+        foreach (var node in nodes)
         {
-            items.Add(new GraphLayout.LayoutItem(node.Model, EstimateWidth(node), EstimateHeight(node)));
+            items.Add(new GraphLayout.LayoutItem(node.Model, LayoutWidth(node), LayoutHeight(node)));
         }
 
-        var models = new HashSet<NodeModel>(selected.Select(n => n.Model));
+        var models = new HashSet<NodeModel>(nodes.Select(n => n.Model));
         var edges = new List<(object From, object To)>();
         foreach (var connection in _graph.Connections)
         {
@@ -1513,22 +1538,22 @@ public partial class GraphEditorViewModel : ObservableObject
             }
         }
 
-        // Anchor on the selection's current bounds so the block does not move.
+        // Anchor on the current bounds so the block does not move.
         double left = double.MaxValue, top = double.MaxValue, bottom = double.MinValue;
-        foreach (var node in selected)
+        foreach (var node in nodes)
         {
             left = Math.Min(left, node.Model.X);
             top = Math.Min(top, node.Model.Y);
-            bottom = Math.Max(bottom, node.Model.Y + EstimateHeight(node));
+            bottom = Math.Max(bottom, node.Model.Y + LayoutHeight(node));
         }
 
-        var placed = GraphLayout.Arrange(items, edges, left, (top + bottom) / 2.0);
+        var result = ArrangeEngine.Arrange(items, edges, left, (top + bottom) / 2.0, useMsagl: UseLayeredArrange);
         int moved = 0;
-        foreach (var node in selected)
+        foreach (var node in nodes)
         {
             // A non-finite position would throw out of the canvas layout pass
             // rather than land anywhere, so it is dropped instead of assigned.
-            if (placed.TryGetValue(node.Model, out var position) &&
+            if (result.Positions.TryGetValue(node.Model, out var position) &&
                 IsUsableCoordinate(position.X) && IsUsableCoordinate(position.Y))
             {
                 node.Location = new Point(position.X, position.Y);
@@ -1536,8 +1561,19 @@ public partial class GraphEditorViewModel : ObservableObject
             }
         }
 
-        StatusMessage = "Arranged " + moved + " nodes.";
+        StatusMessage = "Arranged " + moved.ToString(System.Globalization.CultureInfo.InvariantCulture) + " nodes" +
+                        (result.Engine == "MSAGL" ? "." : " (simple columns: " + result.Note + ")");
     }
+
+    /// <summary>False to always use the built-in column layout for Arrange.</summary>
+    public bool UseLayeredArrange { get; set; } = true;
+
+    // The measured size when the node has been laid out, else the estimate.
+    private static double LayoutWidth(NodeViewModel node) =>
+        IsUsableSize(node.Size.Width) ? Math.Max(node.Size.Width, 120d) : EstimateWidth(node);
+
+    private static double LayoutHeight(NodeViewModel node) =>
+        IsUsableSize(node.Size.Height) ? Math.Max(node.Size.Height, 30d) : EstimateHeight(node);
 
     /// <summary>
     /// Canvas width of a node. Only a node the user has resized reports a real

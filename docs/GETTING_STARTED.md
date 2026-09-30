@@ -48,6 +48,7 @@ This guide takes you from a fresh Navisworks installation to your first working 
        Dyncamelo.Core.dll
        Nodify.dll
        Newtonsoft.Json.dll
+       AutomaticGraphLayout.dll
        en-US\Dyncamelo.xaml
        Resources\*.png
    ```

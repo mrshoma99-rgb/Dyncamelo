@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Microsoft Automatic Graph Layout (MIT): the layered layout behind Arrange. Optional at run time —
+         if the DLL is missing the editor falls back to the built-in column layout. -->
+    <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
   </ItemGroup>
 
   <ItemGroup>

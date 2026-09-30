@@ -431,3 +431,11 @@ public partial class GraphEditorViewModel
     /// <summary>Hides the help overlay.</summary>
     public ICommand CloseHelpCommand => _closeHelpCommand ??= new RelayCommand(() => IsHelpOpen = false);
 }
+
+public partial class GraphEditorViewModel
+{
+    private ICommand? _arrangeAllCommand;
+
+    /// <summary>Arranges every node left to right (Ctrl+Shift+L).</summary>
+    public ICommand ArrangeAllCommand => _arrangeAllCommand ??= new RelayCommand(ArrangeAll);
+}

@@ -82,7 +82,7 @@ jobs:
           $dlls = @(
             'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll',
             'Dyncamelo.Navisworks.dll', 'Dyncamelo.UI.dll',
-            'Nodify.dll', 'Newtonsoft.Json.dll',
+            'Nodify.dll', 'Newtonsoft.Json.dll', 'AutomaticGraphLayout.dll',
             'BIMCamel.dll',
             # XML doc files: read at run time for zero-touch port tooltips.
             'Dyncamelo.Core.xml', 'Dyncamelo.Nodes.xml', 'Dyncamelo.Navisworks.xml'

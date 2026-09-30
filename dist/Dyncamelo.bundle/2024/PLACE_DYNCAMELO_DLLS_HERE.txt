@@ -7,6 +7,7 @@ Drop the Navisworks-2024 build of Dyncamelo into this folder:
   Dyncamelo.UI.dll
   Nodify.dll
   Newtonsoft.Json.dll
+  AutomaticGraphLayout.dll   (Arrange; optional - without it Arrange uses simple columns)
 
 A Debug build does this automatically (see the DeployToBundle target in
 src/Dyncamelo.App/Dyncamelo.App.csproj — it deploys straight into

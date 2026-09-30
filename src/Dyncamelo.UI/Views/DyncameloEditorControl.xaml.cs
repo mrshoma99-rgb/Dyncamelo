@@ -231,6 +231,7 @@ public partial class DyncameloEditorControl : UserControl
             case "graph.fitframe": return vm.FitFrameCommand;
             case "graph.ungroup": return vm.UngroupSelectedCommand;
             case "graph.arrange": return vm.ArrangeSelectionCommand;
+            case "graph.arrangeall": return vm.ArrangeAllCommand;
             case "graph.addnode": return _addNodeCommand;
             default: return null;
         }

@@ -78,6 +78,8 @@
            run time to give zero-touch ports their tooltip descriptions. -->
       <PluginLayoutFiles Include="$(TargetDir)Dyncamelo.Core.xml;$(TargetDir)Dyncamelo.Nodes.xml;$(TargetDir)Dyncamelo.Navisworks.xml" />
       <PluginLayoutFiles Include="$(TargetDir)Nodify.dll;$(TargetDir)Newtonsoft.Json.dll" />
+      <!-- Layered layout behind Arrange (MIT). Optional at run time: without it Arrange uses the built-in column layout. Keep in sync with release.yml. -->
+      <PluginLayoutFiles Include="$(TargetDir)AutomaticGraphLayout.dll" />
       <!-- Vendored BIMCamel IFC exporter engine (copied local via Dyncamelo.Navisworks' Private reference)
            — powers the Export.ToIfc nodes; must ship beside the plugin DLLs. Keep in sync with release.yml. -->
       <PluginLayoutFiles Include="$(TargetDir)BIMCamel.dll" />
