@@ -396,6 +396,40 @@ public class ConnectorViewModel : ObservableObject
         set => PortEditors.SetNumber(Port, value);
     }
 
+    /// <summary>
+    /// Pastes text holding several numbers ("1, 2, 3") into this field and the number fields after it, as one undo step.
+    /// </summary>
+    /// <param name="text">The clipboard text.</param>
+    /// <returns>True when two or more fields were filled (a single number is left to the ordinary paste).</returns>
+    public bool TryPasteNumbers(string? text)
+    {
+        var owner = Node.Owner;
+        var inputs = Port.Owner.InPorts;
+        var graph = Port.Owner.Graph;
+        int filled;
+        using (owner.History.Begin("Paste values"))
+        {
+            var index = -1;
+            for (var i = 0; i < inputs.Count; i++)
+            {
+                if (ReferenceEquals(inputs[i], Port))
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            filled = PortEditors.PasteNumbers(inputs, index, text, p => graph != null && graph.FindConnectionInto(p) != null);
+        }
+
+        if (filled > 0)
+        {
+            owner.ReportStatus("Pasted " + filled.ToString(System.Globalization.CultureInfo.InvariantCulture) + " values from " + Title + " on.");
+        }
+
+        return filled > 0;
+    }
+
     /// <summary>The boolean shown by the toggle editor.</summary>
     public bool BoolValue
     {

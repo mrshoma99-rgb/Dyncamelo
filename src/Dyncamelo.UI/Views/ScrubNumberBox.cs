@@ -6,6 +6,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Dyncamelo.Core.Editing;
+using Dyncamelo.UI.Services;
 
 namespace Dyncamelo.UI.Views;
 
@@ -120,6 +121,16 @@ public sealed class ScrubNumberBox : Decorator
     private double _live;
     private double _pressValue;
     private Point _pressPoint;
+
+    // Dragging past the edge of the screen moves the pointer to the other side; these carry the distance it jumped so the
+    // value carries on smoothly, and skip the mouse events still in flight from before the jump.
+    private double _wrapOffset;
+    private bool _warping;
+    private double _warpFromX;
+    private double _warpJump;
+
+    /// <summary>True (default) to move the pointer to the opposite screen edge when a drag reaches one, so a number can be dragged any distance.</summary>
+    public static bool WrapPointerAtScreenEdge { get; set; } = true;
     private DateTime _lastLiveCommit = DateTime.MinValue;
     private bool _invalid;
     private TextBox? _editor;
@@ -375,6 +386,8 @@ public sealed class ScrubNumberBox : Decorator
         base.OnMouseLeftButtonDown(e);
         _mode = Mode.Pressed;
         _pressPoint = e.GetPosition(this);
+        _wrapOffset = 0d;
+        _warping = false;
         _pressValue = _live;
         _invalid = false;
         CaptureMouse();
@@ -391,7 +404,18 @@ public sealed class ScrubNumberBox : Decorator
         }
 
         var position = e.GetPosition(this);
-        var delta = position.X - _pressPoint.X;
+        if (_warping)
+        {
+            // Events queued before the pointer jumped still report the old side; wait for one from the new side.
+            if (Math.Abs(position.X - _warpFromX) < Math.Abs(_warpJump) / 2d)
+            {
+                return;
+            }
+
+            _warping = false;
+        }
+
+        var delta = position.X - _pressPoint.X + _wrapOffset;
         if (_mode == Mode.Pressed)
         {
             if (Math.Abs(delta) < DragThreshold)
@@ -419,6 +443,28 @@ public sealed class ScrubNumberBox : Decorator
 
         InvalidateVisual();
         e.Handled = true;
+        if (WrapPointerAtScreenEdge)
+        {
+            WrapPointer(position);
+        }
+    }
+
+    // At the edge of the screen: put the pointer just inside the opposite edge and remember how far it jumped.
+    private void WrapPointer(Point position)
+    {
+        PointerWrap.ScreenSpan(out var left, out var width);
+        var onScreen = PointToScreen(position);
+        if (!ScrubMath.TryWrap(onScreen.X, left, width, 2d, out var newX))
+        {
+            return;
+        }
+
+        PointerWrap.MoveTo((int)Math.Round(newX), (int)Math.Round(onScreen.Y));
+        var jump = (newX - onScreen.X) / VisualTreeHelper.GetDpi(this).DpiScaleX;
+        _wrapOffset -= jump;
+        _warpFromX = position.X;
+        _warpJump = jump;
+        _warping = true;
     }
 
     /// <inheritdoc />
@@ -539,6 +585,12 @@ public sealed class ScrubNumberBox : Decorator
             catch (System.Runtime.InteropServices.ExternalException)
             {
                 // clipboard busy: ignore
+            }
+
+            // "1, 2, 3" fills this field and the ones after it (a coordinate into x, y, z).
+            if (DataContext is ViewModels.ConnectorViewModel connector && connector.TryPasteNumbers(text))
+            {
+                return true;
             }
 
             if (ScrubMath.TryParse(text, Spec, out var pasted))

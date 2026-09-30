@@ -50,6 +50,12 @@ public static class SettingKeys
     /// <summary>Keep an autosaved copy of a graph with unsaved changes.</summary>
     public const string Autosave = "autosave";
 
+    /// <summary>Dragging a number past the screen edge continues on the other side.</summary>
+    public const string ScrubWrap = "scrubWrap";
+
+    /// <summary>Draw the wires of the selected nodes heavier and the others fainter.</summary>
+    public const string WireFocus = "wireFocus";
+
     /// <summary>Show the hint line in the status bar.</summary>
     public const string StatusHints = "statusHints";
 
@@ -77,7 +83,7 @@ public partial class GraphEditorViewModel
         nameof(WireLowDetail), nameof(ColourBlindGlyphs), nameof(HideUnusedByDefault), nameof(ScrubSpeed), nameof(ScrubPixelsPerStep),
         nameof(SnapToGrid), nameof(GridCellSize), nameof(AutoOffsetOnInsert), nameof(DeleteReconnectsReroutes), nameof(ShowGrid),
         nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden), nameof(EscCancelsRun), nameof(IsAutosaveEnabled),
-        nameof(ShowStatusHints), nameof(ShowEmptyCanvasHints), nameof(UiScale), nameof(UiScaleFactor),
+        nameof(ShowStatusHints), nameof(ShowEmptyCanvasHints), nameof(FocusSelectedWires), nameof(ScrubWrapsPointer), nameof(UiScale), nameof(UiScaleFactor),
     };
 
     /// <summary>Minimap mode: "auto", "on" or "off".</summary>

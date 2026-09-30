@@ -1171,7 +1171,7 @@
                                Margin="2,5,2,3"
                                FontSize="10"
                                Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                               Text="↑↓ choose · Enter inserts the node · Esc closes" />
+                               Text="{Binding QuickSearchHint}" />
                     <ListBox x:Name="QuickSearchList"
                              MaxHeight="300"
                              Background="Transparent"

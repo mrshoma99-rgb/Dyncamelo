@@ -402,6 +402,101 @@ public class InsightUiTests
         });
     }
 
+    // ----- quick search suggestions ----------------------------------------------------------
+
+    [Fact]
+    public void AnEmptyQuickSearchOffersStarredNodesThenRecentOnes()
+    {
+        StaHost.Run(() =>
+        {
+            var rig = Build(run: false);
+            var vm = rig.Vm;
+            vm.OpenQuickSearch(new Point(0, 0));
+            Assert.Empty(vm.QuickSearchResults);
+            Assert.Contains("↑↓ choose", vm.QuickSearchHint);
+            vm.CloseQuickSearch();
+
+            var sum = vm.Library.AllEntries.First(e => e.Id == "TestSum");
+            var number = vm.Library.AllEntries.First(e => e.Id == Dyncamelo.Core.Nodes.NumberInputNode.TypeName);
+            vm.Library.ToggleFavoriteCommand.Execute(sum);
+            vm.AddNode(number.Id, new Point(0, 500));
+
+            vm.OpenQuickSearch(new Point(0, 0));
+
+            Assert.Equal(new[] { sum.Id, number.Id }, vm.QuickSearchResults.Select(r => r.Id).ToArray());
+            Assert.Contains("Starred and recently added", vm.QuickSearchHint);
+
+            vm.QuickSearchText = "number";
+            Assert.DoesNotContain("Starred", vm.QuickSearchHint);
+        });
+    }
+
+    [Fact]
+    public void TheLastNodesAddedComeFirstAndTheListIsRememberedBetweenSessions()
+    {
+        StaHost.Run(() =>
+        {
+            var path = Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json");
+            var registry = NodeRegistry.CreateDefault();
+            registry.RegisterNodeType("TestSum", () => new SumNode());
+            var first = new GraphEditorViewModel(registry, new ScriptedDialogs(), new UiSettingsService(path));
+            first.AddNode("TestSum", new Point(0, 0));
+            first.AddNode(Dyncamelo.Core.Nodes.NumberInputNode.TypeName, new Point(0, 200));
+            first.AddNode("TestSum", new Point(0, 400));
+
+            var second = new GraphEditorViewModel(registry, new ScriptedDialogs(), new UiSettingsService(path));
+            second.OpenQuickSearch(new Point(0, 0));
+
+            Assert.Equal(new[] { "TestSum", Dyncamelo.Core.Nodes.NumberInputNode.TypeName }, second.QuickSearchResults.Select(r => r.Id).ToArray());
+        });
+    }
+
+    // ----- wire focus ------------------------------------------------------------------------
+
+    [Fact]
+    public void TheWiresOfTheSelectedNodeStandOutAndTheOthersFade()
+    {
+        StaHost.Run(() =>
+        {
+            var rig = Build(run: false);
+            var first = rig.Vm.Connections.Single(c => c.Model.SourceNode == rig.A);    // A -> Thrower
+            var second = rig.Vm.Connections.Single(c => c.Model.SourceNode == rig.T);   // Thrower -> C
+
+            Select(rig.Vm, rig.A);
+            rig.Vm.RefreshWireFocus();
+            Assert.True(first.IsEmphasised);
+            Assert.False(first.IsDimmed);
+            Assert.False(second.IsEmphasised);
+            Assert.True(second.IsDimmed);
+
+            Select(rig.Vm, rig.T);
+            rig.Vm.RefreshWireFocus();
+            Assert.True(first.IsEmphasised);
+            Assert.True(second.IsEmphasised);
+
+            rig.Vm.SelectedItems.Clear();
+            rig.Vm.RefreshWireFocus();
+            Assert.All(rig.Vm.Connections, w => Assert.False(w.IsEmphasised || w.IsDimmed));
+        });
+    }
+
+    [Fact]
+    public void WireFocusCanBeSwitchedOff()
+    {
+        StaHost.Run(() =>
+        {
+            var rig = Build(run: false);
+            Select(rig.Vm, rig.A);
+            rig.Vm.RefreshWireFocus();
+            Assert.Contains(rig.Vm.Connections, w => w.IsDimmed);
+
+            rig.Vm.WriteSetting("wireFocus", false);
+
+            Assert.False(rig.Vm.FocusSelectedWires);
+            Assert.All(rig.Vm.Connections, w => Assert.False(w.IsEmphasised || w.IsDimmed));
+        });
+    }
+
     // ----- hints and scale -------------------------------------------------------------------
 
     [Fact]
@@ -473,9 +568,9 @@ public class InsightUiTests
             var sum = Vm(rig.Vm, rig.A);
             var throwerInput = Vm(rig.Vm, rig.T).Inputs[0];
 
-            // a = 1, b = 2, c = 3 by default.
-            Assert.Contains("value: 6", sum.Outputs[0].ToolTip);
-            Assert.Contains("receives: 6", throwerInput.ToolTip);
+            // The sum node adds its first two inputs: 1 + 2.
+            Assert.Contains("value: 3", sum.Outputs[0].ToolTip);
+            Assert.Contains("receives: 3", throwerInput.ToolTip);
 
             // A node that failed says so instead of claiming a value.
             Assert.Contains("the node failed", Vm(rig.Vm, rig.T).Outputs[0].ToolTip);

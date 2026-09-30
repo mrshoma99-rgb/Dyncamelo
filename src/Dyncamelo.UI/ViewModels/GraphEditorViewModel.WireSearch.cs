@@ -115,7 +115,17 @@ public partial class GraphEditorViewModel
         }
 
         var typed = LibrarySearchText.Tokenize(text).Length > 0;
-        IReadOnlyList<LibraryEntryViewModel> candidates = typed ? Library.QuickSearch(text, 400) : Library.AllEntries;
+        IReadOnlyList<LibraryEntryViewModel> candidates;
+        if (typed)
+        {
+            candidates = Library.QuickSearch(text, 400);
+        }
+        else
+        {
+            // Starred and recent nodes first, then everything else in library order.
+            var suggested = Library.Suggested(400);
+            candidates = suggested.Concat(Library.AllEntries.Where(e => !suggested.Contains(e))).ToList();
+        }
 
         // Exact and convertible fits first, loose ones after; each group keeps its search order.
         var tight = new List<LibraryEntryViewModel>();

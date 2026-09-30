@@ -146,6 +146,32 @@ public class ConnectionViewModel : ObservableObject
         set => SetProperty(ref _isSelected, value);
     }
 
+    private bool _isEmphasised;
+    private bool _isDimmed;
+
+    /// <summary>True when the wire touches a selected node: drawn a little heavier so it can be followed.</summary>
+    public bool IsEmphasised
+    {
+        get => _isEmphasised;
+        private set => SetProperty(ref _isEmphasised, value);
+    }
+
+    /// <summary>True when something else is selected and this wire is not part of it: drawn fainter.</summary>
+    public bool IsDimmed
+    {
+        get => _isDimmed;
+        private set => SetProperty(ref _isDimmed, value);
+    }
+
+    /// <summary>Sets how the wire stands out from the selection (see <see cref="IsEmphasised"/>, <see cref="IsDimmed"/>).</summary>
+    /// <param name="emphasised">True for a wire of a selected node.</param>
+    /// <param name="dimmed">True for a wire of no selected node while some node is selected.</param>
+    public void SetFocus(bool emphasised, bool dimmed)
+    {
+        IsEmphasised = emphasised;
+        IsDimmed = dimmed;
+    }
+
     /// <summary>Removes this wire (context menu "Disconnect").</summary>
     public ICommand DisconnectCommand { get; }
 }

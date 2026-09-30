@@ -208,6 +208,7 @@ public partial class GraphEditorViewModel : ObservableObject
         // Building the empty graph counted as edits; a new editor has nothing unsaved.
         _savedChangeCount = _changeCount;
         _autosavedChangeCount = _changeCount;
+        Views.ScrubNumberBox.WrapPointerAtScreenEdge = ScrubWrapsPointer;
         RefreshHint();
     }
 
@@ -731,6 +732,20 @@ public partial class GraphEditorViewModel : ObservableObject
         }
     }
 
+    /// <summary>What the quick-search popup says under the box: how to use it, or that the list shows favourites and recent nodes.</summary>
+    public string QuickSearchHint
+    {
+        get
+        {
+            if (_quickSearchText.Trim().Length == 0 && QuickSearchResults.Count > 0)
+            {
+                return "Starred and recently added nodes — type to search · ↑↓ choose · Enter inserts · Esc closes";
+            }
+
+            return "↑↓ choose · Enter inserts the node · Esc closes";
+        }
+    }
+
     /// <summary>Ranked quick-search hits (top 50).</summary>
     public ObservableCollection<LibraryEntryViewModel> QuickSearchResults { get; }
 
@@ -832,6 +847,7 @@ public partial class GraphEditorViewModel : ObservableObject
         }
 
         QuickSearchSelected = QuickSearchResults.Count > 0 ? QuickSearchResults[0] : null;
+        OnPropertyChanged(nameof(QuickSearchHint));
     }
 
     /// <summary>
@@ -853,6 +869,7 @@ public partial class GraphEditorViewModel : ObservableObject
         node.X = location.X;
         node.Y = location.Y;
         _graph.AddNode(node);
+        Library.NoteUsed(libraryId);
         StatusMessage = "Added " + node.Name + ".";
         return FindNodeViewModel(node);
     }
@@ -1294,6 +1311,7 @@ public partial class GraphEditorViewModel : ObservableObject
     {
         RefreshPreview();
         RefreshHint();
+        QueueWireFocus();
     }
 
     /// <summary>
@@ -1440,6 +1458,10 @@ public partial class GraphEditorViewModel : ObservableObject
         if (source != null && target != null)
         {
             Connections.Add(new ConnectionViewModel(this, connection, source, target));
+            if (SelectedItems.Count > 0)
+            {
+                QueueWireFocus();
+            }
         }
     }
 
@@ -1458,6 +1480,14 @@ public partial class GraphEditorViewModel : ObservableObject
         {
             PendingConnection.IsVisible = false;
             OpenQuickSearch(PendingConnection.TargetLocation, dragged);
+            return;
+        }
+
+        // Released on the Group Input / Group Output node itself: that makes a new socket for the wire.
+        if (target == null && PendingConnection.Target == null && dragged != null &&
+            TryCreateGroupSocketFromDrop(dragged, PendingConnection.TargetLocation))
+        {
+            PendingConnection.IsVisible = false;
             return;
         }
 

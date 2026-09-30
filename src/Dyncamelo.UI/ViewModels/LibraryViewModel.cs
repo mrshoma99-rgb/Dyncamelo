@@ -563,9 +563,15 @@ public class LibraryViewModel : ObservableObject
     {
         var results = new List<LibraryEntryViewModel>();
         var tokens = LibrarySearchText.Tokenize(searchText);
-        if (tokens.Length == 0 || maxResults <= 0)
+        if (maxResults <= 0)
         {
             return results;
+        }
+
+        // Nothing typed yet: offer what is most likely wanted — the starred nodes, then the ones added lately.
+        if (tokens.Length == 0)
+        {
+            return Suggested(maxResults);
         }
 
         var hits = new List<KeyValuePair<int, LibraryEntryViewModel>>();
@@ -587,6 +593,35 @@ public class LibraryViewModel : ObservableObject
 
         return results;
     }
+
+    /// <summary>The starred nodes (in the order they were starred) followed by the recently added ones, newest first.</summary>
+    /// <param name="maxResults">Cap on the number of entries returned.</param>
+    public List<LibraryEntryViewModel> Suggested(int maxResults)
+    {
+        var suggestions = new List<LibraryEntryViewModel>();
+        var byId = new Dictionary<string, LibraryEntryViewModel>(StringComparer.Ordinal);
+        foreach (var entry in _allEntries)
+        {
+            byId[entry.Id] = entry;
+        }
+
+        if (_settings != null)
+        {
+            foreach (var id in _settings.FavoriteNodeIds.Concat(_settings.RecentNodeIds))
+            {
+                if (byId.TryGetValue(id, out var entry) && !suggestions.Contains(entry) && suggestions.Count < maxResults)
+                {
+                    suggestions.Add(entry);
+                }
+            }
+        }
+
+        return suggestions;
+    }
+
+    /// <summary>Records that a node was added, so it comes first in the next quick search.</summary>
+    /// <param name="libraryId">Library id of the node that was added.</param>
+    public void NoteUsed(string libraryId) => _settings?.AddRecentNode(libraryId);
 
     private void OnSearchTimerTick(object? sender, EventArgs e)
     {
@@ -642,7 +677,8 @@ public class LibraryViewModel : ObservableObject
         IsSearching = true;
     }
 
-    private static int CompareHits(
+    // Among equally good matches the starred nodes come first, then the ones added lately, then alphabetical order.
+    private int CompareHits(
         KeyValuePair<int, LibraryEntryViewModel> left,
         KeyValuePair<int, LibraryEntryViewModel> right)
     {
@@ -652,10 +688,41 @@ public class LibraryViewModel : ObservableObject
             return byRank;
         }
 
+        int byFavourite = right.Value.IsFavorite.CompareTo(left.Value.IsFavorite);
+        if (byFavourite != 0)
+        {
+            return byFavourite;
+        }
+
+        int byRecency = RecencyOf(left.Value).CompareTo(RecencyOf(right.Value));
+        if (byRecency != 0)
+        {
+            return byRecency;
+        }
+
         int byName = string.Compare(left.Value.Name, right.Value.Name, StringComparison.OrdinalIgnoreCase);
         return byName != 0
             ? byName
             : string.Compare(left.Value.Category, right.Value.Category, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Position in the recently-added list (0 = newest); nodes never added lately sort after all of them.
+    private int RecencyOf(LibraryEntryViewModel entry)
+    {
+        if (_settings == null)
+        {
+            return int.MaxValue;
+        }
+
+        for (var i = 0; i < _settings.RecentNodeIds.Count; i++)
+        {
+            if (_settings.RecentNodeIds[i] == entry.Id)
+            {
+                return i;
+            }
+        }
+
+        return int.MaxValue;
     }
 
     // ----- favourites / descriptions -------------------------------------------

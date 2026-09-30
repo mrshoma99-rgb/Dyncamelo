@@ -152,6 +152,25 @@ public sealed class ColorSwatchPicker : Grid
         var hexRow = new DockPanel { Margin = new Thickness(0, 10, 0, 0) };
         DockPanel.SetDock(preview, Dock.Left);
         hexRow.Children.Add(preview);
+        var eyedropper = new Button
+        {
+            Content = new Path
+            {
+                Data = Geometry.Parse("M20.71,5.63L18.37,3.29A1,1,0,0,0,16.96,3.29L13.84,6.41L11.91,4.5L10.5,5.91L11.92,7.33L3,16.25V21H7.75L16.67,12.08L18.09,13.5L19.5,12.09L17.59,10.17L20.71,7.05A1,1,0,0,0,20.71,5.63ZM6.92,19L5,17.08L13.06,9.02L14.98,10.94Z"),
+                Stretch = Stretch.Uniform,
+                Width = 13,
+                Height = 13,
+            },
+            Margin = new Thickness(6, 0, 0, 0),
+            Padding = new Thickness(5, 3, 5, 3),
+            ToolTip = "Pick a colour from anywhere on the screen (Esc cancels)",
+            Focusable = false,
+        };
+        ((Path)eyedropper.Content).SetResourceReference(Shape.FillProperty, "Dyc.TextBrush");
+        eyedropper.SetResourceReference(StyleProperty, "Dyc.SmallButton");
+        eyedropper.Click += (_, _) => StartEyedropper();
+        DockPanel.SetDock(eyedropper, Dock.Right);
+        hexRow.Children.Add(eyedropper);
         _hexBox.Margin = new Thickness(8, 0, 0, 0);
         hexRow.Children.Add(_hexBox);
 
@@ -378,6 +397,24 @@ public sealed class ColorSwatchPicker : Grid
         {
             Hex = PortEditors.ToHex(_wa, _wr, _wg, _wb);
         }
+    }
+
+    // The popup closes when the pointer goes elsewhere; keep it open while the screen is being sampled.
+    private void StartEyedropper()
+    {
+        _popup.StaysOpen = true;
+        EyedropperOverlay.Pick(
+            colour =>
+            {
+                _wr = colour.R;
+                _wg = colour.G;
+                _wb = colour.B;
+                ColourMath.RgbToHsv(_wr, _wg, _wb, out _h, out _s, out _v);
+                _dirty = true;
+                UpdateEditor();
+                _popup.StaysOpen = false;
+            },
+            () => _popup.StaysOpen = false);
     }
 
     private void ReadPendingText()

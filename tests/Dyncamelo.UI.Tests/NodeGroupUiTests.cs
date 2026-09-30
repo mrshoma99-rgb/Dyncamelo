@@ -243,6 +243,81 @@ public class NodeGroupUiTests
     }
 
     [Fact]
+    public void DroppingAWireOnTheGroupOutputNodeAddsASocketAndConnectsIt()
+    {
+        StaHost.Run(() =>
+        {
+            var chain = BuildChain();
+            var group = MakeGroupOfB(chain).Definition!;
+            chain.Vm.ToggleGroupEditCommand.Execute(null);
+            var extra = new SumNode { X = 300, Y = 400 };
+            chain.Vm.Graph.AddNode(extra);
+            var outputVm = Vm(chain.Vm, group.OutputNode);
+            outputVm.Size = new Size(200, 100);
+            var before = group.Outputs.Count;
+
+            var dragged = Vm(chain.Vm, extra).Outputs[0];
+            var handled = chain.Vm.TryCreateGroupSocketFromDrop(dragged, new Point(outputVm.Location.X + 20, outputVm.Location.Y + 20));
+
+            Assert.True(handled);
+            Assert.Equal(before + 1, group.Outputs.Count);
+            Assert.StartsWith("result", group.Outputs[group.Outputs.Count - 1].Name);
+            Assert.Contains(chain.Vm.Graph.Connections, c => c.SourceNode == extra && c.TargetNode == group.OutputNode);
+
+            chain.Vm.UndoCommand.Execute(null);
+            Assert.Equal(before, group.Outputs.Count);
+            Assert.DoesNotContain(chain.Vm.Graph.Connections, c => c.SourceNode == extra && c.TargetNode == group.OutputNode);
+        });
+    }
+
+    [Fact]
+    public void DroppingAnUnwiredInputOnTheGroupInputNodeAddsAnInputSocketFeedingIt()
+    {
+        StaHost.Run(() =>
+        {
+            var chain = BuildChain();
+            var group = MakeGroupOfB(chain).Definition!;
+            chain.Vm.ToggleGroupEditCommand.Execute(null);
+            var extra = new SumNode { X = 300, Y = 400 };
+            chain.Vm.Graph.AddNode(extra);
+            var inputVm = Vm(chain.Vm, group.InputNode);
+            inputVm.Size = new Size(200, 100);
+            var before = group.Inputs.Count;
+
+            var dragged = Vm(chain.Vm, extra).Inputs[2];   // "c": nothing wired to it
+            var handled = chain.Vm.TryCreateGroupSocketFromDrop(dragged, new Point(inputVm.Location.X + 20, inputVm.Location.Y + 20));
+
+            Assert.True(handled);
+            Assert.Equal(before + 1, group.Inputs.Count);
+            Assert.StartsWith("c", group.Inputs[group.Inputs.Count - 1].Name);
+            Assert.Contains(chain.Vm.Graph.Connections, c => c.SourceNode == group.InputNode && c.TargetNode == extra);
+        });
+    }
+
+    [Fact]
+    public void ADropAnywhereElseOrOnTheWrongSideIsLeftToTheOrdinaryRules()
+    {
+        StaHost.Run(() =>
+        {
+            var chain = BuildChain();
+            var group = MakeGroupOfB(chain).Definition!;
+            chain.Vm.ToggleGroupEditCommand.Execute(null);
+            var extra = new SumNode { X = 300, Y = 400 };
+            chain.Vm.Graph.AddNode(extra);
+            var inputVm = Vm(chain.Vm, group.InputNode);
+            inputVm.Size = new Size(200, 100);
+            var outputVm = Vm(chain.Vm, group.OutputNode);
+            outputVm.Size = new Size(200, 100);
+            var socketCount = group.Inputs.Count + group.Outputs.Count;
+
+            // An output socket dropped on the Group Input node, and a drop on empty canvas: nothing is made.
+            Assert.False(chain.Vm.TryCreateGroupSocketFromDrop(Vm(chain.Vm, extra).Outputs[0], new Point(inputVm.Location.X + 20, inputVm.Location.Y + 20)));
+            Assert.False(chain.Vm.TryCreateGroupSocketFromDrop(Vm(chain.Vm, extra).Outputs[0], new Point(-5000, -5000)));
+            Assert.Equal(socketCount, group.Inputs.Count + group.Outputs.Count);
+        });
+    }
+
+    [Fact]
     public void TheTitleAndTheDocumentStayThoseOfTheFileWhileAGroupIsOpen()
     {
         StaHost.Run(() =>

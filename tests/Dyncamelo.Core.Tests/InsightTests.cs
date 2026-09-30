@@ -485,3 +485,122 @@ public class ValueSummaryAndHintTests
         Assert.DoesNotContain(HintLine.ForEmptyCanvas(keymap, "none"), l => l.StartsWith("Double-click"));
     }
 }
+
+public class ScrubWrapTests
+{
+    [Fact]
+    public void ThePointerReappearsOnTheOppositeEdgeJustInsideIt()
+    {
+        Assert.True(ScrubMath.TryWrap(1, 0, 1920, 2, out var fromLeft));
+        Assert.Equal(1916, fromLeft);
+
+        Assert.True(ScrubMath.TryWrap(1919, 0, 1920, 2, out var fromRight));
+        Assert.Equal(4, fromRight);
+    }
+
+    [Fact]
+    public void ThePointerIsLeftAloneAwayFromTheEdges()
+    {
+        Assert.False(ScrubMath.TryWrap(960, 0, 1920, 2, out var x));
+        Assert.Equal(960, x);
+    }
+
+    [Fact]
+    public void ADesktopThatStartsLeftOfZeroWrapsWithinItsOwnBounds()
+    {
+        // Two monitors, the second one to the left of the primary: the desktop spans -1920 .. 1920.
+        Assert.True(ScrubMath.TryWrap(-1919, -1920, 3840, 2, out var x));
+        Assert.Equal(1916, x);
+        Assert.False(ScrubMath.TryWrap(0, -1920, 3840, 2, out _));
+    }
+
+    [Fact]
+    public void ATinyOrUnknownScreenNeverWraps()
+    {
+        Assert.False(ScrubMath.TryWrap(0, 0, 0, 2, out _));
+        Assert.False(ScrubMath.TryWrap(3, 0, 10, 2, out _));
+    }
+}
+
+public class PasteNumbersTests
+{
+    [Theory]
+    [InlineData("1, 2, 3", new[] { 1d, 2d, 3d })]
+    [InlineData("(1.5; -2; 3e2)", new[] { 1.5d, -2d, 300d })]
+    [InlineData("10\t20\t30", new[] { 10d, 20d, 30d })]
+    [InlineData("4\r\n5\r\n6", new[] { 4d, 5d, 6d })]
+    [InlineData("[7 8 9]", new[] { 7d, 8d, 9d })]
+    [InlineData("1+1, 2*3", new[] { 2d, 6d })]
+    public void SeveralNumbersAreSplitWhateverSeparatesThem(string text, double[] expected)
+    {
+        Assert.Equal(expected, PortEditors.SplitNumbers(text).ToArray());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("hello, 2")]
+    [InlineData("1, two, 3")]
+    [InlineData("1 + 2")]
+    public void TextThatIsNotAListOfNumbersGivesNothing(string? text)
+    {
+        // "1 + 2" is one expression, not a list: the ordinary single-value paste deals with it.
+        Assert.True(PortEditors.SplitNumbers(text).Count < 2);
+    }
+
+    private static ZeroTouchNodeModel Add3() => ZT.Node("Add3");
+
+    [Fact]
+    public void ACoordinateFillsConsecutiveFieldsFromTheOneHovered()
+    {
+        var node = Add3();
+
+        var filled = PortEditors.PasteNumbers(node.InPorts, 0, "10, 20, 30", _ => false);
+
+        Assert.Equal(3, filled);
+        Assert.Equal(new[] { 10d, 20d, 30d }, node.InPorts.Select(PortEditors.GetNumber).ToArray());
+    }
+
+    [Fact]
+    public void PastingOnTheMiddleFieldFillsOnlyTheFieldsFromThereOn()
+    {
+        var node = Add3();
+
+        var filled = PortEditors.PasteNumbers(node.InPorts, 1, "5, 6, 7", _ => false);
+
+        Assert.Equal(2, filled);
+        Assert.Equal(5d, PortEditors.GetNumber(node.InPorts[1]));
+        Assert.Equal(6d, PortEditors.GetNumber(node.InPorts[2]));
+        Assert.False(node.InPorts[0].HasUserValue);
+    }
+
+    [Fact]
+    public void FewerNumbersThanFieldsLeavesTheRestAlone()
+    {
+        var node = Add3();
+
+        Assert.Equal(2, PortEditors.PasteNumbers(node.InPorts, 0, "8, 9", _ => false));
+        Assert.False(node.InPorts[2].HasUserValue);
+    }
+
+    [Fact]
+    public void AWiredFieldStopsThePasteAndAMissingStartPastesNothing()
+    {
+        var node = Add3();
+        var wired = node.InPorts[1];
+
+        Assert.Equal(1, PortEditors.PasteNumbers(node.InPorts, 0, "1, 2, 3", p => ReferenceEquals(p, wired)));
+        Assert.Equal(0, PortEditors.PasteNumbers(node.InPorts, 1, "1, 2, 3", p => ReferenceEquals(p, wired)));
+        Assert.Equal(0, PortEditors.PasteNumbers(node.InPorts, -1, "1, 2, 3", _ => false));
+    }
+
+    [Fact]
+    public void ASingleNumberIsLeftToTheOrdinaryPaste()
+    {
+        var node = Add3();
+
+        Assert.Equal(0, PortEditors.PasteNumbers(node.InPorts, 0, "42", _ => false));
+        Assert.False(node.InPorts[0].HasUserValue);
+    }
+}

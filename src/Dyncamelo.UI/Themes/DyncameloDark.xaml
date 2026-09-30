@@ -921,6 +921,15 @@
                         <DataTrigger Binding="{Binding IsReplicating}" Value="True">
                             <Setter Property="StrokeDashArray" Value="{StaticResource Dyc.WireDash}" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsDimmed}" Value="True">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsEmphasised}" Value="True">
+                            <Setter Property="StrokeThickness" Value="3" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="StrokeThickness" Value="3.5" />
+                        </Trigger>
                         <DataTrigger Binding="{Binding IsMuted}" Value="True">
                             <Setter Property="Opacity" Value="0.45" />
                         </DataTrigger>

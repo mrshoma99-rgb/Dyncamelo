@@ -122,6 +122,40 @@ public sealed class NumberEditSpec
 /// <summary>Drag/step/typed-input arithmetic for the number field. Pure, so it is unit-tested.</summary>
 public static class ScrubMath
 {
+    /// <summary>
+    /// Where the pointer should reappear when a drag reaches the edge of the screen area, so a number can be dragged further
+    /// than the screen is wide.
+    /// </summary>
+    /// <param name="x">Pointer X in screen pixels.</param>
+    /// <param name="left">Left edge of the screen area.</param>
+    /// <param name="width">Width of the screen area.</param>
+    /// <param name="margin">How close to an edge counts as reaching it.</param>
+    /// <param name="newX">The X to move the pointer to (the opposite edge, just inside it) when this returns true.</param>
+    /// <returns>True when the pointer is at an edge and should be moved.</returns>
+    public static bool TryWrap(double x, double left, double width, double margin, out double newX)
+    {
+        newX = x;
+        if (width <= margin * 6d)
+        {
+            return false;
+        }
+
+        var right = left + width;
+        if (x <= left + margin)
+        {
+            newX = right - (margin * 2d);
+            return true;
+        }
+
+        if (x >= right - margin)
+        {
+            newX = left + (margin * 2d);
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>Pixels of drag that equal one step when the field has no finite range.</summary>
     public const double PixelsPerStep = 8d;
 
@@ -349,6 +383,77 @@ public static class PortEditors
         }
 
         port.SetUserValue(CoerceNumber(normalised, port.DeclaredType));
+    }
+
+    /// <summary>
+    /// Splits pasted text into numbers: "1, 2, 3", "(1; 2; 3)", one per line or tab (spreadsheet cells), or plain numbers
+    /// separated by spaces. Each part may be an expression ("1+2"). Returns nothing unless every part is a number.
+    /// </summary>
+    /// <param name="text">The clipboard text.</param>
+    public static IReadOnlyList<double> SplitNumbers(string? text)
+    {
+        var numbers = new List<double>();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return numbers;
+        }
+
+        var trimmed = text!.Trim().Trim('(', ')', '[', ']', '{', '}').Trim();
+        var parts = trimmed.Split(new[] { ',', ';', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 2)
+        {
+            // "1 2 3": spaces only separate plain numbers (a space inside "1 + 2" is part of the expression).
+            parts = trimmed.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Any(part => !double.TryParse(part, NumberStyles.Float, CultureInfo.InvariantCulture, out _)))
+            {
+                return numbers;
+            }
+        }
+
+        foreach (var part in parts)
+        {
+            if (!NumberExpression.TryEvaluate(part.Trim(), out var value) || double.IsNaN(value) || double.IsInfinity(value))
+            {
+                return new List<double>();
+            }
+
+            numbers.Add(value);
+        }
+
+        return numbers;
+    }
+
+    /// <summary>
+    /// Pastes several numbers into consecutive number fields starting at <paramref name="start"/> (a coordinate "1, 2, 3" into
+    /// x, y, z). Stops at the first port that is not an unwired number field.
+    /// </summary>
+    /// <param name="inputs">The node's input ports.</param>
+    /// <param name="start">Index of the port the paste started on.</param>
+    /// <param name="text">The clipboard text.</param>
+    /// <param name="isConnected">Whether a port has a wire.</param>
+    /// <returns>How many fields were filled; 0 when the text is not two or more numbers or the first field cannot take one.</returns>
+    public static int PasteNumbers(IReadOnlyList<PortModel> inputs, int start, string? text, Func<PortModel, bool> isConnected)
+    {
+        var numbers = SplitNumbers(text);
+        if (numbers.Count < 2 || start < 0)
+        {
+            return 0;
+        }
+
+        var filled = 0;
+        for (var i = start; i < inputs.Count && filled < numbers.Count; i++)
+        {
+            var port = inputs[i];
+            if (Resolve(port) != PortEditorKind.Number || isConnected(port))
+            {
+                break;
+            }
+
+            SetNumber(port, numbers[filled]);
+            filled++;
+        }
+
+        return filled;
     }
 
     /// <summary>The number converted to the primitive type a port declares (double when unknown).</summary>

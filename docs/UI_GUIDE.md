@@ -94,6 +94,11 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * **Bookmarks.** `Ctrl+K` names the current view (position and zoom) and saves it **in the graph file**; `Ctrl+Shift+K` lists them — click one to go there, the ✕ removes it. Good for touring a large graph (*inputs*, *filters*, *export*).
 * **Find a node by name.** `Ctrl+F` opens the command palette on the nodes of this canvas (it starts with `@`; typing plain text in the palette finds nodes too). `Enter` selects the node and scrolls to it.
 * **Frame and arrows.** `Shift+F` zooms to the selection. The arrow keys (`Left`, `Right`, `Up`, `Down`) move the selection to the nearest node in that direction, so a graph can be toured without the mouse; they only act when the canvas has the keyboard.
+* **Quick search suggestions.** `Space` before typing lists your starred nodes and the ones you added most recently (so Space, Enter repeats the last node); while typing, starred and recent nodes come first among equally good matches.
+* **Follow a wire.** With a node selected, its wires are drawn heavier and the rest fainter (Settings ▸ Canvas ▸ *Highlight the wires of the selected node*); hovering a wire thickens it.
+* **Pasting a coordinate.** Hover a number field and press `Ctrl+V` with `1, 2, 3` (or cells copied from a spreadsheet) on the clipboard: the values go into that field and the number fields after it, as one undo step. A wired field stops the paste.
+* **Colour eyedropper.** The dropper button in a colour popup turns the next click anywhere on the screen — the Navisworks viewport included — into the colour under the pointer. `Esc` or a right click cancels.
+* **Dragging numbers further.** With *Wrap the pointer while dragging numbers* on (Settings ▸ Editing), dragging a number to the edge of the screen brings the pointer back on the other side and the value carries on.
 * **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.
 * **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas lists the ways to add the first node. Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
 
@@ -238,7 +243,10 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Cut wires | Alt+Shift+drag across them |
 | Mute the wires you cut | Hold Ctrl while releasing the cut |
 | Push nodes apart | Ctrl+Shift+drag |
-| Change a number | Drag the field; Shift for fine steps, Ctrl to snap |
+| Change a number | Drag the field; Shift for fine steps, Ctrl to snap; the pointer wraps at the screen edge |
+| Paste a coordinate | Hover a number field, Ctrl+V with "1, 2, 3" on the clipboard fills it and the fields after it |
+| Pick a colour from the screen | The dropper in a colour popup; click anywhere, Esc cancels |
+| Add a node group socket | Drop a wire on the Group Input or Group Output node itself |
 | Copy or paste a field's value | Hover it, then Ctrl+C / Ctrl+V |
 | Reset a field to its default | Hover it, then Backspace |
 | Rename a node | Double-click its title |
@@ -271,6 +279,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Snap nodes to the grid | On / Off | On | Dragged nodes land on grid lines instead of anywhere. |
 | Straight wires | On / Off | Off | Draw wires as straight lines instead of curves. Faster on very large graphs. |
 | Minimap | Automatic / Always / Never | Automatic | The overview in the corner. Automatic shows it once the graph has 40 or more nodes. |
+| Highlight the wires of the selected node | On / Off | On | When a node is selected, its wires are drawn heavier and every other wire fainter, so a connection can be followed through a busy graph. |
 | Layered Arrange | On / Off | On | Arrange with the layered layout that keeps wire crossings to a minimum. Off uses simple columns. |
 
 ### Editing
@@ -278,6 +287,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Setting | Values | Default | What it does |
 |---|---|---|---|
 | Number drag speed | Slow / Normal / Fast | Normal | How far the mouse travels for each step of a number field. |
+| Wrap the pointer while dragging numbers | On / Off | On | When a number is dragged to the edge of the screen the pointer reappears on the other side and the value carries on, so any distance can be dragged. |
 | Run while dragging numbers | On / Off | Off | Re-run the graph continuously while a number field is dragged. Off runs once on release, which is safer for graphs that call Navisworks. |
 | Hide unused inputs by default | On / Off | Off | Nodes that have not been set either way hide their unconnected optional inputs. |
 | Make room when inserting on a wire | On / Off | On | Nodes downstream move right when a node is dropped onto a wire. |

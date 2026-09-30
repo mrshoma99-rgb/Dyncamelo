@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
@@ -455,6 +456,84 @@ public partial class GraphEditorViewModel
         }
 
         NodeGroupOps.AddSocket(group, side, side == SocketSide.Input ? "Input" : "Output", string.Empty, _undo);
+    }
+
+    /// <summary>
+    /// A wire released on the body of the Group Output node (from an output socket) or of the Group Input node (from an
+    /// unwired input socket) adds a socket to the group's interface, named and typed after the dragged socket, and connects
+    /// to it — the same as dropping on the empty socket of Blender's group nodes.
+    /// </summary>
+    /// <param name="dragged">The socket the wire was dragged from.</param>
+    /// <param name="location">Where the wire was released, in canvas space.</param>
+    /// <returns>True when a socket was made and the wire connected; false when the drop was not on a group interface node.</returns>
+    public bool TryCreateGroupSocketFromDrop(ConnectorViewModel dragged, Point location)
+    {
+        var host = NodeUnder(location);
+        if (host == null)
+        {
+            return false;
+        }
+
+        NodeGroup? group;
+        SocketSide side;
+        if (host.Model is GroupOutputNode output && !dragged.IsInput)
+        {
+            group = output.Owner;
+            side = SocketSide.Output;
+        }
+        else if (host.Model is GroupInputNode input && dragged.IsInput)
+        {
+            group = input.Owner;
+            side = SocketSide.Input;
+        }
+        else
+        {
+            return false;
+        }
+
+        if (group == null)
+        {
+            return false;
+        }
+
+        // A wired input is already fed; only a multi-input takes more.
+        if (side == SocketSide.Input && dragged.IsConnected && !dragged.IsMultiInput)
+        {
+            StatusMessage = "That input already has a wire; disconnect it first to feed it from a group input.";
+            return true;
+        }
+
+        using (_undo.Begin("Add group " + (side == SocketSide.Input ? "input" : "output") + " and connect"))
+        {
+            var socket = NodeGroupOps.AddSocket(group, side, dragged.Port.Name, PortKinds.ToHint(dragged.Kind), _undo);
+            var ports = side == SocketSide.Input ? host.Model.OutPorts : host.Model.InPorts;
+            var bound = ports.FirstOrDefault(p => p.Id == socket.Id);
+            if (bound == null)
+            {
+                return true;
+            }
+
+            var result = side == SocketSide.Input ? _graph.Connect(bound, dragged.Port) : _graph.Connect(dragged.Port, bound);
+            StatusMessage = result.Success
+                ? "Added group " + (side == SocketSide.Input ? "input" : "output") + " '" + socket.Name + "' and connected it."
+                : result.Message ?? "The connection was rejected.";
+        }
+
+        return true;
+    }
+
+    private NodeViewModel? NodeUnder(Point location)
+    {
+        foreach (var node in Items.OfType<NodeViewModel>())
+        {
+            var size = node.Size;
+            if (size.Width > 0 && size.Height > 0 && new Rect(node.Location, size).Contains(location))
+            {
+                return node;
+            }
+        }
+
+        return null;
     }
 
     // ----- sockets of the Group Input / Group Output nodes --------------------------------------------

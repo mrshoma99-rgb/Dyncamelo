@@ -121,6 +121,8 @@ public partial class GraphEditorViewModel
             KeymapChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        Views.ScrubNumberBox.WrapPointerAtScreenEdge = ScrubWrapsPointer;
+
         // The typed preferences keep a copy of the stored value.
         if (_doubleClickAction != _settings.DoubleClickAction)
         {
@@ -555,6 +557,8 @@ public partial class GraphEditorViewModel
             case "autosave": return IsAutosaveEnabled;
             case "uiScale": return UiScale;
             case "statusHints": return ShowStatusHints;
+            case "wireFocus": return FocusSelectedWires;
+            case "scrubWrap": return ScrubWrapsPointer;
             case "emptyHints": return ShowEmptyCanvasHints;
             case "previewSelection": return PreviewSelection;
             case "doubleClick": return DoubleClickAction;
@@ -585,6 +589,8 @@ public partial class GraphEditorViewModel
             case "autosave": IsAutosaveEnabled = (bool)value; break;
             case "uiScale": UiScale = (string)value; break;
             case "statusHints": ShowStatusHints = (bool)value; break;
+            case "wireFocus": FocusSelectedWires = (bool)value; break;
+            case "scrubWrap": ScrubWrapsPointer = (bool)value; break;
             case "emptyHints": ShowEmptyCanvasHints = (bool)value; break;
             case "previewSelection": PreviewSelection = (bool)value; break;
             case "doubleClick": DoubleClickAction = (string)value; break;

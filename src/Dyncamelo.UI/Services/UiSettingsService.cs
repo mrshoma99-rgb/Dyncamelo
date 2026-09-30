@@ -15,10 +15,12 @@ namespace Dyncamelo.UI.Services;
 public class UiSettingsService
 {
     private const int MaxRecentFiles = 10;
+    private const int MaxRecentNodes = 12;
 
     private readonly string _settingsPath;
     private readonly List<string> _favoriteNodeIds = new List<string>();
     private readonly List<string> _recentFiles = new List<string>();
+    private readonly List<string> _recentNodeIds = new List<string>();
     private bool _showLibraryDescriptions = true;
     private string _doubleClickAction = "string";
     private bool _previewSelection;
@@ -43,6 +45,28 @@ public class UiSettingsService
 
     /// <summary>Library ids of the starred nodes, in the order they were starred.</summary>
     public IReadOnlyList<string> FavoriteNodeIds => _favoriteNodeIds;
+
+    /// <summary>Library ids of the nodes added most recently, newest first (max 12).</summary>
+    public IReadOnlyList<string> RecentNodeIds => _recentNodeIds;
+
+    /// <summary>Remembers that a node was just added, so quick search can offer it first next time.</summary>
+    /// <param name="nodeId">Library id of the node.</param>
+    public void AddRecentNode(string nodeId)
+    {
+        if (string.IsNullOrEmpty(nodeId) || (_recentNodeIds.Count > 0 && _recentNodeIds[0] == nodeId))
+        {
+            return;
+        }
+
+        _recentNodeIds.Remove(nodeId);
+        _recentNodeIds.Insert(0, nodeId);
+        if (_recentNodeIds.Count > MaxRecentNodes)
+        {
+            _recentNodeIds.RemoveRange(MaxRecentNodes, _recentNodeIds.Count - MaxRecentNodes);
+        }
+
+        Save();
+    }
 
     /// <summary>Recently opened/saved .dyc paths, most recent first (max 10, missing files pruned).</summary>
     public IReadOnlyList<string> RecentFiles => _recentFiles;
@@ -307,6 +331,7 @@ public class UiSettingsService
             {
                 FavoriteNodeIds = new List<string>(_favoriteNodeIds),
                 RecentFiles = new List<string>(_recentFiles),
+                RecentNodeIds = new List<string>(_recentNodeIds),
                 ShowLibraryDescriptions = _showLibraryDescriptions,
                 DoubleClickAction = _doubleClickAction,
                 PreviewSelection = _previewSelection,
@@ -362,6 +387,7 @@ public class UiSettingsService
 
         _favoriteNodeIds.Clear();
         _recentFiles.Clear();
+        _recentNodeIds.Clear();
         _showLibraryDescriptions = true;
         _doubleClickAction = "string";
         _previewSelection = false;
@@ -420,6 +446,17 @@ public class UiSettingsService
                 if (!string.IsNullOrEmpty(path) && !ContainsEquals(_recentFiles, path))
                 {
                     _recentFiles.Add(path);
+                }
+            }
+        }
+
+        if (data.RecentNodeIds != null)
+        {
+            foreach (var id in data.RecentNodeIds)
+            {
+                if (!string.IsNullOrEmpty(id) && !_recentNodeIds.Contains(id) && _recentNodeIds.Count < MaxRecentNodes)
+                {
+                    _recentNodeIds.Add(id);
                 }
             }
         }
@@ -501,6 +538,9 @@ public class UiSettingsService
 
         [JsonProperty("recentFiles")]
         public List<string>? RecentFiles { get; set; }
+
+        [JsonProperty("recentNodeIds")]
+        public List<string>? RecentNodeIds { get; set; }
 
         [JsonProperty("showLibraryDescriptions")]
         public bool? ShowLibraryDescriptions { get; set; }

@@ -508,6 +508,66 @@ public partial class GraphEditorViewModel
         }
     }
 
+    /// <summary>True when dragging a number past the screen edge carries on from the other side (Settings ▸ Editing).</summary>
+    public bool ScrubWrapsPointer
+    {
+        get => _settings.GetBool(SettingKeys.ScrubWrap, true);
+        set
+        {
+            SetPreference(SettingKeys.ScrubWrap, value, true, nameof(ScrubWrapsPointer));
+            Views.ScrubNumberBox.WrapPointerAtScreenEdge = value;
+        }
+    }
+
+    /// <summary>Shows a message in the status bar (for view models and views that act on the editor's behalf).</summary>
+    /// <param name="message">The text.</param>
+    public void ReportStatus(string message) => StatusMessage = message;
+
+    // ----- wire focus ----------------------------------------------------------------------------
+
+    private bool _wireFocusQueued;
+
+    /// <summary>True when the wires of the selected nodes are drawn heavier and the others fainter (Settings ▸ Canvas).</summary>
+    public bool FocusSelectedWires
+    {
+        get => _settings.GetBool(SettingKeys.WireFocus, true);
+        set
+        {
+            SetPreference(SettingKeys.WireFocus, value, true, nameof(FocusSelectedWires));
+            RefreshWireFocus();
+        }
+    }
+
+    // A marquee or Select All changes the selection hundreds of times in a row; update the wires once afterwards.
+    private void QueueWireFocus()
+    {
+        if (_wireFocusQueued)
+        {
+            return;
+        }
+
+        _wireFocusQueued = true;
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke(
+            new Action(() =>
+            {
+                _wireFocusQueued = false;
+                RefreshWireFocus();
+            }),
+            System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    /// <summary>Emphasises the wires of the selected nodes and dims the rest, or restores them all when nothing is selected.</summary>
+    public void RefreshWireFocus()
+    {
+        var selected = new HashSet<NodeModel>(SelectedItems.OfType<NodeViewModel>().Select(n => n.Model));
+        var active = FocusSelectedWires && selected.Count > 0;
+        foreach (var wire in Connections)
+        {
+            var touches = active && (selected.Contains(wire.Model.SourceNode) || selected.Contains(wire.Model.TargetNode));
+            wire.SetFocus(touches, active && !touches);
+        }
+    }
+
     // ----- hints ---------------------------------------------------------------------------------
 
     /// <summary>The one-line hint for what the editor is doing now.</summary>
