@@ -181,6 +181,7 @@ public partial class DyncameloEditorControl : UserControl
             case "wire.mute": return vm.MuteSelectedWiresCommand;
             case "wire.reroute": return vm.RerouteSelectedWiresCommand;
             case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
+            case "help.keys": return vm.ToggleHelpCommand;
             case "view.hud": return _hudCommand;
             case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);
             case "view.settings": return _settingsCommand ??= new RelayCommand(() => SettingsButton.IsChecked = true);
@@ -366,6 +367,13 @@ public partial class DyncameloEditorControl : UserControl
     private void OnControlPreviewKeyDown(object sender, KeyEventArgs e)
     {
         bool typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+
+        if (e.Key == Key.Escape && ViewModel != null && ViewModel.IsHelpOpen)
+        {
+            ViewModel.IsHelpOpen = false;
+            e.Handled = true;
+            return;
+        }
 
         if (e.Key == Key.F12 && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && _perfHud != null)
         {

@@ -989,3 +989,37 @@ public class LodTests
         Assert.Equal(2, changes); // Full -> Compact -> Overview, exactly once each
     }
 }
+
+public class HelpContentTests
+{
+    [Fact]
+    public void EveryShortcutIsDocumented()
+    {
+        var text = string.Join("\n", HelpContent.Build().SelectMany(s => s.Lines).Select(l => l.Action + "|" + l.Keys));
+        foreach (var command in CommandCatalog.All.Where(c => c.Shortcut != null))
+        {
+            Assert.Contains(command.Title + "|" + command.Shortcut, text);
+        }
+    }
+
+    [Fact]
+    public void GesturesAreListedAndLinesAreComplete()
+    {
+        var sections = HelpContent.Build();
+        Assert.Equal("Mouse", sections.Last().Title);
+        Assert.All(sections.SelectMany(s => s.Lines), l =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(l.Action));
+            Assert.False(string.IsNullOrWhiteSpace(l.Keys));
+        });
+        Assert.Contains(sections.Last().Lines, l => l.Action.Contains("Cut wires"));
+    }
+
+    [Fact]
+    public void TheHelpCommandHasAKeyAndAMenuHome()
+    {
+        var help = CommandCatalog.Find("help.keys")!;
+        Assert.Equal("F1", help.Shortcut);
+        Assert.Equal("Help", help.Category);
+    }
+}

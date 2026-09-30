@@ -408,3 +408,26 @@ public partial class GraphEditorViewModel
         }
     }
 }
+
+public partial class GraphEditorViewModel
+{
+    private bool _isHelpOpen;
+    private ICommand? _toggleHelpCommand;
+    private ICommand? _closeHelpCommand;
+
+    /// <summary>The text of the shortcut/gesture overlay (generated from the command catalogue).</summary>
+    public IReadOnlyList<HelpSection> HelpSections { get; } = HelpContent.Build();
+
+    /// <summary>True while the keyboard and mouse help overlay is shown (F1).</summary>
+    public bool IsHelpOpen
+    {
+        get => _isHelpOpen;
+        set => SetProperty(ref _isHelpOpen, value);
+    }
+
+    /// <summary>Shows or hides the help overlay (F1).</summary>
+    public ICommand ToggleHelpCommand => _toggleHelpCommand ??= new RelayCommand(() => IsHelpOpen = !IsHelpOpen);
+
+    /// <summary>Hides the help overlay.</summary>
+    public ICommand CloseHelpCommand => _closeHelpCommand ??= new RelayCommand(() => IsHelpOpen = false);
+}

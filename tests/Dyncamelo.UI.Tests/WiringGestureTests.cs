@@ -581,3 +581,117 @@ public class ShortcutRouterTests
         Assert.Null(router.Find(Key.Space, ModifierKeys.None));
     }
 }
+
+/// <summary>A node with a variable number of inputs, like List.Create (the +/- buttons find these methods by name).</summary>
+public sealed class GrowNode : NodeModel
+{
+    public GrowNode()
+    {
+        Name = "Grow";
+        AddItemPort();
+        AddOutput("out", typeof(object));
+    }
+
+    public override string NodeType => "TestGrow";
+
+    public PortModel AddItemPort()
+    {
+        var port = AddInput("item" + InPorts.Count, typeof(object), null);
+        MarkDirty();
+        return port;
+    }
+
+    public bool RemoveItemPort()
+    {
+        if (InPorts.Count <= 1)
+        {
+            return false;
+        }
+
+        var last = InPorts[InPorts.Count - 1];
+        var connection = Graph?.FindConnectionInto(last);
+        if (connection != null)
+        {
+            Graph!.Disconnect(connection);
+        }
+
+        ((System.Collections.Generic.IList<PortModel>)InPorts).RemoveAt(InPorts.Count - 1);
+        MarkDirty();
+        return true;
+    }
+
+    public override object?[] Evaluate(object?[] inputs, Dyncamelo.Core.Execution.EvaluationContext context) => new object?[] { null };
+}
+
+public class PortCountUndoTests
+{
+    [Fact]
+    public void AddingAndRemovingInputsUndoAndRedoWithTheirWires()
+    {
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            registry.RegisterNodeType("TestSum", () => new SumNode());
+            registry.RegisterNodeType("TestGrow", () => new GrowNode());
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
+            var source = new SumNode();
+            var grow = new GrowNode();
+            vm.Graph.AddNode(source);
+            vm.Graph.AddNode(grow);
+            var growVm = vm.Items.OfType<NodeViewModel>().Single(n => n.Model == grow);
+            vm.History.Clear();
+
+            growVm.AddPortCommand.Execute(null);
+            var second = grow.InPorts[1];
+            Assert.True(vm.Graph.Connect(source.OutPorts[0], second).Success);
+            growVm.RemovePortCommand.Execute(null);
+            Assert.Single(grow.InPorts);
+            Assert.Empty(vm.Graph.Connections);
+
+            vm.UndoCommand.Execute(null);   // the removal: same port object comes back
+            Assert.Equal(2, grow.InPorts.Count);
+            Assert.Same(second, grow.InPorts[1]);
+            vm.UndoCommand.Execute(null);   // its wire returns, onto that port
+            Assert.Same(source, vm.Graph.FindConnectionInto(second)!.SourceNode);
+            Assert.Equal(2, growVm.Inputs.Count);
+
+            vm.UndoCommand.Execute(null);   // the connect
+            vm.UndoCommand.Execute(null);   // the add
+            Assert.Single(grow.InPorts);
+            Assert.Single(growVm.Inputs);
+
+            for (var i = 0; i < 4; i++)
+            {
+                vm.RedoCommand.Execute(null);
+            }
+
+            Assert.Single(grow.InPorts);
+            Assert.Empty(vm.Graph.Connections);
+        });
+    }
+}
+
+public class HelpOverlayTests
+{
+    [Fact]
+    public void F1TogglesTheOverlayAndItListsTheCatalogue()
+    {
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
+            Assert.False(vm.IsHelpOpen);
+            Assert.NotEmpty(vm.HelpSections);
+
+            vm.ToggleHelpCommand.Execute(null);
+            Assert.True(vm.IsHelpOpen);
+            vm.CloseHelpCommand.Execute(null);
+            Assert.False(vm.IsHelpOpen);
+
+            var router = new ShortcutRouter();
+            Assert.Equal("help.keys", router.Find(System.Windows.Input.Key.F1, System.Windows.Input.ModifierKeys.None)!.Id);
+        });
+    }
+}

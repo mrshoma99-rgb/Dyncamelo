@@ -604,20 +604,95 @@ public class NodeViewModel : CanvasItemViewModel
             return;
         }
 
-        _addPortMethod.Invoke(Model, null);
+        var before = Model.InPorts.Count;
+        var created = _addPortMethod.Invoke(Model, null) as PortModel;
         SyncPorts();
+        var port = created ?? (Model.InPorts.Count > before ? Model.InPorts[Model.InPorts.Count - 1] : null);
+        if (port != null)
+        {
+            _owner.History.Record(new PortCountStep(this, added: true, port));
+        }
     }
 
     private void RemovePort()
     {
-        if (_removePortMethod == null)
+        if (_removePortMethod == null || Model.InPorts.Count == 0)
         {
             return;
         }
 
+        var last = Model.InPorts[Model.InPorts.Count - 1];
         _removePortMethod.Invoke(Model, null);
         SyncPorts();
         _owner.RefreshConnectedFlags();
+        if (!Model.InPorts.Contains(last))
+        {
+            _owner.History.Record(new PortCountStep(this, added: false, last));
+        }
+    }
+
+    // Undo/redo put the very same port object back or take it out again, so wires and pinned values recorded
+    // against it stay valid.
+    private void InsertPortRaw(PortModel port)
+    {
+        if (Model.InPorts is IList<PortModel> ports && !ports.IsReadOnly && !ports.Contains(port))
+        {
+            ports.Add(port);
+            Model.MarkDirty();
+            SyncPorts();
+            _owner.RefreshConnectedFlags();
+        }
+    }
+
+    private void TakePortOutRaw(PortModel port)
+    {
+        if (Model.InPorts is IList<PortModel> ports && !ports.IsReadOnly && ports.Remove(port))
+        {
+            Model.MarkDirty();
+            SyncPorts();
+            _owner.RefreshConnectedFlags();
+        }
+    }
+
+    /// <summary>Undo step for the +/- buttons of nodes with a variable number of inputs.</summary>
+    private sealed class PortCountStep : IUndoStep
+    {
+        private readonly NodeViewModel _node;
+        private readonly bool _added;
+        private readonly PortModel _port;
+
+        public PortCountStep(NodeViewModel node, bool added, PortModel port)
+        {
+            _node = node;
+            _added = added;
+            _port = port;
+        }
+
+        public string Label => _added ? "Add input" : "Remove input";
+
+        public void Undo()
+        {
+            if (_added)
+            {
+                _node.TakePortOutRaw(_port);
+            }
+            else
+            {
+                _node.InsertPortRaw(_port);
+            }
+        }
+
+        public void Redo()
+        {
+            if (_added)
+            {
+                _node.InsertPortRaw(_port);
+            }
+            else
+            {
+                _node.TakePortOutRaw(_port);
+            }
+        }
     }
 
     private void SetLacing(string? mode)

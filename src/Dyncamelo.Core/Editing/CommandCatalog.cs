@@ -115,6 +115,7 @@ public static class CommandCatalog
         new CommandInfo("wire.mute", "Mute / Unmute Selected Wires", "Wires", null, keywords: "bypass disable ignore"),
         new CommandInfo("wire.reroute", "Add Reroute to Selected Wires", "Wires", null, keywords: "knot dot bend"),
         new CommandInfo("wire.disconnect", "Disconnect Selected Wires", "Wires", null, keywords: "cut remove unlink"),
+        new CommandInfo("help.keys", "Keyboard & Mouse Shortcuts", "Help", "F1", CommandScope.Global, keywords: "help keys shortcuts gestures cheat sheet"),
         new CommandInfo("graph.addnode", "Add Node…", "Graph", "Space", keywords: "search quick library"),
     };
 

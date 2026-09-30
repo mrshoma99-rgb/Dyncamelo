@@ -645,6 +645,77 @@
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
 
+            <!-- Keyboard & mouse help (F1): generated from the command catalogue. -->
+            <Border Grid.Column="2"
+                    Panel.ZIndex="950"
+                    Background="#F0151719"
+                    Visibility="{Binding IsHelpOpen, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <DockPanel Margin="24,18">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource Dyc.IconButton}"
+                                Content="✕"
+                                ToolTip="Close (Esc or F1)"
+                                Command="{Binding CloseHelpCommand}" />
+                        <TextBlock Text="Keyboard and mouse"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource Dyc.TextBrush}" />
+                    </DockPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding HelpSections}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="330"
+                                            Margin="0,0,14,14"
+                                            Padding="12,10"
+                                            CornerRadius="6"
+                                            Background="{StaticResource Dyc.PanelBrush}"
+                                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}"
+                                                       FontWeight="SemiBold"
+                                                       Margin="0,0,0,6"
+                                                       Foreground="{StaticResource Dyc.AccentBrush}" />
+                                            <ItemsControl ItemsSource="{Binding Lines}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,2">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="{Binding Action}"
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="12"
+                                                                       Foreground="{StaticResource Dyc.TextBrush}" />
+                                                            <TextBlock Grid.Column="1"
+                                                                       Margin="12,0,0,0"
+                                                                       MaxWidth="150"
+                                                                       TextWrapping="Wrap"
+                                                                       TextAlignment="Right"
+                                                                       FontSize="11"
+                                                                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                                                       Text="{Binding Keys}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
             <!-- Quick node search (Space over the canvas): type, ↑/↓ to pick,
                  Enter inserts at the spot the cursor was on when it opened. -->
             <Border Grid.Column="2"
