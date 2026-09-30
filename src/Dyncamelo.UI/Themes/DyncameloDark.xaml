@@ -51,7 +51,6 @@
     <SolidColorBrush x:Key="Dyc.BrandButtonHoverBrush" Color="#47FFFFFF" />
 
     <views:NodeBodyTemplateSelector x:Key="Dyc.NodeBodySelector" />
-    <views:ColorChannelsToBrushConverter x:Key="Dyc.ColorChannelsToBrush" />
     <views:AutoSizeLimitConverter x:Key="Dyc.AutoSizeLimit" />
     <views:ImagePathToSourceConverter x:Key="Dyc.ImagePathToSource" />
     <BooleanToVisibilityConverter x:Key="Dyc.BoolToVisibility" />
@@ -1035,7 +1034,7 @@
                     Margin="4,0,0,0"
                     Content="…"
                     ToolTip="Browse for a file"
-                    Command="{Binding DataContext.BrowseFileCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}" />
+                    Command="{Binding DataContext.BrowseFileCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}" />
             <TextBox Style="{StaticResource Dyc.TextBox}" Text="{Binding Path}" />
         </DockPanel>
     </DataTemplate>
@@ -1059,17 +1058,17 @@
                        Margin="1,0,1,3"
                        FontSize="10"
                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
             <TextBox x:Name="WatchBox"
                      Grid.Row="1"
                      Style="{StaticResource Dyc.TextBox}"
                      MinWidth="120"
                      MinHeight="24"
-                     Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                     Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                     MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
-                     MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=200}"
+                     Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                     Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                     MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
+                     MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=200}"
                      FontFamily="Consolas"
                      FontSize="11"
                      IsReadOnly="True"
@@ -1083,8 +1082,8 @@
                                  Margin="0,2,0,0"
                                  ToolTip="Drag to resize"
                                  TargetElement="{Binding ElementName=WatchBox}"
-                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
-                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
                                  MinTargetWidth="120"
                                  MinTargetHeight="24">
                 <views:SizeGripThumb.Template>
@@ -1122,8 +1121,8 @@
                        Margin="1,0,1,3"
                        FontSize="10"
                        Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                       Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                       Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
             <!-- Two-column rows: a right-aligned index gutter with a separator
                  rule, then the value. A retemplated ListBox supplies scrolling
                  AND row virtualization (an ItemsControl in a ScrollViewer
@@ -1137,10 +1136,10 @@
                     Padding="6,3"
                     MinWidth="140"
                     MinHeight="24"
-                    Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                    Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                    MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
-                    MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=220}">
+                    Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                    Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                    MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=280}"
+                    MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=220}">
                 <ListBox ItemsSource="{Binding Entries}"
                          Background="Transparent"
                          BorderThickness="0"
@@ -1199,8 +1198,8 @@
                                  Margin="0,2,0,0"
                                  ToolTip="Drag to resize"
                                  TargetElement="{Binding ElementName=WatchListBox}"
-                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
-                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
                                  MinTargetWidth="140"
                                  MinTargetHeight="24">
                 <views:SizeGripThumb.Template>
@@ -1221,45 +1220,22 @@
             <Button Style="{StaticResource Dyc.SmallButton}"
                     Content="+"
                     ToolTip="Add item port"
-                    Command="{Binding DataContext.AddPortCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}" />
+                    Command="{Binding DataContext.AddPortCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}" />
             <Button Style="{StaticResource Dyc.SmallButton}"
                     Margin="4,0,0,0"
                     Content="−"
                     ToolTip="Remove last item port"
-                    Command="{Binding DataContext.RemovePortCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}" />
+                    Command="{Binding DataContext.RemovePortCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}" />
         </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.ColorPickerNode">
         <StackPanel Margin="4" MinWidth="180">
-            <Button Height="24" Cursor="Hand"
-                    Command="{Binding DataContext.PickColorCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                    CommandParameter="{Binding}"
-                    ToolTip="Open the colour picker"
-                    BorderBrush="{StaticResource Dyc.InputBorderBrush}" BorderThickness="1">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="3"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}">
-                                        <Border.Background>
-                                            <MultiBinding Converter="{StaticResource Dyc.ColorChannelsToBrush}">
-                                                <Binding Path="A" />
-                                                <Binding Path="R" />
-                                                <Binding Path="G" />
-                                                <Binding Path="B" />
-                                            </MultiBinding>
-                                        </Border.Background>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <views:ColorSwatchPicker Height="24"
+                                     A="{Binding A, Mode=TwoWay}"
+                                     R="{Binding R, Mode=TwoWay}"
+                                     G="{Binding G, Mode=TwoWay}"
+                                     B="{Binding B, Mode=TwoWay}" />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="14" />
@@ -1324,10 +1300,10 @@
                            Stretch="Uniform"
                            MinWidth="160"
                            MinHeight="60"
-                           Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                           Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}}"
-                           MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=320}"
-                           MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=260}"
+                           Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                           Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                           MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=320}"
+                           MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=260}"
                            RenderOptions.BitmapScalingMode="HighQuality">
                         <Image.Source>
                             <MultiBinding Converter="{StaticResource Dyc.ImagePathToSource}">
@@ -1365,8 +1341,8 @@
                                  Margin="0,2,0,0"
                                  ToolTip="Drag to resize"
                                  TargetElement="{Binding ElementName=WatchImageBox}"
-                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
-                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:Node}}, Mode=TwoWay}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
                                  MinTargetWidth="160"
                                  MinTargetHeight="60">
                 <views:SizeGripThumb.Template>
@@ -1589,6 +1565,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
         <Setter Property="ItemsPanel">
@@ -1601,7 +1578,9 @@
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="{x:Type ListBoxItem}">
-                    <Setter Property="Focusable" Value="False" />
+                    <!-- Must stay focusable: ListBoxItem only selects on click when it can take focus. -->
+                    <Setter Property="Focusable" Value="True" />
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Template">
                         <Setter.Value>
@@ -1670,57 +1649,34 @@
 
     <DataTemplate x:Key="Editor.Text">
         <TextBox Style="{StaticResource Dyc.TextBox}"
-                 Height="20"
+                 Height="22"
                  MinWidth="60"
+                 Padding="6,0"
                  FontSize="11"
+                 VerticalContentAlignment="Center"
                  Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
                  ToolTip="{Binding ToolTip}" />
     </DataTemplate>
 
     <DataTemplate x:Key="Editor.Colour">
-        <Button Command="{Binding PickColorCommand}" Height="20" Cursor="Hand" ToolTip="Pick a colour" Focusable="False">
-            <Button.Template>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <Grid>
-                        <Border x:Name="Swatch"
-                                CornerRadius="4"
-                                BorderBrush="{StaticResource Dyc.InputBorderBrush}"
-                                BorderThickness="1"
-                                Background="{Binding ColourBrush}" />
-                        <TextBlock x:Name="Hint"
-                                   Text="pick colour"
-                                   FontSize="10"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                   Visibility="Collapsed" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <DataTrigger Binding="{Binding ColourHex}" Value="">
-                            <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Swatch" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
+        <views:ColorSwatchPicker Hex="{Binding ColourHex, Mode=TwoWay}" />
     </DataTemplate>
 
     <DataTemplate x:Key="Editor.Path">
         <DockPanel>
             <Button DockPanel.Dock="Right"
                     Content="…"
-                    Width="22" Height="20"
+                    Width="22" Height="22"
                     Margin="3,0,0,0"
                     Focusable="False"
                     Command="{Binding BrowseCommand}"
                     Style="{StaticResource Dyc.SmallButton}"
                     ToolTip="Browse" />
             <TextBox Style="{StaticResource Dyc.TextBox}"
-                     Height="20"
+                     Height="22"
+                     Padding="6,0"
                      FontSize="11"
+                     VerticalContentAlignment="Center"
                      Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
                      ToolTip="{Binding TextValue}" />
         </DockPanel>

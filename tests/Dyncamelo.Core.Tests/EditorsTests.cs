@@ -304,3 +304,30 @@ namespace Dyncamelo.Core.Tests
         }
     }
 }
+
+public class ColourMathTests
+{
+    [Theory]
+    [InlineData(255, 0, 0)]
+    [InlineData(0, 255, 0)]
+    [InlineData(0, 0, 255)]
+    [InlineData(255, 255, 255)]
+    [InlineData(0, 0, 0)]
+    [InlineData(12, 200, 99)]
+    [InlineData(128, 128, 128)]
+    public void RgbSurvivesTheRoundTripThroughHsv(int r, int g, int b)
+    {
+        ColourMath.RgbToHsv((byte)r, (byte)g, (byte)b, out var h, out var s, out var v);
+        ColourMath.HsvToRgb(h, s, v, out var r2, out var g2, out var b2);
+        Assert.Equal((r, g, b), ((int)r2, (int)g2, (int)b2));
+    }
+
+    [Fact]
+    public void HueWrapsAndSaturationClamps()
+    {
+        ColourMath.HsvToRgb(-120, 1, 1, out var r, out var g, out var b);
+        Assert.Equal((0, 0, 255), ((int)r, (int)g, (int)b));
+        ColourMath.HsvToRgb(480, 5, 1, out r, out g, out b);
+        Assert.Equal((0, 255, 0), ((int)r, (int)g, (int)b));
+    }
+}

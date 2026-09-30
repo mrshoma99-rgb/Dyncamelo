@@ -36,7 +36,6 @@ public class ConnectorViewModel : ObservableObject
         EditorKind = PortEditors.Resolve(port);
         NumberSpec = EditorKind == PortEditorKind.Number ? NumberEditSpec.FromPort(port) : null;
         ResetCommand = new RelayCommand(() => Port.ClearUserValue(), () => Port.HasUserValue);
-        PickColorCommand = new RelayCommand(PickColour);
         BrowseCommand = new RelayCommand(BrowsePath);
         DisconnectCommand = new RelayCommand(
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
@@ -244,7 +243,17 @@ public class ConnectorViewModel : ObservableObject
     }
 
     /// <summary>The colour as #AARRGGBB, or empty when unset.</summary>
-    public string ColourHex => PortEditors.GetColourHex(Port);
+    public string ColourHex
+    {
+        get => PortEditors.GetColourHex(Port);
+        set
+        {
+            if (PortEditors.TryParseHex(value, out var a, out var r, out var g, out var b))
+            {
+                PortEditors.SetColour(Port, a, r, g, b);
+            }
+        }
+    }
 
     /// <summary>The colour as a brush for the swatch (transparent when unset).</summary>
     public Brush ColourBrush
@@ -277,22 +286,8 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Returns the input to its default (clears the pinned value).</summary>
     public ICommand ResetCommand { get; }
 
-    /// <summary>Opens the colour picker for a colour input.</summary>
-    public ICommand PickColorCommand { get; }
-
     /// <summary>Opens a file (or folder) chooser for a path input.</summary>
     public ICommand BrowseCommand { get; }
-
-    private void PickColour()
-    {
-        PortEditors.TryParseHex(PortEditors.GetColourHex(Port), out var a, out var r, out var g, out var b);
-        var picked = Node.Owner.Dialogs.PickColor(a, r, g, b);
-        if (picked.HasValue)
-        {
-            var c = picked.Value;
-            PortEditors.SetColour(Port, (byte)c.A, (byte)c.R, (byte)c.G, (byte)c.B);
-        }
-    }
 
     private void BrowsePath()
     {
@@ -300,7 +295,7 @@ public class ConnectorViewModel : ObservableObject
         string? chosen;
         if (PortEditors.IsFolder(Port))
         {
-            chosen = dialogs.Prompt("Folder path for '" + Port.Name + "':", "Choose folder", PortEditors.GetText(Port));
+            chosen = dialogs.PickFolder("Choose folder for '" + Port.Name + "'", PortEditors.GetText(Port));
         }
         else
         {

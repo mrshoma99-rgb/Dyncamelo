@@ -37,11 +37,9 @@ public interface IDialogService
     /// <returns>The entered text, or null when cancelled.</returns>
     string? Prompt(string message, string title, string defaultValue);
 
-    /// <summary>Shows a colour picker seeded with the given ARGB channels (0–255).</summary>
-    /// <param name="a">Alpha (0–255).</param>
-    /// <param name="r">Red (0–255).</param>
-    /// <param name="g">Green (0–255).</param>
-    /// <param name="b">Blue (0–255).</param>
-    /// <returns>The chosen ARGB channels, or null when cancelled.</returns>
-    (int A, int R, int G, int B)? PickColor(int a, int r, int g, int b);
+    /// <summary>Lets the user choose a folder.</summary>
+    /// <param name="title">Dialog caption.</param>
+    /// <param name="initialFolder">Folder to start in (may be empty).</param>
+    /// <returns>The chosen folder, or null when cancelled.</returns>
+    string? PickFolder(string title, string initialFolder);
 }

@@ -133,6 +133,7 @@ public static class SearchNodes
     public static List<ModelItem> ByPropertyCompare(
         string categoryName,
         string propertyName,
+        [NodeChoices(">", ">=", "<", "<=")]
         string comparison,
         double value,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]

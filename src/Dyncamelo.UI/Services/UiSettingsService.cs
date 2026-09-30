@@ -313,11 +313,11 @@ public class UiSettingsService
         PruneRecentFiles();
     }
 
-    private static string GetDefaultSettingsPath()
-    {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "Dyncamelo", "ui-settings.json");
-    }
+    /// <summary>The per-user folder holding settings and the error log (%APPDATA%\Dyncamelo).</summary>
+    public static string DefaultDirectory =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dyncamelo");
+
+    private static string GetDefaultSettingsPath() => Path.Combine(DefaultDirectory, "ui-settings.json");
 
     private static bool AddIfMissing(List<string> list, string value)
     {

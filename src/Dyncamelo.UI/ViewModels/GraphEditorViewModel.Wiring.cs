@@ -53,6 +53,10 @@ public partial class GraphEditorViewModel
 
     private static string Count(int n) => n.ToString(CultureInfo.InvariantCulture);
 
+    /// <summary>Shows a problem in the status bar (used by the crash guard when a command fails).</summary>
+    /// <param name="message">What to show.</param>
+    public void ReportProblem(string message) => StatusMessage = message;
+
     private void OnConnectionMuteChanged(object? sender, ConnectionEventArgs e)
     {
         foreach (var connection in Connections)

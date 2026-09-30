@@ -108,4 +108,24 @@ public class ThemeAndWireTests
         var back = DycWire.ControlPoints(new Point(500, 0), new Point(100, 50));
         Assert.True(back.P1.X > 500 && back.P2.X < 100, "backward wires loop out of both sockets");
     }
+
+    [Fact]
+    public void ColourSwatchShowsTheBoundColourAndAHintWhenUnset()
+    {
+        StaHost.Run(() =>
+        {
+            var picker = new ColorSwatchPicker { Hex = "#FF102030" };
+            var swatch = (System.Windows.Controls.Border)picker.Children[0];
+            var hint = (System.Windows.Controls.TextBlock)picker.Children[1];
+            Assert.Equal(Color.FromArgb(255, 0x10, 0x20, 0x30), ((SolidColorBrush)swatch.Background).Color);
+            Assert.Equal(Visibility.Collapsed, hint.Visibility);
+
+            picker.Hex = string.Empty;
+            Assert.Equal(Visibility.Visible, hint.Visibility);
+
+            var byChannels = new ColorSwatchPicker { A = 255, R = 1, G = 2, B = 3 };
+            var brush = (SolidColorBrush)((System.Windows.Controls.Border)byChannels.Children[0]).Background;
+            Assert.Equal(Color.FromArgb(255, 1, 2, 3), brush.Color);
+        });
+    }
 }

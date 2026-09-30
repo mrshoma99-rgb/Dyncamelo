@@ -423,7 +423,7 @@ public static class ClashNodes
     [NodeDescription("The results of a test that have the given status(es) — one, or several comma-separated (\"New,Active\"; wire Clash.Statuses to pick with toggles).")]
     [NodeSearchTags("clash", "results", "status", "statuses", "filter", "triage", "multiple")]
     [return: NodeName("results")]
-    public static List<ClashResult> ResultsByStatus(ClashTest test, string status)
+    public static List<ClashResult> ResultsByStatus(ClashTest test, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status)
     {
         var wanted = ClashHelpers.ParseResultStatuses(status);
         return ClashHelpers.FlattenResults(RequireTest(test)).FindAll(r => wanted.Contains(r.Status));
@@ -438,7 +438,7 @@ public static class ClashNodes
     [NodeDescription("Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).")]
     [NodeSearchTags("clash", "result", "status", "set", "resolve", "approve", "triage")]
     [return: NodeName("result")]
-    public static ClashResult SetStatus(ClashResult result, string status, Document? document = null)
+    public static ClashResult SetStatus(ClashResult result, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status, Document? document = null)
     {
 #if !NAV2026
         var clashResult = RequireResult(result);

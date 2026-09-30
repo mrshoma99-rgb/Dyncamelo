@@ -75,7 +75,7 @@ internal sealed class StubDialogs : IDialogService
 
     public string? Prompt(string message, string title, string defaultValue) => null;
 
-    public (int A, int R, int G, int B)? PickColor(int a, int r, int g, int b) => null;
+    public string? PickFolder(string title, string initialFolder) => null;
 }
 
 /// <summary>
@@ -403,11 +403,43 @@ public class NodeLayoutTests
                 Assert.Equal(1, Editors<System.Windows.Controls.TextBox>(c => c.Port.Name == "outputPath"));
                 Assert.Equal(1, Editors<System.Windows.Controls.ListBox>(c => c.Port.Name == "mode"));
                 Assert.Equal(1, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "kind"));
+                Assert.Equal(1, Editors<ColorSwatchPicker>(c => c.Port.Name == "tint"));
                 Assert.Equal(0, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "mode"));
+                // A ListBoxItem only selects on click when it can take focus (a non-focusable one silently ignores clicks).
+                var segments = FindDescendants<System.Windows.Controls.ListBoxItem>(rig.Window).Where(i => i.DataContext is string).ToList();
+                Assert.NotEmpty(segments);
+                Assert.All(segments, i => Assert.True(i.Focusable, "segment '" + i.DataContext + "' cannot be clicked"));
                 var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
                 var tint = node.Inputs.Single(c => c.Port.Name == "tint");
                 Assert.Equal(Dyncamelo.Core.Editing.PortEditorKind.Colour, tint.EditorKind);
                 Assert.Equal(Dyncamelo.Core.Editing.PortEditorKind.Path, node.Inputs.Single(c => c.Port.Name == "outputPath").EditorKind);
+            });
+        }
+    }
+
+    [Fact]
+    public void BodyTemplateCommandsResolveInTheRowLayout()
+    {
+        var rig = new Rig();
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            rig.Vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
+            rig.Vm.Graph.AddNode(new FilePathNode { X = 100, Y = 100 });
+            rig.Window = new Window { Width = 1400, Height = 900, Content = new DyncameloEditorControl { ViewModel = rig.Vm }, ShowInTaskbar = false, ShowActivated = false, WindowStyle = WindowStyle.None };
+            rig.Window.Show();
+        });
+        StaHost.Flush();
+        using (rig)
+        {
+            StaHost.Run(() =>
+            {
+                Assert.True(rig.Vm.UseRowLayout);
+                var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
+                var browse = FindDescendants<System.Windows.Controls.Button>(rig.Window).Single(b => Equals(b.Content, "…"));
+                // The body templates used to find the node view model through a nodify:Node ancestor, which the row layout does not have.
+                Assert.Same(node.BrowseFileCommand, browse.Command);
             });
         }
     }

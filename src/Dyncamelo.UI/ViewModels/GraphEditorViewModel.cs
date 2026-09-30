@@ -170,7 +170,6 @@ public partial class GraphEditorViewModel : ObservableObject
         OpenSampleCommand = new RelayCommand<SampleGraphViewModel>(OpenSample);
         AddNodeCommand = new RelayCommand<object>(AddNodeFromParameter);
         AddNoteCommand = new RelayCommand<object>(AddNoteFromParameter);
-        PickColorCommand = new RelayCommand<NodeModel>(PickColor);
         CaptureSelectionCommand = new RelayCommand<NodeModel>(CaptureSelection);
         ClearCapturedSelectionCommand = new RelayCommand<NodeModel>(ClearCapturedSelection);
         QuickSearchResults = new ObservableCollection<LibraryEntryViewModel>();
@@ -658,9 +657,6 @@ public partial class GraphEditorViewModel : ObservableObject
 
     /// <summary>Adds a note; parameter is a graph-space <see cref="Point"/> (or none for origin).</summary>
     public ICommand AddNoteCommand { get; }
-
-    /// <summary>Opens the colour picker for a Color Picker node; parameter is the node.</summary>
-    public ICommand PickColorCommand { get; }
 
     /// <summary>Snapshots the live host selection into a Captured Selection node.</summary>
     public ICommand CaptureSelectionCommand { get; }
@@ -1424,36 +1420,6 @@ public partial class GraphEditorViewModel : ObservableObject
         if (node is ICapturedSelectionNode captured)
         {
             captured.ClearCapturedSelection();
-        }
-    }
-
-    private void PickColor(NodeModel? node)
-    {
-        if (node == null)
-        {
-            return;
-        }
-
-        var type = node.GetType();
-        var a = type.GetProperty("A");
-        var r = type.GetProperty("R");
-        var g = type.GetProperty("G");
-        var b = type.GetProperty("B");
-        if (a == null || r == null || g == null || b == null ||
-            !a.CanWrite || !r.CanWrite || !g.CanWrite || !b.CanWrite ||
-            a.PropertyType != typeof(int))
-        {
-            return;
-        }
-
-        var result = Dialogs.PickColor(
-            (int)a.GetValue(node)!, (int)r.GetValue(node)!, (int)g.GetValue(node)!, (int)b.GetValue(node)!);
-        if (result is { } chosen)
-        {
-            a.SetValue(node, chosen.A);
-            r.SetValue(node, chosen.R);
-            g.SetValue(node, chosen.G);
-            b.SetValue(node, chosen.B);
         }
     }
 

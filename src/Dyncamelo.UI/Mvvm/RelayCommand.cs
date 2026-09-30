@@ -32,7 +32,7 @@ public class RelayCommand : ICommand
     public bool CanExecute(object? parameter) => _canExecute == null || _canExecute();
 
     /// <inheritdoc />
-    public void Execute(object? parameter) => _execute();
+    public void Execute(object? parameter) => CommandGuard.Run(_execute);
 
     /// <summary>Forces bound controls to re-query <see cref="CanExecute"/>.</summary>
     public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();
@@ -71,7 +71,7 @@ public class RelayCommand<T> : ICommand
     }
 
     /// <inheritdoc />
-    public void Execute(object? parameter) => _execute(Cast(parameter));
+    public void Execute(object? parameter) => CommandGuard.Run(() => _execute(Cast(parameter)));
 
     /// <summary>Forces bound controls to re-query <see cref="CanExecute"/>.</summary>
     public void RaiseCanExecuteChanged() => CommandManager.InvalidateRequerySuggested();

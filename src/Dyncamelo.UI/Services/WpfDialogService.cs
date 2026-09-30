@@ -62,15 +62,22 @@ public class WpfDialogService : IDialogService
     }
 
     /// <inheritdoc />
-    public (int A, int R, int G, int B)? PickColor(int a, int r, int g, int b)
+    public string? PickFolder(string title, string initialFolder)
     {
-        var dialog = new Views.ColorPickerDialog(a, r, g, b);
-        var owner = System.Windows.Application.Current?.MainWindow;
-        if (owner != null)
+        // Folder pick without WinForms: an open dialog that accepts a folder name typed as the "file".
+        var dialog = new OpenFileDialog
         {
-            dialog.Owner = owner;
+            Title = title,
+            ValidateNames = false,
+            CheckFileExists = false,
+            CheckPathExists = true,
+            FileName = "Select this folder",
+        };
+        if (!string.IsNullOrWhiteSpace(initialFolder) && System.IO.Directory.Exists(initialFolder))
+        {
+            dialog.InitialDirectory = initialFolder;
         }
 
-        return dialog.ShowDialog() == true ? (dialog.A, dialog.R, dialog.G, dialog.B) : ((int, int, int, int)?)null;
+        return dialog.ShowDialog() == true ? System.IO.Path.GetDirectoryName(dialog.FileName) : null;
     }
 }

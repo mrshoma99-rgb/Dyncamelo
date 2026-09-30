@@ -20,7 +20,7 @@ public static class SelectionNodes
     // Pre-0.4 id (before the optional resolveTo parameter was prepended).
     [NodeAliases("Dyncamelo.Navisworks.SelectionNodes.Current@Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
-    public static List<ModelItem> Current(string resolveTo = "Self", Document? document = null)
+    public static List<ModelItem> Current([NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")] string resolveTo = "Self", Document? document = null)
     {
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);

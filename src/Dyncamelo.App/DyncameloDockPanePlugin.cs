@@ -40,6 +40,9 @@ public class DyncameloDockPanePlugin : DockPanePlugin
 
         var editor = new DyncameloEditorControl { ViewModel = _viewModel };
 
+        // A failing command or handler must not take Roamer down with it: report it in the editor and log it.
+        Dyncamelo.UI.Services.CrashGuard.Install(_viewModel, editor.Dispatcher);
+
         // Cached ModelItem handles die with the document: force a full re-run
         // whenever the active document changes.
         NavisApplication.ActiveDocumentChanged += OnActiveDocumentChanged;
