@@ -55,117 +55,16 @@
             </Grid>
         </Border>
 
-        <!-- ===== Header menu bar: generated from CommandCatalog by EditorMenuBuilder ===== -->
-        <Menu x:Name="HeaderMenu"
-              DockPanel.Dock="Top"
-              Background="{StaticResource Dyc.PanelBrush}"
-              Foreground="{StaticResource Dyc.TextBrush}"
-              Padding="4,2" />
-
-        <!-- ===== Toolbar ===== -->
+        <!-- ===== Command bar: the menus (generated from CommandCatalog by EditorMenuBuilder)
+             on the left, the few actions worth a button on the right. Everything else lives in
+             the menus only, so nothing is offered twice. ===== -->
         <Border DockPanel.Dock="Top"
                 Background="{StaticResource Dyc.PanelBrush}"
                 BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="4,3">
+                Padding="4,2">
             <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="New graph (Ctrl+N)" Command="{Binding NewCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.New}" />
-                            <TextBlock Text="New" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Open .dyc graph (Ctrl+O)" Command="{Binding OpenCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Open}" />
-                            <TextBlock Text="Open" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="OpenRecentButton"
-                            Style="{StaticResource Dyc.ToolButton}"
-                            Content="▾"
-                            Padding="4,4"
-                            Margin="0,0,1,0"
-                            ToolTip="Open a recent graph or a sample"
-                            Click="OnOpenRecentClick"
-                            ContextMenuOpening="OnOpenRecentContextMenuOpening">
-                        <Button.ContextMenu>
-                            <ContextMenu>
-                                <ContextMenu.Resources>
-                                    <!-- Submenus disable themselves while empty. -->
-                                    <Style x:Key="Dyc.EmptyDisabledSubmenu" TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
-                                        <Style.Triggers>
-                                            <Trigger Property="HasItems" Value="False">
-                                                <Setter Property="IsEnabled" Value="False" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContextMenu.Resources>
-                                <MenuItem Header="Recent Files"
-                                          Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
-                                          ItemsSource="{Binding RecentFiles}">
-                                    <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
-                                            <Setter Property="Header" Value="{Binding}" />
-                                            <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                                            <Setter Property="CommandParameter" Value="{Binding}" />
-                                            <!-- Render the raw path: a plain Header would eat underscores as access keys. -->
-                                            <Setter Property="HeaderTemplate">
-                                                <Setter.Value>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}" MaxWidth="480" TextTrimming="CharacterEllipsis" />
-                                                    </DataTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </MenuItem.ItemContainerStyle>
-                                </MenuItem>
-                                <MenuItem Header="Sample Graphs"
-                                          Style="{StaticResource Dyc.EmptyDisabledSubmenu}"
-                                          ItemsSource="{Binding SampleGraphs}">
-                                    <MenuItem.ItemContainerStyle>
-                                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}">
-                                            <Setter Property="Header" Value="{Binding Name}" />
-                                            <Setter Property="ToolTip" Value="{Binding FilePath}" />
-                                            <!-- Each item carries its own open command (no ancestor lookup needed). -->
-                                            <Setter Property="Command" Value="{Binding OpenCommand}" />
-                                            <Setter Property="CommandParameter" Value="{Binding}" />
-                                            <!-- Render the raw name: a plain Header would eat underscores as access keys. -->
-                                            <Setter Property="HeaderTemplate">
-                                                <Setter.Value>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}" MaxWidth="360" TextTrimming="CharacterEllipsis" />
-                                                    </DataTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </MenuItem.ItemContainerStyle>
-                                </MenuItem>
-                            </ContextMenu>
-                        </Button.ContextMenu>
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Save graph (Ctrl+S)" Command="{Binding SaveCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Save}" />
-                            <TextBlock Text="Save" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Save graph to a new file (Ctrl+Shift+S)" Command="{Binding SaveAsCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.SaveAs}" />
-                            <TextBlock Text="Save As" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Rename the current .dyc file (F2)" Command="{Binding RenameCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Rename}" />
-                            <TextBlock Text="Rename" />
-                        </StackPanel>
-                    </Button>
-
-                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
-
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding UndoTooltip}" Command="{Binding UndoCommand}">
                         <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Undo}" />
                     </Button>
@@ -192,44 +91,8 @@
                     <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
                                   ToolTip="Show a value preview bubble under each node after a run"
                                   IsChecked="{Binding ShowNodePreviews}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Preview}" />
-                            <TextBlock Text="Preview" />
-                        </StackPanel>
+                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Preview}" />
                     </ToggleButton>
-
-                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
-
-                    <Button Style="{StaticResource Dyc.ToolButton}"
-                            ToolTip="Zoom to fit all nodes"
-                            Command="{x:Static nodify:EditorCommands.FitToScreen}"
-                            CommandTarget="{Binding ElementName=Editor}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Fit}" />
-                            <TextBlock Text="Fit" />
-                        </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}"
-                            Content="+"
-                            ToolTip="Zoom in"
-                            Command="{x:Static nodify:EditorCommands.ZoomIn}"
-                            CommandTarget="{Binding ElementName=Editor}" />
-                    <Button Style="{StaticResource Dyc.ToolButton}"
-                            Content="−"
-                            ToolTip="Zoom out"
-                            Command="{x:Static nodify:EditorCommands.ZoomOut}"
-                            CommandTarget="{Binding ElementName=Editor}" />
-
-                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
-
-                    <Button Style="{StaticResource Dyc.ToolButton}"
-                            ToolTip="Add a note at the center of the view"
-                            Click="OnAddNoteClick">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Note}" />
-                            <TextBlock Text="Note" />
-                        </StackPanel>
-                    </Button>
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
@@ -329,7 +192,11 @@
                     </Popup>
                 </StackPanel>
 
-                <Border />
+                <Menu x:Name="HeaderMenu"
+                      Background="Transparent"
+                      Foreground="{StaticResource Dyc.TextBrush}"
+                      VerticalAlignment="Center"
+                      Padding="0" />
             </DockPanel>
         </Border>
 
@@ -378,7 +245,7 @@
                         <Grid x:Name="EntryRow"
                               Background="Transparent"
                               ToolTipService.ShowDuration="30000"
-                              ToolTipService.InitialShowDelay="200">
+                              ToolTipService.InitialShowDelay="1200">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -865,7 +732,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel ToolTipService.ShowDuration="30000"
-                                            ToolTipService.InitialShowDelay="400">
+                                            ToolTipService.InitialShowDelay="1000">
                                     <StackPanel.ToolTip>
                                         <ToolTip MaxWidth="380">
                                             <StackPanel Margin="2">

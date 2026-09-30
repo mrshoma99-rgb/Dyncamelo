@@ -76,8 +76,9 @@
     <StreamGeometry x:Key="Dyc.Icon.Search">F1 M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z</StreamGeometry>
     <!-- Expand all = two solid chevrons pointing DOWN; collapse all = pointing UP.
          Solid + opposite directions so they can't be confused at 14px. -->
-    <StreamGeometry x:Key="Dyc.Icon.UnfoldMore">F1 M4,5 L20,5 L12,13 Z M4,12 L20,12 L12,20 Z</StreamGeometry>
-    <StreamGeometry x:Key="Dyc.Icon.UnfoldLess">F1 M12,4 L20,12 L4,12 Z M12,11 L20,19 L4,19 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Pick">F1 M20.71,5.63 L18.37,3.29 C17.98,2.9 17.35,2.9 16.96,3.29 L13.84,6.41 L11.91,4.5 L10.5,5.91 L11.92,7.33 L3,16.25 L3,21 L7.75,21 L16.67,12.08 L18.09,13.5 L19.5,12.09 L17.58,10.17 L20.7,7.05 C21.1,6.65 21.1,6.02 20.71,5.63 Z M6.92,19 L5,17.08 L13.06,9.02 L14.98,10.94 L6.92,19 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.UnfoldMore">F1 M12,4 L19,11 L17.6,12.4 L12,6.8 L6.4,12.4 L5,11 Z M12,20 L5,13 L6.4,11.6 L12,17.2 L17.6,11.6 L19,13 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.UnfoldLess">F1 M12,12 L5,5 L6.4,3.6 L12,9.2 L17.6,3.6 L19,5 Z M12,12 L19,19 L17.6,20.4 L12,14.8 L6.4,20.4 L5,19 Z</StreamGeometry>
     <!-- Library category glyphs -->
     <StreamGeometry x:Key="Dyc.Icon.Cat.Annotation">F1 M240-400h480v-60H240v60Zm0-130h480v-60H240v60Zm0-130h480v-60H240v60ZM880-80 720-240H140q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v740ZM140-300h606l74 80v-600H140v520Zm0 0v-520 520Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Cat.Color">F1 M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-85 32-158t87.5-127q55.5-54 130-84.5T489-880q79 0 150 26.5T763.5-780q53.5 47 85 111.5T880-527q0 108-63 170.5T650-294h-75q-18 0-31 14t-13 31q0 27 14.5 46t14.5 44q0 38-21 58.5T480-80Zm0-400Zm-198 11q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm126-170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm214 0q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm131 170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15ZM480-140q11 0 15.5-4.5T500-159q0-14-14.5-26T471-238q0-46 30-81t76-35h73q76 0 123-44.5T820-527q0-132-100-212.5T489-820q-146 0-247.5 98.5T140-480q0 141 99.5 240.5T480-140Z</StreamGeometry>
@@ -1040,11 +1041,17 @@
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.DirectoryPath">
-        <TextBox Style="{StaticResource Dyc.TextBox}"
-                 MinWidth="170"
-                 Margin="4"
-                 Text="{Binding Path}"
-                 ToolTip="Type or paste a directory path" />
+        <DockPanel Margin="4" MinWidth="170">
+            <Button DockPanel.Dock="Right"
+                    Style="{StaticResource Dyc.SmallButton}"
+                    Margin="4,0,0,0"
+                    Content="…"
+                    ToolTip="Browse for a folder"
+                    Command="{Binding DataContext.BrowseFileCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}" />
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     Text="{Binding Path}"
+                     ToolTip="Type or paste a directory path" />
+        </DockPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.Watch">
@@ -1662,6 +1669,92 @@
         <views:ColorSwatchPicker Hex="{Binding ColourHex, Mode=TwoWay}" />
     </DataTemplate>
 
+    <Style x:Key="Dyc.ModelFieldButton" TargetType="{x:Type Button}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd"
+                            Background="{StaticResource Dyc.InputBackgroundBrush}"
+                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="6,0">
+                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Model-element input (Blender's object picker, for Navisworks items): pick the live selection, click the
+         name to select the items again, redo the pick, or clear it. -->
+    <DataTemplate x:Key="Editor.Model">
+        <Grid Height="22">
+            <Button x:Name="Empty"
+                    Style="{StaticResource Dyc.ModelFieldButton}"
+                    HorizontalContentAlignment="Left"
+                    Command="{Binding CaptureModelCommand}"
+                    ToolTip="Use the elements currently selected in Navisworks">
+                <StackPanel Orientation="Horizontal">
+                    <Path Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"
+                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                          Data="{StaticResource Dyc.Icon.Pick}" />
+                    <TextBlock Text="Pick from selection" Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                </StackPanel>
+            </Button>
+            <Grid x:Name="Filled" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        HorizontalContentAlignment="Left"
+                        Command="{Binding RevealModelCommand}"
+                        ToolTip="{Binding ModelSummary}">
+                    <TextBlock Text="{Binding ModelSummary}" TextTrimming="CharacterEllipsis" />
+                </Button>
+                <Button Grid.Column="1"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        Width="24" Margin="3,0,0,0"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding CaptureModelCommand}"
+                        ToolTip="Pick again from the current selection">
+                    <Path Width="12" Height="12" Stretch="Uniform"
+                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                          Data="{StaticResource Dyc.Icon.Pick}" />
+                </Button>
+                <Button Grid.Column="2"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        Width="24" Margin="3,0,0,0"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding ResetCommand}"
+                        ToolTip="Clear">
+                    <TextBlock Text="✕" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                </Button>
+            </Grid>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding HasModelValue}" Value="True">
+                <Setter TargetName="Empty" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="Filled" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
     <DataTemplate x:Key="Editor.Path">
         <DockPanel>
             <Button DockPanel.Dock="Right"
@@ -1720,6 +1813,14 @@
                     <Condition Binding="{Binding Connector.EditorKind}" Value="Colour" />
                 </MultiDataTrigger.Conditions>
                 <Setter Property="ContentTemplate" Value="{StaticResource Editor.Colour}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Model" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.Model}" />
                 <Setter Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
             <MultiDataTrigger>

@@ -114,6 +114,9 @@ public partial class DyncameloEditorControl : UserControl
 
     private readonly ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
     private RelayCommand? _hudCommand;
+    private RelayCommand? _previewsCommand;
+    private RelayCommand? _settingsCommand;
+    private RelayCommand? _autoRunCommand;
     private RelayCommand? _addNoteCommand;
     private RelayCommand? _addNodeCommand;
 
@@ -128,7 +131,13 @@ public partial class DyncameloEditorControl : UserControl
             TryFindResource("Dyc.TopMenuItem") as Style,
             id => ResolveCommand(vm, id),
             Editor,
-            id => id == "view.hud" && _perfHud != null && _perfHud.Visibility == Visibility.Visible,
+            id => id switch
+            {
+                "view.hud" => _perfHud != null && _perfHud.Visibility == Visibility.Visible,
+                "view.previews" => vm.ShowNodePreviews,
+                "graph.autorun" => vm.IsAutoRun,
+                _ => false,
+            },
             (category, top) =>
             {
                 if (category == "File")
@@ -173,6 +182,9 @@ public partial class DyncameloEditorControl : UserControl
             case "wire.reroute": return vm.RerouteSelectedWiresCommand;
             case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
             case "view.hud": return _hudCommand;
+            case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);
+            case "view.settings": return _settingsCommand ??= new RelayCommand(() => SettingsButton.IsChecked = true);
+            case "graph.autorun": return _autoRunCommand ??= new RelayCommand(() => vm.IsAutoRun = !vm.IsAutoRun);
             case "graph.run": return vm.RunCommand;
             case "graph.rename": return vm.RenameCommand;
             case "graph.addnote": return _addNoteCommand;
@@ -488,41 +500,8 @@ public partial class DyncameloEditorControl : UserControl
         Editor.ViewportLocation.X + Editor.ViewportSize.Width / 2,
         Editor.ViewportLocation.Y + Editor.ViewportSize.Height / 2);
 
-    private void OnAddNoteClick(object sender, RoutedEventArgs e)
-    {
-        ViewModel?.AddNote(ViewportCenter);
-    }
 
-    private void OnOpenRecentClick(object sender, RoutedEventArgs e)
-    {
-        // The dropdown (recent files + sample graphs) is the button's
-        // ContextMenu, opened on left click (split-button behaviour). Samples
-        // re-enumerate on every open so newly deployed files appear; empty
-        // submenus disable themselves via a HasItems style trigger.
-        if (!(sender is Button button) || button.ContextMenu == null || ViewModel == null)
-        {
-            return;
-        }
 
-        ViewModel.RefreshSampleGraphs();
-        button.ContextMenu.PlacementTarget = button;
-        button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-        button.ContextMenu.IsOpen = true;
-    }
-
-    private void OnOpenRecentContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-        // Right-clicking the button opens the same ContextMenu through WPF's
-        // built-in behaviour, bypassing OnOpenRecentClick: refresh the sample
-        // list and pin the placement so both paths show an identical, current
-        // dropdown.
-        if (sender is Button button && button.ContextMenu != null && ViewModel != null)
-        {
-            ViewModel.RefreshSampleGraphs();
-            button.ContextMenu.PlacementTarget = button;
-            button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-        }
-    }
 
     private void OnLibraryItemDoubleClick(object sender, MouseButtonEventArgs e)
     {

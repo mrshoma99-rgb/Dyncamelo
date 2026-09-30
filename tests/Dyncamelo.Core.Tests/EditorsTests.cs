@@ -331,3 +331,81 @@ public class ColourMathTests
         Assert.Equal((0, 255, 0), ((int)r, (int)g, (int)b));
     }
 }
+
+// Stand-ins named like the Navisworks types so declared-type detection sees model elements.
+public sealed class ModelItem
+{
+}
+
+public sealed class ModelItemCollection : System.Collections.Generic.List<ModelItem>
+{
+}
+
+public sealed class ModelPortsNode : NodeModel
+{
+    public ModelPortsNode()
+    {
+        Name = "ModelPorts";
+        AddInput("item", typeof(ModelItem), null);
+        AddInput("items", typeof(IEnumerable<ModelItem>), null);
+        AddInput("list", typeof(List<ModelItem>), null);
+        AddInput("collection", typeof(ModelItemCollection), null);
+        AddInput("other", typeof(IEnumerable<string>), null);
+        AddOutput("out", typeof(object));
+    }
+
+    public override string NodeType => "TestModelPorts";
+
+    public override object?[] Evaluate(object?[] inputs, Dyncamelo.Core.Execution.EvaluationContext context) => new object?[] { null };
+}
+
+public class ModelPickerTests
+{
+    [Fact]
+    public void ModelElementPortsGetThePicker()
+    {
+        var node = new ModelPortsNode();
+        Assert.Equal(PortEditorKind.Model, PortEditors.Resolve(node.InPorts[0]));
+        Assert.Equal(PortEditorKind.Model, PortEditors.Resolve(node.InPorts[1]));
+        Assert.Equal(PortEditorKind.Model, PortEditors.Resolve(node.InPorts[2]));
+        Assert.Equal(PortEditorKind.Model, PortEditors.Resolve(node.InPorts[3]));
+        Assert.Equal(PortEditorKind.None, PortEditors.Resolve(node.InPorts[4]));
+    }
+
+    [Fact]
+    public void OnlyAnItemPortIsSingle()
+    {
+        var node = new ModelPortsNode();
+        Assert.True(PortEditors.IsSingleModelItem(node.InPorts[0]));
+        Assert.False(PortEditors.IsSingleModelItem(node.InPorts[1]));
+        Assert.False(PortEditors.IsSingleModelItem(node.InPorts[3]));
+    }
+
+    [Theory]
+    [InlineData(null, 0)]
+    [InlineData("", 0)]
+    [InlineData("hello", 0)]
+    [InlineData("nw:", 0)]
+    [InlineData("nw:0:1/2", 1)]
+    [InlineData("nw:0:1/2;0:4/5;1:", 3)]
+    public void StoredValuesAreCounted(string? value, int expected)
+    {
+        Assert.Equal(expected, ModelPickerHost.CountOf(value));
+    }
+
+    [Fact]
+    public void ThePinnedValueRoundTripsThroughTheGraphFile()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterNodeType("TestModelPorts", () => new ModelPortsNode());
+        var graph = new GraphModel();
+        var node = new ModelPortsNode();
+        graph.AddNode(node);
+        node.InPorts[1].SetUserValue("nw:0:1/2;0:3");
+
+        var json = new Dyncamelo.Core.Serialization.GraphSerializer(registry).Serialize(graph);
+        var loaded = new Dyncamelo.Core.Serialization.GraphSerializer(registry).Deserialize(json);
+
+        Assert.Equal("nw:0:1/2;0:3", loaded.Nodes.Single().InPorts[1].UserValue);
+    }
+}

@@ -75,10 +75,10 @@ public static class CommandCatalog
     /// <summary>All commands, in menu order.</summary>
     public static readonly IReadOnlyList<CommandInfo> All = new List<CommandInfo>
     {
-        new CommandInfo("file.new", "New", "File", "Ctrl+N", CommandScope.Global, toolbar: true),
-        new CommandInfo("file.open", "Open…", "File", "Ctrl+O", CommandScope.Global, toolbar: true),
-        new CommandInfo("file.save", "Save", "File", "Ctrl+S", CommandScope.Global, toolbar: true),
-        new CommandInfo("file.saveas", "Save As…", "File", "Ctrl+Shift+S", CommandScope.Global, toolbar: true),
+        new CommandInfo("file.new", "New", "File", "Ctrl+N", CommandScope.Global),
+        new CommandInfo("file.open", "Open…", "File", "Ctrl+O", CommandScope.Global),
+        new CommandInfo("file.save", "Save", "File", "Ctrl+S", CommandScope.Global),
+        new CommandInfo("file.saveas", "Save As…", "File", "Ctrl+Shift+S", CommandScope.Global),
 
         new CommandInfo("edit.undo", "Undo", "Edit", "Ctrl+Z", toolbar: true, keywords: "revert back"),
         new CommandInfo("edit.redo", "Redo", "Edit", "Ctrl+Y", toolbar: true, keywords: "repeat forward", alternate: "Ctrl+Shift+Z"),
@@ -91,16 +91,19 @@ public static class CommandCatalog
         new CommandInfo("edit.selectupstream", "Select Upstream", "Edit", "Shift+L", keywords: "linked from inputs feeders"),
         new CommandInfo("edit.selectsimilar", "Select Similar", "Edit", "Shift+G", keywords: "same type grouped"),
 
-        new CommandInfo("view.fit", "Fit to Screen", "View", null, toolbar: true, keywords: "zoom all home"),
-        new CommandInfo("view.zoomin", "Zoom In", "View", null, toolbar: true),
-        new CommandInfo("view.zoomout", "Zoom Out", "View", null, toolbar: true),
+        new CommandInfo("view.fit", "Fit to Screen", "View", null, keywords: "zoom all home"),
+        new CommandInfo("view.zoomin", "Zoom In", "View", null),
+        new CommandInfo("view.zoomout", "Zoom Out", "View", null),
         new CommandInfo("view.collapseall", "Collapse All Nodes", "View", null, keywords: "fold minimize"),
         new CommandInfo("view.expandall", "Expand All Nodes", "View", null, keywords: "unfold maximize"),
+        new CommandInfo("view.previews", "Node Value Previews", "View", null, toolbar: true, toggle: true, keywords: "bubble preview values"),
+        new CommandInfo("view.settings", "Settings…", "View", null, toolbar: true, keywords: "options preferences palette layout"),
         new CommandInfo("view.hud", "Performance HUD", "View", "Ctrl+Shift+F12", CommandScope.Global, toggle: true, keywords: "fps diagnostics"),
 
         new CommandInfo("graph.run", "Run", "Graph", "F5", CommandScope.Global, toolbar: true, keywords: "execute evaluate"),
+        new CommandInfo("graph.autorun", "Auto-Run", "Graph", null, toolbar: true, toggle: true, keywords: "automatic rerun live"),
         new CommandInfo("graph.rename", "Rename Graph", "Graph", "F2"),
-        new CommandInfo("graph.addnote", "Add Note", "Graph", null, toolbar: true, keywords: "comment annotation"),
+        new CommandInfo("graph.addnote", "Add Note", "Graph", null, keywords: "comment annotation"),
         new CommandInfo("graph.group", "Group Selection", "Graph", "Ctrl+G", keywords: "frame"),
         new CommandInfo("graph.fitframe", "Fit Frame to Contents", "Graph", "Ctrl+Shift+G", keywords: "group shrink wrap resize"),
         new CommandInfo("graph.ungroup", "Ungroup", "Graph", "Ctrl+Shift+U", keywords: "frame remove group"),

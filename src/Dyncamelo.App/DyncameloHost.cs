@@ -126,6 +126,9 @@ internal static class DyncameloHost
     {
         var registry = NodeRegistry.CreateDefault();
 
+        // Lets model-element inputs on nodes read, describe and re-select the live Navisworks selection.
+        Dyncamelo.Core.Editing.ModelPickerHost.Current = new Dyncamelo.Navisworks.NavisworksModelPicker();
+
         // General-purpose nodes (math/logic/string/list/... plus List.Create,
         // Watch List and Color Picker interactive nodes).
         NodeLibrary.RegisterAll(registry);

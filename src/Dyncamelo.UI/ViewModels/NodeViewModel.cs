@@ -69,7 +69,7 @@ public class NodeViewModel : CanvasItemViewModel
         AddPortCommand = new RelayCommand(AddPort, () => _addPortMethod != null);
         RemovePortCommand = new RelayCommand(RemovePort, () => _removePortMethod != null && Model.InPorts.Count > 1);
         SetLacingCommand = new RelayCommand<string>(SetLacing);
-        BrowseFileCommand = new RelayCommand(BrowseFile, () => Model is FilePathNode);
+        BrowseFileCommand = new RelayCommand(BrowseFile, () => Model is FilePathNode || Model is DirectoryPathNode);
         FindInLibraryCommand = new RelayCommand(() => _owner.FindInLibrary(this));
         TogglePreviewExpandCommand = new RelayCommand(TogglePreviewExpand, () => _hasMorePreview);
 
@@ -636,6 +636,14 @@ public class NodeViewModel : CanvasItemViewModel
             if (path != null)
             {
                 filePathNode.Path = path;
+            }
+        }
+        else if (Model is DirectoryPathNode directoryNode)
+        {
+            var path = _owner.Dialogs.PickFolder("Select Folder", directoryNode.Path);
+            if (path != null)
+            {
+                directoryNode.Path = path;
             }
         }
     }

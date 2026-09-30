@@ -37,6 +37,8 @@ public class ConnectorViewModel : ObservableObject
         NumberSpec = EditorKind == PortEditorKind.Number ? NumberEditSpec.FromPort(port) : null;
         ResetCommand = new RelayCommand(() => Port.ClearUserValue(), () => Port.HasUserValue);
         BrowseCommand = new RelayCommand(BrowsePath);
+        CaptureModelCommand = new RelayCommand(CaptureModel, () => ModelPickerHost.Current != null);
+        RevealModelCommand = new RelayCommand(RevealModel, () => HasModelValue && ModelPickerHost.Current != null);
         DisconnectCommand = new RelayCommand(
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
@@ -255,6 +257,65 @@ public class ConnectorViewModel : ObservableObject
         }
     }
 
+    /// <summary>Stored model elements as text ("Pipe-101 (+2)"); empty when nothing is picked.</summary>
+    public string ModelSummary
+    {
+        get
+        {
+            var stored = PortEditors.Current(Port) as string;
+            var count = ModelPickerHost.CountOf(stored);
+            if (count == 0)
+            {
+                return string.Empty;
+            }
+
+            var described = ModelPickerHost.Current?.Describe(stored);
+            return string.IsNullOrEmpty(described)
+                ? count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " element(s)"
+                : described!;
+        }
+    }
+
+    /// <summary>True when model elements are picked on this input.</summary>
+    public bool HasModelValue => ModelPickerHost.CountOf(PortEditors.Current(Port) as string) > 0;
+
+    /// <summary>Takes the host's current selection as this input's value.</summary>
+    public ICommand CaptureModelCommand { get; }
+
+    /// <summary>Selects the picked elements in the host again.</summary>
+    public ICommand RevealModelCommand { get; }
+
+    private void CaptureModel()
+    {
+        var picker = ModelPickerHost.Current;
+        if (picker == null)
+        {
+            return;
+        }
+
+        var single = PortEditors.IsSingleModelItem(Port);
+        var value = picker.CaptureSelection(single, out var count);
+        if (value == null)
+        {
+            Node.Owner.ReportProblem("Select something in Navisworks first, then use the picker.");
+            return;
+        }
+
+        Port.SetUserValue(value);
+        Node.Owner.ReportProblem(single && count > 1
+            ? "'" + Port.Name + "' takes one element: used the first of " + count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " selected."
+            : "'" + Port.Name + "': picked " + Math.Max(count, 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + " element(s).");
+    }
+
+    private void RevealModel()
+    {
+        var stored = PortEditors.Current(Port) as string;
+        if (ModelPickerHost.Current?.Reveal(stored) != true)
+        {
+            Node.Owner.ReportProblem("The picked elements are no longer in the model.");
+        }
+    }
+
     /// <summary>The colour as a brush for the swatch (transparent when unset).</summary>
     public Brush ColourBrush
     {
@@ -321,6 +382,8 @@ public class ConnectorViewModel : ObservableObject
         OnPropertyChanged(nameof(TextValue));
         OnPropertyChanged(nameof(ColourHex));
         OnPropertyChanged(nameof(ColourBrush));
+        OnPropertyChanged(nameof(ModelSummary));
+        OnPropertyChanged(nameof(HasModelValue));
         OnPropertyChanged(nameof(IsModified));
         OnPropertyChanged(nameof(IsUnset));
     }

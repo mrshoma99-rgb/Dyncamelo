@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Types;
 using Dyncamelo.Core.Loader;
 
 namespace Dyncamelo.Core.Editing;
@@ -24,6 +25,8 @@ public enum PortEditorKind
     Colour,
     /// <summary>Text plus a browse button for a file or folder.</summary>
     Path,
+    /// <summary>Model element picker: use the host's current selection, click to select them again, clear.</summary>
+    Model,
 }
 
 /// <summary>Everything a number field needs to know about its port.</summary>
@@ -228,6 +231,11 @@ public static class PortEditors
             return PortEditorKind.Choice;
         }
 
+        if (IsModelItemPort(port))
+        {
+            return PortEditorKind.Model;
+        }
+
         var kind = PortKinds.FromPort(port);
         if (kind.Depth != PortDepth.Item)
         {
@@ -251,6 +259,31 @@ public static class PortEditors
             default:
                 return PortEditorKind.None;
         }
+    }
+
+    /// <summary>True when the port takes host model elements (a model item, a list of them, or a model-item collection).</summary>
+    public static bool IsModelItemPort(PortModel port)
+    {
+        var type = port.DeclaredType;
+        if (type == null)
+        {
+            return false;
+        }
+
+        if (type.Name == "ModelItemCollection")
+        {
+            return true;
+        }
+
+        var element = TypeCoercion.GetListElementType(type) ?? type;
+        return element.Name == "ModelItem";
+    }
+
+    /// <summary>True when a model-element port takes a single item rather than a list.</summary>
+    public static bool IsSingleModelItem(PortModel port)
+    {
+        var type = port.DeclaredType;
+        return type != null && type.Name == "ModelItem";
     }
 
     /// <summary>True when a port named like a folder expects a directory rather than a file.</summary>

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Types;
 using Dyncamelo.Nodes;
@@ -45,6 +47,20 @@ public static class NavisworksTypeConverters
                 var color = ColorNodes.FromHex((string)value);
                 return NwColor.FromByteRGB(color.R, color.G, color.B);
             });
+
+        // Model-element inputs pin the picked items as "nw:<paths>" strings; they resolve to live items at run time.
+        TypeCoercion.RegisterConverter(
+            typeof(string),
+            typeof(NwModelItem),
+            value => NavisworksModelPicker.Resolve((string)value).FirstOrDefault());
+        TypeCoercion.RegisterConverter(
+            typeof(string),
+            typeof(List<NwModelItem>),
+            value => NavisworksModelPicker.Resolve((string)value));
+        TypeCoercion.RegisterConverter(
+            typeof(string),
+            typeof(Autodesk.Navisworks.Api.ModelItemCollection),
+            value => new Autodesk.Navisworks.Api.ModelItemCollection(NavisworksModelPicker.Resolve((string)value)));
 
         TypeCoercion.RegisterConverter(
             typeof(System.Drawing.Color),
