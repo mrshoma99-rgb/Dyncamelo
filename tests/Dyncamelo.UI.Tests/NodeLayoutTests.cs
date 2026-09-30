@@ -237,15 +237,16 @@ public class NodeLayoutTests
             Assert.True(rig.A.Size.Height < expanded, "collapsed node should be shorter than expanded (" + expanded + "), got " + rig.A.Size.Height);
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "collapsed output");
 
-            // Each input has its own anchor on the left edge, one under another (not all stacked on one point).
-            var inputs = rig.A.Rows.Where(r => r.Kind == Dyncamelo.Core.Editing.RowKind.Input).Select(r => r.Connector!.Anchor).ToList();
-            Assert.Equal(3, inputs.Count);
-            foreach (var anchor in inputs)
-            {
-                AssertOnEdge(rig.A, anchor, rightEdge: false, "collapsed input");
-            }
-
-            Assert.Equal(3, inputs.Select(a => Math.Round(a.Y)).Distinct().Count());
+            // Each input keeps its socket on the left edge, one under another — an unwired socket has no wire anchor, so look at the
+            // socket controls themselves.
+            var sockets = FindDescendants<Nodify.NodeInput>(rig.Window)
+                .Where(i => i.DataContext is ConnectorViewModel c && rig.A.Inputs.Contains(c))
+                .ToList();
+            Assert.Equal(3, sockets.Count);
+            Assert.All(sockets, i => Assert.True(i.IsVisible && i.ActualHeight > 0, "a collapsed node's socket must stay visible"));
+            var positions = sockets.Select(i => i.TransformToAncestor(rig.Window).Transform(new Point(0, 0))).ToList();
+            Assert.Equal(3, positions.Select(p => Math.Round(p.Y)).Distinct().Count());
+            Assert.True(positions.Max(p => p.X) - positions.Min(p => p.X) < 1.5, "the input sockets share one column");
         });
         StaHost.Run(() => rig.A.Model.Ui.Collapsed = false);
         StaHost.Flush();
