@@ -770,9 +770,39 @@ public class CommandCatalogTests
     [Fact]
     public void ShortcutsAreUniqueAndParseable()
     {
-        var shortcuts = CommandCatalog.All.Where(c => c.Shortcut != null).Select(c => c.Shortcut!).ToList();
+        var shortcuts = CommandCatalog.All.SelectMany(c => new[] { c.Shortcut, c.Alternate }).Where(s => s != null).Select(s => s!).ToList();
         Assert.Equal(shortcuts.Count, shortcuts.Select(s => s.ToUpperInvariant()).Distinct().Count());
         Assert.All(shortcuts, s => Assert.Matches("^((Ctrl|Alt|Shift)\\+)*([A-Z0-9]|F([1-9]|1[0-2])|Delete|Space|Home)$", s));
+    }
+
+    [Fact]
+    public void EveryChordParsesAndNoTwoCommandsShareOne()
+    {
+        var chords = Shortcuts.All().ToList();
+        Assert.True(chords.Count >= CommandCatalog.All.Count(c => c.Shortcut != null));
+        Assert.Equal(chords.Count, chords.Select(c => c.Key).Distinct().Count());
+        Assert.Contains(chords, c => c.Value.Id == "edit.redo" && c.Key.Equals(new KeyChord("Z", true, true, false)));
+    }
+
+    [Theory]
+    [InlineData("H", "H", false, false, false)]
+    [InlineData("Ctrl+Delete", "Delete", true, false, false)]
+    [InlineData("Ctrl+Shift+S", "S", true, true, false)]
+    [InlineData("Alt+Shift+F5", "F5", false, true, true)]
+    public void ChordsParse(string text, string key, bool ctrl, bool shift, bool alt)
+    {
+        Assert.True(Shortcuts.TryParse(text, out var chord));
+        Assert.Equal(new KeyChord(key, ctrl, shift, alt), chord);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("Ctrl+")]
+    [InlineData("Hyper+K")]
+    public void MalformedChordsAreRejected(string? text)
+    {
+        Assert.False(Shortcuts.TryParse(text, out _));
     }
 
     [Fact]

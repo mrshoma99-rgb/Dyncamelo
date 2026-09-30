@@ -14,24 +14,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <UserControl.InputBindings>
-        <KeyBinding Key="N" Modifiers="Control" Command="{Binding NewCommand}" />
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenCommand}" />
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}" />
-        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsCommand}" />
-        <KeyBinding Key="F2" Command="{Binding RenameCommand}" />
-        <KeyBinding Key="D" Modifiers="Control" Command="{Binding DuplicateSelectionCommand}" />
-        <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopySelectionCommand}" />
-        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
-        <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
-        <KeyBinding Key="L" Modifiers="Control" Command="{Binding ArrangeSelectionCommand}" />
-        <KeyBinding Key="F5" Command="{Binding RunCommand}" />
-        <KeyBinding Key="H" Modifiers="Control" Command="{Binding ToggleHideUnusedSelectedCommand}" />
-        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
-        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
-        <KeyBinding Key="Z" Modifiers="Control+Shift" Command="{Binding RedoCommand}" />
-    </UserControl.InputBindings>
-
     <DockPanel Background="{StaticResource Dyc.PanelBrush}">
 
         <!-- ===== Brand bar (BIMCamel identity) — the blue gradient header carries
@@ -762,10 +744,6 @@
                         </DrawingBrush.Drawing>
                     </DrawingBrush>
                 </nodify:NodifyEditor.Background>
-
-                <nodify:NodifyEditor.InputBindings>
-                    <KeyBinding Key="Delete" Command="{Binding DeleteSelectionCommand}" />
-                </nodify:NodifyEditor.InputBindings>
 
                 <nodify:NodifyEditor.ContextMenu>
                     <ContextMenu>

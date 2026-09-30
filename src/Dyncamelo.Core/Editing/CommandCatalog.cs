@@ -18,7 +18,8 @@ public sealed class CommandInfo
 {
     /// <summary>Creates a description.</summary>
     public CommandInfo(string id, string title, string category, string? shortcut = null,
-        CommandScope scope = CommandScope.Canvas, bool toolbar = false, bool toggle = false, string keywords = "")
+        CommandScope scope = CommandScope.Canvas, bool toolbar = false, bool toggle = false, string keywords = "",
+        string? alternate = null)
     {
         Id = id;
         Title = title;
@@ -28,6 +29,7 @@ public sealed class CommandInfo
         InToolbar = toolbar;
         IsToggle = toggle;
         Keywords = keywords;
+        Alternate = alternate;
     }
 
     /// <summary>Stable id ("edit.undo").</summary>
@@ -53,6 +55,9 @@ public sealed class CommandInfo
 
     /// <summary>Extra palette search terms.</summary>
     public string Keywords { get; }
+
+    /// <summary>A second shortcut that does the same thing (for example Ctrl+Shift+Z for redo), or null.</summary>
+    public string? Alternate { get; }
 }
 
 /// <summary>
@@ -76,11 +81,15 @@ public static class CommandCatalog
         new CommandInfo("file.saveas", "Save As…", "File", "Ctrl+Shift+S", CommandScope.Global, toolbar: true),
 
         new CommandInfo("edit.undo", "Undo", "Edit", "Ctrl+Z", toolbar: true, keywords: "revert back"),
-        new CommandInfo("edit.redo", "Redo", "Edit", "Ctrl+Y", toolbar: true, keywords: "repeat forward"),
+        new CommandInfo("edit.redo", "Redo", "Edit", "Ctrl+Y", toolbar: true, keywords: "repeat forward", alternate: "Ctrl+Shift+Z"),
         new CommandInfo("edit.copy", "Copy", "Edit", "Ctrl+C", keywords: "clipboard"),
         new CommandInfo("edit.paste", "Paste", "Edit", "Ctrl+V", keywords: "clipboard"),
         new CommandInfo("edit.duplicate", "Duplicate", "Edit", "Ctrl+D", keywords: "clone"),
         new CommandInfo("edit.delete", "Delete", "Edit", "Delete", keywords: "remove"),
+        new CommandInfo("edit.deletereconnect", "Delete and Reconnect", "Edit", "Ctrl+Delete", keywords: "dissolve bridge keep wires"),
+        new CommandInfo("edit.selectdownstream", "Select Downstream", "Edit", "L", keywords: "linked to outputs followers"),
+        new CommandInfo("edit.selectupstream", "Select Upstream", "Edit", "Shift+L", keywords: "linked from inputs feeders"),
+        new CommandInfo("edit.selectsimilar", "Select Similar", "Edit", "Shift+G", keywords: "same type grouped"),
 
         new CommandInfo("view.fit", "Fit to Screen", "View", null, toolbar: true, keywords: "zoom all home"),
         new CommandInfo("view.zoomin", "Zoom In", "View", null, toolbar: true),
@@ -96,10 +105,105 @@ public static class CommandCatalog
         new CommandInfo("graph.arrange", "Arrange Selection", "Graph", "Ctrl+L", keywords: "layout align tidy"),
         new CommandInfo("node.collapse", "Collapse / Expand", "Node", "H", keywords: "fold header minimize"),
         new CommandInfo("node.hideunused", "Hide / Show Unused Sockets", "Node", "Ctrl+H", keywords: "sockets ports optional"),
-        new CommandInfo("node.mute", "Mute / Unmute", "Node", "M", keywords: "bypass disable pass through"),
+        new CommandInfo("node.mute", "Mute / Unmute", "Node", "M", keywords: "bypass disable pass through wire"),
+        new CommandInfo("node.autoconnect", "Connect Selected Nodes", "Node", "F", keywords: "auto link chain make links"),
+        new CommandInfo("wire.mute", "Mute / Unmute Selected Wires", "Wires", null, keywords: "bypass disable ignore"),
+        new CommandInfo("wire.reroute", "Add Reroute to Selected Wires", "Wires", null, keywords: "knot dot bend"),
+        new CommandInfo("wire.disconnect", "Disconnect Selected Wires", "Wires", null, keywords: "cut remove unlink"),
         new CommandInfo("graph.addnode", "Add Node…", "Graph", "Space", keywords: "search quick library"),
     };
 
     /// <summary>Finds a command by id, or null.</summary>
     public static CommandInfo? Find(string id) => All.FirstOrDefault(c => string.Equals(c.Id, id, StringComparison.Ordinal));
+}
+
+/// <summary>A parsed keyboard shortcut: a key name plus the modifiers that must be held.</summary>
+public readonly struct KeyChord : IEquatable<KeyChord>
+{
+    /// <summary>Creates a chord.</summary>
+    public KeyChord(string key, bool ctrl, bool shift, bool alt)
+    {
+        Key = key;
+        Ctrl = ctrl;
+        Shift = shift;
+        Alt = alt;
+    }
+
+    /// <summary>Key name as WPF's Key enum spells it ("H", "Delete", "F5", "Space").</summary>
+    public string Key { get; }
+
+    /// <summary>Ctrl must be held.</summary>
+    public bool Ctrl { get; }
+
+    /// <summary>Shift must be held.</summary>
+    public bool Shift { get; }
+
+    /// <summary>Alt must be held.</summary>
+    public bool Alt { get; }
+
+    /// <inheritdoc />
+    public bool Equals(KeyChord other) =>
+        string.Equals(Key, other.Key, StringComparison.OrdinalIgnoreCase) && Ctrl == other.Ctrl && Shift == other.Shift && Alt == other.Alt;
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj is KeyChord other && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() => (Key.ToUpperInvariant().GetHashCode() * 31) ^ (Ctrl ? 1 : 0) ^ (Shift ? 2 : 0) ^ (Alt ? 4 : 0);
+
+    /// <inheritdoc />
+    public override string ToString() => (Ctrl ? "Ctrl+" : string.Empty) + (Alt ? "Alt+" : string.Empty) + (Shift ? "Shift+" : string.Empty) + Key;
+}
+
+/// <summary>Parses the shortcut strings of <see cref="CommandCatalog"/>.</summary>
+public static class Shortcuts
+{
+    /// <summary>Parses "Ctrl+Shift+L", "Delete", "F5"… Returns false for anything malformed.</summary>
+    public static bool TryParse(string? text, out KeyChord chord)
+    {
+        chord = default;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        bool ctrl = false, shift = false, alt = false;
+        var parts = text!.Split('+');
+        for (var i = 0; i < parts.Length - 1; i++)
+        {
+            switch (parts[i].Trim().ToUpperInvariant())
+            {
+                case "CTRL": ctrl = true; break;
+                case "SHIFT": shift = true; break;
+                case "ALT": alt = true; break;
+                default: return false;
+            }
+        }
+
+        var key = parts[parts.Length - 1].Trim();
+        if (key.Length == 0)
+        {
+            return false;
+        }
+
+        chord = new KeyChord(key, ctrl, shift, alt);
+        return true;
+    }
+
+    /// <summary>Every (command, chord) pair of the catalogue: shortcuts and alternates.</summary>
+    public static IEnumerable<KeyValuePair<KeyChord, CommandInfo>> All()
+    {
+        foreach (var info in CommandCatalog.All)
+        {
+            if (Shortcuts.TryParse(info.Shortcut, out var main))
+            {
+                yield return new KeyValuePair<KeyChord, CommandInfo>(main, info);
+            }
+
+            if (Shortcuts.TryParse(info.Alternate, out var alt))
+            {
+                yield return new KeyValuePair<KeyChord, CommandInfo>(alt, info);
+            }
+        }
+    }
 }

@@ -51,7 +51,7 @@ public class SampleGraphViewModel
 /// The host supplies an <see cref="EvaluationContextFactory"/> to inject
 /// services (e.g. the Navisworks document provider) into each run.
 /// </summary>
-public class GraphEditorViewModel : ObservableObject
+public partial class GraphEditorViewModel : ObservableObject
 {
     private const string FileFilter = "Dyncamelo Graph (*.dyc)|*.dyc|All files (*.*)|*.*";
 
@@ -548,21 +548,29 @@ public class GraphEditorViewModel : ObservableObject
     internal void ToggleMute(NodeViewModel? anchor)
     {
         var targets = ToggleTargets(anchor);
-        if (targets.Count == 0)
+        var wires = anchor == null ? SelectedConnections.ToList() : new List<ConnectionViewModel>();
+        if (targets.Count == 0 && wires.Count == 0)
         {
             return;
         }
 
-        var mute = targets.Any(n => !n.Model.IsMuted);
+        var mute = targets.Any(n => !n.Model.IsMuted) || wires.Any(w => !w.Model.IsMuted);
         using (_undo.Begin(mute ? "Mute" : "Unmute"))
         {
             foreach (var node in targets)
             {
                 node.Model.IsMuted = mute;
             }
+
+            foreach (var wire in wires)
+            {
+                _graph.SetConnectionMuted(wire.Model, mute);
+            }
         }
 
-        StatusMessage = (mute ? "Muted " : "Unmuted ") + targets.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s).";
+        var count = targets.Count + wires.Count;
+        StatusMessage = (mute ? "Muted " : "Unmuted ") + count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                        (wires.Count == 0 ? " node(s)." : targets.Count == 0 ? " wire(s)." : " item(s).");
     }
 
     internal void ToggleHideUnused(NodeViewModel? anchor)
@@ -977,6 +985,7 @@ public class GraphEditorViewModel : ObservableObject
         graph.NodeRemoved += OnNodeRemoved;
         graph.ConnectionAdded += OnConnectionAdded;
         graph.ConnectionRemoved += OnConnectionRemoved;
+        graph.ConnectionMuteChanged += OnConnectionMuteChanged;
         graph.Modified += OnGraphModified;
         graph.PropertyChanged += OnGraphPropertyChanged;
         graph.Notes.CollectionChanged += OnNotesChanged;
@@ -1001,6 +1010,7 @@ public class GraphEditorViewModel : ObservableObject
         _graph.NodeRemoved -= OnNodeRemoved;
         _graph.ConnectionAdded -= OnConnectionAdded;
         _graph.ConnectionRemoved -= OnConnectionRemoved;
+        _graph.ConnectionMuteChanged -= OnConnectionMuteChanged;
         _graph.Modified -= OnGraphModified;
         _graph.PropertyChanged -= OnGraphPropertyChanged;
         _graph.Notes.CollectionChanged -= OnNotesChanged;
@@ -1400,7 +1410,15 @@ public class GraphEditorViewModel : ObservableObject
         {
             if (item is NodeViewModel node)
             {
-                _graph.RemoveNode(node.Model);
+                // A reroute is only a bend in a wire: deleting it keeps the data flowing.
+                if (node.Model is Dyncamelo.Core.Nodes.RerouteNode)
+                {
+                    GraphOps.DissolveNode(_graph, node.Model);
+                }
+                else
+                {
+                    _graph.RemoveNode(node.Model);
+                }
             }
             else if (item is NoteViewModel note)
             {

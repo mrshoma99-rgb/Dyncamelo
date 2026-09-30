@@ -65,6 +65,7 @@ public partial class DyncameloEditorControl : UserControl
         DataContextChanged += OnDataContextChanged;
     }
 
+    private readonly ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
     private RelayCommand? _hudCommand;
     private RelayCommand? _addNoteCommand;
     private RelayCommand? _addNodeCommand;
@@ -104,6 +105,10 @@ public partial class DyncameloEditorControl : UserControl
             case "edit.paste": return vm.PasteCommand;
             case "edit.duplicate": return vm.DuplicateSelectionCommand;
             case "edit.delete": return vm.DeleteSelectionCommand;
+            case "edit.deletereconnect": return vm.DeleteAndReconnectCommand;
+            case "edit.selectdownstream": return vm.SelectDownstreamCommand;
+            case "edit.selectupstream": return vm.SelectUpstreamCommand;
+            case "edit.selectsimilar": return vm.SelectSimilarCommand;
             case "view.fit": return EditorCommands.FitToScreen;
             case "view.zoomin": return EditorCommands.ZoomIn;
             case "view.zoomout": return EditorCommands.ZoomOut;
@@ -112,6 +117,10 @@ public partial class DyncameloEditorControl : UserControl
             case "node.collapse": return vm.ToggleCollapseSelectedCommand;
             case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
             case "node.mute": return vm.ToggleMuteSelectedCommand;
+            case "node.autoconnect": return vm.AutoConnectCommand;
+            case "wire.mute": return vm.MuteSelectedWiresCommand;
+            case "wire.reroute": return vm.RerouteSelectedWiresCommand;
+            case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
             case "view.hud": return _hudCommand;
             case "graph.run": return vm.RunCommand;
             case "graph.rename": return vm.RenameCommand;
@@ -288,25 +297,6 @@ public partial class DyncameloEditorControl : UserControl
             return;
         }
 
-        // Single-key node shortcuts (H collapse, M mute) apply only when no text box has
-        // focus; as InputBindings they would swallow the letters being typed.
-        if (!typing && Keyboard.Modifiers == ModifierKeys.None && ViewModel != null && Editor.IsKeyboardFocusWithin)
-        {
-            if (e.Key == Key.H)
-            {
-                ViewModel.ToggleCollapseSelectedCommand.Execute(null);
-                e.Handled = true;
-                return;
-            }
-
-            if (e.Key == Key.M)
-            {
-                ViewModel.ToggleMuteSelectedCommand.Execute(null);
-                e.Handled = true;
-                return;
-            }
-        }
-
         // Space over the canvas opens the quick node search (Dynamo-style):
         // type to filter, Enter inserts at the spot the cursor was on.
         if (!typing &&
@@ -329,19 +319,30 @@ public partial class DyncameloEditorControl : UserControl
             return;
         }
 
-        if (!typing)
+        // Ctrl+D (duplicate), Ctrl+G (group) and F5 (run) are not consumed by
+        // TextBox editing (unlike Ctrl+C/Ctrl+V), so they would run while the user
+        // types in an inline TextBox (string/number/note/group-title/search) — and since
+        // clicking into a node's TextBox also selects that node, they would silently
+        // duplicate/group it mid-edit. Swallow them while a text box has focus.
+        if (typing)
         {
-            return;
+            bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+            if ((ctrl && (e.Key == Key.D || e.Key == Key.G)) || e.Key == Key.F5)
+            {
+                e.Handled = true;
+                return;
+            }
         }
 
-        // Ctrl+D (duplicate), Ctrl+G (group) and F5 (run) are not consumed by
-        // TextBox editing (unlike Ctrl+C/Ctrl+V), so they would bubble up to
-        // the UserControl's KeyBindings while the user types in an inline
-        // TextBox (string/number/note/group-title/search) — and since clicking
-        // into a node's TextBox also selects that node, they would silently
-        // duplicate/group it mid-edit. Swallow them while a text box has focus.
-        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
-        if ((ctrl && (e.Key == Key.D || e.Key == Key.G)) || e.Key == Key.F5)
+        // Every other catalogue shortcut: menus, help and keys all come from one list.
+        if (ViewModel != null &&
+            _router.TryDispatch(
+                e.Key == Key.System ? e.SystemKey : e.Key,
+                Keyboard.Modifiers,
+                typing,
+                Editor.IsKeyboardFocusWithin,
+                id => ResolveCommand(ViewModel, id),
+                Editor))
         {
             e.Handled = true;
         }
