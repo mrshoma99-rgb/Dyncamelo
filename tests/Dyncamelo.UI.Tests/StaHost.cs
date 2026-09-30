@@ -26,9 +26,20 @@ internal static class StaHost
                     new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
                 }
 
-                dispatcher = Dispatcher.CurrentDispatcher;
+                dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+
+                // An exception escaping a timer or posted callback on this thread would otherwise take the whole test
+                // host down (or park it behind an invisible crash dialog on a CI desktop). Log it where the run
+                // output shows it, and carry on.
+                dispatcher.UnhandledException += (_, e) =>
+                {
+                    Console.Error.WriteLine("UNHANDLED on the WPF test thread: " + e.Exception);
+                    Console.Error.Flush();
+                    e.Handled = true;
+                };
+
                 ready.Set();
-                Dispatcher.Run();
+                System.Windows.Threading.Dispatcher.Run();
             });
             thread.SetApartmentState(ApartmentState.STA);
             thread.IsBackground = true;
@@ -36,6 +47,19 @@ internal static class StaHost
             thread.Start();
             ready.Wait();
         }
+
+        // Let the dispatcher loop end with the process instead of being torn down mid-message.
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            try
+            {
+                dispatcher!.BeginInvokeShutdown(DispatcherPriority.Send);
+            }
+            catch (Exception)
+            {
+                // Already shut down.
+            }
+        };
 
         return dispatcher!;
     }
