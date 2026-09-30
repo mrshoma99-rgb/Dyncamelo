@@ -49,7 +49,7 @@ public sealed class DycWire : BaseConnection
     }
 
     /// <summary>Bézier control points for a wire from <paramref name="source"/> to <paramref name="target"/>.</summary>
-    internal static (Point P1, Point P2) ControlPoints(Point source, Point target)
+    public static (Point P1, Point P2) ControlPoints(Point source, Point target)
     {
         var dx = Math.Abs(target.X - source.X);
         var offset = Math.Max(40d, Math.Min(dx * 0.5d + 20d, 200d));
@@ -57,7 +57,7 @@ public sealed class DycWire : BaseConnection
     }
 
     /// <summary>Point of the cubic at parameter <paramref name="t"/>.</summary>
-    internal static Point Evaluate(Point p0, Point p1, Point p2, Point p3, double t)
+    public static Point Evaluate(Point p0, Point p1, Point p2, Point p3, double t)
     {
         var u = 1d - t;
         var b0 = u * u * u;
