@@ -18,6 +18,7 @@ public class GraphModel : INotifyPropertyChanged
     private readonly List<NodeModel> _nodes = new List<NodeModel>();
     private readonly List<ConnectionModel> _connections = new List<ConnectionModel>();
     private int _nextCreationIndex;
+    private int _nextConnectionSequence;
     private string _name = string.Empty;
     private RunType _runType = RunType.Automatic;
 
@@ -107,6 +108,79 @@ public class GraphModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Puts a previously removed node back (undo/redo). Unlike <see cref="AddNode"/>
+    /// it keeps the node's original creation order so execution order is unchanged.
+    /// </summary>
+    /// <param name="node">A node that was removed from this graph.</param>
+    public void ReinsertNode(NodeModel node)
+    {
+        if (node == null)
+        {
+            throw new ArgumentNullException(nameof(node));
+        }
+
+        if (node.Graph != null)
+        {
+            throw new InvalidOperationException("Node already belongs to a graph.");
+        }
+
+        node.Graph = this;
+        if (node.CreationIndex >= _nextCreationIndex)
+        {
+            _nextCreationIndex = node.CreationIndex + 1;
+        }
+
+        // _nodes is kept in creation order, so an undone deletion returns to its old slot.
+        var at = _nodes.Count;
+        while (at > 0 && _nodes[at - 1].CreationIndex > node.CreationIndex)
+        {
+            at--;
+        }
+
+        _nodes.Insert(at, node);
+        NodeAdded?.Invoke(this, new NodeEventArgs(node));
+        MarkDirty(node);
+    }
+
+    /// <summary>
+    /// Puts a previously removed wire back (undo/redo), keeping the same
+    /// <see cref="ConnectionModel"/> instance so its identity and mute state
+    /// survive. Fails silently (returns false) when an endpoint is gone or the
+    /// input is already wired.
+    /// </summary>
+    /// <param name="connection">A connection that was removed from this graph.</param>
+    /// <returns>True when the wire was restored.</returns>
+    public bool ReinsertConnection(ConnectionModel connection)
+    {
+        if (connection == null)
+        {
+            throw new ArgumentNullException(nameof(connection));
+        }
+
+        if (_connections.Contains(connection) ||
+            connection.SourceNode.Graph != this || connection.TargetNode.Graph != this ||
+            !connection.SourceNode.OutPorts.Contains(connection.Source) ||
+            !connection.TargetNode.InPorts.Contains(connection.Target) ||
+            FindConnectionInto(connection.Target) != null ||
+            IsReachable(connection.TargetNode, connection.SourceNode))
+        {
+            return false;
+        }
+
+        var at = _connections.Count;
+        while (at > 0 && _connections[at - 1].Sequence > connection.Sequence)
+        {
+            at--;
+        }
+
+        _connections.Insert(at, connection);
+        connection.Target.UsingDefaultValue = false;
+        ConnectionAdded?.Invoke(this, new ConnectionEventArgs(connection));
+        MarkDirty(connection.TargetNode);
+        return true;
+    }
+
+    /// <summary>
     /// Removes a node and all connections touching it. Nodes that consumed its
     /// outputs are marked dirty.
     /// </summary>
@@ -182,7 +256,7 @@ public class GraphModel : INotifyPropertyChanged
             RemoveConnectionCore(existing, dirtyTarget: false);
         }
 
-        var connection = new ConnectionModel(source, target);
+        var connection = new ConnectionModel(source, target) { Sequence = _nextConnectionSequence++ };
         _connections.Add(connection);
         target.UsingDefaultValue = false;
         ConnectionAdded?.Invoke(this, new ConnectionEventArgs(connection));

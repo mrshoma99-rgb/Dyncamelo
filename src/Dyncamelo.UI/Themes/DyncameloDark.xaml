@@ -72,6 +72,8 @@
     <!-- Lightning bolt = "auto / live re-run" (clearer than the refresh-loop glyph). -->
     <StreamGeometry x:Key="Dyc.Icon.Auto">F1 M11,21 L11,13 L6,13 L13,3 L13,11 L18,11 Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Preview">F1 M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 240q113 0 207.5-59.5T832-500q-50-121-144.5-180.5T480-740q-113 0-207.5 59.5T128-500q50 121 144.5 180.5T480-260Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Undo">F1 M12.5,8 C9.85,8 7.45,8.99 5.6,10.6 L2,7 L2,16 L11,16 L7.38,12.38 C8.77,11.22 10.54,10.5 12.5,10.5 C16.04,10.5 19.05,12.81 20.1,16 L22.47,15.22 C21.08,11.03 17.15,8 12.5,8 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.Redo">F1 M18.4,10.6 C16.55,8.99 14.15,8 11.5,8 C6.85,8 2.92,11.03 1.54,15.22 L3.9,16 C4.95,12.81 7.95,10.5 11.5,10.5 C13.45,10.5 15.23,11.22 16.62,12.38 L13,16 L22,16 L22,7 L18.4,10.6 Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Search">F1 M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z</StreamGeometry>
     <!-- Expand all = two solid chevrons pointing DOWN; collapse all = pointing UP.
          Solid + opposite directions so they can't be confused at 14px. -->
@@ -234,6 +236,56 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- Top-level item of the header menu bar: a flat label whose dropdown opens
+         BELOW it (Dyc.MenuItem is built for submenus and opens to the right). -->
+    <Style x:Key="Dyc.TopMenuItem" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            Padding="9,3"
+                            Margin="1,0"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              VerticalAlignment="Center" />
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsSubmenuOpen}"
+                                   Focusable="False"
+                                   PopupAnimation="None">
+                                <Border Background="{StaticResource Dyc.PanelBrush}"
+                                        BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="3"
+                                        MinWidth="230"
+                                        SnapsToDevicePixels="True">
+                                    <ScrollViewer CanContentScroll="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

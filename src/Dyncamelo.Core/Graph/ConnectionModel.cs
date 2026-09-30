@@ -45,6 +45,9 @@ public class ConnectionModel
     /// </summary>
     public bool IsMuted { get; internal set; }
 
+    /// <summary>Creation order within the graph; lets undo put a restored wire back in its old position.</summary>
+    internal int Sequence { get; set; }
+
     /// <summary>Stable identifier of the connection.</summary>
     public Guid Id { get; internal set; }
 

@@ -29,6 +29,28 @@ public class ConnectorViewModel : ObservableObject
             () => Node.Owner.DisconnectConnectorCommand.Execute(this),
             () => IsConnected);
         SetLevelCommand = new RelayCommand<string>(SetLevel);
+        Port.PropertyChanged += OnPortPropertyChanged;
+    }
+
+    /// <summary>Stops listening to the port (called when the owning node view model is discarded).</summary>
+    public void Detach()
+    {
+        Port.PropertyChanged -= OnPortPropertyChanged;
+    }
+
+    // Undo/redo (and any other model-side edit) changes the port behind our back.
+    private void OnPortPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(PortModel.UserValue):
+            case nameof(PortModel.HasUserValue):
+                OnPropertyChanged(nameof(SelectedChoice));
+                break;
+            case nameof(PortModel.UseLevels):
+                RaiseLevelsChanged();
+                break;
+        }
     }
 
     /// <summary>Owning node view model.</summary>

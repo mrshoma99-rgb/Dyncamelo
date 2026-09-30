@@ -15,6 +15,7 @@ public class PortModel : INotifyPropertyChanged
     private object? _value;
     private object? _userValue;
     private bool _hasUserValue;
+    private bool _isHidden;
 
     /// <summary>Creates a port.</summary>
     /// <param name="owner">The node the port belongs to.</param>
@@ -98,7 +99,20 @@ public class PortModel : INotifyPropertyChanged
     /// True when the user chose to hide this (unconnected) port on the node.
     /// Presentation only; persisted, never affects evaluation.
     /// </summary>
-    public bool IsHidden { get; set; }
+    public bool IsHidden
+    {
+        get => _isHidden;
+        set
+        {
+            if (_isHidden == value)
+            {
+                return;
+            }
+
+            _isHidden = value;
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// True when the user has pinned an inline value on this unconnected input

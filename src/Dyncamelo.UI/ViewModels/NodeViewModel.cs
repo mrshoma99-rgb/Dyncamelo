@@ -340,6 +340,16 @@ public class NodeViewModel : CanvasItemViewModel
     public void Detach()
     {
         Model.PropertyChanged -= OnModelPropertyChanged;
+        foreach (var connector in Inputs)
+        {
+            connector.Detach();
+        }
+
+        foreach (var connector in Outputs)
+        {
+            connector.Detach();
+        }
+
         foreach (var port in _watchedOutputPorts)
         {
             port.PropertyChanged -= OnOutputPortPropertyChanged;

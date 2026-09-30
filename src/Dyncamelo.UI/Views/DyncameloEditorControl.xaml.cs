@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Dyncamelo.UI.Mvvm;
 using Dyncamelo.UI.ViewModels;
 using Nodify;
 
@@ -64,6 +65,128 @@ public partial class DyncameloEditorControl : UserControl
         DataContextChanged += OnDataContextChanged;
     }
 
+    private RelayCommand? _hudCommand;
+    private RelayCommand? _addNoteCommand;
+    private RelayCommand? _addNodeCommand;
+
+    private void BuildHeaderMenu(GraphEditorViewModel vm)
+    {
+        _hudCommand ??= new RelayCommand(() => _perfHud?.Toggle());
+        _addNoteCommand ??= new RelayCommand(() => ViewModel?.AddNote(ViewportCenter));
+        _addNodeCommand ??= new RelayCommand(OpenQuickSearchFromMenu);
+
+        EditorMenuBuilder.Build(
+            HeaderMenu,
+            TryFindResource("Dyc.TopMenuItem") as Style,
+            id => ResolveCommand(vm, id),
+            Editor,
+            id => id == "view.hud" && _perfHud != null && _perfHud.Visibility == Visibility.Visible,
+            (category, top) =>
+            {
+                if (category == "File")
+                {
+                    AddFileSubmenus(vm, top);
+                }
+            });
+    }
+
+    private ICommand? ResolveCommand(GraphEditorViewModel vm, string id)
+    {
+        switch (id)
+        {
+            case "file.new": return vm.NewCommand;
+            case "file.open": return vm.OpenCommand;
+            case "file.save": return vm.SaveCommand;
+            case "file.saveas": return vm.SaveAsCommand;
+            case "edit.undo": return vm.UndoCommand;
+            case "edit.redo": return vm.RedoCommand;
+            case "edit.copy": return vm.CopySelectionCommand;
+            case "edit.paste": return vm.PasteCommand;
+            case "edit.duplicate": return vm.DuplicateSelectionCommand;
+            case "edit.delete": return vm.DeleteSelectionCommand;
+            case "view.fit": return EditorCommands.FitToScreen;
+            case "view.zoomin": return EditorCommands.ZoomIn;
+            case "view.zoomout": return EditorCommands.ZoomOut;
+            case "view.hud": return _hudCommand;
+            case "graph.run": return vm.RunCommand;
+            case "graph.rename": return vm.RenameCommand;
+            case "graph.addnote": return _addNoteCommand;
+            case "graph.group": return vm.GroupSelectionCommand;
+            case "graph.arrange": return vm.ArrangeSelectionCommand;
+            case "graph.addnode": return _addNodeCommand;
+            default: return null;
+        }
+    }
+
+    private void AddFileSubmenus(GraphEditorViewModel vm, MenuItem file)
+    {
+        file.Items.Add(new Separator());
+
+        var recent = new MenuItem { Header = "Recent Files" };
+        recent.Items.Add(new MenuItem { Header = "(none)", IsEnabled = false });
+        recent.SubmenuOpened += (sender, args) =>
+        {
+            recent.Items.Clear();
+            foreach (var path in vm.RecentFiles)
+            {
+                recent.Items.Add(new MenuItem
+                {
+                    // TextBlock header: a string header would eat underscores as access keys.
+                    Header = new TextBlock { Text = path, MaxWidth = 480, TextTrimming = TextTrimming.CharacterEllipsis },
+                    Command = vm.OpenRecentFileCommand,
+                    CommandParameter = path,
+                });
+            }
+
+            if (recent.Items.Count == 0)
+            {
+                recent.Items.Add(new MenuItem { Header = "(none)", IsEnabled = false });
+            }
+        };
+        file.Items.Add(recent);
+
+        var samples = new MenuItem { Header = "Sample Graphs" };
+        samples.Items.Add(new MenuItem { Header = "(none)", IsEnabled = false });
+        samples.SubmenuOpened += (sender, args) =>
+        {
+            vm.RefreshSampleGraphs();
+            samples.Items.Clear();
+            foreach (var sample in vm.SampleGraphs)
+            {
+                samples.Items.Add(new MenuItem
+                {
+                    Header = new TextBlock { Text = sample.Name, MaxWidth = 360, TextTrimming = TextTrimming.CharacterEllipsis },
+                    ToolTip = sample.FilePath,
+                    Command = sample.OpenCommand,
+                    CommandParameter = sample,
+                });
+            }
+
+            if (samples.Items.Count == 0)
+            {
+                samples.Items.Add(new MenuItem { Header = "(none)", IsEnabled = false });
+            }
+        };
+        file.Items.Add(samples);
+    }
+
+    private void OpenQuickSearchFromMenu()
+    {
+        if (ViewModel == null || ViewModel.IsQuickSearchOpen)
+        {
+            return;
+        }
+
+        ViewModel.OpenQuickSearch(ViewportCenter);
+        Dispatcher.BeginInvoke(
+            new System.Action(() =>
+            {
+                QuickSearchBox.Focus();
+                QuickSearchBox.SelectAll();
+            }),
+            System.Windows.Threading.DispatcherPriority.Input);
+    }
+
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.OldValue is GraphEditorViewModel oldViewModel)
@@ -78,6 +201,7 @@ public partial class DyncameloEditorControl : UserControl
             newViewModel.PropertyChanged += OnViewModelPropertyChanged;
             // Apply the persisted palette once the view model is attached.
             ApplyPalette(newViewModel.PaletteId);
+            BuildHeaderMenu(newViewModel);
         }
     }
 

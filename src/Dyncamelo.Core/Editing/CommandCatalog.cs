@@ -75,6 +75,8 @@ public static class CommandCatalog
         new CommandInfo("file.save", "Save", "File", "Ctrl+S", CommandScope.Global, toolbar: true),
         new CommandInfo("file.saveas", "Save As…", "File", "Ctrl+Shift+S", CommandScope.Global, toolbar: true),
 
+        new CommandInfo("edit.undo", "Undo", "Edit", "Ctrl+Z", toolbar: true, keywords: "revert back"),
+        new CommandInfo("edit.redo", "Redo", "Edit", "Ctrl+Y", toolbar: true, keywords: "repeat forward"),
         new CommandInfo("edit.copy", "Copy", "Edit", "Ctrl+C", keywords: "clipboard"),
         new CommandInfo("edit.paste", "Paste", "Edit", "Ctrl+V", keywords: "clipboard"),
         new CommandInfo("edit.duplicate", "Duplicate", "Edit", "Ctrl+D", keywords: "clone"),

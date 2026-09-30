@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
 using Dyncamelo.Core.Loader;
@@ -60,6 +61,10 @@ public class GraphEditorViewModel : ObservableObject
     private readonly IPreviewService _preview;
     private bool _previewSelection;
     private bool _isRunning;
+    private readonly UndoManager _undo = new UndoManager();
+    private GraphRecorder? _recorder;
+    private UndoTransaction? _dragTransaction;
+    private bool _hasRunThisGraph;
 
     private GraphModel _graph;
     private string? _currentFilePath;
@@ -111,6 +116,26 @@ public class GraphEditorViewModel : ObservableObject
         CreateConnectionCommand = new RelayCommand<ConnectorViewModel>(CompletePendingConnection);
         DisconnectConnectorCommand = new RelayCommand<ConnectorViewModel>(DisconnectConnector);
         RemoveConnectionCommand = new RelayCommand<ConnectionViewModel>(RemoveConnection);
+
+        UndoCommand = new RelayCommand(UndoLast, () => _undo.CanUndo);
+        RedoCommand = new RelayCommand(RedoLast, () => _undo.CanRedo);
+        ItemsDragStartedCommand = new RelayCommand(() =>
+        {
+            // Every position change during one drag becomes a single undo item.
+            _dragTransaction?.Dispose();
+            _dragTransaction = _undo.Begin("Move");
+        });
+        ItemsDragCompletedCommand = new RelayCommand(() =>
+        {
+            _dragTransaction?.Dispose();
+            _dragTransaction = null;
+        });
+        _undo.Changed += (sender, args) =>
+        {
+            OnPropertyChanged(nameof(UndoTooltip));
+            OnPropertyChanged(nameof(RedoTooltip));
+            CommandManager.InvalidateRequerySuggested();
+        };
 
         RunCommand = new RelayCommand(RunGraph);
         NewCommand = new RelayCommand(NewGraph);
@@ -404,6 +429,27 @@ public class GraphEditorViewModel : ObservableObject
     /// <summary>Deletes the selected nodes, notes, groups and wires (Delete key).</summary>
     public ICommand DeleteSelectionCommand { get; }
 
+    /// <summary>Undo/redo history of the open graph (graph edits only; never Navisworks changes).</summary>
+    public UndoManager History => _undo;
+
+    /// <summary>Reverts the most recent edit (Ctrl+Z).</summary>
+    public ICommand UndoCommand { get; }
+
+    /// <summary>Re-applies the most recently undone edit (Ctrl+Y / Ctrl+Shift+Z).</summary>
+    public ICommand RedoCommand { get; }
+
+    /// <summary>Bound to the editor's items-drag-started hook: opens the "Move" undo transaction.</summary>
+    public ICommand ItemsDragStartedCommand { get; }
+
+    /// <summary>Bound to the editor's items-drag-completed hook: closes the "Move" undo transaction.</summary>
+    public ICommand ItemsDragCompletedCommand { get; }
+
+    /// <summary>Toolbar tooltip for Undo, naming the edit it would revert.</summary>
+    public string UndoTooltip => _undo.CanUndo ? "Undo " + _undo.UndoLabel + " (Ctrl+Z)" : "Nothing to undo (Ctrl+Z)";
+
+    /// <summary>Toolbar tooltip for Redo, naming the edit it would re-apply.</summary>
+    public string RedoTooltip => _undo.CanRedo ? "Redo " + _undo.RedoLabel + " (Ctrl+Y)" : "Nothing to redo (Ctrl+Y)";
+
     /// <summary>Duplicates the selected nodes including wires between them (Ctrl+D).</summary>
     public ICommand DuplicateSelectionCommand { get; }
 
@@ -680,7 +726,12 @@ public class GraphEditorViewModel : ObservableObject
         try
         {
             var context = EvaluationContextFactory != null ? EvaluationContextFactory() : new EvaluationContext();
-            result = _engine.Run(_graph, context);
+            using (_undo.Suspend())
+            {
+                result = _engine.Run(_graph, context);
+            }
+
+            _hasRunThisGraph = true;
         }
         catch (Exception ex)
         {
@@ -697,6 +748,26 @@ public class GraphEditorViewModel : ObservableObject
 
         UpdateRunStatistics(result);
         RefreshPreview(); // the selected node's outputs just changed
+    }
+
+    private void UndoLast()
+    {
+        _dragTransaction?.Dispose();
+        _dragTransaction = null;
+        var label = _undo.Undo();
+        if (label != null)
+        {
+            StatusMessage = "Undid " + label + (_hasRunThisGraph ? " (graph only — Navisworks changes from earlier runs are not reverted)." : ".");
+        }
+    }
+
+    private void RedoLast()
+    {
+        var label = _undo.Redo();
+        if (label != null)
+        {
+            StatusMessage = "Redid " + label + ".";
+        }
     }
 
     // ----- graph attachment -------------------------------------------------
@@ -736,11 +807,19 @@ public class GraphEditorViewModel : ObservableObject
 
         RefreshConnectedFlags();
         NodeCount = graph.Nodes.Count;
+
+        _dragTransaction?.Dispose();
+        _dragTransaction = null;
+        _undo.Clear();
+        _hasRunThisGraph = false;
+        _recorder = new GraphRecorder(graph, _undo);
     }
 
     private void DetachGraph()
     {
         _autoRunTimer.Stop();
+        _recorder?.Dispose();
+        _recorder = null;
         _graph.NodeAdded -= OnNodeAdded;
         _graph.NodeRemoved -= OnNodeRemoved;
         _graph.ConnectionAdded -= OnConnectionAdded;
@@ -983,6 +1062,14 @@ public class GraphEditorViewModel : ObservableObject
 
     private void CompletePendingConnection(ConnectorViewModel? target)
     {
+        using (_undo.Begin("Connect"))
+        {
+            CompletePendingConnectionCore(target);
+        }
+    }
+
+    private void CompletePendingConnectionCore(ConnectorViewModel? target)
+    {
         PendingConnection.IsVisible = false;
         var source = PendingConnection.Source;
         target = target ?? PendingConnection.Target;
@@ -1006,6 +1093,14 @@ public class GraphEditorViewModel : ObservableObject
     }
 
     private void DisconnectConnector(ConnectorViewModel? connector)
+    {
+        using (_undo.Begin("Disconnect"))
+        {
+            DisconnectConnectorCore(connector);
+        }
+    }
+
+    private void DisconnectConnectorCore(ConnectorViewModel? connector)
     {
         if (connector == null)
         {
@@ -1105,6 +1200,14 @@ public class GraphEditorViewModel : ObservableObject
 
     private void DeleteSelection()
     {
+        using (_undo.Begin("Delete"))
+        {
+            DeleteSelectionCore();
+        }
+    }
+
+    private void DeleteSelectionCore()
+    {
         foreach (var connection in SelectedConnections.ToList())
         {
             _graph.Disconnect(connection.Model);
@@ -1135,6 +1238,14 @@ public class GraphEditorViewModel : ObservableObject
     /// arrangement stays recognisable rather than jumping somewhere new.
     /// </summary>
     private void ArrangeSelection()
+    {
+        using (_undo.Begin("Arrange"))
+        {
+            ArrangeSelectionCore();
+        }
+    }
+
+    private void ArrangeSelectionCore()
     {
         var selected = SelectedItems.OfType<NodeViewModel>().ToList();
         if (selected.Count < 2)
@@ -1256,6 +1367,14 @@ public class GraphEditorViewModel : ObservableObject
 
     private void Paste()
     {
+        using (_undo.Begin("Paste"))
+        {
+            PasteCore();
+        }
+    }
+
+    private void PasteCore()
+    {
         if (_clipboardFragment == null)
         {
             return;
@@ -1268,6 +1387,14 @@ public class GraphEditorViewModel : ObservableObject
     }
 
     private void DuplicateSelection()
+    {
+        using (_undo.Begin("Duplicate"))
+        {
+            DuplicateSelectionCore();
+        }
+    }
+
+    private void DuplicateSelectionCore()
     {
         var selected = GetSelectedNodeModels();
         if (selected.Count == 0)
@@ -1310,6 +1437,14 @@ public class GraphEditorViewModel : ObservableObject
     }
 
     private void GroupSelection()
+    {
+        using (_undo.Begin("Group"))
+        {
+            GroupSelectionCore();
+        }
+    }
+
+    private void GroupSelectionCore()
     {
         var members = SelectedItems.Where(item => !(item is GroupViewModel)).ToList();
         if (members.Count == 0)

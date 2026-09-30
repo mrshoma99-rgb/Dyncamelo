@@ -26,6 +26,9 @@
         <KeyBinding Key="G" Modifiers="Control" Command="{Binding GroupSelectionCommand}" />
         <KeyBinding Key="L" Modifiers="Control" Command="{Binding ArrangeSelectionCommand}" />
         <KeyBinding Key="F5" Command="{Binding RunCommand}" />
+        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
+        <KeyBinding Key="Z" Modifiers="Control+Shift" Command="{Binding RedoCommand}" />
     </UserControl.InputBindings>
 
     <DockPanel Background="{StaticResource Dyc.PanelBrush}">
@@ -68,6 +71,13 @@
                            Text="{Binding Title}" />
             </Grid>
         </Border>
+
+        <!-- ===== Header menu bar: generated from CommandCatalog by EditorMenuBuilder ===== -->
+        <Menu x:Name="HeaderMenu"
+              DockPanel.Dock="Top"
+              Background="{StaticResource Dyc.PanelBrush}"
+              Foreground="{StaticResource Dyc.TextBrush}"
+              Padding="4,2" />
 
         <!-- ===== Toolbar ===== -->
         <Border DockPanel.Dock="Top"
@@ -169,6 +179,15 @@
                             <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Rename}" />
                             <TextBlock Text="Rename" />
                         </StackPanel>
+                    </Button>
+
+                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
+
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding UndoTooltip}" Command="{Binding UndoCommand}">
+                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Undo}" />
+                    </Button>
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding RedoTooltip}" Command="{Binding RedoCommand}">
+                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Redo}" />
                     </Button>
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
@@ -688,6 +707,8 @@
                                  SelectedItems="{Binding SelectedItems}"
                                  SelectedConnections="{Binding SelectedConnections}"
                                  PendingConnection="{Binding PendingConnection}"
+                                 ItemsDragStartedCommand="{Binding ItemsDragStartedCommand}"
+                                 ItemsDragCompletedCommand="{Binding ItemsDragCompletedCommand}"
                                  PendingConnectionTemplate="{StaticResource Dyc.PendingConnectionTemplate}"
                                  ConnectionTemplate="{StaticResource Dyc.ConnectionTemplate}"
                                  DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"
