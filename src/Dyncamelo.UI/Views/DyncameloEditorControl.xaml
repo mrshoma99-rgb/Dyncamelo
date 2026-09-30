@@ -1194,10 +1194,17 @@
                                    FontSize="16"
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0" />
-                        <TextBlock Text="Running the graph…"
-                                   Foreground="{DynamicResource Dyc.TextBrush}"
-                                   FontSize="13"
-                                   VerticalAlignment="Center" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RunProgressText}"
+                                       Foreground="{DynamicResource Dyc.TextBrush}"
+                                       FontSize="13"
+                                       MaxWidth="460"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="Press Esc to cancel"
+                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                       FontSize="11"
+                                       Margin="0,3,0,0" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Border>

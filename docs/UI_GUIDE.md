@@ -61,6 +61,12 @@ Socket colour names the kind of data. With **Type letters in sockets** turned on
 * A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).
 * Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.
 
+## Running and stopping
+
+* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.
+* While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.
+* The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.
+
 ## Commands and shortcuts
 
 Default shortcuts. **Canvas** commands only act when the canvas has the keyboard (so typing in a box never triggers them); **Everywhere** commands also work while a text box has focus.
@@ -157,6 +163,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 
 | Gesture | How |
 |---|---|
+| Stop a running graph | Esc (the run halts before the next node and continues from there next time) |
 | Pan the canvas | Right or middle mouse drag |
 | Zoom | Mouse wheel |
 | Search for a node here | Space over the canvas |
@@ -213,6 +220,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Hide unused inputs by default | On / Off | Off | Nodes that have not been set either way hide their unconnected optional inputs. |
 | Make room when inserting on a wire | On / Off | On | Nodes downstream move right when a node is dropped onto a wire. |
 | Deleting a reroute keeps the wire | On / Off | On | Removing a reroute dot joins the wire back up instead of deleting it. |
+| Esc cancels a running graph | On / Off | On | Pressing Esc while a run is in progress stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
 | Highlight selected node in Navisworks | On / Off | Off | Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current. |
 | Double-click empty canvas | Insert a String node / Insert a Number node / Add a note / Do nothing | Insert a String node | What double-clicking the empty canvas does. |
 

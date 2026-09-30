@@ -60,6 +60,11 @@ public static class UiGuide
         sb.Append("* A **muted wire** is ignored by the run — a quick way to switch a branch off without deleting it (`Ctrl` held while cutting mutes instead of deleting).\n");
         sb.Append("* Dropping a wire on empty canvas opens the node search filtered to nodes that can accept it; picking one connects it.\n\n");
 
+        sb.Append("## Running and stopping\n\n");
+        sb.Append("* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.\n");
+        sb.Append("* While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.\n");
+        sb.Append("* The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.\n\n");
+
         sb.Append("## Commands and shortcuts\n\n");
         sb.Append("Default shortcuts. **Canvas** commands only act when the canvas has the keyboard (so typing in a box never triggers them); **Everywhere** commands also work while a text box has focus.\n\n");
         foreach (var category in CommandCatalog.Categories)

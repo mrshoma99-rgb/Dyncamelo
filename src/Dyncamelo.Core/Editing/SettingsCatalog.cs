@@ -132,6 +132,8 @@ public static class SettingsCatalog
             "Nodes downstream move right when a node is dropped onto a wire.", true),
         new SettingDescriptor("deleteReconnectsReroutes", "Editing", "Deleting a reroute keeps the wire",
             "Removing a reroute dot joins the wire back up instead of deleting it.", true),
+        new SettingDescriptor("escCancels", "Editing", "Esc cancels a running graph",
+            "Pressing Esc while a run is in progress stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time.", true),
         new SettingDescriptor("previewSelection", "Editing", "Highlight selected node in Navisworks",
             "Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current.", false),
         new SettingDescriptor("doubleClick", "Editing", "Double-click empty canvas", "What double-clicking the empty canvas does.", "string",

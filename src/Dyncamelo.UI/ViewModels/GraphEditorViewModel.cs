@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -987,35 +989,103 @@ public partial class GraphEditorViewModel : ObservableObject
         if (interactive)
         {
             StatusMessage = "Running…";
+            RunProgressText = "Running the graph…";
             IsRunning = true; // raised synchronously so the view paints before we block
         }
 
         RunResult result;
-        try
+        using (var cancellation = new CancellationTokenSource())
         {
-            var context = EvaluationContextFactory != null ? EvaluationContextFactory() : new EvaluationContext();
-            using (_undo.Suspend())
+            _runCancellation = cancellation;
+            try
             {
-                result = _engine.Run(_graph, context);
-            }
+                var context = EvaluationContextFactory != null ? EvaluationContextFactory() : new EvaluationContext();
+                ConfigureRunContext(context, cancellation);
+                using (_undo.Suspend())
+                {
+                    result = _engine.Run(_graph, context);
+                }
 
-            _hasRunThisGraph = true;
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = "Run failed: " + ex.Message;
-            return;
-        }
-        finally
-        {
-            if (interactive)
+                _hasRunThisGraph = true;
+            }
+            catch (Exception ex)
             {
-                IsRunning = false;
+                StatusMessage = "Run failed: " + ex.Message;
+                return;
+            }
+            finally
+            {
+                _runCancellation = null;
+                if (interactive)
+                {
+                    IsRunning = false;
+                }
             }
         }
 
         UpdateRunStatistics(result);
         RefreshPreview(); // the selected node's outputs just changed
+    }
+
+    // ----- cancelling a run ----------------------------------------------------
+
+    private CancellationTokenSource? _runCancellation;
+    private string _runProgressText = "Running the graph…";
+    private readonly Stopwatch _repaintWatch = Stopwatch.StartNew();
+
+    /// <summary>What the busy overlay says: "Running…", then "12 / 40 — node name" as the run advances, "Cancelling…" after Esc.</summary>
+    public string RunProgressText
+    {
+        get => _runProgressText;
+        private set => SetProperty(ref _runProgressText, value);
+    }
+
+    /// <summary>
+    /// Asked between the steps of a run whether the user wants it stopped. The default reads the Esc key from the keyboard
+    /// state (a run blocks the UI thread, so no key message can arrive); tests replace it.
+    /// </summary>
+    public Func<bool> CancelPoll { get; set; } = EscapeKey.WasPressed;
+
+    /// <summary>
+    /// Repaints the window; set by the view. Called a few times a second during a run so the overlay shows progress. It must
+    /// only process rendering, never input, or the graph could be edited mid-run.
+    /// </summary>
+    public Action? RenderPump { get; set; }
+
+    /// <summary>Stops the run in progress before its next step. Only a call from inside the run (the poll) can reach it.</summary>
+    public void RequestCancel()
+    {
+        var source = _runCancellation;
+        if (source != null && !source.IsCancellationRequested)
+        {
+            RunProgressText = "Cancelling…";
+            source.Cancel();
+        }
+    }
+
+    private void ConfigureRunContext(EvaluationContext context, CancellationTokenSource cancellation)
+    {
+        context.UseCancellation(cancellation.Token);
+        var escape = EscCancelsRun;
+        if (escape)
+        {
+            EscapeKey.Reset();
+        }
+
+        context.ProgressCallback = progress => RunProgressText = "Running " + progress.Describe();
+        context.Heartbeat = () =>
+        {
+            if (escape && CancelPoll())
+            {
+                RequestCancel();
+            }
+
+            if (_repaintWatch.ElapsedMilliseconds >= 100)
+            {
+                _repaintWatch.Restart();
+                RenderPump?.Invoke();
+            }
+        };
     }
 
     private void UndoLast()
@@ -2184,7 +2254,9 @@ public partial class GraphEditorViewModel : ObservableObject
         {
             LastRunMilliseconds = Math.Round(result.Elapsed.TotalMilliseconds, 1);
             StatusMessage = result.Cancelled
-                ? "Run cancelled."
+                ? "Run cancelled after " + result.ExecutedNodes.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " of " +
+                  result.PlannedCount.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                  " node(s). The next run continues where it stopped; changes already made in Navisworks are kept."
                 : "Run finished: " + result.ExecutedNodes.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
                   " node(s) executed in " + LastRunMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ms." +
                   DescribeSlowest(result);

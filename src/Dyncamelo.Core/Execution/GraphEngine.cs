@@ -55,6 +55,7 @@ public class GraphEngine
         var stopwatch = Stopwatch.StartNew();
         var executed = new List<NodeModel>();
         bool cancelled = false;
+        int planned = 0;
         context = context ?? new EvaluationContext();
 
         try
@@ -62,40 +63,43 @@ public class GraphEngine
             var plan = LoopPlanner.Plan(graph);
             var frozen = CollectFrozenSet(graph);
             var units = OrderUnits(graph, plan);
+            planned = units.Count(unit => WillRun(unit, frozen));
+            var done = 0;
 
-            foreach (var unit in units)
+            try
             {
-                if (context.CancellationToken.IsCancellationRequested)
+                foreach (var unit in units)
                 {
-                    // Already-executed nodes are clean; the rest stay dirty, so the
-                    // next run resumes exactly where this one stopped.
-                    cancelled = true;
-                    break;
-                }
-
-                if (unit is LoopRegion region)
-                {
-                    if (region.AllNodes().Any(n => frozen.Contains(n)) ||
-                        !region.AllNodes().Any(n => n.IsDirty))
+                    if (!WillRun(unit, frozen))
                     {
                         continue;
                     }
 
-                    ExecuteLoop(graph, region, context, executed);
-                    continue;
-                }
+                    // Stop here (not mid-node) when a cancel was requested. Already-executed nodes are clean and the rest
+                    // stay dirty, so the next run resumes exactly where this one stopped.
+                    context.ReportProgress(done, planned, UnitName(unit));
+                    context.Checkpoint();
 
-                var node = (NodeModel)unit;
-                if (frozen.Contains(node) || !node.IsDirty)
-                {
-                    continue;
-                }
+                    if (unit is LoopRegion region)
+                    {
+                        ExecuteLoop(graph, region, context, executed);
+                        done++;
+                        continue;
+                    }
 
-                ExecuteNode(graph, node, context);
-                ApplyPlanProblem(plan, node);
-                node.IsDirty = false;
-                executed.Add(node);
-                NodeExecuted?.Invoke(this, new NodeEventArgs(node));
+                    var node = (NodeModel)unit;
+                    ExecuteNode(graph, node, context);
+                    ApplyPlanProblem(plan, node);
+                    node.IsDirty = false;
+                    executed.Add(node);
+                    NodeExecuted?.Invoke(this, new NodeEventArgs(node));
+                    done++;
+                }
+            }
+            catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                // The node (or loop) that was interrupted never reached "clean": it stays dirty with its old outputs.
+                cancelled = true;
             }
         }
         finally
@@ -104,7 +108,7 @@ public class GraphEngine
         }
 
         stopwatch.Stop();
-        return new RunResult(executed, cancelled, stopwatch.Elapsed, BuildTimings());
+        return new RunResult(executed, cancelled, stopwatch.Elapsed, BuildTimings(), planned);
     }
 
     private List<NodeTiming> BuildTimings()
@@ -117,6 +121,20 @@ public class GraphEngine
 
         return timings;
     }
+
+    private static bool WillRun(object unit, HashSet<NodeModel> frozen)
+    {
+        if (unit is LoopRegion region)
+        {
+            return !region.AllNodes().Any(n => frozen.Contains(n)) && region.AllNodes().Any(n => n.IsDirty);
+        }
+
+        var node = (NodeModel)unit;
+        return !frozen.Contains(node) && node.IsDirty;
+    }
+
+    private static string UnitName(object unit) =>
+        unit is LoopRegion region ? region.Item.Name + " (loop)" : ((NodeModel)unit).Name;
 
     private void RecordTiming(NodeModel node, TimeSpan elapsed)
     {
@@ -243,6 +261,12 @@ public class GraphEngine
                 node.State = NodeState.Executed;
             }
         }
+        catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+        {
+            // Not a failure: the user stopped the run. The node keeps its previous outputs and stays dirty.
+            node.State = NodeState.Idle;
+            throw;
+        }
         catch (Exception ex) when (!(ex is OutOfMemoryException) && !(ex is StackOverflowException))
         {
             // The single place where node exceptions are absorbed (§4).
@@ -284,10 +308,8 @@ public class GraphEngine
 
         for (int index = 0; index < items.Count; index++)
         {
-            if (context.CancellationToken.IsCancellationRequested)
-            {
-                break;
-            }
+            // A cancel stops the whole loop: partial results are not published and the region stays dirty.
+            context.Checkpoint();
 
             item.BindIteration(items[index], index, items.Count);
             SetOutputs(item, new object?[] { items[index], index, items.Count, item });

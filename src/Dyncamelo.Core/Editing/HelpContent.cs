@@ -46,6 +46,7 @@ public static class HelpContent
     /// <summary>Mouse and pointer gestures (they have no menu item, so they are listed by hand).</summary>
     public static readonly IReadOnlyList<HelpLine> Gestures = new[]
     {
+        new HelpLine("Stop a running graph", "Esc (the run halts before the next node and continues from there next time)"),
         new HelpLine("Pan the canvas", "Right or middle mouse drag"),
         new HelpLine("Zoom", "Mouse wheel"),
         new HelpLine("Search for a node here", "Space over the canvas"),

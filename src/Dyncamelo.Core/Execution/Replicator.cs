@@ -300,6 +300,9 @@ internal static class Replicator
         bool[] elementBound,
         ReplicationStats stats)
     {
+        // Every call of a replicated node is a point where a run can be stopped (and the host can repaint / poll).
+        context.Checkpoint();
+
         bool insideReplication = false;
         foreach (var bound in elementBound)
         {

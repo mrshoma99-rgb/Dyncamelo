@@ -21,18 +21,23 @@ public class RunResult
         IReadOnlyList<NodeModel> executedNodes,
         bool cancelled,
         TimeSpan elapsed,
-        IReadOnlyList<NodeTiming>? nodeTimings = null)
+        IReadOnlyList<NodeTiming>? nodeTimings = null,
+        int plannedCount = 0)
     {
         ExecutedNodes = executedNodes ?? throw new ArgumentNullException(nameof(executedNodes));
         Cancelled = cancelled;
         Elapsed = elapsed;
         NodeTimings = nodeTimings ?? NoTimings;
+        PlannedCount = plannedCount;
     }
+
+    /// <summary>How many nodes (a loop region counts as one unit) the run set out to execute; 0 when not known.</summary>
+    public int PlannedCount { get; }
 
     /// <summary>Nodes that executed during this run, in execution order. Clean (cached) and frozen nodes are absent.</summary>
     public IReadOnlyList<NodeModel> ExecutedNodes { get; }
 
-    /// <summary>True when the run was cancelled between nodes; remaining dirty nodes stay dirty.</summary>
+    /// <summary>True when the run was cancelled; the node it interrupted and everything after it stay dirty.</summary>
     public bool Cancelled { get; }
 
     /// <summary>Wall-clock duration of the run.</summary>

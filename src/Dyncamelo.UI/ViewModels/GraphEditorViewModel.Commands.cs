@@ -531,6 +531,7 @@ public partial class GraphEditorViewModel
             case "hideUnusedDefault": return HideUnusedByDefault;
             case "autoOffset": return AutoOffsetOnInsert;
             case "deleteReconnectsReroutes": return DeleteReconnectsReroutes;
+            case "escCancels": return EscCancelsRun;
             case "previewSelection": return PreviewSelection;
             case "doubleClick": return DoubleClickAction;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));
@@ -556,6 +557,7 @@ public partial class GraphEditorViewModel
             case "hideUnusedDefault": HideUnusedByDefault = (bool)value; break;
             case "autoOffset": AutoOffsetOnInsert = (bool)value; break;
             case "deleteReconnectsReroutes": DeleteReconnectsReroutes = (bool)value; break;
+            case "escCancels": EscCancelsRun = (bool)value; break;
             case "previewSelection": PreviewSelection = (bool)value; break;
             case "doubleClick": DoubleClickAction = (string)value; break;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));

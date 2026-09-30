@@ -436,6 +436,7 @@ public partial class DyncameloEditorControl : UserControl
             newViewModel.CommandResolver = id => ResolveCommand(newViewModel, id);
             newViewModel.CommandTarget = Editor;
             newViewModel.PointerLocation = () => Editor.MouseLocation;
+            newViewModel.RenderPump = PumpRender;
             // Apply the persisted palette once the view model is attached.
             ApplyPalette(newViewModel.PaletteId);
             RebuildKeyRouter(newViewModel);
@@ -501,15 +502,19 @@ public partial class DyncameloEditorControl : UserControl
                 // before we block. Without this the run looks like a freeze.
                 Mouse.OverrideCursor = Cursors.Wait;
                 UpdateLayout();
-                Dispatcher.Invoke(
-                    new System.Action(() => { }),
-                    System.Windows.Threading.DispatcherPriority.Render);
+                PumpRender();
             }
             else
             {
                 Mouse.OverrideCursor = null;
             }
         }
+    }
+
+    // Processes rendering (and bindings), never input: a run can be repainted but the graph cannot be edited under it.
+    private void PumpRender()
+    {
+        Dispatcher.Invoke(new System.Action(() => { }), System.Windows.Threading.DispatcherPriority.Render);
     }
 
     /// <summary>

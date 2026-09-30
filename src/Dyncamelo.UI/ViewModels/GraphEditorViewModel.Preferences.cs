@@ -43,6 +43,9 @@ public static class SettingKeys
 
     /// <summary>Show the node library panel on the left of the canvas.</summary>
     public const string LibraryVisible = "libraryVisible";
+
+    /// <summary>Esc cancels a running graph.</summary>
+    public const string EscCancels = "escCancels";
 }
 
 /// <summary>
@@ -61,7 +64,7 @@ public partial class GraphEditorViewModel
         nameof(MinimapMode), nameof(IsMinimapVisible), nameof(MinimapTooltip), nameof(NodeDensity), nameof(RowBaseHeight), nameof(StraightWires),
         nameof(WireLowDetail), nameof(ColourBlindGlyphs), nameof(HideUnusedByDefault), nameof(ScrubSpeed), nameof(ScrubPixelsPerStep),
         nameof(SnapToGrid), nameof(GridCellSize), nameof(AutoOffsetOnInsert), nameof(DeleteReconnectsReroutes), nameof(ShowGrid),
-        nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden),
+        nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden), nameof(EscCancelsRun),
     };
 
     /// <summary>Minimap mode: "auto", "on" or "off".</summary>
@@ -98,6 +101,13 @@ public partial class GraphEditorViewModel
 
     /// <summary>Hides or shows the node library panel (Ctrl+B).</summary>
     public ICommand ToggleLibraryCommand => _toggleLibraryCommand ??= new RelayCommand(() => IsLibraryVisible = !IsLibraryVisible);
+
+    /// <summary>True when Esc stops a running graph (default).</summary>
+    public bool EscCancelsRun
+    {
+        get => _settings.GetBool(SettingKeys.EscCancels, true);
+        set => SetPreference(SettingKeys.EscCancels, value, true, nameof(EscCancelsRun));
+    }
 
     /// <summary>Row height preset: "compact", "normal" or "comfortable".</summary>
     public string NodeDensity
