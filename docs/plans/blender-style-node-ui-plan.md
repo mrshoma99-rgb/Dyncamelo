@@ -17,7 +17,7 @@ Evidence tags used throughout:
 
 ## 0. What you will get, in one screen
 
-1. **Rows, not columns.** Every node becomes a vertical stack: header → outputs → panels/settings → inputs, each row carrying its own socket and, for unwired inputs, its own editor. (Blender's anatomy, study §2.)
+1. **Rows, not columns.** Every node becomes a vertical stack: header → outputs → panels/settings → inputs. Inputs keep their sockets on the left edge and outputs on the right edge (as in Blender); each row carries its own socket and, for unwired inputs, its own editor. (Blender's anatomy, study §2.)
 2. **Every unwired input is its own editor.** Number fields you drag / Shift-drag / double-click-type, toggles, dropdowns, text boxes, colour swatches, path pickers. Values persist in the `UserValue` slot that already serialises and already feeds the engine.
 3. **Type language.** Socket colour = data family, socket shape = list depth, wire colour = source family, **dashed wire = automatic replication**, unwired-but-defaulted = hollow.
 4. **Rope-style editing.** Drop a wire on empty canvas → filtered search; drag a node onto a wire → insert; Ctrl+X-delete reconnects; Alt-cut wires; mute a node / a wire; reroute dots; frames; auto-offset; grey-out incompatible sockets while dragging; hide-unused-sockets; collapse; panels; resize.
@@ -36,7 +36,7 @@ You did not answer the study's questions, and you asked for no deferrals, so the
 | Q2 | Scrub or type? | **Both, Blender semantics:** click-drag scrubs, Shift = fine, Ctrl = snap, double-click / Enter = type, Tab moves to the next field, Esc reverts. | `ScrubNumberBox` (§6.2) |
 | Q3 | Colour-blind? | **Yes.** Palette is Okabe–Ito-derived; colour is *never* the only signal (shape = list depth, tooltip = type name, optional label chip). Verified in unit tests with CVD simulation (§4.3). | `PortKindPalette` (§4.3) |
 | Q4 | Daily gesture? | **Wire-drop-to-search** and **insert-on-wire** are treated as the two headline gestures and get the most polish; everything else in the study ships too. | §7 |
-| Q5 | Left/right sockets or Blender's stacked rows? | **Stacked rows with sockets on the node edges**: outputs on the right edge, inputs on the left edge, each on its own row. Wires still flow left→right; nodes get shorter and denser. | §5.2 |
+| Q5 | Which edges hold the sockets? | **Same as Blender and as Nodify today: inputs on the left edge, outputs on the right edge**, each socket centred on the edge line (half outside the card). The *only* layout change is vertical: instead of Nodify's side-by-side input/output columns, rows are stacked — output rows first, then inputs, each input row carrying its own editor. Wires still flow left→right. (An earlier draft of this table framed it as "left/right vs Blender", which was wrong: Blender is left/right too.) | §5.2 |
 | Q6 | Palette theming vs. fixed socket colours? | **Two systems.** Chrome (canvas, body, text) keeps the live-swappable `PaletteCatalog`. Socket-family colours are *semantic* and fixed, so they can be frozen (perf) and stay recognisable across palettes. | §4.3, §8.2 |
 
 ---
@@ -489,6 +489,17 @@ The state border/balloon/preview bubble/context-menu blocks (`DyncameloDark.xaml
 `Dyc.Socket.Input` re-templates `NodeInput` to *only* the socket glyph (the label lives in the row, next to the editor). Nodify's contract is a `PART_Connector` element in the template, from which `Anchor` is computed; if missing it falls back to the control centre **[V]** (`Connector.cs:12-17`, `Thumb => ... ?? this`). We name the socket element `PART_Connector` so the anchor is the socket centre, which sits on the node edge because of the −5 px margin.
 
 `PortEditorHost` is a `ContentControl` whose content is chosen by `ConnectorViewModel.EditorKind` (§6). One extra visual tree level per input, created lazily: when `ShowEditor` is false (wired input, or `EditorKind == None`) it is `Collapsed` and never instantiates its template.
+
+
+### 5.3b Details taken from Blender reference screenshots (Geometry Nodes)
+
+Two reference screenshots supplied during review confirm the anatomy and add three details the plan now includes:
+
+1. **Compound fields.** A vector input (Translation/Rotation/Scale) is *one socket* with a label row, then a tight group of three stacked fields (X/Y/Z) sharing one rounded container with hairline dividers. Plan: ports whose kind is `Geometry` with a 3-component `Point`/`Vector` type get a `VectorEditor` (3 `ScrubNumberBox`es in one container, one `SetUserValue` of the composite on any change). Colour-channel and bounding-box ports can reuse the same container later.
+2. **Field-vs-item socket glyph beside an inline field** (diamond sockets next to "Rate", "Damping"): consistent with the shape-by-structure rule in §5.4; the diamond stays reserved for "kind unknown until run".
+3. **Multi-input socket** ("Behaviors": one elongated pill accepting many wires). Dyncamelo inputs accept one wire today (`GraphModel.Connect` replaces, §2.3), but nodes with add/remove-port support (`AddPortCommand` **[V]**) are the natural candidates; the pill glyph is added to the socket set, and multi-wire acceptance is a per-port flag implemented only for those nodes so no existing graph changes meaning.
+
+Also visible and already planned: header with collapse arrow at left, outputs listed first with right-aligned labels, headers coloured by category, dark flat card with a 1 px border, selected node = white outline.
 
 ### 5.4 Sockets
 
@@ -1015,6 +1026,6 @@ Nothing from the study is left unassigned. The two items I *chose not to build* 
 ## 16. What I need from you (none of it blocks starting)
 
 1. **Approve the phase order** (foundations → undo → look → editors → gestures → polish), or tell me which visible phase you want first. Constraint: undo must precede gestures, and types/attributes must precede colours/editors.
-2. **Confirm the assumption in Q5:** stacked rows with sockets on the left/right edges, instead of Nodify's side-by-side columns. It is the biggest visual change and the one most worth a second look at the Phase 2 screenshot.
+2. **Confirm the layout change (Q5):** sockets stay on the left (inputs) and right (outputs) edges exactly as in Blender; only the vertical stacking of rows changes. It is the biggest visual change and the one most worth a second look at the Phase 2 screenshot.
 3. **Confirm you accept one new runtime dependency** (MSAGL, MIT, one DLL) for Phase 5. If you'd rather have none, Phase 5 uses the Core layout only, and the plan otherwise stands.
 4. **Send me one HUD report** after Phase 0 (a graph you consider "big") so the budgets in §8.1 are calibrated to your machine rather than to my guesses.
