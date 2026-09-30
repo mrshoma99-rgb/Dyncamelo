@@ -354,6 +354,162 @@ public class WireDropSearchTests
     }
 }
 
+public class InsertOnWireTests
+{
+    private static GraphEditorViewModel NewEditor()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterNodeType("TestSum", () => new SumNode());
+        var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+        return new GraphEditorViewModel(registry, new StubDialogs(), settings);
+    }
+
+    private static NodeViewModel AddSum(GraphEditorViewModel vm, double x, double y = 0)
+    {
+        var node = new SumNode { X = x, Y = y };
+        vm.Graph.AddNode(node);
+        var viewModel = vm.Items.OfType<NodeViewModel>().Single(n => n.Model == node);
+        viewModel.Size = new Size(200, 90);
+        return viewModel;
+    }
+
+    // a (x=0) -> c (x=600) with the wire drawn at y=50; b is a free node.
+    private static (GraphEditorViewModel Vm, NodeViewModel A, NodeViewModel B, NodeViewModel C) Rig()
+    {
+        var vm = NewEditor();
+        var a = AddSum(vm, 0);
+        var c = AddSum(vm, 600);
+        var b = AddSum(vm, 300, 400);
+        Assert.True(vm.Graph.Connect(a.Model.OutPorts[0], c.Model.InPorts[0]).Success);
+        a.Outputs[0].Anchor = new Point(200, 50);
+        c.Inputs[0].Anchor = new Point(600, 50);
+        return (vm, a, b, c);
+    }
+
+    [Fact]
+    public void AFreeNodeOverAWireIsOfferedThatWire()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _, b, _) = Rig();
+            var over = vm.FindInsertTarget(b.Model, new Rect(300, 20, 200, 90), new Point(400, 50));
+            Assert.Same(vm.Connections.Single(), over);
+
+            var clear = vm.FindInsertTarget(b.Model, new Rect(300, 300, 200, 90), new Point(400, 340));
+            Assert.Null(clear);
+        });
+    }
+
+    [Fact]
+    public void ANodeWithWiresOfItsOwnIsNeverOffered()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _, b, c) = Rig();
+            b.Model.X = 300;
+            Assert.True(vm.Graph.Connect(b.Model.OutPorts[0], c.Model.InPorts[1]).Success);
+            Assert.Null(vm.FindInsertTarget(b.Model, new Rect(300, 20, 200, 90), new Point(400, 50)));
+        });
+    }
+
+    [Fact]
+    public void HoveringHighlightsTheWireAndLeavingClearsIt()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _, b, _) = Rig();
+            var wire = vm.Connections.Single();
+
+            vm.UpdateInsertCandidate(b, new Rect(300, 20, 200, 90), new Point(400, 50));
+            Assert.True(wire.IsInsertTarget);
+            Assert.Same(wire, vm.InsertCandidate);
+
+            vm.UpdateInsertCandidate(b, new Rect(300, 300, 200, 90), new Point(400, 340));
+            Assert.False(wire.IsInsertTarget);
+            Assert.Null(vm.InsertCandidate);
+        });
+    }
+
+    [Fact]
+    public void InsertingSplicesTheNodeMakesRoomAndUndoesAsOneStep()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, a, b, c) = Rig();
+            b.Model.X = 500; // 500..700 overlaps c at 600, so c must move
+            b.Model.Y = 20;
+            vm.History.Clear();
+
+            Assert.True(vm.InsertNodeOnWire(b, vm.Connections.Single()));
+
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(b.Model.InPorts[0])!.SourceNode);
+            Assert.Same(b.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+            Assert.Equal(500 + 200 + GraphOps.InsertGap, c.Model.X, 6);
+            Assert.Equal(1, vm.History.UndoCount);
+
+            vm.UndoCommand.Execute(null);
+            Assert.Equal(600, c.Model.X);
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+        });
+    }
+
+    [Fact]
+    public void DroppingADraggedNodeOnAWireInsertsItInTheSameUndoStepAsTheMove()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, a, b, c) = Rig();
+            vm.SelectedItems.Clear();
+            vm.SelectedItems.Add(b);
+            vm.History.Clear();
+
+            vm.ItemsDragStartedCommand.Execute(null);
+            b.Location = new Point(300, 10);
+            vm.UpdateInsertCandidate(b, new Rect(308, 18, 184, 74), new Point(400, 50));
+            vm.ItemsDragCompletedCommand.Execute(null);
+
+            Assert.Same(b.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+            Assert.Equal(1, vm.History.UndoCount);
+            Assert.Equal("Insert on wire", vm.History.UndoLabel);
+            Assert.Null(vm.InsertCandidate);
+
+            vm.UndoCommand.Execute(null);
+            Assert.Equal(400, b.Model.Y);
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+        });
+    }
+
+    [Fact]
+    public void DroppingALibraryNodeOnAWireInsertsIt()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, a, _, c) = Rig();
+            vm.History.Clear();
+
+            var added = vm.AddNodeOnWire("TestSum", new Point(400, 50));
+
+            Assert.NotNull(added);
+            Assert.Same(added!.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(added.Model.InPorts[0])!.SourceNode);
+            Assert.Equal(1, vm.History.UndoCount);
+        });
+    }
+
+    [Fact]
+    public void DroppingALibraryNodeAwayFromWiresJustAddsIt()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _, _, _) = Rig();
+            var before = vm.Graph.Connections.Count;
+            var added = vm.AddNodeOnWire("TestSum", new Point(400, 600));
+            Assert.NotNull(added);
+            Assert.Equal(before, vm.Graph.Connections.Count);
+        });
+    }
+}
+
 public class ShortcutRouterTests
 {
     [Fact]

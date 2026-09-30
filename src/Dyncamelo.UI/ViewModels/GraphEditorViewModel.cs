@@ -131,8 +131,16 @@ public partial class GraphEditorViewModel : ObservableObject
         });
         ItemsDragCompletedCommand = new RelayCommand(() =>
         {
-            _dragTransaction?.Dispose();
-            _dragTransaction = null;
+            try
+            {
+                // Dropping a free node on a wire splices it in, as part of the same undo step as the move.
+                CommitInsertOnDrop();
+            }
+            finally
+            {
+                _dragTransaction?.Dispose();
+                _dragTransaction = null;
+            }
         });
         _undo.Changed += (sender, args) =>
         {

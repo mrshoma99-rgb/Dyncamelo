@@ -52,6 +52,16 @@ public partial class DyncameloEditorControl : UserControl
 
         PreviewKeyDown += OnControlPreviewKeyDown;
 
+        // While a node is dragged, light up the wire it would be inserted on.
+        _insertTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Input)
+        {
+            Interval = System.TimeSpan.FromMilliseconds(40),
+        };
+        _insertTimer.Tick += OnInsertTimerTick;
+        System.ComponentModel.DependencyPropertyDescriptor
+            .FromProperty(NodifyEditor.IsDraggingProperty, typeof(NodifyEditor))
+            .AddValueChanged(Editor, OnEditorIsDraggingChanged);
+
         // Diagnostics overlay (Ctrl+Shift+F12), hosted in the same grid cell as the canvas.
         if (Editor.Parent is Grid canvasGrid)
         {
@@ -63,6 +73,43 @@ public partial class DyncameloEditorControl : UserControl
         // "Find in library" raises a reveal request on the library view model;
         // scrolling the tree is a view job (containers may be virtualized).
         DataContextChanged += OnDataContextChanged;
+    }
+
+    private readonly System.Windows.Threading.DispatcherTimer _insertTimer;
+
+    private void OnEditorIsDraggingChanged(object? sender, System.EventArgs e)
+    {
+        if (Editor.IsDragging)
+        {
+            _insertTimer.Start();
+        }
+        else
+        {
+            _insertTimer.Stop();
+            ViewModel?.ClearInsertCandidate();
+        }
+    }
+
+    private void OnInsertTimerTick(object? sender, System.EventArgs e)
+    {
+        var vm = ViewModel;
+        if (vm == null)
+        {
+            return;
+        }
+
+        if (vm.SelectedItems.Count != 1 || !(vm.SelectedItems[0] is NodeViewModel node) ||
+            !(Editor.ItemContainerGenerator.ContainerFromItem(node) is ItemContainer container))
+        {
+            vm.UpdateInsertCandidate(null, Rect.Empty, Editor.MouseLocation);
+            return;
+        }
+
+        // Optimised dragging moves the container by a render transform; Location only updates on release.
+        var shift = container.RenderTransform is System.Windows.Media.TranslateTransform t ? new Vector(t.X, t.Y) : default(Vector);
+        var rect = new Rect(container.Location + shift, container.RenderSize);
+        rect.Inflate(-8d, -8d);
+        vm.UpdateInsertCandidate(node, rect, Editor.MouseLocation);
     }
 
     private readonly ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
@@ -642,7 +689,7 @@ public partial class DyncameloEditorControl : UserControl
         if (e.Data.GetData(DragDataFormat) is string id)
         {
             var location = Editor.GetLocationInsideEditor(e);
-            ViewModel.AddNode(id, location);
+            ViewModel.AddNodeOnWire(id, location);
             e.Handled = true;
         }
     }

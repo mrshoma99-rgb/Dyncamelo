@@ -810,6 +810,11 @@
                             <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
                             <Setter Property="StrokeThickness" Value="3" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsInsertTarget}" Value="True">
+                            <Setter Property="Stroke" Value="{StaticResource Dyc.TextBrush}" />
+                            <Setter Property="StrokeThickness" Value="4.5" />
+                            <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </views:DycWire.Style>

@@ -16,6 +16,7 @@ namespace Dyncamelo.UI.ViewModels;
 public class ConnectionViewModel : ObservableObject
 {
     private bool _isSelected;
+    private bool _isInsertTarget;
 
     /// <summary>Creates the wrapper.</summary>
     /// <param name="owner">The editor that owns this wire.</param>
@@ -93,6 +94,13 @@ public class ConnectionViewModel : ObservableObject
 
     /// <summary>The downstream (input) connector.</summary>
     public ConnectorViewModel Target { get; }
+
+    /// <summary>True while a dragged node hovers this wire and would be inserted on it when dropped.</summary>
+    public bool IsInsertTarget
+    {
+        get => _isInsertTarget;
+        set => SetProperty(ref _isInsertTarget, value);
+    }
 
     /// <summary>True while the wire is part of the canvas selection.</summary>
     public bool IsSelected

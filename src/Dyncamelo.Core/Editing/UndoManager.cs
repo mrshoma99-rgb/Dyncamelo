@@ -174,6 +174,16 @@ public sealed class UndoManager
         return new UndoTransaction(this);
     }
 
+    /// <summary>Renames the open transaction (a drag that turned into an insertion is no longer just a "Move").</summary>
+    /// <param name="label">The new name of the undo item.</param>
+    public void RelabelTransaction(string label)
+    {
+        if (_depth > 0)
+        {
+            _transactionLabel = label;
+        }
+    }
+
     /// <summary>Suspends recording until the returned token is disposed (used around graph runs, whose property writes are not user edits).</summary>
     public IDisposable Suspend()
     {

@@ -57,25 +57,10 @@ public sealed class DycWire : BaseConnection
     }
 
     /// <summary>Bézier control points for a wire from <paramref name="source"/> to <paramref name="target"/>.</summary>
-    public static (Point P1, Point P2) ControlPoints(Point source, Point target)
-    {
-        var dx = Math.Abs(target.X - source.X);
-        var offset = Math.Max(40d, Math.Min(dx * 0.5d + 20d, 200d));
-        return (new Point(source.X + offset, source.Y), new Point(target.X - offset, target.Y));
-    }
+    public static (Point P1, Point P2) ControlPoints(Point source, Point target) => Dyncamelo.UI.Services.WireGeometry.ControlPoints(source, target);
 
     /// <summary>Point of the cubic at parameter <paramref name="t"/>.</summary>
-    public static Point Evaluate(Point p0, Point p1, Point p2, Point p3, double t)
-    {
-        var u = 1d - t;
-        var b0 = u * u * u;
-        var b1 = 3d * u * u * t;
-        var b2 = 3d * u * t * t;
-        var b3 = t * t * t;
-        return new Point(
-            b0 * p0.X + b1 * p1.X + b2 * p2.X + b3 * p3.X,
-            b0 * p0.Y + b1 * p1.Y + b2 * p2.Y + b3 * p3.Y);
-    }
+    public static Point Evaluate(Point p0, Point p1, Point p2, Point p3, double t) => Dyncamelo.UI.Services.WireGeometry.Evaluate(p0, p1, p2, p3, t);
 
     /// <inheritdoc />
     protected override ((Point ArrowStartSource, Point ArrowStartTarget), (Point ArrowEndSource, Point ArrowEndTarget)) DrawLineGeometry(
