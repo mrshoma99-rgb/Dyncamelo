@@ -18,6 +18,7 @@ public partial class DyncameloEditorControl : UserControl
 
     private Point _libraryDragStart;
     private LibraryEntryViewModel? _libraryDragEntry;
+    private PerfHud? _perfHud;
 
     /// <summary>
     /// Deleting a node moves keyboard focus to a neighbouring node, and Nodify
@@ -49,6 +50,14 @@ public partial class DyncameloEditorControl : UserControl
             handledEventsToo: true);
 
         PreviewKeyDown += OnControlPreviewKeyDown;
+
+        // Diagnostics overlay (Ctrl+Shift+F12), hosted in the same grid cell as the canvas.
+        if (Editor.Parent is Grid canvasGrid)
+        {
+            _perfHud = new PerfHud(Editor);
+            Grid.SetColumn(_perfHud, Grid.GetColumn(Editor));
+            canvasGrid.Children.Add(_perfHud);
+        }
 
         // "Find in library" raises a reveal request on the library view model;
         // scrolling the tree is a view job (containers may be virtualized).
@@ -134,6 +143,13 @@ public partial class DyncameloEditorControl : UserControl
     private void OnControlPreviewKeyDown(object sender, KeyEventArgs e)
     {
         bool typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+
+        if (e.Key == Key.F12 && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && _perfHud != null)
+        {
+            _perfHud.Toggle();
+            e.Handled = true;
+            return;
+        }
 
         // Space over the canvas opens the quick node search (Dynamo-style):
         // type to filter, Enter inserts at the spot the cursor was on.

@@ -917,6 +917,8 @@ To keep you unblocked while the visual layer changes, Phases 2-4 ship the new no
 
 ### Phase 0 — Foundations and proof (v0.35.0) · no visible change
 
+> **Implementation status (recorded as built):** Core foundations, engine mute, serializer fields, `RerouteNode`, `CommandCatalog`, HUD and the MSAGL spike are done and tested (Core 304 tests). Deviations from the text below: (1) **Colourful was not adopted** — the CVD/contrast checks are ~40 lines of test code (Machado 2009 matrices, CIE Lab ΔE76), fewer dependencies for the same guarantee; (2) the palette was **tuned by those tests** (Integer, Clash, Selection, Action, Any changed; the worst colour-vision-deficiency pair is guarded at ΔE ≥ 3, normal vision ≥ 15 — sixteen families cannot all be CVD-separable, so shape and tooltips carry the rest, as designed); (3) the **command registry migration and header menu bar move to Phase 1** where the menu bar is built (the catalog data and its integrity tests exist now); (4) the **Windows UI-test project (S0/S1)** is scheduled with Phase 2 where anchors first matter; (5) **MSAGL S7:** loads and lays out on .NET 8 (`MsaglSpikeTests`), upstream licence text confirmed MIT; the in-Navisworks load check and the four packaging file lists happen in Phase 5 when the runtime dependency is actually taken. (6) Enum-typed parameters now show as drop-downs (loader fills `Choices`), a small visible change.
+
 | Work | Files (new **N** / changed **C**) | ~LOC |
 |---|---|---|
 | Port kinds, depth, compat, palette | **N** `Core/Editing/PortKind.cs`, `PortKinds.cs`, `Compat.cs`, `PortKindPalette.cs` | 450 |

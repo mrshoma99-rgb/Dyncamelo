@@ -209,6 +209,25 @@ public class GraphModel : INotifyPropertyChanged
         return true;
     }
 
+    /// <summary>Mutes or un-mutes a wire (muted wires are ignored by the engine) and dirties the consumer.</summary>
+    /// <param name="connection">The wire.</param>
+    /// <param name="muted">True to mute.</param>
+    public void SetConnectionMuted(ConnectionModel connection, bool muted)
+    {
+        if (connection == null)
+        {
+            throw new ArgumentNullException(nameof(connection));
+        }
+
+        if (connection.IsMuted == muted)
+        {
+            return;
+        }
+
+        connection.IsMuted = muted;
+        MarkDirty(connection.TargetNode);
+    }
+
     /// <summary>Returns the single connection feeding an input port, or null.</summary>
     /// <param name="input">An input port.</param>
     public ConnectionModel? FindConnectionInto(PortModel input)

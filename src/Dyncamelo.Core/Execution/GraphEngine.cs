@@ -162,6 +162,17 @@ public class GraphEngine
         {
             var port = node.InPorts[i];
             var connection = graph.FindConnectionInto(port);
+            var wireMuted = false;
+            if (connection != null && connection.IsMuted)
+            {
+                // A muted wire is invisible to evaluation: fall through to the
+                // pinned value / default exactly as if it were unconnected.
+                // (Connect() switched UsingDefaultValue off, so a muted wire
+                // must be allowed to use the default explicitly.)
+                connection = null;
+                wireMuted = true;
+            }
+
             if (connection != null)
             {
                 if (connection.SourceNode.State == NodeState.Error)
@@ -177,7 +188,7 @@ public class GraphEngine
                 // wins over the compile-time default on an unconnected port.
                 inputs[i] = port.UserValue;
             }
-            else if (port.HasDefault && port.UsingDefaultValue)
+            else if (port.HasDefault && (port.UsingDefaultValue || wireMuted))
             {
                 inputs[i] = port.DefaultValue;
             }
@@ -192,6 +203,14 @@ public class GraphEngine
             SetOutputs(node, null);
             node.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
             node.State = NodeState.Warning;
+            return;
+        }
+
+        if (node.IsMuted)
+        {
+            // Bypass: no execution, outputs pass through compatible inputs.
+            SetOutputs(node, MutePassThrough.Resolve(node, inputs));
+            node.State = NodeState.Executed;
             return;
         }
 
@@ -305,12 +324,17 @@ public class GraphEngine
     private static object? ReadPortValue(GraphModel graph, PortModel port)
     {
         var connection = graph.FindConnectionInto(port);
-        if (connection != null)
+        if (connection != null && !connection.IsMuted)
         {
             return connection.Source.Value;
         }
 
-        return port.HasDefault && port.UsingDefaultValue ? port.DefaultValue : null;
+        if (port.HasUserValue)
+        {
+            return port.UserValue;
+        }
+
+        return port.HasDefault && (port.UsingDefaultValue || connection != null) ? port.DefaultValue : null;
     }
 
     /// <summary>Materializes a loop's item source into an indexable list (a scalar becomes a single item).</summary>

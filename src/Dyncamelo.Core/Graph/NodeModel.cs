@@ -25,6 +25,7 @@ public abstract class NodeModel : INotifyPropertyChanged
     private double _x;
     private double _y;
     private bool _isFrozen;
+    private bool _isMuted;
     private LacingMode _lacing = LacingMode.Auto;
     private NodeState _state = NodeState.Idle;
 
@@ -116,6 +117,33 @@ public abstract class NodeModel : INotifyPropertyChanged
             }
         }
     }
+
+    /// <summary>
+    /// Muted nodes are not executed: each output passes through the first
+    /// type-compatible input instead (see <c>MutePassThrough</c>), and the
+    /// node reports Executed. Unlike <see cref="IsFrozen"/>, which keeps the
+    /// last outputs, muting replaces them. Un/muting dirties the node.
+    /// </summary>
+    public bool IsMuted
+    {
+        get => _isMuted;
+        set
+        {
+            if (SetField(ref _isMuted, value))
+            {
+                MarkDirty();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Presentation state persisted with the node (collapse, width, hidden
+    /// sockets, open panels). Never affects evaluation.
+    /// </summary>
+    public NodeUiState Ui { get; } = new NodeUiState();
+
+    /// <summary>False for plumbing nodes (reroutes) that must not appear in the node library.</summary>
+    public virtual bool ShowInLibrary => true;
 
     /// <summary>True when the node must re-execute on the next run.</summary>
     public bool IsDirty { get; internal set; }

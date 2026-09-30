@@ -38,6 +38,13 @@ public class ConnectionModel
         Target = target;
     }
 
+    /// <summary>
+    /// A muted wire is ignored by the engine: the target input behaves as if
+    /// it were unconnected (pinned value, then default). Set through
+    /// <see cref="GraphModel.SetConnectionMuted"/> so the target is dirtied.
+    /// </summary>
+    public bool IsMuted { get; internal set; }
+
     /// <summary>Stable identifier of the connection.</summary>
     public Guid Id { get; internal set; }
 

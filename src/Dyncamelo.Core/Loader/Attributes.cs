@@ -183,3 +183,87 @@ public sealed class IsVisibleInLibraryAttribute : Attribute
     /// <summary>Whether the member is imported.</summary>
     public bool Visible { get; }
 }
+
+
+/// <summary>
+/// Soft/hard bounds and step for a numeric parameter. Drives the inline scrub
+/// field: <see cref="Min"/>/<see cref="Max"/> clamp every edit, while
+/// <see cref="SoftMin"/>/<see cref="SoftMax"/> only set the slider's extent
+/// (typing may exceed them). Purely advisory: never changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodeRangeAttribute : Attribute
+{
+    /// <summary>Creates the attribute with hard bounds (soft bounds default to the same values).</summary>
+    /// <param name="min">Hard minimum.</param>
+    /// <param name="max">Hard maximum.</param>
+    public NodeRangeAttribute(double min, double max)
+    {
+        Min = min;
+        Max = max;
+        SoftMin = min;
+        SoftMax = max;
+    }
+
+    /// <summary>Hard minimum.</summary>
+    public double Min { get; }
+
+    /// <summary>Hard maximum.</summary>
+    public double Max { get; }
+
+    /// <summary>Slider extent minimum (typing may go below).</summary>
+    public double SoftMin { get; set; }
+
+    /// <summary>Slider extent maximum (typing may go above).</summary>
+    public double SoftMax { get; set; }
+
+    /// <summary>Step for arrows and scrubbing; NaN derives it from the type/default.</summary>
+    public double Step { get; set; } = double.NaN;
+
+    /// <summary>Unit suffix shown after the value ("mm", "deg", "%").</summary>
+    public string Unit { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Groups a parameter into a named, collapsible panel on the node ("Advanced").
+/// Ports without a panel render in the main list.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodePanelAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="name">Panel title.</param>
+    public NodePanelAttribute(string name)
+    {
+        Name = name ?? string.Empty;
+    }
+
+    /// <summary>Panel title.</summary>
+    public string Name { get; }
+
+    /// <summary>Whether the panel starts expanded on a newly placed node.</summary>
+    public bool DefaultOpen { get; set; }
+}
+
+/// <summary>
+/// Declares the semantic kind of otherwise untyped (<c>object</c>) ports so the
+/// editor can colour and shape their sockets. On a method with
+/// <see cref="MultiReturnAttribute"/> it lists one kind per output key, in order;
+/// on a parameter it gives that input's kind. A kind is a family name
+/// (see <c>PortFamily</c>, case-insensitive: "viewpoint", "item", "text", …)
+/// optionally followed by <c>*</c> for a list or <c>**</c> for a list of lists.
+/// Purely advisory.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class PortKindsAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="kinds">Kind strings, e.g. "viewpoint*", "text*", "integer".</param>
+    public PortKindsAttribute(params string[] kinds)
+    {
+        Kinds = kinds ?? Array.Empty<string>();
+    }
+
+    /// <summary>The kind strings, in port order.</summary>
+    public string[] Kinds { get; }
+}

@@ -402,7 +402,7 @@ public class LibraryViewModel : ObservableObject
         foreach (var nodeType in _registry.NodeTypes)
         {
             var sample = _registry.CreateNode(nodeType);
-            if (sample == null)
+            if (sample == null || !sample.ShowInLibrary)
             {
                 continue;
             }

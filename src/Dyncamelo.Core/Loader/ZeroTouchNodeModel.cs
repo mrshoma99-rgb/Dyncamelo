@@ -36,11 +36,17 @@ public class ZeroTouchNodeModel : NodeModel
             {
                 port.Choices = input.Choices;
             }
+
+            port.Range = input.Range;
+            port.Panel = input.Panel;
+            port.PanelDefaultOpen = input.PanelDefaultOpen;
+            port.KindHint = input.Kind;
         }
 
         foreach (var output in definition.Outputs)
         {
-            AddOutput(output.Name, output.Type, output.Description);
+            var outPort = AddOutput(output.Name, output.Type, output.Description);
+            outPort.KindHint = output.Kind;
         }
     }
 

@@ -82,6 +82,24 @@ public class PortModel : INotifyPropertyChanged
     /// </summary>
     public System.Collections.Generic.IReadOnlyList<string>? Choices { get; internal set; }
 
+    /// <summary>Numeric range/step metadata for the inline scrub field, or null. Static (not serialized).</summary>
+    public Dyncamelo.Core.Loader.NodeRangeAttribute? Range { get; internal set; }
+
+    /// <summary>Panel this port belongs to ("" = main list). Static (not serialized).</summary>
+    public string Panel { get; internal set; } = string.Empty;
+
+    /// <summary>Whether this port's panel starts open. Static.</summary>
+    public bool PanelDefaultOpen { get; internal set; }
+
+    /// <summary>Explicit kind string ("viewpoint*"), or empty. Static; see <c>PortKinds</c>.</summary>
+    public string KindHint { get; internal set; } = string.Empty;
+
+    /// <summary>
+    /// True when the user chose to hide this (unconnected) port on the node.
+    /// Presentation only; persisted, never affects evaluation.
+    /// </summary>
+    public bool IsHidden { get; set; }
+
     /// <summary>
     /// True when the user has pinned an inline value on this unconnected input
     /// (e.g. picked a choice from the dropdown). Takes precedence over

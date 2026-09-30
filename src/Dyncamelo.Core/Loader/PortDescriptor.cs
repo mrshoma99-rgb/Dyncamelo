@@ -37,4 +37,16 @@ public class PortDescriptor
     /// or <c>null</c> for a free port. Drives the editor's dropdown.
     /// </summary>
     public IReadOnlyList<string>? Choices { get; set; }
+
+    /// <summary>Numeric range metadata from <see cref="NodeRangeAttribute"/>, or null.</summary>
+    public NodeRangeAttribute? Range { get; set; }
+
+    /// <summary>Panel title from <see cref="NodePanelAttribute"/>, or empty for the main list.</summary>
+    public string Panel { get; set; } = string.Empty;
+
+    /// <summary>Whether the panel starts open.</summary>
+    public bool PanelDefaultOpen { get; set; }
+
+    /// <summary>Explicit kind string from <see cref="PortKindsAttribute"/>, or empty.</summary>
+    public string Kind { get; set; } = string.Empty;
 }

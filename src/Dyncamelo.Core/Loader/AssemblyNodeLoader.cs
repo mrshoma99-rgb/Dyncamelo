@@ -404,6 +404,29 @@ public static class AssemblyNodeLoader
         {
             descriptor.Choices = choices;
         }
+        else
+        {
+            // An enum-typed parameter is a fixed choice set by construction.
+            var enumType = Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
+            if (enumType.IsEnum)
+            {
+                descriptor.Choices = Enum.GetNames(enumType);
+            }
+        }
+
+        descriptor.Range = parameter.GetCustomAttribute<NodeRangeAttribute>();
+        var panel = parameter.GetCustomAttribute<NodePanelAttribute>();
+        if (panel != null)
+        {
+            descriptor.Panel = panel.Name;
+            descriptor.PanelDefaultOpen = panel.DefaultOpen;
+        }
+
+        var kinds = parameter.GetCustomAttribute<PortKindsAttribute>()?.Kinds;
+        if (kinds != null && kinds.Length > 0)
+        {
+            descriptor.Kind = kinds[0];
+        }
 
         if (parameter.IsOptional)
         {
@@ -465,7 +488,10 @@ public static class AssemblyNodeLoader
     {
         if (multiReturnKeys != null)
         {
-            return multiReturnKeys.Select(k => new PortDescriptor(k, typeof(object))).ToList();
+            var kinds = method.GetCustomAttribute<PortKindsAttribute>()?.Kinds ?? Array.Empty<string>();
+            return multiReturnKeys
+                .Select((k, i) => new PortDescriptor(k, typeof(object)) { Kind = i < kinds.Length ? kinds[i] : string.Empty })
+                .ToList();
         }
 
         if (method.ReturnType == typeof(void))

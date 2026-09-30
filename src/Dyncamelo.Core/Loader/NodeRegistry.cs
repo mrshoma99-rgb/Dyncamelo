@@ -51,6 +51,7 @@ public class NodeRegistry
         registry.RegisterNodeType(WatchNode.TypeName, () => new WatchNode());
         registry.RegisterNodeType(LoopItemNode.TypeName, () => new LoopItemNode());
         registry.RegisterNodeType(LoopCollectNode.TypeName, () => new LoopCollectNode());
+        registry.RegisterNodeType(RerouteNode.TypeName, () => new RerouteNode());
         return registry;
     }
 

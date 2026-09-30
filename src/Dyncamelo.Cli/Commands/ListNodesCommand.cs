@@ -40,7 +40,7 @@ internal static class ListNodesCommand
         foreach (var nodeType in registry.NodeTypes)
         {
             var node = registry.CreateNode(nodeType);
-            if (node == null)
+            if (node == null || !node.ShowInLibrary)
             {
                 continue;
             }

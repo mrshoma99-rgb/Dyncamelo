@@ -375,6 +375,16 @@ public class GraphSerializer
         json["Y"] = node.Y;
         json["Lacing"] = node.Lacing.ToString();
         json["IsFrozen"] = node.IsFrozen;
+        if (node.IsMuted)
+        {
+            json["Muted"] = true;
+        }
+
+        if (!node.Ui.IsDefault)
+        {
+            json["Ui"] = SerializeUi(node.Ui);
+        }
+
         json["InputPorts"] = new JArray(node.InPorts.Select(SerializeInputPort));
         json["OutputPorts"] = new JArray(node.OutPorts.Select(p => new JObject
         {
@@ -394,6 +404,11 @@ public class GraphSerializer
             ["UseLevels"] = port.UseLevels,
             ["KeepListStructure"] = port.KeepListStructure,
         };
+
+        if (port.IsHidden)
+        {
+            json["Hidden"] = true;
+        }
 
         // Persist an inline value pinned by the editor (choice dropdowns). Only
         // JSON-primitive values are expected here; anything else is skipped so a
@@ -426,7 +441,7 @@ public class GraphSerializer
 
     private static JObject SerializeConnection(ConnectionModel connection)
     {
-        return new JObject
+        var json = new JObject
         {
             ["Id"] = connection.Id.ToString("N"),
             ["FromNode"] = connection.SourceNode.Id.ToString("N"),
@@ -434,6 +449,13 @@ public class GraphSerializer
             ["ToNode"] = connection.TargetNode.Id.ToString("N"),
             ["ToPort"] = connection.Target.Name,
         };
+
+        if (connection.IsMuted)
+        {
+            json["Muted"] = true;
+        }
+
+        return json;
     }
 
     private static JObject SerializeNote(NoteModel note)
@@ -513,6 +535,8 @@ public class GraphSerializer
         node.X = json.Value<double?>("X") ?? 0d;
         node.Y = json.Value<double?>("Y") ?? 0d;
         node.IsFrozen = json.Value<bool?>("IsFrozen") ?? false;
+        node.IsMuted = json.Value<bool?>("Muted") ?? false;
+        RestoreUi(node.Ui, json["Ui"] as JObject);
 
         if (Enum.TryParse<LacingMode>(json.Value<string>("Lacing") ?? string.Empty, ignoreCase: true, out var lacing))
         {
@@ -549,6 +573,7 @@ public class GraphSerializer
                     port.Level = portJson.Value<int?>("Level") ?? -1;
                     port.UseLevels = portJson.Value<bool?>("UseLevels") ?? false;
                     port.KeepListStructure = portJson.Value<bool?>("KeepListStructure") ?? false;
+                    port.IsHidden = portJson.Value<bool?>("Hidden") ?? false;
                 }
             }
         }
@@ -577,6 +602,60 @@ public class GraphSerializer
         if (result.Success && restoreId && TryParseGuid(json.Value<string>("Id"), out var connectionId))
         {
             result.Connection!.Id = connectionId;
+        }
+
+        if (result.Success && (json.Value<bool?>("Muted") ?? false))
+        {
+            graph.SetConnectionMuted(result.Connection!, true);
+        }
+    }
+
+    private static JObject SerializeUi(NodeUiState ui)
+    {
+        var json = new JObject();
+        if (ui.Collapsed)
+        {
+            json["Collapsed"] = true;
+        }
+
+        if (ui.Width.HasValue)
+        {
+            json["Width"] = ui.Width.Value;
+        }
+
+        if (ui.HideUnused.HasValue)
+        {
+            json["HideUnused"] = ui.HideUnused.Value;
+        }
+
+        if (ui.OpenPanels.Count > 0)
+        {
+            json["OpenPanels"] = new JArray(ui.OpenPanels.OrderBy(n => n, StringComparer.Ordinal));
+        }
+
+        return json;
+    }
+
+    private static void RestoreUi(NodeUiState ui, JObject? json)
+    {
+        if (json == null)
+        {
+            return;
+        }
+
+        ui.Collapsed = json.Value<bool?>("Collapsed") ?? false;
+        var width = json.Value<double?>("Width");
+        ui.Width = width.HasValue && width.Value > 0d && !double.IsNaN(width.Value) && !double.IsInfinity(width.Value) ? width : null;
+        ui.HideUnused = json.Value<bool?>("HideUnused");
+        if (json["OpenPanels"] is JArray panels)
+        {
+            foreach (var name in panels.Values<string>())
+            {
+                if (!string.IsNullOrEmpty(name))
+                {
+                    ui.OpenPanels.Add(name!);
+                }
+            }
         }
     }
 
