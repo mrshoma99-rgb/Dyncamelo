@@ -180,6 +180,9 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// <summary>Raised whenever <see cref="State"/> changes, so UIs can update badges without polling.</summary>
     public event EventHandler? NodeStateChanged;
 
+    /// <summary>Raised when a node with a dynamic interface (a node group instance) adds, removes, renames or reorders ports.</summary>
+    public event EventHandler? PortsChanged;
+
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -288,6 +291,48 @@ public abstract class NodeModel : INotifyPropertyChanged
         };
         _outPorts.Add(port);
         return port;
+    }
+
+    /// <summary>
+    /// Removes a port from a node whose interface is dynamic. Wires on the port are the caller's concern (disconnect them
+    /// first); the editor is told through <see cref="PortsChanged"/> once the caller has finished changing the set.
+    /// </summary>
+    /// <param name="port">A port of this node.</param>
+    protected bool RemovePort(PortModel port)
+    {
+        return (port.Direction == PortDirection.Input ? _inPorts : _outPorts).Remove(port);
+    }
+
+    /// <summary>Puts a port that was removed earlier back on its side (undo of an interface change keeps the same port object, so its wires can return).</summary>
+    /// <param name="port">A port of this node that is currently not in its list.</param>
+    protected void AttachPort(PortModel port)
+    {
+        var list = port.Direction == PortDirection.Input ? _inPorts : _outPorts;
+        if (!list.Contains(port))
+        {
+            list.Add(port);
+        }
+    }
+
+    /// <summary>Puts the ports of one side in the given order (which must be a permutation of the current ports).</summary>
+    /// <param name="direction">Which side.</param>
+    /// <param name="order">The ports in their new order.</param>
+    protected void SetPortOrder(PortDirection direction, IReadOnlyList<PortModel> order)
+    {
+        var list = direction == PortDirection.Input ? _inPorts : _outPorts;
+        if (order.Count != list.Count || order.Any(p => !list.Contains(p)))
+        {
+            throw new ArgumentException("The new order must contain exactly the current ports.", nameof(order));
+        }
+
+        list.Clear();
+        list.AddRange(order);
+    }
+
+    /// <summary>Tells the editor that the set or names of the ports changed.</summary>
+    protected void RaisePortsChanged()
+    {
+        PortsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Adds a diagnostic to the node. Used by the engine and by <see cref="Evaluate"/> implementations.</summary>

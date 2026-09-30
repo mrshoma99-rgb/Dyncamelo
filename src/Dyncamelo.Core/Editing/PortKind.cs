@@ -239,6 +239,18 @@ public static class PortKinds
         return new PortKind(family, shape);
     }
 
+    /// <summary>The hint string for a kind ("number", "viewpoint*", "text**"); empty when the kind says nothing.</summary>
+    public static string ToHint(PortKind kind)
+    {
+        if (kind.Family == PortFamily.Any)
+        {
+            return string.Empty;
+        }
+
+        var stars = kind.Depth == PortDepth.List ? "*" : kind.Depth == PortDepth.Nested ? "**" : string.Empty;
+        return kind.Family.ToString().ToLowerInvariant() + stars;
+    }
+
     /// <summary>Parses a hint such as "viewpoint*" (list) or "text**" (nested). Unknown names fail.</summary>
     public static bool TryParse(string? hint, out PortKind kind)
     {

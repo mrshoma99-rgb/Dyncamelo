@@ -28,6 +28,28 @@ public class GraphModel : INotifyPropertyChanged
         Uuid = Guid.NewGuid();
         Notes = new ObservableCollection<NoteModel>();
         Groups = new ObservableCollection<GroupModel>();
+        NodeGroups = new Dyncamelo.Core.Groups.NodeGroupLibrary(this);
+    }
+
+    /// <summary>
+    /// The reusable node groups of the document. The root graph owns the library; the bodies of the groups share it, so a
+    /// group made inside another group is visible everywhere.
+    /// </summary>
+    public Dyncamelo.Core.Groups.NodeGroupLibrary NodeGroups { get; internal set; }
+
+    /// <summary>The node group this graph is the body of, or null for a document's own graph.</summary>
+    public Dyncamelo.Core.Groups.NodeGroup? OwnerGroup { get; internal set; }
+
+    /// <summary>
+    /// Marks every node as needing to run, without raising <see cref="Modified"/>. A node group instance does this before it
+    /// runs its body for new inputs; the run itself is not an edit, so nothing downstream may be told.
+    /// </summary>
+    internal void ResetForRun()
+    {
+        foreach (var node in _nodes)
+        {
+            node.IsDirty = true;
+        }
     }
 
     /// <summary>Stable identifier of the graph, persisted in .dyc files.</summary>

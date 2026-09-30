@@ -52,6 +52,9 @@ public class NodeRegistry
         registry.RegisterNodeType(LoopItemNode.TypeName, () => new LoopItemNode());
         registry.RegisterNodeType(LoopCollectNode.TypeName, () => new LoopCollectNode());
         registry.RegisterNodeType(RerouteNode.TypeName, () => new RerouteNode());
+        registry.RegisterNodeType(Dyncamelo.Core.Groups.GroupInputNode.TypeName, () => new Dyncamelo.Core.Groups.GroupInputNode());
+        registry.RegisterNodeType(Dyncamelo.Core.Groups.GroupOutputNode.TypeName, () => new Dyncamelo.Core.Groups.GroupOutputNode());
+        registry.RegisterNodeType(Dyncamelo.Core.Groups.GroupInstanceNode.TypeName, () => new Dyncamelo.Core.Groups.GroupInstanceNode());
         return registry;
     }
 

@@ -38,8 +38,18 @@ public class PortModel : INotifyPropertyChanged
     /// <summary>The node this port belongs to.</summary>
     public NodeModel Owner { get; }
 
-    /// <summary>Port name; also the serialized identity of the port within its node.</summary>
-    public string Name { get; }
+    /// <summary>Port name; also the serialized identity of the port within its node. Only a node group interface renames ports.</summary>
+    public string Name { get; private set; }
+
+    /// <summary>Renames the port (a node group socket was renamed); wires stay on the port.</summary>
+    internal void Rename(string name)
+    {
+        if (!string.Equals(Name, name, StringComparison.Ordinal))
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            OnPropertyChanged(nameof(Name));
+        }
+    }
 
     /// <summary>Description/tooltip for the port.</summary>
     public string Description { get; set; } = string.Empty;

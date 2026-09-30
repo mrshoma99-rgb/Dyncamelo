@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Groups;
 using Dyncamelo.Core.Loader;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,8 +21,11 @@ namespace Dyncamelo.Core.Serialization;
 /// </summary>
 public class GraphSerializer
 {
-    /// <summary>Highest .dyc format version this serializer writes and fully understands.</summary>
-    public const int CurrentFormatVersion = 1;
+    /// <summary>
+    /// Highest .dyc format version this serializer writes and fully understands. Version 2 added node groups; a file is only
+    /// written as version 2 (and only refused by older readers) when it actually contains some.
+    /// </summary>
+    public const int CurrentFormatVersion = 2;
 
     private static readonly string AppVersion = ResolveAppVersion();
 
@@ -66,26 +70,35 @@ public class GraphSerializer
             throw new ArgumentNullException(nameof(graph));
         }
 
+        var hasGroups = graph.NodeGroups.Groups.Count > 0;
+        var version = hasGroups ? 2 : 1;
         var root = new JObject
         {
             ["Dyncamelo"] = new JObject
             {
-                ["FormatVersion"] = CurrentFormatVersion,
-                ["MinReaderVersion"] = 1,
+                ["FormatVersion"] = version,
+                ["MinReaderVersion"] = version,
                 ["AppVersion"] = AppVersion,
             },
             ["Uuid"] = graph.Uuid.ToString("N"),
             ["Name"] = graph.Name,
             ["Description"] = graph.Description,
-            ["Nodes"] = new JArray(graph.Nodes.Select(SerializeNode)),
-            ["Connectors"] = new JArray(graph.Connections.Select(SerializeConnection)),
-            ["Notes"] = new JArray(graph.Notes.Select(SerializeNote)),
-            ["Groups"] = new JArray(graph.Groups.Select(SerializeGroup)),
-            ["View"] = new JObject
-            {
-                ["RunType"] = graph.RunType.ToString(),
-                ["Camera"] = new JObject { ["X"] = 0d, ["Y"] = 0d, ["Zoom"] = 1d },
-            },
+        };
+
+        foreach (var property in SerializeBody(graph).Properties())
+        {
+            root.Add(property.Name, property.Value);
+        }
+
+        if (hasGroups)
+        {
+            root["NodeGroups"] = new JArray(graph.NodeGroups.Groups.Select(SerializeNodeGroup));
+        }
+
+        root["View"] = new JObject
+        {
+            ["RunType"] = graph.RunType.ToString(),
+            ["Camera"] = new JObject { ["X"] = 0d, ["Y"] = 0d, ["Zoom"] = 1d },
         };
 
         return root.ToString(Formatting.Indented);
@@ -151,12 +164,168 @@ public class GraphSerializer
             graph.RunType = runType;
         }
 
+        if (root["NodeGroups"] is JArray nodeGroups)
+        {
+            LoadNodeGroups(graph.NodeGroups, nodeGroups, skipExisting: false);
+        }
+
+        LoadBody(graph, root, null);
+
+        return graph;
+    }
+
+    /// <summary>
+    /// Serializes a set of nodes plus the connections that run among them into a
+    /// standalone JSON fragment (used by copy/paste and duplicate). Connections
+    /// touching nodes outside the set are omitted.
+    /// </summary>
+    /// <param name="nodes">The nodes to serialize. They may belong to any graph (or none).</param>
+    public string SerializeFragment(IReadOnlyCollection<NodeModel> nodes)
+    {
+        if (nodes == null)
+        {
+            throw new ArgumentNullException(nameof(nodes));
+        }
+
+        var nodeSet = new HashSet<NodeModel>(nodes);
+        var connections = nodes
+            .Select(n => n.Graph)
+            .FirstOrDefault(g => g != null)?
+            .Connections
+            .Where(c => nodeSet.Contains(c.SourceNode) && nodeSet.Contains(c.TargetNode))
+            ?? Enumerable.Empty<ConnectionModel>();
+
+        var root = new JObject
+        {
+            ["Dyncamelo"] = new JObject
+            {
+                ["FormatVersion"] = CurrentFormatVersion,
+                ["MinReaderVersion"] = 1,
+                ["Fragment"] = true,
+            },
+            ["Nodes"] = new JArray(nodes.Select(SerializeNode)),
+            ["Connectors"] = new JArray(connections.Select(SerializeConnection)),
+        };
+
+        // Instances are useless without their definitions, so a fragment carries the groups it uses (and theirs).
+        var used = new List<NodeGroup>();
+        foreach (var instance in nodes.OfType<GroupInstanceNode>())
+        {
+            if (instance.Definition != null)
+            {
+                CollectGroups(instance.Definition, used);
+            }
+        }
+
+        if (used.Count > 0)
+        {
+            root["NodeGroups"] = new JArray(used.Select(SerializeNodeGroup));
+        }
+
+        return root.ToString(Formatting.Indented);
+    }
+
+    /// <summary>
+    /// Materializes a fragment produced by <see cref="SerializeFragment"/> into a
+    /// graph: every node gets a fresh identifier and is offset by the given
+    /// amount; connections among the pasted nodes are re-created. The same
+    /// fragment can be pasted any number of times.
+    /// </summary>
+    /// <param name="target">The graph receiving the pasted nodes.</param>
+    /// <param name="json">Fragment JSON.</param>
+    /// <param name="offsetX">Horizontal offset applied to every pasted node.</param>
+    /// <param name="offsetY">Vertical offset applied to every pasted node.</param>
+    /// <returns>The pasted nodes, in fragment order.</returns>
+    /// <exception cref="GraphFormatException">The content is not a readable fragment.</exception>
+    public IReadOnlyList<NodeModel> PasteFragment(GraphModel target, string json, double offsetX, double offsetY)
+    {
+        if (target == null)
+        {
+            throw new ArgumentNullException(nameof(target));
+        }
+
+        if (json == null)
+        {
+            throw new ArgumentNullException(nameof(json));
+        }
+
+        JObject root;
+        try
+        {
+            root = JObject.Parse(json);
+        }
+        catch (JsonException ex)
+        {
+            throw new GraphFormatException("The fragment is not valid JSON.", ex);
+        }
+
+        // Definitions the target does not have yet come along (a paste into another document); ones it has are reused.
+        if (root["NodeGroups"] is JArray fragmentGroups)
+        {
+            LoadNodeGroups(target.NodeGroups, fragmentGroups, skipExisting: true);
+        }
+
+        var pasted = new List<NodeModel>();
+        var nodesByOriginalId = new Dictionary<Guid, NodeModel>();
+        if (root["Nodes"] is JArray nodes)
+        {
+            foreach (var token in nodes.OfType<JObject>())
+            {
+                var node = DeserializeNode(token, target.NodeGroups, target.OwnerGroup);
+                if (node.Id != Guid.Empty && !nodesByOriginalId.ContainsKey(node.Id))
+                {
+                    nodesByOriginalId[node.Id] = node;
+                }
+
+                node.Id = Guid.NewGuid();
+                node.X += offsetX;
+                node.Y += offsetY;
+                target.AddNode(node);
+                pasted.Add(node);
+            }
+        }
+
+        if (root["Connectors"] is JArray connectors)
+        {
+            foreach (var token in connectors.OfType<JObject>())
+            {
+                RestoreConnection(target, nodesByOriginalId, token, restoreId: false);
+            }
+        }
+
+        // Inputs that were fed by nodes outside the fragment lost their wire:
+        // let them fall back to their default value instead of pasting a node
+        // with a missing required input.
+        foreach (var node in pasted)
+        {
+            foreach (var port in node.InPorts)
+            {
+                if (port.HasDefault && !port.UsingDefaultValue && target.FindConnectionInto(port) == null)
+                {
+                    port.UsingDefaultValue = true;
+                }
+            }
+        }
+
+        return pasted;
+    }
+
+    /// <summary>Loads a graph from a .dyc file.</summary>
+    /// <param name="path">Path to the file.</param>
+    /// <exception cref="GraphFormatException">The content is not a readable .dyc document.</exception>
+    public GraphModel LoadFromFile(string path)
+    {
+        return Deserialize(File.ReadAllText(path));
+    }
+
+    private void LoadBody(GraphModel graph, JObject root, NodeGroup? owner)
+    {
         var nodesById = new Dictionary<Guid, NodeModel>();
         if (root["Nodes"] is JArray nodes)
         {
             foreach (var token in nodes.OfType<JObject>())
             {
-                var node = DeserializeNode(token);
+                var node = DeserializeNode(token, graph.NodeGroups, owner);
                 graph.AddNode(node);
                 nodesById[node.Id] = node;
             }
@@ -212,131 +381,116 @@ public class GraphSerializer
                 graph.Groups.Add(group);
             }
         }
-
-        return graph;
     }
 
-    /// <summary>
-    /// Serializes a set of nodes plus the connections that run among them into a
-    /// standalone JSON fragment (used by copy/paste and duplicate). Connections
-    /// touching nodes outside the set are omitted.
-    /// </summary>
-    /// <param name="nodes">The nodes to serialize. They may belong to any graph (or none).</param>
-    public string SerializeFragment(IReadOnlyCollection<NodeModel> nodes)
+    // The content every graph has, for a document and for the body of a node group alike.
+    private static JObject SerializeBody(GraphModel graph)
     {
-        if (nodes == null)
+        return new JObject
         {
-            throw new ArgumentNullException(nameof(nodes));
-        }
-
-        var nodeSet = new HashSet<NodeModel>(nodes);
-        var connections = nodes
-            .Select(n => n.Graph)
-            .FirstOrDefault(g => g != null)?
-            .Connections
-            .Where(c => nodeSet.Contains(c.SourceNode) && nodeSet.Contains(c.TargetNode))
-            ?? Enumerable.Empty<ConnectionModel>();
-
-        var root = new JObject
-        {
-            ["Dyncamelo"] = new JObject
-            {
-                ["FormatVersion"] = CurrentFormatVersion,
-                ["MinReaderVersion"] = 1,
-                ["Fragment"] = true,
-            },
-            ["Nodes"] = new JArray(nodes.Select(SerializeNode)),
-            ["Connectors"] = new JArray(connections.Select(SerializeConnection)),
+            ["Nodes"] = new JArray(graph.Nodes.Select(SerializeNode)),
+            ["Connectors"] = new JArray(graph.Connections.Select(SerializeConnection)),
+            ["Notes"] = new JArray(graph.Notes.Select(SerializeNote)),
+            ["Groups"] = new JArray(graph.Groups.Select(SerializeGroup)),
         };
+    }
 
-        return root.ToString(Formatting.Indented);
+    private static void CollectGroups(NodeGroup group, List<NodeGroup> into)
+    {
+        if (into.Contains(group))
+        {
+            return;
+        }
+
+        // Dependencies first, so a reader that loads in order finds them.
+        foreach (var inner in group.Graph.Nodes.OfType<GroupInstanceNode>())
+        {
+            if (inner.Definition != null)
+            {
+                CollectGroups(inner.Definition, into);
+            }
+        }
+
+        into.Add(group);
+    }
+
+    private static JObject SerializeNodeGroup(NodeGroup group)
+    {
+        return new JObject
+        {
+            ["Id"] = group.Id.ToString("N"),
+            ["Name"] = group.Name,
+            ["Description"] = group.Description,
+            ["Inputs"] = new JArray(group.Inputs.Select(SerializeSocket)),
+            ["Outputs"] = new JArray(group.Outputs.Select(SerializeSocket)),
+            ["Graph"] = SerializeBody(group.Graph),
+        };
+    }
+
+    private static JObject SerializeSocket(GroupSocket socket)
+    {
+        return new JObject
+        {
+            ["Id"] = socket.Id.ToString("N"),
+            ["Name"] = socket.Name,
+            ["Kind"] = socket.Kind,
+        };
     }
 
     /// <summary>
-    /// Materializes a fragment produced by <see cref="SerializeFragment"/> into a
-    /// graph: every node gets a fresh identifier and is offset by the given
-    /// amount; connections among the pasted nodes are re-created. The same
-    /// fragment can be pasted any number of times.
+    /// Reads the node groups of a document (or of a pasted fragment, where groups the target already has are skipped). Two
+    /// passes, so a group can contain instances of another that comes later in the file: every interface is read first, then
+    /// every body.
     /// </summary>
-    /// <param name="target">The graph receiving the pasted nodes.</param>
-    /// <param name="json">Fragment JSON.</param>
-    /// <param name="offsetX">Horizontal offset applied to every pasted node.</param>
-    /// <param name="offsetY">Vertical offset applied to every pasted node.</param>
-    /// <returns>The pasted nodes, in fragment order.</returns>
-    /// <exception cref="GraphFormatException">The content is not a readable fragment.</exception>
-    public IReadOnlyList<NodeModel> PasteFragment(GraphModel target, string json, double offsetX, double offsetY)
+    private List<NodeGroup> LoadNodeGroups(NodeGroupLibrary library, JArray groups, bool skipExisting)
     {
-        if (target == null)
+        var loaded = new List<(NodeGroup Group, JObject Body)>();
+        foreach (var token in groups.OfType<JObject>())
         {
-            throw new ArgumentNullException(nameof(target));
-        }
-
-        if (json == null)
-        {
-            throw new ArgumentNullException(nameof(json));
-        }
-
-        JObject root;
-        try
-        {
-            root = JObject.Parse(json);
-        }
-        catch (JsonException ex)
-        {
-            throw new GraphFormatException("The fragment is not valid JSON.", ex);
-        }
-
-        var pasted = new List<NodeModel>();
-        var nodesByOriginalId = new Dictionary<Guid, NodeModel>();
-        if (root["Nodes"] is JArray nodes)
-        {
-            foreach (var token in nodes.OfType<JObject>())
+            if (!TryParseGuid(token.Value<string>("Id"), out var id) || (skipExisting && library.Find(id) != null))
             {
-                var node = DeserializeNode(token);
-                if (node.Id != Guid.Empty && !nodesByOriginalId.ContainsKey(node.Id))
-                {
-                    nodesByOriginalId[node.Id] = node;
-                }
+                continue;
+            }
 
-                node.Id = Guid.NewGuid();
-                node.X += offsetX;
-                node.Y += offsetY;
-                target.AddNode(node);
-                pasted.Add(node);
+            var group = new NodeGroup(library, id, library.UniqueName(token.Value<string>("Name") ?? "Node Group"))
+            {
+                Description = token.Value<string>("Description") ?? string.Empty,
+            };
+            ReadSockets(group, SocketSide.Input, token["Inputs"] as JArray);
+            ReadSockets(group, SocketSide.Output, token["Outputs"] as JArray);
+            library.Add(group);
+            loaded.Add((group, token["Graph"] as JObject ?? new JObject()));
+        }
+
+        foreach (var entry in loaded)
+        {
+            LoadBody(entry.Group.Graph, entry.Body, entry.Group);
+            entry.Group.AdoptInterfaceNodes();
+        }
+
+        foreach (var entry in loaded)
+        {
+            if (entry.Group.Uses(entry.Group))
+            {
+                throw new GraphFormatException("The node group '" + entry.Group.Name + "' contains itself, so the file cannot be opened.");
             }
         }
 
-        if (root["Connectors"] is JArray connectors)
-        {
-            foreach (var token in connectors.OfType<JObject>())
-            {
-                RestoreConnection(target, nodesByOriginalId, token, restoreId: false);
-            }
-        }
-
-        // Inputs that were fed by nodes outside the fragment lost their wire:
-        // let them fall back to their default value instead of pasting a node
-        // with a missing required input.
-        foreach (var node in pasted)
-        {
-            foreach (var port in node.InPorts)
-            {
-                if (port.HasDefault && !port.UsingDefaultValue && target.FindConnectionInto(port) == null)
-                {
-                    port.UsingDefaultValue = true;
-                }
-            }
-        }
-
-        return pasted;
+        return loaded.Select(e => e.Group).ToList();
     }
 
-    /// <summary>Loads a graph from a .dyc file.</summary>
-    /// <param name="path">Path to the file.</param>
-    /// <exception cref="GraphFormatException">The content is not a readable .dyc document.</exception>
-    public GraphModel LoadFromFile(string path)
+    private static void ReadSockets(NodeGroup group, SocketSide side, JArray? sockets)
     {
-        return Deserialize(File.ReadAllText(path));
+        if (sockets == null)
+        {
+            return;
+        }
+
+        foreach (var token in sockets.OfType<JObject>())
+        {
+            var id = TryParseGuid(token.Value<string>("Id"), out var parsed) ? parsed : Guid.NewGuid();
+            group.LoadSocket(side, id, token.Value<string>("Name") ?? string.Empty, token.Value<string>("Kind") ?? string.Empty);
+        }
     }
 
     private static JObject SerializeNode(NodeModel node)
@@ -483,7 +637,7 @@ public class GraphSerializer
         };
     }
 
-    private NodeModel DeserializeNode(JObject json)
+    private NodeModel DeserializeNode(JObject json, NodeGroupLibrary library, NodeGroup? owner)
     {
         var nodeType = json.Value<string>("NodeType") ?? string.Empty;
         NodeModel? node = null;
@@ -519,6 +673,28 @@ public class GraphSerializer
             {
                 node = new MissingNodeModel(json, "The node's saved data could not be read: " + ex.Message);
             }
+        }
+
+        // A node group's ports come from its definition, so bind before the saved per-port flags are restored by name.
+        if (node is GroupInstanceNode instance)
+        {
+            var definition = library.Find(instance.GroupId);
+            if (definition == null)
+            {
+                node = new MissingNodeModel(json, "Unknown node group '" + instance.GroupId.ToString("N") + "'.");
+            }
+            else
+            {
+                instance.Bind(definition);
+            }
+        }
+        else if (node is GroupInputNode groupInput && owner != null)
+        {
+            groupInput.Bind(owner);
+        }
+        else if (node is GroupOutputNode groupOutput && owner != null)
+        {
+            groupOutput.Bind(owner);
         }
 
         if (TryParseGuid(json.Value<string>("Id"), out var id))
