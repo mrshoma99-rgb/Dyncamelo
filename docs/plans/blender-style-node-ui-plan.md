@@ -805,23 +805,93 @@ Nodify `Minimap` **[V]** bound to the editor; a toggle in the toolbar and `Ctrl+
 
 ---
 
-## 10. Discoverability: keymap, help overlay, settings
+## 10. One command surface: every function reachable everywhere
 
-* **Keymap** (all in one table in the docs and the in-app help):
+**Requirement (added in review):** no capability may exist only as a shortcut or only as a hidden gesture. Every new (and existing) function must be reachable from **the header menu, the relevant context menu, the toolbar where it earns a button, Settings where it has a preference, the help overlay, and a searchable command palette** — and show its shortcut wherever it appears.
 
-  | Key | Action | Key | Action |
-  |---|---|---|---|
-  | Ctrl+Z / Ctrl+Y | undo / redo | M | mute node / wire |
-  | Space | quick search (exists) | H | collapse |
-  | Delete | delete | Ctrl+H | hide unused |
-  | Ctrl+Delete | delete & reconnect | F | auto-connect selection |
-  | Ctrl+L / Ctrl+Shift+L | arrange selection / all | L / Shift+L | select downstream / upstream |
-  | Ctrl+G / Ctrl+Shift+G | frame / shrink frame | Ctrl+M | minimap |
-  | Alt+Shift+drag | cut wires | +Ctrl | mute-cut |
-  | Shift+drag on a wired input | move / swap link | Ctrl+Shift+F12 | perf HUD |
+### 10.1 What exists today **[V]**
 
-* **Help overlay** (`F1` or toolbar "?"): a single scrollable `Popup` listing the table above and the field gestures (§6.3). It is generated from one `KeymapEntry[]` list that also feeds the tooltips, so the docs cannot drift from the bindings.
-* **Settings** (existing `UiSettingsService` **[V]**, 357 lines, persisted): node density (Compact 20 px / Normal 22 px / Comfortable 26 px row height via the token), wire style (curved / straight), gradient wires, live scrub evaluation, hide-unused default, colour-blind aid (adds letter glyphs — N, I, B, T… — inside sockets for users who want redundancy beyond shape), minimap default, HUD.
+* Toolbar icon buttons with tooltips-with-shortcut (`DyncameloEditorControl.xaml:80-235`): New, Open (+ Recent, Samples submenus), Save, Save As, Run, Fit, Zoom in/out, Add note, Settings.
+* A Settings popup (`SettingsButton`, line 234) for descriptions / double-click action / palette, backed by `UiSettingsService` (persisted).
+* Canvas, node, port and wire context menus, and 11 `KeyBinding`s (lines 18-28, 730).
+* **No menu bar**, and shortcuts are defined separately from menus and tooltips, so they can drift (and today's Ctrl+L, Ctrl+G exist in some menus and not others).
+
+### 10.2 Single source of truth: the command registry
+
+```csharp
+public sealed class EditorCommand
+{
+    public string Id;                 // "edit.undo", "graph.arrange.all", "node.mute"
+    public string Title;              // "Undo"
+    public string Category;           // File | Edit | View | Graph | Node | Wires | Help
+    public string? Shortcut;          // "Ctrl+Z" — single definition, parsed into KeyGesture
+    public ICommand Command;          // the same RelayCommand the VM already exposes
+    public Geometry? Icon;            // from Dyc.Icon.*
+    public bool InToolbar;            // earns a toolbar button
+    public bool IsToggle;             // checkable; bound to a bool (mute, minimap, hide-unused)
+    public string? SettingKey;        // links to a Settings entry, if any
+    public string Keywords;           // palette search: "delete reconnect dissolve"
+}
+```
+
+`Services/CommandRegistry.cs` builds the list once from the view-model. Everything below is **generated from it**, so a command cannot appear in one place and be missing from another:
+
+| Surface | Generated from the registry |
+|---|---|
+| `KeyBinding`s on the editor | every entry with a `Shortcut` |
+| **Header menu bar** (new) | grouped by `Category`, with shortcut text and check marks for toggles |
+| Toolbar | entries with `InToolbar` (existing buttons migrate to the registry so their tooltips gain the live shortcut) |
+| Context menus | each menu declares the *category filters* it shows (node menu: Node + Wires; canvas menu: Edit + Graph) |
+| Help overlay (`F1`) | the whole table, searchable |
+| **Command palette** (`Ctrl+Shift+P`) | fuzzy search over `Title` + `Keywords`; runs the command; shows the shortcut |
+| Documentation | `docs/UI_GUIDE.md` keymap table is *generated* by a test (below), not hand-written |
+
+### 10.3 The header menu bar
+
+A compact 22-px `Menu` row directly under the toolbar (the dock pane is narrow, so the toolbar keeps icons only and the menu carries the words). Menus are styled with the existing `Dyc.MenuItem` **[V]**.
+
+| Menu | Entries (shortcut) |
+|---|---|
+| **File** | New (Ctrl+N), Open (Ctrl+O), Recent ▸, Samples ▸, Save (Ctrl+S), Save As (Ctrl+Shift+S) |
+| **Edit** | Undo (Ctrl+Z), Redo (Ctrl+Y), Cut/Copy/Paste (Ctrl+X/C/V), Duplicate (Ctrl+D), Delete (Del), **Delete && Reconnect (Ctrl+Del)**, Select All, **Select Linked ▸ Downstream (L) / Upstream (Shift+L) / Similar (Shift+G)** |
+| **View** | Fit (Home), Zoom in/out, **Minimap (Ctrl+M)** ☑, **Collapse/Expand Selected (H)**, **Hide Unused Sockets (Ctrl+H)** ☑, **Collapse All / Expand All**, **Reset Node Width**, Show Previews ☑, **Performance HUD (Ctrl+Shift+F12)** ☑, Node density ▸ |
+| **Graph** | Run (F5), Auto-run ☑, **Arrange Selection (Ctrl+L)**, **Arrange All (Ctrl+Shift+L)**, Add Note, **Frame Selection (Ctrl+G)**, **Shrink Frame (Ctrl+Shift+G)**, Rename Graph (F2) |
+| **Node** | Freeze ☑, **Mute (M)** ☑, Lacing ▸, Show Preview ☑, Rename, **Auto-Connect Selected (F)**, Find in Library, **Reset Inputs to Default**, **Add Reroute** |
+| **Wires** | **Mute Wire (M on wire)**, **Insert Reroute**, **Swap Links**, **Cut Wires…** (arms the cutting tool so it is usable without Alt+Shift), Disconnect Selected |
+| **Help** | Keyboard Shortcuts (F1), Command Palette (Ctrl+Shift+P), UI Guide, About |
+
+Gestures that are mouse-only by nature also get a **menu/palette equivalent** so nothing is gesture-exclusive: insert-on-wire → *Node ▸ Insert Into Selected Wire* (uses the selected node + selected wire); link move/swap → *Wires ▸ Swap Links* (two wires selected); wire-drop search → *Graph ▸ Add Node…* (Space) with the selected output as context; cut → *Wires ▸ Cut Wires…*; scrub-only widgets always accept typing, and *Node ▸ Reset Inputs to Default*, *Edit ▸ Copy/Paste Value* (on the focused editor) cover the hover shortcuts.
+
+### 10.4 Settings: everything that is a preference
+
+The settings popup becomes a sectioned panel (scrollable, same styling **[V]**), still backed by `UiSettingsService`; each new key is nullable-with-default like the existing ones **[V]** (`UiSettingsService.cs:341-355`) so old settings files load unchanged.
+
+| Section | Settings |
+|---|---|
+| **Appearance** | Palette (existing), **Node density** (Compact / Normal / Comfortable → `Dyc.RowHeight`), **Classic node layout**, **Wire style** (curved / straight), **Gradient wires**, **Colour-blind aid** (glyphs in sockets), Show library descriptions (existing) |
+| **Editing** | Double-click action (existing), **Hide unused sockets by default**, **Live scrub evaluation**, **Scrub sensitivity** (slow / normal / fast), **Snap to grid** on/off, **Auto-offset on insert**, **Delete key reconnects reroutes** |
+| **Canvas** | **Minimap** default, **Show grid**, preview-on-selection (existing) |
+| **Diagnostics** | **Performance HUD**, **Reset all UI settings** |
+| **Shortcuts** | read-only table (from the registry) with a **Reset** button; *rebinding* is included: click a shortcut, press the new chord, conflicts are flagged; overrides persist in settings as `{ "edit.undo": "Ctrl+Z" }` and the registry re-parses them |
+
+Every toggle in the View/Node menus that is a *preference* (density, minimap, HUD, hide-unused default) is the **same property** as its Settings entry, so changing it in either place updates the other (one `UiSettingsService` property, two bindings).
+
+### 10.5 Guardrails so this stays true
+
+Core-side unit tests (no WPF needed; the registry is plain C# in `Dyncamelo.UI` compiled for tests via the Windows UI test project, plus a pure `CommandCatalog` list in Core for the Linux suite):
+
+1. **Completeness:** every `EditorCommand.Id` appears in (a) the palette, (b) the help table, and (c) at least one of {menu bar, toolbar}. A command with neither fails the build.
+2. **Shortcut hygiene:** no two commands share a `Shortcut`; every shortcut in `KeyBinding`s equals the registry's; no shortcut collides with text-editing keys when a text box has focus (the registry marks each as `Global` or `CanvasOnly`, and only `Global` may use Ctrl+letter chords that TextBox also uses — Ctrl+Z inside a text field undoes text, not the graph).
+3. **Tooltip/menu text is generated**, never typed: a test greps the XAML for hard-coded "(Ctrl+" strings and fails if any remain in `DyncameloEditorControl.xaml` after the migration.
+4. **Gesture parity:** each gesture in §7 has a registry entry with a non-gesture route (list in 10.3); a test asserts the mapping is total.
+5. **Docs:** `docs/UI_GUIDE.md`'s keymap table is generated from the registry by a test that fails if the committed file is stale.
+
+### 10.6 Where this lands in the phases
+
+* **Phase 0:** `EditorCommand`, `CommandRegistry`, the Core `CommandCatalog` list and the guardrail tests; existing toolbar/shortcuts/context items migrate onto it (no visible change except tooltips now show the live shortcut).
+* **Phase 1:** *Edit ▸ Undo/Redo* + toolbar buttons, and the **header menu bar** itself (File/Edit/View/Graph/Node/Help) so undo is visible the moment it exists.
+* **Phases 2-4:** each feature lands **with** its registry entry, menu item, context-menu item and Settings entry in the same change — a phase's acceptance checklist now includes "reachable from menu, palette, and (if a preference) Settings".
+* **Phase 5:** command palette, shortcut rebinding UI, generated `UI_GUIDE.md`, Help menu.
 
 ---
 
@@ -835,7 +905,7 @@ Nodify `Minimap` **[V]** bound to the editor; a toggle in the toolbar and `Ctrl+
 | **WPF visuals & gestures** | *Cannot run in this container.* Windows CI job (`windows-latest`, which already builds the UI **[V]** per csproj comment) builds the UI + runs headless STA tests for what doesn't need a GPU: template loading (`XamlReader.Load` of every dictionary), `ScrubNumberBox` state machine via synthetic `MouseEventArgs`, `Freeze()` invariants, `PortFamilyToBrush` identity. | New `Dyncamelo.UI.Tests` project (net48, xunit + `[StaFact]`). |
 | **Manual visual QA on your machine** | You | A one-page checklist per phase (§12) with the exact things to try, and the HUD "Copy report". |
 
-Quality gates per phase: `dotnet build` for `-p:NavisworksYear=2024/2025/2026` (as I do today), `dotnet test`, Windows CI green, then a tagged release and a ~6-minute CI recheck.
+Quality gates per phase (each new function must pass the §10.5 parity tests: menu, palette, help, and Settings where it is a preference): `dotnet build` for `-p:NavisworksYear=2024/2025/2026` (as I do today), `dotnet test`, Windows CI green, then a tagged release and a ~6-minute CI recheck.
 
 ---
 
@@ -855,6 +925,7 @@ To keep you unblocked while the visual layer changes, Phases 2-4 ship the new no
 | Additive `.dyc` fields (`Ui`, `Muted`, `Hidden`), model props | **C** `NodeModel.cs`, `ConnectionModel.cs`, `PortModel.cs`, `GraphSerializer.cs` | 150 |
 | `RerouteNode` | **N** `Core/Nodes/RerouteNode.cs`; **C** `NodeRegistry.cs` | 60 |
 | Engine: `IsMuted` nodes/wires, `MutePassThrough` | **C** `Execution/GraphEngine.cs`; **N** `Execution/MutePassThrough.cs` | 120 |
+| **Command registry + Core `CommandCatalog` + guardrail tests (§10)**; migrate existing shortcuts/tooltips | **N** `UI/Services/CommandRegistry.cs`, `Core/Editing/CommandCatalog.cs`; **C** `DyncameloEditorControl.xaml` | 450 |
 | Diagnostics HUD (baseline measurement of the **current** UI) | **N** `UI/Views/PerfHud.cs` | 180 |
 | Windows UI test project + CI job | **N** `tests/Dyncamelo.UI.Tests/`, **C** `.github/workflows/ci.yml` | 150 |
 | MSAGL packaging (4 file lists, §3) | **C** `Dyncamelo.UI.csproj`, `Dyncamelo.App.csproj:80`, `release.yml:85`, 2 docs | 10 |
@@ -872,7 +943,7 @@ To keep you unblocked while the visual layer changes, Phases 2-4 ship the new no
 | `PasteFragment(preserveIds)` | **C** `GraphSerializer.cs` | 25 |
 | Hook every edit site (§4.6 list) | **C** `GraphEditorViewModel.cs` | 300 |
 | Move/resize recording via `ItemsDragStarted/Completed` | **C** `DyncameloEditorControl.xaml` (bind commands), `GraphEditorViewModel.cs` | 60 |
-| Toolbar buttons, Ctrl+Z/Y, status text | **C** `DyncameloEditorControl.xaml`, `DyncameloDark.xaml` (2 icons) | 70 |
+| Toolbar buttons, Ctrl+Z/Y, status text, **header menu bar** (§10.3) | **C** `DyncameloEditorControl.xaml`, `DyncameloDark.xaml` (2 icons) | 200 |
 | Mute/wire-mute commands (no gesture UI yet: context menu only) | **C** VM + XAML | 80 |
 | Tests | forward/back byte-equality for each step; replay guard; coalescing; capacity; delete-and-restore preserves ids; undo of `Connect` restores the replaced wire | 700 |
 
@@ -936,7 +1007,7 @@ To keep you unblocked while the visual layer changes, Phases 2-4 ship the new no
 |---|---|---|
 | MSAGL arrange adapter + fallbacks + cancel | **N** `Core/Editing/MsaglLayout.cs` (Core, netstandard2.0) | 220 |
 | Minimap, `Ctrl+M`, `Home` | **C** XAML | 80 |
-| Settings panel additions (§10) | **C** `UiSettingsService.cs`, settings XAML | 140 |
+| Command palette, shortcut rebinding, sectioned Settings (§10.4) | **C** `UiSettingsService.cs`, settings XAML; **N** `Views/CommandPalette.xaml` | 420 |
 | CB aid glyphs option | **C** socket template | 60 |
 | Delete classic layout | **C** `DyncameloDark.xaml` | −400 |
 | Docs: `docs/UI_GUIDE.md`, keymap, `NODE_LIBRARY.md` notes, `EXTENDING.md` (how node authors use `[NodeRange]`/`[NodePanel]`/`[PortKinds]`) | docs | — |
