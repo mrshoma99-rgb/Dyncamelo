@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Dyncamelo.UI.Mvvm;
@@ -39,6 +40,9 @@ public static class SettingKeys
 
     /// <summary>Arrange with the layered (MSAGL) engine; off = built-in columns.</summary>
     public const string LayeredArrange = "layeredArrange";
+
+    /// <summary>Show the node library panel on the left of the canvas.</summary>
+    public const string LibraryVisible = "libraryVisible";
 }
 
 /// <summary>
@@ -57,7 +61,7 @@ public partial class GraphEditorViewModel
         nameof(MinimapMode), nameof(IsMinimapVisible), nameof(NodeDensity), nameof(RowBaseHeight), nameof(StraightWires),
         nameof(WireLowDetail), nameof(ColourBlindGlyphs), nameof(HideUnusedByDefault), nameof(ScrubSpeed), nameof(ScrubPixelsPerStep),
         nameof(SnapToGrid), nameof(GridCellSize), nameof(AutoOffsetOnInsert), nameof(DeleteReconnectsReroutes), nameof(ShowGrid),
-        nameof(UseLayeredArrange),
+        nameof(UseLayeredArrange), nameof(IsLibraryVisible), nameof(IsLibraryHidden),
     };
 
     /// <summary>Minimap mode: "auto", "on" or "off".</summary>
@@ -79,6 +83,21 @@ public partial class GraphEditorViewModel
 
     /// <summary>Shows or hides the minimap (Ctrl+M): sets an explicit on/off, ending the automatic behaviour.</summary>
     public ICommand ToggleMinimapCommand => _toggleMinimapCommand ??= new RelayCommand(() => MinimapMode = IsMinimapVisible ? "off" : "on");
+
+    private ICommand? _toggleLibraryCommand;
+
+    /// <summary>True while the node library panel is shown (default); persisted.</summary>
+    public bool IsLibraryVisible
+    {
+        get => _settings.GetBool(SettingKeys.LibraryVisible, true);
+        set => SetPreference(SettingKeys.LibraryVisible, value, true, nameof(IsLibraryVisible), nameof(IsLibraryHidden));
+    }
+
+    /// <summary>True while the library panel is hidden (shows the edge handle that brings it back).</summary>
+    public bool IsLibraryHidden => !IsLibraryVisible;
+
+    /// <summary>Hides or shows the node library panel (Ctrl+B).</summary>
+    public ICommand ToggleLibraryCommand => _toggleLibraryCommand ??= new RelayCommand(() => IsLibraryVisible = !IsLibraryVisible);
 
     /// <summary>Row height preset: "compact", "normal" or "comfortable".</summary>
     public string NodeDensity
@@ -182,6 +201,23 @@ public partial class GraphEditorViewModel
     {
         get => _settings.GetBool(SettingKeys.LayeredArrange, true);
         set => SetPreference(SettingKeys.LayeredArrange, value, true, nameof(UseLayeredArrange));
+    }
+
+    /// <summary>Re-reads socket and wire colours after a palette change (light palettes use darker family colours).</summary>
+    public void RefreshPortColours()
+    {
+        foreach (var node in Items.OfType<NodeViewModel>())
+        {
+            foreach (var connector in node.Inputs.Concat(node.Outputs))
+            {
+                connector.RefreshBrushes();
+            }
+        }
+
+        foreach (var wire in Connections)
+        {
+            wire.RefreshBrushes();
+        }
     }
 
     // Writes a preference (the default value clears it so old settings files stay small) and tells the views.

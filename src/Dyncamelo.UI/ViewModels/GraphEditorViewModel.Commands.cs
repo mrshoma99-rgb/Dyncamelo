@@ -517,6 +517,7 @@ public partial class GraphEditorViewModel
         {
             case "density": return NodeDensity;
             case "cbGlyphs": return ColourBlindGlyphs;
+            case "libraryPanel": return IsLibraryVisible;
             case "libraryDescriptions": return Library.ShowDescriptions;
             case "nodePreviews": return ShowNodePreviews;
             case "showGrid": return ShowGrid;
@@ -541,6 +542,7 @@ public partial class GraphEditorViewModel
         {
             case "density": NodeDensity = (string)value; break;
             case "cbGlyphs": ColourBlindGlyphs = (bool)value; break;
+            case "libraryPanel": IsLibraryVisible = (bool)value; break;
             case "libraryDescriptions": Library.ShowDescriptions = (bool)value; break;
             case "nodePreviews": ShowNodePreviews = (bool)value; break;
             case "showGrid": ShowGrid = (bool)value; break;

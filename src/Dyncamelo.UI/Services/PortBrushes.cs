@@ -14,16 +14,26 @@ namespace Dyncamelo.UI.Services;
 /// </summary>
 public static class PortBrushes
 {
-    private static readonly Dictionary<PortFamily, Brush> Brushes = BuildBrushes();
+    private static readonly Dictionary<PortFamily, Brush> DarkBrushes = BuildBrushes(PortKindPalette.Hex);
+    private static readonly Dictionary<PortFamily, Brush> LightBrushes = BuildBrushes(PortKindPalette.HexOnLight);
+    private static bool _onLight;
     private static readonly Geometry ItemGlyph = Freeze(new EllipseGeometry(new Point(5, 5), 4.6, 4.6));
     private static readonly Geometry ListGlyph = Freeze(new RectangleGeometry(new Rect(0.6, 0.6, 8.8, 8.8), 2, 2));
     private static readonly Geometry NestedGlyph = BuildNested();
     private static readonly Geometry UnknownGlyph = Freeze(Geometry.Parse("M5,0.3 L9.7,5 L5,9.7 L0.3,5 Z"));
 
-    /// <summary>The frozen brush of a family.</summary>
+    /// <summary>True while a light palette is active: sockets and wires use the darker family colours.</summary>
+    public static bool OnLight
+    {
+        get => _onLight;
+        set => _onLight = value;
+    }
+
+    /// <summary>The frozen brush of a family (the light-canvas variant while a light palette is active).</summary>
     public static Brush For(PortFamily family)
     {
-        return Brushes.TryGetValue(family, out var brush) ? brush : Brushes[PortFamily.Any];
+        var set = _onLight ? LightBrushes : DarkBrushes;
+        return set.TryGetValue(family, out var brush) ? brush : set[PortFamily.Any];
     }
 
     /// <summary>The frozen 10×10 socket glyph for a structure.</summary>
@@ -38,12 +48,12 @@ public static class PortBrushes
         }
     }
 
-    private static Dictionary<PortFamily, Brush> BuildBrushes()
+    private static Dictionary<PortFamily, Brush> BuildBrushes(System.Func<PortFamily, string> hexOf)
     {
         var map = new Dictionary<PortFamily, Brush>();
         foreach (var family in PortKindPalette.Families)
         {
-            var hex = PortKindPalette.Hex(family);
+            var hex = hexOf(family);
             var color = Color.FromRgb(
                 byte.Parse(hex.Substring(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
                 byte.Parse(hex.Substring(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture),

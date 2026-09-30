@@ -178,6 +178,7 @@ public partial class DyncameloEditorControl : UserControl
                 "view.previews" => vm.ShowNodePreviews,
                 "graph.autorun" => vm.IsAutoRun,
                 "view.minimap" => vm.IsMinimapVisible,
+                "view.library" => vm.IsLibraryVisible,
                 _ => false,
             },
             (category, top) =>
@@ -218,6 +219,34 @@ public partial class DyncameloEditorControl : UserControl
             {
                 menuItem.InputGestureText = vm.Keymap.ShortcutOf(id) ?? string.Empty;
             }
+        }
+    }
+
+    private GridLength _libraryWidth = new GridLength(230d);
+
+    // The library column takes its width back where it left off; hidden, the column, its splitter and the panel are gone.
+    private void ApplyLibraryVisibility(bool visible)
+    {
+        if (visible)
+        {
+            LibraryColumn.MinWidth = 150d;
+            LibraryColumn.Width = _libraryWidth;
+            SplitterColumn.Width = new GridLength(4d);
+            LibraryPanel.Visibility = Visibility.Visible;
+            LibrarySplitter.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            if (LibraryColumn.Width.Value > 0d)
+            {
+                _libraryWidth = LibraryColumn.Width;
+            }
+
+            LibraryColumn.MinWidth = 0d;
+            LibraryColumn.Width = new GridLength(0d);
+            SplitterColumn.Width = new GridLength(0d);
+            LibraryPanel.Visibility = Visibility.Collapsed;
+            LibrarySplitter.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -273,6 +302,7 @@ public partial class DyncameloEditorControl : UserControl
             case "wire.earlier": return vm.MoveSelectedWiresEarlierCommand;
             case "wire.later": return vm.MoveSelectedWiresLaterCommand;
             case "view.minimap": return vm.ToggleMinimapCommand;
+            case "view.library": return vm.ToggleLibraryCommand;
             case "view.resetwidth": return vm.ResetSelectedWidthCommand;
             case "help.guide": return _guideCommand ??= new RelayCommand(OpenGuide);
             case "wire.mute": return vm.MuteSelectedWiresCommand;
@@ -410,6 +440,7 @@ public partial class DyncameloEditorControl : UserControl
             RebuildKeyRouter(newViewModel);
             BuildHeaderMenu(newViewModel);
             ApplyGrid(newViewModel.ShowGrid);
+            ApplyLibraryVisibility(newViewModel.IsLibraryVisible);
         }
     }
 
@@ -435,6 +466,10 @@ public partial class DyncameloEditorControl : UserControl
                     QuickSearchBox.SelectAll();
                 }),
                 System.Windows.Threading.DispatcherPriority.Input);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.IsLibraryVisible) && ViewModel != null)
+        {
+            ApplyLibraryVisibility(ViewModel.IsLibraryVisible);
         }
         else if (e.PropertyName == nameof(GraphEditorViewModel.ShowGrid) && ViewModel != null)
         {
@@ -477,24 +512,16 @@ public partial class DyncameloEditorControl : UserControl
     }
 
     /// <summary>
-    /// Recolours the UI by mutating each theme brush's <c>Color</c> in place.
-    /// The theme is referenced entirely through StaticResource, so the shared
-    /// (unfrozen) <see cref="SolidColorBrush"/> instances must be mutated rather
-    /// than replaced for already-rendered elements to update. Node header and
-    /// group colours are view-model/hardcoded and deliberately not themed.
+    /// Recolours the UI: <see cref="Dyncamelo.UI.Services.ThemeApplier"/> puts the palette into the theme dictionary, and everything
+    /// that refers to a palette colour does so with DynamicResource, so styles, templates and popups all follow. Node header and
+    /// group colours are data colours and deliberately not themed.
     /// </summary>
     private void ApplyPalette(string paletteId)
     {
         var palette = Dyncamelo.UI.Services.PaletteCatalog.ById(paletteId)
             ?? Dyncamelo.UI.Services.PaletteCatalog.Default;
-
-        foreach (var pair in palette.Colors)
-        {
-            if (TryFindResource(pair.Key) is SolidColorBrush brush && !brush.IsFrozen)
-            {
-                brush.Color = pair.Value;
-            }
-        }
+        Dyncamelo.UI.Services.ThemeApplier.Apply(Resources, palette);
+        ViewModel?.RefreshPortColours();
     }
 
     /// <summary>The modifier keys currently held; replaceable so tests can press Ctrl without a keyboard.</summary>

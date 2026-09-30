@@ -14,12 +14,12 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <DockPanel Background="{StaticResource Dyc.PanelBrush}">
+    <DockPanel Background="{DynamicResource Dyc.PanelBrush}">
 
         <!-- ===== Brand bar (BIMCamel identity) — the blue gradient header carries
              the logo in a black chip so its baked-in black background reads as an
              intentional rounded badge, matching the BIMCamel exporter's title bar. -->
-        <Border DockPanel.Dock="Top" Height="38" Background="{StaticResource Dyc.BrandBrush}">
+        <Border DockPanel.Dock="Top" Height="38" Background="{DynamicResource Dyc.BrandBrush}">
             <Grid Margin="10,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -29,7 +29,7 @@
                 <Border Grid.Column="0"
                         Width="26" Height="26"
                         CornerRadius="7"
-                        Background="{StaticResource Dyc.LogoChipBrush}"
+                        Background="{DynamicResource Dyc.LogoChipBrush}"
                         VerticalAlignment="Center">
                     <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
                            Width="22" Height="22"
@@ -37,17 +37,17 @@
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0">
                     <TextBlock Text="Dyncamelo"
-                               Foreground="{StaticResource Dyc.OnBrandBrush}"
+                               Foreground="{DynamicResource Dyc.OnBrandBrush}"
                                FontWeight="SemiBold"
                                FontSize="13.5" />
                     <TextBlock Text="by BIMCamel"
-                               Foreground="{StaticResource Dyc.OnBrandSubtleBrush}"
+                               Foreground="{DynamicResource Dyc.OnBrandSubtleBrush}"
                                FontSize="9.5"
                                Margin="0,-1,0,0" />
                 </StackPanel>
                 <TextBlock Grid.Column="2"
                            VerticalAlignment="Center"
-                           Foreground="{StaticResource Dyc.OnBrandSubtleBrush}"
+                           Foreground="{DynamicResource Dyc.OnBrandSubtleBrush}"
                            FontSize="11"
                            TextTrimming="CharacterEllipsis"
                            MaxWidth="260"
@@ -59,8 +59,8 @@
              on the left, the few actions worth a button on the right. Everything else lives in
              the menus only, so nothing is offered twice. ===== -->
         <Border DockPanel.Dock="Top"
-                Background="{StaticResource Dyc.PanelBrush}"
-                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                Background="{DynamicResource Dyc.PanelBrush}"
+                BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="4,2">
             <DockPanel>
@@ -72,11 +72,11 @@
                         <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Redo}" />
                     </Button>
 
-                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
+                    <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
 
                     <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding RunTooltip}" Command="{Binding RunCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Run}" Fill="{StaticResource Dyc.AccentBrush}" />
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Run}" Fill="{DynamicResource Dyc.AccentBrush}" />
                             <TextBlock Text="Run" />
                         </StackPanel>
                     </Button>
@@ -94,7 +94,7 @@
                         <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Preview}" />
                     </ToggleButton>
 
-                    <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
+                    <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
 
                     <!-- ===== Settings page (sections, search, shortcut rebinding) ===== -->
                     <ToggleButton x:Name="SettingsButton"
@@ -110,7 +110,7 @@
                 <Menu x:Name="HeaderMenu"
                       IsMainMenu="False"
                       Background="Transparent"
-                      Foreground="{StaticResource Dyc.TextBrush}"
+                      Foreground="{DynamicResource Dyc.TextBrush}"
                       VerticalAlignment="Center"
                       Padding="0" />
             </DockPanel>
@@ -118,23 +118,23 @@
 
         <!-- ===== Status bar ===== -->
         <Border DockPanel.Dock="Bottom"
-                Background="{StaticResource Dyc.PanelBrush}"
-                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                Background="{DynamicResource Dyc.PanelBrush}"
+                BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="8,3">
             <DockPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}" Text="Nodes: " />
-                    <TextBlock Foreground="{StaticResource Dyc.TextBrush}" Text="{Binding NodeCount}" />
-                    <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}" Text="   Warnings: " />
-                    <TextBlock Foreground="{StaticResource Dyc.WarningBrush}" Text="{Binding WarningCount}" />
-                    <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}" Text="   Errors: " />
-                    <TextBlock Foreground="{StaticResource Dyc.ErrorBrush}" Text="{Binding ErrorCount}" />
-                    <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}" Text="   Last run: " />
-                    <TextBlock Foreground="{StaticResource Dyc.TextBrush}" Text="{Binding LastRunMilliseconds}" />
-                    <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}" Text=" ms" />
+                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="Nodes: " />
+                    <TextBlock Foreground="{DynamicResource Dyc.TextBrush}" Text="{Binding NodeCount}" />
+                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Warnings: " />
+                    <TextBlock Foreground="{DynamicResource Dyc.WarningBrush}" Text="{Binding WarningCount}" />
+                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Errors: " />
+                    <TextBlock Foreground="{DynamicResource Dyc.ErrorBrush}" Text="{Binding ErrorCount}" />
+                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text="   Last run: " />
+                    <TextBlock Foreground="{DynamicResource Dyc.TextBrush}" Text="{Binding LastRunMilliseconds}" />
+                    <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}" Text=" ms" />
                 </StackPanel>
-                <TextBlock Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                <TextBlock Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                            TextTrimming="CharacterEllipsis"
                            Text="{Binding StatusMessage}" />
             </DockPanel>
@@ -143,15 +143,15 @@
         <!-- ===== Library + canvas ===== -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230" MinWidth="150" />
-                <ColumnDefinition Width="4" />
+                <ColumnDefinition x:Name="LibraryColumn" Width="230" MinWidth="150" />
+                <ColumnDefinition x:Name="SplitterColumn" Width="4" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Library browser -->
             <DockPanel x:Name="LibraryPanel"
                        Grid.Column="0"
-                       Background="{StaticResource Dyc.PanelBrush}"
+                       Background="{DynamicResource Dyc.PanelBrush}"
                        PreviewKeyDown="OnLibraryPanelPreviewKeyDown"
                        IsKeyboardFocusWithinChanged="OnLibraryPanelIsKeyboardFocusWithinChanged">
                 <DockPanel.Resources>
@@ -186,11 +186,11 @@
                             </Grid.ToolTip>
                             <StackPanel Margin="0,1">
                                 <TextBlock Text="{Binding Name}"
-                                           Foreground="{StaticResource Dyc.TextBrush}"
+                                           Foreground="{DynamicResource Dyc.TextBrush}"
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock Text="{Binding Description}"
                                            FontSize="11"
-                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                           Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                            TextWrapping="Wrap"
                                            TextTrimming="CharacterEllipsis"
                                            MaxHeight="30"
@@ -206,7 +206,7 @@
                                     FontSize="13"
                                     Cursor="Hand"
                                     Visibility="Hidden"
-                                    Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                    Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                     ToolTip="Add to favourites"
                                     Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                     CommandParameter="{Binding}">
@@ -226,7 +226,7 @@
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                 <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="StarButton" Property="Content" Value="★" />
-                                <Setter TargetName="StarButton" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                <Setter TargetName="StarButton" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
                                 <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
                             </DataTrigger>
                         </DataTemplate.Triggers>
@@ -236,14 +236,23 @@
                      compact expand/collapse symbol buttons sitting right beside it.
                      (The "show descriptions" toggle now lives in the Settings popup.) -->
                 <DockPanel DockPanel.Dock="Top" Margin="6,6,6,4">
+                    <Button DockPanel.Dock="Left"
+                            Style="{StaticResource Dyc.IconButton}"
+                            Margin="0,0,4,0"
+                            ToolTip="Hide the node library (View ▸ Node Library Panel)"
+                            Command="{Binding ToggleLibraryCommand}">
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.ChevronLeft}" />
+                    </Button>
                     <Button DockPanel.Dock="Right"
                             Style="{StaticResource Dyc.IconButton}"
                             Margin="4,0,0,0"
                             ToolTip="Collapse all categories"
                             Command="{Binding Library.CollapseAllCommand}">
                         <Path Width="14" Height="14" Stretch="Uniform"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.UnfoldLess}" />
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.ArrowUp}" />
                     </Button>
                     <Button DockPanel.Dock="Right"
                             Style="{StaticResource Dyc.IconButton}"
@@ -251,8 +260,8 @@
                             ToolTip="Expand all categories"
                             Command="{Binding Library.ExpandAllCommand}">
                         <Path Width="14" Height="14" Stretch="Uniform"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.UnfoldMore}" />
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.ArrowDown}" />
                     </Button>
                     <Grid>
                         <TextBox FontSize="13"
@@ -265,7 +274,7 @@
                               HorizontalAlignment="Left" VerticalAlignment="Center"
                               Margin="7,0,0,0"
                               IsHitTestVisible="False"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
                               Data="{StaticResource Dyc.Icon.Search}" />
                         <Button HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
@@ -274,7 +283,7 @@
                                 Content="✕"
                                 FontSize="11"
                                 Cursor="Hand"
-                                Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                 ToolTip="Clear search"
                                 Command="{Binding Library.ClearSearchCommand}"
                                 Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
@@ -285,8 +294,8 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                                            <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -300,7 +309,7 @@
                               Background="Transparent"
                               BorderThickness="0"
                               FontSize="13"
-                              Foreground="{StaticResource Dyc.TextBrush}"
+                              Foreground="{DynamicResource Dyc.TextBrush}"
                               ItemsSource="{Binding Library.RootItems}"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
@@ -322,7 +331,7 @@
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                                 <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
                                 <Setter Property="Padding" Value="0,2" />
                                 <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
                             </Style>
@@ -332,10 +341,10 @@
                                  Color is bound to the theme brushes so the selection highlight
                                  follows a live palette swap (the palette mutates those brushes'
                                  Color in place). -->
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.HoverBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.TextBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.PanelBorderBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Dyc.TextBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.HoverBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.TextBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.PanelBorderBrush}}" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.TextBrush}}" />
                             <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
                                 <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
@@ -344,13 +353,13 @@
                                           Stretch="Uniform"
                                           VerticalAlignment="Center"
                                           Margin="0,0,6,0"
-                                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
                                           Visibility="Collapsed" />
                                     <TextBlock x:Name="CategoryText"
                                                Text="{Binding Name}"
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                 </StackPanel>
                                 <HierarchicalDataTemplate.Triggers>
                                     <DataTrigger Binding="{Binding IconKey}" Value="Annotation">
@@ -415,32 +424,32 @@
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.WarningBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.WarningBrush}" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
                                     </DataTrigger>
                                     <!-- Create / Modify / Info leaf-grouping headers: coloured glyph + label. -->
                                     <DataTrigger Binding="{Binding IconKey}" Value="FnCreate">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnCreate}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnCreateBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnCreateBrush}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnCreateBrush}" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnCreateBrush}" />
                                         <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IconKey}" Value="FnModify">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnModify}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnModifyBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnModifyBrush}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnModifyBrush}" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnModifyBrush}" />
                                         <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IconKey}" Value="FnInfo">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnInfo}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{StaticResource Dyc.FnInfoBrush}" />
+                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnInfoBrush}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{StaticResource Dyc.FnInfoBrush}" />
+                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnInfoBrush}" />
                                         <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
                                     </DataTrigger>
                                 </HierarchicalDataTemplate.Triggers>
@@ -453,7 +462,7 @@
                                    Margin="8,4"
                                    FontSize="11"
                                    TextWrapping="Wrap"
-                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                    Text="{Binding Library.SearchStatusText}"
                                    Visibility="{Binding Library.HasSearchStatus, Converter={StaticResource Dyc.BoolToVisibility}}" />
                         <ListBox x:Name="LibraryResults"
@@ -461,7 +470,7 @@
                                  Background="Transparent"
                                  BorderThickness="0"
                                  FontSize="13"
-                                 Foreground="{StaticResource Dyc.TextBrush}"
+                                 Foreground="{DynamicResource Dyc.TextBrush}"
                                  ItemsSource="{Binding Library.SearchResults}"
                                  ItemContainerStyle="{StaticResource Dyc.LibraryResultItemStyle}"
                                  VirtualizingPanel.IsVirtualizing="True"
@@ -474,10 +483,10 @@
                 </Grid>
             </DockPanel>
 
-            <GridSplitter Grid.Column="1"
+            <GridSplitter x:Name="LibrarySplitter" Grid.Column="1"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          Background="{StaticResource Dyc.PanelBorderBrush}" />
+                          Background="{DynamicResource Dyc.PanelBorderBrush}" />
 
             <!-- Node canvas -->
             <nodify:NodifyEditor x:Name="Editor"
@@ -509,14 +518,14 @@
                                   Transform="{Binding ViewportTransform, ElementName=Editor}">
                         <DrawingBrush.Drawing>
                             <DrawingGroup>
-                                <GeometryDrawing Brush="{StaticResource Dyc.CanvasBrush}">
+                                <GeometryDrawing Brush="{DynamicResource Dyc.CanvasBrush}">
                                     <GeometryDrawing.Geometry>
                                         <RectangleGeometry Rect="0 0 15 15" />
                                     </GeometryDrawing.Geometry>
                                 </GeometryDrawing>
                                 <GeometryDrawing>
                                     <GeometryDrawing.Pen>
-                                        <Pen Brush="{StaticResource Dyc.GridLineBrush}" Thickness="0.6" />
+                                        <Pen Brush="{DynamicResource Dyc.GridLineBrush}" Thickness="0.6" />
                                     </GeometryDrawing.Pen>
                                     <GeometryDrawing.Geometry>
                                         <GeometryGroup>
@@ -566,6 +575,23 @@
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
 
+            <!-- Brings the library back when it is hidden (also View ▸ Node Library Panel, Ctrl+B). -->
+            <Button Grid.Column="2"
+                    Panel.ZIndex="850"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="0,10,0,0"
+                    Width="16"
+                    Height="46"
+                    Style="{StaticResource Dyc.IconButton}"
+                    ToolTip="Show the node library (Ctrl+B)"
+                    Command="{Binding ToggleLibraryCommand}"
+                    Visibility="{Binding IsLibraryHidden, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <Path Width="12" Height="12" Stretch="Uniform"
+                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                      Data="{StaticResource Dyc.Icon.ChevronRight}" />
+            </Button>
+
             <!-- Minimap (Ctrl+M): the whole graph at a glance; drag the frame to pan, wheel to zoom.
                  Automatic from 40 nodes, or on/off in Settings and the View menu. -->
             <nodify:Minimap x:Name="MiniMap"
@@ -580,16 +606,16 @@
                             ViewportLocation="{Binding ViewportLocation, ElementName=Editor, Mode=TwoWay}"
                             ViewportSize="{Binding ViewportSize, ElementName=Editor, Mode=OneWay}"
                             Extent="{Binding ItemsExtent, ElementName=Editor, Mode=OneWay}"
-                            Background="#D9151719"
-                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                            Background="{DynamicResource Dyc.MinimapBrush}"
+                            BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                             BorderThickness="1"
                             Zoom="OnMinimapZoom"
                             Visibility="{Binding IsMinimapVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
                 <nodify:Minimap.ViewportStyle>
                     <Style TargetType="{x:Type Rectangle}">
-                        <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                        <Setter Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
                         <Setter Property="StrokeThickness" Value="2" />
-                        <Setter Property="Fill" Value="#223AA0F0" />
+                        <Setter Property="Fill" Value="{DynamicResource Dyc.ViewportFillBrush}" />
                     </Style>
                 </nodify:Minimap.ViewportStyle>
                 <nodify:Minimap.ItemContainerStyle>
@@ -606,7 +632,7 @@
                         <Setter Property="Location" Value="{Binding Location}" />
                         <Setter Property="Width" Value="{Binding Size.Width}" />
                         <Setter Property="Height" Value="{Binding Size.Height}" />
-                        <Setter Property="Background" Value="#7F8FA3" />
+                        <Setter Property="Background" Value="{DynamicResource Dyc.MinimapItemBrush}" />
                     </Style>
                 </nodify:Minimap.ItemContainerStyle>
             </nodify:Minimap>
@@ -614,7 +640,7 @@
             <!-- Keyboard & mouse help (F1): generated from the command catalogue. -->
             <Border Grid.Column="2"
                     Panel.ZIndex="950"
-                    Background="#F0151719"
+                    Background="{DynamicResource Dyc.OverlayBrush}"
                     Visibility="{Binding IsHelpOpen, Converter={StaticResource Dyc.BoolToVisibility}}">
                 <DockPanel Margin="24,18">
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
@@ -626,7 +652,7 @@
                         <TextBlock Text="Keyboard and mouse"
                                    FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource Dyc.TextBrush}" />
+                                   Foreground="{DynamicResource Dyc.TextBrush}" />
                     </DockPanel>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{Binding HelpSections}">
@@ -641,14 +667,14 @@
                                             Margin="0,0,14,14"
                                             Padding="12,10"
                                             CornerRadius="6"
-                                            Background="{StaticResource Dyc.PanelBrush}"
-                                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                            Background="{DynamicResource Dyc.PanelBrush}"
+                                            BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel>
                                             <TextBlock Text="{Binding Title}"
                                                        FontWeight="SemiBold"
                                                        Margin="0,0,0,6"
-                                                       Foreground="{StaticResource Dyc.AccentBrush}" />
+                                                       Foreground="{DynamicResource Dyc.AccentBrush}" />
                                             <ItemsControl ItemsSource="{Binding Lines}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
@@ -660,14 +686,14 @@
                                                             <TextBlock Text="{Binding Action}"
                                                                        TextWrapping="Wrap"
                                                                        FontSize="12"
-                                                                       Foreground="{StaticResource Dyc.TextBrush}" />
+                                                                       Foreground="{DynamicResource Dyc.TextBrush}" />
                                                             <TextBlock Grid.Column="1"
                                                                        Margin="12,0,0,0"
                                                                        MaxWidth="150"
                                                                        TextWrapping="Wrap"
                                                                        TextAlignment="Right"
                                                                        FontSize="11"
-                                                                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                                                        Text="{Binding Keys}" />
                                                         </Grid>
                                                     </DataTemplate>
@@ -686,7 +712,7 @@
                  section is the rebinding table (Change, then press the chord). -->
             <Border Grid.Column="2"
                     Panel.ZIndex="940"
-                    Background="#F5151719"
+                    Background="{DynamicResource Dyc.OverlayBrush}"
                     Visibility="{Binding IsSettingsOpen, Converter={StaticResource Dyc.BoolToVisibility}}">
                 <DockPanel Margin="24,18">
                     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
@@ -704,7 +730,7 @@
                         <TextBlock Text="Settings"
                                    FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource Dyc.TextBrush}" />
+                                   Foreground="{DynamicResource Dyc.TextBrush}" />
                     </DockPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -731,12 +757,12 @@
                                                 <StackPanel Margin="0,0,16,0">
                                                     <TextBlock Text="{Binding Title}"
                                                                FontWeight="SemiBold"
-                                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                                     <TextBlock Text="{Binding Description}"
                                                                Margin="0,2,0,0"
                                                                FontSize="11"
                                                                TextWrapping="Wrap"
-                                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                                 </StackPanel>
                                                 <CheckBox Grid.Column="1"
                                                           HorizontalAlignment="Left"
@@ -767,11 +793,11 @@
                                 <StackPanel Visibility="{Binding ShowPaletteChoices, Converter={StaticResource Dyc.BoolToVisibility}}">
                                     <TextBlock Text="Colour palette"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                     <TextBlock Text="The colours of the whole editor."
                                                Margin="0,2,0,6"
                                                FontSize="11"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                     <ItemsControl ItemsSource="{Binding Palettes}" Width="300" HorizontalAlignment="Left">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -781,7 +807,7 @@
                                                     <StackPanel Orientation="Horizontal">
                                                         <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0"
                                                                 Background="{Binding Swatch}"
-                                                                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                                                BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                                                                 BorderThickness="1" />
                                                         <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
                                                     </StackPanel>
@@ -806,12 +832,12 @@
                                     <TextBlock Margin="0,0,0,10"
                                                FontSize="11"
                                                TextWrapping="Wrap"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                                Text="Press Change, then the keys you want. Esc cancels, Backspace removes the shortcut. Every command is listed, including those without one." />
                                     <ItemsControl ItemsSource="{Binding ShortcutRows}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Padding="0,4" BorderBrush="{StaticResource Dyc.PanelBorderBrush}" BorderThickness="0,0,0,1">
+                                                <Border Padding="0,4" BorderBrush="{DynamicResource Dyc.PanelBorderBrush}" BorderThickness="0,0,0,1">
                                                     <StackPanel>
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
@@ -825,24 +851,24 @@
                                                             <TextBlock Text="{Binding Category}"
                                                                        VerticalAlignment="Center"
                                                                        FontSize="11"
-                                                                       Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                                             <TextBlock Grid.Column="1"
                                                                        Text="{Binding Title}"
                                                                        VerticalAlignment="Center"
                                                                        TextTrimming="CharacterEllipsis"
-                                                                       Foreground="{StaticResource Dyc.TextBrush}" />
+                                                                       Foreground="{DynamicResource Dyc.TextBrush}" />
                                                             <Border Grid.Column="2"
                                                                     Margin="8,0"
                                                                     Padding="8,2"
                                                                     CornerRadius="3"
                                                                     BorderThickness="1"
-                                                                    Background="{StaticResource Dyc.InputBackgroundBrush}">
+                                                                    Background="{DynamicResource Dyc.InputBackgroundBrush}">
                                                                 <Border.Style>
                                                                     <Style TargetType="{x:Type Border}">
-                                                                        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+                                                                        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding IsCapturing}" Value="True">
-                                                                                <Setter Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                                                <Setter Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
@@ -850,7 +876,7 @@
                                                                 <TextBlock Text="{Binding Display}"
                                                                            FontFamily="Consolas"
                                                                            FontSize="12"
-                                                                           Foreground="{StaticResource Dyc.TextBrush}" />
+                                                                           Foreground="{DynamicResource Dyc.TextBrush}" />
                                                             </Border>
                                                             <Button Grid.Column="3"
                                                                     Style="{StaticResource Dyc.SmallButton}"
@@ -873,7 +899,7 @@
                                                                    Margin="98,3,0,0"
                                                                    FontSize="11"
                                                                    TextWrapping="Wrap"
-                                                                   Foreground="{StaticResource Dyc.WarningBrush}"
+                                                                   Foreground="{DynamicResource Dyc.WarningBrush}"
                                                                    Visibility="{Binding HasMessage, Converter={StaticResource Dyc.BoolToVisibility}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -886,11 +912,11 @@
                                 <StackPanel Visibility="{Binding ShowDiagnosticsPage, Converter={StaticResource Dyc.BoolToVisibility}}">
                                     <TextBlock Text="Tools"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                     <TextBlock Text="Each of these is also in a menu and the command palette."
                                                Margin="0,2,0,8"
                                                FontSize="11"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                     <WrapPanel>
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Performance HUD"
                                                 ToolTip="Frame rate, node counts and input state"
@@ -903,12 +929,12 @@
                                     <TextBlock Text="Reset"
                                                Margin="0,14,0,2"
                                                FontWeight="SemiBold"
-                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                     <TextBlock Text="Puts every setting and shortcut back to its default. Favourites and recent files are kept."
                                                Margin="0,0,0,8"
                                                FontSize="11"
                                                TextWrapping="Wrap"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                     <Button Style="{StaticResource Dyc.SmallButton}"
                                             HorizontalAlignment="Left"
                                             Content="Reset all settings"
@@ -926,8 +952,8 @@
                     VerticalAlignment="Top"
                     Margin="0,42,0,0"
                     Width="480"
-                    Background="{StaticResource Dyc.PanelBrush}"
-                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    Background="{DynamicResource Dyc.PanelBrush}"
+                    BorderBrush="{DynamicResource Dyc.AccentBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="8"
@@ -946,20 +972,20 @@
                               HorizontalAlignment="Left" VerticalAlignment="Center"
                               Margin="7,0,0,0"
                               IsHitTestVisible="False"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
                               Data="{StaticResource Dyc.Icon.Search}" />
                     </Grid>
                     <TextBlock DockPanel.Dock="Top"
                                Margin="2,5,2,3"
                                FontSize="10"
-                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                Text="Type a command or a setting · ↑↓ choose · Enter runs · Esc closes" />
                     <ListBox x:Name="PaletteList"
                              MaxHeight="360"
                              Background="Transparent"
                              BorderThickness="0"
                              FontSize="13"
-                             Foreground="{StaticResource Dyc.TextBrush}"
+                             Foreground="{DynamicResource Dyc.TextBrush}"
                              ItemsSource="{Binding PaletteResults}"
                              SelectedItem="{Binding PaletteSelected, Mode=TwoWay}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -968,7 +994,7 @@
                              PreviewMouseLeftButtonUp="OnPaletteListClick">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
                                 <Setter Property="Padding" Value="6,3" />
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 <Setter Property="Template">
@@ -983,11 +1009,11 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -1006,7 +1032,7 @@
                                         <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding Category}"
                                                    FontSize="10"
-                                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                                    TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                     <TextBlock Grid.Column="1"
@@ -1014,7 +1040,7 @@
                                                VerticalAlignment="Center"
                                                FontFamily="Consolas"
                                                FontSize="11"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                                Text="{Binding Shortcut}"
                                                Visibility="{Binding HasShortcut, Converter={StaticResource Dyc.BoolToVisibility}}" />
                                 </Grid>
@@ -1031,8 +1057,8 @@
                     VerticalAlignment="Top"
                     Margin="0,42,0,0"
                     Width="380"
-                    Background="{StaticResource Dyc.PanelBrush}"
-                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    Background="{DynamicResource Dyc.PanelBrush}"
+                    BorderBrush="{DynamicResource Dyc.AccentBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="8"
@@ -1051,28 +1077,28 @@
                               HorizontalAlignment="Left" VerticalAlignment="Center"
                               Margin="7,0,0,0"
                               IsHitTestVisible="False"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
                               Data="{StaticResource Dyc.Icon.Search}" />
                     </Grid>
                     <TextBlock DockPanel.Dock="Top"
                                Margin="2,6,2,0"
                                FontSize="11"
                                FontWeight="SemiBold"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Foreground="{DynamicResource Dyc.AccentBrush}"
                                TextTrimming="CharacterEllipsis"
                                Text="{Binding QuickSearchContext}"
                                Visibility="{Binding HasQuickSearchContext, Converter={StaticResource Dyc.BoolToVisibility}}" />
                     <TextBlock DockPanel.Dock="Top"
                                Margin="2,5,2,3"
                                FontSize="10"
-                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                Text="↑↓ choose · Enter inserts the node · Esc closes" />
                     <ListBox x:Name="QuickSearchList"
                              MaxHeight="300"
                              Background="Transparent"
                              BorderThickness="0"
                              FontSize="13"
-                             Foreground="{StaticResource Dyc.TextBrush}"
+                             Foreground="{DynamicResource Dyc.TextBrush}"
                              ItemsSource="{Binding QuickSearchResults}"
                              SelectedItem="{Binding QuickSearchSelected, Mode=TwoWay}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -1081,7 +1107,7 @@
                              PreviewMouseLeftButtonUp="OnQuickSearchListClick">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
                                 <Setter Property="Padding" Value="6,3" />
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 <Setter Property="Template">
@@ -1096,11 +1122,11 @@
                                             </Border>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                                                 </Trigger>
                                                 <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -1132,7 +1158,7 @@
                                     <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{Binding Category}"
                                                FontSize="10"
-                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                                TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </DataTemplate>
@@ -1151,8 +1177,8 @@
                     Panel.ZIndex="1000">
                 <Border HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Background="{StaticResource Dyc.PanelBrush}"
-                        BorderBrush="{StaticResource Dyc.AccentBrush}"
+                        Background="{DynamicResource Dyc.PanelBrush}"
+                        BorderBrush="{DynamicResource Dyc.AccentBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Padding="20,14">
@@ -1162,7 +1188,7 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0" />
                         <TextBlock Text="Running the graph…"
-                                   Foreground="{StaticResource Dyc.TextBrush}"
+                                   Foreground="{DynamicResource Dyc.TextBrush}"
                                    FontSize="13"
                                    VerticalAlignment="Center" />
                     </StackPanel>

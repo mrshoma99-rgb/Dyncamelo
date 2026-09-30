@@ -49,6 +49,9 @@ public class ConnectionViewModel : ObservableObject
     /// <summary>Wire colour: the family of the port it leaves.</summary>
     public Brush FamilyBrush => Source.FamilyBrush;
 
+    /// <summary>Re-reads the wire colour after the palette changed.</summary>
+    public void RefreshBrushes() => OnPropertyChanged(nameof(FamilyBrush));
+
     /// <summary>
     /// True when the wire feeds a list into a single-item input and the engine will
     /// replicate the node over it — drawn dashed so automatic replication is visible.

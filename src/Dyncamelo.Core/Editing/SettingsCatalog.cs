@@ -105,6 +105,8 @@ public static class SettingsCatalog
             new SettingOption("compact", "Compact"), new SettingOption("normal", "Normal"), new SettingOption("comfortable", "Comfortable")),
         new SettingDescriptor("cbGlyphs", "Appearance", "Type letters in sockets",
             "Draw a short letter naming the type inside every socket, so types do not rely on colour alone.", false),
+        new SettingDescriptor("libraryPanel", "Appearance", "Node library panel",
+            "Show the node library on the left of the canvas. It can also be hidden with the arrow in its header and brought back with the tab at the canvas edge.", true),
         new SettingDescriptor("libraryDescriptions", "Appearance", "Descriptions in the library",
             "Show a description line under each node in the library panel.", true),
         new SettingDescriptor("nodePreviews", "Appearance", "Value previews under nodes",

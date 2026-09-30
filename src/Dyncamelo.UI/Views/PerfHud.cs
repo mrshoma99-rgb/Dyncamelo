@@ -40,8 +40,8 @@ public sealed class PerfHud : Border
         Margin = new Thickness(8);
         Padding = new Thickness(8, 6, 8, 6);
         CornerRadius = new CornerRadius(4);
-        Background = new SolidColorBrush(Color.FromArgb(0xE6, 0x10, 0x12, 0x16));
-        BorderBrush = new SolidColorBrush(Color.FromRgb(0x3A, 0xA0, 0xF0));
+        SetResourceReference(BackgroundProperty, "Dyc.OverlayBrush");
+        SetResourceReference(BorderBrushProperty, "Dyc.AccentBrush");
         BorderThickness = new Thickness(1);
         Panel.SetZIndex(this, 950);
 
@@ -49,9 +49,9 @@ public sealed class PerfHud : Border
         {
             FontFamily = new FontFamily("Consolas"),
             FontSize = 11,
-            Foreground = Brushes.White,
             Text = "collecting…",
         };
+        _text.SetResourceReference(TextBlock.ForegroundProperty, "Dyc.TextBrush");
 
         var copy = new Button
         {

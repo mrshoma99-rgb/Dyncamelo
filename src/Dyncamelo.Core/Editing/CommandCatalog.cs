@@ -97,6 +97,7 @@ public static class CommandCatalog
         new CommandInfo("view.zoomin", "Zoom In", "View", null),
         new CommandInfo("view.zoomout", "Zoom Out", "View", null),
         new CommandInfo("view.minimap", "Minimap", "View", "Ctrl+M", toggle: true, keywords: "overview map navigator"),
+        new CommandInfo("view.library", "Node Library Panel", "View", "Ctrl+B", toggle: true, keywords: "sidebar side panel nodes hide show collapse"),
         new CommandInfo("view.resetwidth", "Reset Node Width", "View", null, keywords: "resize automatic"),
         new CommandInfo("view.collapseall", "Collapse All Nodes", "View", null, keywords: "fold minimize"),
         new CommandInfo("view.expandall", "Expand All Nodes", "View", null, keywords: "unfold maximize"),

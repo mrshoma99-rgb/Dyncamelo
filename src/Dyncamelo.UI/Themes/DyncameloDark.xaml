@@ -10,9 +10,11 @@
     </ResourceDictionary.MergedDictionaries>
 
     <!-- ===== Dyncamelo palette — aligned to the BIMCamel design system (dark
-         defaults; swapped live for the Light/Midnight/Slate palettes via
-         PaletteCatalog, which mutates these same 18 brushes in place). BIMCamel
-         dark tokens: Bg #15171B, Pane #1C1F24, Card #23272E, Accent #3AA0F0. ===== -->
+         defaults; swapped live for the Light/Midnight/Slate palettes by ThemeApplier
+         using PaletteCatalog). EVERY reference to a palette key below is a
+         DynamicResource: a brush named in a Style or Template with StaticResource is
+         frozen by WPF and could never change colour. BIMCamel dark tokens:
+         Bg #15171B, Pane #1C1F24, Card #23272E, Accent #3AA0F0. ===== -->
     <SolidColorBrush x:Key="Dyc.CanvasBrush" Color="#FF15171B" />
     <SolidColorBrush x:Key="Dyc.GridLineBrush" Color="#FF20242C" />
     <SolidColorBrush x:Key="Dyc.PanelBrush" Color="#FF1C1F24" />
@@ -32,17 +34,23 @@
     <SolidColorBrush x:Key="Dyc.HoverBrush" Color="#FF1F2D3D" />
     <SolidColorBrush x:Key="Dyc.NoteBrush" Color="#FF3A2F12" />
     <SolidColorBrush x:Key="Dyc.NoteBorderBrush" Color="#FF5C4A1E" />
+    <!-- Thin ring around every socket: the card colour in the dark palettes (a gap between socket and card), a grey line on Light so
+         near-white sockets stay visible. -->
+    <SolidColorBrush x:Key="Dyc.SocketOutlineBrush" Color="#FF23272E" />
+    <!-- Full-canvas overlays (help, settings) and the minimap. -->
+    <SolidColorBrush x:Key="Dyc.OverlayBrush" Color="#F2151719" />
+    <SolidColorBrush x:Key="Dyc.MinimapBrush" Color="#D9151719" />
+    <SolidColorBrush x:Key="Dyc.MinimapItemBrush" Color="#FF7F8FA3" />
+    <SolidColorBrush x:Key="Dyc.ViewportFillBrush" Color="#223AA0F0" />
 
-    <!-- ===== BIMCamel brand chrome (constant across palettes — the product identity).
-         The header is the BIMCamel blue gradient; the logo rides in a black chip so
+    <!-- ===== BIMCamel brand chrome. The dark palettes keep the BIMCamel blue gradient; the Light palette
+         turns the header light (dark text on white-to-grey). The logo always rides in a black chip so
          its baked-in black background reads as an intentional rounded badge. ===== -->
     <Color x:Key="Dyc.BrandStartColor">#0070C0</Color>
     <Color x:Key="Dyc.BrandEndColor">#0D83DA</Color>
-    <SolidColorBrush x:Key="Dyc.BrandStartBrush" Color="#FF0070C0" />
-    <SolidColorBrush x:Key="Dyc.BrandEndBrush" Color="#FF0D83DA" />
     <LinearGradientBrush x:Key="Dyc.BrandBrush" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="{StaticResource Dyc.BrandStartColor}" Offset="0" />
-        <GradientStop Color="{StaticResource Dyc.BrandEndColor}" Offset="1" />
+        <GradientStop Color="{DynamicResource Dyc.BrandStartColor}" Offset="0" />
+        <GradientStop Color="{DynamicResource Dyc.BrandEndColor}" Offset="1" />
     </LinearGradientBrush>
     <SolidColorBrush x:Key="Dyc.OnBrandBrush" Color="#FFFFFFFF" />
     <SolidColorBrush x:Key="Dyc.OnBrandSubtleBrush" Color="#DDFFFFFF" />
@@ -77,8 +85,11 @@
     <!-- Expand all = two solid chevrons pointing DOWN; collapse all = pointing UP.
          Solid + opposite directions so they can't be confused at 14px. -->
     <StreamGeometry x:Key="Dyc.Icon.Pick">F1 M20.71,5.63 L18.37,3.29 C17.98,2.9 17.35,2.9 16.96,3.29 L13.84,6.41 L11.91,4.5 L10.5,5.91 L11.92,7.33 L3,16.25 L3,21 L7.75,21 L16.67,12.08 L18.09,13.5 L19.5,12.09 L17.58,10.17 L20.7,7.05 C21.1,6.65 21.1,6.02 20.71,5.63 Z M6.92,19 L5,17.08 L13.06,9.02 L14.98,10.94 L6.92,19 Z</StreamGeometry>
-    <StreamGeometry x:Key="Dyc.Icon.UnfoldMore">F1 M12,4 L19,11 L17.6,12.4 L12,6.8 L6.4,12.4 L5,11 Z M12,20 L5,13 L6.4,11.6 L12,17.2 L17.6,11.6 L19,13 Z</StreamGeometry>
-    <StreamGeometry x:Key="Dyc.Icon.UnfoldLess">F1 M12,12 L5,5 L6.4,3.6 L12,9.2 L17.6,3.6 L19,5 Z M12,12 L19,19 L17.6,20.4 L12,14.8 L6.4,20.4 L5,19 Z</StreamGeometry>
+    <!-- Plain arrows: collapse all categories = up, expand all = down; chevrons hide/show the library panel. -->
+    <StreamGeometry x:Key="Dyc.Icon.ArrowUp">F1 M11,20 L11,7.83 L5.41,13.41 L4,12 L12,4 L20,12 L18.59,13.41 L13,7.83 L13,20 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.ArrowDown">F1 M13,4 L13,16.17 L18.59,10.59 L20,12 L12,20 L4,12 L5.41,10.59 L11,16.17 L11,4 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.ChevronLeft">F1 M15.41,7.41 L14,6 L8,12 L14,18 L15.41,16.59 L10.83,12 Z</StreamGeometry>
+    <StreamGeometry x:Key="Dyc.Icon.ChevronRight">F1 M10,6 L8.59,7.41 L13.17,12 L8.59,16.59 L10,18 L16,12 Z</StreamGeometry>
     <!-- Library category glyphs -->
     <StreamGeometry x:Key="Dyc.Icon.Cat.Annotation">F1 M240-400h480v-60H240v60Zm0-130h480v-60H240v60Zm0-130h480v-60H240v60ZM880-80 720-240H140q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v740ZM140-300h606l74 80v-600H140v520Zm0 0v-520 520Z</StreamGeometry>
     <StreamGeometry x:Key="Dyc.Icon.Cat.Color">F1 M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-85 32-158t87.5-127q55.5-54 130-84.5T489-880q79 0 150 26.5T763.5-780q53.5 47 85 111.5T880-527q0 108-63 170.5T650-294h-75q-18 0-31 14t-13 31q0 27 14.5 46t14.5 44q0 38-21 58.5T480-80Zm0-400Zm-198 11q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm126-170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm214 0q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15Zm131 170q15-15 15-35t-15-35q-15-15-35-15t-35 15q-15 15-15 35t15 35q15 15 35 15t35-15ZM480-140q11 0 15.5-4.5T500-159q0-14-14.5-26T471-238q0-46 30-81t76-35h73q76 0 123-44.5T820-527q0-132-100-212.5T489-820q-146 0-247.5 98.5T140-480q0 141 99.5 240.5T480-140Z</StreamGeometry>
@@ -111,7 +122,7 @@
         <Setter Property="Stretch" Value="Uniform" />
         <Setter Property="Width" Value="13" />
         <Setter Property="Height" Value="13" />
-        <Setter Property="Fill" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Fill" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Margin" Value="0,0,5,0" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -121,21 +132,94 @@
     <!-- ===== Menus & tooltips follow the palette (else they keep system/Nodify
          colours and go white-on-white when the Light palette is active). ===== -->
     <Style TargetType="{x:Type ToolTip}">
-        <Setter Property="Background" Value="{StaticResource Dyc.PanelBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Dyc.PanelBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.PanelBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="8,5" />
     </Style>
+    <!-- ===== Slim scroll bars in the palette. The stock Windows bar is a wide grey track with arrow buttons that clashes
+         with the theme, and its gutter is what made menus look like they always had a scroll bar. The ScrollViewer still
+         decides whether a bar is needed; this only styles it (a thin thumb, no arrows, transparent track). ===== -->
+    <Style x:Key="Dyc.ScrollTrackButton" TargetType="{x:Type RepeatButton}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="Dyc.ScrollThumb" TargetType="{x:Type Thumb}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border x:Name="Bar"
+                            CornerRadius="3"
+                            Margin="2"
+                            Opacity="0.45"
+                            Background="{DynamicResource Dyc.SubtleTextBrush}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bar" Property="Opacity" Value="0.8" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="Bar" Property="Opacity" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type ScrollBar}">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Width" Value="11" />
+        <Setter Property="MinWidth" Value="11" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource Dyc.ScrollTrackButton}" Command="{x:Static ScrollBar.PageUpCommand}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource Dyc.ScrollThumb}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource Dyc.ScrollTrackButton}" Command="{x:Static ScrollBar.PageDownCommand}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                            <Setter Property="Width" Value="Auto" />
+                            <Setter Property="MinWidth" Value="0" />
+                            <Setter Property="Height" Value="11" />
+                            <Setter Property="MinHeight" Value="11" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Retemplated so the default WPF ContextMenu chrome is gone: the stock
          template paints a light "icon gutter" strip down the left edge that,
          over the dark panel, shows as a white stripe overlapping the items.
          This template is just the themed border + items (matching the submenu
          popup below), so there is no gutter. -->
     <Style TargetType="{x:Type ContextMenu}">
-        <Setter Property="Background" Value="{StaticResource Dyc.PanelBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Dyc.PanelBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.PanelBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Template">
             <Setter.Value>
@@ -159,7 +243,7 @@
          with light text reads white-on-white (the Open ▾ Recent/Sample lists).
          Keyed so the explicit menu styles in the view can inherit it via BasedOn. -->
     <Style x:Key="Dyc.MenuItem" TargetType="{x:Type MenuItem}">
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
@@ -180,7 +264,7 @@
                                   Grid.Column="0"
                                   VerticalAlignment="Center" HorizontalAlignment="Center"
                                   Data="M0,4 L3,7 L8,0"
-                                  Stroke="{StaticResource Dyc.AccentBrush}"
+                                  Stroke="{DynamicResource Dyc.AccentBrush}"
                                   StrokeThickness="1.6"
                                   Visibility="Collapsed" />
                             <ContentPresenter x:Name="HeaderHost"
@@ -193,13 +277,13 @@
                                        Text="{TemplateBinding InputGestureText}"
                                        VerticalAlignment="Center"
                                        Margin="0,0,10,0"
-                                       Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                             <Path x:Name="Arrow"
                                   Grid.Column="3"
                                   VerticalAlignment="Center"
                                   Margin="0,0,8,0"
                                   Data="M0,0 L4,4 L0,8 Z"
-                                  Fill="{StaticResource Dyc.SubtleTextBrush}"
+                                  Fill="{DynamicResource Dyc.SubtleTextBrush}"
                                   Visibility="Collapsed" />
                             <Popup x:Name="PART_Popup"
                                    AllowsTransparency="True"
@@ -208,8 +292,8 @@
                                    IsOpen="{TemplateBinding IsSubmenuOpen}"
                                    Focusable="False"
                                    PopupAnimation="None">
-                                <Border Background="{StaticResource Dyc.PanelBrush}"
-                                        BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                <Border Background="{DynamicResource Dyc.PanelBrush}"
+                                        BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="6"
                                         Padding="3"
@@ -232,7 +316,7 @@
                             <Setter TargetName="Check" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -245,7 +329,7 @@
     <!-- Top-level item of the header menu bar: a flat label whose dropdown opens
          BELOW it (Dyc.MenuItem is built for submenus and opens to the right). -->
     <Style x:Key="Dyc.TopMenuItem" TargetType="{x:Type MenuItem}">
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
@@ -266,8 +350,8 @@
                                    IsOpen="{TemplateBinding IsSubmenuOpen}"
                                    Focusable="False"
                                    PopupAnimation="None">
-                                <Border Background="{StaticResource Dyc.PanelBrush}"
-                                        BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                <Border Background="{DynamicResource Dyc.PanelBrush}"
+                                        BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="6"
                                         Padding="3"
@@ -282,10 +366,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsSubmenuOpen" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -295,19 +379,19 @@
     <!-- Apply the themed item to every menu that doesn't set its own style. -->
     <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource Dyc.MenuItem}" />
     <Style TargetType="{x:Type Separator}">
-        <Setter Property="Background" Value="{StaticResource Dyc.PanelBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.PanelBorderBrush}" />
     </Style>
 
     <!-- ===== Small controls used inside nodes and the chrome =====
          Rounded, flat field matching the BIMCamel TextBox (CornerRadius 6, accent
          focus ring). Templated so the corners actually round. -->
     <Style x:Key="Dyc.TextBox" TargetType="{x:Type TextBox}">
-        <Setter Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CaretBrush" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="SelectionBrush" Value="{StaticResource Dyc.AccentBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource Dyc.AccentBrush}" />
         <Setter Property="Padding" Value="6,3" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
@@ -325,7 +409,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5" />
@@ -348,8 +432,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
                     <Border x:Name="Bd"
-                            Background="{StaticResource Dyc.InputBackgroundBrush}"
-                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                            BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6">
                         <Path x:Name="Arrow"
@@ -357,14 +441,14 @@
                               VerticalAlignment="Center"
                               Margin="0,0,7,0"
                               Data="M0,0 L4,4 L8,0 Z"
-                              Fill="{StaticResource Dyc.SubtleTextBrush}" />
+                              Fill="{DynamicResource Dyc.SubtleTextBrush}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -373,7 +457,7 @@
     </Style>
 
     <Style x:Key="Dyc.ComboBoxItem" TargetType="{x:Type ComboBoxItem}">
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="Padding" Value="8,4" />
         <Setter Property="Template">
             <Setter.Value>
@@ -383,7 +467,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -392,8 +476,8 @@
     </Style>
 
     <Style x:Key="Dyc.ComboBox" TargetType="{x:Type ComboBox}">
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="Height" Value="22" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource Dyc.ComboBoxItem}" />
@@ -411,15 +495,15 @@
                                           Margin="8,0,20,0"
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left"
-                                          TextElement.Foreground="{StaticResource Dyc.TextBrush}" />
+                                          TextElement.Foreground="{DynamicResource Dyc.TextBrush}" />
                         <Popup x:Name="PART_Popup"
                                AllowsTransparency="True"
                                Placement="Bottom"
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                Focusable="False"
                                PopupAnimation="Slide">
-                            <Border Background="{StaticResource Dyc.PanelBrush}"
-                                    BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                            <Border Background="{DynamicResource Dyc.PanelBrush}"
+                                    BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="6"
                                     Margin="0,2,0,0"
@@ -440,7 +524,7 @@
          the library expand/collapse controls next to the search box. -->
     <Style x:Key="Dyc.IconButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.SubtleTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
         <Setter Property="Width" Value="26" />
         <Setter Property="Height" Value="26" />
         <Setter Property="Cursor" Value="Hand" />
@@ -449,18 +533,18 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="Chrome"
                             Background="{TemplateBinding Background}"
-                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -470,7 +554,7 @@
 
     <Style x:Key="Dyc.ToolButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="8,4" />
@@ -488,10 +572,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.InputBackgroundBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4" />
@@ -504,7 +588,7 @@
 
     <Style x:Key="Dyc.ToolToggle" TargetType="{x:Type ToggleButton}">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="8,4" />
@@ -522,11 +606,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4" />
@@ -539,18 +623,18 @@
 
     <Style x:Key="Dyc.SmallButton" TargetType="{x:Type Button}" BasedOn="{StaticResource Dyc.ToolButton}">
         <Setter Property="Padding" Value="6,1" />
-        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
     </Style>
 
     <Style x:Key="Dyc.SmallToggle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource Dyc.ToolToggle}">
         <Setter Property="Padding" Value="6,1" />
-        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
     </Style>
 
     <!-- A full-width selectable row in the settings panel; the selected option
          (ChoiceOption.IsSelected) shows an accent border. -->
     <Style x:Key="Dyc.SettingsChoice" TargetType="{x:Type Button}">
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Padding" Value="8,4" />
@@ -569,11 +653,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -584,7 +668,7 @@
     <!-- ===== Library search results (flat Dynamo-style list while searching) ===== -->
     <Style x:Key="Dyc.LibraryResultItemStyle" TargetType="{x:Type ListBoxItem}">
         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="Padding" Value="4,2" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
@@ -599,11 +683,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -626,8 +710,8 @@
         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
         <Setter Property="ActualSize" Value="{Binding Size, Mode=OneWayToSource}" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="SelectedBrush" Value="{StaticResource Dyc.SelectionBorderBrush}" />
-        <Setter Property="HighlightBrush" Value="{StaticResource Dyc.SelectionBorderBrush}" />
+        <Setter Property="SelectedBrush" Value="{DynamicResource Dyc.SelectionBorderBrush}" />
+        <Setter Property="HighlightBrush" Value="{DynamicResource Dyc.SelectionBorderBrush}" />
     </Style>
 
     <!-- ===== Connector (port) visuals: required inputs are filled, inputs with a
@@ -635,13 +719,13 @@
     <ControlTemplate x:Key="Dyc.RequiredConnectorTemplate" TargetType="{x:Type Control}">
         <Ellipse x:Name="Dot"
                  Width="11" Height="11"
-                 Fill="{StaticResource Dyc.WireBrush}"
-                 Stroke="{StaticResource Dyc.WireBrush}"
+                 Fill="{DynamicResource Dyc.WireBrush}"
+                 Stroke="{DynamicResource Dyc.WireBrush}"
                  StrokeThickness="1.5" />
         <ControlTemplate.Triggers>
             <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Dyc.AccentBrush}" />
-                <Setter TargetName="Dot" Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
             </DataTrigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -650,12 +734,12 @@
         <Ellipse x:Name="Dot"
                  Width="11" Height="11"
                  Fill="Transparent"
-                 Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                 Stroke="{DynamicResource Dyc.SubtleTextBrush}"
                  StrokeThickness="1.5" />
         <ControlTemplate.Triggers>
             <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Dyc.AccentBrush}" />
-                <Setter TargetName="Dot" Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource Dyc.AccentBrush}" />
+                <Setter TargetName="Dot" Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
             </DataTrigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -703,7 +787,7 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Title}"
-                                   Foreground="{StaticResource Dyc.TextBrush}"
+                                   Foreground="{DynamicResource Dyc.TextBrush}"
                                    FontSize="11"
                                    VerticalAlignment="Center" />
                         <!-- List@Level badge (right-click the port to change). -->
@@ -712,7 +796,7 @@
                                    FontSize="10"
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"
-                                   Foreground="{StaticResource Dyc.AccentBrush}"
+                                   Foreground="{DynamicResource Dyc.AccentBrush}"
                                    ToolTip="This input consumes the incoming list at this level (right-click the port to change). Counted from the innermost: @L1 = items, @L2 = lists of items."
                                    Visibility="{Binding HasLevels, Converter={StaticResource Dyc.BoolToVisibility}}" />
                         <!-- Inline dropdown for unconnected choice ports (selection
@@ -751,7 +835,7 @@
             <Setter.Value>
                 <DataTemplate>
                     <TextBlock Text="{Binding Title}"
-                               Foreground="{StaticResource Dyc.TextBrush}"
+                               Foreground="{DynamicResource Dyc.TextBrush}"
                                FontSize="11" />
                 </DataTemplate>
             </Setter.Value>
@@ -781,14 +865,14 @@
                             <Setter Property="Opacity" Value="0.45" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                            <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
                             <Setter Property="StrokeThickness" Value="3" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsHidden}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsInsertTarget}" Value="True">
-                            <Setter Property="Stroke" Value="{StaticResource Dyc.TextBrush}" />
+                            <Setter Property="Stroke" Value="{DynamicResource Dyc.TextBrush}" />
                             <Setter Property="StrokeThickness" Value="4.5" />
                             <Setter Property="Opacity" Value="1" />
                         </DataTrigger>
@@ -819,7 +903,7 @@
                                   TargetAnchor="{Binding TargetLocation, Mode=OneWayToSource}"
                                   EnableSnapping="True"
                                   AllowOnlyConnectors="True"
-                                  Stroke="{StaticResource Dyc.AccentBrush}"
+                                  Stroke="{DynamicResource Dyc.AccentBrush}"
                                   StrokeThickness="2"
                                   StartedCommand="{Binding DataContext.StartConnectionCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
                                   CompletedCommand="{Binding DataContext.CreateConnectionCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}" />
@@ -868,7 +952,7 @@
                            MinWidth="30"
                            TextAlignment="Right"
                            FontSize="10"
-                           Foreground="{StaticResource Dyc.AccentBrush}"
+                           Foreground="{DynamicResource Dyc.AccentBrush}"
                            ToolTip="Current value"
                            Text="{Binding Value, StringFormat={}{0:0.###}}" />
                 <TextBox Grid.Column="3"
@@ -879,7 +963,7 @@
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
                 <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
                 <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
                          Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
             </StackPanel>
@@ -917,7 +1001,7 @@
                            MinWidth="30"
                            TextAlignment="Right"
                            FontSize="10"
-                           Foreground="{StaticResource Dyc.AccentBrush}"
+                           Foreground="{DynamicResource Dyc.AccentBrush}"
                            ToolTip="Current value"
                            Text="{Binding Value}" />
                 <TextBox Grid.Column="3"
@@ -928,7 +1012,7 @@
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
                 <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
                 <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
                          Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
             </StackPanel>
@@ -960,15 +1044,15 @@
                                 Width="34" Height="18"
                                 CornerRadius="9"
                                 VerticalAlignment="Center"
-                                Background="{StaticResource Dyc.InputBackgroundBrush}"
-                                BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                                Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                                BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                                 BorderThickness="1">
                             <Ellipse x:Name="Thumb"
                                      Width="12" Height="12"
                                      Margin="2,0"
                                      HorizontalAlignment="Left"
                                      VerticalAlignment="Center"
-                                     Fill="{StaticResource Dyc.SubtleTextBrush}" />
+                                     Fill="{DynamicResource Dyc.SubtleTextBrush}" />
                         </Border>
                         <TextBlock x:Name="StateText"
                                    Text="False"
@@ -976,19 +1060,19 @@
                                    MinWidth="32"
                                    VerticalAlignment="Center"
                                    FontSize="11"
-                                   Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
-                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                             <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
                             <Setter TargetName="Thumb" Property="Fill" Value="White" />
                             <Setter TargetName="StateText" Property="Text" Value="True" />
-                            <Setter TargetName="StateText" Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                            <Setter TargetName="StateText" Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1032,7 +1116,7 @@
             <TextBlock Grid.Row="0"
                        Margin="1,0,1,3"
                        FontSize="10"
-                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                        Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
                        Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
             <TextBox x:Name="WatchBox"
@@ -1065,7 +1149,7 @@
                     <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
                         <Grid Background="Transparent">
                             <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
-                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  Stroke="{DynamicResource Dyc.SubtleTextBrush}"
                                   StrokeThickness="1.5" />
                         </Grid>
                     </ControlTemplate>
@@ -1079,7 +1163,7 @@
                    MaxWidth="240"
                    TextWrapping="Wrap"
                    FontSize="11"
-                   Foreground="{StaticResource Dyc.ErrorBrush}"
+                   Foreground="{DynamicResource Dyc.ErrorBrush}"
                    Text="{Binding Reason}" />
     </DataTemplate>
 
@@ -1095,7 +1179,7 @@
             <TextBlock Grid.Row="0"
                        Margin="1,0,1,3"
                        FontSize="10"
-                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                        Text="{Binding DataContext.WatchCountText, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
                        Visibility="{Binding DataContext.HasWatchCount, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.BoolToVisibility}}" />
             <!-- Two-column rows: a right-aligned index gutter with a separator
@@ -1104,8 +1188,8 @@
                  would realize every row of a 100k-item list). -->
             <Border x:Name="WatchListBox"
                     Grid.Row="1"
-                    Background="{StaticResource Dyc.InputBackgroundBrush}"
-                    BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                    Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                    BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="6"
                     Padding="6,3"
@@ -1118,7 +1202,7 @@
                 <ListBox ItemsSource="{Binding Entries}"
                          Background="Transparent"
                          BorderThickness="0"
-                         Foreground="{StaticResource Dyc.TextBrush}"
+                         Foreground="{DynamicResource Dyc.TextBrush}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling">
@@ -1143,7 +1227,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0"
-                                        BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                                        BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                                         BorderThickness="0,0,1,0"
                                         Padding="0,0,6,0"
                                         Margin="0,0,6,0"
@@ -1153,14 +1237,14 @@
                                                FontSize="11"
                                                MinWidth="22"
                                                TextAlignment="Right"
-                                               Foreground="{StaticResource Dyc.AccentBrush}" />
+                                               Foreground="{DynamicResource Dyc.AccentBrush}" />
                                 </Border>
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Text}"
                                            FontFamily="Consolas"
                                            FontSize="11"
                                            TextWrapping="Wrap"
-                                           Foreground="{StaticResource Dyc.TextBrush}" />
+                                           Foreground="{DynamicResource Dyc.TextBrush}" />
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -1181,7 +1265,7 @@
                     <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
                         <Grid Background="Transparent">
                             <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
-                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  Stroke="{DynamicResource Dyc.SubtleTextBrush}"
                                   StrokeThickness="1.5" />
                         </Grid>
                     </ControlTemplate>
@@ -1222,13 +1306,13 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="A" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="A" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
                 <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding A}" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="R" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="R" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
                 <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding R}" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="G" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="G" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
                 <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding G}" />
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="B" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="B" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" VerticalAlignment="Center" />
                 <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding B}" />
             </Grid>
         </StackPanel>
@@ -1237,7 +1321,7 @@
     <DataTemplate x:Key="NodeBody.CapturedSelectionNode">
         <StackPanel Margin="4" MinWidth="180">
             <TextBlock Text="{Binding CapturedSummary}" TextWrapping="Wrap"
-                       Foreground="{StaticResource Dyc.SubtleTextBrush}" Margin="0,0,0,6" />
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" Margin="0,0,0,6" />
             <StackPanel Orientation="Horizontal">
                 <Button Style="{StaticResource Dyc.SmallButton}"
                         Content="Capture"
@@ -1265,8 +1349,8 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Border Grid.Row="0"
-                    Background="{StaticResource Dyc.InputBackgroundBrush}"
-                    BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                    Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                    BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="6"
                     Padding="3">
@@ -1295,7 +1379,7 @@
                                TextWrapping="Wrap"
                                TextAlignment="Center"
                                MaxWidth="200"
-                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                Text="Wire an image path in and run — the picture shows here."
                                Visibility="Collapsed" />
                 </Grid>
@@ -1303,7 +1387,7 @@
             <TextBlock Grid.Row="1"
                        Margin="1,3,1,0"
                        FontSize="10"
-                       Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                        TextTrimming="CharacterEllipsis"
                        MaxWidth="320"
                        Text="{Binding FileName}"
@@ -1324,7 +1408,7 @@
                     <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
                         <Grid Background="Transparent">
                             <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
-                                  Stroke="{StaticResource Dyc.SubtleTextBrush}"
+                                  Stroke="{DynamicResource Dyc.SubtleTextBrush}"
                                   StrokeThickness="1.5" />
                         </Grid>
                     </ControlTemplate>
@@ -1357,13 +1441,13 @@
             <Border x:Name="HoverRing"
                     Width="14"
                     CornerRadius="7"
-                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    BorderBrush="{DynamicResource Dyc.AccentBrush}"
                     BorderThickness="1.5"
                     Visibility="Collapsed" />
             <Path x:Name="Filled"
                   Data="{Binding SocketGeometry}"
                   Fill="{Binding FamilyBrush}"
-                  Stroke="{StaticResource Dyc.NodeBodyBrush}"
+                  Stroke="{DynamicResource Dyc.SocketOutlineBrush}"
                   StrokeThickness="1"
                   Stretch="None"
                   HorizontalAlignment="Center"
@@ -1373,7 +1457,7 @@
                        Text="{Binding SocketGlyph}"
                        FontSize="8"
                        FontWeight="Bold"
-                       Foreground="{StaticResource Dyc.NodeBodyBrush}"
+                       Foreground="{DynamicResource Dyc.NodeBodyBrush}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        IsHitTestVisible="False" />
@@ -1499,13 +1583,13 @@
 
     <!-- ===== Inline input editors (an unwired input is its own editor) ===== -->
     <Style TargetType="{x:Type views:ScrubNumberBox}">
-        <Setter Property="FieldBrush" Value="{StaticResource Dyc.InputBackgroundBrush}" />
-        <Setter Property="HoverBrush" Value="{StaticResource Dyc.HoverBrush}" />
-        <Setter Property="FillBrush" Value="{StaticResource Dyc.AccentBrush}" />
-        <Setter Property="TextBrush" Value="{StaticResource Dyc.TextBrush}" />
-        <Setter Property="SubtleBrush" Value="{StaticResource Dyc.SubtleTextBrush}" />
-        <Setter Property="AccentBrush" Value="{StaticResource Dyc.AccentBrush}" />
-        <Setter Property="ErrorBrush" Value="{StaticResource Dyc.ErrorBrush}" />
+        <Setter Property="FieldBrush" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
+        <Setter Property="HoverBrush" Value="{DynamicResource Dyc.HoverBrush}" />
+        <Setter Property="FillBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+        <Setter Property="TextBrush" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="SubtleBrush" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+        <Setter Property="AccentBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+        <Setter Property="ErrorBrush" Value="{DynamicResource Dyc.ErrorBrush}" />
     </Style>
 
     <Style x:Key="Dyc.NodeCheckBox" TargetType="{x:Type CheckBox}">
@@ -1519,25 +1603,25 @@
                     <Border x:Name="Box"
                             Width="30" Height="16"
                             CornerRadius="8"
-                            Background="{StaticResource Dyc.InputBackgroundBrush}"
-                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                            BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                             BorderThickness="1">
                         <Ellipse x:Name="Knob"
                                  Width="10" Height="10"
                                  HorizontalAlignment="Left"
                                  Margin="3,0,0,0"
-                                 Fill="{StaticResource Dyc.SubtleTextBrush}" />
+                                 Fill="{DynamicResource Dyc.SubtleTextBrush}" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
-                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                             <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
                             <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
                             <Setter TargetName="Knob" Property="Fill" Value="White" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1573,20 +1657,20 @@
                                 <Border x:Name="Seg"
                                         Height="20"
                                         Margin="0,0,1,0"
-                                        Background="{StaticResource Dyc.InputBackgroundBrush}"
+                                        Background="{DynamicResource Dyc.InputBackgroundBrush}"
                                         CornerRadius="3">
                                     <TextBlock Text="{Binding}"
                                                FontSize="11"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Seg" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                        <Setter TargetName="Seg" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Seg" Property="Background" Value="{StaticResource Dyc.AccentBrush}" />
+                                        <Setter TargetName="Seg" Property="Background" Value="{DynamicResource Dyc.AccentBrush}" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -1623,15 +1707,15 @@
                                         CornerRadius="3">
                                     <TextBlock Text="{Binding}"
                                                FontSize="13"
-                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                               Foreground="{DynamicResource Dyc.TextBrush}" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Nav" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                        <Setter TargetName="Nav" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Nav" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
-                                        <Setter TargetName="Nav" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                        <Setter TargetName="Nav" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                        <Setter TargetName="Nav" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -1696,14 +1780,14 @@
     <Style x:Key="Dyc.ModelFieldButton" TargetType="{x:Type Button}">
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border x:Name="Bd"
-                            Background="{StaticResource Dyc.InputBackgroundBrush}"
-                            BorderBrush="{StaticResource Dyc.InputBorderBrush}"
+                            Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                            BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="4"
                             Padding="6,0">
@@ -1711,7 +1795,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5" />
@@ -1733,9 +1817,9 @@
                     ToolTip="Use the elements currently selected in Navisworks">
                 <StackPanel Orientation="Horizontal">
                     <Path Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0"
-                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
                           Data="{StaticResource Dyc.Icon.Pick}" />
-                    <TextBlock Text="Pick from selection" Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                    <TextBlock Text="Pick from selection" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                 </StackPanel>
             </Button>
             <Grid x:Name="Filled" Visibility="Collapsed">
@@ -1758,7 +1842,7 @@
                         Command="{Binding CaptureModelCommand}"
                         ToolTip="Pick again from the current selection">
                     <Path Width="12" Height="12" Stretch="Uniform"
-                          Fill="{StaticResource Dyc.SubtleTextBrush}"
+                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
                           Data="{StaticResource Dyc.Icon.Pick}" />
                 </Button>
                 <Button Grid.Column="2"
@@ -1767,7 +1851,7 @@
                         HorizontalContentAlignment="Center"
                         Command="{Binding ResetCommand}"
                         ToolTip="Clear">
-                    <TextBlock Text="✕" FontSize="10" Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                    <TextBlock Text="✕" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                 </Button>
             </Grid>
         </Grid>
@@ -1873,7 +1957,7 @@
                        VerticalAlignment="Center"
                        Margin="10,0,14,0"
                        FontSize="11"
-                       Foreground="{StaticResource Dyc.TextBrush}"
+                       Foreground="{DynamicResource Dyc.TextBrush}"
                        Visibility="{Binding ShowContent, Converter={StaticResource Dyc.BoolToVisibility}}" />
             <nodify:NodeOutput DataContext="{Binding Connector}"
                                Style="{StaticResource Dyc.Socket.Output}"
@@ -1902,14 +1986,14 @@
                                Margin="0,0,8,0"
                                FontSize="11"
                                VerticalAlignment="Center"
-                               Foreground="{StaticResource Dyc.TextBrush}"
+                               Foreground="{DynamicResource Dyc.TextBrush}"
                                Visibility="{Binding Connector.ShowPlainLabel, Converter={StaticResource Dyc.BoolToVisibility}}" />
                     <TextBlock Text="{Binding Connector.LevelLabel}"
                                Margin="0,0,6,0"
                                FontSize="10"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Foreground="{DynamicResource Dyc.AccentBrush}"
                                ToolTip="This input consumes the incoming list at this level (right-click the socket to change)."
                                Visibility="{Binding Connector.HasLevels, Converter={StaticResource Dyc.BoolToVisibility}}" />
                 </StackPanel>
@@ -1943,16 +2027,16 @@
                            Text="▸"
                            Width="14"
                            FontSize="11"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                 <TextBlock Text="{Binding Panel}"
                            FontSize="11"
                            FontWeight="SemiBold"
-                           Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                 <TextBlock Text="{Binding CountText}"
                            Margin="6,0,0,0"
                            FontSize="10"
                            VerticalAlignment="Center"
-                           Foreground="{StaticResource Dyc.AccentBrush}"
+                           Foreground="{DynamicResource Dyc.AccentBrush}"
                            Visibility="{Binding HasCount, Converter={StaticResource Dyc.BoolToVisibility}}" />
             </StackPanel>
         </Border>
@@ -1977,7 +2061,7 @@
                        Margin="14,0"
                        VerticalAlignment="Center"
                        FontSize="10"
-                       Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
         </Border>
     </DataTemplate>
 
@@ -1993,10 +2077,10 @@
                         CornerRadius="4"
                         Padding="8,5"
                         BorderThickness="1.5"
-                        Background="{StaticResource Dyc.PanelBrush}"
-                        BorderBrush="{StaticResource Dyc.WarningBrush}">
+                        Background="{DynamicResource Dyc.PanelBrush}"
+                        BorderBrush="{DynamicResource Dyc.WarningBrush}">
                     <TextBlock FontSize="11"
-                               Foreground="{StaticResource Dyc.TextBrush}"
+                               Foreground="{DynamicResource Dyc.TextBrush}"
                                TextWrapping="Wrap"
                                MaxHeight="120"
                                Text="{Binding StateMessage}"
@@ -2036,8 +2120,8 @@
                             <MenuItem Header="Find in Library" Command="{Binding FindInLibraryCommand}" />
                         </ContextMenu>
                     </Border.ContextMenu>
-                    <Border Background="{StaticResource Dyc.NodeBodyBrush}"
-                            BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
+                    <Border Background="{DynamicResource Dyc.NodeBodyBrush}"
+                            BorderBrush="{DynamicResource Dyc.NodeBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             SnapsToDevicePixels="True">
@@ -2075,7 +2159,7 @@
                                              Width="8" Height="8"
                                              Margin="0,0,7,0"
                                              VerticalAlignment="Center"
-                                             Fill="{StaticResource Dyc.FnModifyBrush}"
+                                             Fill="{DynamicResource Dyc.FnModifyBrush}"
                                              ToolTip="{Binding Function}" />
                                     <views:EditableTextBlock FontWeight="SemiBold"
                                                              Foreground="White"
@@ -2099,8 +2183,8 @@
                     CornerRadius="3"
                     Padding="6,3"
                     BorderThickness="1"
-                    Background="{StaticResource Dyc.PanelBrush}"
-                    BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                    Background="{DynamicResource Dyc.PanelBrush}"
+                    BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                     Visibility="{Binding IsPreviewVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
                 <Border.InputBindings>
                     <MouseBinding Gesture="LeftClick" Command="{Binding TogglePreviewExpandCommand}" />
@@ -2109,13 +2193,13 @@
                     <TextBlock x:Name="PreviewSummary"
                                FontSize="10"
                                FontFamily="Consolas"
-                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                                TextWrapping="Wrap"
                                Text="{Binding PreviewText}"
                                ToolTip="{Binding PreviewText}" />
                     <TextBox FontSize="10"
                              FontFamily="Consolas"
-                             Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                             Foreground="{DynamicResource Dyc.SubtleTextBrush}"
                              Background="Transparent"
                              BorderThickness="0"
                              IsReadOnly="True"
@@ -2126,12 +2210,12 @@
                              Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
                     <TextBlock FontSize="9"
                                Margin="0,2,0,0"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Foreground="{DynamicResource Dyc.AccentBrush}"
                                Text="▸ click to show all items"
                                Visibility="{Binding ShowExpandHint, Converter={StaticResource Dyc.BoolToVisibility}}" />
                     <TextBlock FontSize="9"
                                Margin="0,2,0,0"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
+                               Foreground="{DynamicResource Dyc.AccentBrush}"
                                Text="▾ click to collapse"
                                Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
                 </StackPanel>
@@ -2146,10 +2230,10 @@
                 <Setter TargetName="StateBorder" Property="Opacity" Value="0.6" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Function}" Value="Create">
-                <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnCreateBrush}" />
+                <Setter TargetName="FnDot" Property="Fill" Value="{DynamicResource Dyc.FnCreateBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Function}" Value="Info">
-                <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnInfoBrush}" />
+                <Setter TargetName="FnDot" Property="Fill" Value="{DynamicResource Dyc.FnInfoBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding IsPreviewExpanded}" Value="True">
                 <Setter TargetName="PreviewSummary" Property="Visibility" Value="Collapsed" />
@@ -2158,11 +2242,11 @@
                 <Setter TargetName="PreviewBubble" Property="Cursor" Value="Hand" />
             </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Warning">
-                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.WarningBrush}" />
+                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{DynamicResource Dyc.WarningBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Error">
-                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
-                <Setter TargetName="Balloon" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
+                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{DynamicResource Dyc.ErrorBrush}" />
+                <Setter TargetName="Balloon" Property="BorderBrush" Value="{DynamicResource Dyc.ErrorBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding HasMessage}" Value="True">
                 <Setter TargetName="StateBorder" Property="ToolTip" Value="{Binding StateMessage}" />
@@ -2192,8 +2276,8 @@
         <Grid Width="40" Height="22" Background="Transparent" ToolTip="Reroute — Delete removes it and keeps the wire">
             <Border Margin="6,3"
                     CornerRadius="8"
-                    Background="{StaticResource Dyc.NodeBodyBrush}"
-                    BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
+                    Background="{DynamicResource Dyc.NodeBodyBrush}"
+                    BorderBrush="{DynamicResource Dyc.NodeBorderBrush}"
                     BorderThickness="1" />
             <nodify:NodeInput DataContext="{Binding Inputs[0]}"
                               Style="{StaticResource Dyc.Socket.Input}"

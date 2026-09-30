@@ -42,6 +42,33 @@ public static class PortKindPalette
     }
 
     /// <summary>
+    /// The colour of a family on a light canvas: the same hue, darkened until it keeps contrast against white cards
+    /// (the dark-theme colours include near-white and pale yellow, which vanish there).
+    /// </summary>
+    public static string HexOnLight(PortFamily family)
+    {
+        switch (family)
+        {
+            case PortFamily.Number: return "#1E88C8";
+            case PortFamily.Integer: return "#1666B8";
+            case PortFamily.Boolean: return "#D55E00";
+            case PortFamily.Text: return "#B39F00";
+            case PortFamily.DateTime: return "#B05A8C";
+            case PortFamily.Colour: return "#6B7480";
+            case PortFamily.Geometry: return "#00805D";
+            case PortFamily.Item: return "#C57F00";
+            case PortFamily.Selection: return "#8A6220";
+            case PortFamily.Viewpoint: return "#5B47D6";
+            case PortFamily.Clash: return "#C63C2C";
+            case PortFamily.Document: return "#56606D";
+            case PortFamily.Data: return "#4F9A6A";
+            case PortFamily.File: return "#8A6A3F";
+            case PortFamily.Action: return "#D84C82";
+            default: return "#8A93A0";
+        }
+    }
+
+    /// <summary>
     /// A single character that names the family, drawn inside sockets for the colour-blind aid
     /// (so colour is never the only way to tell number from text from geometry).
     /// </summary>

@@ -127,6 +127,9 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Shared frozen brush for the family.</summary>
     public Brush FamilyBrush => PortBrushes.For(_kind.Family);
 
+    /// <summary>Re-reads the family colour after the palette (and with it the light/dark variants) changed.</summary>
+    public void RefreshBrushes() => OnPropertyChanged(nameof(FamilyBrush));
+
     /// <summary>One letter naming the family, drawn in the socket when the colour-blind aid is on; otherwise empty.</summary>
     public string SocketGlyph => Node.Owner.ColourBlindGlyphs ? PortKindPalette.Glyph(_kind.Family) : string.Empty;
 

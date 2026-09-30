@@ -18,6 +18,11 @@ public partial class TextInputDialog : Window
     public TextInputDialog(string message, string title, string defaultValue)
     {
         InitializeComponent();
+        // The dialog merges its own copy of the theme: start it from the palette the editor is showing.
+        Dyncamelo.UI.Services.ThemeApplier.Apply(
+            Resources,
+            Dyncamelo.UI.Services.PaletteCatalog.ById(Dyncamelo.UI.Services.ThemeApplier.CurrentPaletteId)
+            ?? Dyncamelo.UI.Services.PaletteCatalog.Default);
         TitleText.Text = title;
         MessageText.Text = message;
         ResponseBox.Text = defaultValue ?? string.Empty;

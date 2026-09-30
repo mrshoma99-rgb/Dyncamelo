@@ -462,6 +462,24 @@ public class CommandSurfaceTests
             Assert.Equal(CommandCatalog.All.Select(c => c.Id), vm.ShortcutRows.Select(r => r.CommandId));
         });
     }
+
+    [Fact]
+    public void TheLibraryPanelChoiceIsRemembered()
+    {
+        StaHost.Run(() =>
+        {
+            var path = Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json");
+            var vm = NewEditor(path);
+            Assert.True(vm.IsLibraryVisible);
+            Resolver(vm, "view.library");
+            Assert.True(vm.RunCommandById("view.library"));
+            Assert.False(vm.IsLibraryVisible);
+
+            Assert.False(NewEditor(path).IsLibraryVisible);
+            vm.ResetPreferencesCommand.Execute(null);
+            Assert.True(vm.IsLibraryVisible);
+        });
+    }
 }
 
 /// <summary>The palette, Settings page and rebinding as the real control shows and routes them.</summary>
@@ -621,6 +639,44 @@ public class CommandSurfaceViewTests
             Assert.NotEmpty(Descendants<Nodify.MinimapItem>(mini));
             Assert.Empty(Descendants<ScrubNumberBox>(mini));                 // a node's editors live on the canvas only
             Assert.Equal(3, Descendants<ScrubNumberBox>(host.Window).Count); // the node's own three number inputs
+        });
+    }
+
+    [Fact]
+    public void TheLibraryPanelHidesWithCtrlBAndTheEdgeHandleBringsItBack()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            var panel = (System.Windows.Controls.DockPanel)host.Control.FindName("LibraryPanel");
+            var column = (System.Windows.Controls.ColumnDefinition)host.Control.FindName("LibraryColumn");
+            Assert.Equal(System.Windows.Visibility.Visible, panel.Visibility);
+            Assert.Equal(230d, column.Width.Value);
+
+            host.Control.ModifierProvider = () => ModifierKeys.Control;
+            Assert.True(host.Control.WantsHostKey(Key.B));
+            Assert.True(host.Control.ProcessHostKey(Key.B));
+
+            Assert.False(host.Vm.IsLibraryVisible);
+            Assert.True(host.Vm.IsLibraryHidden);
+            Assert.Equal(System.Windows.Visibility.Collapsed, panel.Visibility);
+            Assert.Equal(0d, column.Width.Value);
+            Assert.Equal(0d, ((System.Windows.Controls.ColumnDefinition)host.Control.FindName("SplitterColumn")).Width.Value);
+            Assert.Equal(System.Windows.Visibility.Collapsed, ((System.Windows.Controls.GridSplitter)host.Control.FindName("LibrarySplitter")).Visibility);
+        });
+        StaHost.Flush();
+        StaHost.Run(() =>
+        {
+            // The tab on the canvas edge is shown only while the panel is hidden, and brings it back.
+            var handle = Descendants<System.Windows.Controls.Button>(host.Window).First(b => (b.ToolTip as string ?? string.Empty).StartsWith("Show the node library"));
+            Assert.True(handle.IsVisible);
+            handle.Command.Execute(null);
+
+            Assert.True(host.Vm.IsLibraryVisible);
+            var panel = (System.Windows.Controls.DockPanel)host.Control.FindName("LibraryPanel");
+            Assert.Equal(System.Windows.Visibility.Visible, panel.Visibility);
+            Assert.Equal(230d, ((System.Windows.Controls.ColumnDefinition)host.Control.FindName("LibraryColumn")).Width.Value);
+            Assert.False(handle.IsVisible);
         });
     }
 
