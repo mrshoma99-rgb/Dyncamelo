@@ -404,6 +404,16 @@ public class NodeLayoutTests
                 Assert.Equal(1, Editors<System.Windows.Controls.ListBox>(c => c.Port.Name == "mode"));
                 Assert.Equal(1, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "kind"));
                 Assert.Equal(1, Editors<ColorSwatchPicker>(c => c.Port.Name == "tint"));
+
+                // The typed text must fit inside the box (a 6px vertical padding once cut the text in half).
+                foreach (var box in FindDescendants<System.Windows.Controls.TextBox>(rig.Window)
+                             .Where(t => t.DataContext is Dyncamelo.UI.ViewModels.ConnectorViewModel c && (c.Port.Name == "label" || c.Port.Name == "outputPath")))
+                {
+                    var host = box.Template.FindName("PART_ContentHost", box) as System.Windows.Controls.ScrollViewer;
+                    Assert.NotNull(host);
+                    var needed = box.FontSize * box.FontFamily.LineSpacing;
+                    Assert.True(host!.ActualHeight >= needed - 0.5, "text area " + host.ActualHeight + "px is shorter than one line (" + needed + "px)");
+                }
                 Assert.Equal(0, Editors<System.Windows.Controls.ComboBox>(c => c.Port.Name == "mode"));
                 // A ListBoxItem only selects on click when it can take focus (a non-focusable one silently ignores clicks).
                 var segments = FindDescendants<System.Windows.Controls.ListBoxItem>(rig.Window).Where(i => i.DataContext is string).ToList();
