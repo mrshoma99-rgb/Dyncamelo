@@ -108,6 +108,9 @@ public partial class GraphEditorViewModel
 
             OnPropertyChanged(nameof(Keymap));
             OnPropertyChanged(nameof(HelpSections));
+            OnPropertyChanged(nameof(UndoTooltip));
+            OnPropertyChanged(nameof(RedoTooltip));
+            OnPropertyChanged(nameof(RunTooltip));
             KeymapChanged?.Invoke(this, EventArgs.Empty);
         }
 

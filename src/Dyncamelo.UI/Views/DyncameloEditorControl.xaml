@@ -74,7 +74,7 @@
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="Run the graph (F5)" Command="{Binding RunCommand}">
+                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding RunTooltip}" Command="{Binding RunCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Path Style="{StaticResource Dyc.ToolIcon}" Data="{StaticResource Dyc.Icon.Run}" Fill="{StaticResource Dyc.AccentBrush}" />
                             <TextBlock Text="Run" />
@@ -537,18 +537,23 @@
                                   CommandParameter="{Binding PlacementTarget.MouseLocation, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <Separator />
                         <MenuItem Header="Copy"
+                                  Tag="edit.copy"
                                   InputGestureText="Ctrl+C"
                                   Command="{Binding PlacementTarget.DataContext.CopySelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <MenuItem Header="Paste"
+                                  Tag="edit.paste"
                                   InputGestureText="Ctrl+V"
                                   Command="{Binding PlacementTarget.DataContext.PasteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <MenuItem Header="Duplicate"
+                                  Tag="edit.duplicate"
                                   InputGestureText="Ctrl+D"
                                   Command="{Binding PlacementTarget.DataContext.DuplicateSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <MenuItem Header="Group Selection"
+                                  Tag="graph.group"
                                   InputGestureText="Ctrl+G"
                                   Command="{Binding PlacementTarget.DataContext.GroupSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <MenuItem Header="Arrange Selection"
+                                  Tag="graph.arrange"
                                   InputGestureText="Ctrl+L"
                                   Command="{Binding PlacementTarget.DataContext.ArrangeSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         <Separator />
@@ -607,7 +612,7 @@
                         <Button DockPanel.Dock="Right"
                                 Style="{StaticResource Dyc.IconButton}"
                                 Content="✕"
-                                ToolTip="Close (Esc or F1)"
+                                ToolTip="Close (Esc)"
                                 Command="{Binding CloseHelpCommand}" />
                         <TextBlock Text="Keyboard and mouse"
                                    FontSize="16"
@@ -879,7 +884,7 @@
                                                Foreground="{StaticResource Dyc.SubtleTextBrush}" />
                                     <WrapPanel>
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Performance HUD"
-                                                ToolTip="Frame rate, node counts and input state (Ctrl+Shift+F12)"
+                                                ToolTip="Frame rate, node counts and input state"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="view.hud" />
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Keyboard and mouse help"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.keys" />

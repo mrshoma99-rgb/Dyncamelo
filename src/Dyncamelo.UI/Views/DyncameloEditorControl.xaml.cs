@@ -204,8 +204,35 @@ public partial class DyncameloEditorControl : UserControl
         }
     }
 
+    // The canvas context menu is written in XAML; its shortcut text follows the keymap like the header menus.
+    private void ApplyContextMenuShortcuts(GraphEditorViewModel vm)
+    {
+        if (Editor.ContextMenu == null)
+        {
+            return;
+        }
+
+        foreach (var item in Editor.ContextMenu.Items)
+        {
+            if (item is MenuItem menuItem && menuItem.Tag is string id)
+            {
+                menuItem.InputGestureText = vm.Keymap.ShortcutOf(id) ?? string.Empty;
+            }
+        }
+    }
+
+    private Brush? _gridBackground;
+
+    // Grid lines are the canvas background tile; without them the canvas is the plain background colour.
+    private void ApplyGrid(bool show)
+    {
+        _gridBackground ??= Editor.Background;
+        Editor.Background = show ? _gridBackground : TryFindResource("Dyc.CanvasBrush") as Brush ?? _gridBackground;
+    }
+
     private void RebuildKeyRouter(GraphEditorViewModel vm)
     {
+        ApplyContextMenuShortcuts(vm);
         // Space over the canvas has special handling (it opens the search at the pointer); a rebound chord goes through the router.
         var skip = vm.Keymap.ShortcutOf("graph.addnode") == "Space" ? new[] { "graph.addnode" } : new string[0];
         _router = new ShortcutRouter(vm.Keymap, skip);
@@ -379,6 +406,7 @@ public partial class DyncameloEditorControl : UserControl
             ApplyPalette(newViewModel.PaletteId);
             RebuildKeyRouter(newViewModel);
             BuildHeaderMenu(newViewModel);
+            ApplyGrid(newViewModel.ShowGrid);
         }
     }
 
@@ -404,6 +432,10 @@ public partial class DyncameloEditorControl : UserControl
                     QuickSearchBox.SelectAll();
                 }),
                 System.Windows.Threading.DispatcherPriority.Input);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.ShowGrid) && ViewModel != null)
+        {
+            ApplyGrid(ViewModel.ShowGrid);
         }
         else if (e.PropertyName == nameof(GraphEditorViewModel.IsPaletteOpen) && ViewModel?.IsPaletteOpen == true)
         {

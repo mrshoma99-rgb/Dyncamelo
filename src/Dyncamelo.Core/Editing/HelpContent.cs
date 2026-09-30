@@ -48,7 +48,8 @@ public static class HelpContent
     {
         new HelpLine("Pan the canvas", "Right or middle mouse drag"),
         new HelpLine("Zoom", "Mouse wheel"),
-        new HelpLine("Search for a node here", "Space, or double-click empty canvas"),
+        new HelpLine("Search for a node here", "Space over the canvas"),
+        new HelpLine("Double-click empty canvas", "Does what Settings ▸ Editing says (a String node by default)"),
         new HelpLine("Connect a socket to a new node", "Drag a wire onto empty canvas"),
         new HelpLine("Insert a node into a wire", "Drag the node onto the wire"),
         new HelpLine("Add a reroute", "Double-click a wire"),

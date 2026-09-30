@@ -14,6 +14,7 @@ Dyncamelo is designed so that adding a node is a five-minute job: **a public sta
 6. [Navisworks node packs](#6-navisworks-node-packs)
 7. [Custom interactive nodes (NodeModel + WPF view)](#7-custom-interactive-nodes-nodemodel--wpf-view)
 8. [Conventions checklist](#8-conventions-checklist)
+9. [Making a node look right in the editor](#9-making-a-node-look-right-in-the-editor)
 
 ---
 
@@ -241,3 +242,26 @@ Before publishing a pack:
 - [ ] Pure logic covered by xunit tests (runnable on Linux).
 - [ ] Pack folder contains only your DLLs (+ third-party MIT/Apache/BSD dependencies you are licensed to ship) — never `Dyncamelo.*` or `Autodesk.*` assemblies.
 - [ ] LICENSE file included in the pack folder; license shown in your README.
+
+## 9. Making a node look right in the editor
+
+The editor builds a node's rows from your method signature, so most nodes need nothing extra. A handful of optional attributes (all in `Dyncamelo.Core.Loader`) tune how the rows look. They are **advisory**: none of them changes the node's definition id, so adding one to an existing parameter never breaks saved `.dyc` files.
+
+| You write | The editor shows |
+|---|---|
+| `double width = 200` | A draggable number field with the default remembered; a dot marks it when changed. |
+| `[NodeRange(0, 100, SoftMin = 0, SoftMax = 10, Step = 0.5, Unit = "mm")] double gap` | The field clamps to 0–100, its drag range is 0–10, it steps by 0.5 and prints `mm` after the value. |
+| `[NodeChoices("Model", "Object", "Face")] string level` | A dropdown instead of a free text box — or a segmented switcher when there are two or three short values (24 characters in all). |
+| `[NodePanel("Advanced")] double tolerance = 0.01` | The input sits in a foldable *Advanced* panel (`DefaultOpen = true` starts it expanded). |
+| `[PortKinds("viewpoint*")]` on an `object` parameter, or `[PortKinds("text*", "integer")]` on a `[MultiReturn]` method | The socket takes the colour and shape of that kind: a family name (`number`, `integer`, `boolean`, `text`, `datetime`, `colour`, `geometry`, `item`, `selection`, `viewpoint`, `clash`, `document`, `data`, `file`, `action`), then `*` for a list or `**` for a list of lists. |
+| `ModelItem`, `List<ModelItem>` or `ModelItemCollection` parameter | A **model-element picker**: *Use selection* takes the current Navisworks selection, clicking the value re-selects it, ✕ clears it. |
+| `bool`, `Color`, `DateTime`, enums | A checkbox, a colour swatch, a text field holding an ISO date, and a dropdown (or segmented switcher) of the enum's names. |
+| a `string` parameter whose name ends in `path`, `file`, `filename`, `folder` or `directory` | A file field with a `…` button; names ending in `folder`, `directory` or `dir` open a folder chooser instead. |
+
+Guidelines:
+
+- Give every number a `[NodeRange]` when a sensible range exists — it turns a blind text box into a slider-like field and stops absurd values.
+- Prefer `[NodeChoices]` to documenting "one of A, B, C" in the description.
+- Keep the *main* inputs unpaneled and move rare options into one `[NodePanel("Advanced")]`; the node stays short and the panel is one click away.
+- Use `[PortKinds]` whenever you return `object` from a `[MultiReturn]` method, so the wires downstream are coloured correctly and the editor can filter the node search when a wire is dropped on the canvas.
+- Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).

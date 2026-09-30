@@ -75,7 +75,9 @@ A few editor shortcuts worth knowing from day one:
 - **Hover any port** for a tooltip that says what to connect: name, type, required/optional with its default, and a description of the input (generated from the API documentation for all 314 nodes).
 - **Value previews** appear under each node after a run (toggle with **Preview** in the toolbar). When a preview truncates a list ("… N more"), click the bubble to expand the full scrollable list; click again to collapse. Wire an image path into a **Watch Image** node to see pictures (like the fall-hazard heat maps) inline on the canvas.
 - **Right-click a node → Find in Library** jumps to its library entry; double-click a node's title to rename it.
-- **Ctrl+L** tidies the selected nodes into non-overlapping left-to-right dependency columns (also on the canvas right-click menu as **Arrange Selection**) — the fastest way to untangle a graph that grew organically.
+- **Ctrl+L** tidies the selected nodes into left-to-right layers (also on the canvas right-click menu as **Arrange Selection**), and **Ctrl+Shift+L** does the whole graph — the fastest way to untangle a graph that grew organically. It uses the layered layout that keeps wire crossings to a minimum; if that layout is unavailable it falls back to simple columns and the status line says so.
+- **Ctrl+Shift+P** opens the **command palette**: type a word of any command (or setting) and press Enter. **F1** lists every shortcut; **Settings** (the gear) has sections for appearance, canvas and editing options and lets you rebind any shortcut. The whole editor is described in the [editor guide](UI_GUIDE.md).
+- **Home** fits the graph in view and **Ctrl+M** shows a minimap (it appears on its own from 40 nodes).
 
 ## 4. Your first graph: color all concrete red
 

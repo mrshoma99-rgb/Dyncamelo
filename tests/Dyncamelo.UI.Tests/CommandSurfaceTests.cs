@@ -255,6 +255,24 @@ public class CommandSurfaceTests
     }
 
     [Fact]
+    public void ToolbarTooltipsShowTheShortcutInForce()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            Assert.Equal("Nothing to undo (Ctrl+Z)", vm.UndoTooltip);
+            Assert.Equal("Run the graph (F5)", vm.RunTooltip);
+
+            vm.BeginShortcutCapture(vm.ShortcutRows.Single(r => r.CommandId == "graph.run"));
+            Assert.True(vm.CommitShortcutCapture("F9"));
+            Assert.Equal("Run the graph (F9)", vm.RunTooltip);
+
+            vm.ShortcutRows.Single(r => r.CommandId == "edit.undo").ClearCommand.Execute(null);
+            Assert.Equal("Nothing to undo", vm.UndoTooltip);
+        });
+    }
+
+    [Fact]
     public void TheShortcutTableCanBeFiltered()
     {
         StaHost.Run(() =>
@@ -565,6 +583,47 @@ public class CommandSurfaceViewTests
             Assert.False(host.Control.WantsHostKey(Key.M));
             host.Control.ModifierProvider = () => ModifierKeys.Control | ModifierKeys.Alt;
             Assert.True(host.Control.WantsHostKey(Key.M));
+        });
+    }
+
+    [Fact]
+    public void TheGridSettingSwitchesTheCanvasBackground()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            var editor = (Nodify.NodifyEditor)host.Control.FindName("Editor");
+            Assert.IsType<System.Windows.Media.DrawingBrush>(editor.Background);
+
+            host.Vm.ShowGrid = false;
+            Assert.IsType<System.Windows.Media.SolidColorBrush>(editor.Background);
+
+            host.Vm.ShowGrid = true;
+            Assert.IsType<System.Windows.Media.DrawingBrush>(editor.Background);
+
+            host.Vm.ShowGrid = false;
+            host.Vm.ResetPreferencesCommand.Execute(null);
+            Assert.IsType<System.Windows.Media.DrawingBrush>(editor.Background);
+        });
+    }
+
+    [Fact]
+    public void TheCanvasContextMenuFollowsRebinding()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            var editor = (Nodify.NodifyEditor)host.Control.FindName("Editor");
+            string Gesture(string id) => editor.ContextMenu.Items.OfType<System.Windows.Controls.MenuItem>().Single(m => (string?)m.Tag == id).InputGestureText;
+
+            Assert.Equal("Ctrl+D", Gesture("edit.duplicate"));
+
+            host.Vm.BeginShortcutCapture(host.Vm.ShortcutRows.Single(r => r.CommandId == "edit.duplicate"));
+            Assert.True(host.Vm.CommitShortcutCapture("Ctrl+Alt+D"));
+            Assert.Equal("Ctrl+Alt+D", Gesture("edit.duplicate"));
+
+            host.Vm.ResetAllShortcutsCommand.Execute(null);
+            Assert.Equal("Ctrl+D", Gesture("edit.duplicate"));
         });
     }
 

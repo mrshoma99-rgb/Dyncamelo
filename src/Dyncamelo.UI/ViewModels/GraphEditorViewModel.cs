@@ -618,10 +618,20 @@ public partial class GraphEditorViewModel : ObservableObject
     public ICommand ItemsDragCompletedCommand { get; }
 
     /// <summary>Toolbar tooltip for Undo, naming the edit it would revert.</summary>
-    public string UndoTooltip => _undo.CanUndo ? "Undo " + _undo.UndoLabel + " (Ctrl+Z)" : "Nothing to undo (Ctrl+Z)";
+    public string UndoTooltip => (_undo.CanUndo ? "Undo " + _undo.UndoLabel : "Nothing to undo") + ShortcutSuffix("edit.undo");
 
     /// <summary>Toolbar tooltip for Redo, naming the edit it would re-apply.</summary>
-    public string RedoTooltip => _undo.CanRedo ? "Redo " + _undo.RedoLabel + " (Ctrl+Y)" : "Nothing to redo (Ctrl+Y)";
+    public string RedoTooltip => (_undo.CanRedo ? "Redo " + _undo.RedoLabel : "Nothing to redo") + ShortcutSuffix("edit.redo");
+
+    /// <summary>Toolbar tooltip for Run, showing its current shortcut.</summary>
+    public string RunTooltip => "Run the graph" + ShortcutSuffix("graph.run");
+
+    // " (Ctrl+Z)" for the shortcut in force, or nothing when the command is unbound.
+    private string ShortcutSuffix(string commandId)
+    {
+        var chord = _keymap.ShortcutOf(commandId);
+        return chord == null ? string.Empty : " (" + chord + ")";
+    }
 
     /// <summary>Duplicates the selected nodes including wires between them (Ctrl+D).</summary>
     public ICommand DuplicateSelectionCommand { get; }

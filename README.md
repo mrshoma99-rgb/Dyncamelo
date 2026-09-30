@@ -151,6 +151,7 @@ Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon
 | Document | What it covers |
 |---|---|
 | [Getting Started](docs/GETTING_STARTED.md) | Install, editor tour, your first graph, lacing, saving/loading `.dyc` |
+| [Editor guide](docs/UI_GUIDE.md) | Every command, shortcut, gesture and setting of the editor (generated from the editor itself) |
 | [Node Library](docs/NODE_LIBRARY.md) | The full node catalog: ports, behavior, Navisworks API mapping, tiers |
 | [Architecture](docs/ARCHITECTURE.md) | Projects, engine pipeline, zero-touch loading, `.dyc` format, threading |
 | [Extending Dyncamelo](docs/EXTENDING.md) | Write your own node pack; custom NodeModel nodes with custom UI |
