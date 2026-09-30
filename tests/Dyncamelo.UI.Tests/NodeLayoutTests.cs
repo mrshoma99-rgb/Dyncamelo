@@ -218,6 +218,8 @@ public class NodeLayoutTests
     public void CollapsingKeepsEverySocketVisibleOnTheEdgesAsSlimRows()
     {
         using var rig = Build();
+        var expanded = 0d;
+        StaHost.Run(() => expanded = rig.A.Size.Height);
         StaHost.Run(() => rig.A.Model.Ui.Collapsed = true);
         StaHost.Flush();
         StaHost.Run(() =>
@@ -231,7 +233,8 @@ public class NodeLayoutTests
                 Assert.False(r.ShowContent);
                 Assert.Equal(NodeRowViewModel.CompactRowHeight, r.RowHeight);
             });
-            Assert.True(rig.A.Size.Height < 110, "collapsed node should stay short, got " + rig.A.Size.Height);
+            // The size includes the value-preview bubble under the node, so compare with the expanded node rather than a constant.
+            Assert.True(rig.A.Size.Height < expanded - 20, "collapsed node should be clearly shorter than expanded (" + expanded + "), got " + rig.A.Size.Height);
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "collapsed output");
 
             // Each input has its own anchor on the left edge, one under another (not all stacked on one point).
