@@ -33,7 +33,6 @@ public class ConnectionViewModel : ObservableObject
         _owner = owner;
         source.PropertyChanged += OnEndpointChanged;
         target.PropertyChanged += OnEndpointChanged;
-        owner.PropertyChanged += OnOwnerChanged;
     }
 
     private readonly GraphEditorViewModel _owner;
@@ -43,7 +42,6 @@ public class ConnectionViewModel : ObservableObject
     {
         Source.PropertyChanged -= OnEndpointChanged;
         Target.PropertyChanged -= OnEndpointChanged;
-        _owner.PropertyChanged -= OnOwnerChanged;
     }
 
     /// <summary>Wire colour: the family of the port it leaves.</summary>
@@ -63,8 +61,6 @@ public class ConnectionViewModel : ObservableObject
     /// <summary>Re-raises <see cref="IsMuted"/> after the model flag changed.</summary>
     public void RefreshMuted() => OnPropertyChanged(nameof(IsMuted));
 
-    /// <summary>True when the editor uses the row node layout (wires use the row-layout wire style).</summary>
-    public bool UseRowLayout => _owner.UseRowLayout;
 
     private void OnEndpointChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -76,14 +72,6 @@ public class ConnectionViewModel : ObservableObject
         else if (e.PropertyName == nameof(ConnectorViewModel.Depth))
         {
             OnPropertyChanged(nameof(IsReplicating));
-        }
-    }
-
-    private void OnOwnerChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(GraphEditorViewModel.UseRowLayout))
-        {
-            OnPropertyChanged(nameof(UseRowLayout));
         }
     }
 

@@ -131,13 +131,6 @@
                                 <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
                                               HorizontalAlignment="Left"
                                               Margin="0,8,0,0"
-                                              Content="Classic node layout"
-                                              ToolTip="Draw nodes with the older side-by-side input/output columns instead of the row layout"
-                                              IsChecked="{Binding ClassicNodeLayout}" />
-
-                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
-                                              HorizontalAlignment="Left"
-                                              Margin="0,8,0,0"
                                               Content="Live evaluation while scrubbing"
                                               ToolTip="Re-run the graph while dragging a number field. Off (default): the graph runs once when you release, which is safer for graphs that call Navisworks."
                                               IsChecked="{Binding LiveScrubEvaluation}" />
@@ -584,7 +577,7 @@
                                  DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"
                                  RemoveConnectionCommand="{Binding RemoveConnectionCommand}"
                                  ItemContainerStyle="{StaticResource Dyc.ItemContainerStyle}"
-                                 GridCellSize="15"
+                                 GridCellSize="{Binding GridCellSize}"
                                  AllowDrop="True"
                                  Drop="OnEditorDrop"
                                  PreviewMouseDown="OnEditorPreviewMouseDown">
@@ -647,6 +640,42 @@
                     </ContextMenu>
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
+
+            <!-- Minimap (Ctrl+M): the whole graph at a glance; drag the frame to pan, wheel to zoom.
+                 Automatic from 40 nodes, or on/off in Settings and the View menu. -->
+            <nodify:Minimap x:Name="MiniMap"
+                            Grid.Column="2"
+                            Panel.ZIndex="800"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Width="220"
+                            Height="150"
+                            Margin="0,0,14,14"
+                            ItemsSource="{Binding Items}"
+                            ViewportLocation="{Binding ViewportLocation, ElementName=Editor, Mode=TwoWay}"
+                            ViewportSize="{Binding ViewportSize, ElementName=Editor, Mode=OneWay}"
+                            Extent="{Binding ItemsExtent, ElementName=Editor, Mode=OneWay}"
+                            Background="#D9151719"
+                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                            BorderThickness="1"
+                            Zoom="OnMinimapZoom"
+                            Visibility="{Binding IsMinimapVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <nodify:Minimap.ViewportStyle>
+                    <Style TargetType="{x:Type Rectangle}">
+                        <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
+                        <Setter Property="StrokeThickness" Value="2" />
+                        <Setter Property="Fill" Value="#223AA0F0" />
+                    </Style>
+                </nodify:Minimap.ViewportStyle>
+                <nodify:Minimap.ItemContainerStyle>
+                    <Style TargetType="{x:Type nodify:MinimapItem}">
+                        <Setter Property="Location" Value="{Binding Location}" />
+                        <Setter Property="Width" Value="{Binding Size.Width}" />
+                        <Setter Property="Height" Value="{Binding Size.Height}" />
+                        <Setter Property="Background" Value="#7F8FA3" />
+                    </Style>
+                </nodify:Minimap.ItemContainerStyle>
+            </nodify:Minimap>
 
             <!-- Keyboard & mouse help (F1): generated from the command catalogue. -->
             <Border Grid.Column="2"

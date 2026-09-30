@@ -142,9 +142,12 @@ public partial class GraphEditorViewModel
                 return false;
             }
 
-            foreach (var move in GraphOps.MakeRoom(_graph, node.Model, WidthOf))
+            if (AutoOffsetOnInsert)
             {
-                move.Key.X = move.Value;
+                foreach (var move in GraphOps.MakeRoom(_graph, node.Model, WidthOf))
+                {
+                    move.Key.X = move.Value;
+                }
             }
         }
 

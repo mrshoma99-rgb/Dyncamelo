@@ -1023,3 +1023,124 @@ public class HelpContentTests
         Assert.Equal("Help", help.Category);
     }
 }
+
+public class KeymapTests
+{
+    [Fact]
+    public void WithoutOverridesTheDefaultsApply()
+    {
+        var keymap = new Keymap();
+        Assert.Equal("Ctrl+Z", keymap.ShortcutOf("edit.undo"));
+        Assert.Equal("edit.undo", keymap.Find(new KeyChord("Z", true, false, false))!.Id);
+        Assert.Equal("edit.redo", keymap.Find(new KeyChord("Z", true, true, false))!.Id);   // the built-in alternate
+        Assert.Null(keymap.ShortcutOf("graph.addnote"));
+        Assert.False(keymap.IsCustom("edit.undo"));
+    }
+
+    [Fact]
+    public void ARebindingMovesTheCommandAndFreesTheOldChord()
+    {
+        var keymap = new Keymap(new Dictionary<string, string> { ["node.mute"] = "Ctrl+Alt+M" });
+
+        Assert.Equal("Ctrl+Alt+M", keymap.ShortcutOf("node.mute"));
+        Assert.Equal("node.mute", keymap.Find(new KeyChord("M", true, false, true))!.Id);
+        Assert.Null(keymap.Find(new KeyChord("M", false, false, false)));
+        Assert.True(keymap.IsCustom("node.mute"));
+    }
+
+    [Fact]
+    public void RebindingRedoDropsItsBuiltInAlternate()
+    {
+        var keymap = new Keymap(new Dictionary<string, string> { ["edit.redo"] = "Ctrl+Alt+R" });
+        Assert.Null(keymap.Find(new KeyChord("Z", true, true, false)));
+        Assert.Null(keymap.AlternateOf("edit.redo"));
+        Assert.Equal("Ctrl+Alt+R", keymap.ShortcutOf("edit.redo"));
+    }
+
+    [Fact]
+    public void EmptyChordUnbindsTheCommand()
+    {
+        var keymap = new Keymap(new Dictionary<string, string> { ["node.mute"] = string.Empty });
+        Assert.Null(keymap.ShortcutOf("node.mute"));
+        Assert.Null(keymap.Find(new KeyChord("M", false, false, false)));
+    }
+
+    [Fact]
+    public void ValidationExplainsConflictsBadChordsAndReservedTextChords()
+    {
+        var keymap = new Keymap();
+        Assert.Contains("already used", keymap.Validate("node.mute", "Ctrl+Z"));
+        Assert.Contains("not a valid", keymap.Validate("node.mute", "Hyper+Q"));
+        Assert.Contains("edits text", keymap.Validate("graph.run", "Ctrl+C"));    // graph.run is a global command
+        Assert.Null(keymap.Validate("node.mute", "Ctrl+Alt+M"));
+        Assert.Null(keymap.Validate("node.mute", string.Empty));
+        Assert.Null(keymap.Validate("node.mute", "M"));                            // its own current chord
+        Assert.Equal("Unknown command.", keymap.Validate("nope.nope", "F2"));
+    }
+
+    [Fact]
+    public void WithReturnsNewOverridesAndBindingTheDefaultClearsTheOverride()
+    {
+        var keymap = new Keymap();
+        var changed = keymap.With("node.mute", "Ctrl+Alt+M");
+        Assert.Equal("Ctrl+Alt+M", changed["node.mute"]);
+
+        var back = new Keymap(changed).With("node.mute", "M");
+        Assert.DoesNotContain("node.mute", back.Keys);
+    }
+
+    [Fact]
+    public void OverridesForUnknownCommandsAreIgnored()
+    {
+        var keymap = new Keymap(new Dictionary<string, string> { ["gone.command"] = "F9" });
+        Assert.Empty(keymap.OverriddenIds);
+        Assert.Null(keymap.Find(new KeyChord("F9", false, false, false)));
+    }
+}
+
+public class CommandSearchTests
+{
+    private static IEnumerable<CommandInfo> All => CommandCatalog.All;
+
+    [Fact]
+    public void AnEmptyQueryListsTheCatalogue()
+    {
+        var results = CommandSearch.Rank(string.Empty, All, maxResults: 1000);
+        Assert.Equal(CommandCatalog.All.Count, results.Count);
+        Assert.Equal(CommandCatalog.All[0].Id, results[0].Id);
+    }
+
+    [Fact]
+    public void TitlePrefixBeatsKeywordMatches()
+    {
+        var results = CommandSearch.Rank("undo", All);
+        Assert.Equal("edit.undo", results[0].Id);
+    }
+
+    [Fact]
+    public void EveryWordMustMatch()
+    {
+        var results = CommandSearch.Rank("delete reconnect", All);
+        Assert.Contains(results, r => r.Id == "edit.deletereconnect");
+        Assert.DoesNotContain(results, r => r.Id == "edit.copy");
+    }
+
+    [Fact]
+    public void KeywordsAndCategoriesFindCommands()
+    {
+        Assert.Contains(CommandSearch.Rank("bypass", All), r => r.Id == "node.mute");
+        Assert.Contains(CommandSearch.Rank("wires", All), r => r.Id == "wire.mute");
+    }
+
+    [Fact]
+    public void NoMatchGivesAnEmptyList()
+    {
+        Assert.Empty(CommandSearch.Rank("zzzzqq", All));
+    }
+
+    [Fact]
+    public void ResultsAreCapped()
+    {
+        Assert.True(CommandSearch.Rank("e", All, maxResults: 5).Count <= 5);
+    }
+}

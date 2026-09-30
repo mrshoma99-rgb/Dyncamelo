@@ -80,6 +80,10 @@ public sealed class ScrubNumberBox : Decorator
     public static readonly DependencyProperty LiveCommitProperty = DependencyProperty.Register(
         nameof(LiveCommit), typeof(bool), typeof(ScrubNumberBox), new FrameworkPropertyMetadata(false));
 
+    /// <summary>Pixels of mouse travel per step while dragging (smaller = faster); set from the scrub-speed preference.</summary>
+    public static readonly DependencyProperty PixelsPerStepProperty = DependencyProperty.Register(
+        nameof(PixelsPerStep), typeof(double), typeof(ScrubNumberBox), new FrameworkPropertyMetadata(ScrubMath.PixelsPerStep));
+
     /// <summary>Command that returns the value to its default (Backspace while hovering).</summary>
     public static readonly DependencyProperty ResetCommandProperty = DependencyProperty.Register(
         nameof(ResetCommand), typeof(ICommand), typeof(ScrubNumberBox));
@@ -172,6 +176,9 @@ public sealed class ScrubNumberBox : Decorator
 
     /// <inheritdoc cref="PlaceholderProperty" />
     public string Placeholder { get => (string)GetValue(PlaceholderProperty); set => SetValue(PlaceholderProperty, value); }
+
+    /// <inheritdoc cref="PixelsPerStepProperty" />
+    public double PixelsPerStep { get => (double)GetValue(PixelsPerStepProperty); set => SetValue(PixelsPerStepProperty, value); }
 
     /// <inheritdoc cref="LiveCommitProperty" />
     public bool LiveCommit { get => (bool)GetValue(LiveCommitProperty); set => SetValue(LiveCommitProperty, value); }
@@ -402,7 +409,8 @@ public sealed class ScrubNumberBox : Decorator
             Spec,
             ActualWidth,
             fine: (modifiers & ModifierKeys.Shift) != 0,
-            snap: (modifiers & ModifierKeys.Control) != 0);
+            snap: (modifiers & ModifierKeys.Control) != 0,
+            pixelsPerStep: PixelsPerStep);
         if (LiveCommit && (DateTime.UtcNow - _lastLiveCommit).TotalMilliseconds >= 150d)
         {
             _lastLiveCommit = DateTime.UtcNow;

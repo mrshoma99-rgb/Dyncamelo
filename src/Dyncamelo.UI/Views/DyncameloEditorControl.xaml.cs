@@ -115,6 +115,9 @@ public partial class DyncameloEditorControl : UserControl
         }
     }
 
+    // The minimap reports wheel zoom as a request; the editor does the zooming around that point.
+    private void OnMinimapZoom(object sender, Nodify.Events.ZoomEventArgs e) => Editor.ZoomAtPosition(e.Zoom, e.Location);
+
     private void OnEditorIsDraggingChanged(object? sender, System.EventArgs e)
     {
         if (Editor.IsDragging)
@@ -151,6 +154,7 @@ public partial class DyncameloEditorControl : UserControl
     }
 
     private readonly ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
+    private RelayCommand? _guideCommand;
     private RelayCommand? _hudCommand;
     private RelayCommand? _previewsCommand;
     private RelayCommand? _settingsCommand;
@@ -174,6 +178,7 @@ public partial class DyncameloEditorControl : UserControl
                 "view.hud" => _perfHud != null && _perfHud.Visibility == Visibility.Visible,
                 "view.previews" => vm.ShowNodePreviews,
                 "graph.autorun" => vm.IsAutoRun,
+                "view.minimap" => vm.IsMinimapVisible,
                 _ => false,
             },
             (category, top) =>
@@ -199,6 +204,8 @@ public partial class DyncameloEditorControl : UserControl
             case "file.saveas": return vm.SaveAsCommand;
             case "edit.undo": return vm.UndoCommand;
             case "edit.redo": return vm.RedoCommand;
+            case "edit.cut": return vm.CutSelectionCommand;
+            case "edit.selectall": return vm.SelectAllItemsCommand;
             case "edit.copy": return vm.CopySelectionCommand;
             case "edit.paste": return vm.PasteCommand;
             case "edit.duplicate": return vm.DuplicateSelectionCommand;
@@ -216,6 +223,12 @@ public partial class DyncameloEditorControl : UserControl
             case "node.hideunused": return vm.ToggleHideUnusedSelectedCommand;
             case "node.mute": return vm.ToggleMuteSelectedCommand;
             case "node.autoconnect": return vm.AutoConnectCommand;
+            case "node.resetinputs": return vm.ResetSelectedInputsCommand;
+            case "node.insertonwire": return vm.InsertIntoSelectedWireCommand;
+            case "wire.swap": return vm.SwapSelectedLinksCommand;
+            case "view.minimap": return vm.ToggleMinimapCommand;
+            case "view.resetwidth": return vm.ResetSelectedWidthCommand;
+            case "help.guide": return _guideCommand ??= new RelayCommand(OpenGuide);
             case "wire.mute": return vm.MuteSelectedWiresCommand;
             case "wire.reroute": return vm.RerouteSelectedWiresCommand;
             case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
@@ -303,6 +316,19 @@ public partial class DyncameloEditorControl : UserControl
             }
         };
         file.Items.Add(samples);
+    }
+
+    private static void OpenGuide()
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+                "https://github.com/mrshoma99-rgb/Dyncamelo/blob/main/docs/UI_GUIDE.md") { UseShellExecute = true });
+        }
+        catch (Exception)
+        {
+            // No browser association: the guide is also in the docs folder of the repository.
+        }
     }
 
     private void OpenQuickSearchFromMenu()

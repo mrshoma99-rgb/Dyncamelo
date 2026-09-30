@@ -40,4 +40,31 @@ public static class PortKindPalette
             default: return "#B4BBC4";
         }
     }
+
+    /// <summary>
+    /// A single character that names the family, drawn inside sockets for the colour-blind aid
+    /// (so colour is never the only way to tell number from text from geometry).
+    /// </summary>
+    public static string Glyph(PortFamily family)
+    {
+        switch (family)
+        {
+            case PortFamily.Number: return "N";
+            case PortFamily.Integer: return "I";
+            case PortFamily.Boolean: return "B";
+            case PortFamily.Text: return "T";
+            case PortFamily.DateTime: return "D";
+            case PortFamily.Colour: return "C";
+            case PortFamily.Geometry: return "G";
+            case PortFamily.Item: return "E";
+            case PortFamily.Selection: return "S";
+            case PortFamily.Viewpoint: return "V";
+            case PortFamily.Clash: return "X";
+            case PortFamily.Document: return "F";
+            case PortFamily.Data: return "{";
+            case PortFamily.File: return "P";
+            case PortFamily.Action: return "A";
+            default: return string.Empty;
+        }
+    }
 }

@@ -439,3 +439,138 @@ public partial class GraphEditorViewModel
     /// <summary>Arranges every node left to right (Ctrl+Shift+L).</summary>
     public ICommand ArrangeAllCommand => _arrangeAllCommand ??= new RelayCommand(ArrangeAll);
 }
+
+public partial class GraphEditorViewModel
+{
+    private ICommand? _cutCommand;
+    private ICommand? _selectAllCommand;
+    private ICommand? _resetWidthCommand;
+    private ICommand? _resetInputsCommand;
+    private ICommand? _insertIntoWireCommand;
+    private ICommand? _swapLinksCommand;
+
+    /// <summary>Copies the selection and deletes it (Ctrl+X).</summary>
+    public ICommand CutSelectionCommand => _cutCommand ??= new RelayCommand(CutSelection);
+
+    /// <summary>Selects every node, note and frame (Ctrl+A).</summary>
+    public ICommand SelectAllItemsCommand => _selectAllCommand ??= new RelayCommand(SelectAllItems);
+
+    /// <summary>Gives the selected nodes their automatic width back.</summary>
+    public ICommand ResetSelectedWidthCommand => _resetWidthCommand ??= new RelayCommand(ResetSelectedWidth);
+
+    /// <summary>Clears every typed-in input value of the selected nodes.</summary>
+    public ICommand ResetSelectedInputsCommand => _resetInputsCommand ??= new RelayCommand(ResetSelectedInputs);
+
+    /// <summary>Splices the selected node into the selected wire.</summary>
+    public ICommand InsertIntoSelectedWireCommand => _insertIntoWireCommand ??= new RelayCommand(InsertIntoSelectedWire);
+
+    /// <summary>Swaps the destinations of two selected wires.</summary>
+    public ICommand SwapSelectedLinksCommand => _swapLinksCommand ??= new RelayCommand(SwapSelectedLinks);
+
+    /// <summary>Copies the selected nodes to the clipboard and removes them, as one undo step.</summary>
+    public void CutSelection()
+    {
+        if (SelectedItems.OfType<NodeViewModel>().Count() == 0)
+        {
+            StatusMessage = "Nothing selected to cut.";
+            return;
+        }
+
+        CopySelection();
+        DeleteSelection();
+    }
+
+    /// <summary>Selects every item on the canvas.</summary>
+    public void SelectAllItems()
+    {
+        SelectedItems.Clear();
+        foreach (var item in Items)
+        {
+            SelectedItems.Add(item);
+        }
+
+        StatusMessage = "Selected " + Count(SelectedItems.Count) + " item(s).";
+    }
+
+    /// <summary>Removes the fixed width of the selected nodes.</summary>
+    public void ResetSelectedWidth()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count == 0)
+        {
+            StatusMessage = "Select a node first.";
+            return;
+        }
+
+        using (_undo.Begin("Reset width"))
+        {
+            foreach (var node in nodes)
+            {
+                node.Model.Ui.Width = null;
+            }
+        }
+    }
+
+    /// <summary>Clears the pinned input values of the selected nodes.</summary>
+    public void ResetSelectedInputs()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count == 0)
+        {
+            StatusMessage = "Select a node first.";
+            return;
+        }
+
+        var cleared = 0;
+        using (_undo.Begin("Reset inputs"))
+        {
+            foreach (var node in nodes)
+            {
+                foreach (var port in node.Model.InPorts)
+                {
+                    if (port.HasUserValue)
+                    {
+                        port.ClearUserValue();
+                        cleared++;
+                    }
+                }
+            }
+        }
+
+        StatusMessage = cleared == 0 ? "Nothing to reset." : "Reset " + Count(cleared) + " input(s) to their defaults.";
+    }
+
+    /// <summary>Splices the one selected node into the one selected wire (the menu route of dropping a node on a wire).</summary>
+    public void InsertIntoSelectedWire()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count != 1 || SelectedConnections.Count != 1)
+        {
+            StatusMessage = "Select one node and one wire.";
+            return;
+        }
+
+        if (!InsertNodeOnWire(nodes[0], SelectedConnections[0]))
+        {
+            StatusMessage = "That node cannot be inserted into that wire (it needs no wires of its own and matching sockets).";
+        }
+    }
+
+    /// <summary>Swaps where two selected wires end.</summary>
+    public void SwapSelectedLinks()
+    {
+        if (SelectedConnections.Count != 2)
+        {
+            StatusMessage = "Select exactly two wires to swap.";
+            return;
+        }
+
+        bool swapped;
+        using (_undo.Begin("Swap links"))
+        {
+            swapped = GraphOps.SwapLinks(_graph, SelectedConnections[0].Model, SelectedConnections[1].Model);
+        }
+
+        StatusMessage = swapped ? "Swapped the two links." : "Those links cannot be swapped.";
+    }
+}

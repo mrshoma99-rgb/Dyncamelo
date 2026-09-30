@@ -132,7 +132,8 @@ public static class ScrubMath
     /// <param name="fieldWidth">Rendered width of the field in pixels.</param>
     /// <param name="fine">Shift held: a tenth of the sensitivity.</param>
     /// <param name="snap">Ctrl held: snap to multiples of the step.</param>
-    public static double Scrub(double start, double deltaPixels, NumberEditSpec spec, double fieldWidth, bool fine, bool snap)
+    /// <param name="pixelsPerStep">Drag speed: pixels of travel per step (the default suits most; smaller is faster).</param>
+    public static double Scrub(double start, double deltaPixels, NumberEditSpec spec, double fieldWidth, bool fine, bool snap, double pixelsPerStep = PixelsPerStep)
     {
         double perPixel;
         if (spec.HasSoftRange && fieldWidth > 20d)
@@ -147,6 +148,12 @@ public static class ScrubMath
         if (fine)
         {
             perPixel *= 0.1d;
+        }
+
+        // The speed preference scales both the stepped and the range-based feel equally.
+        if (pixelsPerStep > 0d && !double.IsNaN(pixelsPerStep) && !double.IsInfinity(pixelsPerStep))
+        {
+            perPixel *= PixelsPerStep / pixelsPerStep;
         }
 
         var value = start + deltaPixels * perPixel;

@@ -188,6 +188,48 @@ public static class GraphOps
         return bridged;
     }
 
+    // ----- swap links ----------------------------------------------------------------------
+
+    /// <summary>
+    /// Swaps the destinations of two wires: <c>A → X</c> and <c>B → Y</c> become <c>A → Y</c> and <c>B → X</c>.
+    /// Changes nothing (and returns false) when either new pairing is not accepted.
+    /// </summary>
+    public static bool SwapLinks(GraphModel graph, ConnectionModel first, ConnectionModel second)
+    {
+        if (first == second || !graph.Connections.Contains(first) || !graph.Connections.Contains(second))
+        {
+            return false;
+        }
+
+        var sourceA = first.Source;
+        var targetX = first.Target;
+        var sourceB = second.Source;
+        var targetY = second.Target;
+        if (targetX == targetY || sourceA == sourceB)
+        {
+            return false;
+        }
+
+        graph.Disconnect(first);
+        graph.Disconnect(second);
+        var a = graph.Connect(sourceA, targetY);
+        var b = a.Success ? graph.Connect(sourceB, targetX) : a;
+        if (a.Success && b.Success)
+        {
+            return true;
+        }
+
+        // Put things back the way they were.
+        if (a.Success && a.Connection != null)
+        {
+            graph.Disconnect(a.Connection);
+        }
+
+        graph.Connect(sourceA, targetX);
+        graph.Connect(sourceB, targetY);
+        return false;
+    }
+
     // ----- auto-connect --------------------------------------------------------------------
 
     /// <summary>

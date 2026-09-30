@@ -13,9 +13,6 @@ namespace Dyncamelo.UI.ViewModels;
 /// </summary>
 public sealed class NodeRowViewModel : ObservableObject
 {
-    /// <summary>Height of a normal row in device-independent pixels.</summary>
-    public const double NormalHeight = 22d;
-
     private bool _zeroHeight;
     private bool _isOpen;
     private int _count;
@@ -96,7 +93,7 @@ public sealed class NodeRowViewModel : ObservableObject
     public double RowHeight => Collapsed ? 0d : double.NaN;
 
     /// <summary>Minimum height matching <see cref="RowHeight"/>.</summary>
-    public double RowMinHeight => Collapsed ? 0d : NormalHeight;
+    public double RowMinHeight => Collapsed ? 0d : Node.Owner.RowBaseHeight;
 
     /// <summary>True when the label and editors should be shown (sockets always stay laid out).</summary>
     public bool ShowContent => !Collapsed;

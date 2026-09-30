@@ -26,10 +26,10 @@ public class ThemeAndWireTests
 
             foreach (var key in new[]
             {
-                "Dyc.NodeTemplate.Blender", "Dyc.NodeTemplate.Classic", "Dyc.NodeTemplate.Reroute",
+                "Dyc.NodeTemplate.Blender", "Dyc.NodeTemplate.Reroute",
                 "Dyc.SocketTemplate", "Dyc.Socket.Input", "Dyc.Socket.Output", "Dyc.RowSelector",
                 "Row.Input", "Row.Output", "Row.Body", "Row.PanelHeader", "Row.Hidden",
-                "Dyc.Wire.Blender", "Dyc.Wire.Classic", "Dyc.ConnectionTemplate", "Dyc.TopMenuItem",
+                "Dyc.Wire.Blender", "Dyc.ConnectionTemplate", "Dyc.TopMenuItem",
             })
             {
                 Assert.True(theme.Contains(key), "missing theme resource: " + key);

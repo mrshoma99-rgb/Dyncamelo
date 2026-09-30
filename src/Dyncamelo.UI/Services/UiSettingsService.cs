@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Dyncamelo.UI.Services;
 
@@ -22,8 +23,9 @@ public class UiSettingsService
     private string _doubleClickAction = "string";
     private bool _previewSelection;
     private string _paletteId = "DyncameloDark";
-    private bool _classicNodeLayout;
     private bool _liveScrubEvaluation;
+    private readonly Dictionary<string, JToken> _values = new Dictionary<string, JToken>(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _shortcuts = new Dictionary<string, string>(StringComparer.Ordinal);
 
     /// <summary>Creates the service backed by the default per-user settings file.</summary>
     public UiSettingsService()
@@ -101,20 +103,6 @@ public class UiSettingsService
         }
     }
 
-    /// <summary>True to render nodes with the classic side-by-side layout instead of the row layout (default false).</summary>
-    public bool ClassicNodeLayout => _classicNodeLayout;
-
-    /// <summary>Persists the node layout choice.</summary>
-    /// <param name="classic">True for the classic layout.</param>
-    public void SetClassicNodeLayout(bool classic)
-    {
-        if (_classicNodeLayout != classic)
-        {
-            _classicNodeLayout = classic;
-            Save();
-        }
-    }
-
     /// <summary>True to commit number fields while dragging (re-running the graph live) instead of on release (default false).</summary>
     public bool LiveScrubEvaluation => _liveScrubEvaluation;
 
@@ -127,6 +115,109 @@ public class UiSettingsService
             _liveScrubEvaluation = live;
             Save();
         }
+    }
+
+    /// <summary>Raised after any preference changed and was saved (used to refresh dependent views).</summary>
+    public event EventHandler? Changed;
+
+    /// <summary>A stored text preference, or <paramref name="fallback"/> when unset.</summary>
+    /// <param name="key">Preference key.</param>
+    /// <param name="fallback">Value when nothing is stored.</param>
+    public string GetString(string key, string fallback)
+    {
+        return _values.TryGetValue(key, out var token) && token.Type == JTokenType.String ? token.Value<string>() ?? fallback : fallback;
+    }
+
+    /// <summary>A stored on/off preference, or <paramref name="fallback"/> when unset.</summary>
+    /// <param name="key">Preference key.</param>
+    /// <param name="fallback">Value when nothing is stored.</param>
+    public bool GetBool(string key, bool fallback)
+    {
+        return _values.TryGetValue(key, out var token) && token.Type == JTokenType.Boolean ? token.Value<bool>() : fallback;
+    }
+
+    /// <summary>Stores a text or on/off preference (null removes it, restoring the default) and saves.</summary>
+    /// <param name="key">Preference key.</param>
+    /// <param name="value">A string, a bool or null.</param>
+    public void SetValue(string key, object? value)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            return;
+        }
+
+        var changed = value == null ? _values.Remove(key) : SetToken(key, JToken.FromObject(value));
+        if (changed)
+        {
+            Save();
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private bool SetToken(string key, JToken token)
+    {
+        if (_values.TryGetValue(key, out var existing) && JToken.DeepEquals(existing, token))
+        {
+            return false;
+        }
+
+        _values[key] = token;
+        return true;
+    }
+
+    /// <summary>User-chosen shortcuts by command id ("edit.undo" → "Ctrl+Z"); commands not listed keep their default.</summary>
+    public IReadOnlyDictionary<string, string> ShortcutOverrides => _shortcuts;
+
+    /// <summary>Rebinds one command (an empty chord unbinds it) and saves.</summary>
+    /// <param name="commandId">Command id from the catalogue.</param>
+    /// <param name="chord">"Ctrl+Shift+L"-style chord, or empty for none.</param>
+    public void SetShortcut(string commandId, string chord)
+    {
+        if (string.IsNullOrEmpty(commandId))
+        {
+            return;
+        }
+
+        chord = chord ?? string.Empty;
+        if (_shortcuts.TryGetValue(commandId, out var existing) && existing == chord)
+        {
+            return;
+        }
+
+        _shortcuts[commandId] = chord;
+        Save();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Restores the default shortcut of one command, or of every command when <paramref name="commandId"/> is null.</summary>
+    /// <param name="commandId">Command id, or null for all.</param>
+    public void ResetShortcuts(string? commandId = null)
+    {
+        var changed = commandId == null ? _shortcuts.Count > 0 : _shortcuts.Remove(commandId);
+        if (commandId == null)
+        {
+            _shortcuts.Clear();
+        }
+
+        if (changed)
+        {
+            Save();
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>Restores every preference and shortcut to its default (favourites and recent files are kept).</summary>
+    public void ResetPreferences()
+    {
+        _showLibraryDescriptions = true;
+        _doubleClickAction = "string";
+        _previewSelection = false;
+        _paletteId = "DyncameloDark";
+        _liveScrubEvaluation = false;
+        _values.Clear();
+        _shortcuts.Clear();
+        Save();
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>True when the node id is starred.</summary>
@@ -220,8 +311,9 @@ public class UiSettingsService
                 DoubleClickAction = _doubleClickAction,
                 PreviewSelection = _previewSelection,
                 PaletteId = _paletteId,
-                ClassicNodeLayout = _classicNodeLayout,
                 LiveScrubEvaluation = _liveScrubEvaluation,
+                Values = new Dictionary<string, JToken>(_values),
+                Shortcuts = new Dictionary<string, string>(_shortcuts),
             };
 
             // Write-to-temp-then-replace so a crash (or a concurrent reader in
@@ -274,18 +366,40 @@ public class UiSettingsService
         _doubleClickAction = "string";
         _previewSelection = false;
         _paletteId = "DyncameloDark";
-        _classicNodeLayout = false;
         _liveScrubEvaluation = false;
+        _values.Clear();
+        _shortcuts.Clear();
         if (data == null)
         {
             return;
+        }
+
+        if (data.Values != null)
+        {
+            foreach (var pair in data.Values)
+            {
+                if (!string.IsNullOrEmpty(pair.Key) && pair.Value != null)
+                {
+                    _values[pair.Key] = pair.Value;
+                }
+            }
+        }
+
+        if (data.Shortcuts != null)
+        {
+            foreach (var pair in data.Shortcuts)
+            {
+                if (!string.IsNullOrEmpty(pair.Key) && pair.Value != null)
+                {
+                    _shortcuts[pair.Key] = pair.Value;
+                }
+            }
         }
 
         _showLibraryDescriptions = data.ShowLibraryDescriptions ?? true;
         _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
         _previewSelection = data.PreviewSelection ?? false;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
-        _classicNodeLayout = data.ClassicNodeLayout ?? false;
         _liveScrubEvaluation = data.LiveScrubEvaluation ?? false;
 
         if (data.FavoriteNodeIds != null)
@@ -390,10 +504,13 @@ public class UiSettingsService
         [JsonProperty("paletteId")]
         public string? PaletteId { get; set; }
 
-        [JsonProperty("classicNodeLayout")]
-        public bool? ClassicNodeLayout { get; set; }
-
         [JsonProperty("liveScrubEvaluation")]
         public bool? LiveScrubEvaluation { get; set; }
+
+        [JsonProperty("values")]
+        public Dictionary<string, JToken>? Values { get; set; }
+
+        [JsonProperty("shortcuts")]
+        public Dictionary<string, string>? Shortcuts { get; set; }
     }
 }

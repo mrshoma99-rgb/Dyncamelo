@@ -99,8 +99,6 @@ public class NodeViewModel : CanvasItemViewModel
     /// <summary>True when the node has its own body row (input, slider, watch… nodes; not zero-touch nodes or reroutes).</summary>
     public bool HasBody => !(Model is ZeroTouchNodeModel) && !(Model is RerouteNode);
 
-    /// <summary>True when the editor draws nodes with the row layout.</summary>
-    public bool UseRowLayout => _owner.UseRowLayout;
 
     /// <summary>True at the overview zoom level: nodes shrink to their header.</summary>
     public bool IsOverview => _owner.LodLevel == LodLevel.Overview;
@@ -133,7 +131,7 @@ public class NodeViewModel : CanvasItemViewModel
     /// <summary>Recomputes the rows from the ports and presentation state; reuses row objects and touches the collection only when the sequence changed.</summary>
     public void RebuildRows()
     {
-        var plan = RowPlanner.Plan(Model, port => FindConnector(port)?.IsConnected ?? false, HasBody);
+        var plan = RowPlanner.Plan(Model, port => FindConnector(port)?.IsConnected ?? false, HasBody, _owner.HideUnusedByDefault);
         var old = new Dictionary<string, NodeRowViewModel>(StringComparer.Ordinal);
         foreach (var row in Rows)
         {
@@ -210,14 +208,28 @@ public class NodeViewModel : CanvasItemViewModel
     {
         switch (e.PropertyName)
         {
-            case nameof(GraphEditorViewModel.UseRowLayout):
-                OnPropertyChanged(nameof(UseRowLayout));
-                break;
             case nameof(GraphEditorViewModel.LodLevel):
                 OnPropertyChanged(nameof(IsOverview));
                 foreach (var row in Rows)
                 {
                     row.RaiseHeight();
+                }
+
+                break;
+            case nameof(GraphEditorViewModel.RowBaseHeight):
+                foreach (var row in Rows)
+                {
+                    row.RaiseHeight();
+                }
+
+                break;
+            case nameof(GraphEditorViewModel.HideUnusedByDefault):
+                RebuildRows();
+                break;
+            case nameof(GraphEditorViewModel.ColourBlindGlyphs):
+                foreach (var socket in Inputs.Concat(Outputs))
+                {
+                    socket.RefreshGlyph();
                 }
 
                 break;

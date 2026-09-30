@@ -759,32 +759,6 @@
     </Style>
 
     <!-- ===== Wires (click to select, Delete or context menu to remove) ===== -->
-    <DataTemplate x:Key="Dyc.Wire.Classic">
-        <nodify:Connection nodify:BaseConnection.IsSelectable="True"
-                           Source="{Binding Source.Anchor}"
-                           Target="{Binding Target.Anchor}"
-                           SourceOffsetMode="Edge"
-                           TargetOffsetMode="Edge">
-            <nodify:Connection.Style>
-                <Style TargetType="{x:Type nodify:Connection}" BasedOn="{StaticResource {x:Type nodify:Connection}}">
-                    <Setter Property="Stroke" Value="{StaticResource Dyc.WireBrush}" />
-                    <Setter Property="StrokeThickness" Value="2" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                            <Setter Property="Stroke" Value="{StaticResource Dyc.AccentBrush}" />
-                            <Setter Property="StrokeThickness" Value="3" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </nodify:Connection.Style>
-            <nodify:Connection.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Disconnect" Command="{Binding DisconnectCommand}" />
-                </ContextMenu>
-            </nodify:Connection.ContextMenu>
-        </nodify:Connection>
-    </DataTemplate>
-
     <!-- Row-layout wire: family-coloured soft Bézier; dashed when the node will
          replicate over a list, accent when selected, straight hairline in overview. -->
     <DoubleCollection x:Key="Dyc.WireDash">4 3</DoubleCollection>
@@ -793,7 +767,7 @@
                        Source="{Binding Source.Anchor}"
                        Target="{Binding Target.Anchor}"
                        IsMuted="{Binding IsMuted}"
-                       IsLowDetail="{Binding DataContext.IsOverviewLod, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}">
+                       IsLowDetail="{Binding DataContext.WireLowDetail, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}">
             <views:DycWire.Style>
                 <Style TargetType="{x:Type views:DycWire}" BasedOn="{StaticResource {x:Type nodify:BaseConnection}}">
                     <Setter Property="Stroke" Value="{Binding FamilyBrush}" />
@@ -829,18 +803,12 @@
         </views:DycWire>
     </DataTemplate>
 
-    <!-- What the editor instantiates for every wire: row-layout or classic, per the setting. -->
+    <!-- What the editor instantiates for every wire. -->
     <DataTemplate x:Key="Dyc.ConnectionTemplate" DataType="{x:Type vm:ConnectionViewModel}">
-        <ContentControl x:Name="WireHost"
-                        Content="{Binding}"
+        <ContentControl Content="{Binding}"
                         Focusable="False"
                         IsTabStop="False"
                         ContentTemplate="{StaticResource Dyc.Wire.Blender}" />
-        <DataTemplate.Triggers>
-            <DataTrigger Binding="{Binding UseRowLayout}" Value="False">
-                <Setter TargetName="WireHost" Property="ContentTemplate" Value="{StaticResource Dyc.Wire.Classic}" />
-            </DataTrigger>
-        </DataTemplate.Triggers>
     </DataTemplate>
 
     <DataTemplate x:Key="Dyc.PendingConnectionTemplate" DataType="{x:Type vm:PendingConnectionViewModel}">
@@ -1399,6 +1367,14 @@
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
                   Opacity="{Binding SocketOpacity}" />
+            <TextBlock x:Name="Glyph"
+                       Text="{Binding SocketGlyph}"
+                       FontSize="8"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource Dyc.NodeBodyBrush}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False" />
             <Path x:Name="Hollow"
                   Data="{Binding SocketGeometry}"
                   Fill="Transparent"
@@ -1633,6 +1609,7 @@
                               IsUnset="{Binding IsUnset}"
                               ResetCommand="{Binding ResetCommand}"
                               LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                              PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
                               ToolTip="{Binding ToolTip}" />
     </DataTemplate>
 
@@ -2184,192 +2161,7 @@
         </Grid>
     </DataTemplate>
 
-    <DataTemplate x:Key="Dyc.NodeTemplate.Classic">
-        <StackPanel>
-            <!-- Zero-height canvas: the diagnostics balloon floats above the node
-                 without shifting its position when it appears. -->
-            <Canvas Height="0" HorizontalAlignment="Left">
-                <Border x:Name="Balloon"
-                        Canvas.Bottom="8"
-                        Canvas.Left="0"
-                        Visibility="Collapsed"
-                        MaxWidth="300"
-                        CornerRadius="4"
-                        Padding="8,5"
-                        BorderThickness="1.5"
-                        Background="{StaticResource Dyc.PanelBrush}"
-                        BorderBrush="{StaticResource Dyc.WarningBrush}">
-                    <TextBlock FontSize="11"
-                               Foreground="{StaticResource Dyc.TextBrush}"
-                               TextWrapping="Wrap"
-                               MaxHeight="120"
-                               Text="{Binding StateMessage}"
-                               ToolTip="{Binding StateMessage}" />
-                </Border>
-            </Canvas>
-            <Border x:Name="StateBorder"
-                    BorderThickness="2"
-                    BorderBrush="Transparent"
-                    CornerRadius="6"
-                    Background="Transparent">
-                <Border.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Freeze"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding IsFrozen}" />
-                        <MenuItem Header="Show Preview"
-                                  IsCheckable="True"
-                                  IsChecked="{Binding ShowPreview}" />
-                        <MenuItem Header="Lacing">
-                            <MenuItem Header="Auto" Command="{Binding SetLacingCommand}" CommandParameter="Auto" />
-                            <MenuItem Header="Shortest" Command="{Binding SetLacingCommand}" CommandParameter="Shortest" />
-                            <MenuItem Header="Longest" Command="{Binding SetLacingCommand}" CommandParameter="Longest" />
-                            <MenuItem Header="Cross Product" Command="{Binding SetLacingCommand}" CommandParameter="CrossProduct" />
-                        </MenuItem>
-                        <Separator />
-                        <MenuItem Header="Find in Library" Command="{Binding FindInLibraryCommand}" />
-                    </ContextMenu>
-                </Border.ContextMenu>
-                <!-- Background colours the connector/IO strip; ContentBrush colours the
-                     inline-editor area. Both must be theme brushes or half the node keeps
-                     Nodify's dark default and ignores palette changes. -->
-                <nodify:Node Header="{Binding}"
-                             HeaderBrush="{Binding HeaderBrush}"
-                             Background="{StaticResource Dyc.NodeBodyBrush}"
-                             ContentBrush="{StaticResource Dyc.NodeBodyBrush}"
-                             Foreground="{StaticResource Dyc.TextBrush}"
-                             BorderBrush="{StaticResource Dyc.NodeBorderBrush}"
-                             Input="{Binding Inputs}"
-                             Output="{Binding Outputs}">
-                    <nodify:Node.HeaderTemplate>
-                        <DataTemplate>
-                            <DockPanel MinWidth="90">
-                                <TextBlock DockPanel.Dock="Right"
-                                           Margin="8,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="9"
-                                           Opacity="0.85"
-                                           Foreground="White"
-                                           Text="{Binding LacingLabel}" />
-                                <!-- Function tint: Create (green) / Modify (amber) / Info (blue),
-                                     so what a node does is readable at a glance on the canvas. -->
-                                <Ellipse x:Name="FnDot"
-                                         DockPanel.Dock="Left"
-                                         Width="8" Height="8"
-                                         Margin="0,0,7,0"
-                                         VerticalAlignment="Center"
-                                         Fill="{StaticResource Dyc.FnModifyBrush}"
-                                         ToolTip="{Binding Function}" />
-                                <!-- Double-click the title to rename the placed node (commits to NodeViewModel.Title -> Model.Name). -->
-                                <views:EditableTextBlock FontWeight="SemiBold"
-                                                         Foreground="White"
-                                                         Text="{Binding Title, Mode=TwoWay}"
-                                                         ToolTip="{Binding Description}" />
-                            </DockPanel>
-                            <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding Function}" Value="Create">
-                                    <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnCreateBrush}" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Function}" Value="Info">
-                                    <Setter TargetName="FnDot" Property="Fill" Value="{StaticResource Dyc.FnInfoBrush}" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </nodify:Node.HeaderTemplate>
-                    <ContentControl Focusable="False"
-                                    Content="{Binding Model}"
-                                    ContentTemplateSelector="{StaticResource Dyc.NodeBodySelector}" />
-                </nodify:Node>
-            </Border>
-            <!-- Dynamo-style value preview bubble (global toolbar toggle +
-                 per-node "Show Preview" pin; renders after a run). When the
-                 summary truncates a list, clicking the bubble swaps in the
-                 full, scrollable item list; clicking again collapses. -->
-            <Border x:Name="PreviewBubble"
-                    Margin="8,4,8,0"
-                    HorizontalAlignment="Center"
-                    MaxWidth="300"
-                    CornerRadius="3"
-                    Padding="6,3"
-                    BorderThickness="1"
-                    Background="{StaticResource Dyc.PanelBrush}"
-                    BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
-                    Visibility="{Binding IsPreviewVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
-                <Border.InputBindings>
-                    <MouseBinding Gesture="LeftClick" Command="{Binding TogglePreviewExpandCommand}" />
-                </Border.InputBindings>
-                <StackPanel>
-                    <TextBlock x:Name="PreviewSummary"
-                               FontSize="10"
-                               FontFamily="Consolas"
-                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                               TextWrapping="Wrap"
-                               Text="{Binding PreviewText}"
-                               ToolTip="{Binding PreviewText}" />
-                    <TextBox FontSize="10"
-                             FontFamily="Consolas"
-                             Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             IsReadOnly="True"
-                             TextWrapping="Wrap"
-                             MaxHeight="240"
-                             VerticalScrollBarVisibility="Auto"
-                             Text="{Binding ExpandedPreviewText, Mode=OneWay}"
-                             Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                    <TextBlock FontSize="9"
-                               Margin="0,2,0,0"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
-                               Text="▸ click to show all items"
-                               Visibility="{Binding ShowExpandHint, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                    <TextBlock FontSize="9"
-                               Margin="0,2,0,0"
-                               Foreground="{StaticResource Dyc.AccentBrush}"
-                               Text="▾ click to collapse"
-                               Visibility="{Binding IsPreviewExpanded, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                </StackPanel>
-            </Border>
-        </StackPanel>
-        <DataTemplate.Triggers>
-            <!-- The expanded item list replaces the one-line summary. -->
-            <DataTrigger Binding="{Binding IsPreviewExpanded}" Value="True">
-                <Setter TargetName="PreviewSummary" Property="Visibility" Value="Collapsed" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding HasMorePreview}" Value="True">
-                <Setter TargetName="PreviewBubble" Property="Cursor" Value="Hand" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding State}" Value="Warning">
-                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.WarningBrush}" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding State}" Value="Error">
-                <Setter TargetName="StateBorder" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
-                <Setter TargetName="Balloon" Property="BorderBrush" Value="{StaticResource Dyc.ErrorBrush}" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding HasMessage}" Value="True">
-                <Setter TargetName="StateBorder" Property="ToolTip" Value="{Binding StateMessage}" />
-            </DataTrigger>
-            <DataTrigger Binding="{Binding IsFrozen}" Value="True">
-                <Setter TargetName="StateBorder" Property="Opacity" Value="0.45" />
-            </DataTrigger>
-            <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                    <Condition Binding="{Binding State}" Value="Warning" />
-                    <Condition Binding="{Binding HasMessage}" Value="True" />
-                </MultiDataTrigger.Conditions>
-                <Setter TargetName="Balloon" Property="Visibility" Value="Visible" />
-            </MultiDataTrigger>
-            <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                    <Condition Binding="{Binding State}" Value="Error" />
-                    <Condition Binding="{Binding HasMessage}" Value="True" />
-                </MultiDataTrigger.Conditions>
-                <Setter TargetName="Balloon" Property="Visibility" Value="Visible" />
-            </MultiDataTrigger>
-        </DataTemplate.Triggers>
-    </DataTemplate>
-
-    <!-- What the editor instantiates for every node: the row layout (default), the
-         classic side-by-side layout (Settings), or the reroute pill. -->
+    <!-- What the editor instantiates for every node: the row layout, or the reroute pill. -->
     <DataTemplate DataType="{x:Type vm:NodeViewModel}">
         <ContentControl x:Name="NodeHost"
                         Content="{Binding}"
@@ -2377,9 +2169,6 @@
                         IsTabStop="False"
                         ContentTemplate="{StaticResource Dyc.NodeTemplate.Blender}" />
         <DataTemplate.Triggers>
-            <DataTrigger Binding="{Binding UseRowLayout}" Value="False">
-                <Setter TargetName="NodeHost" Property="ContentTemplate" Value="{StaticResource Dyc.NodeTemplate.Classic}" />
-            </DataTrigger>
             <DataTrigger Binding="{Binding IsReroute}" Value="True">
                 <Setter TargetName="NodeHost" Property="ContentTemplate" Value="{StaticResource Dyc.NodeTemplate.Reroute}" />
             </DataTrigger>

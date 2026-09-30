@@ -80,7 +80,8 @@ public static class RowPlanner
     /// <param name="node">The node.</param>
     /// <param name="isConnected">Whether a port currently has a wire.</param>
     /// <param name="hasBody">True when the node renders its own body row.</param>
-    public static IReadOnlyList<PlannedRow> Plan(NodeModel node, Func<PortModel, bool> isConnected, bool hasBody)
+    /// <param name="hideUnusedDefault">The preference for nodes without an explicit hide-unused choice.</param>
+    public static IReadOnlyList<PlannedRow> Plan(NodeModel node, Func<PortModel, bool> isConnected, bool hasBody, bool hideUnusedDefault = false)
     {
         if (node == null)
         {
@@ -114,7 +115,7 @@ public static class RowPlanner
 
         foreach (var port in node.OutPorts)
         {
-            if (IsHidden(node, port, isConnected(port)))
+            if (IsHidden(node, port, isConnected(port), hideUnusedDefault))
             {
                 hidden++;
                 continue;
@@ -134,7 +135,7 @@ public static class RowPlanner
         foreach (var port in node.InPorts)
         {
             var connected = isConnected(port);
-            if (IsHidden(node, port, connected))
+            if (IsHidden(node, port, connected, hideUnusedDefault))
             {
                 hidden++;
                 continue;
@@ -233,7 +234,7 @@ public static class RowPlanner
     /// when the user hid it, when "hide unused" is on (optional inputs and all outputs), or
     /// for the optional document-context input unless the node explicitly shows everything.
     /// </summary>
-    public static bool IsHidden(NodeModel node, PortModel port, bool connected)
+    public static bool IsHidden(NodeModel node, PortModel port, bool connected, bool hideUnusedDefault = false)
     {
         if (connected || port.HasUserValue)
         {
@@ -245,7 +246,8 @@ public static class RowPlanner
             return true;
         }
 
-        var hideUnused = node.Ui.HideUnused;
+        // A node the user never touched follows the preference; an explicit choice always wins.
+        var hideUnused = node.Ui.HideUnused ?? (hideUnusedDefault ? true : (bool?)null);
         if (port.Direction == PortDirection.Output)
         {
             return hideUnused == true;

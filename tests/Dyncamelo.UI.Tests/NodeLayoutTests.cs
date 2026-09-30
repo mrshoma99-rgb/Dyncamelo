@@ -82,7 +82,7 @@ internal sealed class StubDialogs : IDialogService
 /// Spike S1 made permanent: the real editor control in a real window. Sockets
 /// live outside Nodify's PART_Input/PART_Output panels, so these tests prove the
 /// wire anchors still land on the node edges — at rest, after a move, when the
-/// node collapses, at overview zoom, and in the classic layout.
+/// node collapses and at overview zoom.
 /// </summary>
 public class NodeLayoutTests
 {
@@ -157,7 +157,6 @@ public class NodeLayoutTests
         using var rig = Build();
         StaHost.Run(() =>
         {
-            Assert.True(rig.Vm.UseRowLayout);
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "output");
             AssertOnEdge(rig.B, rig.Wire.Target.Anchor, rightEdge: false, "input");
             // Outputs are listed above inputs (Blender order), so the output sits higher than a's inputs would.
@@ -245,21 +244,6 @@ public class NodeLayoutTests
             Assert.All(rig.A.Rows, r => Assert.Equal(0d, r.RowHeight));
             AssertOnEdge(rig.A, rig.Wire.Source.Anchor, rightEdge: true, "overview output");
             AssertOnEdge(rig.B, rig.Wire.Target.Anchor, rightEdge: false, "overview input");
-        });
-    }
-
-    [Fact]
-    public void ClassicLayoutStillWorks()
-    {
-        using var rig = Build();
-        StaHost.Run(() => rig.Vm.ClassicNodeLayout = true);
-        StaHost.Flush();
-        StaHost.Run(() =>
-        {
-            Assert.False(rig.Vm.UseRowLayout);
-            Assert.True(rig.A.Size.Width > 60);
-            Assert.True(rig.Wire.Source.Anchor.X > rig.A.Location.X && rig.Wire.Source.Anchor.X < rig.A.Location.X + rig.A.Size.Width + 1);
-            Assert.True(rig.Wire.Target.Anchor.X < rig.B.Location.X + rig.B.Size.Width);
         });
     }
 
@@ -445,8 +429,7 @@ public class NodeLayoutTests
         {
             StaHost.Run(() =>
             {
-                Assert.True(rig.Vm.UseRowLayout);
-                var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
+                    var node = rig.Vm.Items.OfType<NodeViewModel>().Single();
                 var browse = FindDescendants<System.Windows.Controls.Button>(rig.Window).Single(b => Equals(b.Content, "…"));
                 // The body templates used to find the node view model through a nodify:Node ancestor, which the row layout does not have.
                 Assert.Same(node.BrowseFileCommand, browse.Command);

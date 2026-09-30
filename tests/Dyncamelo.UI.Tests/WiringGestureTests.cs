@@ -695,3 +695,245 @@ public class HelpOverlayTests
         });
     }
 }
+
+public class ArrangeTests
+{
+    [Fact]
+    public void ArrangeAllLaysTheGraphOutAlongTheFlowAndUndoes()
+    {
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            registry.RegisterNodeType("TestSum", () => new SumNode());
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings);
+            var nodes = Enumerable.Range(0, 5).Select(i => new SumNode { X = 10 * i, Y = 10 * i }).ToList();
+            foreach (var node in nodes)
+            {
+                vm.Graph.AddNode(node);
+            }
+
+            Assert.True(vm.Graph.Connect(nodes[0].OutPorts[0], nodes[1].InPorts[0]).Success);
+            Assert.True(vm.Graph.Connect(nodes[1].OutPorts[0], nodes[2].InPorts[0]).Success);
+            Assert.True(vm.Graph.Connect(nodes[0].OutPorts[0], nodes[3].InPorts[0]).Success);
+            Assert.True(vm.Graph.Connect(nodes[3].OutPorts[0], nodes[4].InPorts[0]).Success);
+            var before = nodes.Select(n => (n.X, n.Y)).ToList();
+            vm.History.Clear();
+
+            vm.ArrangeAllCommand.Execute(null);
+
+            Assert.True(nodes[0].X < nodes[1].X && nodes[1].X < nodes[2].X, "flow should run left to right");
+            Assert.True(nodes[0].X < nodes[3].X && nodes[3].X < nodes[4].X);
+            Assert.DoesNotContain("simple columns", vm.StatusMessage);
+            Assert.Equal(1, vm.History.UndoCount);
+
+            vm.UndoCommand.Execute(null);
+            Assert.Equal(before, nodes.Select(n => (n.X, n.Y)).ToList());
+        });
+    }
+
+    [Fact]
+    public void TheBuiltInLayoutIsUsedWhenTheLayeredOneIsOff()
+    {
+        StaHost.Run(() =>
+        {
+            var registry = NodeRegistry.CreateDefault();
+            var settings = new UiSettingsService(Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json"));
+            var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings) { UseLayeredArrange = false };
+            for (var i = 0; i < 3; i++)
+            {
+                vm.Graph.AddNode(new SumNode { X = i, Y = i });
+            }
+
+            vm.ArrangeAllCommand.Execute(null);
+
+            Assert.Contains("simple columns", vm.StatusMessage);
+        });
+    }
+}
+
+public class ParityCommandTests
+{
+    private static (GraphEditorViewModel Vm, string SettingsPath) NewEditor()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterNodeType("TestSum", () => new SumNode());
+        var path = Path.Combine(Path.GetTempPath(), "dyc-ui-tests-" + Guid.NewGuid().ToString("N") + ".json");
+        return (new GraphEditorViewModel(registry, new StubDialogs(), new UiSettingsService(path)), path);
+    }
+
+    private static NodeViewModel Add(GraphEditorViewModel vm, double x)
+    {
+        var node = new SumNode { X = x };
+        vm.Graph.AddNode(node);
+        return vm.Items.OfType<NodeViewModel>().Single(n => n.Model == node);
+    }
+
+    [Fact]
+    public void CutRemovesTheSelectionInOneStepAndPasteBringsItBack()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _) = NewEditor();
+            var a = Add(vm, 0);
+            vm.History.Clear();
+            vm.SelectedItems.Add(a);
+
+            vm.CutSelectionCommand.Execute(null);
+
+            Assert.Empty(vm.Graph.Nodes);
+            Assert.Equal(1, vm.History.UndoCount);
+            vm.PasteCommand.Execute(null);
+            Assert.Single(vm.Graph.Nodes);
+        });
+    }
+
+    [Fact]
+    public void SelectAllPicksEverything()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _) = NewEditor();
+            Add(vm, 0);
+            Add(vm, 300);
+            vm.Graph.Notes.Add(new NoteModel { Text = "n" });
+
+            vm.SelectAllItemsCommand.Execute(null);
+
+            Assert.Equal(3, vm.SelectedItems.Count);
+        });
+    }
+
+    [Fact]
+    public void ResetInputsAndWidthClearWhatTheUserSet()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _) = NewEditor();
+            var a = Add(vm, 0);
+            a.Model.InPorts[0].SetUserValue(9d);
+            a.Model.Ui.Width = 400;
+            vm.SelectedItems.Add(a);
+            vm.History.Clear();
+
+            vm.ResetSelectedInputsCommand.Execute(null);
+            vm.ResetSelectedWidthCommand.Execute(null);
+
+            Assert.False(a.Model.InPorts[0].HasUserValue);
+            Assert.Null(a.Model.Ui.Width);
+            Assert.Equal(2, vm.History.UndoCount);
+        });
+    }
+
+    [Fact]
+    public void InsertIntoSelectedWireNeedsOneNodeAndOneWire()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _) = NewEditor();
+            var a = Add(vm, 0);
+            var c = Add(vm, 600);
+            var b = Add(vm, 300);
+            Assert.True(vm.Graph.Connect(a.Model.OutPorts[0], c.Model.InPorts[0]).Success);
+            vm.SelectedItems.Add(b);
+
+            vm.InsertIntoSelectedWireCommand.Execute(null);
+            Assert.Contains("one node and one wire", vm.StatusMessage);
+
+            vm.SelectedConnections.Add(vm.Connections.Single());
+            vm.InsertIntoSelectedWireCommand.Execute(null);
+            Assert.Same(b.Model, vm.Graph.FindConnectionInto(c.Model.InPorts[0])!.SourceNode);
+        });
+    }
+
+    [Fact]
+    public void SwapLinksExchangesTwoSelectedWires()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, _) = NewEditor();
+            var a = Add(vm, 0);
+            var b = Add(vm, 0);
+            var x = Add(vm, 300);
+            var y = Add(vm, 300);
+            Assert.True(vm.Graph.Connect(a.Model.OutPorts[0], x.Model.InPorts[0]).Success);
+            Assert.True(vm.Graph.Connect(b.Model.OutPorts[0], y.Model.InPorts[0]).Success);
+            foreach (var wire in vm.Connections.ToList())
+            {
+                vm.SelectedConnections.Add(wire);
+            }
+
+            vm.History.Clear();
+            vm.SwapSelectedLinksCommand.Execute(null);
+
+            Assert.Same(b.Model, vm.Graph.FindConnectionInto(x.Model.InPorts[0])!.SourceNode);
+            Assert.Same(a.Model, vm.Graph.FindConnectionInto(y.Model.InPorts[0])!.SourceNode);
+            Assert.Equal(1, vm.History.UndoCount);
+        });
+    }
+
+    [Fact]
+    public void TheMinimapShowsAutomaticallyOnlyForBigGraphsAndObeysTheToggle()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, path) = NewEditor();
+            Add(vm, 0);
+            Assert.Equal("auto", vm.MinimapMode);
+            Assert.False(vm.IsMinimapVisible);
+
+            for (var i = 1; i < GraphEditorViewModel.MinimapAutoNodeCount; i++)
+            {
+                Add(vm, i * 10);
+            }
+
+            Assert.True(vm.IsMinimapVisible);
+
+            vm.ToggleMinimapCommand.Execute(null);
+            Assert.False(vm.IsMinimapVisible);
+            Assert.Equal("off", vm.MinimapMode);
+
+            // The choice survives a restart.
+            var again = new GraphEditorViewModel(NodeRegistry.CreateDefault(), new StubDialogs(), new UiSettingsService(path));
+            Assert.Equal("off", again.MinimapMode);
+        });
+    }
+
+    [Fact]
+    public void PreferencesDriveTheViewAndResetRestoresTheDefaults()
+    {
+        StaHost.Run(() =>
+        {
+            var (vm, path) = NewEditor();
+            var node = Add(vm, 0);
+            var wireDetail = new System.Collections.Generic.List<string?>();
+            vm.PropertyChanged += (s, e) => wireDetail.Add(e.PropertyName);
+
+            Assert.Equal(22d, vm.RowBaseHeight);
+            vm.NodeDensity = "compact";
+            Assert.Equal(18d, vm.RowBaseHeight);
+            Assert.All(node.Rows.Where(r => r.Kind == Dyncamelo.Core.Editing.RowKind.Input), r => Assert.Equal(18d, r.RowMinHeight));
+
+            Assert.False(vm.WireLowDetail);
+            vm.StraightWires = true;
+            Assert.True(vm.WireLowDetail);
+
+            vm.ScrubSpeed = "fast";
+            Assert.True(vm.ScrubPixelsPerStep < 8d);
+            vm.SnapToGrid = false;
+            Assert.Equal(1u, vm.GridCellSize);
+            Assert.Contains(nameof(GraphEditorViewModel.GridCellSize), wireDetail);
+
+            // A node the user never touched follows the hide-unused preference.
+            var visibleBefore = node.Rows.Count(r => r.Kind == Dyncamelo.Core.Editing.RowKind.Input);
+            vm.HideUnusedByDefault = true;
+            Assert.True(node.Rows.Count(r => r.Kind == Dyncamelo.Core.Editing.RowKind.Input) < visibleBefore);
+
+            var settings = new UiSettingsService(path);
+            Assert.Equal("compact", settings.GetString(SettingKeys.Density, "normal"));
+
+            settings.ResetPreferences();
+            Assert.Equal("normal", settings.GetString(SettingKeys.Density, "normal"));
+        });
+    }
+}

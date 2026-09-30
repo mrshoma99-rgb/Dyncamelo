@@ -283,3 +283,65 @@ public class GraphOpsTests
         return new GraphSerializer(registry).Serialize(graph);
     }
 }
+
+public class SwapLinksTests
+{
+    private static ZeroTouchNodeModel Add(GraphModel graph, string method, double x = 0)
+    {
+        var node = ZT.Node(method);
+        node.X = x;
+        graph.AddNode(node);
+        return node;
+    }
+
+    [Fact]
+    public void TwoWiresExchangeTheirDestinations()
+    {
+        var graph = new GraphModel();
+        var a = Add(graph, "Sqrt");
+        var b = Add(graph, "Sqrt");
+        var x = Add(graph, "Sqrt", 300);
+        var y = Add(graph, "Sqrt", 300);
+        ZT.Wire(graph, a, 0, x, 0);
+        ZT.Wire(graph, b, 0, y, 0);
+        var first = graph.FindConnectionInto(x.InPorts[0])!;
+        var second = graph.FindConnectionInto(y.InPorts[0])!;
+
+        Assert.True(GraphOps.SwapLinks(graph, first, second));
+
+        Assert.Same(b, graph.FindConnectionInto(x.InPorts[0])!.SourceNode);
+        Assert.Same(a, graph.FindConnectionInto(y.InPorts[0])!.SourceNode);
+        Assert.Equal(2, graph.Connections.Count);
+    }
+
+    [Fact]
+    public void ARefusedSwapLeavesEverythingAsItWas()
+    {
+        var graph = new GraphModel();
+        var a = Add(graph, "Sqrt");
+        var x = Add(graph, "Sqrt", 300);
+        // b feeds a: swapping would send x's output back into a's chain and close a loop.
+        var b = Add(graph, "Sqrt", 600);
+        ZT.Wire(graph, a, 0, x, 0);
+        ZT.Wire(graph, x, 0, b, 0);
+        var first = graph.FindConnectionInto(x.InPorts[0])!;
+        var second = graph.FindConnectionInto(b.InPorts[0])!;
+
+        Assert.False(GraphOps.SwapLinks(graph, first, second));
+
+        Assert.Same(a, graph.FindConnectionInto(x.InPorts[0])!.SourceNode);
+        Assert.Same(x, graph.FindConnectionInto(b.InPorts[0])!.SourceNode);
+        Assert.Equal(2, graph.Connections.Count);
+    }
+
+    [Fact]
+    public void ASwapNeedsTwoDifferentWiresOfTheGraph()
+    {
+        var graph = new GraphModel();
+        var a = Add(graph, "Sqrt");
+        var x = Add(graph, "Sqrt", 300);
+        ZT.Wire(graph, a, 0, x, 0);
+        var only = graph.Connections.Single();
+        Assert.False(GraphOps.SwapLinks(graph, only, only));
+    }
+}

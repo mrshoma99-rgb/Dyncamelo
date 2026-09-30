@@ -121,6 +121,12 @@ public class ConnectorViewModel : ObservableObject
     /// <summary>Shared frozen brush for the family.</summary>
     public Brush FamilyBrush => PortBrushes.For(_kind.Family);
 
+    /// <summary>One letter naming the family, drawn in the socket when the colour-blind aid is on; otherwise empty.</summary>
+    public string SocketGlyph => Node.Owner.ColourBlindGlyphs ? PortKindPalette.Glyph(_kind.Family) : string.Empty;
+
+    /// <summary>Re-raises <see cref="SocketGlyph"/> after the preference changed.</summary>
+    public void RefreshGlyph() => OnPropertyChanged(nameof(SocketGlyph));
+
     /// <summary>Shared frozen 10×10 glyph for the structure.</summary>
     public Geometry SocketGeometry => PortBrushes.Glyph(_kind.Depth);
 
@@ -183,6 +189,7 @@ public class ConnectorViewModel : ObservableObject
         OnPropertyChanged(nameof(Family));
         OnPropertyChanged(nameof(Depth));
         OnPropertyChanged(nameof(FamilyBrush));
+        OnPropertyChanged(nameof(SocketGlyph));
         OnPropertyChanged(nameof(SocketGeometry));
         OnPropertyChanged(nameof(KindText));
         OnPropertyChanged(nameof(ToolTip));

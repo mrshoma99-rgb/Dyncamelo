@@ -101,6 +101,7 @@ public partial class GraphEditorViewModel : ObservableObject
         Registry = registry ?? throw new ArgumentNullException(nameof(registry));
         Dialogs = dialogs ?? new WpfDialogService();
         _settings = settings ?? new UiSettingsService();
+        _settings.Changed += OnSettingsChanged;
         _preview = preview ?? new NullPreviewService();
         Library = new LibraryViewModel(registry, _settings);
         RecentFiles = new ObservableCollection<string>(_settings.RecentFiles);
@@ -304,7 +305,13 @@ public partial class GraphEditorViewModel : ObservableObject
     public int NodeCount
     {
         get => _nodeCount;
-        private set => SetProperty(ref _nodeCount, value);
+        private set
+        {
+            if (SetProperty(ref _nodeCount, value))
+            {
+                OnPropertyChanged(nameof(IsMinimapVisible));
+            }
+        }
     }
 
     /// <summary>Number of nodes in the Error state after the last run.</summary>
@@ -447,21 +454,6 @@ public partial class GraphEditorViewModel : ObservableObject
 
     // ----- node layout, level of detail, node-level toggles ----------------------
 
-    /// <summary>True to draw nodes with the classic side-by-side layout (Settings). Persisted.</summary>
-    public bool ClassicNodeLayout
-    {
-        get => _settings.ClassicNodeLayout;
-        set
-        {
-            if (_settings.ClassicNodeLayout != value)
-            {
-                _settings.SetClassicNodeLayout(value);
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(UseRowLayout));
-            }
-        }
-    }
-
     /// <summary>True to re-run the graph while a number field is being scrubbed (Settings); off = commit on release.</summary>
     public bool LiveScrubEvaluation
     {
@@ -476,8 +468,6 @@ public partial class GraphEditorViewModel : ObservableObject
         }
     }
 
-    /// <summary>True when nodes use the row layout (the inverse of <see cref="ClassicNodeLayout"/>).</summary>
-    public bool UseRowLayout => !_settings.ClassicNodeLayout;
 
     /// <summary>Canvas level of detail, derived from the zoom with hysteresis.</summary>
     public LodLevel LodLevel
@@ -488,6 +478,7 @@ public partial class GraphEditorViewModel : ObservableObject
             if (SetProperty(ref _lodLevel, value))
             {
                 OnPropertyChanged(nameof(IsOverviewLod));
+                OnPropertyChanged(nameof(WireLowDetail));
             }
         }
     }
@@ -1443,7 +1434,7 @@ public partial class GraphEditorViewModel : ObservableObject
             if (item is NodeViewModel node)
             {
                 // A reroute is only a bend in a wire: deleting it keeps the data flowing.
-                if (node.Model is Dyncamelo.Core.Nodes.RerouteNode)
+                if (node.Model is Dyncamelo.Core.Nodes.RerouteNode && DeleteReconnectsReroutes)
                 {
                     GraphOps.DissolveNode(_graph, node.Model);
                 }
@@ -1564,9 +1555,6 @@ public partial class GraphEditorViewModel : ObservableObject
         StatusMessage = "Arranged " + moved.ToString(System.Globalization.CultureInfo.InvariantCulture) + " nodes" +
                         (result.Engine == "MSAGL" ? "." : " (simple columns: " + result.Note + ")");
     }
-
-    /// <summary>False to always use the built-in column layout for Arrange.</summary>
-    public bool UseLayeredArrange { get; set; } = true;
 
     // The measured size when the node has been laid out, else the estimate.
     private static double LayoutWidth(NodeViewModel node) =>
