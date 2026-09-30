@@ -415,9 +415,6 @@ public partial class GraphEditorViewModel
     private ICommand? _toggleHelpCommand;
     private ICommand? _closeHelpCommand;
 
-    /// <summary>The text of the shortcut/gesture overlay (generated from the command catalogue).</summary>
-    public IReadOnlyList<HelpSection> HelpSections { get; } = HelpContent.Build();
-
     /// <summary>True while the keyboard and mouse help overlay is shown (F1).</summary>
     public bool IsHelpOpen
     {

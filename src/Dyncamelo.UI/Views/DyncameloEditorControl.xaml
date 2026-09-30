@@ -96,93 +96,13 @@
 
                     <Border Width="1" Margin="6,2" Background="{StaticResource Dyc.PanelBorderBrush}" />
 
-                    <!-- ===== Settings (descriptions / double-click action / colour palette) ===== -->
+                    <!-- ===== Settings page (sections, search, shortcut rebinding) ===== -->
                     <ToggleButton x:Name="SettingsButton"
                                   Style="{StaticResource Dyc.ToolToggle}"
-                                  ToolTip="Settings">
+                                  ToolTip="Settings"
+                                  IsChecked="{Binding IsSettingsOpen, Mode=TwoWay}">
                         <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Settings}" />
                     </ToggleButton>
-                    <Popup PlacementTarget="{Binding ElementName=SettingsButton}"
-                           Placement="Bottom"
-                           StaysOpen="False"
-                           AllowsTransparency="True"
-                           PopupAnimation="Fade"
-                           IsOpen="{Binding IsChecked, ElementName=SettingsButton, Mode=TwoWay}">
-                        <!-- No DropShadowEffect: a bordered, rounded popup reads fine and
-                             avoids the render-to-bitmap pass that shadows force in WPF. -->
-                        <Border Background="{StaticResource Dyc.PanelBrush}"
-                                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                Margin="6"
-                                Padding="14">
-                            <StackPanel Width="230">
-                                <TextBlock Text="Settings"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource Dyc.TextBrush}"
-                                           Margin="0,0,0,10" />
-
-                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
-                                              HorizontalAlignment="Left"
-                                              Content="Show node descriptions"
-                                              ToolTip="Show a description line under each library node"
-                                              IsChecked="{Binding Library.ShowDescriptions}" />
-
-                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
-                                              HorizontalAlignment="Left"
-                                              Margin="0,8,0,0"
-                                              Content="Live evaluation while scrubbing"
-                                              ToolTip="Re-run the graph while dragging a number field. Off (default): the graph runs once when you release, which is safer for graphs that call Navisworks."
-                                              IsChecked="{Binding LiveScrubEvaluation}" />
-
-                                <ToggleButton Style="{StaticResource Dyc.SmallToggle}"
-                                              HorizontalAlignment="Left"
-                                              Margin="0,8,0,0"
-                                              Content="Highlight selected node in Navisworks"
-                                              ToolTip="Select the model items a node outputs in the Navisworks viewport when you click the node. Overwrites the live selection, so turn off if you use Selection.Current."
-                                              IsChecked="{Binding PreviewSelection}" />
-
-                                <TextBlock Text="Double-click empty canvas"
-                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                           Margin="0,14,0,4" />
-                                <ItemsControl ItemsSource="{Binding DoubleClickActions}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <!-- ElementName (not FindAncestor): the Popup is a separate
-                                                 visual tree, so an AncestorType=UserControl walk never
-                                                 reaches the view model. SettingsButton shares this
-                                                 namescope and its DataContext is the view model. -->
-                                            <Button Style="{StaticResource Dyc.SettingsChoice}"
-                                                    Content="{Binding DisplayName}"
-                                                    Command="{Binding DataContext.SelectDoubleClickActionCommand, ElementName=SettingsButton}"
-                                                    CommandParameter="{Binding}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <TextBlock Text="Colour palette"
-                                           Foreground="{StaticResource Dyc.SubtleTextBrush}"
-                                           Margin="0,14,0,4" />
-                                <ItemsControl ItemsSource="{Binding Palettes}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button Style="{StaticResource Dyc.SettingsChoice}"
-                                                    Command="{Binding DataContext.SelectPaletteCommand, ElementName=SettingsButton}"
-                                                    CommandParameter="{Binding}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0"
-                                                            Background="{Binding Swatch}"
-                                                            BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
-                                                            BorderThickness="1" />
-                                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </Popup>
                 </StackPanel>
 
                 <!-- Not the window's main menu: Alt/F10 must stay with Navisworks (a WPF menu in menu mode
@@ -745,6 +665,348 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- Settings page: sections on the left, generated from SettingsCatalog; the Shortcuts
+                 section is the rebinding table (Change, then press the chord). -->
+            <Border Grid.Column="2"
+                    Panel.ZIndex="940"
+                    Background="#F5151719"
+                    Visibility="{Binding IsSettingsOpen, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <DockPanel Margin="24,18">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource Dyc.IconButton}"
+                                Content="✕"
+                                ToolTip="Close (Esc)"
+                                Command="{Binding CloseSettingsCommand}" />
+                        <TextBox DockPanel.Dock="Right"
+                                 Width="240"
+                                 Margin="0,0,12,0"
+                                 Style="{StaticResource Dyc.TextBox}"
+                                 ToolTip="Search the settings"
+                                 Text="{Binding SettingsFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="Settings"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource Dyc.TextBrush}" />
+                    </DockPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ListBox Style="{StaticResource Dyc.NavListBox}"
+                                 VerticalAlignment="Top"
+                                 ItemsSource="{Binding SettingsSectionNames}"
+                                 SelectedItem="{Binding SettingsSection, Mode=TwoWay}" />
+                        <ScrollViewer Grid.Column="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel MaxWidth="760" HorizontalAlignment="Left" Margin="8,0,16,0">
+                                <ItemsControl ItemsSource="{Binding VisibleSettings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,14">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="190" />
+                                                    <ColumnDefinition Width="28" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Margin="0,0,16,0">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                                    <TextBlock Text="{Binding Description}"
+                                                               Margin="0,2,0,0"
+                                                               FontSize="11"
+                                                               TextWrapping="Wrap"
+                                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                                </StackPanel>
+                                                <CheckBox Grid.Column="1"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Top"
+                                                          Style="{StaticResource Dyc.NodeCheckBox}"
+                                                          IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                          Visibility="{Binding IsToggle, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                <ComboBox Grid.Column="1"
+                                                          VerticalAlignment="Top"
+                                                          Height="22"
+                                                          Style="{StaticResource Dyc.ComboBox}"
+                                                          ItemsSource="{Binding OptionLabels}"
+                                                          SelectedItem="{Binding SelectedLabel, Mode=TwoWay}"
+                                                          Visibility="{Binding IsChoice, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                <Button Grid.Column="2"
+                                                        VerticalAlignment="Top"
+                                                        Style="{StaticResource Dyc.IconButton}"
+                                                        Content="↺"
+                                                        ToolTip="Back to the default"
+                                                        Command="{Binding ResetCommand}"
+                                                        Visibility="{Binding IsModified, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Appearance: the colour palette -->
+                                <StackPanel Visibility="{Binding ShowPaletteChoices, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <TextBlock Text="Colour palette"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                    <TextBlock Text="The colours of the whole editor."
+                                               Margin="0,2,0,6"
+                                               FontSize="11"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                    <ItemsControl ItemsSource="{Binding Palettes}" Width="300" HorizontalAlignment="Left">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource Dyc.SettingsChoice}"
+                                                        Command="{Binding DataContext.SelectPaletteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0"
+                                                                Background="{Binding Swatch}"
+                                                                BorderBrush="{StaticResource Dyc.PanelBorderBrush}"
+                                                                BorderThickness="1" />
+                                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <!-- Shortcuts: rebinding table -->
+                                <StackPanel Visibility="{Binding ShowShortcutTable, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <DockPanel Margin="0,0,0,8">
+                                        <Button DockPanel.Dock="Right"
+                                                Style="{StaticResource Dyc.SmallButton}"
+                                                Content="Reset all shortcuts"
+                                                Command="{Binding ResetAllShortcutsCommand}" />
+                                        <TextBox Style="{StaticResource Dyc.TextBox}"
+                                                 Margin="0,0,12,0"
+                                                 ToolTip="Search commands and shortcuts"
+                                                 Text="{Binding ShortcutFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DockPanel>
+                                    <TextBlock Margin="0,0,0,10"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               Text="Press Change, then the keys you want. Esc cancels, Backspace removes the shortcut. Every command is listed, including those without one." />
+                                    <ItemsControl ItemsSource="{Binding ShortcutRows}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="0,4" BorderBrush="{StaticResource Dyc.PanelBorderBrush}" BorderThickness="0,0,0,1">
+                                                    <StackPanel>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="90" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="190" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="{Binding Category}"
+                                                                       VerticalAlignment="Center"
+                                                                       FontSize="11"
+                                                                       Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                                            <TextBlock Grid.Column="1"
+                                                                       Text="{Binding Title}"
+                                                                       VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Foreground="{StaticResource Dyc.TextBrush}" />
+                                                            <Border Grid.Column="2"
+                                                                    Margin="8,0"
+                                                                    Padding="8,2"
+                                                                    CornerRadius="3"
+                                                                    BorderThickness="1"
+                                                                    Background="{StaticResource Dyc.InputBackgroundBrush}">
+                                                                <Border.Style>
+                                                                    <Style TargetType="{x:Type Border}">
+                                                                        <Setter Property="BorderBrush" Value="{StaticResource Dyc.InputBorderBrush}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsCapturing}" Value="True">
+                                                                                <Setter Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <TextBlock Text="{Binding Display}"
+                                                                           FontFamily="Consolas"
+                                                                           FontSize="12"
+                                                                           Foreground="{StaticResource Dyc.TextBrush}" />
+                                                            </Border>
+                                                            <Button Grid.Column="3"
+                                                                    Style="{StaticResource Dyc.SmallButton}"
+                                                                    Content="Change"
+                                                                    Command="{Binding ChangeCommand}" />
+                                                            <Button Grid.Column="4"
+                                                                    Margin="4,0,0,0"
+                                                                    Style="{StaticResource Dyc.IconButton}"
+                                                                    Content="✕"
+                                                                    ToolTip="Remove the shortcut"
+                                                                    Command="{Binding ClearCommand}" />
+                                                            <Button Grid.Column="5"
+                                                                    Style="{StaticResource Dyc.IconButton}"
+                                                                    Content="↺"
+                                                                    ToolTip="Back to the default shortcut"
+                                                                    Command="{Binding ResetCommand}"
+                                                                    Visibility="{Binding IsCustom, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Message}"
+                                                                   Margin="98,3,0,0"
+                                                                   FontSize="11"
+                                                                   TextWrapping="Wrap"
+                                                                   Foreground="{StaticResource Dyc.WarningBrush}"
+                                                                   Visibility="{Binding HasMessage, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <!-- Diagnostics -->
+                                <StackPanel Visibility="{Binding ShowDiagnosticsPage, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <TextBlock Text="Tools"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                    <TextBlock Text="Each of these is also in a menu and the command palette."
+                                               Margin="0,2,0,8"
+                                               FontSize="11"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                    <WrapPanel>
+                                        <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Performance HUD"
+                                                ToolTip="Frame rate, node counts and input state (Ctrl+Shift+F12)"
+                                                Command="{Binding RunCommandIdCommand}" CommandParameter="view.hud" />
+                                        <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Keyboard and mouse help"
+                                                Command="{Binding RunCommandIdCommand}" CommandParameter="help.keys" />
+                                        <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Open the user guide"
+                                                Command="{Binding RunCommandIdCommand}" CommandParameter="help.guide" />
+                                    </WrapPanel>
+                                    <TextBlock Text="Reset"
+                                               Margin="0,14,0,2"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                    <TextBlock Text="Puts every setting and shortcut back to its default. Favourites and recent files are kept."
+                                               Margin="0,0,0,8"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}" />
+                                    <Button Style="{StaticResource Dyc.SmallButton}"
+                                            HorizontalAlignment="Left"
+                                            Content="Reset all settings"
+                                            Command="{Binding ResetPreferencesCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Command palette (Ctrl+Shift+P): type to find any command or setting, Enter runs it. -->
+            <Border Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="0,42,0,0"
+                    Width="480"
+                    Background="{StaticResource Dyc.PanelBrush}"
+                    BorderBrush="{StaticResource Dyc.AccentBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="8"
+                    Panel.ZIndex="960"
+                    Visibility="{Binding IsPaletteOpen, Converter={StaticResource Dyc.BoolToVisibility}}"
+                    IsKeyboardFocusWithinChanged="OnPaletteFocusChanged">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top">
+                        <TextBox x:Name="PaletteBox"
+                                 FontSize="13"
+                                 Style="{StaticResource Dyc.TextBox}"
+                                 Padding="26,4,8,4"
+                                 Text="{Binding PaletteQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 PreviewKeyDown="OnPaletteBoxKeyDown" />
+                        <Path Width="14" Height="14" Stretch="Uniform"
+                              HorizontalAlignment="Left" VerticalAlignment="Center"
+                              Margin="7,0,0,0"
+                              IsHitTestVisible="False"
+                              Fill="{StaticResource Dyc.SubtleTextBrush}"
+                              Data="{StaticResource Dyc.Icon.Search}" />
+                    </Grid>
+                    <TextBlock DockPanel.Dock="Top"
+                               Margin="2,5,2,3"
+                               FontSize="10"
+                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                               Text="Type a command or a setting · ↑↓ choose · Enter runs · Esc closes" />
+                    <ListBox x:Name="PaletteList"
+                             MaxHeight="360"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             FontSize="13"
+                             Foreground="{StaticResource Dyc.TextBrush}"
+                             ItemsSource="{Binding PaletteResults}"
+                             SelectedItem="{Binding PaletteSelected, Mode=TwoWay}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             PreviewMouseLeftButtonUp="OnPaletteListClick">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Foreground" Value="{StaticResource Dyc.TextBrush}" />
+                                <Setter Property="Padding" Value="6,3" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <Border x:Name="Chrome"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    BorderThickness="1,0,0,0"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                                    <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Category}"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="12,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontFamily="Consolas"
+                                               FontSize="11"
+                                               Foreground="{StaticResource Dyc.SubtleTextBrush}"
+                                               Text="{Binding Shortcut}"
+                                               Visibility="{Binding HasShortcut, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
 

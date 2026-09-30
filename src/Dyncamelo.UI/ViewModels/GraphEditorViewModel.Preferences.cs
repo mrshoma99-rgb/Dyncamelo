@@ -203,5 +203,6 @@ public partial class GraphEditorViewModel
         }
 
         OnPropertyChanged(nameof(LiveScrubEvaluation));
+        RefreshAfterSettingsChange();
     }
 }

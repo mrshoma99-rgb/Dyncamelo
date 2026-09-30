@@ -195,6 +195,7 @@ public partial class GraphEditorViewModel : ObservableObject
         _paletteId = _settings.PaletteId;
         _previewSelection = _settings.PreviewSelection;
         UpdateChoiceSelection();
+        InitCommandSurface();
 
         _autoRunTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
         _autoRunTimer.Tick += OnAutoRunTimerTick;

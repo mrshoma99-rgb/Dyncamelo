@@ -1595,6 +1595,51 @@
         </Setter>
     </Style>
 
+    <!-- Vertical section list of the Settings page. -->
+    <Style x:Key="Dyc.NavListBox" TargetType="{x:Type ListBox}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Focusable" Value="True" />
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                <Border x:Name="Nav"
+                                        Padding="12,7"
+                                        Margin="0,1"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="2,0,0,0"
+                                        CornerRadius="3">
+                                    <TextBlock Text="{Binding}"
+                                               FontSize="13"
+                                               Foreground="{StaticResource Dyc.TextBrush}" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Nav" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Nav" Property="Background" Value="{StaticResource Dyc.HoverBrush}" />
+                                        <Setter TargetName="Nav" Property="BorderBrush" Value="{StaticResource Dyc.AccentBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <DataTemplate x:Key="Editor.Number">
         <views:ScrubNumberBox Label="{Binding Title}"
                               Value="{Binding NumberValue, Mode=TwoWay}"

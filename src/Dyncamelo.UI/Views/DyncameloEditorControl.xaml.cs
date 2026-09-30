@@ -153,11 +153,10 @@ public partial class DyncameloEditorControl : UserControl
         vm.UpdateInsertCandidate(node, rect, Editor.MouseLocation);
     }
 
-    private readonly ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
+    private ShortcutRouter _router = new ShortcutRouter(new[] { "graph.addnode" });
     private RelayCommand? _guideCommand;
     private RelayCommand? _hudCommand;
     private RelayCommand? _previewsCommand;
-    private RelayCommand? _settingsCommand;
     private RelayCommand? _autoRunCommand;
     private RelayCommand? _addNoteCommand;
     private RelayCommand? _addNodeCommand;
@@ -191,7 +190,25 @@ public partial class DyncameloEditorControl : UserControl
                 {
                     AddFrameColorSubmenu(vm, top);
                 }
-            });
+            },
+            vm.Keymap);
+    }
+
+    // The user rebound a shortcut (or reset them): the key router and the menus show the new chords.
+    private void OnKeymapChanged(object? sender, System.EventArgs e)
+    {
+        if (ViewModel != null)
+        {
+            RebuildKeyRouter(ViewModel);
+            BuildHeaderMenu(ViewModel);
+        }
+    }
+
+    private void RebuildKeyRouter(GraphEditorViewModel vm)
+    {
+        // Space over the canvas has special handling (it opens the search at the pointer); a rebound chord goes through the router.
+        var skip = vm.Keymap.ShortcutOf("graph.addnode") == "Space" ? new[] { "graph.addnode" } : new string[0];
+        _router = new ShortcutRouter(vm.Keymap, skip);
     }
 
     private ICommand? ResolveCommand(GraphEditorViewModel vm, string id)
@@ -235,7 +252,8 @@ public partial class DyncameloEditorControl : UserControl
             case "help.keys": return vm.ToggleHelpCommand;
             case "view.hud": return _hudCommand;
             case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);
-            case "view.settings": return _settingsCommand ??= new RelayCommand(() => SettingsButton.IsChecked = true);
+            case "view.settings": return vm.ToggleSettingsCommand;
+            case "help.palette": return vm.TogglePaletteCommand;
             case "graph.autorun": return _autoRunCommand ??= new RelayCommand(() => vm.IsAutoRun = !vm.IsAutoRun);
             case "graph.run": return vm.RunCommand;
             case "graph.rename": return vm.RenameCommand;
@@ -347,14 +365,19 @@ public partial class DyncameloEditorControl : UserControl
         {
             oldViewModel.Library.EntryRevealRequested -= OnLibraryEntryRevealRequested;
             oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+            oldViewModel.KeymapChanged -= OnKeymapChanged;
         }
 
         if (e.NewValue is GraphEditorViewModel newViewModel)
         {
             newViewModel.Library.EntryRevealRequested += OnLibraryEntryRevealRequested;
             newViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            newViewModel.KeymapChanged += OnKeymapChanged;
+            newViewModel.CommandResolver = id => ResolveCommand(newViewModel, id);
+            newViewModel.CommandTarget = Editor;
             // Apply the persisted palette once the view model is attached.
             ApplyPalette(newViewModel.PaletteId);
+            RebuildKeyRouter(newViewModel);
             BuildHeaderMenu(newViewModel);
         }
     }
@@ -379,6 +402,16 @@ public partial class DyncameloEditorControl : UserControl
                 {
                     QuickSearchBox.Focus();
                     QuickSearchBox.SelectAll();
+                }),
+                System.Windows.Threading.DispatcherPriority.Input);
+        }
+        else if (e.PropertyName == nameof(GraphEditorViewModel.IsPaletteOpen) && ViewModel?.IsPaletteOpen == true)
+        {
+            Dispatcher.BeginInvoke(
+                new System.Action(() =>
+                {
+                    PaletteBox.Focus();
+                    PaletteBox.SelectAll();
                 }),
                 System.Windows.Threading.DispatcherPriority.Input);
         }
@@ -450,6 +483,13 @@ public partial class DyncameloEditorControl : UserControl
             return false;
         }
 
+        // While a shortcut is being recorded every key belongs to the recorder, and Esc closes an open overlay.
+        if (ViewModel.IsCapturingShortcut ||
+            (key == Key.Escape && (ViewModel.IsHelpOpen || ViewModel.IsPaletteOpen || ViewModel.IsSettingsOpen)))
+        {
+            return true;
+        }
+
         var modifiers = Modifiers;
         var ctrl = (modifiers & ModifierKeys.Control) != 0;
         var typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
@@ -504,12 +544,20 @@ public partial class DyncameloEditorControl : UserControl
     {
         bool typing = Keyboard.FocusedElement is System.Windows.Controls.Primitives.TextBoxBase;
 
-        if (e.Key == Key.Escape && ViewModel != null && ViewModel.IsHelpOpen)
+        if (ViewModel != null && ViewModel.IsCapturingShortcut)
         {
-            ViewModel.IsHelpOpen = false;
+            CaptureShortcutKey(ViewModel, e);
+            return;
+        }
+
+        if (e.Key == Key.Escape && ViewModel != null && CloseTopOverlay(ViewModel))
+        {
             e.Handled = true;
             return;
         }
+
+        // Under an open overlay (settings, palette, help) the canvas shortcuts must not act on the graph behind it.
+        var overlayOpen = ViewModel != null && (ViewModel.IsSettingsOpen || ViewModel.IsPaletteOpen || ViewModel.IsHelpOpen);
 
         if (e.Key == Key.F12 && Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && _perfHud != null)
         {
@@ -529,6 +577,7 @@ public partial class DyncameloEditorControl : UserControl
         // Space over the canvas opens the quick node search (Dynamo-style):
         // type to filter, Enter inserts at the spot the cursor was on.
         if (!typing &&
+            !overlayOpen &&
             e.Key == Key.Space &&
             Modifiers == ModifierKeys.None &&
             ViewModel != null &&
@@ -561,12 +610,117 @@ public partial class DyncameloEditorControl : UserControl
             _router.TryDispatch(
                 e.Key == Key.System ? e.SystemKey : e.Key,
                 Modifiers,
-                typing,
+                typing || overlayOpen,
                 Editor.IsKeyboardFocusWithin,
                 id => ResolveCommand(ViewModel, id),
                 Editor))
         {
             e.Handled = true;
+        }
+    }
+
+    // Closes the top-most overlay (palette, then settings, then help); false when none was open.
+    private bool CloseTopOverlay(GraphEditorViewModel vm)
+    {
+        if (vm.IsPaletteOpen)
+        {
+            vm.ClosePalette();
+        }
+        else if (vm.IsSettingsOpen)
+        {
+            vm.IsSettingsOpen = false;
+        }
+        else if (vm.IsHelpOpen)
+        {
+            vm.IsHelpOpen = false;
+        }
+        else
+        {
+            return false;
+        }
+
+        Editor.Focus();
+        return true;
+    }
+
+    // A Change button was pressed: the next chord goes to the row (Esc cancels, Backspace removes the shortcut).
+    private void CaptureShortcutKey(GraphEditorViewModel vm, KeyEventArgs e)
+    {
+        e.Handled = true;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (ShortcutRouter.IsModifierKey(key))
+        {
+            return;
+        }
+
+        var modifiers = Modifiers;
+        if (modifiers == ModifierKeys.None && key == Key.Escape)
+        {
+            vm.CancelShortcutCapture();
+        }
+        else if (modifiers == ModifierKeys.None && key == Key.Back)
+        {
+            vm.CommitShortcutCapture(string.Empty);
+        }
+        else
+        {
+            vm.CommitShortcutCapture(ShortcutRouter.ChordOf(key, modifiers).ToString());
+        }
+    }
+
+    // ----- command palette (Ctrl+Shift+P) --------------------------------------
+
+    private void OnPaletteBoxKeyDown(object sender, KeyEventArgs e)
+    {
+        var vm = ViewModel;
+        if (vm == null)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Enter:
+                Editor.Focus();
+                vm.RunPaletteEntry();
+                e.Handled = true;
+                break;
+            case Key.Down:
+                vm.MovePaletteSelection(1);
+                ScrollPaletteSelectionIntoView();
+                e.Handled = true;
+                break;
+            case Key.Up:
+                vm.MovePaletteSelection(-1);
+                ScrollPaletteSelectionIntoView();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void ScrollPaletteSelectionIntoView()
+    {
+        if (PaletteList.SelectedItem != null)
+        {
+            PaletteList.ScrollIntoView(PaletteList.SelectedItem);
+        }
+    }
+
+    private void OnPaletteListClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ViewModel != null && (e.OriginalSource as FrameworkElement)?.DataContext is PaletteEntry entry)
+        {
+            Editor.Focus();
+            ViewModel.RunPaletteEntry(entry);
+            e.Handled = true;
+        }
+    }
+
+    private void OnPaletteFocusChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (!(bool)e.NewValue && ViewModel != null && ViewModel.IsPaletteOpen)
+        {
+            ViewModel.ClosePalette();
         }
     }
 

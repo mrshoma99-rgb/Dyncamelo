@@ -65,15 +65,26 @@ public static class HelpContent
     };
 
     /// <summary>All sections: one per command category that has shortcuts, then the gestures.</summary>
-    public static IReadOnlyList<HelpSection> Build()
+    /// <param name="keymap">The shortcuts in force (with the user's rebindings); the defaults when null.</param>
+    public static IReadOnlyList<HelpSection> Build(Keymap? keymap = null)
     {
+        keymap ??= new Keymap();
         var sections = new List<HelpSection>();
         foreach (var category in CommandCatalog.Categories)
         {
-            var lines = CommandCatalog.All
-                .Where(c => c.Category == category && c.Shortcut != null)
-                .Select(c => new HelpLine(c.Title, c.Alternate == null ? c.Shortcut! : c.Shortcut + " / " + c.Alternate))
-                .ToList();
+            var lines = new List<HelpLine>();
+            foreach (var c in CommandCatalog.All)
+            {
+                var main = keymap.ShortcutOf(c.Id);
+                if (c.Category != category || main == null)
+                {
+                    continue;
+                }
+
+                var alternate = keymap.AlternateOf(c.Id);
+                lines.Add(new HelpLine(c.Title, alternate == null ? main : main + " / " + alternate));
+            }
+
             if (lines.Count > 0)
             {
                 sections.Add(new HelpSection(category, lines));

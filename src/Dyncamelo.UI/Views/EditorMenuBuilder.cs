@@ -22,14 +22,17 @@ internal static class EditorMenuBuilder
     /// <param name="commandTarget">Target for routed commands (the canvas).</param>
     /// <param name="isChecked">Current state of a toggle command, refreshed whenever its menu opens.</param>
     /// <param name="extend">Adds extra entries (submenus) to a category after its catalogue entries.</param>
+    /// <param name="keymap">The shortcuts in force, shown beside each item; the defaults when null.</param>
     public static void Build(
         Menu menu,
         Style? topStyle,
         Func<string, ICommand?> resolve,
         IInputElement? commandTarget,
         Func<string, bool> isChecked,
-        Action<string, MenuItem>? extend)
+        Action<string, MenuItem>? extend,
+        Keymap? keymap = null)
     {
+        keymap ??= new Keymap();
         menu.Items.Clear();
         foreach (var category in CommandCatalog.Categories)
         {
@@ -66,7 +69,7 @@ internal static class EditorMenuBuilder
                 {
                     Header = new TextBlock { Text = info.Title },
                     Command = command,
-                    InputGestureText = info.Shortcut ?? string.Empty,
+                    InputGestureText = keymap.ShortcutOf(info.Id) ?? string.Empty,
                     IsCheckable = info.IsToggle,
                 };
                 if (command is RoutedCommand)

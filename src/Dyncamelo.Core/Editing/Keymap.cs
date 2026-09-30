@@ -97,9 +97,17 @@ public sealed class Keymap
             return "'" + chord + "' is not a valid shortcut.";
         }
 
-        if (info.Scope == CommandScope.Global && ReservedTextChords.Contains(parsed.ToString()))
+        if (info.Scope == CommandScope.Global)
         {
-            return parsed + " edits text inside boxes, so a command that also works there cannot use it.";
+            if (ReservedTextChords.Contains(parsed.ToString()))
+            {
+                return parsed + " edits text inside boxes, so a command that also works there cannot use it.";
+            }
+
+            if (!parsed.Ctrl && !parsed.Alt && !IsFunctionKey(parsed.Key))
+            {
+                return parsed + " is typed into text boxes, so a command that also works there needs Ctrl or Alt (or a function key).";
+            }
         }
 
         var owner = Find(parsed);
@@ -109,6 +117,11 @@ public sealed class Keymap
         }
 
         return null;
+    }
+
+    private static bool IsFunctionKey(string key)
+    {
+        return key.Length >= 2 && (key[0] == 'F' || key[0] == 'f') && int.TryParse(key.Substring(1), out var n) && n >= 1 && n <= 24;
     }
 
     /// <summary>Returns the overrides that result from binding one command (the keymap itself is immutable).</summary>
