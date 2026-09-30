@@ -120,6 +120,116 @@ public static class ViewpointTreeNodes
         };
     }
 
+    /// <summary>Lists the saved viewpoints inside a folder.</summary>
+    /// <param name="folder">The folder to read: a folder object, its name, a path such as "Reviews/Week 12", or empty for the top level of the Saved Viewpoints window.</param>
+    /// <param name="recursive">True (default) includes viewpoints in nested subfolders; false lists only the folder's direct children.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The viewpoints in tree order, their names, the subfolders met on the way, and how many viewpoints were found.</returns>
+    [NodeName("Viewpoints.InFolder")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
+    [NodeDescription(
+        "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object " +
+        "(Viewpoints.CreateFolder / SavedViewpoint.Folder), a folder NAME, or a path like \"Reviews/Week 12\" " +
+        "to pick between same-named folders; leave it empty for the top level. Nested subfolders are included " +
+        "unless recursive is off. Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage, " +
+        "Viewpoints.ExportFile or a Loop.Item.")]
+    [NodeSearchTags("viewpoints", "folder", "contents", "children", "list", "inside", "views", "all")]
+    [MultiReturn("viewpoints", "names", "subfolders", "count")]
+    public static Dictionary<string, object?> InFolder(
+        object? folder = null,
+        bool recursive = true,
+        Document? document = null)
+    {
+        var doc = NavisworksContext.ResolveDocument(document);
+        var root = doc.SavedViewpoints.RootItem;
+        var start = ResolveFolderOrRoot(root, folder);
+
+        var viewpoints = new List<SavedViewpoint>();
+        var subfolders = new List<FolderItem>();
+        CollectViewpoints(start.Children, recursive, viewpoints, subfolders);
+
+        var names = new List<string>(viewpoints.Count);
+        foreach (var viewpoint in viewpoints)
+        {
+            names.Add(viewpoint.DisplayName ?? string.Empty);
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["viewpoints"] = viewpoints,
+            ["names"] = names,
+            ["subfolders"] = subfolders,
+            ["count"] = viewpoints.Count,
+        };
+    }
+
+    /// <summary>
+    /// Resolves the folder input: null/empty = the tree root, a folder object,
+    /// a "A/B" path (each segment matched among the previous folder's direct
+    /// children), or a bare name (first match anywhere in the tree).
+    /// </summary>
+    private static GroupItem ResolveFolderOrRoot(FolderItem root, object? folder)
+    {
+        switch (folder)
+        {
+            case null:
+                return root;
+            case string text when text.Trim().Length == 0:
+                return root;
+            case string path when path.IndexOf('/') >= 0:
+                GroupItem current = root;
+                foreach (var segment in path.Split('/'))
+                {
+                    var name = segment.Trim();
+                    if (name.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    GroupItem? next = null;
+                    foreach (var child in current.Children)
+                    {
+                        if (child is FolderItem candidate &&
+                            string.Equals(candidate.DisplayName, name, StringComparison.Ordinal))
+                        {
+                            next = candidate;
+                            break;
+                        }
+                    }
+
+                    current = next ?? throw new InvalidOperationException(
+                        "No viewpoint folder '" + name + "' exists in the path '" + path + "'.");
+                }
+
+                return current;
+            default:
+                return SavedItemTreeHelpers.ResolveStored<FolderItem>(root, folder, "viewpoint folder");
+        }
+    }
+
+    private static void CollectViewpoints(
+        IEnumerable<SavedItem> items,
+        bool recursive,
+        List<SavedViewpoint> viewpoints,
+        List<FolderItem> subfolders)
+    {
+        foreach (var item in items)
+        {
+            if (item is SavedViewpoint viewpoint)
+            {
+                viewpoints.Add(viewpoint);
+            }
+            else if (item is FolderItem folder)
+            {
+                subfolders.Add(folder);
+                if (recursive)
+                {
+                    CollectViewpoints(folder.Children, true, viewpoints, subfolders);
+                }
+            }
+        }
+    }
+
     /// <summary>Renames a saved-viewpoint folder.</summary>
     /// <param name="folder">The folder (e.g. from Viewpoints.CreateFolder), or its current name.</param>
     /// <param name="newName">The new folder name.</param>
