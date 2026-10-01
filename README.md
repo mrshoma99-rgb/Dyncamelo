@@ -43,7 +43,7 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 - **Editor quality of life** — Space-bar quick node search at the cursor, port tooltips generated from the API docs on all **314 nodes**, an inline **Watch Image** node for the analysis PNGs, an index gutter on Watch List, click-to-expand preview bubbles, a proper Boolean switch, and Create/Modify/Info grouping with symbols throughout the library.
 - **One BIMCamel ribbon** — a single tab shared with the IFC exporter, unified About window, and an update check when the editor opens.
 
-The newest release (0.45: tables, conditional flow, about 220 new nodes) is described in [docs/WHATS_NEW_0.45.md](docs/WHATS_NEW_0.45.md), with role-by-role [recipes](docs/RECIPES.md). Full details of the 0.23 wave in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
+The newest release is 0.45.1 ([a fix for picking from the node library](docs/WHATS_NEW_0.45.1.md)); 0.45 (tables, conditional flow, about 220 new nodes) is described in [docs/WHATS_NEW_0.45.md](docs/WHATS_NEW_0.45.md), with role-by-role [recipes](docs/RECIPES.md). Full details of the 0.23 wave in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
 
 ## Features
 

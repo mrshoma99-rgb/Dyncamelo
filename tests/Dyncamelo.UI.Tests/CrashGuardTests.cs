@@ -62,6 +62,9 @@ public class CrashGuardTests
     [Fact]
     public void ATemplateOfOursThatFailsToLoadIsRecognisedByTheFileItWasReading()
     {
+        // "pack://" is only a known URI scheme once WPF has started (the shared test thread creates the Application); on a test
+        // that runs first, new Uri("pack://application:,,,/...") reads ":,,," as a port and throws.
+        StaHost.Run(() => { });
         Assert.True(CrashGuard.IsDyncameloFile(new Uri("pack://application:,,,/Dyncamelo.UI;component/themes/dyncamelodark.xaml")));
         Assert.False(CrashGuard.IsDyncameloFile(new Uri("pack://application:,,,/Autodesk.Navisworks.Gui;component/ribbon.xaml")));
         Assert.False(CrashGuard.IsDyncameloFile(null));
