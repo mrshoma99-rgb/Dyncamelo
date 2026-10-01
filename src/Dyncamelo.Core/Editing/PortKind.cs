@@ -226,6 +226,7 @@ public static class PortKinds
             case "string": family = PortFamily.Text; break;
             case "datetime": family = PortFamily.DateTime; break;
             case "dict": family = PortFamily.Data; break;
+            case "file": family = PortFamily.File; break;
             case "any":
             case "var":
             case "object": family = PortFamily.Any; break;

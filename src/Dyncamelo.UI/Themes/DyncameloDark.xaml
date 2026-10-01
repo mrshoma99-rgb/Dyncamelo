@@ -1087,6 +1087,52 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate x:Key="NodeBody.IntegerInput">
+        <views:ScrubNumberBox Margin="4"
+                              MinWidth="110"
+                              Label="Value"
+                              IsInteger="True"
+                              Value="{Binding Value, Mode=TwoWay}"
+                              Step="1"
+                              LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                              PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                              ToolTip="Drag to scrub (Shift = fine, Ctrl = snap), click to type a whole number." />
+    </DataTemplate>
+
+    <!-- A date typed as text (2026-10-01 or 2026-10-01 14:30); a warning appears while it does not read as a date. -->
+    <DataTemplate x:Key="NodeBody.DateInput">
+        <StackPanel Margin="4" MinWidth="130">
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Type a date like 2026-10-01, or with a time: 2026-10-01 14:30" />
+            <TextBlock Margin="0,3,0,0"
+                       FontSize="10"
+                       Foreground="{DynamicResource Dyc.ErrorBrush}"
+                       Text="Not a date — use 2026-10-01"
+                       Visibility="{Binding IsInvalid, Converter={StaticResource Dyc.BoolToVisibility}}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- A pick-list with the author's own options: the dropdown picks, the box below lists them one per line. -->
+    <DataTemplate x:Key="NodeBody.Choice">
+        <StackPanel Margin="4" MinWidth="150">
+            <ComboBox Style="{StaticResource Dyc.ComboBox}"
+                      Height="22"
+                      ItemsSource="{Binding Options}"
+                      SelectedItem="{Binding Value, Mode=TwoWay}" />
+            <TextBlock Margin="0,5,0,2"
+                       FontSize="10"
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                       Text="Options, one per line" />
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     MinHeight="48"
+                     MaxHeight="120"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding OptionsText, UpdateSourceTrigger=LostFocus}" />
+        </StackPanel>
+    </DataTemplate>
+
     <DataTemplate x:Key="NodeBody.StringInput">
         <TextBox Style="{StaticResource Dyc.TextBox}"
                  MinWidth="130"
@@ -1329,6 +1375,129 @@
                                  TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
                                  MinTargetWidth="140"
                                  MinTargetHeight="24">
+                <views:SizeGripThumb.Template>
+                    <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
+                        <Grid Background="Transparent">
+                            <Path Data="M 12,2 L 2,12 M 12,7 L 7,12"
+                                  Stroke="{DynamicResource Dyc.SubtleTextBrush}"
+                                  StrokeThickness="1.5" />
+                        </Grid>
+                    </ControlTemplate>
+                </views:SizeGripThumb.Template>
+            </views:SizeGripThumb>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Watch Table: the table as a grid. Equal-width columns (a UniformGrid per line), the header on top, the rows in a virtualized list. -->
+    <DataTemplate x:Key="NodeBody.WatchTableNode">
+        <Grid Margin="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Margin="1,0,1,3"
+                       FontSize="10"
+                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                       Text="{Binding Summary}" />
+            <Border x:Name="WatchTableBox"
+                    Grid.Row="1"
+                    Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                    BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="6,3"
+                    MinWidth="180"
+                    MinHeight="40"
+                    Width="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                    Height="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}}"
+                    MaxWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=520}"
+                    MaxHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Converter={StaticResource Dyc.AutoSizeLimit}, ConverterParameter=260}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ItemsControl Grid.Row="0"
+                                  ItemsSource="{Binding Headers}"
+                                  Focusable="False"
+                                  IsTabStop="False"
+                                  Margin="0,0,0,2">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           ToolTip="{Binding}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,0,10,0"
+                                           Foreground="{DynamicResource Dyc.AccentBrush}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Rows}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="{DynamicResource Dyc.TextBrush}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <Setter Property="Focusable" Value="False" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding Cells}" Focusable="False" IsTabStop="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       ToolTip="{Binding}"
+                                                       FontFamily="Consolas"
+                                                       FontSize="11"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Margin="0,0,10,0"
+                                                       Foreground="{DynamicResource Dyc.TextBrush}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <views:SizeGripThumb Grid.Row="2"
+                                 HorizontalAlignment="Right"
+                                 Width="14"
+                                 Height="12"
+                                 Margin="0,2,0,0"
+                                 ToolTip="Drag to resize"
+                                 TargetElement="{Binding ElementName=WatchTableBox}"
+                                 TargetWidth="{Binding DataContext.WatchWidth, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
+                                 TargetHeight="{Binding DataContext.WatchHeight, RelativeSource={RelativeSource AncestorType={x:Type nodify:ItemContainer}}, Mode=TwoWay}"
+                                 MinTargetWidth="180"
+                                 MinTargetHeight="40">
                 <views:SizeGripThumb.Template>
                     <ControlTemplate TargetType="{x:Type views:SizeGripThumb}">
                         <Grid Background="Transparent">

@@ -1,6 +1,6 @@
 {
  "version": "v0.44.0",
- "count": 550,
+ "count": 555,
  "categories": [
   {
    "name": "Annotation",
@@ -24,7 +24,7 @@
   },
   {
    "name": "Display",
-   "count": 3
+   "count": 4
   },
   {
    "name": "File",
@@ -36,7 +36,7 @@
   },
   {
    "name": "Input",
-   "count": 7
+   "count": 10
   },
   {
    "name": "List",
@@ -144,6 +144,10 @@
   },
   {
    "name": "Utility",
+   "count": 1
+  },
+  {
+   "name": "WatchTableNode",
    "count": 1
   },
   {
@@ -306,7 +310,7 @@
    "outputs": [
     {
      "name": "colors",
-     "type": "any",
+     "type": "Color[]",
      "description": ""
     },
     {
@@ -316,7 +320,7 @@
     },
     {
      "name": "uniqueColors",
-     "type": "any",
+     "type": "Color[]",
      "description": ""
     }
    ],
@@ -342,22 +346,22 @@
    "outputs": [
     {
      "name": "red",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "green",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "blue",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "alpha",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -754,17 +758,17 @@
    "outputs": [
     {
      "name": "hue",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "saturation",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "value",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -886,17 +890,17 @@
    "outputs": [
     {
      "name": "addedKeys",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "removedKeys",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "changedKeys",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -1225,57 +1229,57 @@
    "outputs": [
     {
      "name": "year",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "month",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "day",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "hour",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "minute",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "second",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "weekday",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "dayOfYear",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "isoWeek",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "isoYear",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "quarter",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -2062,6 +2066,28 @@
    "interactive": true
   },
   {
+   "name": "Watch Table",
+   "category": "Display",
+   "description": "Displays a table as a grid: column names on top, one line per row.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "any",
+     "description": "The table (or rows, or dictionaries) to display."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "any",
+     "description": "The incoming value, passed through."
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
    "name": "CSV.AppendToFile",
    "category": "File",
    "description": "Appends rows to a CSV file (same quoting as CSV.WriteToFile), writing the optional headers only when the file is new or empty.",
@@ -2436,12 +2462,12 @@
     },
     {
      "name": "headers",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "sheetNames",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -2648,37 +2674,37 @@
    "outputs": [
     {
      "name": "exists",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "extension",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "directory",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "sizeBytes",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "modified",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "created",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     }
    ],
@@ -3715,27 +3741,27 @@
    "outputs": [
     {
      "name": "sizeX",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "sizeY",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "sizeZ",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "min",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "max",
-     "type": "any",
+     "type": "Point",
      "description": ""
     }
    ],
@@ -3949,17 +3975,17 @@
    "outputs": [
     {
      "name": "x",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "y",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "z",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -4322,17 +4348,17 @@
    "outputs": [
     {
      "name": "x",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "y",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "z",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -4701,6 +4727,43 @@
    "interactive": true
   },
   {
+   "name": "Choice",
+   "category": "Input",
+   "description": "A pick-list with your own options (one per line); gives the chosen text and its position.",
+   "tags": [],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": ""
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
+   "name": "Date",
+   "category": "Input",
+   "description": "A date (and optional time), typed as 2026-10-01 or 2026-10-01 14:30.",
+   "tags": [],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "datetime",
+     "description": ""
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
    "name": "Directory Path",
    "category": "Input",
    "description": "A path to a directory.",
@@ -4726,6 +4789,22 @@
     {
      "name": "path",
      "type": "string",
+     "description": ""
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
+   "name": "Integer",
+   "category": "Input",
+   "description": "A whole number (no slider range): a count, an index, a level.",
+   "tags": [],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -5128,7 +5207,7 @@
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     }
    ],
@@ -5157,12 +5236,12 @@
    "outputs": [
     {
      "name": "trueCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "falseCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -5339,7 +5418,7 @@
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     }
    ],
@@ -5439,7 +5518,7 @@
     },
     {
      "name": "mask",
-     "type": "any",
+     "type": "boolean[]",
      "description": ""
     }
    ],
@@ -5594,22 +5673,22 @@
    "outputs": [
     {
      "name": "lower",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "upper",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     },
     {
      "name": "labels",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -5871,7 +5950,7 @@
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -6540,37 +6619,37 @@
    "outputs": [
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "sum",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "min",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "max",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "average",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "median",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "standardDeviation",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -8604,17 +8683,17 @@
    "outputs": [
     {
      "name": "items1",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "items2",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -8665,12 +8744,12 @@
    "outputs": [
     {
      "name": "items",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -8716,17 +8795,17 @@
    "outputs": [
     {
      "name": "distance",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "pointA",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "pointB",
-     "type": "any",
+     "type": "Point",
      "description": ""
     }
    ],
@@ -8857,22 +8936,22 @@
    "outputs": [
     {
      "name": "imagePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "dangerousLength",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "protectedLength",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "safeLength",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
@@ -8993,27 +9072,27 @@
    "outputs": [
     {
      "name": "imagePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "openingCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "widestGaps",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "centers",
-     "type": "any",
+     "type": "Point[]",
      "description": ""
     },
     {
      "name": "viewpoints",
-     "type": "any",
+     "type": "Viewpoint[]",
      "description": ""
     },
     {
@@ -9088,22 +9167,22 @@
    "outputs": [
     {
      "name": "groups",
-     "type": "any",
+     "type": "ModelItem[][]",
      "description": ""
     },
     {
      "name": "clusterNumbers",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     },
     {
      "name": "clusterCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "sizes",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     },
     {
@@ -9207,17 +9286,17 @@
    "outputs": [
     {
      "name": "keys",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "sums",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     }
    ],
@@ -9269,12 +9348,12 @@
    "outputs": [
     {
      "name": "items",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "assignedCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -9321,12 +9400,12 @@
    "outputs": [
     {
      "name": "items",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "legend",
-     "type": "any",
+     "type": "dict",
      "description": ""
     }
    ],
@@ -9652,7 +9731,7 @@
    "outputs": [
     {
      "name": "done",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
@@ -9747,17 +9826,17 @@
    "outputs": [
     {
      "name": "position",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "focalDistance",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "heightField",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -9978,22 +10057,22 @@
    "outputs": [
     {
      "name": "groups",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     },
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "testNames",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     }
    ],
@@ -10028,22 +10107,22 @@
    "outputs": [
     {
      "name": "newResults",
-     "type": "any",
+     "type": "dict[]",
      "description": ""
     },
     {
      "name": "resolved",
-     "type": "any",
+     "type": "dict[]",
      "description": ""
     },
     {
      "name": "persisting",
-     "type": "any",
+     "type": "dict[]",
      "description": ""
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "dict",
      "description": ""
     }
    ],
@@ -10074,12 +10153,12 @@
    "outputs": [
     {
      "name": "results",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     },
     {
      "name": "duplicates",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     }
    ],
@@ -10426,27 +10505,27 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "group",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "added",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "moved",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "skipped",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10481,12 +10560,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "groupCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10531,12 +10610,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "groupCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10575,12 +10654,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "groupCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10620,12 +10699,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "groupCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10658,12 +10737,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "groupCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10732,12 +10811,12 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "resultCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10868,7 +10947,7 @@
     },
     {
      "name": "headers",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -10935,22 +11014,22 @@
    "outputs": [
     {
      "name": "group",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "results",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     },
     {
      "name": "status",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -10981,32 +11060,32 @@
    "outputs": [
     {
      "name": "results",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     },
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "status",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "testName",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -11130,17 +11209,17 @@
    "outputs": [
     {
      "name": "hasViewpoint",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "hasRedlines",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "commentCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -11227,32 +11306,32 @@
    "outputs": [
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "status",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "distance",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "description",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "assignedTo",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "createdTime",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     }
    ],
@@ -11279,12 +11358,12 @@
    "outputs": [
     {
      "name": "item1",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     },
     {
      "name": "item2",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     }
    ],
@@ -11317,27 +11396,27 @@
    "outputs": [
     {
      "name": "degrees",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "shape1",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "shape2",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "slope1",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "slope2",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -11697,22 +11776,22 @@
    "outputs": [
     {
      "name": "groups",
-     "type": "any",
+     "type": "ClashResult[]",
      "description": ""
     },
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "statuses",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "counts",
-     "type": "any",
+     "type": "integer[]",
      "description": ""
     }
    ],
@@ -11739,32 +11818,32 @@
    "outputs": [
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "status",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "testType",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "tolerance",
-     "type": "any",
+     "type": "number",
      "description": ""
     },
     {
      "name": "lastRun",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "resultCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -11887,12 +11966,12 @@
    "outputs": [
     {
      "name": "test",
-     "type": "any",
+     "type": "ClashResult",
      "description": ""
     },
     {
      "name": "resultCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -12006,22 +12085,22 @@
    "outputs": [
     {
      "name": "bodies",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "authors",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "statuses",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "dates",
-     "type": "any",
+     "type": "datetime[]",
      "description": ""
     }
    ],
@@ -12042,12 +12121,12 @@
    "outputs": [
     {
      "name": "product",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "apiVersion",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -12082,12 +12161,12 @@
    "outputs": [
     {
      "name": "document",
-     "type": "any",
+     "type": "Document",
      "description": ""
     },
     {
      "name": "models",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     }
    ],
@@ -12135,22 +12214,22 @@
    "outputs": [
     {
      "name": "fileName",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "title",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "units",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "modelCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -12370,12 +12449,12 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "topicCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -12416,12 +12495,12 @@
    "outputs": [
     {
      "name": "topics",
-     "type": "any",
+     "type": "dict[]",
      "description": ""
     },
     {
      "name": "modelItems",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     }
    ],
@@ -12461,12 +12540,12 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "rowCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -12524,12 +12603,12 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "rowCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -13038,27 +13117,27 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "fileCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "elementCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "triangleCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "fileSizeKb",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -13139,22 +13218,22 @@
    "outputs": [
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "position",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "levelName",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "label",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -13189,17 +13268,17 @@
    "outputs": [
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "points",
-     "type": "any",
+     "type": "Point[]",
      "description": ""
     },
     {
      "name": "levelNames",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -13229,17 +13308,17 @@
    "outputs": [
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "elevations",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "levels",
-     "type": "any",
+     "type": "dict[]",
      "description": ""
     }
    ],
@@ -13569,17 +13648,17 @@
    "outputs": [
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "types",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
      "name": "texts",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
@@ -13617,22 +13696,22 @@
    "outputs": [
     {
      "name": "fileName",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "sourceFileName",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "units",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "rootItem",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     }
    ],
@@ -13751,17 +13830,17 @@
    "outputs": [
     {
      "name": "matches",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "ancestor",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     },
     {
      "name": "ancestorName",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -13829,12 +13908,12 @@
    "outputs": [
     {
      "name": "matches",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "ancestor",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     },
     {
@@ -13958,12 +14037,12 @@
    "outputs": [
     {
      "name": "className",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "classDisplayName",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -14309,17 +14388,17 @@
    "outputs": [
     {
      "name": "bboxCenter",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "bboxMin",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "localOrigin",
-     "type": "any",
+     "type": "Point",
      "description": ""
     }
    ],
@@ -14348,17 +14427,17 @@
    "outputs": [
     {
      "name": "sourceFileName",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "itemType",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "model",
-     "type": "any",
+     "type": "ModelItem",
      "description": ""
     }
    ],
@@ -14510,7 +14589,7 @@
    "outputs": [
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
@@ -14550,12 +14629,12 @@
    "outputs": [
     {
      "name": "modelItems",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "removedCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -14748,12 +14827,12 @@
    "outputs": [
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "displayName",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
@@ -15537,7 +15616,7 @@
    "outputs": [
     {
      "name": "selectionSets",
-     "type": "any",
+     "type": "ModelItemCollection[]",
      "description": ""
     },
     {
@@ -15623,7 +15702,7 @@
    "outputs": [
     {
      "name": "attachedCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
@@ -15778,42 +15857,42 @@
    "outputs": [
     {
      "name": "name",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "displayId",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "plannedStart",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "plannedEnd",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "actualStart",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "actualEnd",
-     "type": "any",
+     "type": "datetime",
      "description": ""
     },
     {
      "name": "taskType",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "progress",
-     "type": "any",
+     "type": "number",
      "description": ""
     }
    ],
@@ -15920,17 +15999,17 @@
    "outputs": [
     {
      "name": "origin",
-     "type": "any",
+     "type": "Point",
      "description": ""
     },
     {
      "name": "matrix",
-     "type": "any",
+     "type": "number[]",
      "description": ""
     },
     {
      "name": "hasOverride",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     }
    ],
@@ -16434,7 +16513,7 @@
    "outputs": [
     {
      "name": "folderPath",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
@@ -16666,22 +16745,22 @@
    "outputs": [
     {
      "name": "visibleItems",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "outsideItems",
-     "type": "any",
+     "type": "ModelItem[]",
      "description": ""
     },
     {
      "name": "mask",
-     "type": "any",
+     "type": "boolean[]",
      "description": ""
     },
     {
      "name": "containsAny",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
@@ -16857,12 +16936,12 @@
    "outputs": [
     {
      "name": "filePath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
@@ -16955,12 +17034,12 @@
    "outputs": [
     {
      "name": "viewpoints",
-     "type": "any",
+     "type": "Viewpoint[]",
      "description": ""
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
@@ -17008,12 +17087,12 @@
    "outputs": [
     {
      "name": "viewpoints",
-     "type": "any",
+     "type": "Viewpoint[]",
      "description": ""
     },
     {
      "name": "names",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     },
     {
@@ -17023,7 +17102,7 @@
     },
     {
      "name": "count",
-     "type": "any",
+     "type": "integer",
      "description": ""
     }
    ],
@@ -17794,17 +17873,17 @@
    "outputs": [
     {
      "name": "found",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "match",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "groups",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -18450,37 +18529,37 @@
    "outputs": [
     {
      "name": "userName",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "machineName",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "osVersion",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "currentDirectory",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "tempPath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "documentsPath",
-     "type": "any",
+     "type": "file",
      "description": ""
     },
     {
      "name": "appDataPath",
-     "type": "any",
+     "type": "file",
      "description": ""
     }
    ],
@@ -18565,17 +18644,17 @@
    "outputs": [
     {
      "name": "exitCode",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "output",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "error",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],
@@ -18619,17 +18698,17 @@
    "outputs": [
     {
      "name": "status",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "body",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "ok",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     }
    ],
@@ -18686,17 +18765,17 @@
    "outputs": [
     {
      "name": "status",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "body",
-     "type": "any",
+     "type": "string",
      "description": ""
     },
     {
      "name": "ok",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     }
    ],
@@ -18917,12 +18996,12 @@
    "outputs": [
     {
      "name": "matched",
-     "type": "any",
+     "type": "dict",
      "description": ""
     },
     {
      "name": "rejected",
-     "type": "any",
+     "type": "dict",
      "description": ""
     }
    ],
@@ -19198,17 +19277,17 @@
    "outputs": [
     {
      "name": "rowCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "columnCount",
-     "type": "any",
+     "type": "integer",
      "description": ""
     },
     {
      "name": "headers",
-     "type": "any",
+     "type": "string[]",
      "description": ""
     }
    ],
@@ -19771,6 +19850,27 @@
    "interactive": true
   },
   {
+   "name": "WatchTableNode.ToTable",
+   "category": "WatchTableNode",
+   "description": "Turns whatever arrives into a table to draw.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "A table, a list of rows, a list of dictionaries, or any other value."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "DyncameloTable",
+     "description": ""
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Flow.Then",
    "category": "Workflow",
    "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).",
@@ -19852,12 +19952,12 @@
     },
     {
      "name": "failed",
-     "type": "any",
+     "type": "boolean",
      "description": ""
     },
     {
      "name": "error",
-     "type": "any",
+     "type": "string",
      "description": ""
     }
    ],

@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**550 nodes in 38 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**555 nodes in 39 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -11,10 +11,10 @@
 | [Data](#data) | 4 |
 | [DateTime](#datetime) | 19 |
 | [Dictionary](#dictionary) | 13 |
-| [Display](#display) | 3 |
+| [Display](#display) | 4 |
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
-| [Input](#input) | 7 |
+| [Input](#input) | 10 |
 | [List](#list) | 63 |
 | [Logic](#logic) | 18 |
 | [Math](#math) | 37 |
@@ -42,6 +42,7 @@
 | [System](#system) | 5 |
 | [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
+| [WatchTableNode](#watchtablenode) | 1 |
 | [Workflow](#workflow) | 7 |
 | [Workflow.Actions](#workflowactions) | 9 |
 
@@ -132,6 +133,7 @@
 | `Watch` *(interactive)* | value | value | Displays the incoming value |
 | `Watch Image` *(interactive)* | imagePath | imagePath | Displays the image file at the incoming path (PNG, JPG, BMP) |
 | `Watch List` *(interactive)* | list | list | Displays the elements of a list, one per line |
+| `Watch Table` *(interactive)* | table | table | Displays a table as a grid: column names on top, one line per row |
 
 ## File
 
@@ -227,8 +229,11 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Boolean` *(interactive)* | — | value | A true/false toggle |
+| `Choice` *(interactive)* | — | value, index | A pick-list with your own options (one per line) |
+| `Date` *(interactive)* | — | value | A date (and optional time), typed as 2026-10-01 or 2026-10-01 14:30 |
 | `Directory Path` *(interactive)* | — | path | A path to a directory |
 | `File Path` *(interactive)* | — | path | A path to a file |
+| `Integer` *(interactive)* | — | value | A whole number (no slider range): a count, an index, a level |
 | `Integer Slider` *(interactive)* | — | value | An integer selected with a slider |
 | `Number` *(interactive)* | — | value | A number literal |
 | `Number Slider` *(interactive)* | — | value | A number selected with a slider |
@@ -758,6 +763,12 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Reroute` *(interactive)* | in | out | A wire waypoint that passes its value through unchanged |
+
+## WatchTableNode
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `WatchTableNode.ToTable` | value | result | Turns whatever arrives into a table to draw |
 
 ## Workflow
 

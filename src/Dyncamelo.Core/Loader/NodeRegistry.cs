@@ -45,6 +45,9 @@ public class NodeRegistry
         registry.RegisterNodeType(IntegerSliderNode.TypeName, () => new IntegerSliderNode());
         registry.RegisterNodeType(NumberSliderNode.TypeName, () => new NumberSliderNode());
         registry.RegisterNodeType(StringInputNode.TypeName, () => new StringInputNode());
+        registry.RegisterNodeType(IntegerInputNode.TypeName, () => new IntegerInputNode());
+        registry.RegisterNodeType(DateInputNode.TypeName, () => new DateInputNode());
+        registry.RegisterNodeType(ChoiceInputNode.TypeName, () => new ChoiceInputNode());
         registry.RegisterNodeType(BooleanToggleNode.TypeName, () => new BooleanToggleNode());
         registry.RegisterNodeType(FilePathNode.TypeName, () => new FilePathNode());
         registry.RegisterNodeType(DirectoryPathNode.TypeName, () => new DirectoryPathNode());

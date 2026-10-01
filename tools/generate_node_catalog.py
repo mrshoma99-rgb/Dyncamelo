@@ -201,6 +201,33 @@ DYNCAMELO_TYPES = {
 }
 
 
+# The sockets of a [MultiReturn] node take their colour from [PortKinds]; the catalogue names the same thing in the
+# vocabulary of the other port types (PortKinds.FromTypeName reads it back).
+KIND_TYPES = {
+    "number": "number",
+    "integer": "integer",
+    "boolean": "boolean",
+    "text": "string",
+    "datetime": "datetime",
+    "colour": "Color",
+    "geometry": "Point",
+    "item": "ModelItem",
+    "selection": "ModelItemCollection",
+    "viewpoint": "Viewpoint",
+    "clash": "ClashResult",
+    "document": "Document",
+    "data": "dict",
+    "file": "file",
+    "action": "IWorkflowAction",
+}
+
+
+def kind_type(kind: str) -> str:
+    stars = len(kind) - len(kind.rstrip("*"))
+    base = KIND_TYPES.get(kind.rstrip("*").strip().lower(), "any")
+    return base + "[]" * stars if base != "any" else "any"
+
+
 def friendly_type(cs: str) -> str:
     t = re.sub(r"\s+", " ", cs).strip()
     for prefix in ("params ", "this "):
@@ -416,7 +443,10 @@ def parse_method(
 
     multi = attr_strings(attr_block, "MultiReturn")
     if multi and "Dictionary" in return_type:
-        outputs = [{"name": k, "type": "any", "description": ""} for k in multi]
+        kinds = attr_strings(attr_block, "PortKinds") or []
+        if len(kinds) != len(multi):
+            kinds = [""] * len(multi)
+        outputs = [{"name": k, "type": kind_type(kind), "description": ""} for k, kind in zip(multi, kinds)]
     elif return_type == "void":
         pass_type = inputs[0]["type"] if inputs else "any"
         outputs = [

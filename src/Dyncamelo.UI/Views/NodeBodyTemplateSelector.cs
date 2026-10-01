@@ -39,6 +39,12 @@ public class NodeBodyTemplateSelector : DataTemplateSelector
                 return "NodeBody.IntegerSlider";
             case StringInputNode _:
                 return "NodeBody.StringInput";
+            case IntegerInputNode _:
+                return "NodeBody.IntegerInput";
+            case DateInputNode _:
+                return "NodeBody.DateInput";
+            case ChoiceInputNode _:
+                return "NodeBody.Choice";
             case BooleanToggleNode _:
                 return "NodeBody.BooleanToggle";
             case FilePathNode _:
