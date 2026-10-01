@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**567 nodes in 47 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**580 nodes in 47 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -21,13 +21,13 @@
 | [Logic](#logic) | 18 |
 | [Math](#math) | 37 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
-| [Navisworks.Appearance](#navisworksappearance) | 12 |
-| [Navisworks.Camera](#navisworkscamera) | 6 |
+| [Navisworks.Appearance](#navisworksappearance) | 13 |
+| [Navisworks.Camera](#navisworkscamera) | 7 |
 | [Navisworks.Clash.Filter](#navisworksclashfilter) | 7 |
 | [Navisworks.Clash.Group](#navisworksclashgroup) | 9 |
 | [Navisworks.Clash.Report](#navisworksclashreport) | 3 |
 | [Navisworks.Clash.Results](#navisworksclashresults) | 14 |
-| [Navisworks.Clash.Tests](#navisworksclashtests) | 12 |
+| [Navisworks.Clash.Tests](#navisworksclashtests) | 16 |
 | [Navisworks.Comments](#navisworkscomments) | 3 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
 | [Navisworks.Export](#navisworksexport) | 14 |
@@ -39,10 +39,10 @@
 | [Navisworks.Search](#navisworkssearch) | 5 |
 | [Navisworks.Selection](#navisworksselection) | 9 |
 | [Navisworks.SelectionSets](#navisworksselectionsets) | 13 |
-| [Navisworks.TimeLiner](#navisworkstimeliner) | 7 |
-| [Navisworks.Transform](#navisworkstransform) | 5 |
+| [Navisworks.TimeLiner](#navisworkstimeliner) | 10 |
+| [Navisworks.Transform](#navisworkstransform) | 7 |
 | [Navisworks.Units](#navisworksunits) | 4 |
-| [Navisworks.Viewpoints](#navisworksviewpoints) | 15 |
+| [Navisworks.Viewpoints](#navisworksviewpoints) | 17 |
 | [Navisworks.Viewpoints.Files](#navisworksviewpointsfiles) | 2 |
 | [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 5 |
 | [Report](#report) | 2 |
@@ -411,6 +411,7 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Appearance.ColorByValues` | items, values, palette?, document? | items, legend | One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs t… |
+| `Appearance.Focus` | items, otherTransparency?, resetFirst?, document? | items | Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparenc… |
 | `Appearance.Hide` | items, document? | items | Hides model items in the viewport |
 | `Appearance.Isolate` | items, document? | items | Shows only these items and hides everything else (undo with Appearance.ShowAll) |
 | `Appearance.OverrideColor` | items, color, document? | items | Overrides the color of model items (a permanent override: saved with the file and undoable) |
@@ -431,6 +432,7 @@
 | `Camera.LookAt` | eye, target, document? | done | Moves the camera to 'eye' looking at 'target' (up stays +Z) |
 | `Camera.SetFieldOfView` | degrees, document? | done | Sets the camera's vertical field of view in degrees (perspective camera) |
 | `Camera.SetProjection` | perspective, document? | done | Switches the camera between perspective (true) and orthographic (false) projection |
+| `Camera.SetStandardView` | view?, items?, paddingFactor?, document? | viewpoint | Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items |
 | `Camera.ZoomToItems` | items, paddingFactor?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
 | `Viewpoint.SetSectionBox` | boundingBox, enabled?, document? | done | Applies a section box around a region on the current view (Sectioning > Box, scriptable) |
 
@@ -496,7 +498,11 @@
 | `Clash.Statuses` | newStatus?, active?, reviewed?, approved?, resolved? | statuses | Pick SEVERAL clash statuses with toggles |
 | `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashTest.ByName` | name, document? | test | Finds a clash test by its display name (searches folders too) |
+| `ClashTest.ClearResults` | test, document? | test | Removes every result (and result group) of a clash test and leaves the test and its settings in place |
 | `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, document? | test | Creates a clash test between two item selections |
+| `ClashTest.Delete` | test, document? | deleted | Deletes a clash test and all of its results from the document |
+| `ClashTest.Duplicate` | test, newName?, document? | test | Duplicates a clash test |
+| `ClashTest.Edit` | test, newName?, testType?, tolerance?, mergeComposites?, itemsA?, itemsB?, document? | test | Edits an existing clash test in place |
 | `ClashTest.Groups` | test, document? | groups, names, statuses, counts | All result groups of a clash test |
 | `ClashTest.Info` | test | name, status, testType, tolerance, lastRun, resultCount | Name, status, type, tolerance, last run time and result count of a clash test |
 | `ClashTest.Name` | test | name | The display name of a clash test |
@@ -667,17 +673,22 @@
 | `TimeLiner.Tasks` | document? | tasks | All TimeLiner tasks in a document, with subtasks flattened into one list |
 | `TimelinerTask.AttachSet` | task, setName, document? | task | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) |
 | `TimelinerTask.Create` | name, plannedStart, plannedEnd, items?, taskType?, document? | task | Creates a top-level TimeLiner task with planned dates and optionally attaches model items |
+| `TimelinerTask.Delete` | task, document? | deleted | Deletes a TimeLiner task together with its subtasks |
 | `TimelinerTask.Info` | task | name, displayId, plannedStart, plannedEnd, actualStart, actualEnd, taskType, progress | Name, id, planned and actual dates, task type and progress of a TimeLiner task |
 | `TimelinerTask.Items` | task, document? | items | The model items attached to a TimeLiner task |
+| `TimelinerTask.SetActual` | task, start, end, document? | task | Sets a task's ACTUAL start and end dates (the planned dates are untouched |
 | `TimelinerTask.SetDates` | task, plannedStart, plannedEnd, document? | task | Updates a task's planned start/end dates in place |
+| `TimelinerTask.SetProgress` | task, percent, document? | task | Sets a task's percent complete (0-100 |
 
 ## Navisworks.Transform
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `ModelItem.GetTransform` | item | origin, matrix, hasOverride | Reads an item's current (active) transform: origin = its translation (a practical base point), matrix = 16 numbers row-major (feed ModelItem.SetTransform to round-trip),… |
+| `ModelItem.MoveTo` | items, target, document? | items | Moves model items so the centre of their combined bounding box lands on a target point |
 | `ModelItem.ResetTransform` | items?, resetAll?, document? | items | Removes permanent transform overrides, restoring items to their original position |
 | `ModelItem.RotateAboutAxis` | items, origin, axis, degrees, document? | items | Rotates model items by an angle (degrees) about an axis through a point |
+| `ModelItem.Scale` | items, factor, about?, document? | items | Scales model items uniformly about a point |
 | `ModelItem.SetTransform` | items, matrix, document? | items | Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) |
 | `ModelItem.Translate` | items, vector, document? | items | Moves model items by a vector, in document units (chain Units.Convert for meters/feet) |
 
@@ -700,9 +711,11 @@
 | `SavedViewpoint.Delete` | name, document? | deleted | Deletes a saved viewpoint by name (searches folders too) |
 | `SavedViewpoint.Duplicate` | viewpoint, newName?, document? | viewpoint | Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides |
 | `SavedViewpoint.Folder` | viewpoint, document? | folderPath, folder | The folder containing a saved viewpoint: its path as "A/B" ("" for top-level viewpoints) and the folder itself |
+| `SavedViewpoint.Info` | viewpoint, document? | name, folder, hasSection, hasOverrides, commentCount, position, lookAt | Reads a saved viewpoint: its name, folder path ("A/B", "" at the top level), whether it carries a section box, whether it has baked appearance or visibility overrides, i… |
 | `SavedViewpoint.MoveToFolder` | viewpoint, folder, document? | viewpoint | Moves a saved viewpoint into a folder (appended at the end) |
 | `SavedViewpoint.Name` | viewpoint | name | The display name of a saved viewpoint |
 | `SavedViewpoint.Rename` | viewpoint, newName, document? | viewpoint | Renames a saved viewpoint (accepts the viewpoint or its current name |
+| `SavedViewpoint.Update` | viewpoint, document? | viewpoint | Re-captures the current view into an existing saved viewpoint |
 | `Viewpoint.SaveCurrent` | name, document? | viewpoint | Saves the current view as a new saved viewpoint |
 | `Viewpoint.SaveWithOverrides` | name, folderName?, document? | viewpoint | Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) |
 | `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |

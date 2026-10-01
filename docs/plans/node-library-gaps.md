@@ -7,6 +7,9 @@ How it was checked: every node named as *existing* below is looked up in the gen
 **Priority** — H: this role hits it in its normal week; M: regularly; L: occasionally.
 **Feasibility** — *pure*: plain .NET, fully testable on a build agent; *API*: documented Navisworks .NET API (compiles in CI, only runs in Navisworks); *COM*: needs the Navisworks COM interop (the mesh-based `Distance.BetweenItems` already does); *verify*: version-dependent or I am not sure the API allows it — needs a probe in Navisworks before any promise.
 
+
+> **Status (v0.45).** Built: waves A (fundamentals), B (the table family, Watch Table, reports, `Properties.Discover` / `ToTable`, `Model.Snapshot` / `Statistics`, `Search.ByGuid`), C (clash test edit / delete / duplicate / clear, viewpoint info and update, standard views, `Appearance.Focus`, TimeLiner progress, scale and move, selection invert / remove, set info and duplicate) and the first part of D (`IFC.GuidEncode` / `GuidDecode`, `ModelItem.IfcGuid`, `Web.Get` / `Post`, `System.Run`). Also built, not in the list below: `Flow.When` and `Flow.Try` as engine features. Not built: `Takeoff.GroupBy` (`Properties.ToTable` + `Table.GroupBy` replace it), `Audit.CheckRules`, the BCF additions, `Model.Refresh` / `Replace`, section planes, the batch runner, `Dialog.*` and `Clipboard.*` (they need a UI host service), a file-list input, and the dynamic pick-lists of §8. `Logic.Switch` maps a value to a result (a lookup); `Logic.Choose` is the index-to-option one. [WHATS_NEW_0.45.md](../WHATS_NEW_0.45.md) and [RECIPES.md](../RECIPES.md) describe what shipped.
+
 ---
 
 ## 1. BIM coordinator — weekly clash cycle

@@ -1,6 +1,6 @@
 {
- "version": "v0.44.0",
- "count": 567,
+ "version": "v0.45.0",
+ "count": 580,
  "categories": [
   {
    "name": "Annotation",
@@ -64,11 +64,11 @@
   },
   {
    "name": "Navisworks.Appearance",
-   "count": 12
+   "count": 13
   },
   {
    "name": "Navisworks.Camera",
-   "count": 6
+   "count": 7
   },
   {
    "name": "Navisworks.Clash.Filter",
@@ -88,7 +88,7 @@
   },
   {
    "name": "Navisworks.Clash.Tests",
-   "count": 12
+   "count": 16
   },
   {
    "name": "Navisworks.Comments",
@@ -136,11 +136,11 @@
   },
   {
    "name": "Navisworks.TimeLiner",
-   "count": 7
+   "count": 10
   },
   {
    "name": "Navisworks.Transform",
-   "count": 5
+   "count": 7
   },
   {
    "name": "Navisworks.Units",
@@ -148,7 +148,7 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 15
+   "count": 17
   },
   {
    "name": "Navisworks.Viewpoints.Files",
@@ -9504,6 +9504,56 @@
    "returns": "The colored items and a value → \"#RRGGBB\" legend for reporting."
   },
   {
+   "name": "Appearance.Focus",
+   "category": "Navisworks.Appearance",
+   "description": "Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparency override — the Action.Ghost look in one node, no permanent change. With resetFirst on, every temporary override is cleared first; undo it later with Appearance.ResetTemporary. Touches every item in the model, so allow a moment on large models.",
+   "tags": [
+    "appearance",
+    "focus",
+    "ghost",
+    "fade",
+    "transparency",
+    "context",
+    "highlight",
+    "isolate",
+    "temporary"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The items to focus on.",
+     "multiInput": true
+    },
+    {
+     "name": "otherTransparency",
+     "type": "number",
+     "description": "How transparent everything else becomes, from 0 (opaque) to 100 (invisible).",
+     "default": "85"
+    },
+    {
+     "name": "resetFirst",
+     "type": "boolean",
+     "description": "True clears every temporary override before ghosting, so each run starts clean.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The focused items (pass-through)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Appearance.Hide",
    "category": "Navisworks.Appearance",
    "description": "Hides model items in the viewport.",
@@ -10037,6 +10087,60 @@
      "name": "done",
      "type": "boolean",
      "description": "True when the projection was set."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Camera.SetStandardView",
+   "category": "Navisworks.Camera",
+   "description": "Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items — or the whole model when none are wired. Convention: Z is up and +Y is north, so top is a plan with north at the top of the screen, front looks north from the south side, left looks east from the west side, and iso looks from the south-east above. Assumes a Z-up model; for others use Camera.LookAt.",
+   "tags": [
+    "camera",
+    "standard",
+    "view",
+    "top",
+    "plan",
+    "front",
+    "back",
+    "left",
+    "right",
+    "iso",
+    "isometric",
+    "elevation"
+   ],
+   "inputs": [
+    {
+     "name": "view",
+     "type": "string",
+     "description": "One of top, bottom, front, back, left, right, iso.",
+     "default": "\"iso\""
+    },
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The items to frame (leave unwired to frame the whole model).",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "paddingFactor",
+     "type": "number",
+     "description": "Space to leave around the framed box (1 = tight fit).",
+     "default": "1.2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "Viewpoint",
+     "description": "A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.SaveCurrent)."
     }
    ],
    "returns": ""
@@ -11784,6 +11888,42 @@
    "returns": ""
   },
   {
+   "name": "ClashTest.ClearResults",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Removes every result (and result group) of a clash test and leaves the test and its settings in place — the clean slate before a re-run. Statuses, assignments and comments on those results are lost.",
+   "tags": [
+    "clash",
+    "test",
+    "clear",
+    "results",
+    "reset",
+    "empty",
+    "clean",
+    "rerun"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The clash test to clear."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The stored test, now without results."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ClashTest.Create",
    "category": "Navisworks.Clash.Tests",
    "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.",
@@ -11835,6 +11975,157 @@
      "name": "test",
      "type": "ClashTest",
      "description": "The stored clash test, ready for ClashTest.Run."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ClashTest.Delete",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Deletes a clash test and all of its results from the document. Returns false (and changes nothing) when the test is not there, so a clean-up step can run twice. Undoable in Navisworks.",
+   "tags": [
+    "clash",
+    "test",
+    "delete",
+    "remove",
+    "clean",
+    "matrix"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The clash test to delete."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": "True when the test was removed; false when it was not in the document."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ClashTest.Duplicate",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Duplicates a clash test — type, tolerance, rules and both selections — as a new test named \"<name> copy\" (or newName) in the same folder. The copy starts un-run: its results are cleared, so run it with ClashTest.Run. Errors if a test with that name already exists, so re-runs do not pile up copies — over a list of tests, leave newName empty or give each test its own name.",
+   "tags": [
+    "clash",
+    "test",
+    "duplicate",
+    "copy",
+    "clone",
+    "variant",
+    "matrix"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The clash test to copy."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "Name for the copy (\"\" uses \"<name> copy\").",
+     "default": "\"\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The new stored test, placed in the same folder as the original."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ClashTest.Edit",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The test's existing results are kept but are stale after a change: re-run it with ClashTest.Run.",
+   "tags": [
+    "clash",
+    "test",
+    "edit",
+    "modify",
+    "tolerance",
+    "type",
+    "clearance",
+    "hard",
+    "selection",
+    "update"
+   ],
+   "inputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The stored clash test (from Clash.Tests, ClashTest.ByName or ClashTest.Create)."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "A new display name (\"\" keeps the current name).",
+     "default": "\"\""
+    },
+    {
+     "name": "testType",
+     "type": "string",
+     "description": "Hard, HardConservative, Clearance, Duplicate or Custom (\"unchanged\" keeps the current type).",
+     "default": "\"unchanged\""
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "The new tolerance in document units — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).",
+     "default": "-1"
+    },
+    {
+     "name": "mergeComposites",
+     "type": "string",
+     "description": "\"yes\" or \"no\" to switch the merge-composites option, \"unchanged\" to keep it.",
+     "default": "\"unchanged\""
+    },
+    {
+     "name": "itemsA",
+     "type": "ModelItem[]",
+     "description": "Items to use as the test's selection A (leave unwired to keep the current selection).",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "itemsB",
+     "type": "ModelItem[]",
+     "description": "Items to use as the test's selection B (leave unwired to keep the current selection).",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "test",
+     "type": "ClashTest",
+     "description": "The edited stored test."
     }
    ],
    "returns": ""
@@ -16327,6 +16618,41 @@
    "returns": ""
   },
   {
+   "name": "TimelinerTask.Delete",
+   "category": "Navisworks.TimeLiner",
+   "description": "Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document, so a clean-up step can run twice.",
+   "tags": [
+    "timeliner",
+    "task",
+    "delete",
+    "remove",
+    "clean",
+    "4d",
+    "schedule"
+   ],
+   "inputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The stored TimeLiner task to delete."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": "True when the task was removed; false when it is not in the document."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "TimelinerTask.Info",
    "category": "Navisworks.TimeLiner",
    "description": "Name, id, planned and actual dates, task type and progress of a TimeLiner task.",
@@ -16422,6 +16748,53 @@
    "returns": ""
   },
   {
+   "name": "TimelinerTask.SetActual",
+   "category": "Navisworks.TimeLiner",
+   "description": "Sets a task's ACTUAL start and end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan.",
+   "tags": [
+    "timeliner",
+    "task",
+    "actual",
+    "dates",
+    "start",
+    "end",
+    "schedule",
+    "4d",
+    "update"
+   ],
+   "inputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The stored TimeLiner task."
+    },
+    {
+     "name": "start",
+     "type": "datetime",
+     "description": "Actual start date."
+    },
+    {
+     "name": "end",
+     "type": "datetime",
+     "description": "Actual end date."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The updated stored task. Lace over lists for bulk updates."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "TimelinerTask.SetDates",
    "category": "Navisworks.TimeLiner",
    "description": "Updates a task's planned start/end dates in place — bulk schedule edits without a re-import.",
@@ -16466,6 +16839,47 @@
    "returns": ""
   },
   {
+   "name": "TimelinerTask.SetProgress",
+   "category": "Navisworks.TimeLiner",
+   "description": "Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages.",
+   "tags": [
+    "timeliner",
+    "task",
+    "progress",
+    "percent",
+    "complete",
+    "status",
+    "4d",
+    "update"
+   ],
+   "inputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The stored TimeLiner task (from TimeLiner.Tasks or TimelinerTask.Create)."
+    },
+    {
+     "name": "percent",
+     "type": "number",
+     "description": "Percent complete; values outside 0-100 are clamped to 0 or 100."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The updated stored task. Lace over task / percent lists for bulk progress updates."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ModelItem.GetTransform",
    "category": "Navisworks.Transform",
    "description": "Reads an item's current (active) transform: origin = its translation (a practical base point), matrix = 16 numbers row-major (feed ModelItem.SetTransform to round-trip), hasOverride = whether a permanent transform override is applied.",
@@ -16504,6 +16918,49 @@
     }
    ],
    "returns": "The transform origin (translation — a practical base point), the 16-number row-major matrix, and whether a permanent override is active."
+  },
+  {
+   "name": "ModelItem.MoveTo",
+   "category": "Navisworks.Transform",
+   "description": "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there.",
+   "tags": [
+    "item",
+    "move",
+    "moveto",
+    "place",
+    "position",
+    "target",
+    "centre",
+    "center",
+    "transform"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to move (they keep their layout relative to each other).",
+     "multiInput": true
+    },
+    {
+     "name": "target",
+     "type": "any",
+     "description": "Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The moved items (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "ModelItem.ResetTransform",
@@ -16594,6 +17051,55 @@
      "name": "items",
      "type": "ModelItem[]",
      "description": "The rotated items (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "ModelItem.Scale",
+   "category": "Navisworks.Transform",
+   "description": "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again). One override per item, so allow a moment on large selections.",
+   "tags": [
+    "item",
+    "scale",
+    "resize",
+    "size",
+    "grow",
+    "shrink",
+    "factor",
+    "transform",
+    "units"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to scale. Wire the items themselves, not a container AND its children.",
+     "multiInput": true
+    },
+    {
+     "name": "factor",
+     "type": "number",
+     "description": "The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive."
+    },
+    {
+     "name": "about",
+     "type": "any",
+     "description": "The fixed point of the scaling (a Point or a list of three numbers); leave unwired to scale about the centre of the items' combined bounding box.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The scaled items (pass-through for chaining)."
     }
    ],
    "returns": ""
@@ -17015,6 +17521,74 @@
    "returns": "The folder path (\"A/B\"; \"\" at the top level) and the immediate folder (null at the top level)."
   },
   {
+   "name": "SavedViewpoint.Info",
+   "category": "Navisworks.Viewpoints",
+   "description": "Reads a saved viewpoint: its name, folder path (\"A/B\", \"\" at the top level), whether it carries a section box, whether it has baked appearance or visibility overrides, its comment count and its camera — the position and the look-at point (one focal distance ahead of the camera, or one unit when none is stored). hasSection reads nothing on Navisworks 2025 and later (it comes back empty).",
+   "tags": [
+    "viewpoint",
+    "view",
+    "info",
+    "camera",
+    "folder",
+    "section",
+    "overrides",
+    "comments",
+    "position",
+    "lookat"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The saved viewpoint."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "folder",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "hasSection",
+     "type": "boolean",
+     "description": ""
+    },
+    {
+     "name": "hasOverrides",
+     "type": "boolean",
+     "description": ""
+    },
+    {
+     "name": "commentCount",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "position",
+     "type": "Point",
+     "description": ""
+    },
+    {
+     "name": "lookAt",
+     "type": "Point",
+     "description": ""
+    }
+   ],
+   "returns": "Name, folder path, section / overrides flags, comment count, camera position and look-at point."
+  },
+  {
    "name": "SavedViewpoint.MoveToFolder",
    "category": "Navisworks.Viewpoints",
    "description": "Moves a saved viewpoint into a folder (appended at the end). A viewpoint already in the folder is left alone, so re-runs are clean.",
@@ -17112,6 +17686,42 @@
      "name": "viewpoint",
      "type": "SavedViewpoint",
      "description": "The renamed stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SavedViewpoint.Update",
+   "category": "Navisworks.Viewpoints",
+   "description": "Re-captures the current view into an existing saved viewpoint — the UI's \"Update\" — keeping its name, folder and place in the list. Set the camera first (Camera.LookAt, Camera.ZoomToItems, Camera.SetStandardView), then update the view; compare Viewpoint.SaveCurrent, which replaces a view by name with a new one.",
+   "tags": [
+    "viewpoint",
+    "view",
+    "update",
+    "refresh",
+    "recapture",
+    "replace",
+    "camera",
+    "current"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The saved viewpoint to refresh (or wire it by name through SavedViewpoint.ByName)."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The updated stored viewpoint, still in its folder and position with its name."
     }
    ],
    "returns": ""

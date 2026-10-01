@@ -15,7 +15,7 @@ namespace Dyncamelo.Navisworks;
 /// (a stored test is read-only in place) and hands back the re-located stored instance, because
 /// a test wrapper can go stale after an edit.
 /// </summary>
-[NodeCategory("Navisworks.Clash")]
+[NodeCategory("Navisworks.Clash.Tests")]
 public static class ClashTestMaintenanceNodes
 {
     /// <summary>Changes the settings of an existing clash test.</summary>
