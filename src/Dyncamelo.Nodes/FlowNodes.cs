@@ -55,7 +55,7 @@ public static class FlowNodes
 
     /// <summary>
     /// Lets a graph carry on after a node failed. When the node wired into <paramref name="value"/> ran fine its result passes
-    /// through; when it failed, <paramref name="result"/> becomes the fallback and the reason arrives in <c>error</c> — nothing
+    /// through; when it failed, the "result" output becomes the fallback and the reason arrives in <c>error</c> — nothing
     /// after this node turns red. Typical use: read a file that may not exist, fall back to an empty list, log the reason.
     /// </summary>
     /// <param name="value">The node output to try. Wire the node that might fail.</param>

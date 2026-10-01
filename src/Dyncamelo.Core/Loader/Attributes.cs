@@ -190,8 +190,8 @@ public sealed class CatchesUpstreamErrorsAttribute : Attribute
 
 /// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
-/// renaming a port would silently drop them; with this attribute a graph that still says <paramref name="oldName"/> finds the
-/// port now called <paramref name="currentName"/>. Repeat the attribute for several ports.
+/// renaming a port would silently drop them; with this attribute a graph that still says the old name finds the
+/// port now called the current name. Repeat the attribute for several ports.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public sealed class PortAliasAttribute : Attribute
