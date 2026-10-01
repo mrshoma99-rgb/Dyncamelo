@@ -36,6 +36,7 @@ public class SampleGraphFileTests
         "QTO Rollup by Category.dyc",
         "Section Box Viewpoints per Group.dyc",
         "Spotlight Viewpoints per Item.dyc",
+        "Table Summary from Text.dyc",
         "csv-roundtrip.dyc",
         "hello-math.dyc",
         "list-lacing.dyc",
@@ -46,6 +47,7 @@ public class SampleGraphFileTests
     private static readonly string[] RunnableSamples =
     {
         "Getting Started - Math and Watch.dyc",
+        "Table Summary from Text.dyc",
         "csv-roundtrip.dyc",
         "hello-math.dyc",
         "list-lacing.dyc",
@@ -102,6 +104,14 @@ public class SampleGraphFileTests
 
             case "hello-math.dyc":
                 Assert.Equal("85", Watch(graph, "Result"));
+                break;
+
+            case "Table Summary from Text.dyc":
+                var totals = Assert.IsType<WatchTableNode>(Pipeline.Node(graph, "Totals by category"));
+                Assert.Equal(new[] { "Category", "count", "sum(Length)", "max(Length)" }, totals.Headers);
+                Assert.Equal(new[] { "Wall", "3", "10000", "4500" }, totals.Rows[0].Cells);
+                Assert.Equal(new[] { "Pipe", "2", "2000", "1200" }, totals.Rows[1].Cells);
+                Assert.Equal(new[] { "Door", "1", "900", "900" }, totals.Rows[2].Cells);
                 break;
 
             case "list-lacing.dyc":

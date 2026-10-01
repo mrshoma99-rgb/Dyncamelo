@@ -5,11 +5,11 @@ Two families of `.dyc` graphs live here:
 - **Developer samples** (lower-case file names) — four small graphs that
   exercise the headless pipeline end to end. None of them need Navisworks or
   WPF; they run anywhere the `dyncamelo` CLI runs, including Linux and CI.
-- **In-app example workflows** (Title Case file names) — nine teaching graphs
+- **In-app example workflows** (Title Case file names) — ten teaching graphs
   that ship with the Navisworks plugin (the build stages every Title-Case
   graph — the four lower-case developer graphs are excluded — into a
   `Samples` folder next to the plugin DLL, where the UI's Samples menu finds
-  them). Except for *Getting Started - Math and Watch*, they use
+  them). Except for *Getting Started - Math and Watch* and *Table Summary from Text*, they use
   `Dyncamelo.Navisworks` nodes and need a running Navisworks with a model
   open — on other machines they load as placeholder nodes.
 
@@ -36,6 +36,14 @@ which pins the on-disk format against accidental drift.
 Two sliders multiplied into an area, shown in a Watch node and formatted into
 a text report (`String.FromObject` + `String.Concat`). Pure general nodes, so
 it also runs headless; expected Watch values: **32** and **`Area = 32`**.
+
+### Table Summary from Text.dyc
+
+Pasted CSV text becomes a table (`String.Lines → String.Split → Table.FromRows`), is grouped by category with a count,
+a total and a maximum (`Table.GroupBy`), sorted largest first (`Table.Sort`) and shown in a **Watch Table** and as
+Markdown (`Table.ToText`). Pure general nodes, so it also runs headless. On model data the first three nodes are replaced
+by `Properties.ToTable`, and `Table.ToExcelFile` or `Report.Html` publishes the result. Expected first row:
+**Wall, 3, 10000, 4500**.
 
 ### Color Elements by Property.dyc
 

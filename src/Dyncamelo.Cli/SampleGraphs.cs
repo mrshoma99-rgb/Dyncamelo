@@ -25,6 +25,7 @@ internal static class SampleGraphs
             new KeyValuePair<string, GraphModel>("list-lacing.dyc", BuildListLacing(registry)),
             new KeyValuePair<string, GraphModel>("string-report.dyc", BuildStringReport(registry)),
             new KeyValuePair<string, GraphModel>("csv-roundtrip.dyc", BuildCsvRoundtrip(registry)),
+            new KeyValuePair<string, GraphModel>("Table Summary from Text.dyc", BuildTableSummary(registry)),
         };
     }
 
@@ -297,6 +298,90 @@ internal static class SampleGraphs
         graph.Notes.Add(new NoteModel
         {
             Text = "Writes [[1,2,3],[4,5,6]] to 'dyncamelo-sample-output.csv' in the current working directory, then reads it back. Wiring the write node's path output into the read node sequences the read after the write.",
+            X = 0,
+            Y = -140,
+        });
+
+        return graph;
+    }
+
+    /// <summary>
+    /// Text lines -> rows -> Table -> group by category -> totals -> sorted -> Watch Table + Markdown. The pattern behind every
+    /// "roll the data up" script (properties to table, group, total), with pasted text standing in for model data.
+    /// </summary>
+    public static GraphModel BuildTableSummary(NodeRegistry registry)
+    {
+        var graph = new GraphModel
+        {
+            Name = "Table Summary from Text",
+            Description = "Pasted rows become a table, are grouped by category, totalled and sorted - the same steps as a quantity take-off, without needing a model.",
+        };
+
+        var data = new StringInputNode
+        {
+            Name = "Rows (CSV text)",
+            Value = "Level,Category,Length\nL01,Wall,3000\nL02,Door,900\nL01,Wall,4500\nL02,Wall,2500\nL01,Pipe,1200\nL02,Pipe,800",
+        };
+        Place(data, 0, 0);
+
+        var lines = ZeroTouch(registry, "String.Lines", 330, 0);
+        var comma = new StringInputNode { Name = "Separator", Value = "," };
+        Place(comma, 330, 150);
+        var cells = ZeroTouch(registry, "String.Split", 600, 60);
+        cells.Name = "Split every line";
+
+        var header = new BooleanToggleNode { Name = "First row is the header", Value = true };
+        Place(header, 600, 220);
+        var table = ZeroTouch(registry, "Table.FromRows", 880, 60);
+
+        var by = new StringInputNode { Name = "Group by", Value = "Category" };
+        Place(by, 880, 260);
+        var aggregations = new StringInputNode { Name = "Work out", Value = "count,sum:Length,max:Length" };
+        Place(aggregations, 880, 380);
+        var aggregationList = ZeroTouch(registry, "String.Split", 1150, 380);
+        aggregationList.Name = "Split the list";
+        var comma2 = new StringInputNode { Name = "Separator 2", Value = "," };
+        Place(comma2, 880, 500);
+
+        var group = ZeroTouch(registry, "Table.GroupBy", 1420, 140);
+        var sortBy = new StringInputNode { Name = "Sort by", Value = "sum(Length)" };
+        Place(sortBy, 1420, 360);
+        var sort = ZeroTouch(registry, "Table.Sort", 1700, 140);
+        sort.Name = "Largest total first";
+        var descending = new BooleanToggleNode { Name = "Largest first", Value = true };
+        Place(descending, 1700, 360);
+
+        var watch = new WatchTableNode { Name = "Totals by category" };
+        Place(watch, 1990, 100);
+        var markdown = ZeroTouch(registry, "Table.ToText", 1990, 380);
+        var report = new WatchNode { Name = "As Markdown" };
+        Place(report, 2260, 380);
+
+        foreach (var node in new NodeModel[] { data, lines, comma, cells, header, table, by, aggregations, aggregationList, comma2, group, sortBy, sort, descending, watch, markdown, report })
+        {
+            graph.AddNode(node);
+        }
+
+        Connect(graph, data, "value", lines, "text");
+        Connect(graph, lines, "lines", cells, "text");
+        Connect(graph, comma, "value", cells, "separator");
+        Connect(graph, cells, "list", table, "rows");
+        Connect(graph, header, "value", table, "firstRowIsHeader");
+        Connect(graph, table, "table", group, "table");
+        Connect(graph, by, "value", group, "by");
+        Connect(graph, aggregations, "value", aggregationList, "text");
+        Connect(graph, comma2, "value", aggregationList, "separator");
+        Connect(graph, aggregationList, "list", group, "aggregations");
+        Connect(graph, group, "table", sort, "table");
+        Connect(graph, sortBy, "value", sort, "columns");
+        Connect(graph, descending, "value", sort, "descending");
+        Connect(graph, sort, "table", watch, "table");
+        Connect(graph, sort, "table", markdown, "table");
+        Connect(graph, markdown, "text", report, "value");
+
+        graph.Notes.Add(new NoteModel
+        {
+            Text = "The same steps work on model data: Properties.ToTable (items + property names) replaces the three nodes on the left, and Table.ToExcelFile or Report.Html publishes the result.",
             X = 0,
             Y = -140,
         });

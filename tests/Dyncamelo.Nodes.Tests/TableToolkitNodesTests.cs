@@ -369,6 +369,19 @@ public class TableToolkitNodesTests
     }
 
     [Fact]
+    public void GroupBy_MinAndMaxOfNumbersWrittenAsText_AreNumbers_NotTextOrdering()
+    {
+        var table = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "9" }, new object?[] { "a", "100" }, new object?[] { "a", " 25 " }), L("K", "V"));
+        var result = TableToolkitNodes.GroupBy(table, "K", L("min:V", "max:V"));
+        Assert.Equal(9.0, result.Rows[0][1]);
+        Assert.Equal(100.0, result.Rows[0][2]);
+
+        // text that is not numeric still compares as text
+        var words = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "pear" }, new object?[] { "a", "apple" }), L("K", "V"));
+        Assert.Equal("apple", TableToolkitNodes.GroupBy(words, "K", L("min:V")).Rows[0][1]);
+    }
+
+    [Fact]
     public void GroupBy_ReadsNumericTextAsNumbers()
     {
         var table = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "10" }, new object?[] { "a", "5.5" }), L("K", "V"));

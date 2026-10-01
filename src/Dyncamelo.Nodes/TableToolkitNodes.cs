@@ -1111,10 +1111,33 @@ public static class TableToolkitNodes
             case "min":
             case "max":
             {
-                var present = cells.Where(c => c != null).ToList();
+                var present = cells.Where(c => c != null && !(c is string blankText && blankText.Trim().Length == 0)).ToList();
                 if (present.Count == 0)
                 {
                     return null;
+                }
+
+                // Numbers that arrived as text (a column read from pasted rows) compare, and come back, as numbers.
+                var numbersOnly = new List<double>();
+                foreach (var cell in present)
+                {
+                    if (ValueComparison.IsNumeric(cell!))
+                    {
+                        numbersOnly.Add(ValueComparison.ToDouble(cell!));
+                    }
+                    else if (cell is string numericText && double.TryParse(numericText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedNumber))
+                    {
+                        numbersOnly.Add(parsedNumber);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (numbersOnly.Count == present.Count)
+                {
+                    return spec.Function == "min" ? numbersOnly.Min() : numbersOnly.Max();
                 }
 
                 var best = present[0];

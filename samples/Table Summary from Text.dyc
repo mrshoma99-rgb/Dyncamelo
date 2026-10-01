@@ -1,0 +1,593 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.44.0"
+  },
+  "Uuid": "ceff22d2d4404526946ecb8a6641d530",
+  "Name": "Table Summary from Text",
+  "Description": "Pasted rows become a table, are grouped by category, totalled and sorted - the same steps as a quantity take-off, without needing a model.",
+  "Nodes": [
+    {
+      "Id": "0dd427bd93074766926ae373327b3d6d",
+      "NodeType": "StringInput",
+      "Name": "Rows (CSV text)",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Level,Category,Length\nL01,Wall,3000\nL02,Door,900\nL01,Wall,4500\nL02,Wall,2500\nL01,Pipe,1200\nL02,Pipe,800"
+      }
+    },
+    {
+      "Id": "ec3b9887ef4945818f5bbe330240d584",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringExtraNodes.Lines@string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "String.Lines",
+      "X": 330.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "removeEmpty",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "lines"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9158fbaef50949c9bcd840a00cc71772",
+      "NodeType": "StringInput",
+      "Name": "Separator",
+      "X": 330.0,
+      "Y": 150.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": ","
+      }
+    },
+    {
+      "Id": "3c2401a6f7eb4a4e841d75e1888cc91f",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Split every line",
+      "X": 600.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "5411d44d988c4784bb51a2a120c3eaaf",
+      "NodeType": "BooleanToggle",
+      "Name": "First row is the header",
+      "X": 600.0,
+      "Y": 220.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": true
+      }
+    },
+    {
+      "Id": "2f3034cdc6754baab423d5007ab81021",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromRows@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.FromRows",
+      "X": 880.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "rows",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "headers",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "firstRowIsHeader",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e2186f9d5a94443e8d8232e329f89739",
+      "NodeType": "StringInput",
+      "Name": "Group by",
+      "X": 880.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Category"
+      }
+    },
+    {
+      "Id": "5b09ef4d1f054dfc8d2abc031cc4e534",
+      "NodeType": "StringInput",
+      "Name": "Work out",
+      "X": 880.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "count,sum:Length,max:Length"
+      }
+    },
+    {
+      "Id": "d3030a7fd465444ead4264f9b129f333",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Split the list",
+      "X": 1150.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "7e9503845e984dc7bea56f6001f06eda",
+      "NodeType": "StringInput",
+      "Name": "Separator 2",
+      "X": 880.0,
+      "Y": 500.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": ","
+      }
+    },
+    {
+      "Id": "a96d9d6c1c814434b9f1129f24880458",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.GroupBy@Dyncamelo.Nodes.DyncameloTable,string,System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.GroupBy",
+      "X": 1420.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "by",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "aggregations",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "4ad9caf94d1d4a45845aba6d995d3a5a",
+      "NodeType": "StringInput",
+      "Name": "Sort by",
+      "X": 1420.0,
+      "Y": 360.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "sum(Length)"
+      }
+    },
+    {
+      "Id": "f0daed2bf9874c829238d1c13846884e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Sort@Dyncamelo.Nodes.DyncameloTable,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Largest total first",
+      "X": 1700.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "columns",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "descending",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "89d27afa37234acbabb702238acab7eb",
+      "NodeType": "BooleanToggle",
+      "Name": "Largest first",
+      "X": 1700.0,
+      "Y": 360.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": true
+      }
+    },
+    {
+      "Id": "9bf1915208a24eb8b551bfacc1f5140c",
+      "NodeType": "WatchTable",
+      "Name": "Totals by category",
+      "X": 1990.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "bb5a122956e3444b831d30b71f2c43e9",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.ToText@Dyncamelo.Nodes.DyncameloTable,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.ToText",
+      "X": 1990.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "format",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "text"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "3d89646e8d824479b8abbcff6758860e",
+      "NodeType": "Watch",
+      "Name": "As Markdown",
+      "X": 2260.0,
+      "Y": 380.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "230f8bee21ae4b76aaa88d95ef3e4713",
+      "FromNode": "0dd427bd93074766926ae373327b3d6d",
+      "FromPort": "value",
+      "ToNode": "ec3b9887ef4945818f5bbe330240d584",
+      "ToPort": "text"
+    },
+    {
+      "Id": "575f972993554832a8cc55d9b92301d8",
+      "FromNode": "ec3b9887ef4945818f5bbe330240d584",
+      "FromPort": "lines",
+      "ToNode": "3c2401a6f7eb4a4e841d75e1888cc91f",
+      "ToPort": "text"
+    },
+    {
+      "Id": "c41dc46215a34648ae5bd7b630d8b231",
+      "FromNode": "9158fbaef50949c9bcd840a00cc71772",
+      "FromPort": "value",
+      "ToNode": "3c2401a6f7eb4a4e841d75e1888cc91f",
+      "ToPort": "separator"
+    },
+    {
+      "Id": "bec6198066f542daa28ca1c88501ed19",
+      "FromNode": "3c2401a6f7eb4a4e841d75e1888cc91f",
+      "FromPort": "list",
+      "ToNode": "2f3034cdc6754baab423d5007ab81021",
+      "ToPort": "rows"
+    },
+    {
+      "Id": "85e19263973d4e64b73bb10e4ff10a30",
+      "FromNode": "5411d44d988c4784bb51a2a120c3eaaf",
+      "FromPort": "value",
+      "ToNode": "2f3034cdc6754baab423d5007ab81021",
+      "ToPort": "firstRowIsHeader"
+    },
+    {
+      "Id": "81626ae24c8b473bb8c2a4a9d9a2706d",
+      "FromNode": "2f3034cdc6754baab423d5007ab81021",
+      "FromPort": "table",
+      "ToNode": "a96d9d6c1c814434b9f1129f24880458",
+      "ToPort": "table"
+    },
+    {
+      "Id": "a0e5f0d2b25e4ec79d2f146e0e7b3c3e",
+      "FromNode": "e2186f9d5a94443e8d8232e329f89739",
+      "FromPort": "value",
+      "ToNode": "a96d9d6c1c814434b9f1129f24880458",
+      "ToPort": "by"
+    },
+    {
+      "Id": "09b7bdca91174508ba7680f40b224641",
+      "FromNode": "5b09ef4d1f054dfc8d2abc031cc4e534",
+      "FromPort": "value",
+      "ToNode": "d3030a7fd465444ead4264f9b129f333",
+      "ToPort": "text"
+    },
+    {
+      "Id": "b20733f7feb04b9ca05de8181fd17405",
+      "FromNode": "7e9503845e984dc7bea56f6001f06eda",
+      "FromPort": "value",
+      "ToNode": "d3030a7fd465444ead4264f9b129f333",
+      "ToPort": "separator"
+    },
+    {
+      "Id": "ab5fb5970cb945cd826103bba1aa84db",
+      "FromNode": "d3030a7fd465444ead4264f9b129f333",
+      "FromPort": "list",
+      "ToNode": "a96d9d6c1c814434b9f1129f24880458",
+      "ToPort": "aggregations"
+    },
+    {
+      "Id": "683dcd6efc4b428aafa7840addaf0f91",
+      "FromNode": "a96d9d6c1c814434b9f1129f24880458",
+      "FromPort": "table",
+      "ToNode": "f0daed2bf9874c829238d1c13846884e",
+      "ToPort": "table"
+    },
+    {
+      "Id": "209ac89b27934b2682427ec1114731d2",
+      "FromNode": "4ad9caf94d1d4a45845aba6d995d3a5a",
+      "FromPort": "value",
+      "ToNode": "f0daed2bf9874c829238d1c13846884e",
+      "ToPort": "columns"
+    },
+    {
+      "Id": "f78872af9b93402e9f2418fa54783bd2",
+      "FromNode": "89d27afa37234acbabb702238acab7eb",
+      "FromPort": "value",
+      "ToNode": "f0daed2bf9874c829238d1c13846884e",
+      "ToPort": "descending"
+    },
+    {
+      "Id": "29210acfed1942d4a3ec3146169e7d12",
+      "FromNode": "f0daed2bf9874c829238d1c13846884e",
+      "FromPort": "table",
+      "ToNode": "9bf1915208a24eb8b551bfacc1f5140c",
+      "ToPort": "table"
+    },
+    {
+      "Id": "265f7f2cc7d84f5794442267c2adcac9",
+      "FromNode": "f0daed2bf9874c829238d1c13846884e",
+      "FromPort": "table",
+      "ToNode": "bb5a122956e3444b831d30b71f2c43e9",
+      "ToPort": "table"
+    },
+    {
+      "Id": "548807109b664564afda2605629be1c8",
+      "FromNode": "bb5a122956e3444b831d30b71f2c43e9",
+      "FromPort": "text",
+      "ToNode": "3d89646e8d824479b8abbcff6758860e",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "02d7eede647b4dff95ba23c74f483b8a",
+      "Text": "The same steps work on model data: Properties.ToTable (items + property names) replaces the three nodes on the left, and Table.ToExcelFile or Report.Html publishes the result.",
+      "X": 0.0,
+      "Y": -140.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Automatic",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
