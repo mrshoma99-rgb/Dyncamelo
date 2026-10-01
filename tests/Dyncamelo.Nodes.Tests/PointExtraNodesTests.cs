@@ -12,7 +12,7 @@ using Xunit;
 namespace Dyncamelo.Nodes.Tests;
 
 /// <summary>
-/// PointExtraNodes: Point.Add, Midpoint, Lerp, Centroid, Distance2D and Round.
+/// PointExtraNodes: Midpoint, Lerp, Centroid, Distance2D and Round.
 /// </summary>
 public class PointExtraNodesTests
 {
@@ -37,44 +37,6 @@ public class PointExtraNodesTests
         public double Y { get; }
 
         public double Z { get; }
-    }
-
-    // --------------------------------------------------------------- Point.Add
-
-    [Fact]
-    public void Add_OffsetsThePointByTheVector()
-    {
-        Assert.Equal(P(5, 7, 9), PointExtraNodes.Add(P(1, 2, 3), V(4, 5, 6)));
-        Assert.Equal(P(1, 2, 3), PointExtraNodes.Add(P(1, 2, 3), V(0, 0, 0)));
-        Assert.Equal(P(0, 0, 1), PointExtraNodes.Add(P(0, 0, 0), VectorNodes.ZAxis()));
-    }
-
-    [Fact]
-    public void Add_MatchesPointTranslate()
-    {
-        var point = P(1.5, -2, 8);
-        var vector = V(-0.25, 10, 3);
-
-        Assert.Equal(SpatialNodes.PointTranslate(point, vector), PointExtraNodes.Add(point, vector));
-    }
-
-    [Fact]
-    public void Add_DoesNotModifyTheInput()
-    {
-        var point = P(1, 1, 1);
-        PointExtraNodes.Add(point, V(5, 5, 5));
-        Assert.Equal(P(1, 1, 1), point);
-    }
-
-    [Fact]
-    public void Add_NullArguments_NameTheNodeAndPort()
-    {
-        var noPoint = Assert.Throws<ArgumentNullException>(() => PointExtraNodes.Add(null!, V(1, 1, 1)));
-        Assert.Contains("Point.Add", noPoint.Message);
-        Assert.Contains("'point'", noPoint.Message);
-
-        var noVector = Assert.Throws<ArgumentNullException>(() => PointExtraNodes.Add(P(0, 0, 0), null!));
-        Assert.Contains("'vector'", noVector.Message);
     }
 
     // ---------------------------------------------------------- Point.Midpoint
@@ -406,7 +368,7 @@ public class PointExtraNodesTests
     {
         var registry = CreateRegistry();
 
-        foreach (var name in new[] { "Point.Add", "Point.Midpoint", "Point.Lerp", "Point.Centroid", "Point.Distance2D", "Point.Round" })
+        foreach (var name in new[] { "Point.Midpoint", "Point.Lerp", "Point.Centroid", "Point.Distance2D", "Point.Round" })
         {
             var definition = Definition(registry, name);   // Single: the name is unique in the whole library
             Assert.Equal("Geometry", definition.Category);
@@ -421,7 +383,7 @@ public class PointExtraNodesTests
         var registry = CreateRegistry();
 
         Assert.Equal(NodeFunction.Info, Definition(registry, "Point.Distance2D").Function);
-        foreach (var name in new[] { "Point.Add", "Point.Midpoint", "Point.Lerp", "Point.Centroid", "Point.Round" })
+        foreach (var name in new[] { "Point.Midpoint", "Point.Lerp", "Point.Centroid", "Point.Round" })
         {
             Assert.Equal(NodeFunction.Create, Definition(registry, name).Function);
         }

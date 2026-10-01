@@ -151,7 +151,7 @@ public class BoundingBoxExtraNodesTests
         var corners = BoundingBoxExtraNodes.Corners(box);
 
         Assert.Equal(8, corners.Distinct().Count());
-        Assert.All(corners, c => Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, c)));
+        Assert.All(corners, c => Assert.True(SpatialNodes.BoundingBoxContains(box, c)));
         Assert.Equal(box, BoundingBoxExtraNodes.FromPoints(corners.Cast<object?>().ToList()));
     }
 
@@ -385,53 +385,6 @@ public class BoundingBoxExtraNodesTests
         Assert.Contains("'b'", Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.Overlap(Box(0, 0, 0, 1, 1, 1), null!)).Message);
     }
 
-    // ------------------------------------------------------------- ContainsPoint
-
-    [Fact]
-    public void ContainsPoint_InsideIsTrue_OutsideIsFalse()
-    {
-        var box = Box(0, 0, 0, 10, 10, 10);
-
-        Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, P(5, 5, 5)));
-        Assert.False(BoundingBoxExtraNodes.ContainsPoint(box, P(11, 5, 5)));
-        Assert.False(BoundingBoxExtraNodes.ContainsPoint(box, P(5, -1, 5)));
-        Assert.False(BoundingBoxExtraNodes.ContainsPoint(box, P(5, 5, 10.0001)));
-    }
-
-    [Fact]
-    public void ContainsPoint_BoundaryCountsAsInside()
-    {
-        var box = Box(0, 0, 0, 10, 10, 10);
-
-        Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, P(0, 0, 0)));          // corner
-        Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, P(10, 10, 10)));       // opposite corner
-        Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, P(10, 5, 5)));         // face
-        Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, P(0, 10, 5)));         // edge
-    }
-
-    [Fact]
-    public void ContainsPoint_AgreesWithBoundingBoxContains()
-    {
-        var box = Box(-2, -2, -2, 3, 3, 3);
-        foreach (var x in new[] { -3d, -2d, 0d, 3d, 4d })
-        {
-            foreach (var z in new[] { -2.5, -2d, 1d, 3d, 3.5 })
-            {
-                var point = P(x, 0, z);
-                Assert.Equal(SpatialNodes.BoundingBoxContains(box, point), BoundingBoxExtraNodes.ContainsPoint(box, point));
-            }
-        }
-    }
-
-    [Fact]
-    public void ContainsPoint_NullArguments_NameTheNodeAndPort()
-    {
-        var noBox = Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.ContainsPoint(null!, P(0, 0, 0)));
-        Assert.Contains("BoundingBox.ContainsPoint", noBox.Message);
-        Assert.Contains("'box'", noBox.Message);
-        Assert.Contains("'point'", Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.ContainsPoint(Box(0, 0, 0, 1, 1, 1), null!)).Message);
-    }
-
     // ------------------------------------------------------------- ContainsBox
 
     [Fact]
@@ -519,7 +472,7 @@ public class BoundingBoxExtraNodesTests
         var points = new List<object?> { P(0.5, 0.5, 0.5), P(-9, 3, 2), P(7, -4, 1), P(2, 2, -6), P(2, 2, 6) };
         var box = BoundingBoxExtraNodes.FromPoints(points);
 
-        Assert.All(points, p => Assert.True(BoundingBoxExtraNodes.ContainsPoint(box, (DyncameloPoint)p!)));
+        Assert.All(points, p => Assert.True(SpatialNodes.BoundingBoxContains(box, (DyncameloPoint)p!)));
     }
 
     [Fact]
@@ -602,7 +555,7 @@ public class BoundingBoxExtraNodesTests
         var box = Box(0, 0, 0, 2, 2, 2);
         var moved = BoundingBoxExtraNodes.Translate(box, V(5, 6, 7));
 
-        Assert.Equal(PointExtraNodes.Add(box.Center, V(5, 6, 7)), moved.Center);
+        Assert.Equal(SpatialNodes.PointTranslate(box.Center, V(5, 6, 7)), moved.Center);
     }
 
     [Fact]
@@ -633,7 +586,7 @@ public class BoundingBoxExtraNodesTests
         var names = new[]
         {
             "BoundingBox.Volume", "BoundingBox.SurfaceArea", "BoundingBox.Footprint", "BoundingBox.Corners",
-            "BoundingBox.Expand", "BoundingBox.Overlap", "BoundingBox.ContainsPoint", "BoundingBox.ContainsBox",
+            "BoundingBox.Expand", "BoundingBox.Overlap", "BoundingBox.ContainsBox",
             "BoundingBox.FromPoints", "BoundingBox.Translate",
         };
 
@@ -651,7 +604,7 @@ public class BoundingBoxExtraNodesTests
     {
         var registry = CreateRegistry();
 
-        foreach (var name in new[] { "BoundingBox.Volume", "BoundingBox.SurfaceArea", "BoundingBox.Footprint", "BoundingBox.Corners", "BoundingBox.ContainsPoint", "BoundingBox.ContainsBox" })
+        foreach (var name in new[] { "BoundingBox.Volume", "BoundingBox.SurfaceArea", "BoundingBox.Footprint", "BoundingBox.Corners", "BoundingBox.ContainsBox" })
         {
             Assert.Equal(NodeFunction.Info, Definition(registry, name).Function);
         }

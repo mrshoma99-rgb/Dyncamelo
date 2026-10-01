@@ -292,7 +292,7 @@ public static class FileNodes
     // Helpers (not imported as nodes: non-public).
     // ------------------------------------------------------------------
 
-    private static void RequireExistingFile(string path, string nodeName)
+    internal static void RequireExistingFile(string path, string nodeName)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -305,7 +305,7 @@ public static class FileNodes
         }
     }
 
-    private static void RequireWritablePath(string path, string nodeName)
+    internal static void RequireWritablePath(string path, string nodeName)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -319,7 +319,7 @@ public static class FileNodes
         }
     }
 
-    private static char RequireSingleCharDelimiter(string delimiter, string nodeName)
+    internal static char RequireSingleCharDelimiter(string delimiter, string nodeName)
     {
         if (string.IsNullOrEmpty(delimiter) || delimiter.Length != 1)
         {
@@ -422,7 +422,7 @@ public static class FileNodes
 
         return text;
     }
-    private static string EscapeCsvCell(string cell, char separator)
+    internal static string EscapeCsvCell(string cell, char separator)
     {
         bool needsQuoting = cell.IndexOf(separator) >= 0 ||
                             cell.IndexOf('"') >= 0 ||

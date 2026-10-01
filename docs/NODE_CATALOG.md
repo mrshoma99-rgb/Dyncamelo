@@ -2,22 +2,22 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**357 nodes in 35 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**550 nodes in 38 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
-| [Color](#color) | 9 |
-| [Data](#data) | 5 |
-| [DateTime](#datetime) | 6 |
-| [Dictionary](#dictionary) | 5 |
+| [Color](#color) | 18 |
+| [Data](#data) | 4 |
+| [DateTime](#datetime) | 19 |
+| [Dictionary](#dictionary) | 13 |
 | [Display](#display) | 3 |
-| [File](#file) | 11 |
-| [Geometry](#geometry) | 13 |
+| [File](#file) | 36 |
+| [Geometry](#geometry) | 43 |
 | [Input](#input) | 7 |
-| [List](#list) | 43 |
-| [Logic](#logic) | 11 |
-| [Math](#math) | 15 |
+| [List](#list) | 63 |
+| [Logic](#logic) | 18 |
+| [Math](#math) | 37 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 12 |
 | [Navisworks.Camera](#navisworkscamera) | 6 |
@@ -37,9 +37,12 @@
 | [Navisworks.Transform](#navisworkstransform) | 5 |
 | [Navisworks.Units](#navisworksunits) | 4 |
 | [Navisworks.Viewpoints](#navisworksviewpoints) | 22 |
-| [String](#string) | 14 |
+| [Report](#report) | 2 |
+| [String](#string) | 36 |
+| [System](#system) | 5 |
+| [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
-| [Workflow](#workflow) | 4 |
+| [Workflow](#workflow) | 7 |
 | [Workflow.Actions](#workflowactions) | 9 |
 
 ## Annotation
@@ -54,13 +57,22 @@
 |---|---|---|---|
 | `Color Picker` *(interactive)* | — | color | A color chosen with a picker |
 | `Color.ByARGB` | a?, r?, g?, b? | color | Creates a color from alpha, red, green and blue values (0-255) |
+| `Color.ByHSV` | hue, saturation, value, alpha? | color | Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped) |
 | `Color.ByValues` | values, colors? | colors, uniqueValues, uniqueColors | One color per value, equal values sharing a color |
 | `Color.Components` | color | red, green, blue, alpha | Splits a color into its red, green, blue and alpha channels (0-255) |
+| `Color.ContrastText` | background | color | Black or white, whichever reads better on a background color (WCAG contrast) |
+| `Color.Darken` | color, amount? | color | Makes a color darker by shifting its HSL lightness down by amount (0-1, clamped) |
 | `Color.FromHex` | hex | color | Parses a hex color string ("#RRGGBB" or "#AARRGGBB") |
 | `Color.Gradient` | count, start?, end? | colors | A list of N colors evenly blended between two colors (endpoints included |
+| `Color.Invert` | color | color | Inverts a color's red, green and blue channels (the photographic negative) |
 | `Color.Lerp` | start, end, t | color | Interpolates between two colors (t clamped to 0-1) |
+| `Color.Lighten` | color, amount? | color | Makes a color lighter by shifting its HSL lightness up by amount (0-1, clamped) |
+| `Color.Palette` | name?, count? | colors | A named palette as a list of colors: colourblind-safe, tableau, pastel, status (green/amber/red/grey) or the viridis, heat and grey ramps interpolated to count |
 | `Color.Random` | seed? | color | A pseudo-random color, stable per seed: the same seed always gives the same color (re-runs stay consistent) |
 | `Color.RandomList` | count, seed? | colors | A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed |
+| `Color.ToHex` | color, includeAlpha? | hex | Formats a color as hex text, "#RRGGBB" (or "#AARRGGBB" with includeAlpha) |
+| `Color.ToHSV` | color | hue, saturation, value | Splits a color into hue (degrees, 0-360), saturation and value (0-1) |
+| `Color.WithAlpha` | color, alpha | color | Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque |
 
 ## Data
 
@@ -69,7 +81,6 @@
 | `JSON.Parse` | json | value | Parses a JSON string into dictionaries, lists and values |
 | `JSON.Stringify` | value, indented? | json | Serializes any value to a JSON string |
 | `Snapshot.Diff` | oldValue, newValue | addedKeys, removedKeys, changedKeys | Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality |
-| `Table.JoinByKey` | rows, headers, keys, keyColumn | matchedRows, unmatchedKeys | Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing |
 | `XML.Parse` | xml | value | Parses XML into dictionaries, lists and strings (attributes as "@name", repeated elements as lists, mixed text as "#text") |
 
 ## DateTime
@@ -77,20 +88,41 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `DateTime.AddDays` | dateTime, days | dateTime | Offsets a date/time by a number of days (fractional and negative values allowed) |
+| `DateTime.AddHours` | dateTime, hours | dateTime | Adds hours to a date/time (fractional and negative values allowed) |
+| `DateTime.AddMinutes` | dateTime, minutes | dateTime | Adds minutes to a date/time (fractional and negative values allowed) |
+| `DateTime.AddMonths` | dateTime, months | dateTime | Adds calendar months to a date/time (the day clamps to the end of a shorter month) |
+| `DateTime.AddYears` | dateTime, years | dateTime | Adds calendar years to a date/time (29 February clamps to 28 February in a common year) |
+| `DateTime.AgeInDays` | dateTime, reference | days | Returns how many days old a date/time is at a reference date/time (reference minus date |
 | `DateTime.ByDate` | year, month, day | dateTime | Creates a date from year, month and day numbers |
+| `DateTime.Compare` | a, b | result | Compares two date/times: -1 when the first is earlier, 0 when equal, 1 when it is later |
+| `DateTime.Components` | dateTime | year, month, day, hour, minute, second, weekday, dayOfYear, isoWeek, isoYear, quarter | Splits a date/time into year, month, day, hour, minute, second, English weekday name, day of year, ISO week, ISO year and quarter |
 | `DateTime.DaysBetween` | start, end | days | Returns the signed number of days between two date/times (end minus start) |
+| `DateTime.EndOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns the last millisecond of the day, week, month, quarter or year containing a date/time (start of the next period minus 1 ms) |
 | `DateTime.Format` | dateTime, format? | text | Formats a date/time as text using a .NET format string (invariant culture) |
+| `DateTime.FromUnixSeconds` | seconds | dateTime | Converts Unix seconds since 1970-01-01 UTC to a (UTC) date/time |
 | `DateTime.Now` | — | dateTime | Returns the current local date and time (captured at execution) |
 | `DateTime.Parse` | text, format? | dateTime | Parses text as a date/time, optionally with an exact .NET format string |
+| `DateTime.Range` | start, end, stepDays? | dates | Creates a list of dates from a start to an end (both included) with a step in days |
+| `DateTime.StartOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns midnight at the start of the day, week, month, quarter or year containing a date/time |
+| `DateTime.Today` | — | dateTime | Returns today's local date at midnight (captured at execution) |
+| `DateTime.ToUnixSeconds` | dateTime | seconds | Converts a date/time to Unix seconds since 1970-01-01 UTC (a value without a time zone is taken as UTC) |
 
 ## Dictionary
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Dictionary.ByKeysValues` | keys, values | dictionary | Creates a dictionary from a list of keys and a list of values of the same length |
+| `Dictionary.ContainsKey` | dictionary, key | hasKey | Tests whether a dictionary has the given key (case-sensitive) |
+| `Dictionary.Count` | dictionary | count | Returns the number of entries in a dictionary |
+| `Dictionary.FromRows` | rows | dictionary | Builds a dictionary from a list of [key, value] rows (a later row wins for a repeated key) |
+| `Dictionary.Invert` | dictionary | dictionary | Swaps keys and values into a new dictionary (values become text keys |
 | `Dictionary.Keys` | dictionary | keys | Returns all keys of a dictionary as a list |
+| `Dictionary.Merge` | dictionaries | dictionary | Combines several dictionaries into a new one |
+| `Dictionary.RemoveKey` | dictionary, key | dictionary | Returns a copy of the dictionary without the given key (a missing key is fine) |
 | `Dictionary.SetValueAtKey` | dictionary, key, value | dictionary | Returns a copy of the dictionary with the given key set or updated |
+| `Dictionary.ToRows` | dictionary | rows | Converts a dictionary to a list of [key, value] rows |
 | `Dictionary.ValueAtKey` | dictionary, key | value | Returns the value stored under the given key |
+| `Dictionary.ValueOrDefault` | dictionary, key, defaultValue? | value | Returns the value stored under a key, or a default value when the key is missing |
 | `Dictionary.Values` | dictionary | values | Returns all values of a dictionary as a list |
 
 ## Display
@@ -105,17 +137,42 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
+| `CSV.AppendToFile` | path, rows, delimiter?, headers? | path | Appends rows to a CSV file (same quoting as CSV.WriteToFile), writing the optional headers only when the file is new or empty |
 | `CSV.ReadFromFile` | path, delimiter? | data | Reads a CSV file into a list of rows (numeric cells become numbers) |
 | `CSV.WriteToFile` | path, data, delimiter? | path | Writes a list of rows to a CSV file (overwrites |
+| `Directory.Create` | path | path | Creates a folder including any missing parent folders (does nothing when it already exists) |
+| `Directory.Delete` | path, recursive? | deleted | Deletes a folder (an empty one, or with its whole content when recursive is true) |
+| `Directory.Exists` | path | exists | Tests whether a folder exists at the given path |
+| `Directory.FindFiles` | path, pattern?, recursive?, sortBy?, descending?, limit? | files | Finds files under a folder by wildcard (several allowed, separated by ";"), sorted by name, date or size, with an optional limit - the newest file is sortBy modified + d… |
+| `Directory.GetDirectories` | path, pattern?, recursive? | directories | Lists the sub-folders of a folder as full paths (optionally filtered by a wildcard such as "2026*" and optionally at every depth) |
 | `Directory.GetFiles` | path, pattern? | files | Lists the files in a folder (optionally filtered by a wildcard such as "*.nwd") |
 | `Excel.ReadFromFile` | path, sheet?, hasHeaders? | rows, headers, sheetNames | Reads an .xlsx worksheet into rows + headers (dates arrive as Excel serial numbers |
 | `Excel.WriteToFile` | path, rows, headers?, sheet?, append? | path | Writes rows (+ optional headers) to an .xlsx worksheet |
+| `File.Copy` | source, destination, overwrite? | path | Copies a file to a new path (creates the destination folder |
+| `File.Delete` | path | deleted | Deletes a file |
 | `File.Exists` | path | exists | Tests whether a file exists at the given path |
+| `File.Hash` | path, algorithm? | hash | Computes a checksum of a file's content (SHA256, SHA1 or MD5) as lower-case hex text - handy for change detection |
+| `File.Info` | path | exists, name, extension, directory, sizeBytes, modified, created | Reads a file's name, extension, folder, size in bytes and modified / created dates |
+| `File.Move` | source, destination, overwrite? | path | Moves or renames a file (creates the destination folder |
 | `JSON.ReadFromFile` | path | data | Reads a JSON file into dictionaries, lists and values |
 | `JSON.WriteToFile` | path, data, indented? | path | Writes any value to a JSON file (overwrites |
+| `Log.Write` | path, message, level? | line | Appends one line "yyyy-MM-dd HH:mm:ss LEVEL message" (local time) to a log file and returns that line |
+| `Path.ChangeExtension` | path, extension | path | Replaces the extension of a path ("a.nwd" + "nwf" gives "a.nwf") |
 | `Path.Combine` | directory, fileName | path | Joins a folder path and a file name with the correct separator |
+| `Path.GetDirectory` | path | directory | Returns the folder part of a path ("C:\Models\site.nwd" gives "C:\Models") |
+| `Path.GetExtension` | path | extension | Returns the extension of a path with its leading dot (".nwd"), or empty text when there is none |
+| `Path.GetFileName` | path | fileName | Returns the file name of a path including its extension ("C:\Models\site.nwd" gives "site.nwd") |
+| `Path.GetFileNameWithoutExtension` | path | name | Returns the file name of a path without its extension ("C:\Models\site.nwd" gives "site") |
+| `Path.GetFullPath` | path | path | Resolves a path to an absolute path (relative paths start from the current folder) |
+| `Path.GetRelativePath` | path, baseDirectory | path | Expresses a path relative to a base folder |
+| `Path.IsAbsolute` | path | isAbsolute | Tests whether a path is absolute (starts at a drive, network share or root) rather than relative |
+| `Path.Normalize` | path | path | Cleans a path as text: one separator style, no trailing separator, "." and ".." resolved (the disk is never read) |
+| `Text.AppendToFile` | path, text, newLine? | path | Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed |
 | `Text.ReadFromFile` | path | text | Reads the entire content of a text file |
 | `Text.WriteToFile` | path, text | path | Writes text to a file (overwrites |
+| `Zip.Create` | sources, zipPath, overwrite? | path | Packs files and folders into a zip archive (a folder is stored with its structure under its own name) |
+| `Zip.Extract` | zipPath, directory, overwrite? | directory | Unpacks a zip archive into a folder |
+| `Zip.List` | zipPath | entries | Lists the entry names inside a zip archive without extracting it |
 
 ## Geometry
 
@@ -124,16 +181,46 @@
 | `BoundingBox.ByCorners` | min, max | boundingBox | Creates an axis-aligned bounding box spanning two corner points |
 | `BoundingBox.Center` | boundingBox | point | Returns the center point of a bounding box |
 | `BoundingBox.Contains` | boundingBox, point | contains | Tests whether a point lies inside a bounding box (points on the boundary count as inside) |
+| `BoundingBox.ContainsBox` | outer, inner | contains | True when the inner box fits entirely inside the outer box (touching faces count as inside) |
+| `BoundingBox.Corners` | box | corners | The 8 corner points of a bounding box: the bottom face counter-clockwise from the Min corner (0-3), then the top face in the same order (4-7) |
+| `BoundingBox.Expand` | box, amount | boundingBox | Grows a bounding box by an amount on every side (negative shrinks it |
+| `BoundingBox.Footprint` | box | area | The plan (floor) area of a bounding box: size X times size Y, ignoring height |
+| `BoundingBox.FromPoints` | points | boundingBox | The smallest bounding box around a set of points (several wires can feed one input |
 | `BoundingBox.Intersects` | boundingBox, other | intersects | Tests whether two bounding boxes overlap (touching counts as intersecting) |
+| `BoundingBox.Overlap` | a, b | boundingBox | The bounding box shared by two overlapping boxes |
 | `BoundingBox.PlanGap` | outer, inner | gap | The widest strip of open floor between an inner box (equipment) and the outer box (opening) in plan |
 | `BoundingBox.Scale` | boundingBox, factor | boundingBox | Scales a bounding box about its center by a factor (2 = double, 0.5 = half) |
 | `BoundingBox.Size` | boundingBox | sizeX, sizeY, sizeZ, min, max | Returns a bounding box's size along each axis and its min/max corner points |
+| `BoundingBox.SurfaceArea` | box | area | The total area of a bounding box's six faces (square model units) |
+| `BoundingBox.Translate` | box, offset | boundingBox | Moves a bounding box by an offset vector, keeping its size |
 | `BoundingBox.Union` | geometry | boundingBox | ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too |
+| `BoundingBox.Volume` | box | volume | The volume of a bounding box (cubic model units) |
 | `Point.ByCoordinates` | x?, y?, z? | point | Creates a 3D point from X, Y and Z coordinates |
+| `Point.Centroid` | points | point | The centroid (average position) of a list of points |
 | `Point.Components` | point | x, y, z | Splits a point into its X, Y and Z coordinates |
+| `Point.Distance2D` | a, b | distance | The distance between two points measured in plan (XY only, Z ignored) |
 | `Point.DistanceTo` | point, other | distance | Returns the straight-line distance between two points |
+| `Point.Lerp` | a, b, t | point | Interpolates between two points: t = 0 is the first, t = 1 the second |
+| `Point.Midpoint` | a, b | point | The point halfway between two points |
+| `Point.Round` | point, digits? | point | Rounds a point's X, Y and Z to the given number of decimal digits (midpoints round away from zero) |
 | `Point.Translate` | point, vector | point | Offsets a point by a vector, returning a new point |
+| `Vector.Add` | a, b | vector | Adds two vectors (a + b) |
+| `Vector.Angle` | a, b | degrees | The angle between two vectors in degrees, 0 (same direction) to 180 (opposite) |
 | `Vector.ByCoordinates` | x?, y?, z? | vector | Creates a 3D direction vector from X, Y and Z components |
+| `Vector.ByPoints` | from, to | vector | Creates the vector that leads from one point to another (end minus start) |
+| `Vector.Components` | vector | x, y, z | Splits a vector into its X, Y and Z components |
+| `Vector.Cross` | a, b | vector | The cross product of two vectors: a vector perpendicular to both (right-hand rule), zero when they are parallel |
+| `Vector.Dot` | a, b | dot | The dot product of two vectors: positive when they point the same way, 0 when perpendicular, negative when opposed |
+| `Vector.IsParallel` | a, b, tolerance? | isParallel | True when two vectors lie along the same line (same or opposite direction) within a length-independent tolerance |
+| `Vector.IsPerpendicular` | a, b, tolerance? | isPerpendicular | True when two vectors meet at a right angle within a length-independent tolerance |
+| `Vector.Length` | vector | length | Returns the length (magnitude) of a vector |
+| `Vector.Negate` | vector | vector | Reverses a vector so it points the opposite way |
+| `Vector.Normalize` | vector | vector | Scales a vector to length 1, keeping its direction (a zero-length vector has no direction and is an error) |
+| `Vector.Scale` | vector, factor | vector | Multiplies a vector by a number (2 doubles its length, -1 reverses it) |
+| `Vector.Subtract` | a, b | vector | Subtracts one vector from another (a - b) |
+| `Vector.XAxis` | — | vector | The unit vector along the X axis, (1, 0, 0) |
+| `Vector.YAxis` | — | vector | The unit vector along the Y axis, (0, 1, 0) |
+| `Vector.ZAxis` | — | vector | The unit vector along the Z axis, (0, 0, 1) |
 
 ## Input
 
@@ -156,27 +243,39 @@
 | `List.AllIndicesOf` | list, item | indices | Every zero-based index at which the item occurs in the list |
 | `List.AllTrue` | list | allTrue | True when EVERY element of the list is true |
 | `List.AnyTrue` | list | anyTrue | True when AT LEAST ONE element of the list is true |
+| `List.Average` | list | average | The arithmetic mean of the numbers of a list (nulls are skipped |
 | `List.Chop` | list, lengths | lists | Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]) |
 | `List.Clean` | list, removeEmptyLists? | list | Removes null elements from a list, at every nesting level |
 | `List.Contains` | list, item | contains | Tests whether a list contains a value (numbers compare by value regardless of numeric type) |
 | `List.Count` | list | count | Returns the number of elements in a list |
+| `List.CountBy` | list | values, counts | Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs |
 | `List.CountTrue` | list | trueCount, falseCount | Counts the true and not-true elements of a mask |
 | `List.Create` *(interactive)* | item0 … itemN | list | Builds a list from the wired item inputs |
+| `List.CumulativeSum` | list | totals | A running total: each item is the sum of the list up to and including that position |
 | `List.Cycle` | list, amount | list | Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]) |
 | `List.DropItems` | list, amount | list | Drops elements from the start of the list |
+| `List.DropWhile` | list, mask | list | Drops items from the start of the list for as long as the mask is true |
+| `List.Duplicates` | list | duplicates, counts | The values that occur more than once, with how many times each occurs |
 | `List.FilterByBoolMask` | list, mask | in, out | Splits a list into elements whose mask entry is true ("in") and the rest ("out") |
+| `List.FilterByValue` | list, test?, value?, keys?, ignoreCase? | matched, rejected, mask | Keeps the items that pass a test such as > 100, contains "wall" or matches "A-*" |
 | `List.FirstItem` | list | item | Returns the first element of a list |
 | `List.Flatten` | list, amount? | list | Flattens a nested list by a given number of levels (-1 = completely) |
 | `List.GetItemAtIndex` | list, index | item | Returns the element at the given index (negative indexes count from the end) |
 | `List.GroupByKey` | list, keys | groups, uniqueKeys | Groups list elements by a parallel key list |
+| `List.Histogram` | list, bins? | lower, upper, counts, labels | Splits the range of the numbers into equal bins and counts how many fall in each |
 | `List.IndexOf` | list, item | index | Returns the index of the first occurrence of a value in a list (-1 when absent) |
 | `List.Insert` | list, item, index | list | Returns a new list with the value inserted at the index (0 = front |
 | `List.LastIndexOf` | list, item | index | The zero-based index of the LAST occurrence of the item (-1 when absent) |
 | `List.LastItem` | list | item | Returns the last element of a list |
 | `List.MaximumItem` | list | item | The largest element of a list (numbers, texts or dates |
+| `List.Median` | list | median | The middle value of the numbers of a list (the mean of the two middle ones when the count is even) |
 | `List.Merge` | lists | list | Concatenates any number of lists into one |
 | `List.MinimumItem` | list | item | The smallest element of a list (numbers, texts or dates |
+| `List.MostCommon` | list | item, count | The value that occurs most often in a list (the earliest wins a tie) and how many times |
 | `List.OfRepeatedItem` | item, amount | list | A list of one value repeated N times |
+| `List.Pairs` | list, cyclic? | pairs | Pairs each item with the next one: [[a, b], [b, c], …] |
+| `List.Percentile` | list, percent? | value | The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC) |
+| `List.Product` | list | product | Multiplies the numbers of a list (nulls are skipped, an empty list gives 1) |
 | `List.Range` | start, end, step? | list | Creates a sequence of numbers from start to end using the given step |
 | `List.RemoveItemAtIndex` | list, index | list | Removes the element at the given index (negative indexes count from the end) |
 | `List.ReplaceItemAtIndex` | list, index, item | list | Returns a new list with the element at the index replaced (negative indexes count from the end) |
@@ -187,13 +286,21 @@
 | `List.SetIntersection` | list1, list2 | list | The distinct elements present in BOTH lists (value equality, ordered as in the first) |
 | `List.SetUnion` | list1, list2 | list | The distinct elements present in EITHER list (value equality, first-seen order) |
 | `List.ShiftIndices` | list, amount | list | Rotates the list: +1 moves every element one place towards the end and wraps the last to the front ([a,b,c] → [c,a,b]) |
+| `List.Shuffle` | list, seed? | list | Shuffles a list |
 | `List.Slice` | list, start, end, step? | list | A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element |
 | `List.Sort` | list | list | Returns the list sorted ascending (numbers numerically, strings alphabetically) |
 | `List.SortByKey` | list, keys | sorted, sortedKeys | Sorts list elements by a parallel key list |
+| `List.SortDescending` | list | list | Returns the list sorted descending (largest first |
+| `List.StandardDeviation` | list, sample? | standardDeviation | The standard deviation of the numbers of a list (population by default |
+| `List.Statistics` | list | count, sum, min, max, average, median, standardDeviation | Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node |
+| `List.Sum` | list | sum | Adds up the numbers of a list (nulls are skipped, an empty list gives 0) |
 | `List.TakeEveryNthItem` | list, n, offset? | list | Every n-th element, optionally after skipping offset elements |
 | `List.TakeItems` | list, amount | list | Takes elements from the start of the list |
+| `List.TakeWhile` | list, mask | list | Takes items from the start of the list for as long as the mask is true (stops at the first false) |
 | `List.Transpose` | list | lists | Swaps rows and columns of a list of lists |
 | `List.UniqueItems` | list | list | Removes duplicate elements from a list, preserving the original order |
+| `List.WithIndex` | list | pairs | Pairs each item with its position: [[0, item0], [1, item1], …] |
+| `List.Zip` | first, second | pairs | Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list |
 
 ## Logic
 
@@ -208,6 +315,13 @@
 | `IsNullOrEmpty` | value | isEmpty | True when the value is null, an empty string, an empty list or an empty dictionary |
 | `LessThan` | a, b | result | Returns true when the first number is less than the second |
 | `LessThanOrEqual` | a, b | result | Returns true when the first number is less than or equal to the second |
+| `Logic.Choose` | index, options | value | Picks one of several options by position (0 = first) |
+| `Logic.Compare` | a, b?, test?, ignoreCase? | result | Compares two values |
+| `Logic.IsBetween` | value, min, max, inclusive? | result | True when a number, text or date lies between a lower and an upper bound (bounds included by default) |
+| `Logic.NotEquals` | a, b | result | True when two values are different (numbers compare by value regardless of numeric type) |
+| `Logic.Switch` | value, cases, results, fallback? | value | Gives the result that goes with the first case equal to the value, otherwise the fallback |
+| `Logic.TypeOf` | value | type | Names the kind of a value |
+| `Logic.Xor` | a, b | result | True when exactly one of the two inputs is true |
 | `Not` | value | result | Inverts a boolean value |
 | `Or` | a, b | result | Returns true when at least one input is true |
 
@@ -218,15 +332,37 @@
 | `Add` | a, b | result | Adds two numbers |
 | `Divide` | a, b | result | Divides the first number by the second |
 | `Math.Abs` | number | result | Returns the absolute value of a number |
+| `Math.Acos` | value, unit? | angle | Inverse cosine: the angle whose cosine is the value (result in degrees by default) |
+| `Math.Asin` | value, unit? | angle | Inverse sine: the angle whose sine is the value (result in degrees by default) |
+| `Math.Atan` | value, unit? | angle | Inverse tangent: the angle for a slope (result in degrees by default) |
+| `Math.Atan2` | y, x, unit? | angle | Angle of the direction (x, y) from the X axis, from -180 to 180 degrees |
 | `Math.Ceiling` | number | result | Rounds a number up to the nearest integer |
+| `Math.Clamp` | value, min, max | value | Limits a number to a range: below the minimum gives the minimum, above the maximum gives the maximum |
+| `Math.Cos` | angle, unit? | value | Cosine of an angle (degrees by default) |
+| `Math.Degrees` | radians | degrees | Converts radians to degrees |
+| `Math.Exp` | power | value | e raised to a power (the inverse of the natural logarithm) |
 | `Math.Floor` | number | result | Rounds a number down to the nearest integer |
+| `Math.Formula` | expression, a?, b?, c?, d?, e?, f? | result | Evaluates a formula such as "a * b + 2" or "if(a > 10, a - 10, 0)" over the inputs a to f |
+| `Math.Lerp` | a, b, t | value | Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited) |
+| `Math.Ln` | value | value | Natural logarithm (base e) of a positive number |
+| `Math.Log` | value, logBase? | value | Logarithm of a positive number to a base (10 by default) |
 | `Math.MapRange` | value, fromLow, fromHigh, toLow, toHigh | result | Linearly remaps a value from one range to another (values outside the range extrapolate) |
 | `Math.Max` | a, b | result | Returns the larger of two numbers |
 | `Math.Min` | a, b | result | Returns the smaller of two numbers |
+| `Math.Negate` | number | value | Flips the sign of a number (5 becomes -5) |
+| `Math.Percent` | part, total | percent | What percentage the part is of the total (37 of 340 gives 10.88) |
+| `Math.Pi` | — | pi | The constant pi (3.14159…) |
 | `Math.Pow` | @base, exponent | result | Raises the first number to the power of the second |
+| `Math.Radians` | degrees | radians | Converts degrees to radians |
 | `Math.Random` | min?, max?, seed? | result | Returns a random number in a range (seed >= 0 makes it deterministic) |
 | `Math.Round` | number, digits? | result | Rounds a number to the given number of decimal digits (midpoints round away from zero) |
+| `Math.RoundToMultiple` | value, multiple | value | Rounds to the nearest multiple of a step, e.g |
+| `Math.Sequence` | start, count, step? | numbers | A list of count numbers starting at start and growing by step (the count-based sibling of List.Range) |
+| `Math.Sign` | number | sign | -1 for a negative number, 0 for zero, 1 for a positive number |
+| `Math.Sin` | angle, unit? | value | Sine of an angle (degrees by default) |
 | `Math.Sqrt` | number | result | Returns the square root of a non-negative number |
+| `Math.Tan` | angle, unit? | value | Tangent of an angle (degrees by default) |
+| `Math.Truncate` | number | value | Drops the decimals, towards zero (2.7 becomes 2, -2.7 becomes -2) |
 | `Modulo` | a, b | result | Returns the remainder of dividing the first number by the second |
 | `Multiply` | a, b | result | Multiplies two numbers |
 | `Subtract` | a, b | result | Subtracts the second number from the first |
@@ -526,24 +662,96 @@
 | `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder or its current name |
 | `Viewpoints.SortFolder` | folder?, recursive?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) |
 
+## Report
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Report.Html` | title, sections, subtitle? | html | Builds a self-contained HTML report from tables and text ("# Heading" makes a heading) |
+| `Report.Markdown` | title, sections, subtitle? | markdown | Builds a Markdown report from tables and text |
+
 ## String
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
+| `Number.Format` | number, decimals?, thousandsSeparator?, prefix?, suffix? | text | Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture) |
 | `String.Concat` | a, b | result | Joins two strings into one |
 | `String.Contains` | text, searchFor, ignoreCase? | result | Tests whether a string contains the given substring |
 | `String.EndsWith` | text, searchFor, ignoreCase? | result | Tests whether a string ends with the given suffix |
+| `String.Format` | format, values | text | Fills a .NET composite format such as "{0} is {1:0.00} m" with the wired values (invariant culture, "{{" and "}}" are literal braces) |
 | `String.FromObject` | obj | result | Converts any value (including whole lists) to its display string |
+| `String.IndexOf` | text, search, ignoreCase?, startIndex? | index | Returns the zero-based index of the first occurrence of a text (-1 when absent) |
+| `String.IsBlank` | text | isBlank | Tests whether a text is null, empty or only whitespace |
 | `String.Join` | separator, list | result | Joins the elements of a list into a single string with a separator |
+| `String.LastIndexOf` | text, search, ignoreCase? | index | Returns the zero-based index of the last occurrence of a text (-1 when absent) |
+| `String.Left` | text, count | text | Returns the first characters of a text (the whole text when the count is larger) |
 | `String.Length` | text | result | Returns the number of characters in a string |
+| `String.Lines` | text, removeEmpty? | lines | Splits a text into a list of lines (handles \r\n, \n and \r), optionally dropping the empty ones |
+| `String.PadLeft` | text, width, padChar? | text | Pads a text on the left with a character up to a total width ("7" becomes "007" with width 3 and padChar 0) |
+| `String.PadRight` | text, width, padChar? | text | Pads a text on the right with a character up to a total width |
+| `String.RegexIsMatch` | text, pattern, ignoreCase? | isMatch | Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text) |
+| `String.RegexMatch` | text, pattern, ignoreCase? | found, match, groups | Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n |
+| `String.RegexMatches` | text, pattern, ignoreCase? | matches | Returns the text of every match of a regular expression as a list (empty when nothing matches) |
+| `String.RegexReplace` | text, pattern, replacement, ignoreCase? | text | Replaces every match of a regular expression |
+| `String.RegexSplit` | text, pattern | list | Splits a text into a list of parts wherever a regular expression matches |
+| `String.RemoveDiacritics` | text | text | Removes accents from letters ("é" becomes "e") so names compare and sort without them |
+| `String.Repeat` | text, count, separator? | text | Repeats a text a number of times (0 to 10000), optionally with a separator between the copies |
 | `String.Replace` | text, searchFor, replaceWith | result | Replaces all occurrences of a substring with another string |
+| `String.Reverse` | text | text | Reverses the characters of a text |
+| `String.Right` | text, count | text | Returns the last characters of a text (the whole text when the count is larger) |
 | `String.Split` | text, separator | list | Splits a string into a list of substrings around a separator |
 | `String.StartsWith` | text, searchFor, ignoreCase? | result | Tests whether a string starts with the given prefix |
 | `String.Substring` | text, startIndex, length? | result | Extracts part of a string from a start index (-1 length = to the end) |
+| `String.Template` | template, dictionary, onMissing? | text | Replaces {name} placeholders in a text with the values of a dictionary ("{{" and "}}" are literal braces) |
 | `String.ToLower` | text | result | Converts a string to lowercase |
 | `String.ToNumber` | text | result | Converts a numeric string (invariant culture, e.g |
+| `String.ToTitleCase` | text | text | Capitalises the first letter of every word and lowercases the rest ("bim COORDINATION" becomes "Bim Coordination") |
 | `String.ToUpper` | text | result | Converts a string to uppercase |
 | `String.Trim` | text | result | Removes leading and trailing whitespace from a string |
+| `String.TrimEnd` | text, chars? | text | Removes whitespace (or the given characters) from the end of a text |
+| `String.TrimStart` | text, chars? | text | Removes whitespace (or the given characters) from the start of a text |
+
+## System
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `System.Environment` | — | userName, machineName, osVersion, currentDirectory, tempPath, documentsPath, appDataPath | Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders |
+| `System.OpenPath` | path, reveal? | path | Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true |
+| `System.Run` | executable, arguments?, workingDirectory?, timeoutSeconds? | exitCode, output, error | Runs a program with arguments, waits for it (stopped after the timeout) and returns its exit code, output and error text |
+| `Web.Get` | url, headers?, timeoutSeconds? | status, body, ok | Downloads text from an http(s) address with GET |
+| `Web.Post` | url, body, contentType?, headers?, timeoutSeconds? | status, body, ok | Sends data to an http(s) address with POST (JSON by default, e.g |
+
+## Table
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Table.AddColumn` | table, name, values | table | Adds a column at the end: a list with one value per row, or a single value repeated on every row |
+| `Table.AddFormulaColumn` | table, name, formula | table | Adds a column calculated per row from the others, e.g |
+| `Table.Column` | table, column | values | The cells of one column, top to bottom |
+| `Table.Concat` | tables | table | Stacks tables one below the other, matching columns by name |
+| `Table.Distinct` | table, columns? | table | Keeps only the first row for each distinct value (of the given columns, or of the whole row) |
+| `Table.Filter` | table, column, test?, value?, ignoreCase? | matched, rejected | Splits a table by a test on one column |
+| `Table.FromColumns` | columns, headers? | table | Makes a table from columns: a list of lists, one per column, with optional names |
+| `Table.FromCsvFile` | path, delimiter?, firstRowIsHeader? | table | Reads a CSV file straight into a table (numbers become numbers, everything else stays text) |
+| `Table.FromDictionaries` | dictionaries | table | Makes a table from a list of dictionaries (one row each) |
+| `Table.FromExcelFile` | path, sheet?, firstRowIsHeader? | table | Reads an Excel worksheet straight into a table |
+| `Table.FromRows` | rows, headers?, firstRowIsHeader? | table | Makes a table from rows of cells and column names (or from the first row) |
+| `Table.GroupBy` | table, by, aggregations | table | Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group |
+| `Table.Headers` | table | headers | The column names of a table, in order |
+| `Table.Info` | table | rowCount, columnCount, headers | How many rows and columns a table has, and its column names |
+| `Table.Join` | left, right, leftKey, rightKey?, kind? | table | Joins two tables on a key column (inner, left or outer) |
+| `Table.JoinByKey` | rows, headers, keys, keyColumn | matchedRows, unmatchedKeys | Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing |
+| `Table.Pivot` | table, rowColumn, columnColumn, valueColumn?, aggregation? | table | Cross-tabulates: rows from one column, columns from another, each cell the sum (or count, average …) of a third |
+| `Table.RemoveColumns` | table, columns | table | Drops the listed columns and keeps the rest |
+| `Table.RenameColumn` | table, column, newName | table | Renames one column |
+| `Table.Row` | table, index | row | One row of a table as a dictionary from column name to cell (0 is the first row |
+| `Table.Rows` | table | rows | The rows of a table as a list of lists of cells (for Excel.WriteToFile, CSV.WriteToFile and the List nodes) |
+| `Table.SelectColumns` | table, columns | table | Keeps only the listed columns, in that order (names as a list or one comma-separated text) |
+| `Table.Slice` | table, start?, count? | table | Takes count rows from a starting row (count -1 takes all the rest) |
+| `Table.Sort` | table, columns, descending? | table | Sorts the rows by one or more columns ("Level, -Length" sorts by level, then longest first) |
+| `Table.ToCsvFile` | table, path, delimiter? | path | Writes a table, with its column names, to a CSV file |
+| `Table.ToDictionaries` | table | dictionaries | The rows of a table as dictionaries (column name to cell) |
+| `Table.ToExcelFile` | table, path, sheet?, append? | path | Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook) |
+| `Table.ToText` | table, format? | text | Renders a table as Markdown, CSV, tab-separated or an HTML table |
 
 ## Utility
 
@@ -556,6 +764,9 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Flow.Then` | value, after, after2?, after3? | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
+| `Flow.Try` | value, fallback? | result, failed, error | Carries on after a failure: gives the node's result, or your fallback plus the error text when that node failed |
+| `Flow.Wait` | value, seconds? | value | Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow |
+| `Flow.When` | value, condition | value | Runs the nodes wired after it only when the condition is true |
 | `Loop.Collect` *(interactive)* | loop, value | results | Closes a loop and collects one value per iteration |
 | `Loop.Item` *(interactive)* | items | item, index, count, loop | Yields the current item of a loop |
 | `Workflow.ForEach` | items, actions | results | Runs a sequence of actions on each item, one item fully before the next |

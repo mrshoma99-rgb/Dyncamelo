@@ -8,36 +8,13 @@ using Dyncamelo.Core.Types;
 namespace Dyncamelo.Nodes;
 
 /// <summary>
-/// More point nodes over <see cref="DyncameloPoint"/>: add a vector, midpoint,
+/// More point nodes over <see cref="DyncameloPoint"/>: midpoint,
 /// linear interpolation, the centroid of many points, plan (XY) distance and
 /// rounding. Every node is pure and returns a new value.
 /// </summary>
 [NodeCategory("Geometry")]
 public static class PointExtraNodes
 {
-    /// <summary>Adds a vector to a point, giving the point displaced by that vector.</summary>
-    /// <param name="point">The point to move.</param>
-    /// <param name="vector">The displacement (same units as the point).</param>
-    /// <returns>The new point.</returns>
-    [NodeName("Point.Add")]
-    [return: NodeName("point")]
-    [NodeDescription("Adds a vector to a point, giving the displaced point (same result as Point.Translate).")]
-    [NodeSearchTags("plus", "move", "offset", "displace", "translate", "vector")]
-    public static DyncameloPoint Add(DyncameloPoint point, DyncameloVector vector)
-    {
-        if (point == null)
-        {
-            throw new ArgumentNullException(nameof(point), "Point.Add requires a point. Wire a point into the 'point' input.");
-        }
-
-        if (vector == null)
-        {
-            throw new ArgumentNullException(nameof(vector), "Point.Add requires a vector to add. Wire a vector into the 'vector' input.");
-        }
-
-        return new DyncameloPoint(point.X + vector.X, point.Y + vector.Y, point.Z + vector.Z);
-    }
-
     /// <summary>The point halfway between two points.</summary>
     /// <param name="a">The first point.</param>
     /// <param name="b">The second point.</param>

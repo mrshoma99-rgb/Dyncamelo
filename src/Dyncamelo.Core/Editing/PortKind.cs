@@ -135,7 +135,7 @@ public static class PortKinds
         Add(PortFamily.Viewpoint, "Viewpoint", "SavedViewpoint", "SavedItem", "FolderItem", "GroupItem", "Camera", "SavedViewpointAnimation", "SavedViewpointAnimationCut");
         Add(PortFamily.Clash, "ClashResult", "ClashTest", "ClashResultGroup", "ClashResultGroupBase", "ClashResultGroupCollection");
         Add(PortFamily.Document, "Document", "DocumentModels");
-        Add(PortFamily.Data, "IDictionary", "Dictionary", "DataProperty", "PropertyCategory", "ParamMapRule");
+        Add(PortFamily.Data, "IDictionary", "Dictionary", "DataProperty", "PropertyCategory", "ParamMapRule", "DyncameloTable");
         Add(PortFamily.Action, "IWorkflowAction");
         return map;
     }

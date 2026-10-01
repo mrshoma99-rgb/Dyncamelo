@@ -45,7 +45,7 @@ public class DataPlumbingRegistrationTests
 
         Assert.Equal("File", Definition(registry, "Excel.ReadFromFile").Category);
         Assert.Equal("File", Definition(registry, "Excel.WriteToFile").Category);
-        Assert.Equal("Data", Definition(registry, "Table.JoinByKey").Category);
+        Assert.Equal("Table", Definition(registry, "Table.JoinByKey").Category);
         Assert.Equal("Data", Definition(registry, "XML.Parse").Category);
         Assert.Equal("Data", Definition(registry, "Snapshot.Diff").Category);
         Assert.Equal("Data", Definition(registry, "JSON.Parse").Category);

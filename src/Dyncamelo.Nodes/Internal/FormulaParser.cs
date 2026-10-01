@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace Dyncamelo.Nodes.Internal;
@@ -25,22 +26,31 @@ internal static class FormulaParser
 
     /// <summary>Compiles (or fetches) the expression as a function of the six variable values.</summary>
     /// <param name="expression">The expression text.</param>
-    internal static Func<double[], double> Compile(string expression)
+    internal static Func<double[], double> Compile(string expression) => Compile(expression, Variables);
+
+    /// <summary>
+    /// Compiles (or fetches) the expression with its own variable names (for example the columns of a table): the function takes
+    /// one value per name, in order. A name containing spaces or symbols is written in square brackets, <c>[Fire Rating] * 2</c>.
+    /// </summary>
+    /// <param name="expression">The expression text.</param>
+    /// <param name="names">The variable names, matched case-insensitively.</param>
+    internal static Func<double[], double> Compile(string expression, IReadOnlyList<string> names)
     {
         if (string.IsNullOrWhiteSpace(expression))
         {
-            throw new ArgumentException("Math.Formula requires an expression such as \"a * b + 2\".", nameof(expression));
+            throw new ArgumentException("A formula is empty; write an expression such as \"a * b + 2\".", nameof(expression));
         }
 
+        var key = ReferenceEquals(names, Variables) ? expression : expression + "\u0001" + string.Join("\u0001", names);
         lock (CacheLock)
         {
-            if (Cache.TryGetValue(expression, out var cached))
+            if (Cache.TryGetValue(key, out var cached))
             {
                 return cached;
             }
         }
 
-        var compiled = new Parser(expression).ParseAll();
+        var compiled = new Parser(expression, names).ParseAll();
         lock (CacheLock)
         {
             if (Cache.Count >= 512)
@@ -48,7 +58,7 @@ internal static class FormulaParser
                 Cache.Clear();
             }
 
-            Cache[expression] = compiled;
+            Cache[key] = compiled;
         }
 
         return compiled;
@@ -102,17 +112,20 @@ internal static class FormulaParser
         public string Text;
         public double Number;
         public int Position;
+        public bool Bracketed;
     }
 
     private sealed class Parser
     {
         private readonly string _text;
+        private readonly IReadOnlyList<string> _names;
         private readonly List<Token> _tokens = new List<Token>();
         private int _index;
 
-        public Parser(string text)
+        public Parser(string text, IReadOnlyList<string> names)
         {
             _text = text;
+            _names = names;
             Tokenize();
         }
 
@@ -130,7 +143,7 @@ internal static class FormulaParser
         private Token Peek => _tokens[_index];
 
         private Exception Error(string message, int position) =>
-            new FormatException("Math.Formula: " + message + " at position " + (position + 1).ToString(CultureInfo.InvariantCulture) +
+            new FormatException("Formula: " + message + " at position " + (position + 1).ToString(CultureInfo.InvariantCulture) +
                                 " in \"" + _text + "\".");
 
         private void Tokenize()
@@ -180,6 +193,19 @@ internal static class FormulaParser
                     }
 
                     _tokens.Add(new Token { Kind = Kind.Number, Text = literal, Number = number, Position = start });
+                    continue;
+                }
+
+                if (c == '[')
+                {
+                    var close = _text.IndexOf(']', i + 1);
+                    if (close < 0)
+                    {
+                        throw Error("a '[' is never closed", i);
+                    }
+
+                    _tokens.Add(new Token { Kind = Kind.Name, Text = _text.Substring(i + 1, close - i - 1).Trim(), Position = i, Bracketed = true });
+                    i = close + 1;
                     continue;
                 }
 
@@ -424,12 +450,25 @@ internal static class FormulaParser
             }
         }
 
+        private int IndexOf(string lowerName)
+        {
+            for (int i = 0; i < _names.Count; i++)
+            {
+                if (string.Equals(_names[i], lowerName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
         private static string DescribeToken(Token token) =>
             token.Kind == Kind.End ? token.Text : "'" + token.Text + "'";
 
         private Func<double[], double> ParseName(Token token)
         {
-            if (Peek.Kind == Kind.Symbol && Peek.Text == "(")
+            if (!token.Bracketed && Peek.Kind == Kind.Symbol && Peek.Text == "(")
             {
                 _index++;
                 if (!Functions.TryGetValue(token.Text, out var function))
@@ -475,30 +514,38 @@ internal static class FormulaParser
             }
 
             var name = token.Text.ToLowerInvariant();
-            if (name == "pi")
+            if (!token.Bracketed || IndexOf(name) < 0)
             {
-                return _ => Math.PI;
+                // A name that is also a column wins over the constants, so a column called "tau" still works.
+                if (IndexOf(name) < 0)
+                {
+                    if (name == "pi")
+                    {
+                        return _ => Math.PI;
+                    }
+
+                    if (name == "tau")
+                    {
+                        return _ => 2d * Math.PI;
+                    }
+
+                    if (name == "true")
+                    {
+                        return _ => 1d;
+                    }
+
+                    if (name == "false")
+                    {
+                        return _ => 0d;
+                    }
+                }
             }
 
-            if (name == "tau")
-            {
-                return _ => 2d * Math.PI;
-            }
-
-            if (name == "true")
-            {
-                return _ => 1d;
-            }
-
-            if (name == "false")
-            {
-                return _ => 0d;
-            }
-
-            var index = Array.IndexOf(Variables, name);
+            var index = IndexOf(name);
             if (index < 0)
             {
-                throw Error("unknown name '" + token.Text + "' (use " + string.Join(", ", Variables) + ", pi, tau, true or false)", token.Position);
+                var known = string.Join(", ", _names.Count > 12 ? _names.Take(12).Concat(new[] { "…" }) : _names);
+                throw Error("unknown name '" + token.Text + "' (use " + known + ", pi, tau, true or false)", token.Position);
             }
 
             return x => x[index];

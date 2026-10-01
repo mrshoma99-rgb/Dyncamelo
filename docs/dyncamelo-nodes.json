@@ -1,6 +1,6 @@
 {
  "version": "v0.44.0",
- "count": 357,
+ "count": 550,
  "categories": [
   {
    "name": "Annotation",
@@ -8,19 +8,19 @@
   },
   {
    "name": "Color",
-   "count": 9
+   "count": 18
   },
   {
    "name": "Data",
-   "count": 5
+   "count": 4
   },
   {
    "name": "DateTime",
-   "count": 6
+   "count": 19
   },
   {
    "name": "Dictionary",
-   "count": 5
+   "count": 13
   },
   {
    "name": "Display",
@@ -28,11 +28,11 @@
   },
   {
    "name": "File",
-   "count": 11
+   "count": 36
   },
   {
    "name": "Geometry",
-   "count": 13
+   "count": 43
   },
   {
    "name": "Input",
@@ -40,15 +40,15 @@
   },
   {
    "name": "List",
-   "count": 43
+   "count": 63
   },
   {
    "name": "Logic",
-   "count": 11
+   "count": 18
   },
   {
    "name": "Math",
-   "count": 15
+   "count": 37
   },
   {
    "name": "Navisworks.Analysis",
@@ -127,8 +127,20 @@
    "count": 22
   },
   {
+   "name": "Report",
+   "count": 2
+  },
+  {
    "name": "String",
-   "count": 14
+   "count": 36
+  },
+  {
+   "name": "System",
+   "count": 5
+  },
+  {
+   "name": "Table",
+   "count": 28
   },
   {
    "name": "Utility",
@@ -136,7 +148,7 @@
   },
   {
    "name": "Workflow",
-   "count": 4
+   "count": 7
   },
   {
    "name": "Workflow.Actions",
@@ -208,6 +220,50 @@
      "type": "integer",
      "description": "Blue channel, 0–255.",
      "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.ByHSV",
+   "category": "Color",
+   "description": "Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped).",
+   "tags": [
+    "hsv",
+    "hsb",
+    "hue",
+    "saturation",
+    "brightness",
+    "create"
+   ],
+   "inputs": [
+    {
+     "name": "hue",
+     "type": "number",
+     "description": "Hue in degrees (0 = red, 120 = green, 240 = blue); wraps around."
+    },
+    {
+     "name": "saturation",
+     "type": "number",
+     "description": "Saturation, 0 (grey) to 1 (vivid); clamped."
+    },
+    {
+     "name": "value",
+     "type": "number",
+     "description": "Value (brightness), 0 (black) to 1 (full); clamped."
+    },
+    {
+     "name": "alpha",
+     "type": "integer",
+     "description": "Alpha channel, 0–255 (default fully opaque).",
+     "default": "255"
     }
    ],
    "outputs": [
@@ -308,6 +364,70 @@
    "returns": "Dictionary with \"red\", \"green\", \"blue\" and \"alpha\" values (0-255)."
   },
   {
+   "name": "Color.ContrastText",
+   "category": "Color",
+   "description": "Black or white, whichever reads better on a background color (WCAG contrast) — for labels on coloured fills and legends.",
+   "tags": [
+    "contrast",
+    "text",
+    "label",
+    "legible",
+    "readable",
+    "accessibility",
+    "wcag",
+    "black or white",
+    "foreground"
+   ],
+   "inputs": [
+    {
+     "name": "background",
+     "type": "Color",
+     "description": "The fill color the text will sit on."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "Opaque black or opaque white."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.Darken",
+   "category": "Color",
+   "description": "Makes a color darker by shifting its HSL lightness down by amount (0-1, clamped); alpha is kept.",
+   "tags": [
+    "darker",
+    "shade",
+    "dim",
+    "lightness",
+    "hsl"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to darken."
+    },
+    {
+     "name": "amount",
+     "type": "number",
+     "description": "How much lightness to remove, 0 (none) to 1 (black); clamped.",
+     "default": "0.2"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The darker color."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Color.FromHex",
    "category": "Color",
    "description": "Parses a hex color string (\"#RRGGBB\" or \"#AARRGGBB\").",
@@ -376,6 +496,33 @@
    "returns": ""
   },
   {
+   "name": "Color.Invert",
+   "category": "Color",
+   "description": "Inverts a color's red, green and blue channels (the photographic negative); alpha is kept.",
+   "tags": [
+    "negative",
+    "opposite",
+    "complement",
+    "flip",
+    "reverse"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to invert."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The inverted color."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Color.Lerp",
    "category": "Color",
    "description": "Interpolates between two colors (t clamped to 0-1).",
@@ -407,6 +554,83 @@
      "name": "color",
      "type": "Color",
      "description": "The interpolated color."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.Lighten",
+   "category": "Color",
+   "description": "Makes a color lighter by shifting its HSL lightness up by amount (0-1, clamped); alpha is kept.",
+   "tags": [
+    "lighter",
+    "brighten",
+    "tint",
+    "pale",
+    "lightness",
+    "hsl"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to lighten."
+    },
+    {
+     "name": "amount",
+     "type": "number",
+     "description": "How much lightness to add, 0 (none) to 1 (white); clamped.",
+     "default": "0.2"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The lighter color."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.Palette",
+   "category": "Color",
+   "description": "A named palette as a list of colors: colourblind-safe, tableau, pastel, status (green/amber/red/grey) or the viridis, heat and grey ramps interpolated to count; fixed palettes cycle past their size.",
+   "tags": [
+    "palette",
+    "scheme",
+    "colourblind",
+    "colorblind",
+    "okabe",
+    "ito",
+    "tableau",
+    "viridis",
+    "heatmap",
+    "gray",
+    "ramp",
+    "categorical",
+    "legend",
+    "list"
+   ],
+   "inputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "Palette name: colourblind, tableau, pastel, status, viridis, heat or grey.",
+     "default": "\"colourblind\""
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many colors to return (1–256).",
+     "default": "8"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "colors",
+     "type": "Color[]",
+     "description": "The palette colors."
     }
    ],
    "returns": ""
@@ -468,6 +692,112 @@
      "name": "colors",
      "type": "Color[]",
      "description": "The colors."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.ToHex",
+   "category": "Color",
+   "description": "Formats a color as hex text, \"#RRGGBB\" (or \"#AARRGGBB\" with includeAlpha) — the reverse of Color.FromHex.",
+   "tags": [
+    "hex",
+    "html",
+    "web",
+    "string",
+    "text",
+    "format",
+    "css"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to format."
+    },
+    {
+     "name": "includeAlpha",
+     "type": "boolean",
+     "description": "True to prefix the alpha channel (\"#AARRGGBB\"); false drops it (\"#RRGGBB\").",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "hex",
+     "type": "string",
+     "description": "The hex text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Color.ToHSV",
+   "category": "Color",
+   "description": "Splits a color into hue (degrees, 0-360), saturation and value (0-1); greys have hue 0.",
+   "tags": [
+    "hsv",
+    "hsb",
+    "hue",
+    "saturation",
+    "brightness",
+    "deconstruct",
+    "components"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to decompose."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "hue",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "saturation",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "value",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"hue\" (0–360, 0 for greys), \"saturation\" and \"value\" (0–1)."
+  },
+  {
+   "name": "Color.WithAlpha",
+   "category": "Color",
+   "description": "Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque; red, green and blue are unchanged.",
+   "tags": [
+    "alpha",
+    "opacity",
+    "transparency",
+    "transparent",
+    "set"
+   ],
+   "inputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color to change."
+    },
+    {
+     "name": "alpha",
+     "type": "integer",
+     "description": "The new alpha, 0 (transparent) to 255 (opaque); clamped."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The color with the new alpha."
     }
    ],
    "returns": ""
@@ -573,56 +903,6 @@
    "returns": "Dictionary with \"addedKeys\", \"removedKeys\" and \"changedKeys\"."
   },
   {
-   "name": "Table.JoinByKey",
-   "category": "Data",
-   "description": "Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.",
-   "tags": [
-    "join",
-    "lookup",
-    "vlookup",
-    "merge",
-    "link",
-    "table",
-    "excel",
-    "csv"
-   ],
-   "inputs": [
-    {
-     "name": "rows",
-     "type": "any[]",
-     "description": "Table rows; each row a list of cells (e.g. from Excel.ReadFromFile)."
-    },
-    {
-     "name": "headers",
-     "type": "any[]",
-     "description": "Column headers, one per cell column."
-    },
-    {
-     "name": "keys",
-     "type": "any[]",
-     "description": "Keys to look up, e.g. element GUIDs or mark values."
-    },
-    {
-     "name": "keyColumn",
-     "type": "string",
-     "description": "Name of the header column holding the keys."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "matchedRows",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "unmatchedKeys",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Dictionary with \"matchedRows\" (parallel to keys; null when unmatched) and \"unmatchedKeys\"."
-  },
-  {
    "name": "XML.Parse",
    "category": "Data",
    "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").",
@@ -684,6 +964,174 @@
    "returns": ""
   },
   {
+   "name": "DateTime.AddHours",
+   "category": "DateTime",
+   "description": "Adds hours to a date/time (fractional and negative values allowed).",
+   "tags": [
+    "offset",
+    "shift",
+    "schedule",
+    "hour",
+    "later",
+    "earlier",
+    "time"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to offset."
+    },
+    {
+     "name": "hours",
+     "type": "number",
+     "description": "Hours to add (fractional and negative values allowed)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The offset date/time."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.AddMinutes",
+   "category": "DateTime",
+   "description": "Adds minutes to a date/time (fractional and negative values allowed).",
+   "tags": [
+    "offset",
+    "shift",
+    "schedule",
+    "minute",
+    "later",
+    "earlier",
+    "time"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to offset."
+    },
+    {
+     "name": "minutes",
+     "type": "number",
+     "description": "Minutes to add (fractional and negative values allowed)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The offset date/time."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.AddMonths",
+   "category": "DateTime",
+   "description": "Adds calendar months to a date/time (the day clamps to the end of a shorter month).",
+   "tags": [
+    "offset",
+    "shift",
+    "schedule",
+    "month",
+    "later",
+    "earlier"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to offset."
+    },
+    {
+     "name": "months",
+     "type": "integer",
+     "description": "Months to add (negative values allowed)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The offset date/time."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.AddYears",
+   "category": "DateTime",
+   "description": "Adds calendar years to a date/time (29 February clamps to 28 February in a common year).",
+   "tags": [
+    "offset",
+    "shift",
+    "schedule",
+    "year",
+    "later",
+    "earlier"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to offset."
+    },
+    {
+     "name": "years",
+     "type": "integer",
+     "description": "Years to add (negative values allowed)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The offset date/time."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.AgeInDays",
+   "category": "DateTime",
+   "description": "Returns how many days old a date/time is at a reference date/time (reference minus date; fractional days included).",
+   "tags": [
+    "age",
+    "old",
+    "elapsed",
+    "since",
+    "overdue",
+    "duration",
+    "days"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to measure the age of, e.g. when a clash was created."
+    },
+    {
+     "name": "reference",
+     "type": "datetime",
+     "description": "The date/time to measure up to, e.g. DateTime.Now."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "days",
+     "type": "number",
+     "description": "The age in days (reference minus dateTime)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "DateTime.ByDate",
    "category": "DateTime",
    "description": "Creates a date from year, month and day numbers.",
@@ -720,6 +1168,120 @@
    "returns": ""
   },
   {
+   "name": "DateTime.Compare",
+   "category": "DateTime",
+   "description": "Compares two date/times: -1 when the first is earlier, 0 when equal, 1 when it is later.",
+   "tags": [
+    "earlier",
+    "later",
+    "before",
+    "after",
+    "equal",
+    "order",
+    "sort"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "datetime",
+     "description": "The first date/time."
+    },
+    {
+     "name": "b",
+     "type": "datetime",
+     "description": "The second date/time."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "integer",
+     "description": "-1 when a is earlier than b, 0 when they are equal, 1 when a is later than b."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.Components",
+   "category": "DateTime",
+   "description": "Splits a date/time into year, month, day, hour, minute, second, English weekday name, day of year, ISO week, ISO year and quarter.",
+   "tags": [
+    "deconstruct",
+    "parts",
+    "year",
+    "month",
+    "weekday",
+    "week number",
+    "iso week",
+    "quarter"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to split."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "year",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "month",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "day",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "hour",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "minute",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "second",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "weekday",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "dayOfYear",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "isoWeek",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "isoYear",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "quarter",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"year\", \"month\", \"day\", \"hour\", \"minute\", \"second\", \"weekday\", \"dayOfYear\", \"isoWeek\", \"isoYear\" and \"quarter\"."
+  },
+  {
    "name": "DateTime.DaysBetween",
    "category": "DateTime",
    "description": "Returns the signed number of days between two date/times (end minus start).",
@@ -746,6 +1308,49 @@
      "name": "days",
      "type": "number",
      "description": "The signed day difference."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.EndOf",
+   "category": "DateTime",
+   "description": "Returns the last millisecond of the day, week, month, quarter or year containing a date/time (start of the next period minus 1 ms).",
+   "tags": [
+    "ceiling",
+    "period",
+    "last day",
+    "finish",
+    "deadline",
+    "week",
+    "month",
+    "quarter",
+    "year"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time inside the period."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "\"day\", \"week\", \"month\", \"quarter\" or \"year\" (any case).",
+     "default": "\"week\""
+    },
+    {
+     "name": "firstDayOfWeek",
+     "type": "string",
+     "description": "\"Monday\" or \"Sunday\" (any case); only used for \"week\".",
+     "default": "\"Monday\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The start of the next period minus one millisecond."
     }
    ],
    "returns": ""
@@ -778,6 +1383,34 @@
      "name": "text",
      "type": "string",
      "description": "The formatted text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.FromUnixSeconds",
+   "category": "DateTime",
+   "description": "Converts Unix seconds since 1970-01-01 UTC to a (UTC) date/time.",
+   "tags": [
+    "epoch",
+    "timestamp",
+    "posix",
+    "unix",
+    "seconds",
+    "convert"
+   ],
+   "inputs": [
+    {
+     "name": "seconds",
+     "type": "number",
+     "description": "Seconds since the Unix epoch (negative before 1970)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time, with kind UTC."
     }
    ],
    "returns": ""
@@ -835,6 +1468,138 @@
    "returns": ""
   },
   {
+   "name": "DateTime.Range",
+   "category": "DateTime",
+   "description": "Creates a list of dates from a start to an end (both included) with a step in days; at most 100000 items.",
+   "tags": [
+    "sequence",
+    "series",
+    "calendar",
+    "schedule",
+    "every",
+    "days",
+    "timeline"
+   ],
+   "inputs": [
+    {
+     "name": "start",
+     "type": "datetime",
+     "description": "The first date."
+    },
+    {
+     "name": "end",
+     "type": "datetime",
+     "description": "The last date (included when the step lands on it)."
+    },
+    {
+     "name": "stepDays",
+     "type": "number",
+     "description": "Days between two items; must be greater than 0.",
+     "default": "1"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dates",
+     "type": "datetime[]",
+     "description": "The dates, in order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.StartOf",
+   "category": "DateTime",
+   "description": "Returns midnight at the start of the day, week, month, quarter or year containing a date/time.",
+   "tags": [
+    "floor",
+    "truncate",
+    "period",
+    "first day",
+    "beginning",
+    "week",
+    "month",
+    "quarter",
+    "year"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time inside the period."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "\"day\", \"week\", \"month\", \"quarter\" or \"year\" (any case).",
+     "default": "\"week\""
+    },
+    {
+     "name": "firstDayOfWeek",
+     "type": "string",
+     "description": "\"Monday\" or \"Sunday\" (any case); only used for \"week\".",
+     "default": "\"Monday\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The first instant (00:00:00) of the period."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.Today",
+   "category": "DateTime",
+   "description": "Returns today's local date at midnight (captured at execution).",
+   "tags": [
+    "current",
+    "date",
+    "now",
+    "midnight",
+    "day"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The local date at 00:00:00."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.ToUnixSeconds",
+   "category": "DateTime",
+   "description": "Converts a date/time to Unix seconds since 1970-01-01 UTC (a value without a time zone is taken as UTC).",
+   "tags": [
+    "epoch",
+    "timestamp",
+    "posix",
+    "unix",
+    "seconds",
+    "convert"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to convert."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "seconds",
+     "type": "number",
+     "description": "Seconds since the Unix epoch (negative before 1970)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.ByKeysValues",
    "category": "Dictionary",
    "description": "Creates a dictionary from a list of keys and a list of values of the same length.",
@@ -865,6 +1630,123 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.ContainsKey",
+   "category": "Dictionary",
+   "description": "Tests whether a dictionary has the given key (case-sensitive).",
+   "tags": [
+    "has",
+    "exists",
+    "key",
+    "lookup",
+    "contains",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to look in."
+    },
+    {
+     "name": "key",
+     "type": "string",
+     "description": "The key to look for."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "hasKey",
+     "type": "boolean",
+     "description": "True when the dictionary has the key."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.Count",
+   "category": "Dictionary",
+   "description": "Returns the number of entries in a dictionary.",
+   "tags": [
+    "size",
+    "length",
+    "number",
+    "entries",
+    "keys",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to measure."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "The number of keys."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.FromRows",
+   "category": "Dictionary",
+   "description": "Builds a dictionary from a list of [key, value] rows (a later row wins for a repeated key).",
+   "tags": [
+    "pairs",
+    "table",
+    "rows",
+    "keyvalue",
+    "create",
+    "columns",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "A list of rows, each a list with the key in cell 0 and the value in cell 1."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "The new dictionary."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.Invert",
+   "category": "Dictionary",
+   "description": "Swaps keys and values into a new dictionary (values become text keys; for equal values the last entry wins).",
+   "tags": [
+    "reverse",
+    "swap",
+    "flip",
+    "reverse lookup",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to invert."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary from value text to the old key."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.Keys",
    "category": "Dictionary",
    "description": "Returns all keys of a dictionary as a list.",
@@ -885,6 +1767,69 @@
      "name": "keys",
      "type": "string[]",
      "description": "The keys as a list of strings."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.Merge",
+   "category": "Dictionary",
+   "description": "Combines several dictionaries into a new one; for a repeated key the later dictionary wins.",
+   "tags": [
+    "combine",
+    "join",
+    "union",
+    "overlay",
+    "update",
+    "defaults",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionaries",
+     "type": "any[]",
+     "description": "The dictionaries to combine, earliest first.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary with the keys of all of them."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.RemoveKey",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary without the given key (a missing key is fine).",
+   "tags": [
+    "delete",
+    "drop",
+    "remove",
+    "omit",
+    "without",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy."
+    },
+    {
+     "name": "key",
+     "type": "string",
+     "description": "The key to leave out."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary without the key."
     }
    ],
    "returns": ""
@@ -927,6 +1872,35 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.ToRows",
+   "category": "Dictionary",
+   "description": "Converts a dictionary to a list of [key, value] rows.",
+   "tags": [
+    "pairs",
+    "table",
+    "rows",
+    "entries",
+    "items",
+    "keyvalue",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to convert."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "A list of [key, value] rows; the key is text."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.ValueAtKey",
    "category": "Dictionary",
    "description": "Returns the value stored under the given key.",
@@ -952,6 +1926,46 @@
      "name": "value",
      "type": "any",
      "description": "The value stored under the key."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.ValueOrDefault",
+   "category": "Dictionary",
+   "description": "Returns the value stored under a key, or a default value when the key is missing.",
+   "tags": [
+    "get",
+    "lookup",
+    "fallback",
+    "safe",
+    "optional",
+    "missing",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to read from."
+    },
+    {
+     "name": "key",
+     "type": "string",
+     "description": "The key to look up."
+    },
+    {
+     "name": "defaultValue",
+     "type": "any",
+     "description": "Returned when the key is missing (null when left unwired).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The stored value, or the default."
     }
    ],
    "returns": ""
@@ -1048,6 +2062,51 @@
    "interactive": true
   },
   {
+   "name": "CSV.AppendToFile",
+   "category": "File",
+   "description": "Appends rows to a CSV file (same quoting as CSV.WriteToFile), writing the optional headers only when the file is new or empty.",
+   "tags": [
+    "csv",
+    "append",
+    "add rows",
+    "table",
+    "report",
+    "export"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The CSV file to append to."
+    },
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "List of rows (each row a list of cell values; a scalar becomes a one-cell row)."
+    },
+    {
+     "name": "delimiter",
+     "type": "string",
+     "description": "Single-character cell delimiter.",
+     "default": "\",\""
+    },
+    {
+     "name": "headers",
+     "type": "any[]",
+     "description": "Optional header cells, written once when the file is new or empty.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path that was written, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "CSV.ReadFromFile",
    "category": "File",
    "description": "Reads a CSV file into a list of rows (numeric cells become numbers).",
@@ -1112,6 +2171,195 @@
      "name": "path",
      "type": "string",
      "description": "The path that was written, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Directory.Create",
+   "category": "File",
+   "description": "Creates a folder including any missing parent folders (does nothing when it already exists).",
+   "tags": [
+    "mkdir",
+    "make",
+    "folder",
+    "new",
+    "directory"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder to create."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder path, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Directory.Delete",
+   "category": "File",
+   "description": "Deletes a folder (an empty one, or with its whole content when recursive is true); returns false when it did not exist.",
+   "tags": [
+    "remove",
+    "rmdir",
+    "erase",
+    "clean",
+    "folder",
+    "directory"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder to delete."
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True to delete the folder together with everything inside it.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": "True when a folder was deleted; false when there was no such folder."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Directory.Exists",
+   "category": "File",
+   "description": "Tests whether a folder exists at the given path.",
+   "tags": [
+    "folder",
+    "check",
+    "found",
+    "present",
+    "directory"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder path to test."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "exists",
+     "type": "boolean",
+     "description": "True when a folder exists at the path (false for files and missing paths)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Directory.FindFiles",
+   "category": "File",
+   "description": "Finds files under a folder by wildcard (several allowed, separated by \";\"), sorted by name, date or size, with an optional limit - the newest file is sortBy modified + descending + limit 1.",
+   "tags": [
+    "search",
+    "find",
+    "newest",
+    "latest",
+    "recursive",
+    "list",
+    "wildcard",
+    "files",
+    "directory"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder to search."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "Wildcard filter on the file name (\"*\" and \"?\"); several patterns can be separated by \";\" (e.g. \"*.nwd;*.nwf\").",
+     "default": "\"*\""
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True (default) to search sub-folders too.",
+     "default": "true"
+    },
+    {
+     "name": "sortBy",
+     "type": "string",
+     "description": "name (full path, alphabetical), modified, created or size.",
+     "default": "\"name\""
+    },
+    {
+     "name": "descending",
+     "type": "boolean",
+     "description": "True to reverse the order (newest / largest first).",
+     "default": "false"
+    },
+    {
+     "name": "limit",
+     "type": "integer",
+     "description": "Keep only the first N files after sorting; 0 keeps all.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "files",
+     "type": "string[]",
+     "description": "The full file paths in the requested order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Directory.GetDirectories",
+   "category": "File",
+   "description": "Lists the sub-folders of a folder as full paths (optionally filtered by a wildcard such as \"2026*\" and optionally at every depth).",
+   "tags": [
+    "folders",
+    "subfolders",
+    "list",
+    "browse",
+    "directory",
+    "tree"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The folder to list."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "Wildcard filter on the folder name (\"*\" and \"?\"); several patterns can be separated by \";\".",
+     "default": "\"*\""
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True to include sub-folders of sub-folders.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "directories",
+     "type": "string[]",
+     "description": "The full folder paths, sorted alphabetically."
     }
    ],
    "returns": ""
@@ -1251,6 +2499,71 @@
    "returns": ""
   },
   {
+   "name": "File.Copy",
+   "category": "File",
+   "description": "Copies a file to a new path (creates the destination folder; refuses to replace an existing file unless overwrite is true).",
+   "tags": [
+    "duplicate",
+    "backup",
+    "clone",
+    "file",
+    "copy"
+   ],
+   "inputs": [
+    {
+     "name": "source",
+     "type": "string",
+     "description": "The file to copy."
+    },
+    {
+     "name": "destination",
+     "type": "string",
+     "description": "The full destination file path (not just a folder)."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace an existing destination file; false (default) to fail instead.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The destination path, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "File.Delete",
+   "category": "File",
+   "description": "Deletes a file; returns true when it was deleted and false when it did not exist.",
+   "tags": [
+    "remove",
+    "erase",
+    "clean",
+    "file",
+    "delete"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to delete."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": "True when a file was deleted; false when there was no such file."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "File.Exists",
    "category": "File",
    "description": "Tests whether a file exists at the given path.",
@@ -1272,6 +2585,139 @@
      "name": "exists",
      "type": "boolean",
      "description": "True when a file exists at the path."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "File.Hash",
+   "category": "File",
+   "description": "Computes a checksum of a file's content (SHA256, SHA1 or MD5) as lower-case hex text - handy for change detection.",
+   "tags": [
+    "checksum",
+    "sha",
+    "md5",
+    "digest",
+    "change",
+    "compare",
+    "fingerprint"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to hash."
+    },
+    {
+     "name": "algorithm",
+     "type": "string",
+     "description": "SHA256 (default), SHA1 or MD5, in any case.",
+     "default": "\"SHA256\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "hash",
+     "type": "string",
+     "description": "The hash as lower-case hexadecimal text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "File.Info",
+   "category": "File",
+   "description": "Reads a file's name, extension, folder, size in bytes and modified / created dates; a missing file gives exists = false and empty values instead of an error.",
+   "tags": [
+    "size",
+    "date",
+    "modified",
+    "created",
+    "properties",
+    "stat",
+    "exists",
+    "attributes"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to inspect."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "exists",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "name",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "extension",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "directory",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "sizeBytes",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "modified",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "created",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"exists\", \"name\", \"extension\", \"directory\", \"sizeBytes\", \"modified\" and \"created\"."
+  },
+  {
+   "name": "File.Move",
+   "category": "File",
+   "description": "Moves or renames a file (creates the destination folder; refuses to replace an existing file unless overwrite is true).",
+   "tags": [
+    "rename",
+    "relocate",
+    "archive",
+    "file",
+    "move"
+   ],
+   "inputs": [
+    {
+     "name": "source",
+     "type": "string",
+     "description": "The file to move."
+    },
+    {
+     "name": "destination",
+     "type": "string",
+     "description": "The full destination file path (not just a folder)."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace an existing destination file; false (default) to fail instead.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The destination path, for sequencing further file nodes."
     }
    ],
    "returns": ""
@@ -1338,6 +2784,79 @@
    "returns": ""
   },
   {
+   "name": "Log.Write",
+   "category": "File",
+   "description": "Appends one line \"yyyy-MM-dd HH:mm:ss  LEVEL  message\" (local time) to a log file and returns that line.",
+   "tags": [
+    "log",
+    "logging",
+    "audit trail",
+    "timestamp",
+    "journal",
+    "append",
+    "report"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The log file."
+    },
+    {
+     "name": "message",
+     "type": "string",
+     "description": "The text to log; line breaks are replaced by \" | \" so an entry stays on one line."
+    },
+    {
+     "name": "level",
+     "type": "string",
+     "description": "INFO (default), WARN, ERROR or DEBUG, in any case.",
+     "default": "\"INFO\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "line",
+     "type": "string",
+     "description": "The line that was written, e.g. \"2026-10-01 10:20:35 INFO message\"."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.ChangeExtension",
+   "category": "File",
+   "description": "Replaces the extension of a path (\"a.nwd\" + \"nwf\" gives \"a.nwf\"); empty text removes the extension.",
+   "tags": [
+    "extension",
+    "rename",
+    "replace",
+    "suffix",
+    "convert",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to change."
+    },
+    {
+     "name": "extension",
+     "type": "string",
+     "description": "The new extension, with or without the leading dot; empty text removes the extension."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path with the new extension."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Path.Combine",
    "category": "File",
    "description": "Joins a folder path and a file name with the correct separator.",
@@ -1364,6 +2883,268 @@
      "name": "path",
      "type": "string",
      "description": "The combined path."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetDirectory",
+   "category": "File",
+   "description": "Returns the folder part of a path (\"C:\\Models\\site.nwd\" gives \"C:\\Models\"); empty text for a root or a bare file name.",
+   "tags": [
+    "folder",
+    "parent",
+    "dirname",
+    "directory",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to split."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "directory",
+     "type": "string",
+     "description": "The path without its last part; empty for a drive/root or a bare file name."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetExtension",
+   "category": "File",
+   "description": "Returns the extension of a path with its leading dot (\".nwd\"), or empty text when there is none.",
+   "tags": [
+    "extension",
+    "suffix",
+    "type",
+    "ext",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to inspect."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "extension",
+     "type": "string",
+     "description": "The extension with its dot (\".nwd\"); empty when the file name has none."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetFileName",
+   "category": "File",
+   "description": "Returns the file name of a path including its extension (\"C:\\Models\\site.nwd\" gives \"site.nwd\").",
+   "tags": [
+    "filename",
+    "basename",
+    "name",
+    "split",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to split, e.g. \"C:\\Models\\site.nwd\"."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "fileName",
+     "type": "string",
+     "description": "The last part of the path (\"site.nwd\"); empty when the path ends with a separator."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetFileNameWithoutExtension",
+   "category": "File",
+   "description": "Returns the file name of a path without its extension (\"C:\\Models\\site.nwd\" gives \"site\").",
+   "tags": [
+    "filename",
+    "basename",
+    "stem",
+    "name",
+    "split",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to split, e.g. \"C:\\Models\\site.nwd\"."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The file name without the last extension (\"site\")."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetFullPath",
+   "category": "File",
+   "description": "Resolves a path to an absolute path (relative paths start from the current folder); the file does not have to exist.",
+   "tags": [
+    "absolute",
+    "resolve",
+    "full",
+    "expand",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The (possibly relative) path."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The absolute path with \".\" and \"..\" resolved."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.GetRelativePath",
+   "category": "File",
+   "description": "Expresses a path relative to a base folder; returns the full path when they are on different drives.",
+   "tags": [
+    "relative",
+    "base",
+    "make relative",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to express (absolute, or relative to the current folder)."
+    },
+    {
+     "name": "baseDirectory",
+     "type": "string",
+     "description": "The folder the result is relative to."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The relative path (\"..\\other\\a.nwd\"), \".\" when both are the same folder, or the full path when they have different roots (e.g. different drives)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.IsAbsolute",
+   "category": "File",
+   "description": "Tests whether a path is absolute (starts at a drive, network share or root) rather than relative.",
+   "tags": [
+    "absolute",
+    "relative",
+    "rooted",
+    "check",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to test."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isAbsolute",
+     "type": "boolean",
+     "description": "True for \"C:\\a\", \"\\\\server\\share\" and \"/home/a\"; false for \"a\\b\", \"..\\a\" and drive-relative \"C:a\"."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Path.Normalize",
+   "category": "File",
+   "description": "Cleans a path as text: one separator style, no trailing separator, \".\" and \"..\" resolved (the disk is never read).",
+   "tags": [
+    "clean",
+    "tidy",
+    "canonical",
+    "separator",
+    "slash",
+    "simplify",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path to clean."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The normalized path; \".\" when a relative path cancels out completely."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Text.AppendToFile",
+   "category": "File",
+   "description": "Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed.",
+   "tags": [
+    "append",
+    "add",
+    "log",
+    "write",
+    "txt",
+    "export"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to append to."
+    },
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to append."
+    },
+    {
+     "name": "newLine",
+     "type": "boolean",
+     "description": "True (default) to end the appended text with a line break.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path that was written, for sequencing further file nodes."
     }
    ],
    "returns": ""
@@ -1421,6 +3202,113 @@
      "name": "path",
      "type": "string",
      "description": "The path that was written, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Zip.Create",
+   "category": "File",
+   "description": "Packs files and folders into a zip archive (a folder is stored with its structure under its own name); a missing source is an error.",
+   "tags": [
+    "zip",
+    "compress",
+    "archive",
+    "package",
+    "deliverable",
+    "pack",
+    "bundle"
+   ],
+   "inputs": [
+    {
+     "name": "sources",
+     "type": "any[]",
+     "description": "The files and/or folders to pack (a list of paths)."
+    },
+    {
+     "name": "zipPath",
+     "type": "string",
+     "description": "The zip file to create (its folder is created when needed)."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace an existing zip file; false (default) to fail instead.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The zip path, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Zip.Extract",
+   "category": "File",
+   "description": "Unpacks a zip archive into a folder; refuses entries that would escape the folder and files that already exist unless overwrite is true.",
+   "tags": [
+    "unzip",
+    "extract",
+    "decompress",
+    "unpack",
+    "archive",
+    "zip"
+   ],
+   "inputs": [
+    {
+     "name": "zipPath",
+     "type": "string",
+     "description": "The zip file to unpack."
+    },
+    {
+     "name": "directory",
+     "type": "string",
+     "description": "The destination folder (created when needed)."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace files that already exist; false (default) to fail instead.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "directory",
+     "type": "string",
+     "description": "The destination folder, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Zip.List",
+   "category": "File",
+   "description": "Lists the entry names inside a zip archive without extracting it.",
+   "tags": [
+    "zip",
+    "contents",
+    "list",
+    "inspect",
+    "archive",
+    "entries"
+   ],
+   "inputs": [
+    {
+     "name": "zipPath",
+     "type": "string",
+     "description": "The zip file to read."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "entries",
+     "type": "string[]",
+     "description": "The entry names as stored (folders end with \"/\")."
     }
    ],
    "returns": ""
@@ -1513,6 +3401,166 @@
    "returns": ""
   },
   {
+   "name": "BoundingBox.ContainsBox",
+   "category": "Geometry",
+   "description": "True when the inner box fits entirely inside the outer box (touching faces count as inside).",
+   "tags": [
+    "inside",
+    "within",
+    "fits",
+    "enclosed",
+    "enclose",
+    "zone",
+    "test",
+    "containment"
+   ],
+   "inputs": [
+    {
+     "name": "outer",
+     "type": "BoundingBox",
+     "description": "The box that should hold the other."
+    },
+    {
+     "name": "inner",
+     "type": "BoundingBox",
+     "description": "The box that should fit inside."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "contains",
+     "type": "boolean",
+     "description": "True when every part of the inner box is inside or on the outer box."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Corners",
+   "category": "Geometry",
+   "description": "The 8 corner points of a bounding box: the bottom face counter-clockwise from the Min corner (0-3), then the top face in the same order (4-7).",
+   "tags": [
+    "vertices",
+    "points",
+    "extremes",
+    "eight",
+    "decompose",
+    "explode"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "corners",
+     "type": "Point[]",
+     "description": "The eight corners: indices 0-3 bottom face, 4-7 top face."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Expand",
+   "category": "Geometry",
+   "description": "Grows a bounding box by an amount on every side (negative shrinks it; shrinking past zero size is an error) — a clearance or tolerance zone around an element.",
+   "tags": [
+    "grow",
+    "inflate",
+    "pad",
+    "offset",
+    "margin",
+    "clearance",
+    "buffer",
+    "shrink",
+    "tolerance"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    },
+    {
+     "name": "amount",
+     "type": "number",
+     "description": "Distance to move every face outwards (negative moves them inwards)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The expanded bounding box."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Footprint",
+   "category": "Geometry",
+   "description": "The plan (floor) area of a bounding box: size X times size Y, ignoring height.",
+   "tags": [
+    "plan",
+    "floor",
+    "area",
+    "base",
+    "ground",
+    "xy",
+    "measure",
+    "m2"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "area",
+     "type": "number",
+     "description": "The footprint area, in square model units."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.FromPoints",
+   "category": "Geometry",
+   "description": "The smallest bounding box around a set of points (several wires can feed one input; a single point gives a zero-size box).",
+   "tags": [
+    "fit",
+    "enclose",
+    "extents",
+    "around",
+    "points",
+    "aabb",
+    "bounds",
+    "from points"
+   ],
+   "inputs": [
+    {
+     "name": "points",
+     "type": "any[]",
+     "description": "The points to enclose (at least one; every item must be a point).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The bounding box that just contains all the points."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "BoundingBox.Intersects",
    "category": "Geometry",
    "description": "Tests whether two bounding boxes overlap (touching counts as intersecting).",
@@ -1539,6 +3587,40 @@
      "name": "intersects",
      "type": "boolean",
      "description": "True when the boxes overlap or touch."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Overlap",
+   "category": "Geometry",
+   "description": "The bounding box shared by two overlapping boxes; an error when they do not meet, so test with BoundingBox.Intersects first.",
+   "tags": [
+    "intersection",
+    "intersect",
+    "common",
+    "shared",
+    "clash",
+    "interference",
+    "volume"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "BoundingBox",
+     "description": "The first bounding box."
+    },
+    {
+     "name": "b",
+     "type": "BoundingBox",
+     "description": "The second bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The intersection box."
     }
    ],
    "returns": ""
@@ -1660,6 +3742,68 @@
    "returns": "Dictionary with \"sizeX\", \"sizeY\", \"sizeZ\", \"min\" and \"max\"."
   },
   {
+   "name": "BoundingBox.SurfaceArea",
+   "category": "Geometry",
+   "description": "The total area of a bounding box's six faces (square model units) — e.g. for a coating or cladding estimate.",
+   "tags": [
+    "area",
+    "faces",
+    "skin",
+    "paint",
+    "coating",
+    "cladding",
+    "measure",
+    "m2"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "area",
+     "type": "number",
+     "description": "The surface area, in square model units."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Translate",
+   "category": "Geometry",
+   "description": "Moves a bounding box by an offset vector, keeping its size.",
+   "tags": [
+    "move",
+    "shift",
+    "offset",
+    "displace",
+    "vector"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    },
+    {
+     "name": "offset",
+     "type": "Vector",
+     "description": "The displacement (same units as the box)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "boundingBox",
+     "type": "BoundingBox",
+     "description": "The moved bounding box."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "BoundingBox.Union",
    "category": "Geometry",
    "description": "ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.",
@@ -1686,6 +3830,34 @@
      "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box fitting all inputs."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "BoundingBox.Volume",
+   "category": "Geometry",
+   "description": "The volume of a bounding box (cubic model units); a flat box has volume 0.",
+   "tags": [
+    "size",
+    "cubic",
+    "capacity",
+    "space",
+    "measure",
+    "m3"
+   ],
+   "inputs": [
+    {
+     "name": "box",
+     "type": "BoundingBox",
+     "description": "The bounding box."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "volume",
+     "type": "number",
+     "description": "The volume, in cubic model units."
     }
    ],
    "returns": ""
@@ -1729,6 +3901,36 @@
    "returns": ""
   },
   {
+   "name": "Point.Centroid",
+   "category": "Geometry",
+   "description": "The centroid (average position) of a list of points; an empty list, a null or a non-point item is an error naming the item.",
+   "tags": [
+    "average",
+    "mean",
+    "center",
+    "centre",
+    "middle",
+    "barycenter",
+    "cluster",
+    "list"
+   ],
+   "inputs": [
+    {
+     "name": "points",
+     "type": "any[]",
+     "description": "The points to average; at least one, and every item must be a point."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "point",
+     "type": "Point",
+     "description": "The mean point."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Point.Components",
    "category": "Geometry",
    "description": "Splits a point into its X, Y and Z coordinates.",
@@ -1764,6 +3966,41 @@
    "returns": "Dictionary with \"x\", \"y\" and \"z\" values."
   },
   {
+   "name": "Point.Distance2D",
+   "category": "Geometry",
+   "description": "The distance between two points measured in plan (XY only, Z ignored) — for horizontal run lengths and offsets.",
+   "tags": [
+    "plan",
+    "horizontal",
+    "xy",
+    "flat",
+    "length",
+    "measure",
+    "between",
+    "ignore z"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Point",
+     "description": "The first point."
+    },
+    {
+     "name": "b",
+     "type": "Point",
+     "description": "The second point."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "distance",
+     "type": "number",
+     "description": "The distance measured in the XY plane."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Point.DistanceTo",
    "category": "Geometry",
    "description": "Returns the straight-line distance between two points.",
@@ -1790,6 +4027,111 @@
      "name": "distance",
      "type": "number",
      "description": "The distance."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Point.Lerp",
+   "category": "Geometry",
+   "description": "Interpolates between two points: t = 0 is the first, t = 1 the second; t is not clamped, so other values extend the line beyond them.",
+   "tags": [
+    "interpolate",
+    "blend",
+    "between",
+    "fraction",
+    "along",
+    "mix",
+    "extrapolate"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Point",
+     "description": "The point at t = 0."
+    },
+    {
+     "name": "b",
+     "type": "Point",
+     "description": "The point at t = 1."
+    },
+    {
+     "name": "t",
+     "type": "number",
+     "description": "The interpolation parameter (not clamped)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "point",
+     "type": "Point",
+     "description": "The interpolated point."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Point.Midpoint",
+   "category": "Geometry",
+   "description": "The point halfway between two points.",
+   "tags": [
+    "middle",
+    "center",
+    "halfway",
+    "average",
+    "between"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Point",
+     "description": "The first point."
+    },
+    {
+     "name": "b",
+     "type": "Point",
+     "description": "The second point."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "point",
+     "type": "Point",
+     "description": "The midpoint."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Point.Round",
+   "category": "Geometry",
+   "description": "Rounds a point's X, Y and Z to the given number of decimal digits (midpoints round away from zero) — tidies float noise before comparing or grouping points.",
+   "tags": [
+    "round",
+    "snap",
+    "tidy",
+    "precision",
+    "decimals",
+    "clean"
+   ],
+   "inputs": [
+    {
+     "name": "point",
+     "type": "Point",
+     "description": "The point to round."
+    },
+    {
+     "name": "digits",
+     "type": "integer",
+     "description": "Number of decimal digits to keep (0–15).",
+     "default": "3"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "point",
+     "type": "Point",
+     "description": "The rounded point."
     }
    ],
    "returns": ""
@@ -1822,6 +4164,69 @@
      "name": "point",
      "type": "Point",
      "description": "The translated point."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Add",
+   "category": "Geometry",
+   "description": "Adds two vectors (a + b).",
+   "tags": [
+    "sum",
+    "plus",
+    "combine",
+    "resultant"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The sum a + b."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Angle",
+   "category": "Geometry",
+   "description": "The angle between two vectors in degrees, 0 (same direction) to 180 (opposite); a zero-length vector has no direction and is an error.",
+   "tags": [
+    "between",
+    "degrees",
+    "bearing",
+    "deviation",
+    "measure"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector; it must not have zero length."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector; it must not have zero length."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "degrees",
+     "type": "number",
+     "description": "The angle in degrees, 0 to 180."
     }
    ],
    "returns": ""
@@ -1860,6 +4265,421 @@
      "name": "vector",
      "type": "Vector",
      "description": "The vector."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.ByPoints",
+   "category": "Geometry",
+   "description": "Creates the vector that leads from one point to another (end minus start).",
+   "tags": [
+    "between",
+    "direction",
+    "from",
+    "to",
+    "two points",
+    "displacement"
+   ],
+   "inputs": [
+    {
+     "name": "from",
+     "type": "Point",
+     "description": "The start point."
+    },
+    {
+     "name": "to",
+     "type": "Point",
+     "description": "The end point."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector from the start point to the end point."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Components",
+   "category": "Geometry",
+   "description": "Splits a vector into its X, Y and Z components.",
+   "tags": [
+    "deconstruct",
+    "xyz",
+    "coordinates",
+    "components"
+   ],
+   "inputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector to decompose."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "x",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "y",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "z",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"x\", \"y\" and \"z\" values."
+  },
+  {
+   "name": "Vector.Cross",
+   "category": "Geometry",
+   "description": "The cross product of two vectors: a vector perpendicular to both (right-hand rule), zero when they are parallel.",
+   "tags": [
+    "perpendicular",
+    "normal",
+    "orthogonal",
+    "product",
+    "right hand"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "a × b."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Dot",
+   "category": "Geometry",
+   "description": "The dot product of two vectors: positive when they point the same way, 0 when perpendicular, negative when opposed.",
+   "tags": [
+    "scalar",
+    "inner",
+    "product",
+    "projection",
+    "multiply"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dot",
+     "type": "number",
+     "description": "a · b."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.IsParallel",
+   "category": "Geometry",
+   "description": "True when two vectors lie along the same line (same or opposite direction) within a length-independent tolerance; zero-length vectors are an error.",
+   "tags": [
+    "parallel",
+    "collinear",
+    "same direction",
+    "aligned",
+    "test"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector; it must not have zero length."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector; it must not have zero length."
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "Largest allowed sine of the angle between them (0 = exactly parallel).",
+     "default": "1e-9"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isParallel",
+     "type": "boolean",
+     "description": "True when the vectors are parallel or anti-parallel within the tolerance."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.IsPerpendicular",
+   "category": "Geometry",
+   "description": "True when two vectors meet at a right angle within a length-independent tolerance; zero-length vectors are an error.",
+   "tags": [
+    "perpendicular",
+    "orthogonal",
+    "right angle",
+    "normal",
+    "square",
+    "test"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The first vector; it must not have zero length."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The second vector; it must not have zero length."
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "Largest allowed cosine of the angle between them (0 = exactly perpendicular).",
+     "default": "1e-9"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isPerpendicular",
+     "type": "boolean",
+     "description": "True when the vectors are perpendicular within the tolerance."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Length",
+   "category": "Geometry",
+   "description": "Returns the length (magnitude) of a vector.",
+   "tags": [
+    "magnitude",
+    "norm",
+    "size",
+    "measure"
+   ],
+   "inputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector to measure."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "length",
+     "type": "number",
+     "description": "The Euclidean length."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Negate",
+   "category": "Geometry",
+   "description": "Reverses a vector so it points the opposite way.",
+   "tags": [
+    "reverse",
+    "flip",
+    "opposite",
+    "invert",
+    "minus"
+   ],
+   "inputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector to reverse."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector pointing the opposite way."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Normalize",
+   "category": "Geometry",
+   "description": "Scales a vector to length 1, keeping its direction (a zero-length vector has no direction and is an error).",
+   "tags": [
+    "unit",
+    "normalise",
+    "normalize",
+    "direction",
+    "unitize"
+   ],
+   "inputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector to normalise; it must not have zero length."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The unit vector with the same direction."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Scale",
+   "category": "Geometry",
+   "description": "Multiplies a vector by a number (2 doubles its length, -1 reverses it).",
+   "tags": [
+    "multiply",
+    "stretch",
+    "factor",
+    "times",
+    "resize"
+   ],
+   "inputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The vector to scale."
+    },
+    {
+     "name": "factor",
+     "type": "number",
+     "description": "The scale factor (2 = twice as long, -1 = reversed, 0 = the zero vector)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The scaled vector."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.Subtract",
+   "category": "Geometry",
+   "description": "Subtracts one vector from another (a - b).",
+   "tags": [
+    "minus",
+    "difference",
+    "delta"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "Vector",
+     "description": "The vector to subtract from."
+    },
+    {
+     "name": "b",
+     "type": "Vector",
+     "description": "The vector to subtract."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The difference a - b."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.XAxis",
+   "category": "Geometry",
+   "description": "The unit vector along the X axis, (1, 0, 0).",
+   "tags": [
+    "axis",
+    "unit",
+    "east",
+    "right",
+    "direction"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The X axis direction."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.YAxis",
+   "category": "Geometry",
+   "description": "The unit vector along the Y axis, (0, 1, 0).",
+   "tags": [
+    "axis",
+    "unit",
+    "north",
+    "forward",
+    "direction"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The Y axis direction."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Vector.ZAxis",
+   "category": "Geometry",
+   "description": "The unit vector along the Z axis, (0, 0, 1) — straight up.",
+   "tags": [
+    "axis",
+    "unit",
+    "up",
+    "vertical",
+    "direction"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "vector",
+     "type": "Vector",
+     "description": "The Z axis direction."
     }
    ],
    "returns": ""
@@ -2131,6 +4951,33 @@
    "returns": ""
   },
   {
+   "name": "List.Average",
+   "category": "List",
+   "description": "The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).",
+   "tags": [
+    "mean",
+    "aggregate",
+    "avg",
+    "kpi"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "average",
+     "type": "number",
+     "description": "The arithmetic mean."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Chop",
    "category": "List",
    "description": "Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).",
@@ -2255,6 +5102,39 @@
    "returns": ""
   },
   {
+   "name": "List.CountBy",
+   "category": "List",
+   "description": "Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.",
+   "tags": [
+    "tally",
+    "frequency",
+    "distribution",
+    "group",
+    "count",
+    "how many of each"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to tally (nulls are counted as one value, shown empty)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "values",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The distinct values in order of first appearance and how many times each occurs."
+  },
+  {
    "name": "List.CountTrue",
    "category": "List",
    "description": "Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).",
@@ -2309,6 +5189,32 @@
    ],
    "returns": "",
    "interactive": true
+  },
+  {
+   "name": "List.CumulativeSum",
+   "category": "List",
+   "description": "A running total: each item is the sum of the list up to and including that position.",
+   "tags": [
+    "running",
+    "accumulate",
+    "progress",
+    "s-curve"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are an error here, so positions stay aligned)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "totals",
+     "type": "number[]",
+     "description": "A list as long as the input: each item is the sum of everything up to and including it."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "List.Cycle",
@@ -2376,6 +5282,70 @@
    "returns": ""
   },
   {
+   "name": "List.DropWhile",
+   "category": "List",
+   "description": "Drops items from the start of the list for as long as the mask is true; keeps everything from the first false.",
+   "tags": [
+    "skip",
+    "leading",
+    "tail",
+    "prefix"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The items."
+    },
+    {
+     "name": "mask",
+     "type": "any[]",
+     "description": "One true/false per item (same length)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The items from the first false on."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Duplicates",
+   "category": "List",
+   "description": "The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.",
+   "tags": [
+    "duplicate",
+    "repeated",
+    "twice",
+    "unique",
+    "check",
+    "audit"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to check."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "duplicates",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The repeated values (first appearance order) and how many times each occurs."
+  },
+  {
    "name": "List.FilterByBoolMask",
    "category": "List",
    "description": "Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\").",
@@ -2410,6 +5380,70 @@
     }
    ],
    "returns": "Dictionary with \"in\" and \"out\" lists."
+  },
+  {
+   "name": "List.FilterByValue",
+   "category": "List",
+   "description": "Keeps the items that pass a test such as > 100, contains \"wall\" or matches \"A-*\" — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask.",
+   "tags": [
+    "filter",
+    "where",
+    "select",
+    "keep",
+    "compare",
+    "mask",
+    "search",
+    "query"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The items to filter."
+    },
+    {
+     "name": "test",
+     "type": "string",
+     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.",
+     "default": "\"==\""
+    },
+    {
+     "name": "value",
+     "type": "any",
+     "description": "What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests).",
+     "default": "null"
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "Optional: a list of the same length whose values are tested instead of the items themselves (filter model items by a property value).",
+     "default": "null"
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True (default) ignores upper/lower case in text tests.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matched",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "rejected",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "mask",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The items that passed, the items that did not, and the true/false mask."
   },
   {
    "name": "List.FirstItem",
@@ -2531,6 +5565,55 @@
     }
    ],
    "returns": "Dictionary with \"groups\" (list of lists) and \"uniqueKeys\"."
+  },
+  {
+   "name": "List.Histogram",
+   "category": "List",
+   "description": "Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.",
+   "tags": [
+    "distribution",
+    "bins",
+    "buckets",
+    "chart",
+    "frequency",
+    "range"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    },
+    {
+     "name": "bins",
+     "type": "integer",
+     "description": "How many bins, from the smallest to the largest value.",
+     "default": "10"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "lower",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "upper",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "labels",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "For each bin: its lower edge, upper edge, count and a text label."
   },
   {
    "name": "List.IndexOf",
@@ -2684,6 +5767,31 @@
    "returns": ""
   },
   {
+   "name": "List.Median",
+   "category": "List",
+   "description": "The middle value of the numbers of a list (the mean of the two middle ones when the count is even).",
+   "tags": [
+    "middle",
+    "aggregate",
+    "typical"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "median",
+     "type": "number",
+     "description": "The median; the mean of the two middle values when the count is even."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Merge",
    "category": "List",
    "description": "Concatenates any number of lists into one — a multi-input socket: connect as many wires as you like, in the order you want them.",
@@ -2739,6 +5847,37 @@
    "returns": ""
   },
   {
+   "name": "List.MostCommon",
+   "category": "List",
+   "description": "The value that occurs most often in a list (the earliest wins a tie) and how many times.",
+   "tags": [
+    "mode",
+    "frequent",
+    "popular",
+    "typical"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to check (at least one non-null)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The most common value (the first to appear wins a tie) and how many times it occurs."
+  },
+  {
    "name": "List.OfRepeatedItem",
    "category": "List",
    "description": "A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing.",
@@ -2766,6 +5905,96 @@
      "name": "list",
      "type": "any[]",
      "description": "The repeated-value list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Pairs",
+   "category": "List",
+   "description": "Pairs each item with the next one: [[a, b], [b, c], …] — consecutive points, segments, steps.",
+   "tags": [
+    "neighbours",
+    "consecutive",
+    "segments",
+    "window",
+    "adjacent"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list."
+    },
+    {
+     "name": "cyclic",
+     "type": "boolean",
+     "description": "True also pairs the last item with the first.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "pairs",
+     "type": "any[]",
+     "description": "[item0, item1], [item1, item2], … (one pair fewer than items, or as many with 'cyclic')."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Percentile",
+   "category": "List",
+   "description": "The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).",
+   "tags": [
+    "quantile",
+    "quartile",
+    "aggregate",
+    "percent"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    },
+    {
+     "name": "percent",
+     "type": "number",
+     "description": "Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).",
+     "default": "90"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Product",
+   "category": "List",
+   "description": "Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).",
+   "tags": [
+    "multiply",
+    "aggregate",
+    "times"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "product",
+     "type": "number",
+     "description": "The product; 1 for an empty list."
     }
    ],
    "returns": ""
@@ -3090,6 +6319,38 @@
    "returns": ""
   },
   {
+   "name": "List.Shuffle",
+   "category": "List",
+   "description": "Shuffles a list; the same seed always gives the same order, so a run can be repeated.",
+   "tags": [
+    "random",
+    "mix",
+    "sample",
+    "permute"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list."
+    },
+    {
+     "name": "seed",
+     "type": "integer",
+     "description": "Same seed, same order; change it for a different order.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A shuffled copy."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Slice",
    "category": "List",
    "description": "A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element. Negative start/end count from the end, Python-style.",
@@ -3195,6 +6456,156 @@
    "returns": "Dictionary with \"sorted\" elements and the \"sortedKeys\"."
   },
   {
+   "name": "List.SortDescending",
+   "category": "List",
+   "description": "Returns the list sorted descending (largest first; text alphabetically from Z).",
+   "tags": [
+    "order",
+    "descending",
+    "reverse",
+    "biggest first",
+    "top"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list to sort."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "A new list, descending (numbers numerically, text alphabetically)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.StandardDeviation",
+   "category": "List",
+   "description": "The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).",
+   "tags": [
+    "spread",
+    "variance",
+    "deviation",
+    "stdev",
+    "statistics"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one (two for a sample) is required."
+    },
+    {
+     "name": "sample",
+     "type": "boolean",
+     "description": "True divides by n-1 (a sample of a larger population); false (default) divides by n.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "standardDeviation",
+     "type": "number",
+     "description": "The standard deviation."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Statistics",
+   "category": "List",
+   "description": "Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.",
+   "tags": [
+    "summary",
+    "describe",
+    "aggregate",
+    "kpi",
+    "qto",
+    "min",
+    "max",
+    "statistics"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "sum",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "min",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "max",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "average",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "median",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "standardDeviation",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers."
+  },
+  {
+   "name": "List.Sum",
+   "category": "List",
+   "description": "Adds up the numbers of a list (nulls are skipped, an empty list gives 0).",
+   "tags": [
+    "total",
+    "add",
+    "aggregate",
+    "quantity",
+    "qto",
+    "sum"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped; text such as \"12.5\" is read as a number).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "sum",
+     "type": "number",
+     "description": "The total; 0 for an empty list."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.TakeEveryNthItem",
    "category": "List",
    "description": "Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).",
@@ -3267,6 +6678,37 @@
    "returns": ""
   },
   {
+   "name": "List.TakeWhile",
+   "category": "List",
+   "description": "Takes items from the start of the list for as long as the mask is true (stops at the first false).",
+   "tags": [
+    "head",
+    "until",
+    "leading",
+    "prefix"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The items."
+    },
+    {
+     "name": "mask",
+     "type": "any[]",
+     "description": "One true/false per item (same length)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The items before the first false."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "List.Transpose",
    "category": "List",
    "description": "Swaps rows and columns of a list of lists — the table pivot for Excel/CSV data and property grids. Shorter rows pad with nulls so the result stays rectangular (Dynamo behavior); List.Clean or List.ReplaceNulls deal with the padding.",
@@ -3316,6 +6758,65 @@
      "name": "list",
      "type": "any[]",
      "description": "A new list with duplicates removed, in original order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.WithIndex",
+   "category": "List",
+   "description": "Pairs each item with its position: [[0, item0], [1, item1], …].",
+   "tags": [
+    "enumerate",
+    "index",
+    "number",
+    "position",
+    "row number"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The list."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "pairs",
+     "type": "any[]",
+     "description": "A list of [index, item] pairs, indexes starting at 0."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Zip",
+   "category": "List",
+   "description": "Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list.",
+   "tags": [
+    "pair",
+    "combine",
+    "merge",
+    "interleave",
+    "together"
+   ],
+   "inputs": [
+    {
+     "name": "first",
+     "type": "any[]",
+     "description": "The first list."
+    },
+    {
+     "name": "second",
+     "type": "any[]",
+     "description": "The second list."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "pairs",
+     "type": "any[]",
+     "description": "[first0, second0], [first1, second1], … as long as the shorter list."
     }
    ],
    "returns": ""
@@ -3597,6 +7098,268 @@
    "returns": ""
   },
   {
+   "name": "Logic.Choose",
+   "category": "Logic",
+   "description": "Picks one of several options by position (0 = first) — a multi-way If.",
+   "tags": [
+    "select",
+    "pick",
+    "switch",
+    "index",
+    "option",
+    "multiplexer"
+   ],
+   "inputs": [
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "Which option, counting from 0."
+    },
+    {
+     "name": "options",
+     "type": "any[]",
+     "description": "The options (wire several nodes into the one socket, or a list).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The option at that index."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.Compare",
+   "category": "Logic",
+   "description": "Compares two values — numbers, text or dates — with a test chosen from a list (==, >, contains, matches, regex …). Text that reads as a number is compared as a number.",
+   "tags": [
+    "compare",
+    "greater",
+    "less",
+    "equal",
+    "date",
+    "text",
+    "contains",
+    "wildcard",
+    "regex",
+    "test"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "any",
+     "description": "The value to test."
+    },
+    {
+     "name": "b",
+     "type": "any",
+     "description": "What to test it against (unused by the isNull / notNull / isEmpty / notEmpty tests).",
+     "default": "null"
+    },
+    {
+     "name": "test",
+     "type": "string",
+     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.",
+     "default": "\"==\""
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True (default) ignores upper/lower case when comparing text.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "boolean",
+     "description": "True when the test passes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.IsBetween",
+   "category": "Logic",
+   "description": "True when a number, text or date lies between a lower and an upper bound (bounds included by default).",
+   "tags": [
+    "range",
+    "within",
+    "between",
+    "inside",
+    "interval",
+    "tolerance"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to test (number, text or date)."
+    },
+    {
+     "name": "min",
+     "type": "any",
+     "description": "The lower bound."
+    },
+    {
+     "name": "max",
+     "type": "any",
+     "description": "The upper bound."
+    },
+    {
+     "name": "inclusive",
+     "type": "boolean",
+     "description": "True (default) counts the bounds themselves as inside.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "boolean",
+     "description": "True when the value is within the range."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.NotEquals",
+   "category": "Logic",
+   "description": "True when two values are different (numbers compare by value regardless of numeric type).",
+   "tags": [
+    "!=",
+    "different",
+    "not equal",
+    "unequal"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "any",
+     "description": "First value."
+    },
+    {
+     "name": "b",
+     "type": "any",
+     "description": "Second value."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "boolean",
+     "description": "True when the values are not equal."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.Switch",
+   "category": "Logic",
+   "description": "Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or code-to-name mapping.",
+   "tags": [
+    "case",
+    "match",
+    "map",
+    "lookup",
+    "translate",
+    "switch",
+    "select"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to look for."
+    },
+    {
+     "name": "cases",
+     "type": "any[]",
+     "description": "The values it can be."
+    },
+    {
+     "name": "results",
+     "type": "any[]",
+     "description": "What to give for each case (same length as the cases)."
+    },
+    {
+     "name": "fallback",
+     "type": "any",
+     "description": "What to give when no case matches (nothing by default).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The result for the first matching case, or the fallback."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.TypeOf",
+   "category": "Logic",
+   "description": "Names the kind of a value — number, text, boolean, datetime, list, dictionary, null or the object's type — for debugging what a node really returns.",
+   "tags": [
+    "type",
+    "kind",
+    "debug",
+    "inspect",
+    "what is this",
+    "class"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "Any value."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "type",
+     "type": "string",
+     "description": "One of: null, number, text, boolean, datetime, list, dictionary, or the type's name."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Logic.Xor",
+   "category": "Logic",
+   "description": "True when exactly one of the two inputs is true.",
+   "tags": [
+    "exclusive or",
+    "either",
+    "one of"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "boolean",
+     "description": "First operand."
+    },
+    {
+     "name": "b",
+     "type": "boolean",
+     "description": "Second operand."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "boolean",
+     "description": "True when the two inputs differ."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Not",
    "category": "Logic",
    "description": "Inverts a boolean value.",
@@ -3739,6 +7502,138 @@
    "returns": ""
   },
   {
+   "name": "Math.Acos",
+   "category": "Math",
+   "description": "Inverse cosine: the angle whose cosine is the value (result in degrees by default).",
+   "tags": [
+    "trigonometry",
+    "arccosine",
+    "inverse"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "A number from -1 to 1."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the result: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Asin",
+   "category": "Math",
+   "description": "Inverse sine: the angle whose sine is the value (result in degrees by default).",
+   "tags": [
+    "trigonometry",
+    "arcsine",
+    "inverse"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "A number from -1 to 1."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the result: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Atan",
+   "category": "Math",
+   "description": "Inverse tangent: the angle for a slope (result in degrees by default).",
+   "tags": [
+    "trigonometry",
+    "arctangent",
+    "inverse",
+    "slope"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "Any number (rise over run)."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the result: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Atan2",
+   "category": "Math",
+   "description": "Angle of the direction (x, y) from the X axis, from -180 to 180 degrees — the heading between two points.",
+   "tags": [
+    "trigonometry",
+    "heading",
+    "bearing",
+    "direction",
+    "angle"
+   ],
+   "inputs": [
+    {
+     "name": "y",
+     "type": "number",
+     "description": "The Y (rise) component."
+    },
+    {
+     "name": "x",
+     "type": "number",
+     "description": "The X (run) component."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the result: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle from -180 to 180 degrees."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Math.Ceiling",
    "category": "Math",
    "description": "Rounds a number up to the nearest integer.",
@@ -3764,6 +7659,124 @@
    "returns": ""
   },
   {
+   "name": "Math.Clamp",
+   "category": "Math",
+   "description": "Limits a number to a range: below the minimum gives the minimum, above the maximum gives the maximum.",
+   "tags": [
+    "limit",
+    "bound",
+    "range",
+    "saturate",
+    "cap"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The number to limit."
+    },
+    {
+     "name": "min",
+     "type": "number",
+     "description": "The lowest allowed value."
+    },
+    {
+     "name": "max",
+     "type": "number",
+     "description": "The highest allowed value."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The value, or the nearest bound when it lies outside."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Cos",
+   "category": "Math",
+   "description": "Cosine of an angle (degrees by default).",
+   "tags": [
+    "trigonometry",
+    "cosine",
+    "angle"
+   ],
+   "inputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the angle: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The cosine, between -1 and 1."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Degrees",
+   "category": "Math",
+   "description": "Converts radians to degrees.",
+   "tags": [
+    "convert",
+    "angle",
+    "radians"
+   ],
+   "inputs": [
+    {
+     "name": "radians",
+     "type": "number",
+     "description": "The angle in radians."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "degrees",
+     "type": "number",
+     "description": "The angle in degrees."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Exp",
+   "category": "Math",
+   "description": "e raised to a power (the inverse of the natural logarithm).",
+   "tags": [
+    "exponential",
+    "e",
+    "power"
+   ],
+   "inputs": [
+    {
+     "name": "power",
+     "type": "number",
+     "description": "The exponent."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "e to the power."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Math.Floor",
    "category": "Math",
    "description": "Rounds a number down to the nearest integer.",
@@ -3784,6 +7797,165 @@
      "name": "result",
      "type": "number",
      "description": "The largest integer less than or equal to the number."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Formula",
+   "category": "Math",
+   "description": "Evaluates a formula such as \"a * b + 2\" or \"if(a > 10, a - 10, 0)\" over the inputs a to f. Operators + - * / % ^ and comparisons; functions abs sqrt sin cos tan (radians) asin acos atan atan2 ln log exp pow min max round floor ceil trunc sign clamp mod hypot rad deg if; constants pi, tau. A list on any input evaluates once per item.",
+   "tags": [
+    "expression",
+    "calculate",
+    "equation",
+    "code block",
+    "calc",
+    "evaluate",
+    "math"
+   ],
+   "inputs": [
+    {
+     "name": "expression",
+     "type": "string",
+     "description": "The formula, e.g. a * b + 2 or if(a > 10, a - 10, 0)."
+    },
+    {
+     "name": "a",
+     "type": "number",
+     "description": "Value of a.",
+     "default": "0"
+    },
+    {
+     "name": "b",
+     "type": "number",
+     "description": "Value of b.",
+     "default": "0"
+    },
+    {
+     "name": "c",
+     "type": "number",
+     "description": "Value of c.",
+     "default": "0"
+    },
+    {
+     "name": "d",
+     "type": "number",
+     "description": "Value of d.",
+     "default": "0"
+    },
+    {
+     "name": "e",
+     "type": "number",
+     "description": "Value of e.",
+     "default": "0"
+    },
+    {
+     "name": "f",
+     "type": "number",
+     "description": "Value of f.",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "number",
+     "description": "The result of the formula."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Lerp",
+   "category": "Math",
+   "description": "Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited).",
+   "tags": [
+    "interpolate",
+    "blend",
+    "mix",
+    "between"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "number",
+     "description": "The value at t = 0."
+    },
+    {
+     "name": "b",
+     "type": "number",
+     "description": "The value at t = 1."
+    },
+    {
+     "name": "t",
+     "type": "number",
+     "description": "How far from a towards b (0 to 1; outside the range extrapolates)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "a + (b - a) * t."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Ln",
+   "category": "Math",
+   "description": "Natural logarithm (base e) of a positive number.",
+   "tags": [
+    "logarithm",
+    "log",
+    "ln",
+    "natural"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "A positive number."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The natural logarithm (base e)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Log",
+   "category": "Math",
+   "description": "Logarithm of a positive number to a base (10 by default).",
+   "tags": [
+    "logarithm",
+    "log10",
+    "log2",
+    "base"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "A positive number."
+    },
+    {
+     "name": "logBase",
+     "type": "number",
+     "description": "The base (default 10); positive and not 1.",
+     "default": "10"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The logarithm."
     }
    ],
    "returns": ""
@@ -3894,6 +8066,84 @@
    "returns": ""
   },
   {
+   "name": "Math.Negate",
+   "category": "Math",
+   "description": "Flips the sign of a number (5 becomes -5).",
+   "tags": [
+    "minus",
+    "opposite",
+    "invert",
+    "flip"
+   ],
+   "inputs": [
+    {
+     "name": "number",
+     "type": "number",
+     "description": "The number."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The number multiplied by -1."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Percent",
+   "category": "Math",
+   "description": "What percentage the part is of the total (37 of 340 gives 10.88); 0 when the total is 0, so an empty model reads 0 %.",
+   "tags": [
+    "percentage",
+    "ratio",
+    "share",
+    "kpi",
+    "fraction",
+    "%"
+   ],
+   "inputs": [
+    {
+     "name": "part",
+     "type": "number",
+     "description": "The part."
+    },
+    {
+     "name": "total",
+     "type": "number",
+     "description": "The whole."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "percent",
+     "type": "number",
+     "description": "part / total * 100, or 0 when the total is 0."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Pi",
+   "category": "Math",
+   "description": "The constant pi (3.14159…).",
+   "tags": [
+    "constant",
+    "3.14",
+    "circle"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "pi",
+     "type": "number",
+     "description": "3.14159…"
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Math.Pow",
    "category": "Math",
    "description": "Raises the first number to the power of the second.",
@@ -3920,6 +8170,31 @@
      "name": "result",
      "type": "number",
      "description": "base raised to exponent."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Radians",
+   "category": "Math",
+   "description": "Converts degrees to radians.",
+   "tags": [
+    "convert",
+    "angle",
+    "degrees"
+   ],
+   "inputs": [
+    {
+     "name": "degrees",
+     "type": "number",
+     "description": "The angle in degrees."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "radians",
+     "type": "number",
+     "description": "The angle in radians."
     }
    ],
    "returns": ""
@@ -3994,6 +8269,133 @@
    "returns": ""
   },
   {
+   "name": "Math.RoundToMultiple",
+   "category": "Math",
+   "description": "Rounds to the nearest multiple of a step, e.g. a length to the nearest 5 mm or a level to 0.25 m.",
+   "tags": [
+    "round",
+    "step",
+    "snap",
+    "grid",
+    "nearest"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The number to round."
+    },
+    {
+     "name": "multiple",
+     "type": "number",
+     "description": "The step to round to (greater than 0), e.g. 0.05 or 250."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The nearest multiple; halves round away from zero."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Sequence",
+   "category": "Math",
+   "description": "A list of count numbers starting at start and growing by step (the count-based sibling of List.Range).",
+   "tags": [
+    "range",
+    "series",
+    "list",
+    "count",
+    "steps"
+   ],
+   "inputs": [
+    {
+     "name": "start",
+     "type": "number",
+     "description": "The first number."
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many numbers (0 to 1,000,000)."
+    },
+    {
+     "name": "step",
+     "type": "number",
+     "description": "The distance between neighbours (negative counts down).",
+     "default": "1"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "numbers",
+     "type": "number[]",
+     "description": "start, start + step, … (count numbers)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Sign",
+   "category": "Math",
+   "description": "-1 for a negative number, 0 for zero, 1 for a positive number.",
+   "tags": [
+    "positive",
+    "negative",
+    "direction"
+   ],
+   "inputs": [
+    {
+     "name": "number",
+     "type": "number",
+     "description": "The number."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "sign",
+     "type": "integer",
+     "description": "-1, 0 or 1."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Sin",
+   "category": "Math",
+   "description": "Sine of an angle (degrees by default).",
+   "tags": [
+    "trigonometry",
+    "sine",
+    "angle",
+    "wave"
+   ],
+   "inputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the angle: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The sine, between -1 and 1."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Math.Sqrt",
    "category": "Math",
    "description": "Returns the square root of a non-negative number.",
@@ -4013,6 +8415,64 @@
      "name": "result",
      "type": "number",
      "description": "The square root."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Tan",
+   "category": "Math",
+   "description": "Tangent of an angle (degrees by default); slope = tan(angle).",
+   "tags": [
+    "trigonometry",
+    "tangent",
+    "angle",
+    "slope"
+   ],
+   "inputs": [
+    {
+     "name": "angle",
+     "type": "number",
+     "description": "The angle."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "The unit of the angle: degrees (default) or radians.",
+     "default": "\"degrees\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The tangent."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Math.Truncate",
+   "category": "Math",
+   "description": "Drops the decimals, towards zero (2.7 becomes 2, -2.7 becomes -2).",
+   "tags": [
+    "integer",
+    "whole",
+    "cut",
+    "decimals"
+   ],
+   "inputs": [
+    {
+     "name": "number",
+     "type": "number",
+     "description": "The number."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The whole part (-2.7 becomes -2)."
     }
    ],
    "returns": ""
@@ -12650,6 +17110,143 @@
    "returns": ""
   },
   {
+   "name": "Report.Html",
+   "category": "Report",
+   "description": "Builds a self-contained HTML report from tables and text (\"# Heading\" makes a heading) — light and dark, printable, ready for Text.WriteToFile or an e-mail.",
+   "tags": [
+    "report",
+    "html",
+    "page",
+    "weekly",
+    "summary",
+    "export",
+    "publish",
+    "document"
+   ],
+   "inputs": [
+    {
+     "name": "title",
+     "type": "string",
+     "description": "The report title."
+    },
+    {
+     "name": "sections",
+     "type": "any[]",
+     "description": "What goes in the report, top to bottom: tables, text paragraphs (\"# Heading\" and \"## Subheading\" make headings), lists and other values (shown as text). Wire several into the one socket.",
+     "multiInput": true
+    },
+    {
+     "name": "subtitle",
+     "type": "string",
+     "description": "A line under the title, e.g. the model name and date.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "html",
+     "type": "string",
+     "description": "A complete HTML page."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Report.Markdown",
+   "category": "Report",
+   "description": "Builds a Markdown report from tables and text — for Teams, issue trackers and wikis.",
+   "tags": [
+    "report",
+    "markdown",
+    "md",
+    "weekly",
+    "summary",
+    "wiki",
+    "document"
+   ],
+   "inputs": [
+    {
+     "name": "title",
+     "type": "string",
+     "description": "The report title."
+    },
+    {
+     "name": "sections",
+     "type": "any[]",
+     "description": "What goes in the report, top to bottom: tables, text (a \"# Heading\" line stays a heading) and other values.",
+     "multiInput": true
+    },
+    {
+     "name": "subtitle",
+     "type": "string",
+     "description": "A line under the title.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "markdown",
+     "type": "string",
+     "description": "The Markdown text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Number.Format",
+   "category": "String",
+   "description": "Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture).",
+   "tags": [
+    "round",
+    "decimals",
+    "currency",
+    "unit",
+    "thousands",
+    "tostring",
+    "display",
+    "format"
+   ],
+   "inputs": [
+    {
+     "name": "number",
+     "type": "number",
+     "description": "The number to format."
+    },
+    {
+     "name": "decimals",
+     "type": "integer",
+     "description": "Digits after the decimal point, 0 to 15 (the number is rounded).",
+     "default": "2"
+    },
+    {
+     "name": "thousandsSeparator",
+     "type": "boolean",
+     "description": "True to group the digits in thousands with \",\".",
+     "default": "false"
+    },
+    {
+     "name": "prefix",
+     "type": "string",
+     "description": "Text placed before the number (and its sign), e.g. \"EUR \".",
+     "default": "\"\""
+    },
+    {
+     "name": "suffix",
+     "type": "string",
+     "description": "Text placed after the number, e.g. \" m2\".",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The formatted text."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "String.Concat",
    "category": "String",
    "description": "Joins two strings into one.",
@@ -12753,6 +17350,40 @@
    "returns": ""
   },
   {
+   "name": "String.Format",
+   "category": "String",
+   "description": "Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces).",
+   "tags": [
+    "sprintf",
+    "interpolate",
+    "placeholder",
+    "compose",
+    "message",
+    "text"
+   ],
+   "inputs": [
+    {
+     "name": "format",
+     "type": "string",
+     "description": "The composite format text, e.g. \"Wall {0} is {1:0.00} m high\"."
+    },
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "The values for {0}, {1}, ... in the order they are wired.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The formatted text."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "String.FromObject",
    "category": "String",
    "description": "Converts any value (including whole lists) to its display string.",
@@ -12773,6 +17404,78 @@
      "name": "result",
      "type": "string",
      "description": "The formatted text (\"null\" for null)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.IndexOf",
+   "category": "String",
+   "description": "Returns the zero-based index of the first occurrence of a text (-1 when absent).",
+   "tags": [
+    "find",
+    "position",
+    "locate",
+    "search",
+    "first"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to search in."
+    },
+    {
+     "name": "search",
+     "type": "string",
+     "description": "The text to look for."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    },
+    {
+     "name": "startIndex",
+     "type": "integer",
+     "description": "Zero-based index to start searching at (0 to the text's length).",
+     "default": "0"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The zero-based index of the first occurrence, or -1 when it is absent."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.IsBlank",
+   "category": "String",
+   "description": "Tests whether a text is null, empty or only whitespace.",
+   "tags": [
+    "empty",
+    "null",
+    "whitespace",
+    "missing",
+    "has value",
+    "validate"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to test."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isBlank",
+     "type": "boolean",
+     "description": "True when the text is null, empty or only whitespace."
     }
    ],
    "returns": ""
@@ -12809,6 +17512,78 @@
    "returns": ""
   },
   {
+   "name": "String.LastIndexOf",
+   "category": "String",
+   "description": "Returns the zero-based index of the last occurrence of a text (-1 when absent).",
+   "tags": [
+    "find",
+    "position",
+    "locate",
+    "search",
+    "last",
+    "extension"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to search in."
+    },
+    {
+     "name": "search",
+     "type": "string",
+     "description": "The text to look for."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The zero-based index of the last occurrence, or -1 when it is absent."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.Left",
+   "category": "String",
+   "description": "Returns the first characters of a text (the whole text when the count is larger).",
+   "tags": [
+    "first",
+    "start",
+    "prefix",
+    "head",
+    "take",
+    "substring"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to take from."
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many characters to take (0 or more)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The first count characters."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "String.Length",
    "category": "String",
    "description": "Returns the number of characters in a string.",
@@ -12828,6 +17603,396 @@
      "name": "result",
      "type": "integer",
      "description": "The number of characters."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.Lines",
+   "category": "String",
+   "description": "Splits a text into a list of lines (handles \\r\\n, \\n and \\r), optionally dropping the empty ones.",
+   "tags": [
+    "split",
+    "newline",
+    "linebreak",
+    "rows",
+    "paragraph",
+    "multiline"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to split."
+    },
+    {
+     "name": "removeEmpty",
+     "type": "boolean",
+     "description": "True to drop lines that are empty (lines holding only spaces are kept).",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "lines",
+     "type": "string[]",
+     "description": "The lines, without their line breaks."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.PadLeft",
+   "category": "String",
+   "description": "Pads a text on the left with a character up to a total width (\"7\" becomes \"007\" with width 3 and padChar 0).",
+   "tags": [
+    "pad",
+    "zero",
+    "leading",
+    "align",
+    "fill",
+    "right-align"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to pad."
+    },
+    {
+     "name": "width",
+     "type": "integer",
+     "description": "The wanted total length; a longer text is returned unchanged."
+    },
+    {
+     "name": "padChar",
+     "type": "string",
+     "description": "The padding character: exactly one character (default a space).",
+     "default": "\" \""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The padded text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.PadRight",
+   "category": "String",
+   "description": "Pads a text on the right with a character up to a total width.",
+   "tags": [
+    "pad",
+    "trailing",
+    "align",
+    "fill",
+    "left-align",
+    "column"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to pad."
+    },
+    {
+     "name": "width",
+     "type": "integer",
+     "description": "The wanted total length; a longer text is returned unchanged."
+    },
+    {
+     "name": "padChar",
+     "type": "string",
+     "description": "The padding character: exactly one character (default a space).",
+     "default": "\" \""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The padded text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.RegexIsMatch",
+   "category": "String",
+   "description": "Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text).",
+   "tags": [
+    "regex",
+    "regexp",
+    "pattern",
+    "match",
+    "test",
+    "validate",
+    "wildcard"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to test."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "The .NET regular expression, e.g. \"^[A-Z]{2}-\\d+$\"."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isMatch",
+     "type": "boolean",
+     "description": "True when the pattern matches somewhere in the text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.RegexMatch",
+   "category": "String",
+   "description": "Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n.",
+   "tags": [
+    "regex",
+    "regexp",
+    "pattern",
+    "capture",
+    "group",
+    "extract",
+    "parse",
+    "find"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to search."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "The .NET regular expression, e.g. \"(\\d+)-(\\w+)\"."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "found",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "match",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "groups",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"found\", \"match\" and \"groups\"."
+  },
+  {
+   "name": "String.RegexMatches",
+   "category": "String",
+   "description": "Returns the text of every match of a regular expression as a list (empty when nothing matches).",
+   "tags": [
+    "regex",
+    "regexp",
+    "pattern",
+    "findall",
+    "extract",
+    "all",
+    "numbers"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to search."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "The .NET regular expression, e.g. \"\\d+\"."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matches",
+     "type": "string[]",
+     "description": "The text of every match, in order (empty when nothing matches)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.RegexReplace",
+   "category": "String",
+   "description": "Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups.",
+   "tags": [
+    "regex",
+    "regexp",
+    "pattern",
+    "substitute",
+    "rename",
+    "clean",
+    "sub"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to change."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "The .NET regular expression to replace."
+    },
+    {
+     "name": "replacement",
+     "type": "string",
+     "description": "The replacement text; $1, $2, ... insert capture groups."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to ignore upper/lower case.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text with every match replaced."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.RegexSplit",
+   "category": "String",
+   "description": "Splits a text into a list of parts wherever a regular expression matches.",
+   "tags": [
+    "regex",
+    "regexp",
+    "pattern",
+    "tokenize",
+    "divide",
+    "delimiter",
+    "separator"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to split."
+    },
+    {
+     "name": "pattern",
+     "type": "string",
+     "description": "The .NET regular expression that separates the parts, e.g. \"[,;]\\s*\"."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "list",
+     "type": "string[]",
+     "description": "The parts between the matches."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.RemoveDiacritics",
+   "category": "String",
+   "description": "Removes accents from letters (\"é\" becomes \"e\") so names compare and sort without them.",
+   "tags": [
+    "accents",
+    "umlaut",
+    "ascii",
+    "normalize",
+    "normalise",
+    "latin",
+    "strip"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to clean."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text without diacritics."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.Repeat",
+   "category": "String",
+   "description": "Repeats a text a number of times (0 to 10000), optionally with a separator between the copies.",
+   "tags": [
+    "duplicate",
+    "multiply",
+    "fill",
+    "line",
+    "dashes",
+    "times"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to repeat."
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many copies, 0 to 10000 (0 gives an empty text)."
+    },
+    {
+     "name": "separator",
+     "type": "string",
+     "description": "Text placed between two copies.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The repeated text."
     }
    ],
    "returns": ""
@@ -12862,6 +18027,65 @@
      "name": "result",
      "type": "string",
      "description": "The string with all occurrences replaced."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.Reverse",
+   "category": "String",
+   "description": "Reverses the characters of a text.",
+   "tags": [
+    "backwards",
+    "mirror",
+    "flip",
+    "invert"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to reverse."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The reversed text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.Right",
+   "category": "String",
+   "description": "Returns the last characters of a text (the whole text when the count is larger).",
+   "tags": [
+    "last",
+    "end",
+    "suffix",
+    "tail",
+    "take",
+    "substring"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to take from."
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many characters to take (0 or more)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The last count characters."
     }
    ],
    "returns": ""
@@ -12970,6 +18194,47 @@
    "returns": ""
   },
   {
+   "name": "String.Template",
+   "category": "String",
+   "description": "Replaces {name} placeholders in a text with the values of a dictionary (\"{{\" and \"}}\" are literal braces).",
+   "tags": [
+    "placeholder",
+    "mustache",
+    "merge",
+    "interpolate",
+    "fill",
+    "replace",
+    "report",
+    "message"
+   ],
+   "inputs": [
+    {
+     "name": "template",
+     "type": "string",
+     "description": "The text with {name} placeholders, e.g. \"Level {level}: {count} clashes\"."
+    },
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The values by name."
+    },
+    {
+     "name": "onMissing",
+     "type": "string",
+     "description": "\"keep\" leaves the placeholder as written, \"empty\" replaces it with nothing, \"error\" fails.",
+     "default": "\"keep\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text with the placeholders replaced."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "String.ToLower",
    "category": "String",
    "description": "Converts a string to lowercase.",
@@ -13014,6 +18279,34 @@
      "name": "result",
      "type": "number",
      "description": "The parsed number."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.ToTitleCase",
+   "category": "String",
+   "description": "Capitalises the first letter of every word and lowercases the rest (\"bim COORDINATION\" becomes \"Bim Coordination\").",
+   "tags": [
+    "capitalize",
+    "capitalise",
+    "proper",
+    "case",
+    "words",
+    "heading"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to convert."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text in title case."
     }
    ],
    "returns": ""
@@ -13064,6 +18357,1393 @@
      "name": "result",
      "type": "string",
      "description": "The trimmed string."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.TrimEnd",
+   "category": "String",
+   "description": "Removes whitespace (or the given characters) from the end of a text.",
+   "tags": [
+    "trim",
+    "strip",
+    "trailing",
+    "right",
+    "clean",
+    "whitespace"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to trim."
+    },
+    {
+     "name": "chars",
+     "type": "string",
+     "description": "The characters to remove (each character of this text counts); empty means whitespace.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The trimmed text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.TrimStart",
+   "category": "String",
+   "description": "Removes whitespace (or the given characters) from the start of a text.",
+   "tags": [
+    "trim",
+    "strip",
+    "leading",
+    "left",
+    "clean",
+    "whitespace"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to trim."
+    },
+    {
+     "name": "chars",
+     "type": "string",
+     "description": "The characters to remove (each character of this text counts); empty means whitespace.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The trimmed text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "System.Environment",
+   "category": "System",
+   "description": "Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders.",
+   "tags": [
+    "user",
+    "username",
+    "machine",
+    "computer",
+    "os",
+    "windows",
+    "temp",
+    "documents",
+    "appdata",
+    "folder",
+    "whoami"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "userName",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "machineName",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "osVersion",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "currentDirectory",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "tempPath",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "documentsPath",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "appDataPath",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"userName\", \"machineName\", \"osVersion\", \"currentDirectory\", \"tempPath\", \"documentsPath\" and \"appDataPath\"."
+  },
+  {
+   "name": "System.OpenPath",
+   "category": "System",
+   "description": "Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true.",
+   "tags": [
+    "open",
+    "explorer",
+    "reveal",
+    "show",
+    "launch",
+    "folder",
+    "default app",
+    "finder"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file or folder to open."
+    },
+    {
+     "name": "reveal",
+     "type": "boolean",
+     "description": "True to show the item in Explorer (Windows) / open its containing folder (other systems) instead of opening it.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path that was opened, for sequencing further nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "System.Run",
+   "category": "System",
+   "description": "Runs a program with arguments, waits for it (stopped after the timeout) and returns its exit code, output and error text.",
+   "tags": [
+    "run",
+    "execute",
+    "process",
+    "command",
+    "exe",
+    "cmd",
+    "shell",
+    "script",
+    "launch"
+   ],
+   "inputs": [
+    {
+     "name": "executable",
+     "type": "string",
+     "description": "The program to start: a full path, or a name found on the PATH."
+    },
+    {
+     "name": "arguments",
+     "type": "string",
+     "description": "The command-line arguments as one string.",
+     "default": "\"\""
+    },
+    {
+     "name": "workingDirectory",
+     "type": "string",
+     "description": "The folder to run in; empty uses the current folder.",
+     "default": "\"\""
+    },
+    {
+     "name": "timeoutSeconds",
+     "type": "integer",
+     "description": "How long to wait before stopping the program (1 to 3600 seconds).",
+     "default": "60"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "exitCode",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "output",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "error",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"exitCode\", \"output\" (standard output) and \"error\" (standard error)."
+  },
+  {
+   "name": "Web.Get",
+   "category": "System",
+   "description": "Downloads text from an http(s) address with GET; an error status such as 404 is returned (ok = false), only a network failure or timeout is an error.",
+   "tags": [
+    "http",
+    "https",
+    "request",
+    "download",
+    "api",
+    "rest",
+    "url",
+    "fetch",
+    "json",
+    "web"
+   ],
+   "inputs": [
+    {
+     "name": "url",
+     "type": "string",
+     "description": "The address, starting with http:// or https://."
+    },
+    {
+     "name": "headers",
+     "type": "IDictionary",
+     "description": "Optional request headers (name to value), e.g. an Authorization token.",
+     "default": "null"
+    },
+    {
+     "name": "timeoutSeconds",
+     "type": "integer",
+     "description": "How long to wait for the answer (1 to 600 seconds).",
+     "default": "30"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "body",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "ok",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"status\" (HTTP code), \"body\" (response text) and \"ok\" (true for 2xx)."
+  },
+  {
+   "name": "Web.Post",
+   "category": "System",
+   "description": "Sends data to an http(s) address with POST (JSON by default, e.g. a Teams or Slack web hook); an error status is returned (ok = false), only a network failure or timeout is an error.",
+   "tags": [
+    "http",
+    "https",
+    "post",
+    "send",
+    "webhook",
+    "teams",
+    "slack",
+    "api",
+    "rest",
+    "json",
+    "notify",
+    "upload"
+   ],
+   "inputs": [
+    {
+     "name": "url",
+     "type": "string",
+     "description": "The address, starting with http:// or https://."
+    },
+    {
+     "name": "body",
+     "type": "any",
+     "description": "The data to send: text as it is; anything else becomes JSON when the content type contains \"json\". Nothing wired sends an empty body."
+    },
+    {
+     "name": "contentType",
+     "type": "string",
+     "description": "The Content-Type of the body; defaults to application/json.",
+     "default": "\"application/json\""
+    },
+    {
+     "name": "headers",
+     "type": "IDictionary",
+     "description": "Optional request headers (name to value), e.g. an Authorization token.",
+     "default": "null"
+    },
+    {
+     "name": "timeoutSeconds",
+     "type": "integer",
+     "description": "How long to wait for the answer (1 to 600 seconds).",
+     "default": "30"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "body",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "ok",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"status\" (HTTP code), \"body\" (response text) and \"ok\" (true for 2xx)."
+  },
+  {
+   "name": "Table.AddColumn",
+   "category": "Table",
+   "description": "Adds a column at the end: a list with one value per row, or a single value repeated on every row.",
+   "tags": [
+    "add",
+    "column",
+    "append",
+    "new field",
+    "constant"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The new column's name."
+    },
+    {
+     "name": "values",
+     "type": "any",
+     "description": "A list with one value per row, or a single value repeated on every row."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table with the column added at the end."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.AddFormulaColumn",
+   "category": "Table",
+   "description": "Adds a column calculated per row from the others, e.g. \"Width * Height * Length / 1000000000\" (same formula language as Math.Formula; [Names with spaces] in brackets).",
+   "tags": [
+    "formula",
+    "calculated",
+    "computed",
+    "column",
+    "expression",
+    "volume",
+    "area"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The new column's name."
+    },
+    {
+     "name": "formula",
+     "type": "string",
+     "description": "A formula over the column names, e.g. Width * Height or [Fire Rating] / 60 (names with spaces in square brackets)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table with the calculated column added at the end."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Column",
+   "category": "Table",
+   "description": "The cells of one column, top to bottom — wire it into List.Sum, List.CountBy, Search or a property writer.",
+   "tags": [
+    "column",
+    "field",
+    "values",
+    "extract",
+    "pick"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "column",
+     "type": "string",
+     "description": "The column name."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "The cells of that column, top to bottom."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Concat",
+   "category": "Table",
+   "description": "Stacks tables one below the other, matching columns by name; a column one table lacks is left empty — weekly snapshots, one table per model.",
+   "tags": [
+    "append",
+    "union",
+    "stack",
+    "merge",
+    "combine",
+    "rbind"
+   ],
+   "inputs": [
+    {
+     "name": "tables",
+     "type": "any[]",
+     "description": "The tables, top first (wire several into the one socket).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "One table with every column of every table (matched by name; missing cells are empty)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Distinct",
+   "category": "Table",
+   "description": "Keeps only the first row for each distinct value (of the given columns, or of the whole row).",
+   "tags": [
+    "unique",
+    "duplicates",
+    "dedupe",
+    "remove duplicates",
+    "distinct"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "columns",
+     "type": "string",
+     "description": "Columns that must differ (separated by commas); leave empty to compare whole rows.",
+     "default": "\"\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table with only the first row of each kind."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Filter",
+   "category": "Table",
+   "description": "Splits a table by a test on one column — Level == \"L02\", Length > 3000, Name matches \"W-*\" — into the rows that pass and the rows that do not.",
+   "tags": [
+    "filter",
+    "where",
+    "query",
+    "select rows",
+    "search",
+    "keep"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "column",
+     "type": "string",
+     "description": "The column to test."
+    },
+    {
+     "name": "test",
+     "type": "string",
+     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.",
+     "default": "\"==\""
+    },
+    {
+     "name": "value",
+     "type": "any",
+     "description": "What to test against (unused by the null / empty tests).",
+     "default": "null"
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True (default) ignores upper/lower case in text tests.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matched",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "rejected",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The rows that passed and the rows that did not, both as tables."
+  },
+  {
+   "name": "Table.FromColumns",
+   "category": "Table",
+   "description": "Makes a table from columns: a list of lists, one per column, with optional names — for results that come as parallel lists.",
+   "tags": [
+    "columns",
+    "parallel lists",
+    "zip",
+    "table",
+    "transpose"
+   ],
+   "inputs": [
+    {
+     "name": "columns",
+     "type": "any[]",
+     "description": "One list per column (they may differ in length; short ones are padded with nulls)."
+    },
+    {
+     "name": "headers",
+     "type": "any[]",
+     "description": "The column names (leave unwired for Column 1, Column 2 …).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.FromCsvFile",
+   "category": "Table",
+   "description": "Reads a CSV file straight into a table (numbers become numbers, everything else stays text).",
+   "tags": [
+    "csv",
+    "read",
+    "import",
+    "load",
+    "file"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The CSV file."
+    },
+    {
+     "name": "delimiter",
+     "type": "string",
+     "description": "The cell separator (default a comma).",
+     "default": "\",\""
+    },
+    {
+     "name": "firstRowIsHeader",
+     "type": "boolean",
+     "description": "True (default) takes the first row as the column names.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.FromDictionaries",
+   "category": "Table",
+   "description": "Makes a table from a list of dictionaries (one row each); the columns are all their keys — property bags become rows.",
+   "tags": [
+    "properties",
+    "records",
+    "json",
+    "dictionary",
+    "table",
+    "dataframe"
+   ],
+   "inputs": [
+    {
+     "name": "dictionaries",
+     "type": "any[]",
+     "description": "Dictionaries such as the ones Properties.AsDictionary returns; the columns are all their keys, in order of first appearance."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.FromExcelFile",
+   "category": "Table",
+   "description": "Reads an Excel worksheet straight into a table.",
+   "tags": [
+    "excel",
+    "xlsx",
+    "read",
+    "import",
+    "load",
+    "spreadsheet"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The .xlsx file."
+    },
+    {
+     "name": "sheet",
+     "type": "string",
+     "description": "The worksheet name (empty takes the first sheet).",
+     "default": "\"\""
+    },
+    {
+     "name": "firstRowIsHeader",
+     "type": "boolean",
+     "description": "True (default) takes the first row as the column names.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.FromRows",
+   "category": "Table",
+   "description": "Makes a table from rows of cells and column names (or from the first row) — the doorway from Excel, CSV and list data.",
+   "tags": [
+    "create",
+    "table",
+    "dataframe",
+    "rows",
+    "headers",
+    "sheet",
+    "grid"
+   ],
+   "inputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "The rows; each row a list of cells (as read by Excel.ReadFromFile or CSV.ReadFromFile)."
+    },
+    {
+     "name": "headers",
+     "type": "any[]",
+     "description": "The column names. Leave unwired to name the columns Column 1, Column 2 …, or tick firstRowIsHeader.",
+     "default": "null"
+    },
+    {
+     "name": "firstRowIsHeader",
+     "type": "boolean",
+     "description": "True takes the first row as the column names (when no headers are wired).",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.GroupBy",
+   "category": "Table",
+   "description": "Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group — \"sum:Volume\", \"count\" — the pivot-table core for quantities.",
+   "tags": [
+    "group",
+    "aggregate",
+    "summary",
+    "rollup",
+    "total",
+    "sum",
+    "count",
+    "pivot",
+    "takeoff",
+    "qto"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "by",
+     "type": "string",
+     "description": "The column(s) to group by, separated by commas; leave empty for one total row."
+    },
+    {
+     "name": "aggregations",
+     "type": "any[]",
+     "description": "What to work out per group, one text each: count, sum:Volume, average:Length as AvgLength. Functions: count, sum, average, min, max, median, first, last, list, distinct."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "One row per group: the grouping columns followed by one column per aggregation."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Headers",
+   "category": "Table",
+   "description": "The column names of a table, in order.",
+   "tags": [
+    "columns",
+    "names",
+    "header",
+    "fields"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "headers",
+     "type": "string[]",
+     "description": "The names, in column order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Info",
+   "category": "Table",
+   "description": "How many rows and columns a table has, and its column names.",
+   "tags": [
+    "size",
+    "count",
+    "shape",
+    "dimensions",
+    "length"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "rowCount",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "columnCount",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "headers",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "rowCount, columnCount and headers."
+  },
+  {
+   "name": "Table.Join",
+   "category": "Table",
+   "description": "Joins two tables on a key column (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and \"42\" are the same.",
+   "tags": [
+    "join",
+    "merge",
+    "lookup",
+    "vlookup",
+    "combine",
+    "match",
+    "relate"
+   ],
+   "inputs": [
+    {
+     "name": "left",
+     "type": "DyncameloTable",
+     "description": "The main table."
+    },
+    {
+     "name": "right",
+     "type": "DyncameloTable",
+     "description": "The table to add columns from."
+    },
+    {
+     "name": "leftKey",
+     "type": "string",
+     "description": "The key column of the left table."
+    },
+    {
+     "name": "rightKey",
+     "type": "string",
+     "description": "The key column of the right table (leave empty to use the same name as leftKey).",
+     "default": "\"\""
+    },
+    {
+     "name": "kind",
+     "type": "string",
+     "description": "inner keeps rows with a match on both sides; left keeps every left row; outer keeps every row of both.",
+     "default": "\"inner\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The joined table: the left columns, then the right columns (a repeated name gets \" (right)\")."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.JoinByKey",
+   "category": "Table",
+   "description": "Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.",
+   "tags": [
+    "join",
+    "lookup",
+    "vlookup",
+    "merge",
+    "link",
+    "table",
+    "excel",
+    "csv"
+   ],
+   "inputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "Table rows; each row a list of cells (e.g. from Excel.ReadFromFile)."
+    },
+    {
+     "name": "headers",
+     "type": "any[]",
+     "description": "Column headers, one per cell column."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "Keys to look up, e.g. element GUIDs or mark values."
+    },
+    {
+     "name": "keyColumn",
+     "type": "string",
+     "description": "Name of the header column holding the keys."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matchedRows",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "unmatchedKeys",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"matchedRows\" (parallel to keys; null when unmatched) and \"unmatchedKeys\"."
+  },
+  {
+   "name": "Table.Pivot",
+   "category": "Table",
+   "description": "Cross-tabulates: rows from one column, columns from another, each cell the sum (or count, average …) of a third — clashes by level and status.",
+   "tags": [
+    "pivot",
+    "cross-tab",
+    "matrix",
+    "crosstab",
+    "summary",
+    "levels by status"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "rowColumn",
+     "type": "string",
+     "description": "The column whose values become the rows."
+    },
+    {
+     "name": "columnColumn",
+     "type": "string",
+     "description": "The column whose values become the new columns."
+    },
+    {
+     "name": "valueColumn",
+     "type": "string",
+     "description": "The column to total in each cell (not needed for count).",
+     "default": "\"\""
+    },
+    {
+     "name": "aggregation",
+     "type": "string",
+     "description": "How to combine: sum (default), count, average, min, max, first, last.",
+     "default": "\"sum\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "One row per row value, one column per column value."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.RemoveColumns",
+   "category": "Table",
+   "description": "Drops the listed columns and keeps the rest.",
+   "tags": [
+    "drop",
+    "delete",
+    "columns",
+    "remove",
+    "hide"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "columns",
+     "type": "any[]",
+     "description": "The names to remove (a list, or one text with names separated by commas)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table without them."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.RenameColumn",
+   "category": "Table",
+   "description": "Renames one column.",
+   "tags": [
+    "rename",
+    "header",
+    "column name"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "column",
+     "type": "string",
+     "description": "The current name."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "The new name."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table with the column renamed."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Row",
+   "category": "Table",
+   "description": "One row of a table as a dictionary from column name to cell (0 is the first row; -1 the last).",
+   "tags": [
+    "row",
+    "record",
+    "line",
+    "get"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The row number, counting from 0 (negative counts from the end)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "row",
+     "type": "dict",
+     "description": "The row as a dictionary from column name to cell."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Rows",
+   "category": "Table",
+   "description": "The rows of a table as a list of lists of cells (for Excel.WriteToFile, CSV.WriteToFile and the List nodes).",
+   "tags": [
+    "rows",
+    "cells",
+    "list",
+    "export",
+    "values"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "A list of rows, each a list of cells in column order (feeds Excel.WriteToFile and CSV.WriteToFile)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.SelectColumns",
+   "category": "Table",
+   "description": "Keeps only the listed columns, in that order (names as a list or one comma-separated text).",
+   "tags": [
+    "keep",
+    "columns",
+    "pick",
+    "reorder",
+    "project",
+    "narrow"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "columns",
+     "type": "any[]",
+     "description": "The names to keep (a list, or one text with names separated by commas)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The narrower table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Slice",
+   "category": "Table",
+   "description": "Takes count rows from a starting row (count -1 takes all the rest) — the first 10 rows: start 0, count 10.",
+   "tags": [
+    "take",
+    "skip",
+    "head",
+    "top",
+    "limit",
+    "page",
+    "subset"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "start",
+     "type": "integer",
+     "description": "The first row to take, counting from 0.",
+     "default": "0"
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": "How many rows (-1 takes all the rest).",
+     "default": "-1"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The rows from start on, at most count of them."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Sort",
+   "category": "Table",
+   "description": "Sorts the rows by one or more columns (\"Level, -Length\" sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last.",
+   "tags": [
+    "sort",
+    "order",
+    "rank",
+    "arrange",
+    "ascending",
+    "descending"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "columns",
+     "type": "string",
+     "description": "Columns to sort by, separated by commas; add \" desc\" or a leading \"-\" for largest first: Level, -Length."
+    },
+    {
+     "name": "descending",
+     "type": "boolean",
+     "description": "True sorts every column largest first (a column can still opt out with \" asc\").",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The sorted table; empty cells go last and equal rows keep their order."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.ToCsvFile",
+   "category": "Table",
+   "description": "Writes a table, with its column names, to a CSV file.",
+   "tags": [
+    "csv",
+    "write",
+    "export",
+    "save",
+    "file"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to write (overwritten; folders are created)."
+    },
+    {
+     "name": "delimiter",
+     "type": "string",
+     "description": "The cell separator (default a comma).",
+     "default": "\",\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path that was written."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.ToDictionaries",
+   "category": "Table",
+   "description": "The rows of a table as dictionaries (column name to cell) — for JSON.WriteToFile or per-row lookups.",
+   "tags": [
+    "records",
+    "json",
+    "dictionary",
+    "objects"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionaries",
+     "type": "any[]",
+     "description": "One dictionary per row, from column name to cell."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.ToExcelFile",
+   "category": "Table",
+   "description": "Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook).",
+   "tags": [
+    "excel",
+    "xlsx",
+    "write",
+    "export",
+    "save",
+    "spreadsheet",
+    "sheet"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The .xlsx file to write."
+    },
+    {
+     "name": "sheet",
+     "type": "string",
+     "description": "The worksheet name.",
+     "default": "\"Sheet1\""
+    },
+    {
+     "name": "append",
+     "type": "boolean",
+     "description": "True adds the sheet to an existing workbook instead of replacing the file.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The path that was written."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.ToText",
+   "category": "Table",
+   "description": "Renders a table as Markdown, CSV, tab-separated or an HTML table — for a report, an e-mail or a log.",
+   "tags": [
+    "markdown",
+    "csv",
+    "html",
+    "render",
+    "print",
+    "string",
+    "report"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "The table."
+    },
+    {
+     "name": "format",
+     "type": "string",
+     "description": "markdown (default), csv, tsv, or html.",
+     "default": "\"markdown\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The table rendered in that format, ready for Text.WriteToFile, an e-mail or Log.Write."
     }
    ],
    "returns": ""
@@ -13132,6 +19812,123 @@
      "name": "value",
      "type": "any",
      "description": "The value input, unchanged."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Flow.Try",
+   "category": "Workflow",
+   "description": "Carries on after a failure: gives the node's result, or your fallback plus the error text when that node failed — nothing after it turns red.",
+   "tags": [
+    "try",
+    "catch",
+    "error",
+    "recover",
+    "fallback",
+    "optional",
+    "safe",
+    "exception",
+    "on error"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The node output to try. Wire the node that might fail."
+    },
+    {
+     "name": "fallback",
+     "type": "any",
+     "description": "What to output when it failed (nothing by default).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "failed",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "error",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The \"result\" (the value, or the fallback after a failure), whether it \"failed\", and the \"error\" text."
+  },
+  {
+   "name": "Flow.Wait",
+   "category": "Workflow",
+   "description": "Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow.",
+   "tags": [
+    "wait",
+    "sleep",
+    "pause",
+    "delay",
+    "timer",
+    "throttle",
+    "seconds"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to pass through after the pause (it is also what makes the pause happen in the right place)."
+    },
+    {
+     "name": "seconds",
+     "type": "number",
+     "description": "How long to wait, 0 to 3600 seconds (fractions allowed).",
+     "default": "1"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value input, unchanged."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Flow.When",
+   "category": "Workflow",
+   "description": "Runs the nodes wired after it only when the condition is true; when false they are skipped (idle, not an error) — e.g. export only if there are clashes.",
+   "tags": [
+    "if",
+    "only",
+    "skip",
+    "branch",
+    "gate",
+    "conditional",
+    "run if",
+    "guard"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to pass on when the condition is true. Wire the output of the node that must have run."
+    },
+    {
+     "name": "condition",
+     "type": "boolean",
+     "description": "True lets the branch run; false skips everything wired after this node."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value input, or nothing when the condition is false."
     }
    ],
    "returns": ""

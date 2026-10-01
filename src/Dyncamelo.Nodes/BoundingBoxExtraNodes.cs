@@ -165,28 +165,6 @@ public static class BoundingBoxExtraNodes
         return new DyncameloBoundingBox(new DyncameloPoint(minX, minY, minZ), new DyncameloPoint(maxX, maxY, maxZ));
     }
 
-    /// <summary>Tests whether a point lies inside a bounding box; points on a face, edge or corner count as inside.</summary>
-    /// <param name="box">The bounding box.</param>
-    /// <param name="point">The point to test.</param>
-    /// <returns>True when the point is inside or on the box.</returns>
-    [NodeName("BoundingBox.ContainsPoint")]
-    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
-    [return: NodeName("contains")]
-    [NodeDescription("True when a point lies inside a bounding box (the boundary counts as inside).")]
-    [NodeSearchTags("inside", "within", "point in box", "zone", "test", "containment")]
-    public static bool ContainsPoint(DyncameloBoundingBox box, DyncameloPoint point)
-    {
-        Require(box, "BoundingBox.ContainsPoint", nameof(box));
-        if (point == null)
-        {
-            throw new ArgumentNullException(nameof(point), "BoundingBox.ContainsPoint requires a point to test. Wire a point into the 'point' input.");
-        }
-
-        return box.Min.X <= point.X && point.X <= box.Max.X &&
-               box.Min.Y <= point.Y && point.Y <= box.Max.Y &&
-               box.Min.Z <= point.Z && point.Z <= box.Max.Z;
-    }
-
     /// <summary>Tests whether the inner box lies entirely inside the outer box; touching faces count as inside.</summary>
     /// <param name="outer">The box that should hold the other.</param>
     /// <param name="inner">The box that should fit inside.</param>

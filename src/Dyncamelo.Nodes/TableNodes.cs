@@ -12,7 +12,7 @@ namespace Dyncamelo.Nodes;
 /// list of column headers), the shape produced by Excel.ReadFromFile and
 /// CSV.ReadFromFile.
 /// </summary>
-[NodeCategory("Data")]
+[NodeCategory("Table")]
 public static class TableNodes
 {
     /// <summary>
