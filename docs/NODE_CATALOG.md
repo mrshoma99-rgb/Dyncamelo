@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**356 nodes in 35 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**357 nodes in 35 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -31,7 +31,7 @@
 | [Navisworks.ModelItem](#navisworksmodelitem) | 19 |
 | [Navisworks.Properties](#navisworksproperties) | 11 |
 | [Navisworks.Search](#navisworkssearch) | 4 |
-| [Navisworks.Selection](#navisworksselection) | 6 |
+| [Navisworks.Selection](#navisworksselection) | 7 |
 | [Navisworks.SelectionSets](#navisworksselectionsets) | 11 |
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 7 |
 | [Navisworks.Transform](#navisworkstransform) | 5 |
@@ -444,6 +444,7 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
+| `Captured Selection` *(interactive)* | — | items | Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else |
 | `Selection.AddToCurrent` | items, document? | items | Adds items to the existing Navisworks selection (union) and returns the result |
 | `Selection.Clear` | document? | cleared | Clears the interactive Navisworks selection |
 | `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks |

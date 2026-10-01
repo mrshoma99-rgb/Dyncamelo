@@ -1,6 +1,6 @@
 {
- "version": "v0.43.0",
- "count": 356,
+ "version": "v0.44.0",
+ "count": 357,
  "categories": [
   {
    "name": "Annotation",
@@ -104,7 +104,7 @@
   },
   {
    "name": "Navisworks.Selection",
-   "count": 6
+   "count": 7
   },
   {
    "name": "Navisworks.SelectionSets",
@@ -10508,6 +10508,22 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "Captured Selection",
+   "category": "Navisworks.Selection",
+   "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else. Press Capture to (re)store the live selection, Clear to forget it.",
+   "tags": [],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The captured model items."
+    }
+   ],
+   "returns": "",
+   "interactive": true
   },
   {
    "name": "Selection.AddToCurrent",

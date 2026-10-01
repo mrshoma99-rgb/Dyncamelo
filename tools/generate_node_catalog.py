@@ -2,8 +2,8 @@
 """Generate the Dyncamelo node catalog (dyncamelo-nodes.json) from source.
 
 Walks the zero-touch node sources (src/Dyncamelo.Nodes, src/Dyncamelo.Navisworks)
-and the interactive NodeModel nodes (src/Dyncamelo.Core/Nodes plus the three in
-Dyncamelo.Nodes), mirroring the import rules in
+and the interactive NodeModel nodes (every file under those directories and
+src/Dyncamelo.Core/Nodes that defines a NodeModel subclass), mirroring the import rules in
 src/Dyncamelo.Core/Loader/AssemblyNodeLoader.cs:
 
   * every public class contributes its public static methods
@@ -43,12 +43,6 @@ ZERO_TOUCH_DIRS = [
 ]
 INTERACTIVE_DIRS = [
     REPO / "src" / "Dyncamelo.Core" / "Nodes",
-]
-INTERACTIVE_FILES = [
-    REPO / "src" / "Dyncamelo.Nodes" / "WatchListNode.cs",
-    REPO / "src" / "Dyncamelo.Nodes" / "ColorPickerNode.cs",
-    REPO / "src" / "Dyncamelo.Nodes" / "ListCreateNode.cs",
-    REPO / "src" / "Dyncamelo.Nodes" / "WatchImageNode.cs",
 ]
 EXCLUDED_PARTS = {"Internal", "bin", "obj"}
 
@@ -472,9 +466,9 @@ def parse_interactive_file(path: Path, nodes: list[dict]) -> None:
         return
 
     def const(prop: str) -> str:
-        # word boundary so "Name" never matches the "TypeName" const
-        m = re.search(r"(?<![A-Za-z])" + prop + r'\s*=\s*"((?:[^"\\]|\\.)*)"\s*;', text)
-        return m.group(1) if m else ""
+        # word boundary so "Name" never matches the "TypeName" const; the value may be literals joined with +
+        m = re.search(r"(?<![A-Za-z])" + prop + r'\s*=\s*("(?:[^"\\]|\\.)*"(?:\s*\+\s*"(?:[^"\\]|\\.)*")*)\s*;', text)
+        return eval_string_expr(m.group(1)) if m else ""
 
     ports = {"inputs": [], "outputs": []}
     for m in re.finditer(r"Add(Input|Output)\s*\(", text):
@@ -615,8 +609,12 @@ def main() -> int:
     nodes: list[dict] = []
     for f in iter_source_files(ZERO_TOUCH_DIRS):
         parse_zero_touch_file(f, nodes)
-    for f in iter_source_files(INTERACTIVE_DIRS) + INTERACTIVE_FILES:
-        parse_interactive_file(f, nodes)
+    # Every file that defines a NodeModel subclass: found by scanning, so a new interactive node cannot be forgotten.
+    seen = set()
+    for f in iter_source_files(INTERACTIVE_DIRS) + iter_source_files(ZERO_TOUCH_DIRS):
+        if f not in seen:
+            seen.add(f)
+            parse_interactive_file(f, nodes)
     nodes.append(NOTE_NODE)
 
     names = [n["name"] for n in nodes]
