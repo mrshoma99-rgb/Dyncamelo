@@ -9,8 +9,9 @@ using System.Xml;
 namespace Dyncamelo.Navisworks.Internal;
 
 // ---------------------------------------------------------------------------
-// Pure BCF 2.1 file logic: topic model, .bcfzip writer/reader, IFC GUID codec
-// and quaternion camera math. Deliberately free of Autodesk types so the
+// Pure BCF 2.1 file logic: topic model, .bcfzip writer/reader and quaternion
+// camera math (the IFC GUID codec now lives in Dyncamelo.Nodes.IfcGuidCodec,
+// shared with the IFC.GuidEncode / IFC.GuidDecode nodes). Deliberately free of Autodesk types so the
 // logic can be exercised headlessly (Linux CI / scratch harness); the node
 // layer (BcfNodes.cs) owns every Navisworks call.
 // ---------------------------------------------------------------------------
@@ -614,132 +615,6 @@ internal static class BcfFile
         }
 
         return 0.0;
-    }
-}
-
-/// <summary>
-/// The standard IFC GUID compression: a 128-bit GUID as 22 characters of the
-/// IFC base-64 alphabet (<c>0-9 A-Z a-z _ $</c>), most significant bits first
-/// (the first character encodes only 2 bits). This is the format BCF
-/// component references (<c>IfcGuid</c>) use.
-/// </summary>
-internal static class IfcGuidCodec
-{
-    private const string Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$";
-
-    /// <summary>Encodes a GUID as its 22-character IFC form.</summary>
-    internal static string Encode(Guid guid)
-    {
-        var bits = ToBigEndianBytes(guid);
-
-        // 132 bits = 4 zero pad bits + 128 GUID bits, chunked MSB-first into
-        // 22 six-bit groups.
-        var chars = new char[22];
-        int bitPosition = -4; // pad
-        for (int i = 0; i < 22; i++)
-        {
-            int value = 0;
-            for (int bit = 0; bit < 6; bit++, bitPosition++)
-            {
-                value <<= 1;
-                if (bitPosition >= 0)
-                {
-                    int byteIndex = bitPosition >> 3;
-                    int bitIndex = 7 - (bitPosition & 7);
-                    value |= (bits[byteIndex] >> bitIndex) & 1;
-                }
-            }
-
-            chars[i] = Alphabet[value];
-        }
-
-        return new string(chars);
-    }
-
-    /// <summary>
-    /// Decodes a 22-character IFC GUID (or a plain GUID string) back to a
-    /// <see cref="Guid"/>. Returns false for anything else.
-    /// </summary>
-    internal static bool TryDecode(string? text, out Guid guid)
-    {
-        guid = Guid.Empty;
-        if (string.IsNullOrEmpty(text))
-        {
-            return false;
-        }
-
-        var trimmed = text!.Trim();
-        if (Guid.TryParse(trimmed, out guid))
-        {
-            return true;
-        }
-
-        if (trimmed.Length != 22)
-        {
-            return false;
-        }
-
-        var bits = new byte[16];
-        int bitPosition = -4;
-        foreach (var ch in trimmed)
-        {
-            int value = Alphabet.IndexOf(ch);
-            if (value < 0)
-            {
-                return false;
-            }
-
-            for (int bit = 5; bit >= 0; bit--, bitPosition++)
-            {
-                if (bitPosition < 0)
-                {
-                    // The 4 pad bits must be zero (first char < '4' in the alphabet).
-                    if (((value >> bit) & 1) != 0)
-                    {
-                        return false;
-                    }
-
-                    continue;
-                }
-
-                if (((value >> bit) & 1) != 0)
-                {
-                    int byteIndex = bitPosition >> 3;
-                    int bitIndex = 7 - (bitPosition & 7);
-                    bits[byteIndex] |= (byte)(1 << bitIndex);
-                }
-            }
-        }
-
-        guid = FromBigEndianBytes(bits);
-        return true;
-    }
-
-    /// <summary>The GUID's 16 bytes in canonical big-endian (RFC 4122 text) order.</summary>
-    private static byte[] ToBigEndianBytes(Guid guid)
-    {
-        var little = guid.ToByteArray(); // Data1..Data3 little-endian
-        return new[]
-        {
-            little[3], little[2], little[1], little[0],
-            little[5], little[4],
-            little[7], little[6],
-            little[8], little[9], little[10], little[11],
-            little[12], little[13], little[14], little[15],
-        };
-    }
-
-    private static Guid FromBigEndianBytes(byte[] big)
-    {
-        var little = new[]
-        {
-            big[3], big[2], big[1], big[0],
-            big[5], big[4],
-            big[7], big[6],
-            big[8], big[9], big[10], big[11],
-            big[12], big[13], big[14], big[15],
-        };
-        return new Guid(little);
     }
 }
 
