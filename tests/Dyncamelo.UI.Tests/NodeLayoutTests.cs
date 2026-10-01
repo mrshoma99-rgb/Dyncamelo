@@ -145,7 +145,8 @@ public class NodeLayoutTests
     private static void AssertOnEdge(NodeViewModel node, Point anchor, bool rightEdge, string what)
     {
         var size = node.Size;
-        Assert.True(size.Width > 100 && size.Height > 30, what + ": node not measured, size " + size);
+        // A collapsed node is a capsule as wide as its title, so only "measured at all" is asserted.
+        Assert.True(size.Width > 60 && size.Height > 20, what + ": node not measured, size " + size);
         // Sockets are centred on the visible card outline: 7px item margin + 2px state border.
         var expectedX = rightEdge ? node.Location.X + size.Width - 9 : node.Location.X + 9;
         Assert.True(Math.Abs(anchor.X - expectedX) <= 2.5, what + ": anchor.X " + anchor.X + " expected ~" + expectedX);
