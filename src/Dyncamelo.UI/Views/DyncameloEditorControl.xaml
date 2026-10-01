@@ -364,14 +364,10 @@
                             </Style>
                         </TreeView.ItemContainerStyle>
                         <TreeView.Resources>
-                            <!-- Selection colors for the default TreeViewItem template. Their
-                                 Color is bound to the theme brushes so the selection highlight
-                                 follows a live palette swap (the palette mutates those brushes'
-                                 Color in place). -->
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.HoverBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.TextBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.PanelBorderBrush}}" />
-                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Dyc.TextBrush}}" />
+                            <!-- The selection colours of the default TreeViewItem template (SystemColors.Highlight*BrushKey) are set in
+                                 code, in the control's constructor: they are the theme's own brushes, so the selection follows a palette
+                                 swap. (A Binding with a DynamicResource Source cannot be written here: WPF throws when the entry is first
+                                 looked up, i.e. when a library item is first selected.) -->
                             <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
                                 <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
                                 <StackPanel Orientation="Horizontal" Margin="0,2">

@@ -21,6 +21,7 @@ public partial class PlayerControl : UserControl, IHostKeyTarget
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
         PreviewKeyDown += OnPlayerPreviewKeyDown;
+        PreviewMouseDown += (_, _) => Dyncamelo.UI.Services.CrashGuard.NoteActivity();
         IsVisibleChanged += (_, e) =>
         {
             if ((bool)e.NewValue && ViewModel != null)

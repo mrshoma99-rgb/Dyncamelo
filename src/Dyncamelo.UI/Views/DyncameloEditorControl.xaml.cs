@@ -58,6 +58,7 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
     {
         ThemeDependencies.EnsureLoaded();
         InitializeComponent();
+        AliasLibrarySelectionBrushes();
 
         // Double-clicking empty canvas inserts a String input node at the click
         // position (Dynamo-style quick node). handledEventsToo because the
@@ -68,6 +69,10 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             handledEventsToo: true);
 
         PreviewKeyDown += OnControlPreviewKeyDown;
+
+        // Anything done in the editor counts as recent activity for the crash guard: a WPF failure that follows is the editor's.
+        PreviewMouseDown += (_, _) => CrashGuard.NoteActivity();
+        PreviewKeyDown += (_, _) => CrashGuard.NoteActivity();
 
         // The pane's own chrome (dragging or docking it) lives outside this control. A mouse capture that outlived
         // its gesture would keep the host from receiving those clicks, so drop any stale one when the pointer leaves.
@@ -241,6 +246,18 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
     private GridLength _libraryWidth = new GridLength(230d);
 
     // The library column takes its width back where it left off; hidden, the column, its splitter and the panel are gone.
+    // The selection colours of the library tree are the theme's own brushes (the palette changes their Color in place), so the
+    // selection follows a palette change. Written in XAML as a Binding with a DynamicResource Source, WPF rejected it — and only
+    // when a library item was first selected, which is what closed Navisworks when a node was picked from the library.
+    private void AliasLibrarySelectionBrushes()
+    {
+        var resources = LibraryTree.Resources;
+        resources[SystemColors.HighlightBrushKey] = (Brush)FindResource("Dyc.HoverBrush");
+        resources[SystemColors.HighlightTextBrushKey] = (Brush)FindResource("Dyc.TextBrush");
+        resources[SystemColors.InactiveSelectionHighlightBrushKey] = (Brush)FindResource("Dyc.PanelBorderBrush");
+        resources[SystemColors.InactiveSelectionHighlightTextBrushKey] = (Brush)FindResource("Dyc.TextBrush");
+    }
+
     private void ApplyLibraryVisibility(bool visible)
     {
         if (visible)
