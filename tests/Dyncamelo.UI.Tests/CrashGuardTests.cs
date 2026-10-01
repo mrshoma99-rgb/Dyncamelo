@@ -83,4 +83,27 @@ public class CrashGuardTests
 
         Assert.True(CrashGuard.IsFromDyncamelo(caught));
     }
+
+    [Fact]
+    public void AFailureToBuildSomethingFromXamlOrAResourceIsRecognised()
+    {
+        Assert.True(CrashGuard.IsWpfLoadFailure(new System.Windows.Markup.XamlParseException("template")));
+        Assert.True(CrashGuard.IsWpfLoadFailure(new InvalidOperationException("outer", new System.Windows.Markup.XamlParseException("inner"))));
+        Assert.True(CrashGuard.IsWpfLoadFailure(new System.IO.FileNotFoundException("Could not load file or assembly")));
+        Assert.True(CrashGuard.IsWpfLoadFailure(new TypeInitializationException("Some.Type", new InvalidOperationException())));
+        Assert.False(CrashGuard.IsWpfLoadFailure(new InvalidOperationException("an ordinary failure")));
+        Assert.False(CrashGuard.IsWpfLoadFailure(new ArgumentException("another")));
+    }
+
+    [Fact]
+    public void AWpfLoadFailureSoonAfterTheEditorDidSomethingIsTheEditors()
+    {
+        // A template that cannot be built is reported with WPF frames only and, for a control of Nodify's, a file that is not ours.
+        CrashGuard.NoteActivity();
+        var failure = new System.Windows.Markup.XamlParseException("Cannot create an instance of 'Something'");
+        Assert.True(CrashGuard.IsOurFailure(failure));
+
+        // Without a WPF load failure the activity alone proves nothing.
+        Assert.False(CrashGuard.IsOurFailure(new InvalidOperationException("not WPF loading and not our code")));
+    }
 }

@@ -989,107 +989,101 @@
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.NumberInput">
-        <TextBox Style="{StaticResource Dyc.TextBox}"
-                 MinWidth="90"
-                 Margin="4"
-                 Text="{Binding Value}" />
+        <views:ScrubNumberBox Margin="4"
+                              MinWidth="110"
+                              Label="Value"
+                              Value="{Binding Value, Mode=TwoWay}"
+                              Step="1"
+                              LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                              ToolTip="Drag to scrub (Shift = fine, Ctrl = snap), click to type a number or arithmetic such as 2*3+1." />
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.NumberSlider">
+        <!-- The same scrub field as every other number in the editor; the slider fill shows the position between min and max. -->
         <StackPanel Margin="4" MinWidth="200">
-            <TextBox Style="{StaticResource Dyc.TextBox}"
-                     HorizontalAlignment="Stretch"
-                     Text="{Binding Value}" />
+            <views:ScrubNumberBox Label="Value"
+                                  Value="{Binding Value, Mode=TwoWay}"
+                                  Minimum="{Binding Min}"
+                                  Maximum="{Binding Max}"
+                                  SoftMinimum="{Binding Min}"
+                                  SoftMaximum="{Binding Max}"
+                                  Step="{Binding Step}"
+                                  LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                  ToolTip="Drag to scrub (Shift = fine, Ctrl = snap), click to type." />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="44" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="44" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Style="{StaticResource Dyc.TextBox}"
-                         FontSize="10"
-                         Text="{Binding Min}"
-                         ToolTip="Minimum" />
-                <Slider Grid.Column="1"
-                        Margin="4,0"
-                        VerticalAlignment="Center"
-                        Minimum="{Binding Min}"
-                        Maximum="{Binding Max}"
-                        Value="{Binding Value}"
-                        IsSnapToTickEnabled="True"
-                        TickFrequency="{Binding Step}" />
-                <TextBlock Grid.Column="2"
-                           Margin="0,0,4,0"
-                           VerticalAlignment="Center"
-                           MinWidth="30"
-                           TextAlignment="Right"
-                           FontSize="10"
-                           Foreground="{DynamicResource Dyc.AccentBrush}"
-                           ToolTip="Current value"
-                           Text="{Binding Value, StringFormat={}{0:0.###}}" />
-                <TextBox Grid.Column="3"
-                         Style="{StaticResource Dyc.TextBox}"
-                         FontSize="10"
-                         Text="{Binding Max}"
-                         ToolTip="Maximum" />
+                <views:ScrubNumberBox Grid.Column="0" Margin="0,0,2,0"
+                                      Label="min"
+                                      Value="{Binding Min, Mode=TwoWay}"
+                                      Step="{Binding Step}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Lowest value of the slider" />
+                <views:ScrubNumberBox Grid.Column="1" Margin="2,0"
+                                      Label="max"
+                                      Value="{Binding Max, Mode=TwoWay}"
+                                      Step="{Binding Step}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Highest value of the slider" />
+                <views:ScrubNumberBox Grid.Column="2" Margin="2,0,0,0"
+                                      Label="step"
+                                      Value="{Binding Step, Mode=TwoWay}"
+                                      Minimum="0.000001"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Step size (the field snaps to this)" />
             </Grid>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
-                <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
-                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
-                <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
-                         Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
-            </StackPanel>
         </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="NodeBody.IntegerSlider">
+        <!-- The same scrub field as every other number in the editor; the slider fill shows the position between min and max. -->
         <StackPanel Margin="4" MinWidth="200">
-            <TextBox Style="{StaticResource Dyc.TextBox}"
-                     HorizontalAlignment="Stretch"
-                     Text="{Binding Value}" />
+            <views:ScrubNumberBox Label="Value"
+                                  Value="{Binding Value, Mode=TwoWay}"
+                                  Minimum="{Binding Min}"
+                                  Maximum="{Binding Max}"
+                                  SoftMinimum="{Binding Min}"
+                                  SoftMaximum="{Binding Max}"
+                                  Step="{Binding Step}" IsInteger="True"
+                                  LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                  ToolTip="Drag to scrub (Shift = fine, Ctrl = snap), click to type." />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="44" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="44" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"
-                         Style="{StaticResource Dyc.TextBox}"
-                         FontSize="10"
-                         Text="{Binding Min}"
-                         ToolTip="Minimum" />
-                <Slider Grid.Column="1"
-                        Margin="4,0"
-                        VerticalAlignment="Center"
-                        Minimum="{Binding Min}"
-                        Maximum="{Binding Max}"
-                        Value="{Binding Value}"
-                        IsSnapToTickEnabled="True"
-                        TickFrequency="{Binding Step}" />
-                <TextBlock Grid.Column="2"
-                           Margin="0,0,4,0"
-                           VerticalAlignment="Center"
-                           MinWidth="30"
-                           TextAlignment="Right"
-                           FontSize="10"
-                           Foreground="{DynamicResource Dyc.AccentBrush}"
-                           ToolTip="Current value"
-                           Text="{Binding Value}" />
-                <TextBox Grid.Column="3"
-                         Style="{StaticResource Dyc.TextBox}"
-                         FontSize="10"
-                         Text="{Binding Max}"
-                         ToolTip="Maximum" />
+                <views:ScrubNumberBox Grid.Column="0" Margin="0,0,2,0"
+                                      Label="min" IsInteger="True"
+                                      Value="{Binding Min, Mode=TwoWay}"
+                                      Step="{Binding Step}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Lowest value of the slider" />
+                <views:ScrubNumberBox Grid.Column="1" Margin="2,0"
+                                      Label="max" IsInteger="True"
+                                      Value="{Binding Max, Mode=TwoWay}"
+                                      Step="{Binding Step}"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Highest value of the slider" />
+                <views:ScrubNumberBox Grid.Column="2" Margin="2,0,0,0"
+                                      Label="step" IsInteger="True"
+                                      Value="{Binding Step, Mode=TwoWay}"
+                                      Minimum="1"
+                                      LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
+                                      ToolTip="Step size (the field snaps to this)" />
             </Grid>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
-                <TextBlock Text="step" VerticalAlignment="Center" FontSize="10"
-                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" Margin="0,0,4,0" />
-                <TextBox Style="{StaticResource Dyc.TextBox}" FontSize="10" Width="50"
-                         Text="{Binding Step}" ToolTip="Step size (slider snaps to this)" />
-            </StackPanel>
         </StackPanel>
     </DataTemplate>
 

@@ -868,10 +868,37 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 
         node.X = location.X;
         node.Y = location.Y;
+        Dyncamelo.UI.Services.CrashGuard.NoteActivity();
+        var now = DateTime.UtcNow;
+        _recentlyAdded.RemoveAll(e => now - e.When > TimeSpan.FromMinutes(1));
+        _recentlyAdded.Add((node, now));
         _graph.AddNode(node);
         Library.NoteUsed(libraryId);
         StatusMessage = "Added " + node.Name + ".";
         return FindNodeViewModel(node);
+    }
+
+    private readonly List<(NodeModel Node, DateTime When)> _recentlyAdded = new List<(NodeModel, DateTime)>();
+
+    /// <summary>
+    /// Takes away the nodes added from the library in the last few seconds. The crash guard calls it after a node's visual failed to
+    /// build: left in the graph it would fail again at every layout pass.
+    /// </summary>
+    /// <returns>How many nodes were taken away.</returns>
+    public int DiscardRecentlyAddedNodes()
+    {
+        var cutoff = DateTime.UtcNow - TimeSpan.FromSeconds(15);
+        var removed = 0;
+        foreach (var entry in _recentlyAdded.Where(e => e.When >= cutoff).ToList())
+        {
+            if (_graph.RemoveNode(entry.Node))
+            {
+                removed++;
+            }
+        }
+
+        _recentlyAdded.Clear();
+        return removed;
     }
 
     /// <summary>Adds an empty note at the given graph-space location.</summary>

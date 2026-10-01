@@ -16,10 +16,6 @@
                               Size="Large"
                               ShowText="True"
                               Orientation="Vertical" />
-        <local:NWRibbonButton x:Uid="Button_DyncameloRunLast" Id="ID_Button_DyncameloRunLast"
-                              Size="Large"
-                              ShowText="True"
-                              Orientation="Vertical" />
         <local:NWRibbonButton x:Uid="Button_DyncameloAbout" Id="ID_Button_DyncameloAbout"
                               Size="Large"
                               ShowText="True"
