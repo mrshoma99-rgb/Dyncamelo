@@ -6,6 +6,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using IfcGuidCodec = Dyncamelo.Nodes.IfcGuidCodec;
 
 namespace Dyncamelo.Navisworks;
 
