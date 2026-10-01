@@ -24,6 +24,8 @@
     <ProjectReference Include="..\..\src\Dyncamelo.Core\Dyncamelo.Core.csproj" />
     <ProjectReference Include="..\..\src\Dyncamelo.UI\Dyncamelo.UI.csproj" />
     <ProjectReference Include="..\..\src\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
+    <!-- The editor hosted the way Navisworks hosts it runs in a process of its own (HostedLikeNavisworksTests); the exe is copied next to the tests. -->
+    <ProjectReference Include="..\Dyncamelo.UI.HostProbe\Dyncamelo.UI.HostProbe.csproj" />
   </ItemGroup>
 
 </Project>
