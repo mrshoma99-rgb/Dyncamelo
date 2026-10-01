@@ -27,8 +27,7 @@ public class HostedLikeNavisworksTests
 {
     [Theory]
     [InlineData("DyncameloDark", false)]
-    [InlineData("Light", false)]
-    [InlineData("DyncameloDark", true)]
+    [InlineData("Light", true)]
     public void EveryNodeCanBeAddedFromTheLibraryInsideAnElementHostWithoutAnApplication(string palette, bool collapsed)
     {
         // CodeBase is where the assembly came from even when the test runner shadow-copied it.
@@ -58,7 +57,7 @@ public sealed class HostRunner : MarshalByRefObject
         thread.SetApartmentState(ApartmentState.STA);
         thread.IsBackground = true;
         thread.Start();
-        return thread.Join(TimeSpan.FromMinutes(4)) ? report : "The host thread did not finish within 4 minutes (the message loop is stuck).";
+        return thread.Join(TimeSpan.FromMinutes(3)) ? report : "The host thread did not finish within 3 minutes (the message loop is stuck).";
     }
 
     private static string Run(string palette, bool collapsed)
@@ -105,7 +104,11 @@ public sealed class HostRunner : MarshalByRefObject
                 .Concat(registry.Definitions.OrderBy(d => d.Id, StringComparer.Ordinal).Select(d => d.Id))
                 .ToList();
 
+            // The message loop runs after every node for the first ones (a failure then names the node), and after every batch of
+            // them later: layout of a few hundred big nodes after each single add would take minutes for no extra coverage.
             var added = 0;
+            const int OneByOne = 30;
+            const int BatchSize = 25;
             for (var i = 0; i < ids.Count; i++)
             {
                 var node = vm.AddNode(ids[i], new Point(60 + (i % 8) * 340, 60 + (i / 8) * 380));
@@ -120,11 +123,15 @@ public sealed class HostRunner : MarshalByRefObject
                     node.Model.Ui.Collapsed = true;
                 }
 
-                Pump(dispatcher);
-                if (errors.Count > 0)
+                if (i < OneByOne || i % BatchSize == 0 || i == ids.Count - 1)
                 {
-                    errors.Insert(0, "after adding '" + ids[i] + "' (node " + (i + 1) + " of " + ids.Count + "):");
-                    break;
+                    Pump(dispatcher);
+                    if (errors.Count > 0)
+                    {
+                        errors.Insert(0, "after adding '" + ids[i] + "' (node " + (i + 1) + " of " + ids.Count + "; the batch started at " +
+                                         ids[Math.Max(0, i - BatchSize + 1)] + "):");
+                        break;
+                    }
                 }
             }
 

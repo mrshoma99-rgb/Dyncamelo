@@ -20,6 +20,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are skipped; text such as "12.5" is read as a number).</param>
     /// <returns>The total; 0 for an empty list.</returns>
     [NodeName("List.Sum")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("sum")]
     [NodeDescription("Adds up the numbers of a list (nulls are skipped, an empty list gives 0).")]
@@ -39,6 +40,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are skipped).</param>
     /// <returns>The product; 1 for an empty list.</returns>
     [NodeName("List.Product")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("product")]
     [NodeDescription("Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).")]
@@ -58,6 +60,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
     /// <returns>The arithmetic mean.</returns>
     [NodeName("List.Average")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("average")]
     [NodeDescription("The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).")]
@@ -73,6 +76,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
     /// <returns>The median; the mean of the two middle values when the count is even.</returns>
     [NodeName("List.Median")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("median")]
     [NodeDescription("The middle value of the numbers of a list (the mean of the two middle ones when the count is even).")]
@@ -89,6 +93,7 @@ public static class ListStatsNodes
     /// <param name="percent">Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).</param>
     /// <returns>The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC).</returns>
     [NodeName("List.Percentile")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("value")]
     [NodeDescription("The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).")]
@@ -111,6 +116,7 @@ public static class ListStatsNodes
     /// <param name="sample">True divides by n-1 (a sample of a larger population); false (default) divides by n.</param>
     /// <returns>The standard deviation.</returns>
     [NodeName("List.StandardDeviation")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [return: NodeName("standardDeviation")]
     [NodeDescription("The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).")]
@@ -138,6 +144,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are skipped).</param>
     /// <returns>count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers.</returns>
     [NodeName("List.Statistics")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("count", "sum", "min", "max", "average", "median", "standardDeviation")]
     [PortKinds("integer", "number", "number", "number", "number", "number", "number")]
@@ -175,6 +182,7 @@ public static class ListStatsNodes
     /// <param name="list">The numbers (nulls are an error here, so positions stay aligned).</param>
     /// <returns>A list as long as the input: each item is the sum of everything up to and including it.</returns>
     [NodeName("List.CumulativeSum")]
+    [NodeCategory("List.Statistics")]
     [return: NodeName("totals")]
     [NodeDescription("A running total: each item is the sum of the list up to and including that position.")]
     [NodeSearchTags("running", "accumulate", "progress", "s-curve")]
@@ -201,6 +209,7 @@ public static class ListStatsNodes
     /// <param name="list">The values to tally (nulls are counted as one value, shown empty).</param>
     /// <returns>The distinct values in order of first appearance and how many times each occurs.</returns>
     [NodeName("List.CountBy")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("values", "counts")]
     [PortKinds("", "integer*")]
@@ -245,6 +254,7 @@ public static class ListStatsNodes
     /// <param name="list">The values to check.</param>
     /// <returns>The repeated values (first appearance order) and how many times each occurs.</returns>
     [NodeName("List.Duplicates")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("duplicates", "counts")]
     [PortKinds("", "integer*")]
@@ -273,6 +283,7 @@ public static class ListStatsNodes
     /// <param name="list">The values to check (at least one non-null).</param>
     /// <returns>The most common value (the first to appear wins a tie) and how many times it occurs.</returns>
     [NodeName("List.MostCommon")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("item", "count")]
     [PortKinds("", "integer")]
@@ -305,6 +316,7 @@ public static class ListStatsNodes
     /// <param name="bins">How many bins, from the smallest to the largest value.</param>
     /// <returns>For each bin: its lower edge, upper edge, count and a text label.</returns>
     [NodeName("List.Histogram")]
+    [NodeCategory("List.Statistics")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("lower", "upper", "counts", "labels")]
     [PortKinds("number*", "number*", "integer*", "text*")]

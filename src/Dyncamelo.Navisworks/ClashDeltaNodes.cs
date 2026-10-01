@@ -22,6 +22,7 @@ public static class ClashDeltaNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written path and the number of results captured.</returns>
     [NodeName("Clash.SnapshotToFile")]
+    [NodeCategory("Navisworks.Clash.Report")]
     [NodeDescription("Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.")]
     [NodeSearchTags("clash", "snapshot", "save", "history", "delta", "baseline", "json")]
     [MultiReturn("filePath", "resultCount")]
@@ -106,6 +107,7 @@ public static class ClashDeltaNodes
     /// <param name="newPath">The newer snapshot .json.</param>
     /// <returns>Result dictionaries per bucket plus a counts dictionary.</returns>
     [NodeName("Clash.CompareSnapshots")]
+    [NodeCategory("Navisworks.Clash.Report")]
     [NodeDescription("Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) — the weekly delta report no plugin does via live API. Pure file IO: needs no open model.")]
     [NodeSearchTags("clash", "compare", "delta", "diff", "new", "resolved", "persisting", "report")]
     [MultiReturn("newResults", "resolved", "persisting", "counts")]

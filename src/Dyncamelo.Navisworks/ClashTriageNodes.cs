@@ -27,6 +27,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The test, the stored group, and how many results were added, moved and skipped.</returns>
     [NodeName("Clash.GroupResults")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription(
         "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping " +
         "rule, not a built-in one: filter results any way you like, then group what came out. Results " +
@@ -243,6 +244,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The group, the results inside it, the group's own status, and the result count.</returns>
     [NodeName("ClashGroup.ByName")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Finds a clash result group by test name + group name and opens it up: the results inside, the " +
@@ -295,6 +297,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>One flat list of every group, with each group's name, its test's name and its result count (index-aligned).</returns>
     [NodeName("Clash.AllGroups")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Every result group of every clash test in the document, as ONE flat list — the whole-project " +
@@ -340,6 +343,7 @@ public static class ClashTriageNodes
     /// <param name="group">The result group (e.g. from ClashTest.Groups).</param>
     /// <returns>The results inside it, its name and status, how many results it holds, and the test it belongs to (object and name).</returns>
     [NodeName("ClashGroup.Info")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Everything about a clash result group, straight from the group object — the results inside, its " +
@@ -392,6 +396,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The groups with their names, statuses and result counts, index-aligned.</returns>
     [NodeName("ClashTest.Groups")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.")]
     [NodeSearchTags("clash", "test", "groups", "list", "names", "statuses", "overview")]
@@ -433,6 +438,7 @@ public static class ClashTriageNodes
     /// <param name="result">The clash result.</param>
     /// <returns>The crossing angle, each element's box shape (slab/wall/riser/run/block, "none" without geometry) and its slope from horizontal (0–90°).</returns>
     [NodeName("ClashResult.Orientation")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "ClashResult.Angle with world context: the crossing angle PLUS each element's bounding-box shape — " +
@@ -466,6 +472,7 @@ public static class ClashTriageNodes
     /// <param name="shape2">Required shape of the other element (the pair is matched in either order).</param>
     /// <returns>The matching results, input order preserved (results without geometry are dropped).</returns>
     [NodeName("Clash.FilterByOrientation")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Keeps only the clashes between elements of the given box shapes, matched in either order — " +
@@ -516,6 +523,7 @@ public static class ClashTriageNodes
     /// <param name="test">The clash test.</param>
     /// <returns>The test's display name.</returns>
     [NodeName("ClashTest.Name")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("The display name of a clash test — the one-output companion of ClashTest.Info for wiring names into reports, group lookups and file paths.")]
     [NodeSearchTags("clash", "test", "name", "display", "title")]
@@ -529,6 +537,7 @@ public static class ClashTriageNodes
     /// <param name="status">New, Active, Reviewed, Approved or Resolved.</param>
     /// <returns>The chosen status text.</returns>
     [NodeName("Clash.Status")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeDescription("A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.")]
     [NodeSearchTags("clash", "status", "dropdown", "choice", "new", "active", "reviewed", "approved", "resolved")]
@@ -548,6 +557,7 @@ public static class ClashTriageNodes
     /// <param name="resolved">Include Resolved results.</param>
     /// <returns>The picked statuses as comma-separated text (e.g. "New,Active") — the form every status input accepts.</returns>
     [NodeName("Clash.Statuses")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [NodeDescription(
         "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and " +
@@ -606,6 +616,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The clashing model items (pass-through for chaining, e.g. into Flow.Then or a viewpoint save).</returns>
     [NodeName("ClashResult.Focus")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription(
         "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides " +
         "everything else (isolate), zooms the camera to the clashing pair, and optionally selects the " +

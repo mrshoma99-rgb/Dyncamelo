@@ -40,7 +40,11 @@
   },
   {
    "name": "List",
-   "count": 63
+   "count": 51
+  },
+  {
+   "name": "List.Statistics",
+   "count": 12
   },
   {
    "name": "Logic",
@@ -63,8 +67,24 @@
    "count": 6
   },
   {
-   "name": "Navisworks.Clash",
-   "count": 45
+   "name": "Navisworks.Clash.Filter",
+   "count": 7
+  },
+  {
+   "name": "Navisworks.Clash.Group",
+   "count": 9
+  },
+  {
+   "name": "Navisworks.Clash.Report",
+   "count": 3
+  },
+  {
+   "name": "Navisworks.Clash.Results",
+   "count": 14
+  },
+  {
+   "name": "Navisworks.Clash.Tests",
+   "count": 12
   },
   {
    "name": "Navisworks.Comments",
@@ -124,7 +144,15 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 22
+   "count": 15
+  },
+  {
+   "name": "Navisworks.Viewpoints.Files",
+   "count": 2
+  },
+  {
+   "name": "Navisworks.Viewpoints.Folders",
+   "count": 5
   },
   {
    "name": "Report",
@@ -5030,33 +5058,6 @@
    "returns": ""
   },
   {
-   "name": "List.Average",
-   "category": "List",
-   "description": "The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).",
-   "tags": [
-    "mean",
-    "aggregate",
-    "avg",
-    "kpi"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required.",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "average",
-     "type": "number",
-     "description": "The arithmetic mean."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "List.Chop",
    "category": "List",
    "description": "Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).",
@@ -5181,39 +5182,6 @@
    "returns": ""
   },
   {
-   "name": "List.CountBy",
-   "category": "List",
-   "description": "Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.",
-   "tags": [
-    "tally",
-    "frequency",
-    "distribution",
-    "group",
-    "count",
-    "how many of each"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The values to tally (nulls are counted as one value, shown empty)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "values",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "integer[]",
-     "description": ""
-    }
-   ],
-   "returns": "The distinct values in order of first appearance and how many times each occurs."
-  },
-  {
    "name": "List.CountTrue",
    "category": "List",
    "description": "Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).",
@@ -5268,32 +5236,6 @@
    ],
    "returns": "",
    "interactive": true
-  },
-  {
-   "name": "List.CumulativeSum",
-   "category": "List",
-   "description": "A running total: each item is the sum of the list up to and including that position.",
-   "tags": [
-    "running",
-    "accumulate",
-    "progress",
-    "s-curve"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are an error here, so positions stay aligned)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "totals",
-     "type": "number[]",
-     "description": "A list as long as the input: each item is the sum of everything up to and including it."
-    }
-   ],
-   "returns": ""
   },
   {
    "name": "List.Cycle",
@@ -5390,39 +5332,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "List.Duplicates",
-   "category": "List",
-   "description": "The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.",
-   "tags": [
-    "duplicate",
-    "repeated",
-    "twice",
-    "unique",
-    "check",
-    "audit"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The values to check."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "duplicates",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "integer[]",
-     "description": ""
-    }
-   ],
-   "returns": "The repeated values (first appearance order) and how many times each occurs."
   },
   {
    "name": "List.FilterByBoolMask",
@@ -5646,55 +5555,6 @@
    "returns": "Dictionary with \"groups\" (list of lists) and \"uniqueKeys\"."
   },
   {
-   "name": "List.Histogram",
-   "category": "List",
-   "description": "Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.",
-   "tags": [
-    "distribution",
-    "bins",
-    "buckets",
-    "chart",
-    "frequency",
-    "range"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
-    },
-    {
-     "name": "bins",
-     "type": "integer",
-     "description": "How many bins, from the smallest to the largest value.",
-     "default": "10"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "lower",
-     "type": "number[]",
-     "description": ""
-    },
-    {
-     "name": "upper",
-     "type": "number[]",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "integer[]",
-     "description": ""
-    },
-    {
-     "name": "labels",
-     "type": "string[]",
-     "description": ""
-    }
-   ],
-   "returns": "For each bin: its lower edge, upper edge, count and a text label."
-  },
-  {
    "name": "List.IndexOf",
    "category": "List",
    "description": "Returns the index of the first occurrence of a value in a list (-1 when absent).",
@@ -5846,31 +5706,6 @@
    "returns": ""
   },
   {
-   "name": "List.Median",
-   "category": "List",
-   "description": "The middle value of the numbers of a list (the mean of the two middle ones when the count is even).",
-   "tags": [
-    "middle",
-    "aggregate",
-    "typical"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "median",
-     "type": "number",
-     "description": "The median; the mean of the two middle values when the count is even."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "List.Merge",
    "category": "List",
    "description": "Concatenates any number of lists into one — a multi-input socket: connect as many wires as you like, in the order you want them.",
@@ -5924,37 +5759,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "List.MostCommon",
-   "category": "List",
-   "description": "The value that occurs most often in a list (the earliest wins a tie) and how many times.",
-   "tags": [
-    "mode",
-    "frequent",
-    "popular",
-    "typical"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The values to check (at least one non-null)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "item",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "count",
-     "type": "integer",
-     "description": ""
-    }
-   ],
-   "returns": "The most common value (the first to appear wins a tie) and how many times it occurs."
   },
   {
    "name": "List.OfRepeatedItem",
@@ -6017,63 +5821,6 @@
      "name": "pairs",
      "type": "any[]",
      "description": "[item0, item1], [item1, item2], … (one pair fewer than items, or as many with 'cyclic')."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "List.Percentile",
-   "category": "List",
-   "description": "The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).",
-   "tags": [
-    "quantile",
-    "quartile",
-    "aggregate",
-    "percent"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
-    },
-    {
-     "name": "percent",
-     "type": "number",
-     "description": "Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).",
-     "default": "90"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "value",
-     "type": "number",
-     "description": "The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "List.Product",
-   "category": "List",
-   "description": "Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).",
-   "tags": [
-    "multiply",
-    "aggregate",
-    "times"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "product",
-     "type": "number",
-     "description": "The product; 1 for an empty list."
     }
    ],
    "returns": ""
@@ -6562,129 +6309,6 @@
    "returns": ""
   },
   {
-   "name": "List.StandardDeviation",
-   "category": "List",
-   "description": "The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).",
-   "tags": [
-    "spread",
-    "variance",
-    "deviation",
-    "stdev",
-    "statistics"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one (two for a sample) is required."
-    },
-    {
-     "name": "sample",
-     "type": "boolean",
-     "description": "True divides by n-1 (a sample of a larger population); false (default) divides by n.",
-     "default": "false"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "standardDeviation",
-     "type": "number",
-     "description": "The standard deviation."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "List.Statistics",
-   "category": "List",
-   "description": "Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.",
-   "tags": [
-    "summary",
-    "describe",
-    "aggregate",
-    "kpi",
-    "qto",
-    "min",
-    "max",
-    "statistics"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped).",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "count",
-     "type": "integer",
-     "description": ""
-    },
-    {
-     "name": "sum",
-     "type": "number",
-     "description": ""
-    },
-    {
-     "name": "min",
-     "type": "number",
-     "description": ""
-    },
-    {
-     "name": "max",
-     "type": "number",
-     "description": ""
-    },
-    {
-     "name": "average",
-     "type": "number",
-     "description": ""
-    },
-    {
-     "name": "median",
-     "type": "number",
-     "description": ""
-    },
-    {
-     "name": "standardDeviation",
-     "type": "number",
-     "description": ""
-    }
-   ],
-   "returns": "count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers."
-  },
-  {
-   "name": "List.Sum",
-   "category": "List",
-   "description": "Adds up the numbers of a list (nulls are skipped, an empty list gives 0).",
-   "tags": [
-    "total",
-    "add",
-    "aggregate",
-    "quantity",
-    "qto",
-    "sum"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The numbers (nulls are skipped; text such as \"12.5\" is read as a number).",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "sum",
-     "type": "number",
-     "description": "The total; 0 for an empty list."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "List.TakeEveryNthItem",
    "category": "List",
    "description": "Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).",
@@ -6896,6 +6520,410 @@
      "name": "pairs",
      "type": "any[]",
      "description": "[first0, second0], [first1, second1], … as long as the shorter list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Average",
+   "category": "List.Statistics",
+   "description": "The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).",
+   "tags": [
+    "mean",
+    "aggregate",
+    "avg",
+    "kpi"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "average",
+     "type": "number",
+     "description": "The arithmetic mean."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.CountBy",
+   "category": "List.Statistics",
+   "description": "Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.",
+   "tags": [
+    "tally",
+    "frequency",
+    "distribution",
+    "group",
+    "count",
+    "how many of each"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to tally (nulls are counted as one value, shown empty)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "values",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "integer[]",
+     "description": ""
+    }
+   ],
+   "returns": "The distinct values in order of first appearance and how many times each occurs."
+  },
+  {
+   "name": "List.CumulativeSum",
+   "category": "List.Statistics",
+   "description": "A running total: each item is the sum of the list up to and including that position.",
+   "tags": [
+    "running",
+    "accumulate",
+    "progress",
+    "s-curve"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are an error here, so positions stay aligned)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "totals",
+     "type": "number[]",
+     "description": "A list as long as the input: each item is the sum of everything up to and including it."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Duplicates",
+   "category": "List.Statistics",
+   "description": "The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.",
+   "tags": [
+    "duplicate",
+    "repeated",
+    "twice",
+    "unique",
+    "check",
+    "audit"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to check."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "duplicates",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "integer[]",
+     "description": ""
+    }
+   ],
+   "returns": "The repeated values (first appearance order) and how many times each occurs."
+  },
+  {
+   "name": "List.Histogram",
+   "category": "List.Statistics",
+   "description": "Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.",
+   "tags": [
+    "distribution",
+    "bins",
+    "buckets",
+    "chart",
+    "frequency",
+    "range"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    },
+    {
+     "name": "bins",
+     "type": "integer",
+     "description": "How many bins, from the smallest to the largest value.",
+     "default": "10"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "lower",
+     "type": "number[]",
+     "description": ""
+    },
+    {
+     "name": "upper",
+     "type": "number[]",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "integer[]",
+     "description": ""
+    },
+    {
+     "name": "labels",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "For each bin: its lower edge, upper edge, count and a text label."
+  },
+  {
+   "name": "List.Median",
+   "category": "List.Statistics",
+   "description": "The middle value of the numbers of a list (the mean of the two middle ones when the count is even).",
+   "tags": [
+    "middle",
+    "aggregate",
+    "typical"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "median",
+     "type": "number",
+     "description": "The median; the mean of the two middle values when the count is even."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.MostCommon",
+   "category": "List.Statistics",
+   "description": "The value that occurs most often in a list (the earliest wins a tie) and how many times.",
+   "tags": [
+    "mode",
+    "frequent",
+    "popular",
+    "typical"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The values to check (at least one non-null)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": ""
+    }
+   ],
+   "returns": "The most common value (the first to appear wins a tie) and how many times it occurs."
+  },
+  {
+   "name": "List.Percentile",
+   "category": "List.Statistics",
+   "description": "The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).",
+   "tags": [
+    "quantile",
+    "quartile",
+    "aggregate",
+    "percent"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one is required."
+    },
+    {
+     "name": "percent",
+     "type": "number",
+     "description": "Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).",
+     "default": "90"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "number",
+     "description": "The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Product",
+   "category": "List.Statistics",
+   "description": "Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).",
+   "tags": [
+    "multiply",
+    "aggregate",
+    "times"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "product",
+     "type": "number",
+     "description": "The product; 1 for an empty list."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.StandardDeviation",
+   "category": "List.Statistics",
+   "description": "The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).",
+   "tags": [
+    "spread",
+    "variance",
+    "deviation",
+    "stdev",
+    "statistics"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped); at least one (two for a sample) is required."
+    },
+    {
+     "name": "sample",
+     "type": "boolean",
+     "description": "True divides by n-1 (a sample of a larger population); false (default) divides by n.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "standardDeviation",
+     "type": "number",
+     "description": "The standard deviation."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "List.Statistics",
+   "category": "List.Statistics",
+   "description": "Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.",
+   "tags": [
+    "summary",
+    "describe",
+    "aggregate",
+    "kpi",
+    "qto",
+    "min",
+    "max",
+    "statistics"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "count",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "sum",
+     "type": "number",
+     "description": ""
+    },
+    {
+     "name": "min",
+     "type": "number",
+     "description": ""
+    },
+    {
+     "name": "max",
+     "type": "number",
+     "description": ""
+    },
+    {
+     "name": "average",
+     "type": "number",
+     "description": ""
+    },
+    {
+     "name": "median",
+     "type": "number",
+     "description": ""
+    },
+    {
+     "name": "standardDeviation",
+     "type": "number",
+     "description": ""
+    }
+   ],
+   "returns": "count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers."
+  },
+  {
+   "name": "List.Sum",
+   "category": "List.Statistics",
+   "description": "Adds up the numbers of a list (nulls are skipped, an empty list gives 0).",
+   "tags": [
+    "total",
+    "add",
+    "aggregate",
+    "quantity",
+    "qto",
+    "sum"
+   ],
+   "inputs": [
+    {
+     "name": "list",
+     "type": "any[]",
+     "description": "The numbers (nulls are skipped; text such as \"12.5\" is read as a number).",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "sum",
+     "type": "number",
+     "description": "The total; 0 for an empty list."
     }
    ],
    "returns": ""
@@ -10032,105 +10060,8 @@
    "returns": ""
   },
   {
-   "name": "Clash.AllGroups",
-   "category": "Navisworks.Clash",
-   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (which needs List@Level to iterate). Tests without groups contribute nothing.",
-   "tags": [
-    "clash",
-    "groups",
-    "all",
-    "project",
-    "every",
-    "tests",
-    "flat",
-    "loop",
-    "batch"
-   ],
-   "inputs": [
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "groups",
-     "type": "ClashResult[]",
-     "description": ""
-    },
-    {
-     "name": "names",
-     "type": "string[]",
-     "description": ""
-    },
-    {
-     "name": "testNames",
-     "type": "string[]",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "integer[]",
-     "description": ""
-    }
-   ],
-   "returns": "One flat list of every group, with each group's name, its test's name and its result count (index-aligned)."
-  },
-  {
-   "name": "Clash.CompareSnapshots",
-   "category": "Navisworks.Clash",
-   "description": "Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) — the weekly delta report no plugin does via live API. Pure file IO: needs no open model.",
-   "tags": [
-    "clash",
-    "compare",
-    "delta",
-    "diff",
-    "new",
-    "resolved",
-    "persisting",
-    "report"
-   ],
-   "inputs": [
-    {
-     "name": "oldPath",
-     "type": "string",
-     "description": "The older snapshot .json (the baseline)."
-    },
-    {
-     "name": "newPath",
-     "type": "string",
-     "description": "The newer snapshot .json."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "newResults",
-     "type": "dict[]",
-     "description": ""
-    },
-    {
-     "name": "resolved",
-     "type": "dict[]",
-     "description": ""
-    },
-    {
-     "name": "persisting",
-     "type": "dict[]",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "dict",
-     "description": ""
-    }
-   ],
-   "returns": "Result dictionaries per bucket plus a counts dictionary."
-  },
-  {
    "name": "Clash.Deduplicate",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or mirrored across an A-vs-B and B-vs-A test matrix, count once. Pairs are unordered and matched by stable item identity (InstanceGuid, else tree path); the first result in input order is the representative, the rest come out on duplicates. 400 raw results, 60 real issues.",
    "tags": [
     "clash",
@@ -10166,7 +10097,7 @@
   },
   {
    "name": "Clash.FilterByAngle",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.",
    "tags": [
     "clash",
@@ -10207,7 +10138,7 @@
   },
   {
    "name": "Clash.FilterByDepth",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps clashes whose penetration depth falls in a range, in the unit you name — minDepth 0.025 with units Meters drops every grazing clash shallower than 25 mm, the #1 noise reducer. Depth is positive for overlaps (hard clashes); clearance-test results carry their gap as a NEGATIVE depth, so a range like -1..0 keeps clearance violations instead.",
    "tags": [
     "clash",
@@ -10262,7 +10193,7 @@
   },
   {
    "name": "Clash.FilterByItemProperty",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps clashes whose two items' PROPERTY values match a pair of texts, in either order — the semantic clash rule: category \"Element\", property \"Category\", value1 \"Pipe\", value2 \"Wall\" keeps pipe-vs-wall clashes whichever side the pipe landed on. An empty value matches anything (one-sided rules). Looks up the property on the item and, by default, its ancestors — clash items are often bare geometry while the data lives on the element above. The geometric sibling is Clash.FilterByOrientation.",
    "tags": [
     "clash",
@@ -10333,7 +10264,7 @@
   },
   {
    "name": "Clash.FilterByOrientation",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps only the clashes between elements of the given box shapes, matched in either order — shape1=run + shape2=wall keeps pipes through walls, run/riser + slab keeps pipes through floors; Clash.FilterByAngle alone cannot tell those apart (both cross at ~90°). Shapes are ClashResult.Orientation's: slab, wall, riser, run, block, or any.",
    "tags": [
     "clash",
@@ -10376,7 +10307,7 @@
   },
   {
    "name": "Clash.FilterBySet",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) — sets are the coordination scope language: \"only my package\", \"only against the existing building\". invert turns it into the classic ignore-list: drop every clash touching the \"Accepted penetrations\" set. An item counts as in the set when itself OR any ancestor is a member, matching how Navisworks selections include descendants.",
    "tags": [
     "clash",
@@ -10430,7 +10361,7 @@
   },
   {
    "name": "Clash.FilterByStatus",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Filter",
    "description": "Keeps only the clash results with the given status(es) — pick one from the dropdown, or wire several comma-separated (\"New,Active\"; the Clash.Statuses node builds that from toggles). The triage staple: drop the already-Approved ones and work the rest.",
    "tags": [
     "clash",
@@ -10466,8 +10397,55 @@
    "returns": ""
   },
   {
+   "name": "Clash.AllGroups",
+   "category": "Navisworks.Clash.Group",
+   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (which needs List@Level to iterate). Tests without groups contribute nothing.",
+   "tags": [
+    "clash",
+    "groups",
+    "all",
+    "project",
+    "every",
+    "tests",
+    "flat",
+    "loop",
+    "batch"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "groups",
+     "type": "ClashResult[]",
+     "description": ""
+    },
+    {
+     "name": "names",
+     "type": "string[]",
+     "description": ""
+    },
+    {
+     "name": "testNames",
+     "type": "string[]",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "integer[]",
+     "description": ""
+    }
+   ],
+   "returns": "One flat list of every group, with each group's name, its test's name and its result count (index-aligned)."
+  },
+  {
    "name": "Clash.GroupResults",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping rule, not a built-in one: filter results any way you like, then group what came out. Results already in other groups are left alone (skipped) unless moveExisting is true, which pulls them into this group. An existing same-named group is extended; re-runs are clean.",
    "tags": [
     "clash",
@@ -10533,7 +10511,7 @@
   },
   {
    "name": "Clash.GroupResultsByGridIntersection",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).",
    "tags": [
     "clash",
@@ -10573,7 +10551,7 @@
   },
   {
    "name": "Clash.GroupResultsByLevel",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.",
    "tags": [
     "clash",
@@ -10623,7 +10601,7 @@
   },
   {
    "name": "Clash.GroupResultsByProximity",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.",
    "tags": [
     "clash",
@@ -10667,7 +10645,7 @@
   },
   {
    "name": "Clash.GroupResultsBySameItem",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.",
    "tags": [
     "clash",
@@ -10712,7 +10690,7 @@
   },
   {
    "name": "Clash.GroupResultsByStatus",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.",
    "tags": [
     "clash",
@@ -10749,240 +10727,8 @@
    "returns": "The regrouped test and the number of groups created."
   },
   {
-   "name": "Clash.RunAllTests",
-   "category": "Navisworks.Clash",
-   "description": "Runs every Clash Detective test in the document — the weekly coordination re-run in one node.",
-   "tags": [
-    "clash",
-    "run",
-    "all",
-    "tests",
-    "batch"
-   ],
-   "inputs": [
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "All tests after the run."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Clash.SnapshotToFile",
-   "category": "Navisworks.Clash",
-   "description": "Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.",
-   "tags": [
-    "clash",
-    "snapshot",
-    "save",
-    "history",
-    "delta",
-    "baseline",
-    "json"
-   ],
-   "inputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "Destination .json path; the directory is created when missing."
-    },
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "The tests to snapshot (empty/unwired = every test in the document).",
-     "default": "null"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "filePath",
-     "type": "file",
-     "description": ""
-    },
-    {
-     "name": "resultCount",
-     "type": "integer",
-     "description": ""
-    }
-   ],
-   "returns": "The written path and the number of results captured."
-  },
-  {
-   "name": "Clash.Status",
-   "category": "Navisworks.Clash",
-   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.",
-   "tags": [
-    "clash",
-    "status",
-    "dropdown",
-    "choice",
-    "new",
-    "active",
-    "reviewed",
-    "approved",
-    "resolved"
-   ],
-   "inputs": [
-    {
-     "name": "status",
-     "type": "string",
-     "description": "New, Active, Reviewed, Approved or Resolved.",
-     "default": "\"New\""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "status",
-     "type": "string",
-     "description": "The chosen status text."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Clash.Statuses",
-   "category": "Navisworks.Clash",
-   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
-   "tags": [
-    "clash",
-    "status",
-    "statuses",
-    "multiple",
-    "select",
-    "toggle",
-    "new",
-    "active",
-    "reviewed",
-    "approved",
-    "resolved"
-   ],
-   "inputs": [
-    {
-     "name": "newStatus",
-     "type": "boolean",
-     "description": "Include New results.",
-     "default": "true"
-    },
-    {
-     "name": "active",
-     "type": "boolean",
-     "description": "Include Active results.",
-     "default": "false"
-    },
-    {
-     "name": "reviewed",
-     "type": "boolean",
-     "description": "Include Reviewed results.",
-     "default": "false"
-    },
-    {
-     "name": "approved",
-     "type": "boolean",
-     "description": "Include Approved results.",
-     "default": "false"
-    },
-    {
-     "name": "resolved",
-     "type": "boolean",
-     "description": "Include Resolved results.",
-     "default": "false"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "statuses",
-     "type": "string",
-     "description": "The picked statuses as comma-separated text (e.g. \"New,Active\") — the form every status input accepts."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Clash.SummaryTable",
-   "category": "Navisworks.Clash",
-   "description": "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.",
-   "tags": [
-    "clash",
-    "summary",
-    "table",
-    "matrix",
-    "counts",
-    "report",
-    "excel"
-   ],
-   "inputs": [
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "The tests to summarize (empty/unwired = every test in the document).",
-     "default": "null"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "rows",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "headers",
-     "type": "string[]",
-     "description": ""
-    }
-   ],
-   "returns": "Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile."
-  },
-  {
-   "name": "Clash.Tests",
-   "category": "Navisworks.Clash",
-   "description": "All Clash Detective tests in a document, including those inside folders.",
-   "tags": [
-    "clash",
-    "tests",
-    "detective",
-    "all"
-   ],
-   "inputs": [
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "Every clash test, including those nested in folders."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "ClashGroup.ByName",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.",
    "tags": [
     "clash",
@@ -11037,7 +10783,7 @@
   },
   {
    "name": "ClashGroup.Info",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Group",
    "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.",
    "tags": [
     "clash",
@@ -11092,8 +10838,145 @@
    "returns": "The results inside it, its name and status, how many results it holds, and the test it belongs to (object and name)."
   },
   {
+   "name": "Clash.CompareSnapshots",
+   "category": "Navisworks.Clash.Report",
+   "description": "Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) — the weekly delta report no plugin does via live API. Pure file IO: needs no open model.",
+   "tags": [
+    "clash",
+    "compare",
+    "delta",
+    "diff",
+    "new",
+    "resolved",
+    "persisting",
+    "report"
+   ],
+   "inputs": [
+    {
+     "name": "oldPath",
+     "type": "string",
+     "description": "The older snapshot .json (the baseline)."
+    },
+    {
+     "name": "newPath",
+     "type": "string",
+     "description": "The newer snapshot .json."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "newResults",
+     "type": "dict[]",
+     "description": ""
+    },
+    {
+     "name": "resolved",
+     "type": "dict[]",
+     "description": ""
+    },
+    {
+     "name": "persisting",
+     "type": "dict[]",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "dict",
+     "description": ""
+    }
+   ],
+   "returns": "Result dictionaries per bucket plus a counts dictionary."
+  },
+  {
+   "name": "Clash.SnapshotToFile",
+   "category": "Navisworks.Clash.Report",
+   "description": "Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.",
+   "tags": [
+    "clash",
+    "snapshot",
+    "save",
+    "history",
+    "delta",
+    "baseline",
+    "json"
+   ],
+   "inputs": [
+    {
+     "name": "filePath",
+     "type": "string",
+     "description": "Destination .json path; the directory is created when missing."
+    },
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "The tests to snapshot (empty/unwired = every test in the document).",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "filePath",
+     "type": "file",
+     "description": ""
+    },
+    {
+     "name": "resultCount",
+     "type": "integer",
+     "description": ""
+    }
+   ],
+   "returns": "The written path and the number of results captured."
+  },
+  {
+   "name": "Clash.SummaryTable",
+   "category": "Navisworks.Clash.Report",
+   "description": "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.",
+   "tags": [
+    "clash",
+    "summary",
+    "table",
+    "matrix",
+    "counts",
+    "report",
+    "excel"
+   ],
+   "inputs": [
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "The tests to summarize (empty/unwired = every test in the document).",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "rows",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "headers",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile."
+  },
+  {
    "name": "ClashResult.Angle",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal). ~0° means they run parallel/together, ~90° means they cross perpendicular — so you can filter clashes by crossing angle (e.g. keep only ~90° crossings). Returns NaN when an element has no measurable direction (a point-like box).",
    "tags": [
     "clash",
@@ -11122,7 +11005,7 @@
   },
   {
    "name": "ClashResult.Assign",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Assigns a clash result to a person or trade — bulk assignment via lacing.",
    "tags": [
     "clash",
@@ -11160,7 +11043,7 @@
   },
   {
    "name": "ClashResult.Center",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "The clash point of a result, in document units.",
    "tags": [
     "clash",
@@ -11187,7 +11070,7 @@
   },
   {
    "name": "ClashResult.Documentation",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "How documented a clash already is — whether it has a saved viewpoint, redline markup, and how many comments. Filter to the reviewed/annotated ones, or find the ones still needing attention (commentCount = 0).",
    "tags": [
     "clash",
@@ -11227,7 +11110,7 @@
   },
   {
    "name": "ClashResult.Focus",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and optionally selects the elements. Wire one result, or a list to frame a whole group together. Follow with Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back.",
    "tags": [
     "clash",
@@ -11287,7 +11170,7 @@
   },
   {
    "name": "ClashResult.Info",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Name, status, distance, description, assignee and creation time of a clash result.",
    "tags": [
     "clash",
@@ -11339,7 +11222,7 @@
   },
   {
    "name": "ClashResult.Items",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "The two model items involved in a clash result.",
    "tags": [
     "clash",
@@ -11371,7 +11254,7 @@
   },
   {
    "name": "ClashResult.Orientation",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "ClashResult.Angle with world context: the crossing angle PLUS each element's bounding-box shape — \"slab\" (thin horizontal), \"wall\" (thin upright), \"riser\" (long vertical), \"run\" (long horizontal) or \"block\" — and its slope from horizontal (0–90°). This is what tells a pipe through a wall (run + wall) from a pipe through a floor (run/riser + slab) when the crossing angle alone is 90° in both cases. Box-based: a strongly diagonal linear element can read as planar; \"none\" means the element has no measurable box.",
    "tags": [
     "clash",
@@ -11424,7 +11307,7 @@
   },
   {
    "name": "ClashResult.Rename",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Renames a clash result or result group — with lacing and String nodes this is batch renaming (\"Clash1\" → \"Pipe vs Duct L02-B3\").",
    "tags": [
     "clash",
@@ -11463,7 +11346,7 @@
   },
   {
    "name": "ClashResult.SaveImage",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Renders a clash snapshot (scene plus clash highlight) to a .png/.jpg/.bmp file — the picture half of every clash report.",
    "tags": [
     "clash",
@@ -11514,7 +11397,7 @@
   },
   {
    "name": "ClashResult.SetDescription",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Sets a clash result's description text (context for reports and reviews).",
    "tags": [
     "clash",
@@ -11552,7 +11435,7 @@
   },
   {
    "name": "ClashResult.SetStatus",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).",
    "tags": [
     "clash",
@@ -11592,7 +11475,7 @@
   },
   {
    "name": "ClashResult.Size",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "The size of the clash overlap region — its bounding-box volume in document units³. Filter out tiny grazing clashes and keep the significant ones. Pair with Units.Convert for readable units.",
    "tags": [
     "clash",
@@ -11622,7 +11505,7 @@
   },
   {
    "name": "ClashResult.Viewpoint",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Results",
    "description": "The camera viewpoint Navisworks generates for a clash result; optionally applies it to the current view.",
    "tags": [
     "clash",
@@ -11660,8 +11543,153 @@
    "returns": ""
   },
   {
+   "name": "Clash.RunAllTests",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Runs every Clash Detective test in the document — the weekly coordination re-run in one node.",
+   "tags": [
+    "clash",
+    "run",
+    "all",
+    "tests",
+    "batch"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "All tests after the run."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.Status",
+   "category": "Navisworks.Clash.Tests",
+   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.",
+   "tags": [
+    "clash",
+    "status",
+    "dropdown",
+    "choice",
+    "new",
+    "active",
+    "reviewed",
+    "approved",
+    "resolved"
+   ],
+   "inputs": [
+    {
+     "name": "status",
+     "type": "string",
+     "description": "New, Active, Reviewed, Approved or Resolved.",
+     "default": "\"New\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "type": "string",
+     "description": "The chosen status text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.Statuses",
+   "category": "Navisworks.Clash.Tests",
+   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
+   "tags": [
+    "clash",
+    "status",
+    "statuses",
+    "multiple",
+    "select",
+    "toggle",
+    "new",
+    "active",
+    "reviewed",
+    "approved",
+    "resolved"
+   ],
+   "inputs": [
+    {
+     "name": "newStatus",
+     "type": "boolean",
+     "description": "Include New results.",
+     "default": "true"
+    },
+    {
+     "name": "active",
+     "type": "boolean",
+     "description": "Include Active results.",
+     "default": "false"
+    },
+    {
+     "name": "reviewed",
+     "type": "boolean",
+     "description": "Include Reviewed results.",
+     "default": "false"
+    },
+    {
+     "name": "approved",
+     "type": "boolean",
+     "description": "Include Approved results.",
+     "default": "false"
+    },
+    {
+     "name": "resolved",
+     "type": "boolean",
+     "description": "Include Resolved results.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "statuses",
+     "type": "string",
+     "description": "The picked statuses as comma-separated text (e.g. \"New,Active\") — the form every status input accepts."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Clash.Tests",
+   "category": "Navisworks.Clash.Tests",
+   "description": "All Clash Detective tests in a document, including those inside folders.",
+   "tags": [
+    "clash",
+    "tests",
+    "detective",
+    "all"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "Every clash test, including those nested in folders."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ClashTest.ByName",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "Finds a clash test by its display name (searches folders too).",
    "tags": [
     "clash",
@@ -11693,7 +11721,7 @@
   },
   {
    "name": "ClashTest.Create",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.",
    "tags": [
     "clash",
@@ -11749,7 +11777,7 @@
   },
   {
    "name": "ClashTest.Groups",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.",
    "tags": [
     "clash",
@@ -11799,7 +11827,7 @@
   },
   {
    "name": "ClashTest.Info",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "Name, status, type, tolerance, last run time and result count of a clash test.",
    "tags": [
     "clash",
@@ -11851,7 +11879,7 @@
   },
   {
    "name": "ClashTest.Name",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "The display name of a clash test — the one-output companion of ClashTest.Info for wiring names into reports, group lookups and file paths.",
    "tags": [
     "clash",
@@ -11878,7 +11906,7 @@
   },
   {
    "name": "ClashTest.Rename",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.",
    "tags": [
     "clash",
@@ -11915,7 +11943,7 @@
   },
   {
    "name": "ClashTest.Results",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "The individual results of a clash test (grouped results are flattened).",
    "tags": [
     "clash",
@@ -11941,7 +11969,7 @@
   },
   {
    "name": "ClashTest.Run",
-   "category": "Navisworks.Clash",
+   "category": "Navisworks.Clash.Tests",
    "description": "Runs one clash test now and reports the result count.",
    "tags": [
     "clash",
@@ -16821,27 +16849,28 @@
    "returns": ""
   },
   {
-   "name": "Viewpoints.CreateFolder",
+   "name": "Viewpoints.FromClashResults",
    "category": "Navisworks.Viewpoints",
-   "description": "Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.",
+   "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.",
    "tags": [
     "viewpoints",
-    "folder",
-    "create",
-    "organize",
-    "nested"
+    "clash",
+    "results",
+    "batch",
+    "generate",
+    "triage"
    ],
    "inputs": [
     {
-     "name": "name",
-     "type": "string",
-     "description": "The folder's display name."
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results)."
     },
     {
-     "name": "parentFolder",
-     "type": "FolderItem",
-     "description": "Parent folder for nesting (null creates at the top level).",
-     "default": "null"
+     "name": "folderName",
+     "type": "string",
+     "description": "Viewpoint folder to file them under (null/empty stores them at the top level).",
+     "default": "\"Clash Views\""
     },
     {
      "name": "document",
@@ -16852,55 +16881,16 @@
    ],
    "outputs": [
     {
-     "name": "folder",
-     "type": "FolderItem",
-     "description": "The stored folder (an existing same-named folder in that location is reused)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Viewpoints.DuplicateFolder",
-   "category": "Navisworks.Viewpoints",
-   "description": "Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.",
-   "tags": [
-    "viewpoints",
-    "folder",
-    "duplicate",
-    "copy",
-    "clone",
-    "organize"
-   ],
-   "inputs": [
-    {
-     "name": "folder",
-     "type": "any",
-     "description": "The source folder, or its name."
-    },
-    {
-     "name": "newName",
-     "type": "string",
-     "description": "Name for the new folder."
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "folder",
-     "type": "FolderItem",
-     "description": "The new stored folder."
+     "name": "viewpoints",
+     "type": "SavedViewpoint[]",
+     "description": "The stored viewpoints, one per result, named after the result."
     }
    ],
    "returns": ""
   },
   {
    "name": "Viewpoints.ExportFile",
-   "category": "Navisworks.Viewpoints",
+   "category": "Navisworks.Viewpoints.Files",
    "description": "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave viewpoints empty to export them all, or wire specific viewpoints, folders or names. Element overrides are not carried (they only exist relative to the source model's items).",
    "tags": [
     "viewpoints",
@@ -16953,48 +16943,8 @@
    "returns": "The written file path, how many viewpoints it holds, and a summary report."
   },
   {
-   "name": "Viewpoints.FromClashResults",
-   "category": "Navisworks.Viewpoints",
-   "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.",
-   "tags": [
-    "viewpoints",
-    "clash",
-    "results",
-    "batch",
-    "generate",
-    "triage"
-   ],
-   "inputs": [
-    {
-     "name": "results",
-     "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
-    },
-    {
-     "name": "folderName",
-     "type": "string",
-     "description": "Viewpoint folder to file them under (null/empty stores them at the top level).",
-     "default": "\"Clash Views\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "viewpoints",
-     "type": "SavedViewpoint[]",
-     "description": "The stored viewpoints, one per result, named after the result."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Viewpoints.ImportFile",
-   "category": "Navisworks.Viewpoints",
+   "category": "Navisworks.Viewpoints.Files",
    "description": "Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box and folder structure. Positions are converted automatically when the source model used different units. Re-runs update same-named views instead of duplicating (overwrite).",
    "tags": [
     "viewpoints",
@@ -17051,8 +17001,86 @@
    "returns": "The stored viewpoints, how many were imported, and a summary report."
   },
   {
+   "name": "Viewpoints.CreateFolder",
+   "category": "Navisworks.Viewpoints.Folders",
+   "description": "Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "create",
+    "organize",
+    "nested"
+   ],
+   "inputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The folder's display name."
+    },
+    {
+     "name": "parentFolder",
+     "type": "FolderItem",
+     "description": "Parent folder for nesting (null creates at the top level).",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The stored folder (an existing same-named folder in that location is reused)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Viewpoints.DuplicateFolder",
+   "category": "Navisworks.Viewpoints.Folders",
+   "description": "Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "duplicate",
+    "copy",
+    "clone",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The source folder, or its name."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "Name for the new folder."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The new stored folder."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Viewpoints.InFolder",
-   "category": "Navisworks.Viewpoints",
+   "category": "Navisworks.Viewpoints.Folders",
    "description": "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object (Viewpoints.CreateFolder / SavedViewpoint.Folder), a folder NAME, or a path like \"Reviews/Week 12\" to pick between same-named folders; leave it empty for the top level. Nested subfolders are included unless recursive is off. Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage, Viewpoints.ExportFile or a Loop.Item.",
    "tags": [
     "viewpoints",
@@ -17110,7 +17138,7 @@
   },
   {
    "name": "Viewpoints.RenameFolder",
-   "category": "Navisworks.Viewpoints",
+   "category": "Navisworks.Viewpoints.Folders",
    "description": "Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).",
    "tags": [
     "viewpoints",
@@ -17148,7 +17176,7 @@
   },
   {
    "name": "Viewpoints.SortFolder",
-   "category": "Navisworks.Viewpoints",
+   "category": "Navisworks.Viewpoints.Folders",
    "description": "Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.",
    "tags": [
     "viewpoints",

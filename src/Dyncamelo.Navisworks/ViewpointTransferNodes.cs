@@ -30,6 +30,7 @@ public static class ViewpointTransferNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path, how many viewpoints it holds, and a summary report.</returns>
     [NodeName("Viewpoints.ExportFile")]
+    [NodeCategory("Navisworks.Viewpoints.Files")]
     [NodeDescription(
         "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package " +
         "for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave " +
@@ -124,6 +125,7 @@ public static class ViewpointTransferNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoints, how many were imported, and a summary report.</returns>
     [NodeName("Viewpoints.ImportFile")]
+    [NodeCategory("Navisworks.Viewpoints.Files")]
     [NodeDescription(
         "Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box " +
         "and folder structure. Positions are converted automatically when the source model used different " +

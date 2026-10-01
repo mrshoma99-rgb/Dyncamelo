@@ -15,6 +15,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Every clash test, including those nested in folders.</returns>
     [NodeName("Clash.Tests")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("All Clash Detective tests in a document, including those inside folders.")]
     [NodeSearchTags("clash", "tests", "detective", "all")]
     [return: NodeName("tests")]
@@ -30,6 +31,7 @@ public static class ClashNodes
     /// <param name="test">The clash test.</param>
     /// <returns>Name, status, type, tolerance, last-run time and result count.</returns>
     [NodeName("ClashTest.Info")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Name, status, type, tolerance, last run time and result count of a clash test.")]
     [NodeSearchTags("clash", "test", "info", "status", "tolerance")]
     [MultiReturn("name", "status", "testType", "tolerance", "lastRun", "resultCount")]
@@ -52,6 +54,7 @@ public static class ClashNodes
     /// <param name="test">The clash test.</param>
     /// <returns>Every result, with grouped results flattened.</returns>
     [NodeName("ClashTest.Results")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("The individual results of a clash test (grouped results are flattened).")]
     [NodeSearchTags("clash", "test", "results", "clashes")]
     [return: NodeName("results")]
@@ -64,6 +67,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>Name, status, distance, description, assignee and creation time.</returns>
     [NodeName("ClashResult.Info")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Name, status, distance, description, assignee and creation time of a clash result.")]
     [NodeSearchTags("clash", "result", "info", "status", "distance")]
     [MultiReturn("name", "status", "distance", "description", "assignedTo", "createdTime")]
@@ -86,6 +90,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>The clashing items.</returns>
     [NodeName("ClashResult.Items")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("The two model items involved in a clash result.")]
     [NodeSearchTags("clash", "result", "items", "elements", "pair")]
     [MultiReturn("item1", "item2")]
@@ -104,6 +109,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>The clash center point, in document units.</returns>
     [NodeName("ClashResult.Center")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("The clash point of a result, in document units.")]
     [NodeSearchTags("clash", "result", "center", "point", "location")]
     [return: NodeName("point")]
@@ -116,6 +122,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>The angle in degrees (0–90) between the two elements' overall directions.</returns>
     [NodeName("ClashResult.Angle")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "The angle in degrees (0–90) between the two clashing elements, taken from each element's overall " +
@@ -144,6 +151,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>The clash bounding-box volume in document units³ (0 when unavailable).</returns>
     [NodeName("ClashResult.Size")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("The size of the clash overlap region — its bounding-box volume in document units³. Filter out tiny grazing clashes and keep the significant ones. Pair with Units.Convert for readable units.")]
     [NodeSearchTags("clash", "size", "volume", "extent", "significance", "big", "small", "filter")]
@@ -163,6 +171,7 @@ public static class ClashNodes
     /// <param name="result">The clash result.</param>
     /// <returns>Whether it has a saved viewpoint, redline markup, and its comment count.</returns>
     [NodeName("ClashResult.Documentation")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("How documented a clash already is — whether it has a saved viewpoint, redline markup, and how many comments. Filter to the reviewed/annotated ones, or find the ones still needing attention (commentCount = 0).")]
     [NodeSearchTags("clash", "comments", "viewpoint", "redline", "reviewed", "documented", "annotated", "filter")]
@@ -184,6 +193,7 @@ public static class ClashNodes
     /// <param name="status">One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several ("New,Active"; Clash.Statuses builds this from toggles).</param>
     /// <returns>The matching results, input order preserved.</returns>
     [NodeName("Clash.FilterByStatus")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("Keeps only the clash results with the given status(es) — pick one from the dropdown, or wire several comma-separated (\"New,Active\"; the Clash.Statuses node builds that from toggles). The triage staple: drop the already-Approved ones and work the rest.")]
     [NodeSearchTags("clash", "filter", "status", "statuses", "new", "active", "approved", "resolved", "triage", "multiple")]
@@ -217,6 +227,7 @@ public static class ClashNodes
     /// <param name="maxDegrees">Highest crossing angle to keep (90 = perpendicular).</param>
     /// <returns>The matching results, input order preserved (angle-less results are dropped).</returns>
     [NodeName("Clash.FilterByAngle")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription("Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.")]
     [NodeSearchTags("clash", "filter", "angle", "perpendicular", "parallel", "crossing", "degrees")]
@@ -300,6 +311,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored clash test.</returns>
     [NodeName("ClashTest.ByName")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Finds a clash test by its display name (searches folders too).")]
     [NodeSearchTags("clash", "test", "byname", "find")]
     [return: NodeName("test")]
@@ -326,6 +338,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored clash test, ready for ClashTest.Run.</returns>
     [NodeName("ClashTest.Create")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.")]
     [NodeSearchTags("clash", "test", "create", "new", "setup", "matrix")]
     [return: NodeName("test")]
@@ -387,6 +400,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The test (pass-through) and its result count after the run.</returns>
     [NodeName("ClashTest.Run")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Runs one clash test now and reports the result count.")]
     [NodeSearchTags("clash", "test", "run", "execute", "detect")]
     [MultiReturn("test", "resultCount")]
@@ -409,6 +423,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>All tests after the run.</returns>
     [NodeName("Clash.RunAllTests")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Runs every Clash Detective test in the document — the weekly coordination re-run in one node.")]
     [NodeSearchTags("clash", "run", "all", "tests", "batch")]
     [return: NodeName("tests")]
@@ -440,6 +455,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over result lists for bulk triage.</returns>
     [NodeName("ClashResult.SetStatus")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).")]
     [NodeSearchTags("clash", "result", "status", "set", "resolve", "approve", "triage")]
     [return: NodeName("result")]
@@ -466,6 +482,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over result lists for bulk assignment.</returns>
     [NodeName("ClashResult.Assign")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Assigns a clash result to a person or trade — bulk assignment via lacing.")]
     [NodeSearchTags("clash", "result", "assign", "trade", "responsible")]
     [return: NodeName("result")]
@@ -491,6 +508,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through).</returns>
     [NodeName("ClashResult.SetDescription")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Sets a clash result's description text (context for reports and reviews).")]
     [NodeSearchTags("clash", "result", "description", "set", "note")]
     [return: NodeName("result")]
@@ -508,6 +526,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The viewpoint aimed at the clash.</returns>
     [NodeName("ClashResult.Viewpoint")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("The camera viewpoint Navisworks generates for a clash result; optionally applies it to the current view.")]
     [NodeSearchTags("clash", "result", "viewpoint", "camera", "goto")]
     [return: NodeName("viewpoint")]
@@ -532,6 +551,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path. Lace over result lists for a snapshot folder.</returns>
     [NodeName("ClashResult.SaveImage")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Renders a clash snapshot (scene plus clash highlight) to a .png/.jpg/.bmp file — the picture half of every clash report.")]
     [NodeSearchTags("clash", "result", "image", "snapshot", "screenshot", "report")]
     [return: NodeName("filePath")]
@@ -578,6 +598,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsBySameItem")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.")]
     [NodeSearchTags("clash", "group", "same", "item", "element", "triage")]
     [MultiReturn("test", "groupCount")]
@@ -596,6 +617,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByProximity")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.")]
     [NodeSearchTags("clash", "group", "proximity", "cluster", "radius", "triage")]
     [MultiReturn("test", "groupCount")]
@@ -620,6 +642,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByLevel")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.")]
     [NodeSearchTags("clash", "group", "level", "floor", "storey", "elevation", "triage")]
     [MultiReturn("test", "groupCount")]

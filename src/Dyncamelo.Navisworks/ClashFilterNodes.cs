@@ -31,6 +31,7 @@ public static class ClashFilterNodes
     /// <param name="caseSensitive">True matches exact casing; false (default) ignores case.</param>
     /// <returns>The matching results, input order preserved.</returns>
     [NodeName("Clash.FilterByItemProperty")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Keeps clashes whose two items' PROPERTY values match a pair of texts, in either order — the " +
@@ -97,6 +98,7 @@ public static class ClashFilterNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The matching results, input order preserved.</returns>
     [NodeName("Clash.FilterBySet")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Keeps clashes whose items belong to a selection/search set (either one, both, or a specific " +
@@ -164,6 +166,7 @@ public static class ClashFilterNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The matching results, input order preserved.</returns>
     [NodeName("Clash.FilterByDepth")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Keeps clashes whose penetration depth falls in a range, in the unit you name — minDepth 0.025 " +
@@ -210,6 +213,7 @@ public static class ClashFilterNodes
     /// <param name="results">The clash results — from one test, or several (mirrored A-vs-B / B-vs-A test pairs dedupe too).</param>
     /// <returns>The first result of each unique unordered item pair, and the duplicates that were dropped.</returns>
     [NodeName("Clash.Deduplicate")]
+    [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or " +

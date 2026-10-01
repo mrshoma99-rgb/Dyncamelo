@@ -21,6 +21,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored test (pass-through for chaining).</returns>
     [NodeName("ClashTest.Rename")]
+    [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.")]
     [NodeSearchTags("clash", "test", "rename", "name")]
     [return: NodeName("test")]
@@ -40,6 +41,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over results + String nodes for Smart-Results-style batch naming (e.g. "Pipe vs Duct L02-B3").</returns>
     [NodeName("ClashResult.Rename")]
+    [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Renames a clash result or result group — with lacing and String nodes this is batch renaming (\"Clash1\" → \"Pipe vs Duct L02-B3\").")]
     [NodeSearchTags("clash", "result", "rename", "name", "smart", "batch")]
     [return: NodeName("result")]
@@ -147,6 +149,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByStatus")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.")]
     [NodeSearchTags("clash", "group", "status", "triage", "bucket")]
     [MultiReturn("test", "groupCount")]
@@ -162,6 +165,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByGridIntersection")]
+    [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).")]
     [NodeSearchTags("clash", "group", "grid", "intersection", "level", "location", "triage")]
     [MultiReturn("test", "groupCount")]
@@ -192,6 +196,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile.</returns>
     [NodeName("Clash.SummaryTable")]
+    [NodeCategory("Navisworks.Clash.Report")]
     [NodeDescription("Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.")]
     [NodeSearchTags("clash", "summary", "table", "matrix", "counts", "report", "excel")]
     [MultiReturn("rows", "headers")]

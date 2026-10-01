@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**555 nodes in 39 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**555 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -15,13 +15,18 @@
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
 | [Input](#input) | 10 |
-| [List](#list) | 63 |
+| [List](#list) | 51 |
+| [List.Statistics](#liststatistics) | 12 |
 | [Logic](#logic) | 18 |
 | [Math](#math) | 37 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 12 |
 | [Navisworks.Camera](#navisworkscamera) | 6 |
-| [Navisworks.Clash](#navisworksclash) | 45 |
+| [Navisworks.Clash.Filter](#navisworksclashfilter) | 7 |
+| [Navisworks.Clash.Group](#navisworksclashgroup) | 9 |
+| [Navisworks.Clash.Report](#navisworksclashreport) | 3 |
+| [Navisworks.Clash.Results](#navisworksclashresults) | 14 |
+| [Navisworks.Clash.Tests](#navisworksclashtests) | 12 |
 | [Navisworks.Comments](#navisworkscomments) | 3 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
 | [Navisworks.Export](#navisworksexport) | 14 |
@@ -36,7 +41,9 @@
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 7 |
 | [Navisworks.Transform](#navisworkstransform) | 5 |
 | [Navisworks.Units](#navisworksunits) | 4 |
-| [Navisworks.Viewpoints](#navisworksviewpoints) | 22 |
+| [Navisworks.Viewpoints](#navisworksviewpoints) | 15 |
+| [Navisworks.Viewpoints.Files](#navisworksviewpointsfiles) | 2 |
+| [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 5 |
 | [Report](#report) | 2 |
 | [String](#string) | 36 |
 | [System](#system) | 5 |
@@ -248,39 +255,30 @@
 | `List.AllIndicesOf` | list, item | indices | Every zero-based index at which the item occurs in the list |
 | `List.AllTrue` | list | allTrue | True when EVERY element of the list is true |
 | `List.AnyTrue` | list | anyTrue | True when AT LEAST ONE element of the list is true |
-| `List.Average` | list | average | The arithmetic mean of the numbers of a list (nulls are skipped |
 | `List.Chop` | list, lengths | lists | Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]) |
 | `List.Clean` | list, removeEmptyLists? | list | Removes null elements from a list, at every nesting level |
 | `List.Contains` | list, item | contains | Tests whether a list contains a value (numbers compare by value regardless of numeric type) |
 | `List.Count` | list | count | Returns the number of elements in a list |
-| `List.CountBy` | list | values, counts | Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs |
 | `List.CountTrue` | list | trueCount, falseCount | Counts the true and not-true elements of a mask |
 | `List.Create` *(interactive)* | item0 … itemN | list | Builds a list from the wired item inputs |
-| `List.CumulativeSum` | list | totals | A running total: each item is the sum of the list up to and including that position |
 | `List.Cycle` | list, amount | list | Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]) |
 | `List.DropItems` | list, amount | list | Drops elements from the start of the list |
 | `List.DropWhile` | list, mask | list | Drops items from the start of the list for as long as the mask is true |
-| `List.Duplicates` | list | duplicates, counts | The values that occur more than once, with how many times each occurs |
 | `List.FilterByBoolMask` | list, mask | in, out | Splits a list into elements whose mask entry is true ("in") and the rest ("out") |
 | `List.FilterByValue` | list, test?, value?, keys?, ignoreCase? | matched, rejected, mask | Keeps the items that pass a test such as > 100, contains "wall" or matches "A-*" |
 | `List.FirstItem` | list | item | Returns the first element of a list |
 | `List.Flatten` | list, amount? | list | Flattens a nested list by a given number of levels (-1 = completely) |
 | `List.GetItemAtIndex` | list, index | item | Returns the element at the given index (negative indexes count from the end) |
 | `List.GroupByKey` | list, keys | groups, uniqueKeys | Groups list elements by a parallel key list |
-| `List.Histogram` | list, bins? | lower, upper, counts, labels | Splits the range of the numbers into equal bins and counts how many fall in each |
 | `List.IndexOf` | list, item | index | Returns the index of the first occurrence of a value in a list (-1 when absent) |
 | `List.Insert` | list, item, index | list | Returns a new list with the value inserted at the index (0 = front |
 | `List.LastIndexOf` | list, item | index | The zero-based index of the LAST occurrence of the item (-1 when absent) |
 | `List.LastItem` | list | item | Returns the last element of a list |
 | `List.MaximumItem` | list | item | The largest element of a list (numbers, texts or dates |
-| `List.Median` | list | median | The middle value of the numbers of a list (the mean of the two middle ones when the count is even) |
 | `List.Merge` | lists | list | Concatenates any number of lists into one |
 | `List.MinimumItem` | list | item | The smallest element of a list (numbers, texts or dates |
-| `List.MostCommon` | list | item, count | The value that occurs most often in a list (the earliest wins a tie) and how many times |
 | `List.OfRepeatedItem` | item, amount | list | A list of one value repeated N times |
 | `List.Pairs` | list, cyclic? | pairs | Pairs each item with the next one: [[a, b], [b, c], …] |
-| `List.Percentile` | list, percent? | value | The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC) |
-| `List.Product` | list | product | Multiplies the numbers of a list (nulls are skipped, an empty list gives 1) |
 | `List.Range` | start, end, step? | list | Creates a sequence of numbers from start to end using the given step |
 | `List.RemoveItemAtIndex` | list, index | list | Removes the element at the given index (negative indexes count from the end) |
 | `List.ReplaceItemAtIndex` | list, index, item | list | Returns a new list with the element at the index replaced (negative indexes count from the end) |
@@ -296,9 +294,6 @@
 | `List.Sort` | list | list | Returns the list sorted ascending (numbers numerically, strings alphabetically) |
 | `List.SortByKey` | list, keys | sorted, sortedKeys | Sorts list elements by a parallel key list |
 | `List.SortDescending` | list | list | Returns the list sorted descending (largest first |
-| `List.StandardDeviation` | list, sample? | standardDeviation | The standard deviation of the numbers of a list (population by default |
-| `List.Statistics` | list | count, sum, min, max, average, median, standardDeviation | Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node |
-| `List.Sum` | list | sum | Adds up the numbers of a list (nulls are skipped, an empty list gives 0) |
 | `List.TakeEveryNthItem` | list, n, offset? | list | Every n-th element, optionally after skipping offset elements |
 | `List.TakeItems` | list, amount | list | Takes elements from the start of the list |
 | `List.TakeWhile` | list, mask | list | Takes items from the start of the list for as long as the mask is true (stops at the first false) |
@@ -306,6 +301,23 @@
 | `List.UniqueItems` | list | list | Removes duplicate elements from a list, preserving the original order |
 | `List.WithIndex` | list | pairs | Pairs each item with its position: [[0, item0], [1, item1], …] |
 | `List.Zip` | first, second | pairs | Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list |
+
+## List.Statistics
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `List.Average` | list | average | The arithmetic mean of the numbers of a list (nulls are skipped |
+| `List.CountBy` | list | values, counts | Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs |
+| `List.CumulativeSum` | list | totals | A running total: each item is the sum of the list up to and including that position |
+| `List.Duplicates` | list | duplicates, counts | The values that occur more than once, with how many times each occurs |
+| `List.Histogram` | list, bins? | lower, upper, counts, labels | Splits the range of the numbers into equal bins and counts how many fall in each |
+| `List.Median` | list | median | The middle value of the numbers of a list (the mean of the two middle ones when the count is even) |
+| `List.MostCommon` | list | item, count | The value that occurs most often in a list (the earliest wins a tie) and how many times |
+| `List.Percentile` | list, percent? | value | The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC) |
+| `List.Product` | list | product | Multiplies the numbers of a list (nulls are skipped, an empty list gives 1) |
+| `List.StandardDeviation` | list, sample? | standardDeviation | The standard deviation of the numbers of a list (population by default |
+| `List.Statistics` | list | count, sum, min, max, average, median, standardDeviation | Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node |
+| `List.Sum` | list | sum | Adds up the numbers of a list (nulls are skipped, an empty list gives 0) |
 
 ## Logic
 
@@ -414,12 +426,10 @@
 | `Camera.ZoomToItems` | items, paddingFactor?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
 | `Viewpoint.SetSectionBox` | boundingBox, enabled?, document? | done | Applies a section box around a region on the current view (Sectioning > Box, scriptable) |
 
-## Navisworks.Clash
+## Navisworks.Clash.Filter
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Clash.AllGroups` | document? | groups, names, testNames, counts | Every result group of every clash test in the document, as ONE flat list |
-| `Clash.CompareSnapshots` | oldPath, newPath | newResults, resolved, persisting, counts | Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) |
 | `Clash.Deduplicate` | results | results, duplicates | Keeps ONE clash per unique item pair |
 | `Clash.FilterByAngle` | results, minDegrees?, maxDegrees? | results | Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range |
 | `Clash.FilterByDepth` | results, minDepth?, maxDepth?, units?, document? | results | Keeps clashes whose penetration depth falls in a range, in the unit you name |
@@ -427,20 +437,33 @@
 | `Clash.FilterByOrientation` | results, shape1?, shape2? | results | Keeps only the clashes between elements of the given box shapes, matched in either order |
 | `Clash.FilterBySet` | results, set, which?, invert?, document? | results | Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) |
 | `Clash.FilterByStatus` | results, status | results | Keeps only the clash results with the given status(es) |
+
+## Navisworks.Clash.Group
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Clash.AllGroups` | document? | groups, names, testNames, counts | Every result group of every clash test in the document, as ONE flat list |
 | `Clash.GroupResults` | results, groupName, moveExisting?, document? | test, group, added, moved, skipped | Puts an explicit list of clash results into a named group in Clash Detective |
 | `Clash.GroupResultsByGridIntersection` | test, document? | test, groupCount | Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g |
 | `Clash.GroupResultsByLevel` | test, levelNames, levelElevations, document? | test, groupCount | Groups a test's results by nearest level below each clash point (wire your level names and elevations) |
 | `Clash.GroupResultsByProximity` | test, radius, document? | test, groupCount | Groups a test's results into clusters whose clash points lie within a radius of the cluster seed |
 | `Clash.GroupResultsBySameItem` | test, useItem1?, document? | test, groupCount | Groups a test's results so every clash involving the same element lands in one group (named after the element) |
 | `Clash.GroupResultsByStatus` | test, document? | test, groupCount | Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) |
-| `Clash.RunAllTests` | document? | tests | Runs every Clash Detective test in the document |
-| `Clash.SnapshotToFile` | filePath, tests?, document? | filePath, resultCount | Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON |
-| `Clash.Status` | status? | status | A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) |
-| `Clash.Statuses` | newStatus?, active?, reviewed?, approved?, resolved? | statuses | Pick SEVERAL clash statuses with toggles |
-| `Clash.SummaryTable` | tests?, document? | rows, headers | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
-| `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashGroup.ByName` | test, groupName, document? | group, results, status, count | Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count |
 | `ClashGroup.Info` | group | results, name, status, count, test, testName | Everything about a clash result group, straight from the group object |
+
+## Navisworks.Clash.Report
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Clash.CompareSnapshots` | oldPath, newPath | newResults, resolved, persisting, counts | Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) |
+| `Clash.SnapshotToFile` | filePath, tests?, document? | filePath, resultCount | Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON |
+| `Clash.SummaryTable` | tests?, document? | rows, headers | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
+
+## Navisworks.Clash.Results
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
 | `ClashResult.Angle` | result | degrees | The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal) |
 | `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result to a person or trade |
 | `ClashResult.Center` | result | point | The clash point of a result, in document units |
@@ -455,6 +478,15 @@
 | `ClashResult.SetStatus` | result, status, document? | result | Sets a clash result's status |
 | `ClashResult.Size` | result | volume | The size of the clash overlap region |
 | `ClashResult.Viewpoint` | result, apply?, document? | viewpoint | The camera viewpoint Navisworks generates for a clash result |
+
+## Navisworks.Clash.Tests
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Clash.RunAllTests` | document? | tests | Runs every Clash Detective test in the document |
+| `Clash.Status` | status? | status | A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) |
+| `Clash.Statuses` | newStatus?, active?, reviewed?, approved?, resolved? | statuses | Pick SEVERAL clash statuses with toggles |
+| `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashTest.ByName` | name, document? | test | Finds a clash test by its display name (searches folders too) |
 | `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, document? | test | Creates a clash test between two item selections |
 | `ClashTest.Groups` | test, document? | groups, names, statuses, counts | All result groups of a clash test |
@@ -658,11 +690,21 @@
 | `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
 | `ViewpointPackageFile.Parse` | json | result | Parses a package from JSON with node-friendly errors: malformed text and files written by a newer Dyncamelo both fail with a message that says what to do, never a raw se… |
 | `Viewpoints.All` | document? | viewpoints | All saved viewpoints in a document, including those inside folders |
+| `Viewpoints.FromClashResults` | results, folderName?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result |
+
+## Navisworks.Viewpoints.Files
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `Viewpoints.ExportFile` | filePath, viewpoints?, document? | filePath, count, report | Exports saved viewpoints |
+| `Viewpoints.ImportFile` | filePath, folderName?, overwrite?, document? | viewpoints, count, report | Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box and folder structure |
+
+## Navisworks.Viewpoints.Folders
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
 | `Viewpoints.CreateFolder` | name, parentFolder?, document? | folder | Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder |
 | `Viewpoints.DuplicateFolder` | folder, newName, document? | folder | Duplicates a Saved Viewpoints folder |
-| `Viewpoints.ExportFile` | filePath, viewpoints?, document? | filePath, count, report | Exports saved viewpoints |
-| `Viewpoints.FromClashResults` | results, folderName?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result |
-| `Viewpoints.ImportFile` | filePath, folderName?, overwrite?, document? | viewpoints, count, report | Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box and folder structure |
 | `Viewpoints.InFolder` | folder?, recursive?, document? | viewpoints, names, subfolders, count | All saved viewpoints inside a folder, in Saved Viewpoints window order |
 | `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder or its current name |
 | `Viewpoints.SortFolder` | folder?, recursive?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) |

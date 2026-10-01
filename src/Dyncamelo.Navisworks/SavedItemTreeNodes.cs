@@ -46,6 +46,7 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored folder (an existing same-named folder in that location is reused).</returns>
     [NodeName("Viewpoints.CreateFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeDescription("Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.")]
     [NodeSearchTags("viewpoints", "folder", "create", "organize", "nested")]
     [return: NodeName("folder")]
@@ -127,6 +128,7 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The viewpoints in tree order, their names, the subfolders met on the way, and how many viewpoints were found.</returns>
     [NodeName("Viewpoints.InFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object " +
@@ -238,6 +240,7 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The renamed stored folder (pass-through for chaining).</returns>
     [NodeName("Viewpoints.RenameFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeDescription("Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).")]
     [NodeSearchTags("viewpoints", "folder", "rename", "name", "organize")]
     [return: NodeName("folder")]
@@ -299,6 +302,7 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The new stored folder.</returns>
     [NodeName("Viewpoints.DuplicateFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeDescription("Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.")]
     [NodeSearchTags("viewpoints", "folder", "duplicate", "copy", "clone", "organize")]
     [return: NodeName("folder")]
@@ -334,6 +338,7 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The sorted folder (null when the top level was sorted).</returns>
     [NodeName("Viewpoints.SortFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeDescription("Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.")]
     [NodeSearchTags("viewpoints", "folder", "sort", "alphabetical", "order", "organize", "arrange")]
     [return: NodeName("folder")]
