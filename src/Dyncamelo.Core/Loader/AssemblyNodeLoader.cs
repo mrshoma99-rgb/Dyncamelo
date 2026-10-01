@@ -274,6 +274,8 @@ public static class AssemblyNodeLoader
         definition.MultiReturnKeys = ResolveMultiReturnKeys(method);
         definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys, docs);
 
+        definition.CatchesUpstreamErrors = method.GetCustomAttribute<CatchesUpstreamErrorsAttribute>() != null;
+
         var deprecated = method.GetCustomAttribute<NodeDeprecatedAttribute>();
         if (deprecated != null)
         {

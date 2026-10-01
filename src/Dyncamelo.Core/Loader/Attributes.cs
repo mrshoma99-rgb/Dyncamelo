@@ -179,6 +179,16 @@ public sealed class NodeDeprecatedAttribute : Attribute
 }
 
 /// <summary>
+/// The node runs even when a node feeding it has failed: instead of the usual "Upstream failure" stop, every failed input
+/// arrives as an <see cref="Dyncamelo.Core.Execution.UpstreamError"/> carrying the failing node's message, and the node
+/// decides what to do (see <c>Flow.Try</c>). Without the attribute a failed input stops the node, as always.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class CatchesUpstreamErrorsAttribute : Attribute
+{
+}
+
+/// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
 /// renaming a port would silently drop them; with this attribute a graph that still says <paramref name="oldName"/> finds the
 /// port now called <paramref name="currentName"/>. Repeat the attribute for several ports.

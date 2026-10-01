@@ -63,6 +63,9 @@ public class ZeroTouchNodeModel : NodeModel
     public override NodeFunction Function => Definition.Function;
 
     /// <inheritdoc />
+    public override bool CatchesUpstreamErrors => Definition.CatchesUpstreamErrors;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         object? returned;

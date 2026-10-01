@@ -203,8 +203,10 @@ public class GraphEngine
     {
         node.ClearMessages();
 
+        node.FailedUpstream = false;
         var inputs = new object?[node.InPorts.Count];
         var missingInputs = new List<string>();
+        var failedPorts = new List<int>();
         bool upstreamFailed = false;
 
         for (int i = 0; i < node.InPorts.Count; i++)
@@ -214,6 +216,7 @@ public class GraphEngine
             if (failed)
             {
                 upstreamFailed = true;
+                failedPorts.Add(i);
             }
 
             // A muted wire is invisible to evaluation: fall through to the
@@ -240,11 +243,29 @@ public class GraphEngine
             }
         }
 
-        if (upstreamFailed)
+        if (upstreamFailed && node.CatchesUpstreamErrors)
+        {
+            // The node asked to see the failure instead of being stopped by it (Flow.Try).
+            foreach (var index in failedPorts)
+            {
+                inputs[index] = UpstreamError.Describe(graph, node.InPorts[index]);
+            }
+        }
+        else if (upstreamFailed)
         {
             SetOutputs(node, null);
+            node.FailedUpstream = true;
             node.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
             node.State = NodeState.Warning;
+            return;
+        }
+
+        if (!node.IsMuted && inputs.Any(value => value is InactiveValue))
+        {
+            // A branch that was switched off (Flow.When): nothing to do here, and nothing for the nodes after it to do either.
+            SetOutputs(node, Enumerable.Repeat<object?>(InactiveValue.Instance, node.OutPorts.Count).ToArray());
+            node.AddMessage(MessageSeverity.Info, "Skipped: an input comes from a branch that was switched off (Flow.When was false).");
+            node.State = NodeState.Idle;
             return;
         }
 

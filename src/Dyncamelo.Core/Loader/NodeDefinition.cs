@@ -59,6 +59,9 @@ public class NodeDefinition
     /// <summary>True when the node is retired (see <see cref="NodeDeprecatedAttribute"/>): it still loads and runs but is not offered.</summary>
     public bool IsDeprecated { get; set; }
 
+    /// <summary>True when the node runs on failed inputs, receiving them as <see cref="Dyncamelo.Core.Execution.UpstreamError"/> values.</summary>
+    public bool CatchesUpstreamErrors { get; set; }
+
     /// <summary>What to use instead of a deprecated node, or empty.</summary>
     public string Replacement { get; set; } = string.Empty;
 

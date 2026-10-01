@@ -63,6 +63,15 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// </summary>
     public virtual NodeFunction Function => NodeFunction.Modify;
 
+    /// <summary>
+    /// True when the node runs even though a node feeding it failed; the failed inputs then arrive as
+    /// <see cref="Dyncamelo.Core.Execution.UpstreamError"/> values (zero-touch: <see cref="Dyncamelo.Core.Loader.CatchesUpstreamErrorsAttribute"/>).
+    /// </summary>
+    public virtual bool CatchesUpstreamErrors => false;
+
+    /// <summary>True when the last run stopped this node because a node feeding it had failed (it did not execute).</summary>
+    public bool FailedUpstream { get; internal set; }
+
     /// <summary>Description shown in the library browser and node tooltip.</summary>
     public string Description { get; set; } = string.Empty;
 

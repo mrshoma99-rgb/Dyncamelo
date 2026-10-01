@@ -13,7 +13,7 @@ public static class MultiInput
 {
     /// <summary>
     /// Combines the values of several wires, in wire order, into one list: a list-valued wire contributes its elements,
-    /// any other value contributes itself, and a wire that carries nothing (null) contributes nothing.
+    /// any other value contributes itself, and a wire that carries nothing (null, or a branch that was switched off) contributes nothing.
     /// A dictionary or string is a single value, not a list.
     /// </summary>
     /// <param name="values">One value per wire, in the order the wires were made.</param>
@@ -22,7 +22,7 @@ public static class MultiInput
         var combined = new List<object?>();
         foreach (var value in values)
         {
-            if (value == null)
+            if (value == null || value is InactiveValue)
             {
                 continue;
             }
@@ -75,8 +75,21 @@ public static class MultiInput
             return false;
         }
 
-        upstreamFailed = active.Any(w => w.SourceNode.State == NodeState.Error);
-        value = active.Count == 1 ? active[0].Source.Value : Combine(active.Select(w => w.Source.Value));
+        upstreamFailed = active.Any(w => w.SourceNode.State == NodeState.Error || w.SourceNode.FailedUpstream);
+        if (active.Count == 1)
+        {
+            value = active[0].Source.Value;
+        }
+        else if (active.All(w => w.Source.Value is InactiveValue))
+        {
+            // Every branch feeding the socket is switched off: the socket is off too.
+            value = InactiveValue.Instance;
+        }
+        else
+        {
+            value = Combine(active.Select(w => w.Source.Value));
+        }
+
         return true;
     }
 }
