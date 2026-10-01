@@ -63,6 +63,8 @@ public sealed class HostRunner : MarshalByRefObject
     private static string Run(string palette, bool collapsed)
     {
         var errors = new List<string>();
+        Dispatcher? dispatcher = null;
+        System.Windows.Forms.Form? form = null;
         try
         {
             if (Application.Current != null)
@@ -70,7 +72,7 @@ public sealed class HostRunner : MarshalByRefObject
                 return "FAILED: this AppDomain already has a WPF Application, so it does not model Navisworks.";
             }
 
-            var dispatcher = Dispatcher.CurrentDispatcher;
+            dispatcher = Dispatcher.CurrentDispatcher;
             dispatcher.UnhandledException += (_, e) =>
             {
                 errors.Add("dispatcher: " + e.Exception);
@@ -86,7 +88,7 @@ public sealed class HostRunner : MarshalByRefObject
 
             var control = new DyncameloEditorControl { ViewModel = vm };
             var host = new ElementHost { Child = control, Dock = System.Windows.Forms.DockStyle.Fill };
-            var form = new System.Windows.Forms.Form
+            form = new System.Windows.Forms.Form
             {
                 Width = 1500,
                 Height = 950,
@@ -155,6 +157,20 @@ public sealed class HostRunner : MarshalByRefObject
             }
 
             return text.ToString();
+        }
+        finally
+        {
+            // WPF releases its text-services COM objects when the dispatcher shuts down. Left to the AppDomain unload they are released
+            // from another thread, after this one has gone, and the test host dies with an InvalidComObjectException.
+            try
+            {
+                form?.Dispose();
+                dispatcher?.InvokeShutdown();
+            }
+            catch (Exception)
+            {
+                // Nothing left to report from here; the result of the run is already decided.
+            }
         }
     }
 
