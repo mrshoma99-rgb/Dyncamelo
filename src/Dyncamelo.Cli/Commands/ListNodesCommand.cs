@@ -26,7 +26,7 @@ internal static class ListNodesCommand
         var entries = new List<Entry>();
 
         // Zero-touch definitions carry their metadata directly.
-        foreach (var definition in registry.Definitions)
+        foreach (var definition in registry.Definitions.Where(d => !d.IsDeprecated))
         {
             entries.Add(new Entry(
                 definition.Category,

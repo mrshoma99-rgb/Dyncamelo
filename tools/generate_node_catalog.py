@@ -13,7 +13,7 @@ src/Dyncamelo.Core/Loader/AssemblyNodeLoader.cs:
   * outputs = [MultiReturn] keys, or the single return port named by
               [return: NodeName], or "result"; void methods pass input 0 through
   * methods with `params`, by-ref or delegate parameters and
-    [IsVisibleInLibrary(false)] / [TypeConverterRegistration] members are skipped
+    [IsVisibleInLibrary(false)] / [NodeDeprecated] / [TypeConverterRegistration] members are skipped
 
 The output feeds the node-library browser on bimcamel.com/plugins/dyncamelo, so
 types are prettified (IEnumerable<ModelItem> -> "ModelItem[]", double ->
@@ -372,6 +372,9 @@ def parse_method(
         return None
     vis = find_attr_args(attr_block, "IsVisibleInLibrary")
     if vis is not None and "false" in vis:
+        return None
+    # A retired node still loads in old graphs but is not offered, so it is not in the catalogue either.
+    if find_attr_args(attr_block, "NodeDeprecated") is not None:
         return None
 
     # parameter text: between the first '(' after the name and its match

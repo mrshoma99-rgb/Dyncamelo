@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -40,6 +41,9 @@ public class PortModel : INotifyPropertyChanged
 
     /// <summary>Port name; also the serialized identity of the port within its node. Only a node group interface renames ports.</summary>
     public string Name { get; private set; }
+
+    /// <summary>Earlier names of the port that saved graphs may still carry (a node's author renamed it).</summary>
+    public IReadOnlyList<string> Aliases { get; internal set; } = System.Array.Empty<string>();
 
     /// <summary>Renames the port (a node group socket was renamed); wires stay on the port.</summary>
     internal void Rename(string name)

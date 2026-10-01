@@ -69,6 +69,46 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// <summary>Input ports, in declaration order.</summary>
     public IReadOnlyList<PortModel> InPorts => _inPorts;
 
+    /// <summary>
+    /// The input a saved name refers to: the port of exactly that name, else the one that used to be called that (a renamed
+    /// port keeps its wires through <see cref="PortModel.Aliases"/>).
+    /// </summary>
+    /// <param name="name">The name stored in a graph file.</param>
+    public PortModel? FindInPort(string? name) => FindPort(_inPorts, name);
+
+    /// <summary>The output a saved name refers to (see <see cref="FindInPort"/>).</summary>
+    /// <param name="name">The name stored in a graph file.</param>
+    public PortModel? FindOutPort(string? name) => FindPort(_outPorts, name);
+
+    private static PortModel? FindPort(IReadOnlyList<PortModel> ports, string? name)
+    {
+        if (name == null)
+        {
+            return null;
+        }
+
+        foreach (var port in ports)
+        {
+            if (port.Name == name)
+            {
+                return port;
+            }
+        }
+
+        foreach (var port in ports)
+        {
+            foreach (var alias in port.Aliases)
+            {
+                if (alias == name)
+                {
+                    return port;
+                }
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>Output ports, in declaration order.</summary>
     public IReadOnlyList<PortModel> OutPorts => _outPorts;
 

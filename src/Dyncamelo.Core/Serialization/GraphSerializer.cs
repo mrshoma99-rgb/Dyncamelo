@@ -104,6 +104,14 @@ public class GraphSerializer
         return root.ToString(Formatting.Indented);
     }
 
+    private readonly List<string> _loadWarnings = new List<string>();
+
+    /// <summary>
+    /// What the last load or paste could not restore, one sentence each: a wire or a typed-in value that belonged to an input or
+    /// output the node no longer has (a node was changed since the file was saved). Empty when everything came back.
+    /// </summary>
+    public IReadOnlyList<string> LoadWarnings => _loadWarnings;
+
     /// <summary>Serializes a graph and writes it to a file (UTF-8).</summary>
     /// <param name="graph">The graph to save.</param>
     /// <param name="path">Destination file path (conventionally *.dyc).</param>
@@ -121,6 +129,8 @@ public class GraphSerializer
         {
             throw new ArgumentNullException(nameof(json));
         }
+
+        _loadWarnings.Clear();
 
         JObject root;
         try
@@ -248,6 +258,8 @@ public class GraphSerializer
         {
             throw new ArgumentNullException(nameof(json));
         }
+
+        _loadWarnings.Clear();
 
         JObject root;
         try
@@ -781,9 +793,14 @@ public class GraphSerializer
                 foreach (var portJson in inputPorts.OfType<JObject>())
                 {
                     var portName = portJson.Value<string>("Name");
-                    var port = node.InPorts.FirstOrDefault(p => p.Name == portName);
+                    var port = node.FindInPort(portName);
                     if (port == null)
                     {
+                        if (portJson["UserValue"] != null)
+                        {
+                            _loadWarnings.Add("'" + node.Name + "' no longer has an input '" + portName + "'; the value typed into it was dropped.");
+                        }
+
                         continue;
                     }
 
@@ -812,7 +829,7 @@ public class GraphSerializer
         return node;
     }
 
-    private static void RestoreConnection(GraphModel graph, Dictionary<Guid, NodeModel> nodesById, JObject json, bool restoreId = true)
+    private void RestoreConnection(GraphModel graph, Dictionary<Guid, NodeModel> nodesById, JObject json, bool restoreId = true)
     {
         if (!TryParseGuid(json.Value<string>("FromNode"), out var fromNodeId) ||
             !TryParseGuid(json.Value<string>("ToNode"), out var toNodeId) ||
@@ -822,10 +839,20 @@ public class GraphSerializer
             return; // tolerate dangling connectors
         }
 
-        var fromPort = fromNode.OutPorts.FirstOrDefault(p => p.Name == json.Value<string>("FromPort"));
-        var toPort = toNode.InPorts.FirstOrDefault(p => p.Name == json.Value<string>("ToPort"));
+        var fromName = json.Value<string>("FromPort");
+        var toName = json.Value<string>("ToPort");
+        var fromPort = fromNode.FindOutPort(fromName);
+        var toPort = toNode.FindInPort(toName);
         if (fromPort == null || toPort == null)
         {
+            // A node that is not installed is already shown as a placeholder; say nothing more about its wires.
+            if (!(fromNode is MissingNodeModel) && !(toNode is MissingNodeModel))
+            {
+                _loadWarnings.Add(fromPort == null
+                    ? "A connection from '" + fromNode.Name + "' was dropped: it no longer has an output '" + fromName + "'."
+                    : "A connection into '" + toNode.Name + "' was dropped: it no longer has an input '" + toName + "'.");
+            }
+
             return;
         }
 

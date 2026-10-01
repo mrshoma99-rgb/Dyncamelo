@@ -1998,7 +1998,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
             var serializer = new GraphSerializer(Registry);
             var graph = serializer.LoadFromFile(path);
             LoadGraph(graph, path);
-            StatusMessage = "Opened " + System.IO.Path.GetFileName(path) + ".";
+            StatusMessage = "Opened " + System.IO.Path.GetFileName(path) + "." + DescribeLoadWarnings(serializer.LoadWarnings);
             RecordRecentFile(path);
             return true;
         }
@@ -2022,6 +2022,19 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         }
 
         return false;
+    }
+
+    /// <summary>The sentence appended to "Opened …" when a node was changed since the file was saved and some wires or values could not come back.</summary>
+    private static string DescribeLoadWarnings(System.Collections.Generic.IReadOnlyList<string> warnings)
+    {
+        if (warnings.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        return " " + warnings.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " connection" + (warnings.Count == 1 ? string.Empty : "s") +
+               " or value" + (warnings.Count == 1 ? string.Empty : "s") + " could not be restored — " + warnings[0] +
+               (warnings.Count > 1 ? " (+" + (warnings.Count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + " more)" : string.Empty);
     }
 
     private void RecordRecentFile(string path)

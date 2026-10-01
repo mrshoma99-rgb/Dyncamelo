@@ -26,6 +26,9 @@ public class PortDescriptor
     /// <summary>Description/tooltip text.</summary>
     public string Description { get; set; } = string.Empty;
 
+    /// <summary>Earlier names of this port that saved graphs may still use (see <see cref="PortAliasAttribute"/>).</summary>
+    public IReadOnlyList<string> Aliases { get; set; } = Array.Empty<string>();
+
     /// <summary>True when the underlying parameter is optional.</summary>
     public bool HasDefault { get; set; }
 

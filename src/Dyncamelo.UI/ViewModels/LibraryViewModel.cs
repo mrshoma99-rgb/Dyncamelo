@@ -391,6 +391,12 @@ public class LibraryViewModel : ObservableObject
 
         foreach (var definition in _registry.Definitions)
         {
+            // A retired node still loads and runs in old graphs; it is just no longer offered.
+            if (definition.IsDeprecated)
+            {
+                continue;
+            }
+
             _allEntries.Add(new LibraryEntryViewModel(
                 definition.Id,
                 definition.Name,

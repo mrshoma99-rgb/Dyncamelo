@@ -273,8 +273,35 @@ public static class AssemblyNodeLoader
 
         definition.MultiReturnKeys = ResolveMultiReturnKeys(method);
         definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys, docs);
+
+        var deprecated = method.GetCustomAttribute<NodeDeprecatedAttribute>();
+        if (deprecated != null)
+        {
+            definition.IsDeprecated = true;
+            definition.Replacement = deprecated.Replacement;
+            definition.Description = DeprecationNote(deprecated.Replacement) + definition.Description;
+        }
+
+        var aliases = method.GetCustomAttributes<PortAliasAttribute>().ToList();
+        if (aliases.Count > 0)
+        {
+            foreach (var port in definition.Inputs.Concat(definition.Outputs))
+            {
+                var old = aliases.Where(a => a.CurrentName == port.Name && a.OldName != port.Name).Select(a => a.OldName).ToList();
+                if (old.Count > 0)
+                {
+                    port.Aliases = old;
+                }
+            }
+        }
+
         return definition;
     }
+
+    private static string DeprecationNote(string replacement) =>
+        replacement.Length == 0
+            ? "Retired — still works, but is no longer offered. "
+            : "Retired — use " + replacement + " instead; this node still works. ";
 
     private static string ResolveCategory(MethodInfo method, Type type, string assemblyName)
     {

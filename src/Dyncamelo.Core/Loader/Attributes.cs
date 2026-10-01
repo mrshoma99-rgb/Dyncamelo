@@ -136,6 +136,49 @@ public sealed class NodeAliasesAttribute : Attribute
 }
 
 /// <summary>
+/// Retires a node without breaking the graphs that use it. A deprecated node is still registered — saved graphs keep loading and
+/// running — but it is left out of the library and the quick search, and its description says what to use instead. Prefer
+/// making the old method forward to the new one so there is a single implementation.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class NodeDeprecatedAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="replacement">What to use instead, e.g. "List.Merge".</param>
+    public NodeDeprecatedAttribute(string replacement)
+    {
+        Replacement = replacement ?? string.Empty;
+    }
+
+    /// <summary>What to use instead.</summary>
+    public string Replacement { get; }
+}
+
+/// <summary>
+/// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
+/// renaming a port would silently drop them; with this attribute a graph that still says <paramref name="oldName"/> finds the
+/// port now called <paramref name="currentName"/>. Repeat the attribute for several ports.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public sealed class PortAliasAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="oldName">The name saved graphs may still use.</param>
+    /// <param name="currentName">The port's name now (a parameter name, a [MultiReturn] key or the return name).</param>
+    public PortAliasAttribute(string oldName, string currentName)
+    {
+        OldName = oldName ?? string.Empty;
+        CurrentName = currentName ?? string.Empty;
+    }
+
+    /// <summary>The previous port name.</summary>
+    public string OldName { get; }
+
+    /// <summary>The current port name.</summary>
+    public string CurrentName { get; }
+}
+
+/// <summary>
 /// Marks a method returning <c>Dictionary&lt;string, object&gt;</c> as multi-output:
 /// one output port per key, in the order given here. A key missing from the
 /// returned dictionary yields null on that port plus a node warning.

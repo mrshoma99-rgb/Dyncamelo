@@ -42,12 +42,14 @@ public class ZeroTouchNodeModel : NodeModel
             port.PanelDefaultOpen = input.PanelDefaultOpen;
             port.KindHint = input.Kind;
             port.IsMultiInput = input.MultiInput;
+            port.Aliases = input.Aliases;
         }
 
         foreach (var output in definition.Outputs)
         {
             var outPort = AddOutput(output.Name, output.Type, output.Description);
             outPort.KindHint = output.Kind;
+            outPort.Aliases = output.Aliases;
         }
     }
 
