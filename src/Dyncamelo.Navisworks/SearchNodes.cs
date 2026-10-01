@@ -10,6 +10,49 @@ namespace Dyncamelo.Navisworks;
 [NodeCategory("Navisworks.Search")]
 public static class SearchNodes
 {
+    /// <summary>Finds every model item by one property: equal to a value, containing text, matching a wildcard or compared with a number.</summary>
+    /// <param name="categoryName">Category display name (e.g. "Element"). Internal names do not match.</param>
+    /// <param name="propertyName">Property display name (e.g. "Category"). Internal names do not match.</param>
+    /// <param name="value">What to look for: any value for "equals"; text for "contains" and "wildcard" (* matches any text, ? one character); a number for &gt;, &gt;=, &lt; and &lt;=.</param>
+    /// <param name="mode">How the property is matched: equals, contains, wildcard, &gt;, &gt;=, &lt; or &lt;=.</param>
+    /// <param name="resolveTo">Optional selection resolution applied to the matches, like Options &gt; Interface &gt; Selection &gt; Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.</param>
+    /// <param name="document">The document to search (defaults to the active document).</param>
+    /// <returns>All matching model items.</returns>
+    [NodeName("Search.ByProperty")]
+    [NodeDescription("Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, < or <= a number (e.g. pipes with Diameter > 100).")]
+    [NodeSearchTags("search", "find", "filter", "property", "equals", "contains", "wildcard", "pattern", "compare", "greater", "less", "numeric", "text", "query")]
+    [return: NodeName("items")]
+    public static List<ModelItem> ByProperty(
+        string categoryName,
+        string propertyName,
+        object value,
+        [NodeChoices("equals", "contains", "wildcard", ">", ">=", "<", "<=")]
+        string mode = "equals",
+        [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
+        string resolveTo = "Self",
+        Document? document = null)
+    {
+        var chosen = (mode ?? string.Empty).Trim();
+        switch (chosen.ToLowerInvariant())
+        {
+            case "":
+            case "equals":
+                return ByPropertyValue(categoryName, propertyName, value, resolveTo, document);
+            case "contains":
+                return ByPropertyContains(categoryName, propertyName, ValueAsText(value, "contains"), resolveTo, document);
+            case "wildcard":
+                return ByPropertyWildcard(categoryName, propertyName, ValueAsText(value, "wildcard"), resolveTo, document);
+            case ">":
+            case ">=":
+            case "<":
+            case "<=":
+                return ByPropertyCompare(categoryName, propertyName, chosen, ValueAsNumber(value, chosen), resolveTo, document);
+            default:
+                throw new ArgumentException(
+                    "Unknown mode '" + mode + "'. Use equals, contains, wildcard, >, >=, < or <=.", nameof(mode));
+        }
+    }
+
     /// <summary>Finds every model item whose property equals a value.</summary>
     /// <param name="categoryName">Category display name (e.g. "Element"). Internal names do not match.</param>
     /// <param name="propertyName">Property display name (e.g. "Category"). Internal names do not match.</param>
@@ -18,6 +61,7 @@ public static class SearchNodes
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyValue")]
+    [NodeDeprecated("Search.ByProperty")]
     [NodeDescription("Finds every model item whose property exactly equals the given value.")]
     [NodeSearchTags("search", "find", "filter", "property", "equals", "query")]
     // Pre-0.4 id (before the optional resolveTo parameter was appended).
@@ -58,6 +102,7 @@ public static class SearchNodes
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyContains")]
+    [NodeDeprecated("Search.ByProperty")]
     [NodeDescription("Finds every model item whose property text contains the given substring.")]
     [NodeSearchTags("search", "find", "filter", "property", "contains", "text")]
     // Pre-0.4 id (before the optional resolveTo parameter was appended).
@@ -91,6 +136,7 @@ public static class SearchNodes
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyWildcard")]
+    [NodeDeprecated("Search.ByProperty")]
     [NodeDescription("Finds every model item whose property text matches a wildcard pattern (* and ?).")]
     [NodeSearchTags("search", "find", "filter", "property", "wildcard", "pattern")]
     // Pre-0.4 id (before the optional resolveTo parameter was appended).
@@ -125,6 +171,7 @@ public static class SearchNodes
     /// <param name="document">The document to search (defaults to the active document).</param>
     /// <returns>All matching model items.</returns>
     [NodeName("Search.ByPropertyCompare")]
+    [NodeDeprecated("Search.ByProperty")]
     [NodeDescription("Finds every model item whose numeric property is >, >=, < or <= a value (e.g. pipes with Diameter > 100).")]
     [NodeSearchTags("search", "find", "filter", "property", "compare", "greater", "less", "numeric")]
     // Pre-0.4 id (before the optional resolveTo parameter was appended).
@@ -311,6 +358,33 @@ public static class SearchNodes
         search.Locations = SearchLocations.DescendantsAndSelf;
         search.SearchConditions.Add(BuildPropertyCondition(categoryName, propertyName).EqualValue(variant));
         return search;
+    }
+
+    private static string ValueAsText(object? value, string mode)
+    {
+        if (value == null)
+        {
+            throw new ArgumentNullException(nameof(value), "No search text provided for mode '" + mode + "'.");
+        }
+
+        return value as string ?? Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+    }
+
+    private static double ValueAsNumber(object? value, string mode)
+    {
+        switch (value)
+        {
+            case null:
+                throw new ArgumentNullException(nameof(value), "No number provided for mode '" + mode + "'.");
+            case double d:
+                return d;
+            case string text when double.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var parsed):
+                return parsed;
+            case IConvertible convertible when !(value is string):
+                return convertible.ToDouble(System.Globalization.CultureInfo.InvariantCulture);
+            default:
+                throw new ArgumentException("Mode '" + mode + "' compares with a number; '" + value + "' is not one.", nameof(value));
+        }
     }
 
     private static SearchConditionComparison ParseComparison(string? comparison)

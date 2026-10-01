@@ -194,6 +194,7 @@ public static class SelectionSetNodes
     [NodeDescription("One search set per distinct value of a property (e.g. one set per Level) — bulk set generation without the Find Items dialog. Existing same-named sets in the target location are replaced.")]
     [NodeSearchTags("selection", "sets", "bulk", "generate", "values", "level", "system")]
     [MultiReturn("selectionSets", "values")]
+    [PortKinds("selection*", "")]
     public static Dictionary<string, object?> BulkByPropertyValues(
         string categoryName,
         string propertyName,

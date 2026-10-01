@@ -37,6 +37,7 @@ public static class ViewpointTransferNodes
         "overrides are not carried (they only exist relative to the source model's items).")]
     [NodeSearchTags("viewpoints", "export", "transfer", "copy", "between", "models", "package", "camera", "section", "box")]
     [MultiReturn("filePath", "count", "report")]
+    [PortKinds("file", "integer", "")]
     public static Dictionary<string, object?> ExportFile(
         string filePath,
         object? viewpoints = null,
@@ -129,6 +130,7 @@ public static class ViewpointTransferNodes
         "units. Re-runs update same-named views instead of duplicating (overwrite).")]
     [NodeSearchTags("viewpoints", "import", "transfer", "copy", "between", "models", "package", "restore")]
     [MultiReturn("viewpoints", "count", "report")]
+    [PortKinds("viewpoint*", "integer", "")]
     public static Dictionary<string, object?> ImportFile(
         string filePath,
         string? folderName = null,

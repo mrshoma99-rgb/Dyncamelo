@@ -239,6 +239,8 @@ Before publishing a pack:
 - [ ] Optional parameters used for sensible defaults; no boolean traps (name flags clearly: `includeSelf`, `overwrite`).
 - [ ] Culture-invariant parsing/formatting throughout (`CultureInfo.InvariantCulture`).
 - [ ] Inputs never mutated; collections returned fresh.
+- [ ] A node that acts on something returns that thing (so the next node can be chained to it); a bare `done` flag is only for acts on the whole document.
+- [ ] A `[MultiReturn]` node also declares `[PortKinds(...)]`, one kind per output, so its sockets are coloured before the graph has run (a test fails when it is missing).
 - [ ] Errors thrown with actionable messages; recoverable issues warn + return null; no UI, no console, no threads.
 - [ ] Pure logic covered by xunit tests (runnable on Linux).
 - [ ] Pack folder contains only your DLLs (+ third-party MIT/Apache/BSD dependencies you are licensed to ship) — never `Dyncamelo.*` or `Autodesk.*` assemblies.

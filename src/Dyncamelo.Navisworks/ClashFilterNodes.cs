@@ -218,6 +218,7 @@ public static class ClashFilterNodes
         "representative, the rest come out on duplicates. 400 raw results, 60 real issues.")]
     [NodeSearchTags("clash", "deduplicate", "duplicates", "unique", "pair", "mirror", "matrix", "noise", "merge")]
     [MultiReturn("results", "duplicates")]
+    [PortKinds("clash*", "clash*")]
     public static Dictionary<string, object?> Deduplicate(IEnumerable<ClashResult> results)
     {
         RequireResults(results);

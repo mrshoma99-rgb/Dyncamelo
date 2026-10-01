@@ -33,6 +33,7 @@ public static class ClashNodes
     [NodeDescription("Name, status, type, tolerance, last run time and result count of a clash test.")]
     [NodeSearchTags("clash", "test", "info", "status", "tolerance")]
     [MultiReturn("name", "status", "testType", "tolerance", "lastRun", "resultCount")]
+    [PortKinds("text", "text", "text", "number", "datetime", "integer")]
     public static Dictionary<string, object?> Info(ClashTest test)
     {
         var clashTest = ClashHelpers.RequireTest(test);
@@ -66,6 +67,7 @@ public static class ClashNodes
     [NodeDescription("Name, status, distance, description, assignee and creation time of a clash result.")]
     [NodeSearchTags("clash", "result", "info", "status", "distance")]
     [MultiReturn("name", "status", "distance", "description", "assignedTo", "createdTime")]
+    [PortKinds("text", "text", "number", "text", "text", "datetime")]
     public static Dictionary<string, object?> ResultInfo(ClashResult result)
     {
         var clashResult = ClashHelpers.RequireResult(result);
@@ -87,6 +89,7 @@ public static class ClashNodes
     [NodeDescription("The two model items involved in a clash result.")]
     [NodeSearchTags("clash", "result", "items", "elements", "pair")]
     [MultiReturn("item1", "item2")]
+    [PortKinds("item", "item")]
     public static Dictionary<string, object?> ResultItems(ClashResult result)
     {
         var clashResult = ClashHelpers.RequireResult(result);
@@ -164,6 +167,7 @@ public static class ClashNodes
     [NodeDescription("How documented a clash already is — whether it has a saved viewpoint, redline markup, and how many comments. Filter to the reviewed/annotated ones, or find the ones still needing attention (commentCount = 0).")]
     [NodeSearchTags("clash", "comments", "viewpoint", "redline", "reviewed", "documented", "annotated", "filter")]
     [MultiReturn("hasViewpoint", "hasRedlines", "commentCount")]
+    [PortKinds("boolean", "boolean", "integer")]
     public static Dictionary<string, object?> Documentation(ClashResult result)
     {
         var clashResult = ClashHelpers.RequireResult(result);
@@ -386,6 +390,7 @@ public static class ClashNodes
     [NodeDescription("Runs one clash test now and reports the result count.")]
     [NodeSearchTags("clash", "test", "run", "execute", "detect")]
     [MultiReturn("test", "resultCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> Run(ClashTest test, Document? document = null)
     {
         var stored = ClashHelpers.RequireStoredTest(test);
@@ -420,13 +425,13 @@ public static class ClashNodes
     /// <param name="status">One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several ("New,Active"; Clash.Statuses builds this from toggles).</param>
     /// <returns>The results with any of those statuses (grouped results are flattened).</returns>
     [NodeName("ClashTest.ResultsByStatus")]
+    [NodeDeprecated("ClashTest.Results followed by Clash.FilterByStatus")]
     [NodeDescription("The results of a test that have the given status(es) — one, or several comma-separated (\"New,Active\"; wire Clash.Statuses to pick with toggles).")]
     [NodeSearchTags("clash", "results", "status", "statuses", "filter", "triage", "multiple")]
     [return: NodeName("results")]
     public static List<ClashResult> ResultsByStatus(ClashTest test, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status)
     {
-        var wanted = ClashHelpers.ParseResultStatuses(status);
-        return ClashHelpers.FlattenResults(ClashHelpers.RequireTest(test)).FindAll(r => wanted.Contains(r.Status));
+        return FilterByStatus(Results(test), status);
     }
 
     /// <summary>Sets the status of a clash result.</summary>
@@ -576,6 +581,7 @@ public static class ClashNodes
     [NodeDescription("Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.")]
     [NodeSearchTags("clash", "group", "same", "item", "element", "triage")]
     [MultiReturn("test", "groupCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsBySameItem(
         ClashTest test,
         bool useItem1 = true,
@@ -593,6 +599,7 @@ public static class ClashNodes
     [NodeDescription("Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.")]
     [NodeSearchTags("clash", "group", "proximity", "cluster", "radius", "triage")]
     [MultiReturn("test", "groupCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByProximity(
         ClashTest test,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 10)] double radius,
@@ -616,6 +623,7 @@ public static class ClashNodes
     [NodeDescription("Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.")]
     [NodeSearchTags("clash", "group", "level", "floor", "storey", "elevation", "triage")]
     [MultiReturn("test", "groupCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByLevel(
         ClashTest test,
         IEnumerable<string> levelNames,

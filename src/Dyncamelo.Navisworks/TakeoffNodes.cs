@@ -22,6 +22,7 @@ public static class TakeoffNodes
     [NodeDescription("One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".")]
     [NodeSearchTags("takeoff", "qto", "quantity", "sum", "group", "rollup", "pivot")]
     [MultiReturn("keys", "sums", "counts")]
+    [PortKinds("text*", "number*", "integer*")]
     public static Dictionary<string, object?> SumPropertyByGroup(
         [MultiInput] IEnumerable<ModelItem> items,
         string groupCategoryName,

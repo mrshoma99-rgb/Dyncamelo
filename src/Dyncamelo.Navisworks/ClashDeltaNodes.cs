@@ -25,6 +25,7 @@ public static class ClashDeltaNodes
     [NodeDescription("Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.")]
     [NodeSearchTags("clash", "snapshot", "save", "history", "delta", "baseline", "json")]
     [MultiReturn("filePath", "resultCount")]
+    [PortKinds("file", "integer")]
     public static Dictionary<string, object?> SnapshotToFile(
         string filePath,
         IEnumerable<ClashTest>? tests = null,
@@ -108,6 +109,7 @@ public static class ClashDeltaNodes
     [NodeDescription("Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) — the weekly delta report no plugin does via live API. Pure file IO: needs no open model.")]
     [NodeSearchTags("clash", "compare", "delta", "diff", "new", "resolved", "persisting", "report")]
     [MultiReturn("newResults", "resolved", "persisting", "counts")]
+    [PortKinds("data*", "data*", "data*", "data")]
     public static Dictionary<string, object?> CompareSnapshots(string oldPath, string newPath)
     {
         var oldRoot = ClashSnapshotFile.Read(oldPath);

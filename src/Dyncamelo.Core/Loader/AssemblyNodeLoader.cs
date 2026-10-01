@@ -428,9 +428,14 @@ public static class AssemblyNodeLoader
         }
 
         var choices = parameter.GetCustomAttribute<NodeChoicesAttribute>()?.Choices;
+        var fromEnum = parameter.GetCustomAttribute<NodeChoicesFromEnumAttribute>();
         if (choices != null && choices.Length > 0)
         {
             descriptor.Choices = choices;
+        }
+        else if (fromEnum != null && fromEnum.EnumType.IsEnum)
+        {
+            descriptor.Choices = fromEnum.Extra.Concat(Enum.GetNames(fromEnum.EnumType)).ToArray();
         }
         else
         {

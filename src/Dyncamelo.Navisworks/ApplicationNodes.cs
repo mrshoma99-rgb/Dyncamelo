@@ -14,6 +14,7 @@ public static class ApplicationNodes
     [NodeDescription("The running Navisworks product name and API version (report headers, compatibility checks).")]
     [NodeSearchTags("application", "version", "product", "api", "navisworks")]
     [MultiReturn("product", "apiVersion")]
+    [PortKinds("text", "text")]
     public static Dictionary<string, object?> Version()
     {
         try

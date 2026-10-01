@@ -45,6 +45,7 @@ public static class TimelinerNodes
     [NodeDescription("Name, id, planned and actual dates, task type and progress of a TimeLiner task.")]
     [NodeSearchTags("timeliner", "task", "info", "dates", "schedule")]
     [MultiReturn("name", "displayId", "plannedStart", "plannedEnd", "actualStart", "actualEnd", "taskType", "progress")]
+    [PortKinds("text", "text", "datetime", "datetime", "datetime", "datetime", "text", "number")]
     public static Dictionary<string, object?> Info(TimelinerTask task)
     {
         var timelinerTask = RequireTask(task);

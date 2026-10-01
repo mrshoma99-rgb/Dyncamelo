@@ -30,6 +30,7 @@ public static class TableNodes
     [NodeName("Table.JoinByKey")]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [MultiReturn("matchedRows", "unmatchedKeys")]
+    [PortKinds("", "")]
     [NodeDescription("Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.")]
     [NodeSearchTags("join", "lookup", "vlookup", "merge", "link", "table", "excel", "csv")]
     public static Dictionary<string, object> JoinByKey(

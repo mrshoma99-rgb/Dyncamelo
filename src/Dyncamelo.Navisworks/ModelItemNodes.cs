@@ -176,6 +176,7 @@ public static class ModelItemNodes
         "the tree shows them (class name when unnamed), case-insensitive unless caseSensitive.")]
     [NodeSearchTags("item", "ancestor", "name", "contains", "starts", "ends", "branch", "under", "tree", "hierarchy", "filter", "check")]
     [MultiReturn("matches", "ancestor", "ancestorName")]
+    [PortKinds("boolean", "item", "text")]
     public static Dictionary<string, object?> AncestorNameMatches(
         ModelItem item,
         string text,
@@ -239,6 +240,7 @@ public static class ModelItemNodes
         "don't match. Lace over item lists for a List.FilterByBoolMask mask.")]
     [NodeSearchTags("item", "ancestor", "property", "contains", "starts", "ends", "branch", "under", "tree", "hierarchy", "filter", "check", "category")]
     [MultiReturn("matches", "ancestor", "value")]
+    [PortKinds("boolean", "item", "")]
     public static Dictionary<string, object?> AncestorPropertyMatches(
         ModelItem item,
         string category,
@@ -416,6 +418,7 @@ public static class ModelItemNodes
     [NodeDescription("The internal and localized class names of a model item (layer/group/geometry detection).")]
     [NodeSearchTags("item", "class", "classname", "type", "kind")]
     [MultiReturn("className", "classDisplayName")]
+    [PortKinds("text", "text")]
     public static Dictionary<string, object?> ClassInfo(ModelItem item)
     {
         var modelItem = NavisValues.RequireItem(item);

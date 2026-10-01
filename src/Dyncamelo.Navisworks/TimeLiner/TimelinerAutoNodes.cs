@@ -29,6 +29,7 @@ public static class TimelinerAutoNodes
     [NodeDescription("For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks.")]
     [NodeSearchTags("timeliner", "auto", "attach", "rules", "4d", "link", "schedule", "property")]
     [MultiReturn("attachedCount", "unmatchedTasks")]
+    [PortKinds("integer", "")]
     public static Dictionary<string, object?> AutoAttachByProperty(
         string category,
         string property,

@@ -56,7 +56,7 @@
       "IsFrozen": false,
       "InputPorts": [
         {
-          "Name": "str",
+          "Name": "text",
           "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
@@ -286,7 +286,7 @@
       "FromNode": "2d454a006d5a4a95be204b8c18e3b602",
       "FromPort": "value",
       "ToNode": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
-      "ToPort": "str"
+      "ToPort": "text"
     },
     {
       "Id": "8b4759e29d3444aba45af8b7b749a7db",

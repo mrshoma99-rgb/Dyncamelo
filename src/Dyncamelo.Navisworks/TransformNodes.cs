@@ -123,6 +123,7 @@ public static class TransformNodes
     [NodeDescription("Reads an item's current (active) transform: origin = its translation (a practical base point), matrix = 16 numbers row-major (feed ModelItem.SetTransform to round-trip), hasOverride = whether a permanent transform override is applied.")]
     [NodeSearchTags("item", "transform", "get", "read", "matrix", "origin", "override", "position")]
     [MultiReturn("origin", "matrix", "hasOverride")]
+    [PortKinds("geometry", "number*", "boolean")]
     public static Dictionary<string, object?> GetTransform(ModelItem item)
     {
         if (item == null)

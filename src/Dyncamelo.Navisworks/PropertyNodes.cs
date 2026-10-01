@@ -75,6 +75,7 @@ public static class PropertyNodes
     [NodeDescription("All property names and values inside one category of an item. Returns empty lists when the item lacks the category.")]
     [NodeSearchTags("property", "category", "all", "names", "values", "tab")]
     [MultiReturn("names", "values")]
+    [PortKinds("text*", "")]
     public static Dictionary<string, object?> InCategory(ModelItem item, string categoryName)
     {
         var modelItem = NavisValues.RequireItem(item);
@@ -184,6 +185,7 @@ public static class PropertyNodes
     [NodeDescription("The internal name, display name and plain value of a raw data property.")]
     [NodeSearchTags("property", "info", "name", "displayname", "raw")]
     [MultiReturn("name", "displayName", "value")]
+    [PortKinds("text", "text", "")]
     public static Dictionary<string, object?> Info(DataProperty property)
     {
         if (property == null)

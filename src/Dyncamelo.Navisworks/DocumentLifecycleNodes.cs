@@ -52,6 +52,7 @@ public static class DocumentLifecycleNodes
     [NodeDescription("Appends design files to the document — Directory.GetFiles → Document.AppendFiles → Export.NWD is the Navisworks Batch Utility in three nodes. Cached model items from earlier runs are invalidated.")]
     [NodeSearchTags("document", "append", "files", "add", "batch", "federate", "combine")]
     [MultiReturn("document", "models")]
+    [PortKinds("document", "item*")]
     public static Dictionary<string, object?> AppendFiles(IEnumerable<string> filePaths, Document? document = null)
     {
         var paths = MaterializePaths(filePaths);

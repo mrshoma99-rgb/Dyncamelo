@@ -41,6 +41,7 @@ public static class ClusterNodes
     [NodeSearchTags("cluster", "group", "touching", "connected", "proximity", "ladder", "assembly", "clump", "component", "mesh", "precise")]
     [NodeAliases("Dyncamelo.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,Autodesk.Navisworks.Api.Document")]
     [MultiReturn("groups", "clusterNumbers", "clusterCount", "sizes", "report")]
+    [PortKinds("item**", "integer*", "integer", "integer*", "")]
     public static Dictionary<string, object?> Cluster(
         [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,

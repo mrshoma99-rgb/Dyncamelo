@@ -56,6 +56,46 @@ public static class RedlineNodes
             list.Add(Styled(new LcOpRedlineText(text, new Point2D(x, y)), color, thickness)));
     }
 
+    /// <summary>Adds a line, arrow or ellipse markup to a saved viewpoint.</summary>
+    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="shape">line, arrow (points from start to end) or ellipse (fitted to the corner-to-corner box).</param>
+    /// <param name="x1">Markup-space X of the start point (tail, or first box corner).</param>
+    /// <param name="y1">Markup-space Y of the start point.</param>
+    /// <param name="x2">Markup-space X of the end point (head, or opposite box corner).</param>
+    /// <param name="y2">Markup-space Y of the end point.</param>
+    /// <param name="color">Line colour: a Color, hex "#RRGGBB" or [r,g,b] (empty keeps the Navisworks default).</param>
+    /// <param name="thickness">Line thickness in pixels.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The stored viewpoint (pass-through for chaining).</returns>
+    [NodeName("Markup.AddShape")]
+    [NodeDescription("EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
+    [NodeSearchTags("markup", "redline", "line", "arrow", "ellipse", "circle", "shape", "draw", "viewpoint")]
+    [return: NodeName("viewpoint")]
+    public static SavedViewpoint AddShape(
+        object viewpoint,
+        [NodeChoices("line", "arrow", "ellipse")]
+        string shape,
+        double x1,
+        double y1,
+        double x2,
+        double y2,
+        [PortKinds("colour")] object? color = null,
+        [NodeRange(1, 20)] int thickness = 2,
+        Document? document = null)
+    {
+        switch ((shape ?? string.Empty).Trim().ToLowerInvariant())
+        {
+            case "line":
+                return AddLine(viewpoint, x1, y1, x2, y2, color, thickness, document);
+            case "arrow":
+                return AddArrow(viewpoint, x1, y1, x2, y2, color, thickness, document);
+            case "ellipse":
+                return AddEllipse(viewpoint, x1, y1, x2, y2, color, thickness, document);
+            default:
+                throw new ArgumentException("Unknown shape '" + shape + "'. Use line, arrow or ellipse.", nameof(shape));
+        }
+    }
+
     /// <summary>Adds a straight line markup to a saved viewpoint.</summary>
     /// <param name="viewpoint">The saved viewpoint (or its name).</param>
     /// <param name="x1">Markup-space X of the start point.</param>
@@ -67,6 +107,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddLine")]
+    [NodeDeprecated("Markup.AddShape")]
     [NodeDescription("EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "line", "draw", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -95,6 +136,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddArrow")]
+    [NodeDeprecated("Markup.AddShape")]
     [NodeDescription("EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "arrow", "pointer", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -123,6 +165,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddEllipse")]
+    [NodeDeprecated("Markup.AddShape")]
     [NodeDescription("EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "ellipse", "circle", "ring", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -232,6 +275,7 @@ public static class RedlineNodes
     [NodeDescription("EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.")]
     [NodeSearchTags("markup", "redline", "list", "read", "count", "calibrate", "viewpoint")]
     [MultiReturn("count", "types", "texts", "positions")]
+    [PortKinds("integer", "text*", "text*", "")]
     public static Dictionary<string, object?> List(object viewpoint, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);

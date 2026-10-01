@@ -30,6 +30,7 @@ public static class GeometryNodes
     /// <returns>Dictionary with "x", "y" and "z" values.</returns>
     [NodeName("Point.Components")]
     [MultiReturn("x", "y", "z")]
+    [PortKinds("number", "number", "number")]
     [NodeDescription("Splits a point into its X, Y and Z coordinates.")]
     [NodeSearchTags("deconstruct", "xyz", "coordinates")]
     public static Dictionary<string, object> PointComponents(DyncameloPoint point)
@@ -285,6 +286,7 @@ public static class GeometryNodes
     /// <returns>Dictionary with "sizeX", "sizeY", "sizeZ", "min" and "max".</returns>
     [NodeName("BoundingBox.Size")]
     [MultiReturn("sizeX", "sizeY", "sizeZ", "min", "max")]
+    [PortKinds("number", "number", "number", "geometry", "geometry")]
     [NodeDescription("Returns a bounding box's size along each axis and its min/max corner points.")]
     [NodeSearchTags("extent", "dimensions", "width", "height", "depth")]
     public static Dictionary<string, object> BoundingBoxSize(DyncameloBoundingBox boundingBox)

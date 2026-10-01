@@ -26,6 +26,7 @@ public static class DistanceNodes
     [NodeDescription("Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.")]
     [NodeSearchTags("distance", "clearance", "closest", "shortest", "measure", "between", "gap")]
     [MultiReturn("distance", "pointA", "pointB")]
+    [PortKinds("number", "geometry", "geometry")]
     public static Dictionary<string, object?> BetweenItems(
         IEnumerable<ModelItem> itemsA,
         IEnumerable<ModelItem> itemsB,

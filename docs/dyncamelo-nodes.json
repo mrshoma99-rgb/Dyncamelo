@@ -1,6 +1,6 @@
 {
  "version": "v0.43.0",
- "count": 367,
+ "count": 356,
  "categories": [
   {
    "name": "Annotation",
@@ -40,7 +40,7 @@
   },
   {
    "name": "List",
-   "count": 44
+   "count": 43
   },
   {
    "name": "Logic",
@@ -64,7 +64,7 @@
   },
   {
    "name": "Navisworks.Clash",
-   "count": 48
+   "count": 45
   },
   {
    "name": "Navisworks.Comments",
@@ -84,11 +84,11 @@
   },
   {
    "name": "Navisworks.Markup",
-   "count": 8
+   "count": 6
   },
   {
    "name": "Navisworks.Model",
-   "count": 5
+   "count": 3
   },
   {
    "name": "Navisworks.ModelItem",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.Search",
-   "count": 7
+   "count": 4
   },
   {
    "name": "Navisworks.Selection",
@@ -2595,37 +2595,6 @@
      "name": "list",
      "type": "any[]",
      "description": "A new list with the element inserted."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "List.Join",
-   "category": "List",
-   "description": "Concatenates two lists into one.",
-   "tags": [
-    "concat",
-    "combine",
-    "merge",
-    "append"
-   ],
-   "inputs": [
-    {
-     "name": "listA",
-     "type": "any[]",
-     "description": "The first list."
-    },
-    {
-     "name": "listB",
-     "type": "any[]",
-     "description": "The second list."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "A new list with the elements of both, in order."
     }
    ],
    "returns": ""
@@ -6584,58 +6553,6 @@
    "returns": "The results inside it, its name and status, how many results it holds, and the test it belongs to (object and name)."
   },
   {
-   "name": "ClashResult.AddComment",
-   "category": "Navisworks.Clash",
-   "description": "Appends a comment to a clash result or group — review notes in bulk, and the sync-back half of BCF round trips.",
-   "tags": [
-    "clash",
-    "result",
-    "comment",
-    "add",
-    "note",
-    "review",
-    "bcf"
-   ],
-   "inputs": [
-    {
-     "name": "result",
-     "type": "SavedItem",
-     "description": "The clash result (from ClashTest.Results) or group."
-    },
-    {
-     "name": "body",
-     "type": "string",
-     "description": "The comment text."
-    },
-    {
-     "name": "status",
-     "type": "string",
-     "description": "\"New\", \"Active\", \"Approved\" or \"Resolved\".",
-     "default": "\"New\""
-    },
-    {
-     "name": "author",
-     "type": "string",
-     "description": "Comment author (\"\" uses the Navisworks user name).",
-     "default": "\"\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "result",
-     "type": "SavedItem",
-     "description": "The result (pass-through). Lace over result lists for review notes in bulk."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "ClashResult.Angle",
    "category": "Navisworks.Clash",
    "description": "The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal). ~0° means they run parallel/together, ~90° means they cross perpendicular — so you can filter clashes by crossing angle (e.g. keep only ~90° crossings). Returns NaN when an element has no measurable direction (a point-like box).",
@@ -6728,49 +6645,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "ClashResult.Comments",
-   "category": "Navisworks.Clash",
-   "description": "The comment thread of a clash result or group: texts, authors, statuses and dates, index-aligned — feeds reports and BCF export.",
-   "tags": [
-    "clash",
-    "result",
-    "comments",
-    "read",
-    "thread",
-    "review"
-   ],
-   "inputs": [
-    {
-     "name": "result",
-     "type": "SavedItem",
-     "description": "The clash result or result group."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "comments",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "authors",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "statuses",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "dates",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Index-aligned comment texts, authors, statuses and creation dates."
   },
   {
    "name": "ClashResult.Documentation",
@@ -7527,40 +7401,6 @@
    "returns": ""
   },
   {
-   "name": "ClashTest.ResultsByStatus",
-   "category": "Navisworks.Clash",
-   "description": "The results of a test that have the given status(es) — one, or several comma-separated (\"New,Active\"; wire Clash.Statuses to pick with toggles).",
-   "tags": [
-    "clash",
-    "results",
-    "status",
-    "statuses",
-    "filter",
-    "triage",
-    "multiple"
-   ],
-   "inputs": [
-    {
-     "name": "test",
-     "type": "ClashTest",
-     "description": "The clash test."
-    },
-    {
-     "name": "status",
-     "type": "string",
-     "description": "One or several of: New, Active, Reviewed, Approved, Resolved — comma-separated for several (\"New,Active\"; Clash.Statuses builds this from toggles)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "results",
-     "type": "ClashResult[]",
-     "description": "The results with any of those statuses (grouped results are flattened)."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "ClashTest.Run",
    "category": "Navisworks.Clash",
    "description": "Runs one clash test now and reports the result count.",
@@ -7601,7 +7441,7 @@
   {
    "name": "SavedItem.AddComment",
    "category": "Navisworks.Comments",
-   "description": "Adds a comment to a saved viewpoint, selection/search set or folder — the Review-tab Comments feature, scriptable. For clash results use ClashResult.AddComment.",
+   "description": "Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk.",
    "tags": [
     "comment",
     "add",
@@ -7615,7 +7455,7 @@
     {
      "name": "item",
      "type": "SavedItem",
-     "description": "The saved item (a viewpoint, selection/search set, or one of their folders)."
+     "description": "The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group)."
     },
     {
      "name": "body",
@@ -8946,71 +8786,6 @@
    "returns": "Level names, their elevations (document units) and the GridLevel objects, in grid-system order."
   },
   {
-   "name": "Markup.AddArrow",
-   "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
-   "tags": [
-    "markup",
-    "redline",
-    "arrow",
-    "pointer",
-    "viewpoint"
-   ],
-   "inputs": [
-    {
-     "name": "viewpoint",
-     "type": "any",
-     "description": "The saved viewpoint (or its name)."
-    },
-    {
-     "name": "x1",
-     "type": "number",
-     "description": "Markup-space X of the arrow tail."
-    },
-    {
-     "name": "y1",
-     "type": "number",
-     "description": "Markup-space Y of the arrow tail."
-    },
-    {
-     "name": "x2",
-     "type": "number",
-     "description": "Markup-space X of the arrow head."
-    },
-    {
-     "name": "y2",
-     "type": "number",
-     "description": "Markup-space Y of the arrow head."
-    },
-    {
-     "name": "color",
-     "type": "any",
-     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
-     "default": "null"
-    },
-    {
-     "name": "thickness",
-     "type": "integer",
-     "description": "Line thickness in pixels.",
-     "default": "2"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "viewpoint",
-     "type": "SavedViewpoint",
-     "description": "The stored viewpoint (pass-through for chaining)."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Markup.AddCloud",
    "category": "Navisworks.Markup",
    "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.",
@@ -9032,137 +8807,6 @@
      "name": "points",
      "type": "any[]",
      "description": "Cloud outline: a list of [x, y] pairs, or a flat list x1, y1, x2, y2, … (3+ points)."
-    },
-    {
-     "name": "color",
-     "type": "any",
-     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
-     "default": "null"
-    },
-    {
-     "name": "thickness",
-     "type": "integer",
-     "description": "Line thickness in pixels.",
-     "default": "2"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "viewpoint",
-     "type": "SavedViewpoint",
-     "description": "The stored viewpoint (pass-through for chaining)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Markup.AddEllipse",
-   "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
-   "tags": [
-    "markup",
-    "redline",
-    "ellipse",
-    "circle",
-    "ring",
-    "viewpoint"
-   ],
-   "inputs": [
-    {
-     "name": "viewpoint",
-     "type": "any",
-     "description": "The saved viewpoint (or its name)."
-    },
-    {
-     "name": "x1",
-     "type": "number",
-     "description": "Markup-space X of the first box corner."
-    },
-    {
-     "name": "y1",
-     "type": "number",
-     "description": "Markup-space Y of the first box corner."
-    },
-    {
-     "name": "x2",
-     "type": "number",
-     "description": "Markup-space X of the opposite corner."
-    },
-    {
-     "name": "y2",
-     "type": "number",
-     "description": "Markup-space Y of the opposite corner."
-    },
-    {
-     "name": "color",
-     "type": "any",
-     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
-     "default": "null"
-    },
-    {
-     "name": "thickness",
-     "type": "integer",
-     "description": "Line thickness in pixels.",
-     "default": "2"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "viewpoint",
-     "type": "SavedViewpoint",
-     "description": "The stored viewpoint (pass-through for chaining)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Markup.AddLine",
-   "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
-   "tags": [
-    "markup",
-    "redline",
-    "line",
-    "draw",
-    "viewpoint"
-   ],
-   "inputs": [
-    {
-     "name": "viewpoint",
-     "type": "any",
-     "description": "The saved viewpoint (or its name)."
-    },
-    {
-     "name": "x1",
-     "type": "number",
-     "description": "Markup-space X of the start point."
-    },
-    {
-     "name": "y1",
-     "type": "number",
-     "description": "Markup-space Y of the start point."
-    },
-    {
-     "name": "x2",
-     "type": "number",
-     "description": "Markup-space X of the end point."
-    },
-    {
-     "name": "y2",
-     "type": "number",
-     "description": "Markup-space Y of the end point."
     },
     {
      "name": "color",
@@ -9237,6 +8881,80 @@
      "type": "string",
      "description": "Optional comment attached to the viewpoint (shows in the Comments panel).",
      "default": "\"\""
+    },
+    {
+     "name": "color",
+     "type": "any",
+     "description": "Line colour: a Color, hex \"#RRGGBB\" or [r,g,b] (empty keeps the Navisworks default).",
+     "default": "null"
+    },
+    {
+     "name": "thickness",
+     "type": "integer",
+     "description": "Line thickness in pixels.",
+     "default": "2"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "SavedViewpoint",
+     "description": "The stored viewpoint (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Markup.AddShape",
+   "category": "Navisworks.Markup",
+   "description": "EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "tags": [
+    "markup",
+    "redline",
+    "line",
+    "arrow",
+    "ellipse",
+    "circle",
+    "shape",
+    "draw",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (or its name)."
+    },
+    {
+     "name": "shape",
+     "type": "string",
+     "description": "line, arrow (points from start to end) or ellipse (fitted to the corner-to-corner box)."
+    },
+    {
+     "name": "x1",
+     "type": "number",
+     "description": "Markup-space X of the start point (tail, or first box corner)."
+    },
+    {
+     "name": "y1",
+     "type": "number",
+     "description": "Markup-space Y of the start point."
+    },
+    {
+     "name": "x2",
+     "type": "number",
+     "description": "Markup-space X of the end point (head, or opposite box corner)."
+    },
+    {
+     "name": "y2",
+     "type": "number",
+     "description": "Markup-space Y of the end point."
     },
     {
      "name": "color",
@@ -9413,15 +9131,21 @@
    "returns": "Markup count, per-markup type names, texts (empty for shapes) and anchor positions as [x, y] — the calibration reference for the Add nodes."
   },
   {
-   "name": "Model.FileName",
+   "name": "Model.Info",
    "category": "Navisworks.Model",
-   "description": "The cached and original source file paths of a model (federated-file inventory).",
+   "description": "The cached and original source file paths of a model, its native units (unit-mismatch audits across appended files) and its root model item — one node for the federated-file inventory.",
    "tags": [
     "model",
+    "info",
     "filename",
     "source",
     "path",
-    "file"
+    "file",
+    "units",
+    "native",
+    "root",
+    "item",
+    "tree"
    ],
    "inputs": [
     {
@@ -9440,9 +9164,19 @@
      "name": "sourceFileName",
      "type": "any",
      "description": ""
+    },
+    {
+     "name": "units",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "rootItem",
+     "type": "any",
+     "description": ""
     }
    ],
-   "returns": "The cached (loaded) file path and the original source file path."
+   "returns": "The cached and original file paths, the native units and the root item."
   },
   {
    "name": "Model.Remove",
@@ -9475,59 +9209,6 @@
      "name": "removed",
      "type": "boolean",
      "description": "True when the model was removed; false when Navisworks refused (e.g. the last remaining model)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Model.RootItem",
-   "category": "Navisworks.Model",
-   "description": "The root model item of a model.",
-   "tags": [
-    "model",
-    "root",
-    "item",
-    "tree"
-   ],
-   "inputs": [
-    {
-     "name": "model",
-     "type": "Model",
-     "description": "The model."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "rootItem",
-     "type": "ModelItem",
-     "description": "The model's root item."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Model.Units",
-   "category": "Navisworks.Model",
-   "description": "The native units of a model's source file (unit-mismatch audits across appended files).",
-   "tags": [
-    "model",
-    "units",
-    "native",
-    "meters",
-    "feet"
-   ],
-   "inputs": [
-    {
-     "name": "model",
-     "type": "Model",
-     "description": "The model."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "units",
-     "type": "string",
-     "description": "The unit name, e.g. \"Meters\" or \"Millimeters\"."
     }
    ],
    "returns": ""
@@ -10624,122 +10305,23 @@
    "returns": "Internal name, display name, and the plain value."
   },
   {
-   "name": "Search.ByPropertyCompare",
+   "name": "Search.ByProperty",
    "category": "Navisworks.Search",
-   "description": "Finds every model item whose numeric property is >, >=, < or <= a value (e.g. pipes with Diameter > 100).",
-   "tags": [
-    "search",
-    "find",
-    "filter",
-    "property",
-    "compare",
-    "greater",
-    "less",
-    "numeric"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"Element\"). Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name (e.g. \"Diameter\"). Internal names do not match."
-    },
-    {
-     "name": "comparison",
-     "type": "string",
-     "description": "One of: >, >=, <, <= (or GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual)."
-    },
-    {
-     "name": "value",
-     "type": "number",
-     "description": "The number to compare against, in document units."
-    },
-    {
-     "name": "resolveTo",
-     "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document to search (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "All matching model items."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Search.ByPropertyContains",
-   "category": "Navisworks.Search",
-   "description": "Finds every model item whose property text contains the given substring.",
-   "tags": [
-    "search",
-    "find",
-    "filter",
-    "property",
-    "contains",
-    "text"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"Item\"). Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name (e.g. \"Name\"). Internal names do not match."
-    },
-    {
-     "name": "value",
-     "type": "string",
-     "description": "The substring to look for (case sensitive, like Find Items)."
-    },
-    {
-     "name": "resolveTo",
-     "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document to search (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "All matching model items."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Search.ByPropertyValue",
-   "category": "Navisworks.Search",
-   "description": "Finds every model item whose property exactly equals the given value.",
+   "description": "Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, < or <= a number (e.g. pipes with Diameter > 100).",
    "tags": [
     "search",
     "find",
     "filter",
     "property",
     "equals",
+    "contains",
+    "wildcard",
+    "pattern",
+    "compare",
+    "greater",
+    "less",
+    "numeric",
+    "text",
     "query"
    ],
    "inputs": [
@@ -10756,57 +10338,13 @@
     {
      "name": "value",
      "type": "any",
-     "description": "The value to match (string, number, boolean or date). Numbers match plain, length, area, volume and angle properties; strings match display and identifier strings."
+     "description": "What to look for: any value for \"equals\"; text for \"contains\" and \"wildcard\" (* matches any text, ? one character); a number for >, >=, < and <=."
     },
     {
-     "name": "resolveTo",
+     "name": "mode",
      "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document to search (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "All matching model items."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Search.ByPropertyWildcard",
-   "category": "Navisworks.Search",
-   "description": "Finds every model item whose property text matches a wildcard pattern (* and ?).",
-   "tags": [
-    "search",
-    "find",
-    "filter",
-    "property",
-    "wildcard",
-    "pattern"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"Item\"). Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name (e.g. \"Name\"). Internal names do not match."
-    },
-    {
-     "name": "pattern",
-     "type": "string",
-     "description": "Wildcard pattern: * matches any text, ? matches one character (e.g. \"*-L1-*\")."
+     "description": "How the property is matched: equals, contains, wildcard, >, >=, < or <=.",
+     "default": "\"equals\""
     },
     {
      "name": "resolveTo",
@@ -13129,7 +12667,7 @@
   {
    "name": "String.Contains",
    "category": "String",
-   "description": "Tests whether a string contains the given substring.",
+   "description": "Tests whether a string contains the given substring. Case-sensitive unless ignoreCase is on.",
    "tags": [
     "substring",
     "search",
@@ -13137,7 +12675,7 @@
    ],
    "inputs": [
     {
-     "name": "str",
+     "name": "text",
      "type": "string",
      "description": "The string to search in."
     },
@@ -13165,7 +12703,7 @@
   {
    "name": "String.EndsWith",
    "category": "String",
-   "description": "Tests whether a string ends with the given suffix.",
+   "description": "Tests whether a string ends with the given suffix. Ignores case unless ignoreCase is switched off.",
    "tags": [
     "suffix",
     "trailing",
@@ -13264,7 +12802,7 @@
    ],
    "inputs": [
     {
-     "name": "str",
+     "name": "text",
      "type": "string",
      "description": "The string to measure."
     }
@@ -13288,7 +12826,7 @@
    ],
    "inputs": [
     {
-     "name": "str",
+     "name": "text",
      "type": "string",
      "description": "The string to modify."
     },
@@ -13323,7 +12861,7 @@
    ],
    "inputs": [
     {
-     "name": "str",
+     "name": "text",
      "type": "string",
      "description": "The string to split."
     },
@@ -13345,7 +12883,7 @@
   {
    "name": "String.StartsWith",
    "category": "String",
-   "description": "Tests whether a string starts with the given prefix.",
+   "description": "Tests whether a string starts with the given prefix. Ignores case unless ignoreCase is switched off.",
    "tags": [
     "prefix",
     "begins",
@@ -13450,7 +12988,7 @@
    ],
    "inputs": [
     {
-     "name": "str",
+     "name": "text",
      "type": "string",
      "description": "The text to parse, e.g. \"3.14\"."
     }

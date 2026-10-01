@@ -72,6 +72,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over result lists for review notes in bulk.</returns>
     [NodeName("ClashResult.AddComment")]
+    [NodeDeprecated("SavedItem.AddComment")]
     [NodeDescription("Appends a comment to a clash result or group — review notes in bulk, and the sync-back half of BCF round trips.")]
     [NodeSearchTags("clash", "result", "comment", "add", "note", "review", "bcf")]
     [return: NodeName("result")]
@@ -83,15 +84,19 @@ public static class ClashEditNodes
         string author = "",
         Document? document = null)
     {
+        return SavedItemCommentNodes.AddComment(result, body, status, author, document);
+    }
+
+    /// <summary>Writes a comment onto a clash result or result group (the clash half of SavedItem.AddComment).</summary>
+    internal static SavedItem AddClashComment(SavedItem result, string body, string status, string author, Document? document)
+    {
         if (result == null)
         {
             throw new ArgumentNullException(nameof(result), "No clash result provided.");
         }
 
         var clashResult = result as IClashResult
-            ?? throw new ArgumentException(
-                "'" + result.DisplayName + "' is not a clash result or result group. " +
-                "For viewpoints and sets use SavedItem.AddComment.", nameof(result));
+            ?? throw new ArgumentException("'" + result.DisplayName + "' is not a clash result or result group.", nameof(result));
         if (string.IsNullOrEmpty(body))
         {
             throw new ArgumentException("No comment body provided.", nameof(body));
@@ -115,9 +120,11 @@ public static class ClashEditNodes
     /// <param name="result">The clash result or result group.</param>
     /// <returns>Index-aligned comment texts, authors, statuses and creation dates.</returns>
     [NodeName("ClashResult.Comments")]
+    [NodeDeprecated("SavedItem.Comments")]
     [NodeDescription("The comment thread of a clash result or group: texts, authors, statuses and dates, index-aligned — feeds reports and BCF export.")]
     [NodeSearchTags("clash", "result", "comments", "read", "thread", "review")]
     [MultiReturn("comments", "authors", "statuses", "dates")]
+    [PortKinds("text*", "text*", "text*", "datetime*")]
     public static Dictionary<string, object?> Comments(SavedItem result)
     {
         if (result == null)
@@ -125,24 +132,13 @@ public static class ClashEditNodes
             throw new ArgumentNullException(nameof(result), "No clash result provided.");
         }
 
-        var comments = new List<string>();
-        var authors = new List<string>();
-        var statuses = new List<string>();
-        var dates = new List<DateTime>();
-        foreach (var comment in result.Comments)
-        {
-            comments.Add(comment.Body ?? string.Empty);
-            authors.Add(comment.Author ?? string.Empty);
-            statuses.Add(comment.Status.ToString());
-            dates.Add(comment.CreationDate);
-        }
-
+        var thread = SavedItemCommentNodes.Comments(result);
         return new Dictionary<string, object?>
         {
-            ["comments"] = comments,
-            ["authors"] = authors,
-            ["statuses"] = statuses,
-            ["dates"] = dates,
+            ["comments"] = thread["bodies"],
+            ["authors"] = thread["authors"],
+            ["statuses"] = thread["statuses"],
+            ["dates"] = thread["dates"],
         };
     }
 
@@ -154,6 +150,7 @@ public static class ClashEditNodes
     [NodeDescription("Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.")]
     [NodeSearchTags("clash", "group", "status", "triage", "bucket")]
     [MultiReturn("test", "groupCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByStatus(ClashTest test, Document? document = null)
     {
         return RegroupAndCommit(test, document, results =>
@@ -168,6 +165,7 @@ public static class ClashEditNodes
     [NodeDescription("Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).")]
     [NodeSearchTags("clash", "group", "grid", "intersection", "level", "location", "triage")]
     [MultiReturn("test", "groupCount")]
+    [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByGridIntersection(
         ClashTest test,
         Document? document = null)
@@ -197,6 +195,7 @@ public static class ClashEditNodes
     [NodeDescription("Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.")]
     [NodeSearchTags("clash", "summary", "table", "matrix", "counts", "report", "excel")]
     [MultiReturn("rows", "headers")]
+    [PortKinds("", "text*")]
     public static Dictionary<string, object?> SummaryTable(
         IEnumerable<ClashTest>? tests = null,
         Document? document = null)

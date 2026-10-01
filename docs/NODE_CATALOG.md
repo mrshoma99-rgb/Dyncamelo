@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**367 nodes in 35 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are not listed.
+**356 nodes in 35 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -15,22 +15,22 @@
 | [File](#file) | 11 |
 | [Geometry](#geometry) | 13 |
 | [Input](#input) | 7 |
-| [List](#list) | 44 |
+| [List](#list) | 43 |
 | [Logic](#logic) | 11 |
 | [Math](#math) | 15 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 12 |
 | [Navisworks.Camera](#navisworkscamera) | 6 |
-| [Navisworks.Clash](#navisworksclash) | 48 |
+| [Navisworks.Clash](#navisworksclash) | 45 |
 | [Navisworks.Comments](#navisworkscomments) | 3 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
 | [Navisworks.Export](#navisworksexport) | 14 |
 | [Navisworks.Grids](#navisworksgrids) | 3 |
-| [Navisworks.Markup](#navisworksmarkup) | 8 |
-| [Navisworks.Model](#navisworksmodel) | 5 |
+| [Navisworks.Markup](#navisworksmarkup) | 6 |
+| [Navisworks.Model](#navisworksmodel) | 3 |
 | [Navisworks.ModelItem](#navisworksmodelitem) | 19 |
 | [Navisworks.Properties](#navisworksproperties) | 11 |
-| [Navisworks.Search](#navisworkssearch) | 7 |
+| [Navisworks.Search](#navisworkssearch) | 4 |
 | [Navisworks.Selection](#navisworksselection) | 6 |
 | [Navisworks.SelectionSets](#navisworksselectionsets) | 11 |
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 7 |
@@ -171,7 +171,6 @@
 | `List.GroupByKey` | list, keys | groups, uniqueKeys | Groups list elements by a parallel key list |
 | `List.IndexOf` | list, item | index | Returns the index of the first occurrence of a value in a list (-1 when absent) |
 | `List.Insert` | list, item, index | list | Returns a new list with the value inserted at the index (0 = front |
-| `List.Join` | listA, listB | list | Concatenates two lists into one |
 | `List.LastIndexOf` | list, item | index | The zero-based index of the LAST occurrence of the item (-1 when absent) |
 | `List.LastItem` | list | item | Returns the last element of a list |
 | `List.MaximumItem` | list | item | The largest element of a list (numbers, texts or dates |
@@ -301,11 +300,9 @@
 | `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashGroup.ByName` | test, groupName, document? | group, results, status, count | Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count |
 | `ClashGroup.Info` | group | results, name, status, count, test, testName | Everything about a clash result group, straight from the group object |
-| `ClashResult.AddComment` | result, body, status?, author?, document? | result | Appends a comment to a clash result or group |
 | `ClashResult.Angle` | result | degrees | The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal) |
 | `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result to a person or trade |
 | `ClashResult.Center` | result | point | The clash point of a result, in document units |
-| `ClashResult.Comments` | result | comments, authors, statuses, dates | The comment thread of a clash result or group: texts, authors, statuses and dates, index-aligned |
 | `ClashResult.Documentation` | result | hasViewpoint, hasRedlines, commentCount | How documented a clash already is |
 | `ClashResult.Focus` | results, isolate?, zoom?, select?, paddingFactor?, document? | items | Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and option… |
 | `ClashResult.Info` | result | name, status, distance, description, assignedTo, createdTime | Name, status, distance, description, assignee and creation time of a clash result |
@@ -324,14 +321,13 @@
 | `ClashTest.Name` | test | name | The display name of a clash test |
 | `ClashTest.Rename` | test, newName, document? | test | Renames a clash test |
 | `ClashTest.Results` | test | results | The individual results of a clash test (grouped results are flattened) |
-| `ClashTest.ResultsByStatus` | test, status | results | The results of a test that have the given status(es) |
 | `ClashTest.Run` | test, document? | test, resultCount | Runs one clash test now and reports the result count |
 
 ## Navisworks.Comments
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `SavedItem.AddComment` | item, body, status?, author?, document? | item | Adds a comment to a saved viewpoint, selection/search set or folder |
+| `SavedItem.AddComment` | item, body, status?, author?, document? | item | Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group |
 | `SavedItem.ClearComments` | item, document? | item | Deletes every comment on a saved viewpoint, selection/search set or folder (replace-all with an empty thread) |
 | `SavedItem.Comments` | item | bodies, authors, statuses, dates | The comment thread on any saved item (viewpoint, set, folder, clash test): bodies, authors, statuses and creation dates, index-aligned |
 
@@ -380,11 +376,9 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Markup.AddArrow` | viewpoint, x1, y1, x2, y2, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API) |
 | `Markup.AddCloud` | viewpoint, points, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API) |
-| `Markup.AddEllipse` | viewpoint, x1, y1, x2, y2, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API) |
-| `Markup.AddLine` | viewpoint, x1, y1, x2, y2, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API) |
 | `Markup.AddNumberTag` | viewpoint, number, x, y, radius?, comment?, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment |
+| `Markup.AddShape` | viewpoint, shape, x1, y1, x2, y2, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API) |
 | `Markup.AddText` | viewpoint, text, x, y, color?, thickness?, document? | viewpoint | EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API) |
 | `Markup.Clear` | viewpoint, document? | viewpoint | EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API) |
 | `Markup.List` | viewpoint, document? | count, types, texts, positions | EXPERIMENTAL: lists the redline markups on a saved viewpoint |
@@ -393,10 +387,8 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Model.FileName` | model | fileName, sourceFileName | The cached and original source file paths of a model (federated-file inventory) |
+| `Model.Info` | model | fileName, sourceFileName, units, rootItem | The cached and original source file paths of a model, its native units (unit-mismatch audits across appended files) and its root model item |
 | `Model.Remove` | model, document? | removed | Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name) |
-| `Model.RootItem` | model | rootItem | The root model item of a model |
-| `Model.Units` | model | units | The native units of a model's source file (unit-mismatch audits across appended files) |
 | `Models.RootItems` | document? | rootItems | The root model items of every model loaded in a document |
 
 ## Navisworks.ModelItem
@@ -443,10 +435,7 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Search.ByPropertyCompare` | categoryName, propertyName, comparison, value, resolveTo?, document? | items | Finds every model item whose numeric property is >, >=, < or <= a value (e.g |
-| `Search.ByPropertyContains` | categoryName, propertyName, value, resolveTo?, document? | items | Finds every model item whose property text contains the given substring |
-| `Search.ByPropertyValue` | categoryName, propertyName, value, resolveTo?, document? | items | Finds every model item whose property exactly equals the given value |
-| `Search.ByPropertyWildcard` | categoryName, propertyName, pattern, resolveTo?, document? | items | Finds every model item whose property text matches a wildcard pattern (* and ?) |
+| `Search.ByProperty` | categoryName, propertyName, value, mode?, resolveTo?, document? | items | Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, <… |
 | `Search.HasCategory` | categoryName, resolveTo?, document? | items | Finds every model item that carries a property tab (e.g |
 | `Search.HasProperty` | categoryName, propertyName, resolveTo?, document? | items | Finds every model item that carries the property at all, regardless of value |
 | `Search.InItems` | items, categoryName, propertyName, value, resolveTo?, document? | items | Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement) |
@@ -541,17 +530,17 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `String.Concat` | a, b | result | Joins two strings into one |
-| `String.Contains` | str, searchFor, ignoreCase? | result | Tests whether a string contains the given substring |
+| `String.Contains` | text, searchFor, ignoreCase? | result | Tests whether a string contains the given substring |
 | `String.EndsWith` | text, searchFor, ignoreCase? | result | Tests whether a string ends with the given suffix |
 | `String.FromObject` | obj | result | Converts any value (including whole lists) to its display string |
 | `String.Join` | separator, list | result | Joins the elements of a list into a single string with a separator |
-| `String.Length` | str | result | Returns the number of characters in a string |
-| `String.Replace` | str, searchFor, replaceWith | result | Replaces all occurrences of a substring with another string |
-| `String.Split` | str, separator | list | Splits a string into a list of substrings around a separator |
+| `String.Length` | text | result | Returns the number of characters in a string |
+| `String.Replace` | text, searchFor, replaceWith | result | Replaces all occurrences of a substring with another string |
+| `String.Split` | text, separator | list | Splits a string into a list of substrings around a separator |
 | `String.StartsWith` | text, searchFor, ignoreCase? | result | Tests whether a string starts with the given prefix |
 | `String.Substring` | text, startIndex, length? | result | Extracts part of a string from a start index (-1 length = to the end) |
 | `String.ToLower` | text | result | Converts a string to lowercase |
-| `String.ToNumber` | str | result | Converts a numeric string (invariant culture, e.g |
+| `String.ToNumber` | text | result | Converts a numeric string (invariant culture, e.g |
 | `String.ToUpper` | text | result | Converts a string to uppercase |
 | `String.Trim` | text | result | Removes leading and trailing whitespace from a string |
 
@@ -583,4 +572,25 @@
 | `Action.SaveViewpoint` | name?, folder?, bakeOverrides? | action | Per item: saves the current view as a saved viewpoint named from the item |
 | `Action.ShowAll` | — | action | Per item: un-hides every item in the model (Appearance.ShowAll) |
 | `Action.ZoomTo` | paddingFactor? | action | Per item: frames the current item in the view (Camera.ZoomToItems) |
+
+## Retired nodes
+
+These still load and run in saved graphs, but are no longer offered in the library. Use the replacement in new graphs.
+
+| Retired node | Use instead |
+|---|---|
+| `ClashResult.AddComment` | SavedItem.AddComment |
+| `ClashResult.Comments` | SavedItem.Comments |
+| `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
+| `List.Join` | List.Merge |
+| `Markup.AddArrow` | Markup.AddShape |
+| `Markup.AddEllipse` | Markup.AddShape |
+| `Markup.AddLine` | Markup.AddShape |
+| `Model.FileName` | Model.Info |
+| `Model.RootItem` | Model.Info |
+| `Model.Units` | Model.Info |
+| `Search.ByPropertyCompare` | Search.ByProperty |
+| `Search.ByPropertyContains` | Search.ByProperty |
+| `Search.ByPropertyValue` | Search.ByProperty |
+| `Search.ByPropertyWildcard` | Search.ByProperty |
 

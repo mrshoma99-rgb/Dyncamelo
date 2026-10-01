@@ -168,3 +168,31 @@ public class NodeEvolutionTests
         Assert.Same(area.OutPorts[0], area.FindOutPort("result"));
     }
 }
+
+public enum Hue
+{
+    Red,
+    Green,
+}
+
+public static class ChoiceFixtures
+{
+    [NodeName("Choices.Pick")]
+    public static string Pick([NodeChoicesFromEnum(typeof(Hue), "any")] string hue = "any") => hue;
+}
+
+public class EnumChoiceTests
+{
+    [Fact]
+    public void AStringInputCanOfferAnEnumsNamesAfterValuesOfItsOwn()
+    {
+        var registry = NodeRegistry.CreateDefault();
+        registry.RegisterAssembly(typeof(ChoiceFixtures).Assembly);
+
+        var input = registry.Definitions.Single(d => d.Name == "Choices.Pick").Inputs[0];
+
+        Assert.Equal(new[] { "any", "Red", "Green" }, input.Choices);
+        Assert.Equal(typeof(string), input.Type);
+        Assert.Equal("any", input.DefaultValue);
+    }
+}

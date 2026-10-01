@@ -29,6 +29,7 @@ public static class SnapshotNodes
     /// <returns>Dictionary with "addedKeys", "removedKeys" and "changedKeys".</returns>
     [NodeName("Snapshot.Diff")]
     [MultiReturn("addedKeys", "removedKeys", "changedKeys")]
+    [PortKinds("text*", "text*", "text*")]
     [NodeDescription("Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality; nested dictionary key order is ignored).")]
     [NodeSearchTags("compare", "delta", "difference", "version", "changes", "model compare")]
     public static Dictionary<string, object> Diff(IDictionary oldValue, IDictionary newValue)

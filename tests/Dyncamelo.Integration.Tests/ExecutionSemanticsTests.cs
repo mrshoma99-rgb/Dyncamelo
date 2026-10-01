@@ -36,7 +36,7 @@ public class ExecutionSemanticsTests
         graph.AddNode(d);
         graph.AddNode(healthy);
 
-        Pipeline.Connect(graph, badText, "value", toNumber, "str");
+        Pipeline.Connect(graph, badText, "value", toNumber, "text");
         Pipeline.Connect(graph, toNumber, "result", downstream, "a");
         Pipeline.Connect(graph, one, "value", downstream, "b");
         Pipeline.Connect(graph, downstream, "result", watch, "value");

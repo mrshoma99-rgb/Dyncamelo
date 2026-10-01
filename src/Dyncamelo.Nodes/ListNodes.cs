@@ -101,6 +101,7 @@ public static class ListNodes
     /// <returns>Dictionary with "in" and "out" lists.</returns>
     [NodeName("List.FilterByBoolMask")]
     [MultiReturn("in", "out")]
+    [PortKinds("", "")]
     [NodeDescription("Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\").")]
     [NodeSearchTags("filter", "mask", "partition", "sieve")]
     public static Dictionary<string, object> FilterByBoolMask(IList<object?> list, IList<object?> mask)
@@ -327,6 +328,7 @@ public static class ListNodes
     /// <param name="listB">The second list.</param>
     /// <returns>A new list with the elements of both, in order.</returns>
     [NodeName("List.Join")]
+    [NodeDeprecated("List.Merge")]
     [return: NodeName("list")]
     [NodeDescription("Concatenates two lists into one.")]
     [NodeSearchTags("concat", "combine", "merge", "append")]
@@ -406,6 +408,7 @@ public static class ListNodes
     /// <returns>Dictionary with "groups" (list of lists) and "uniqueKeys".</returns>
     [NodeName("List.GroupByKey")]
     [MultiReturn("groups", "uniqueKeys")]
+    [PortKinds("", "")]
     [NodeDescription("Groups list elements by a parallel key list; returns the groups and their unique keys.")]
     [NodeSearchTags("group", "bucket", "categorize", "partition")]
     public static Dictionary<string, object> GroupByKey(IList<object?> list, IList<object?> keys)
@@ -459,6 +462,7 @@ public static class ListNodes
     /// <returns>Dictionary with "sorted" elements and the "sortedKeys".</returns>
     [NodeName("List.SortByKey")]
     [MultiReturn("sorted", "sortedKeys")]
+    [PortKinds("", "")]
     [NodeDescription("Sorts list elements by a parallel key list; returns the sorted elements and keys.")]
     [NodeSearchTags("order", "arrange", "rank", "key")]
     public static Dictionary<string, object> SortByKey(IList<object?> list, IList<object?> keys)
@@ -1045,6 +1049,7 @@ public static class ListNodes
     /// <returns>The true and not-true counts.</returns>
     [NodeName("List.CountTrue")]
     [MultiReturn("trueCount", "falseCount")]
+    [PortKinds("integer", "integer")]
     [NodeDescription("Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).")]
     [NodeSearchTags("count", "true", "false", "mask", "tally", "how many")]
     public static Dictionary<string, object> CountTrue([MultiInput] IList<object?> list)

@@ -63,6 +63,7 @@ public static class CustomPropertyNodes
     [NodeDescription("Removes a user-defined property tab from items. Items without the tab are skipped (see removedCount) — safe for clean re-runs of SetCustom graphs.")]
     [NodeSearchTags("property", "custom", "remove", "delete", "tab", "clean", "user")]
     [MultiReturn("modelItems", "removedCount")]
+    [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> RemoveCustomTab(
         [MultiInput] IEnumerable<ModelItem> modelItems,
         string tabName)

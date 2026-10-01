@@ -5,6 +5,23 @@ node-group and Watch Image nodes the catalogue generator misses. Everything belo
 Navisworks-side nodes cannot run in CI (no Navisworks), so the Navisworks half is only compile-checked and statically tested;
 that is why the plan below prefers *forwarding and hiding* over rewriting.
 
+## Outcome
+
+Done (steps 0–4 below, in the release after v0.43):
+
+* **Mechanisms.** `[NodeDeprecated]` (a retired node keeps loading and running, is hidden from the library, quick search, CLI list and catalogue, and says what to use), `[PortAlias]` (a renamed input or output keeps the wires and values of old graphs), `[NodeChoicesFromEnum]` (a string input with an enum's names as its dropdown), and a report when a file is opened with wires or values that no longer have a port. Documented in EXTENDING §10.
+* **Retired (14):** `List.Join`, `ClashTest.ResultsByStatus`, `ClashResult.Comments`, `ClashResult.AddComment` (`SavedItem.AddComment` now also handles clash results), `Search.ByPropertyValue/Contains/Wildcard/Compare` → new `Search.ByProperty` (mode dropdown), `Markup.AddLine/AddArrow/AddEllipse` → new `Markup.AddShape`, `Model.FileName/Units/RootItem` → new `Model.Info`. The catalogue lists them under "Retired nodes".
+* **Tidying.** Nine groups of copied helpers now live once; categories merged (Application→Document, Audit/Takeoff→Analysis, Exchange→Export, `Viewpoint.SetSectionBox`→Camera, a new Data category for JSON/XML parsing, `Snapshot.Diff`, `Table.JoinByKey`); `docs/NODE_CATALOG.md` is generated beside `dyncamelo-nodes.json` (now including Watch Image) and CI fails when either is stale.
+* **Consistency.** All 74 multi-output nodes declare `[PortKinds]` (a test keeps it so); the String nodes' `str` input is `text` (old files keep their wires through the alias); the case-sensitivity default of each String comparison is stated in its description; the IFC export's `units` is a dropdown.
+
+Not done, and why:
+
+* `SavedItem.Rename / MoveToFolder / Delete` were **not** merged: the typed nodes also accept the item's *name*, and each lives under the tree where people look for it. `SavedItem.AddComment/Comments` already covered every kind, so those did merge.
+* `Clash.Status` was kept: it is a reusable, validated constant that can feed several status inputs from one place.
+* The "13 nodes end in a done flag" inconsistency is a convention, not a defect, and changing it would change port names and types; it is now a checklist item for new nodes.
+* The String comparison *defaults* (`Contains` case-sensitive, `StartsWith/EndsWith` not) are unchanged, because changing a default changes what existing graphs compute; they are documented instead.
+* Correction to section 4: four of the five `units` inputs already had a dropdown; only the IFC export's did not.
+
 ## 1. What decides how much we can change
 
 | Fact (verified) | Consequence |

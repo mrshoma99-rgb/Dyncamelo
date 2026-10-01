@@ -31,6 +31,7 @@ public static class ExcelNodes
     /// <returns>Dictionary with "rows", "headers" and "sheetNames".</returns>
     [NodeName("Excel.ReadFromFile")]
     [MultiReturn("rows", "headers", "sheetNames")]
+    [PortKinds("", "text*", "text*")]
     [NodeDescription("Reads an .xlsx worksheet into rows + headers (dates arrive as Excel serial numbers; .xls is not supported).")]
     [NodeSearchTags("xlsx", "excel", "spreadsheet", "workbook", "table", "import")]
     public static Dictionary<string, object> ReadFromFile(string path, string sheet = "", bool hasHeaders = true)

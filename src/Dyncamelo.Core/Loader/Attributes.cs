@@ -114,6 +114,30 @@ public sealed class NodeChoicesAttribute : Attribute
 }
 
 /// <summary>
+/// Gives a <c>string</c> parameter a dropdown made of the names of an enum, optionally preceded by extra values of its own
+/// (e.g. <c>"document"</c> before the unit names). The parameter stays a string, so its definition id does not change and a wired
+/// text still works.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodeChoicesFromEnumAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="enumType">The enum whose names are offered.</param>
+    /// <param name="extra">Values to offer first, before the enum's names.</param>
+    public NodeChoicesFromEnumAttribute(Type enumType, params string[] extra)
+    {
+        EnumType = enumType ?? throw new ArgumentNullException(nameof(enumType));
+        Extra = extra ?? Array.Empty<string>();
+    }
+
+    /// <summary>The enum whose names are offered.</summary>
+    public Type EnumType { get; }
+
+    /// <summary>Values offered before the enum's names.</summary>
+    public string[] Extra { get; }
+}
+
+/// <summary>
 /// Legacy definition ids under which a zero-touch node was previously
 /// serialized. When a method's signature changes (e.g. a new optional
 /// parameter is appended), its mangled definition id changes with it and

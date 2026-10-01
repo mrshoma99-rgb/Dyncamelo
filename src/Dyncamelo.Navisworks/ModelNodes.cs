@@ -10,10 +10,31 @@ namespace Dyncamelo.Navisworks;
 [NodeCategory("Navisworks.Model")]
 public static class ModelNodes
 {
+    /// <summary>Everything a model is made of: where it came from, its units and its root item.</summary>
+    /// <param name="model">The model.</param>
+    /// <returns>The cached and original file paths, the native units and the root item.</returns>
+    [NodeName("Model.Info")]
+    [NodeDescription("The cached and original source file paths of a model, its native units (unit-mismatch audits across appended files) and its root model item — one node for the federated-file inventory.")]
+    [NodeSearchTags("model", "info", "filename", "source", "path", "file", "units", "native", "root", "item", "tree")]
+    [MultiReturn("fileName", "sourceFileName", "units", "rootItem")]
+    [PortKinds("file", "file", "text", "item")]
+    public static Dictionary<string, object?> Info(Model model)
+    {
+        var resolved = RequireModel(model);
+        return new Dictionary<string, object?>
+        {
+            ["fileName"] = resolved.FileName,
+            ["sourceFileName"] = resolved.SourceFileName,
+            ["units"] = resolved.Units.ToString(),
+            ["rootItem"] = resolved.RootItem,
+        };
+    }
+
     /// <summary>The root model item of a model.</summary>
     /// <param name="model">The model.</param>
     /// <returns>The model's root item.</returns>
     [NodeName("Model.RootItem")]
+    [NodeDeprecated("Model.Info")]
     [NodeDescription("The root model item of a model.")]
     [NodeSearchTags("model", "root", "item", "tree")]
     [return: NodeName("rootItem")]
@@ -26,6 +47,7 @@ public static class ModelNodes
     /// <param name="model">The model.</param>
     /// <returns>The cached (loaded) file path and the original source file path.</returns>
     [NodeName("Model.FileName")]
+    [NodeDeprecated("Model.Info")]
     [NodeDescription("The cached and original source file paths of a model (federated-file inventory).")]
     [NodeSearchTags("model", "filename", "source", "path", "file")]
     [MultiReturn("fileName", "sourceFileName")]
@@ -43,6 +65,7 @@ public static class ModelNodes
     /// <param name="model">The model.</param>
     /// <returns>The unit name, e.g. "Meters" or "Millimeters".</returns>
     [NodeName("Model.Units")]
+    [NodeDeprecated("Model.Info")]
     [NodeDescription("The native units of a model's source file (unit-mismatch audits across appended files).")]
     [NodeSearchTags("model", "units", "native", "meters", "feet")]
     [return: NodeName("units")]

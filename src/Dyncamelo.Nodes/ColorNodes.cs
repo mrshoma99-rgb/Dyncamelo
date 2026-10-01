@@ -78,6 +78,7 @@ public static class ColorNodes
     /// <returns>Dictionary with "red", "green", "blue" and "alpha" values (0-255).</returns>
     [NodeName("Color.Components")]
     [MultiReturn("red", "green", "blue", "alpha")]
+    [PortKinds("integer", "integer", "integer", "integer")]
     [NodeDescription("Splits a color into its red, green, blue and alpha channels (0-255).")]
     [NodeSearchTags("deconstruct", "channels", "rgb", "argb")]
     public static Dictionary<string, object> Components(DyncameloColor color)
@@ -218,6 +219,7 @@ public static class ColorNodes
     /// <returns>A color per input value, and the distinct values with their colors (index-aligned legend).</returns>
     [NodeName("Color.ByValues")]
     [MultiReturn("colors", "uniqueValues", "uniqueColors")]
+    [PortKinds("colour*", "", "colour*")]
     [NodeDescription("One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled).")]
     [NodeSearchTags("color", "by", "value", "parameter", "property", "categorical", "legend", "map", "group")]
     public static Dictionary<string, object?> ByValues(IList<object?> values, IList<object?>? colors = null)

@@ -34,6 +34,7 @@ public static class ClashTriageNodes
         "into this group. An existing same-named group is extended; re-runs are clean.")]
     [NodeSearchTags("clash", "group", "results", "move", "triage", "bucket", "organize")]
     [MultiReturn("test", "group", "added", "moved", "skipped")]
+    [PortKinds("clash", "clash", "integer", "integer", "integer")]
     public static Dictionary<string, object?> GroupResults(
         IEnumerable<ClashResult> results,
         string groupName,
@@ -249,6 +250,7 @@ public static class ClashTriageNodes
         "any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.")]
     [NodeSearchTags("clash", "group", "name", "fetch", "results", "status", "lookup")]
     [MultiReturn("group", "results", "status", "count")]
+    [PortKinds("clash", "clash*", "text", "integer")]
     public static Dictionary<string, object?> GroupByName(object test, string groupName, Document? document = null)
     {
         if (string.IsNullOrEmpty(groupName))
@@ -301,6 +303,7 @@ public static class ClashTriageNodes
         "per test (which needs List@Level to iterate). Tests without groups contribute nothing.")]
     [NodeSearchTags("clash", "groups", "all", "project", "every", "tests", "flat", "loop", "batch")]
     [MultiReturn("groups", "names", "testNames", "counts")]
+    [PortKinds("clash*", "text*", "text*", "integer*")]
     public static Dictionary<string, object?> AllGroups(Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -346,6 +349,7 @@ public static class ClashTriageNodes
         "parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.")]
     [NodeSearchTags("clash", "group", "info", "results", "name", "status", "test", "parent", "loop")]
     [MultiReturn("results", "name", "status", "count", "test", "testName")]
+    [PortKinds("clash*", "text", "text", "integer", "clash", "text")]
     public static Dictionary<string, object?> GroupInfo(ClashResultGroup group)
     {
         if (group == null)
@@ -392,6 +396,7 @@ public static class ClashTriageNodes
     [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.")]
     [NodeSearchTags("clash", "test", "groups", "list", "names", "statuses", "overview")]
     [MultiReturn("groups", "names", "statuses", "counts")]
+    [PortKinds("clash*", "text*", "text*", "integer*")]
     public static Dictionary<string, object?> Groups(object test, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -438,6 +443,7 @@ public static class ClashTriageNodes
         "planar; \"none\" means the element has no measurable box.")]
     [NodeSearchTags("clash", "orientation", "angle", "wall", "floor", "slab", "pipe", "shape", "slope", "vertical", "horizontal")]
     [MultiReturn("degrees", "shape1", "shape2", "slope1", "slope2")]
+    [PortKinds("number", "text", "text", "number", "number")]
     public static Dictionary<string, object?> Orientation(ClashResult result)
     {
         var clashResult = ClashHelpers.RequireResult(result);

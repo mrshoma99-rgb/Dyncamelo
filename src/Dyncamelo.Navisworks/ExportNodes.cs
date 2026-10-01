@@ -132,6 +132,7 @@ public static class ExportNodes
     [NodeDescription("One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready).")]
     [NodeSearchTags("export", "clash", "report", "csv", "excel", "triage")]
     [MultiReturn("filePath", "rowCount")]
+    [PortKinds("file", "integer")]
     public static Dictionary<string, object?> ClashReportCsv(
         string filePath,
         IEnumerable<ClashTest>? tests = null,
@@ -174,6 +175,7 @@ public static class ExportNodes
     [NodeDescription("Self-contained HTML clash report — one section per test, one row per result, optionally with embedded snapshots. Shareable as a single file.")]
     [NodeSearchTags("export", "clash", "report", "html", "snapshot", "share")]
     [MultiReturn("filePath", "rowCount")]
+    [PortKinds("file", "integer")]
     public static Dictionary<string, object?> ClashReportHtml(
         string filePath,
         IEnumerable<ClashTest>? tests = null,

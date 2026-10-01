@@ -164,7 +164,7 @@ public class PersistenceTests : IDisposable
         Pipeline.Connect(graph, range, "list", add, "a");
         Pipeline.Connect(graph, offset, "value", add, "b");
         Pipeline.Connect(graph, add, "result", watch, "value");
-        Pipeline.Connect(graph, text, "value", split, "str");
+        Pipeline.Connect(graph, text, "value", split, "text");
         Pipeline.Connect(graph, sep, "value", split, "separator");
 
         graph.Notes.Add(new NoteModel { Text = "round-trip me", X = 1, Y = 2 });

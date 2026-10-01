@@ -36,6 +36,7 @@ public static class ViewpointVisibilityNodes
         "framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.")]
     [NodeSearchTags("viewpoint", "visible", "contains", "frustum", "camera", "view", "sees", "inview", "mask")]
     [MultiReturn("visibleItems", "outsideItems", "mask", "containsAny", "report")]
+    [PortKinds("item*", "item*", "boolean*", "boolean", "")]
     public static Dictionary<string, object?> VisibleItems(
         object items,
         object? viewpoint = null,

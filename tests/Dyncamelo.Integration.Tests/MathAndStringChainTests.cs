@@ -67,12 +67,12 @@ public class MathAndStringChainTests
         graph.AddNode(join);
         graph.AddNode(length);
 
-        Pipeline.Connect(graph, text, "value", split, "str");
+        Pipeline.Connect(graph, text, "value", split, "text");
         Pipeline.Connect(graph, space, "value", split, "separator");
         Pipeline.Connect(graph, split, "list", count, "list");
         Pipeline.Connect(graph, dash, "value", join, "separator");
         Pipeline.Connect(graph, split, "list", join, "list");
-        Pipeline.Connect(graph, join, "result", length, "str");
+        Pipeline.Connect(graph, join, "result", length, "text");
 
         var run = Pipeline.SaveLoadAndRun(graph, registry, out var result);
 

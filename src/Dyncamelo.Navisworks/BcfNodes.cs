@@ -38,6 +38,7 @@ public static class BcfNodes
     [NodeDescription("Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention.")]
     [NodeSearchTags("bcf", "export", "issues", "bcfzip", "bimcollab", "revizto", "konekt", "acc", "exchange")]
     [MultiReturn("filePath", "topicCount")]
+    [PortKinds("file", "integer")]
     public static Dictionary<string, object?> ExportIssues(
         string filePath,
         IEnumerable<SavedItem>? results = null,
@@ -114,6 +115,7 @@ public static class BcfNodes
     [NodeDescription("Reads a BCF 2.0/2.1 package: per topic title/status/description/comments/component GUIDs/camera, plus the model items each topic's components resolve to (matched by IFC GlobalId, then InstanceGuid). Optionally applies one topic's camera to the current view — feeds ClashResult.SetStatus and Selection.SetCurrent for the issue-sync return leg.")]
     [NodeSearchTags("bcf", "import", "issues", "bcfzip", "read", "roundtrip", "exchange")]
     [MultiReturn("topics", "modelItems")]
+    [PortKinds("data*", "item*")]
     public static Dictionary<string, object?> ImportIssues(
         string filePath,
         int applyCameraTopicIndex = -1,

@@ -16,15 +16,15 @@ namespace Dyncamelo.Navisworks;
 [NodeCategory("Navisworks.Comments")]
 public static class SavedItemCommentNodes
 {
-    /// <summary>Adds a comment to a saved viewpoint, set or folder.</summary>
-    /// <param name="item">The saved item (a viewpoint, selection/search set, or one of their folders).</param>
+    /// <summary>Adds a comment to a saved viewpoint, set, folder, clash result or result group.</summary>
+    /// <param name="item">The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group).</param>
     /// <param name="body">The comment text.</param>
     /// <param name="status">"New", "Active", "Approved" or "Resolved".</param>
     /// <param name="author">Comment author ("" uses the Navisworks user name).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored item the comment was added to (pass-through for chaining).</returns>
     [NodeName("SavedItem.AddComment")]
-    [NodeDescription("Adds a comment to a saved viewpoint, selection/search set or folder — the Review-tab Comments feature, scriptable. For clash results use ClashResult.AddComment.")]
+    [NodeDescription("Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk.")]
     [NodeSearchTags("comment", "add", "review", "note", "viewpoint", "set", "annotate")]
     [return: NodeName("item")]
     public static SavedItem AddComment(
@@ -35,6 +35,12 @@ public static class SavedItemCommentNodes
         string author = "",
         Document? document = null)
     {
+        // A clash result or result group lives in Clash Detective's own tree, with its own write path.
+        if (item is Autodesk.Navisworks.Api.Clash.IClashResult)
+        {
+            return ClashEditNodes.AddClashComment(item, body, status, author, document);
+        }
+
         if (string.IsNullOrEmpty(body))
         {
             throw new ArgumentException("No comment body provided.", nameof(body));
@@ -67,6 +73,7 @@ public static class SavedItemCommentNodes
     [NodeDescription("The comment thread on any saved item (viewpoint, set, folder, clash test): bodies, authors, statuses and creation dates, index-aligned.")]
     [NodeSearchTags("comment", "comments", "read", "review", "thread", "notes")]
     [MultiReturn("bodies", "authors", "statuses", "dates")]
+    [PortKinds("text*", "text*", "text*", "datetime*")]
     public static Dictionary<string, object?> Comments(SavedItem item)
     {
         if (item == null)

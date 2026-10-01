@@ -208,7 +208,7 @@ internal static class SampleGraphs
         graph.AddNode(watchCount);
         graph.AddNode(watchWords);
 
-        Connect(graph, text, "value", split, "str");
+        Connect(graph, text, "value", split, "text");
         Connect(graph, separator, "value", split, "separator");
         Connect(graph, split, "list", count, "list");
         Connect(graph, count, "count", countText, "obj");

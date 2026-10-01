@@ -542,7 +542,20 @@ def first_sentence(text: str, limit: int = 170) -> str:
     return text.replace("|", "\\|")
 
 
-def render_markdown(catalog: dict) -> str:
+RETIRED_RE = re.compile(
+    r'\[NodeName\("(?P<name>[^"]+)"\)\]\s*\[NodeDeprecated\("(?P<replacement>[^"]*)"\)\]', re.S)
+
+
+def find_retired() -> list:
+    """Nodes marked [NodeDeprecated]: still registered for saved graphs, not offered, not in the catalogue."""
+    found = []
+    for f in iter_source_files(ZERO_TOUCH_DIRS):
+        for m in RETIRED_RE.finditer(f.read_text(encoding="utf-8-sig")):
+            found.append((m.group("name"), m.group("replacement")))
+    return sorted(found, key=lambda x: x[0].lower())
+
+
+def render_markdown(catalog: dict, retired: list) -> str:
     """docs/NODE_CATALOG.md: every node by category, from the same data as the JSON."""
     lines = [
         "# Dyncamelo node catalogue",
@@ -552,7 +565,7 @@ def render_markdown(catalog: dict) -> str:
         "CI fails when this file or `dyncamelo-nodes.json` is out of date.",
         "",
         f"**{catalog['count']} nodes in {len(catalog['categories'])} categories.** "
-        "A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are not listed.",
+        "A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.",
         "",
         "| Category | Nodes |",
         "|---|---|",
@@ -571,6 +584,17 @@ def render_markdown(catalog: dict) -> str:
             outs = ", ".join(o["name"] for o in n["outputs"]) or "—"
             kind = " *(interactive)*" if n.get("interactive") else ""
             lines.append(f"| `{n['name']}`{kind} | {ins} | {outs} | {first_sentence(n['description'])} |")
+        lines.append("")
+    if retired:
+        lines += [
+            "## Retired nodes",
+            "",
+            "These still load and run in saved graphs, but are no longer offered in the library. Use the replacement in new graphs.",
+            "",
+            "| Retired node | Use instead |",
+            "|---|---|",
+        ]
+        lines += [f"| `{name}` | {replacement} |" for name, replacement in retired]
         lines.append("")
     return "\n".join(lines) + "\n"
 
@@ -626,7 +650,7 @@ def main() -> int:
             print(f"ERROR: baseline nodes missing ({len(missing)}): {missing}", file=sys.stderr)
             return 1
 
-    markdown = render_markdown(catalog)
+    markdown = render_markdown(catalog, find_retired())
     if args.check:
         problems = []
         try:

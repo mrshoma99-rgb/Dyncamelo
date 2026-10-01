@@ -29,6 +29,7 @@ public static class GridNodes
     [NodeDescription("The model's own levels from the active grid system — names and elevations (document units) without hand-typed elevation lists. Grid data comes from source models (e.g. Revit/IFC) and is read-only.")]
     [NodeSearchTags("grid", "level", "levels", "elevation", "storey", "story", "floor")]
     [MultiReturn("names", "elevations", "levels")]
+    [PortKinds("text*", "number*", "data*")]
     public static Dictionary<string, object?> Levels(Document? document = null)
     {
         var system = ResolveActiveSystem(document);
@@ -64,6 +65,7 @@ public static class GridNodes
     [NodeDescription("All grid intersections of the active grid system, per level — names like \"A-1\" with positions in document units. The API only answers closest-intersection queries, so intersections are discovered by sampling the model's bounding box and completing the line lattice; raise samples if a very dense grid comes back incomplete.")]
     [NodeSearchTags("grid", "intersection", "intersections", "gridline", "axis", "lattice")]
     [MultiReturn("names", "points", "levelNames")]
+    [PortKinds("text*", "geometry*", "text*")]
     public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 10000, SoftMin = 2, SoftMax = 100)] int samples = 20)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -112,6 +114,7 @@ public static class GridNodes
     [NodeDescription("The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.")]
     [NodeSearchTags("grid", "intersection", "closest", "nearest", "location", "label", "level")]
     [MultiReturn("name", "position", "levelName", "label")]
+    [PortKinds("text", "geometry", "text", "text")]
     public static Dictionary<string, object?> ClosestIntersection(object point, Document? document = null)
     {
         var queryPoint = NavisValues.ToPoint3D(point);

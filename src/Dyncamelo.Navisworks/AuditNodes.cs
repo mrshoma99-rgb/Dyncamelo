@@ -22,6 +22,7 @@ public static class AuditNodes
     [NodeDescription("Finds every item that does NOT carry the given property — the data-completeness audit. Lace over a property list to batch-audit.")]
     [NodeSearchTags("audit", "missing", "property", "qa", "completeness", "not defined")]
     [MultiReturn("items", "count")]
+    [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> MissingProperty(
         string categoryName,
         string propertyName,
@@ -78,6 +79,7 @@ public static class AuditNodes
     [NodeDescription("Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.")]
     [NodeSearchTags("audit", "duplicate", "geometry", "double", "export", "qa")]
     [MultiReturn("items1", "items2", "count")]
+    [PortKinds("item*", "item*", "integer")]
     public static Dictionary<string, object?> DuplicateItems(
         [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.001,

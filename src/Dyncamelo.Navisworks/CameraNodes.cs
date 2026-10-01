@@ -18,6 +18,7 @@ public static class CameraNodes
     [NodeDescription("The current camera position, focal distance and vertical field height.")]
     [NodeSearchTags("camera", "current", "position", "view", "eye")]
     [MultiReturn("position", "focalDistance", "heightField")]
+    [PortKinds("geometry", "number", "number")]
     public static Dictionary<string, object?> Current(Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);

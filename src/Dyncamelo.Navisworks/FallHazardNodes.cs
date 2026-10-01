@@ -44,6 +44,7 @@ public static class FallHazardNodes
     [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab", "color", "gradient", "label", "report")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
+    [PortKinds("file", "integer", "number*", "geometry*", "viewpoint*", "")]
     public static Dictionary<string, object?> FloorOpeningMap(
         IEnumerable<ModelItem> floors,
         double level,
@@ -230,6 +231,7 @@ public static class FallHazardNodes
     [NodeDescription("Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), and blue where a handrail covers it — override any of the three colours with the colour inputs. Handrail geometry is projected flat onto the plan — posts and rails, corners and all — and matched per length, so a 1 m handrail on a 5 m edge protects only its 1 m. A dangerous stretch shorter than 'minPassage' also counts as safe (a person cannot fit through the break). Turn on 'showOverage' to print how far each dangerous run exceeds the limit on the image, ready for reports. Set 'units' to the unit your numbers are in (e.g. Meters) — documents often store coordinates in feet even when the measure tool displays metres. Writes a top-down PNG and reports the dangerous / protected / safe edge lengths. Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "edge", "handrail", "guardrail", "railing", "floor", "void", "opening", "safety", "protected", "perimeter", "color", "label", "report")]
     [MultiReturn("imagePath", "dangerousLength", "protectedLength", "safeLength", "report")]
+    [PortKinds("file", "number", "number", "number", "")]
     public static Dictionary<string, object?> EdgeHandrailCheck(
         IEnumerable<ModelItem> floors,
         double level,

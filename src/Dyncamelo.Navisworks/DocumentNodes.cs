@@ -28,6 +28,7 @@ public static class DocumentNodes
     [NodeDescription("File name, title, display units and model count of a document.")]
     [NodeSearchTags("document", "info", "filename", "title", "units")]
     [MultiReturn("fileName", "title", "units", "modelCount")]
+    [PortKinds("file", "text", "text", "integer")]
     public static Dictionary<string, object?> Info(Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);

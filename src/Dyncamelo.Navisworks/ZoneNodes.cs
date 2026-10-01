@@ -29,6 +29,7 @@ public static class ZoneNodes
     [NodeDescription("Tags each target with the name of the zone volume containing its bounding-box center — the iConstruct Zone Tool as one node. The first zone (in list order) that contains an item wins; items inside no zone are left untouched. Written as a searchable user property tab (persists in NWF/NWD only).")]
     [NodeSearchTags("zone", "assign", "volume", "room", "area", "tag", "spatial", "contains")]
     [MultiReturn("items", "assignedCount")]
+    [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> AssignByVolumes(
         IEnumerable<ModelItem> zoneItems,
         IEnumerable<string>? zoneNames,

@@ -22,6 +22,7 @@ public static class ModelItemInfoNodes
     [NodeDescription("Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value.")]
     [NodeSearchTags("item", "reference", "base", "point", "insertion", "origin", "location", "center")]
     [MultiReturn("bboxCenter", "bboxMin", "localOrigin")]
+    [PortKinds("geometry", "geometry", "geometry")]
     public static Dictionary<string, object?> ReferencePoints(ModelItem item)
     {
         var modelItem = NavisValues.RequireItem(item);
@@ -44,6 +45,7 @@ public static class ModelItemInfoNodes
     [NodeDescription("One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model.")]
     [NodeSearchTags("item", "source", "file", "origin", "type", "model", "provenance")]
     [MultiReturn("sourceFileName", "itemType", "model")]
+    [PortKinds("file", "text", "item")]
     public static Dictionary<string, object?> SourceInfo(ModelItem item)
     {
         var modelItem = NavisValues.RequireItem(item);

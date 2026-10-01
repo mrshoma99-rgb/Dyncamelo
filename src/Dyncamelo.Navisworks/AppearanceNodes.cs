@@ -132,6 +132,7 @@ public static class AppearanceNodes
     [NodeSearchTags("appearance", "reset", "temporary", "clear", "clean", "runtime", "highlight", "loop")]
     [NodeAliases("Dyncamelo.Navisworks.AppearanceNodes.ResetTemporary@Autodesk.Navisworks.Api.Document")]
     [MultiReturn("done", "after")]
+    [PortKinds("boolean", "")]
     public static Dictionary<string, object?> ResetTemporary(object? after = null, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -242,6 +243,7 @@ public static class AppearanceNodes
     [NodeDescription("One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.")]
     [NodeSearchTags("appearance", "color", "values", "legend", "heatmap", "code", "byvalue")]
     [MultiReturn("items", "legend")]
+    [PortKinds("item*", "data")]
     public static Dictionary<string, object?> ColorByValues(
         [MultiInput] IEnumerable<ModelItem> items,
         IEnumerable<object?> values,

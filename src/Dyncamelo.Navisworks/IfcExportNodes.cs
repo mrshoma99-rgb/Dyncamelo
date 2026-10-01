@@ -48,6 +48,7 @@ public static class IfcExportNodes
     [NodeDescription("Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing.")]
     [NodeSearchTags("export", "ifc", "openbim", "bim", "qto", "ifc4", "ifc2x3", "bimcamel")]
     [MultiReturn("filePath", "fileCount", "elementCount", "triangleCount", "fileSizeKb")]
+    [PortKinds("file", "integer", "integer", "integer", "number")]
     public static Dictionary<string, object?> ToIfc(
         [MultiInput] IEnumerable<ModelItem> items,
         string filePath,
@@ -57,6 +58,7 @@ public static class IfcExportNodes
         bool properties = true,
         bool materials = true,
         bool quantities = true,
+        [NodeChoicesFromEnum(typeof(Units), "Auto")]
         string units = "Auto",
         string quality = "Balanced",
         CoordOptions? coordinates = null,

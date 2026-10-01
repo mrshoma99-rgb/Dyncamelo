@@ -105,6 +105,7 @@ public static class ViewpointTreeNodes
     [NodeDescription("The folder containing a saved viewpoint: its path as \"A/B\" (\"\" for top-level viewpoints) and the folder itself — drives folder-based status workflows.")]
     [NodeSearchTags("viewpoint", "view", "folder", "path", "parent", "location")]
     [MultiReturn("folderPath", "folder")]
+    [PortKinds("text", "")]
     public static Dictionary<string, object?> Folder(object viewpoint, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -135,6 +136,7 @@ public static class ViewpointTreeNodes
         "Viewpoints.ExportFile or a Loop.Item.")]
     [NodeSearchTags("viewpoints", "folder", "contents", "children", "list", "inside", "views", "all")]
     [MultiReturn("viewpoints", "names", "subfolders", "count")]
+    [PortKinds("viewpoint*", "text*", "", "integer")]
     public static Dictionary<string, object?> InFolder(
         object? folder = null,
         bool recursive = true,
