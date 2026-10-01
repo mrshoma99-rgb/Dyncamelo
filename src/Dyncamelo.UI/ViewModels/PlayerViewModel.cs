@@ -230,6 +230,10 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
 
     void IConnectorHost.ReportProblem(string message) => StatusText = message;
 
+    /// <summary>Shows a message at the bottom of the pane (used by the host's crash guard).</summary>
+    /// <param name="message">The message.</param>
+    public void ReportProblem(string message) => StatusText = message;
+
     // ----- the list -----------------------------------------------------------------------
 
     /// <summary>The scripts shown (filtered by <see cref="SearchText"/>).</summary>

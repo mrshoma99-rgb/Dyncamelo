@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dyncamelo.Core\Dyncamelo.Core.csproj" />
     <ProjectReference Include="..\..\src\Dyncamelo.UI\Dyncamelo.UI.csproj" />
+    <ProjectReference Include="..\..\src\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
   </ItemGroup>
 
 </Project>

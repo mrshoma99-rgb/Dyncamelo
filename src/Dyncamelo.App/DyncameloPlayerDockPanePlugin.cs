@@ -42,6 +42,14 @@ public class DyncameloPlayerDockPanePlugin : DockPanePlugin
         player.OpenInEditorRequested += OnOpenInEditorRequested;
 
         var control = new PlayerControl { ViewModel = player };
+
+        // A failing template or handler must not take Roamer down: report it in the pane and log it. The editor, when it is open,
+        // installs its own report on top of this.
+        if (DyncameloHost.Editor == null)
+        {
+            Dyncamelo.UI.Services.CrashGuard.Install(player.ReportProblem, control.Dispatcher);
+        }
+
         var host = new ElementHost
         {
             Child = control,

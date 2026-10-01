@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Dyncamelo.UI.Services;
 using Dyncamelo.UI.Mvvm;
 using Dyncamelo.UI.ViewModels;
 using Nodify;
@@ -55,6 +56,7 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
     /// <summary>Creates the control. Assign <see cref="ViewModel"/> before showing it.</summary>
     public DyncameloEditorControl()
     {
+        ThemeDependencies.EnsureLoaded();
         InitializeComponent();
 
         // Double-clicking empty canvas inserts a String input node at the click

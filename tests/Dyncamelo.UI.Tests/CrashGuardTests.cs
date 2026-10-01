@@ -60,6 +60,14 @@ public class CrashGuardTests
     }
 
     [Fact]
+    public void ATemplateOfOursThatFailsToLoadIsRecognisedByTheFileItWasReading()
+    {
+        Assert.True(CrashGuard.IsDyncameloFile(new Uri("pack://application:,,,/Dyncamelo.UI;component/themes/dyncamelodark.xaml")));
+        Assert.False(CrashGuard.IsDyncameloFile(new Uri("pack://application:,,,/Autodesk.Navisworks.Gui;component/ribbon.xaml")));
+        Assert.False(CrashGuard.IsDyncameloFile(null));
+    }
+
+    [Fact]
     public void ExceptionsThrownInDyncameloCodeAreRecognised()
     {
         Exception caught;

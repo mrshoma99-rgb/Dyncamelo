@@ -26,7 +26,7 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 
 ## Anatomy of a node
 
-* The **header** carries the node's name (double-click to rename) and its state colour; `H` collapses the node to its header and a slim column of sockets on each edge, so it can still be wired.
+* The **header** carries the node's name (double-click to rename) and its state colour; `H` collapses the node to a capsule in its category colour — the title in the middle, the input sockets down the left edge and the output sockets down the right — so it can still be wired.
 * **Rows** run top to bottom: outputs first as labels on the right, then inputs. An input row has a **socket** on the left and, when nothing is wired to it, an **inline editor** — a draggable number field, a checkbox, a text box, a dropdown or segmented switcher for named choices, a colour swatch, a file field with a `…` button, or a **model-element picker** that takes the current Navisworks selection.
 * A number field that differs from its default shows a dot at its left edge; **hover a field and press `Backspace`** to put the default back. `Ctrl+C` / `Ctrl+V` while hovering copies or pastes the value.
 * Optional inputs can be hidden while they are unconnected (**Hide / Show Unused Sockets**, `Ctrl+H`); nodes with an *Advanced* panel fold rarely-used inputs into it.

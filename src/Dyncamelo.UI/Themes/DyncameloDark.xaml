@@ -2187,7 +2187,8 @@
                 </Border>
             </Canvas>
             <Grid x:Name="NodeRoot" Width="{Binding NodeWidth}" MinWidth="154">
-                <views:NodeWidthGrip Target="{Binding ElementName=NodeRoot}"
+                <views:NodeWidthGrip x:Name="WidthGrip"
+                                     Target="{Binding ElementName=NodeRoot}"
                                      Margin="0,26,0,0"
                                      ToolTip="Drag to resize · double-click for automatic width" />
                 <Border x:Name="StateBorder"
@@ -2229,14 +2230,22 @@
                                       Visibility="{Binding IsGroupInstance, Converter={StaticResource Dyc.BoolToVisibility}}" />
                         </ContextMenu>
                     </Border.ContextMenu>
-                    <Border Background="{DynamicResource Dyc.NodeBodyBrush}"
+                    <Border x:Name="Card"
+                            Background="{DynamicResource Dyc.NodeBodyBrush}"
                             BorderBrush="{DynamicResource Dyc.NodeBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             SnapsToDevicePixels="True">
-                        <StackPanel>
-                            <!-- Header: collapse chevron, function dot, editable title, lacing, mute badge. -->
-                            <Border Background="{Binding HeaderBrush}"
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <!-- Header: collapse chevron, function dot, editable title, lacing, mute badge. Collapsed, the header is the
+                                 whole node (a capsule in the category colour) and the socket rows are drawn over it. -->
+                            <Border x:Name="Header"
+                                    Grid.Row="0"
+                                    Background="{Binding HeaderBrush}"
                                     CornerRadius="5,5,0,0"
                                     MinHeight="26"
                                     Padding="6,0,8,0">
@@ -2293,9 +2302,11 @@
                                                Text="{Binding LacingLabel}" />
                                     <Ellipse x:Name="FnDot"
                                              DockPanel.Dock="Left"
-                                             Width="8" Height="8"
+                                             Width="10" Height="10"
                                              Margin="0,0,7,0"
                                              VerticalAlignment="Center"
+                                             Stroke="White"
+                                             StrokeThickness="1.5"
                                              Fill="{DynamicResource Dyc.FnModifyBrush}"
                                              ToolTip="{Binding Function}" />
                                     <views:EditableTextBlock FontWeight="SemiBold"
@@ -2304,12 +2315,14 @@
                                                              ToolTip="{Binding Description}" />
                                 </DockPanel>
                             </Border>
-                            <ItemsControl ItemsSource="{Binding Rows}"
+                            <ItemsControl x:Name="RowsHost"
+                                          Grid.Row="1"
+                                          ItemsSource="{Binding Rows}"
                                           ItemTemplateSelector="{StaticResource Dyc.RowSelector}"
                                           Focusable="False"
                                           IsTabStop="False"
                                           Padding="0,3" />
-                        </StackPanel>
+                        </Grid>
                     </Border>
                 </Border>
             </Grid>
@@ -2361,6 +2374,29 @@
         <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding IsCollapsed}" Value="True">
                 <Setter TargetName="Chevron" Property="Text" Value="▸" />
+                <!-- Blender's hidden node: a capsule filled with the category colour, as wide as its title, the input sockets
+                     down the left edge and the output sockets down the right edge. -->
+                <Setter TargetName="NodeRoot" Property="Width" Value="NaN" />
+                <Setter TargetName="NodeRoot" Property="MinWidth" Value="96" />
+                <Setter TargetName="WidthGrip" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="StateBorder" Property="CornerRadius" Value="15" />
+                <Setter TargetName="Card" Property="CornerRadius" Value="13" />
+                <Setter TargetName="Card" Property="Background" Value="{Binding HeaderBrush}" />
+                <Setter TargetName="Card" Property="BorderBrush" Value="{Binding HeaderBrush}" />
+                <Setter TargetName="Header" Property="CornerRadius" Value="13" />
+                <Setter TargetName="Header" Property="Background" Value="Transparent" />
+                <Setter TargetName="Header" Property="Padding" Value="14,0,14,0" />
+                <Setter TargetName="FnDot" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="RowsHost" Property="Grid.Row" Value="0" />
+                <Setter TargetName="RowsHost" Property="Padding" Value="0" />
+                <Setter TargetName="RowsHost" Property="Margin" Value="0,5" />
+                <Setter TargetName="RowsHost" Property="ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+                            <views:CollapsedSocketPanel />
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
             </DataTrigger>
             <DataTrigger Binding="{Binding IsGroupInstance}" Value="True">
                 <Setter TargetName="EnterGroupButton" Property="Visibility" Value="Visible" />

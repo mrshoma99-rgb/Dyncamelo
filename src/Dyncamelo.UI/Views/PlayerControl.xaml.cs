@@ -16,6 +16,8 @@ public partial class PlayerControl : UserControl, IHostKeyTarget
     /// <summary>Creates the control.</summary>
     public PlayerControl()
     {
+        // The pane may be the first thing opened in the session: the theme needs Nodify loaded already (see ThemeDependencies).
+        ThemeDependencies.EnsureLoaded();
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
         PreviewKeyDown += OnPlayerPreviewKeyDown;

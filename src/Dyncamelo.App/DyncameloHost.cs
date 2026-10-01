@@ -41,6 +41,9 @@ internal static class DyncameloHost
         // place before any node loading or graph deserialization reflects over
         // Dyncamelo.Navisworks.
         AppDomain.CurrentDomain.AssemblyResolve += ResolveHostAssembly;
+
+        // A failure that closes Navisworks leaves only its outer exception in the crash dialog; keep the whole of it, when it is ours.
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => Dyncamelo.UI.Services.CrashGuard.LogFatal(e.ExceptionObject);
     }
 
     /// <summary>
@@ -53,7 +56,7 @@ internal static class DyncameloHost
         var requested = new AssemblyName(args.Name);
         if (!string.Equals(requested.Name, "Autodesk.Navisworks.Timeliner", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            return LoadFromAddInFolder(requested.Name);
         }
 
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -84,6 +87,35 @@ internal static class DyncameloHost
         finally
         {
             _resolvingHostAssembly = false;
+        }
+    }
+
+    /// <summary>
+    /// Last resort for a reference the host could not resolve: an assembly that ships beside this add-in. WPF resolves the
+    /// <c>pack://application:,,,/Name;component/…</c> URIs of the theme by simple name, which the host's probing paths do not
+    /// cover for an add-in folder.
+    /// </summary>
+    private static Assembly? LoadFromAddInFolder(string? simpleName)
+    {
+        if (string.IsNullOrEmpty(simpleName) || simpleName!.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        try
+        {
+            var folder = Path.GetDirectoryName(typeof(DyncameloHost).Assembly.Location);
+            if (string.IsNullOrEmpty(folder))
+            {
+                return null;
+            }
+
+            var candidate = Path.Combine(folder, simpleName + ".dll");
+            return File.Exists(candidate) ? Assembly.LoadFrom(candidate) : null;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

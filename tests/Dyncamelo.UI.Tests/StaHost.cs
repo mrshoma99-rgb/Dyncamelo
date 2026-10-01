@@ -13,6 +13,9 @@ namespace Dyncamelo.UI.Tests;
 /// </summary>
 internal static class StaHost
 {
+    /// <summary>Exceptions that escaped to the WPF test thread's dispatcher (they are logged and swallowed so the run goes on).</summary>
+    public static readonly System.Collections.Concurrent.ConcurrentQueue<string> Unhandled = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
     private static readonly Dispatcher Dispatcher = Start();
 
     private static Dispatcher Start()
@@ -34,6 +37,7 @@ internal static class StaHost
                 // output shows it, and carry on.
                 dispatcher.UnhandledException += (_, e) =>
                 {
+                    Unhandled.Enqueue(e.Exception.ToString());
                     Console.Error.WriteLine("UNHANDLED on the WPF test thread: " + e.Exception);
                     Console.Error.Flush();
                     e.Handled = true;
