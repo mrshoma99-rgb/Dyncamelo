@@ -182,7 +182,7 @@ public static class ClashFilterNodes
     {
         RequireResults(results);
         var doc = NavisworksContext.ResolveDocument(document);
-        var scale = ResolveUnitsScale(doc, units);
+        var scale = NavisValues.ResolveUnitsScale(doc, units);
         var min = minDepth * scale;
         var max = double.IsPositiveInfinity(maxDepth) ? double.PositiveInfinity : maxDepth * scale;
 
@@ -231,8 +231,8 @@ public static class ClashFilterNodes
                 continue;
             }
 
-            var id1 = ItemIdentity(result.Item1);
-            var id2 = ItemIdentity(result.Item2);
+            var id1 = NavisValues.ItemIdentity(result.Item1);
+            var id2 = NavisValues.ItemIdentity(result.Item2);
             if (id1.Length == 0 && id2.Length == 0)
             {
                 kept.Add(result); // unidentifiable items — never merge blindly
@@ -354,36 +354,4 @@ public static class ClashFilterNodes
         }
     }
 
-    /// <summary>Stable identity for pair matching: InstanceGuid, else tree path (same scheme as clash snapshots).</summary>
-    private static string ItemIdentity(ModelItem? item)
-    {
-        if (item == null)
-        {
-            return string.Empty;
-        }
-
-        var guid = item.InstanceGuid;
-        return guid != Guid.Empty
-            ? "guid:" + guid.ToString("N")
-            : "path:" + NavisValues.ItemPath(item);
-    }
-
-    /// <summary>Scale from a named unit onto document units ("document" = 1).</summary>
-    private static double ResolveUnitsScale(Document doc, string? units)
-    {
-        var trimmed = (units ?? string.Empty).Trim();
-        if (trimmed.Length == 0 || string.Equals(trimmed, "document", StringComparison.OrdinalIgnoreCase))
-        {
-            return 1.0;
-        }
-
-        if (!Enum.TryParse<Units>(trimmed, true, out var parsed))
-        {
-            throw new ArgumentException(
-                "Unknown units '" + units + "'. Use \"document\" or a Navisworks unit name " +
-                "(e.g. \"Meters\", \"Millimeters\", \"Feet\").", nameof(units));
-        }
-
-        return UnitConversion.ScaleFactor(parsed, doc.Units);
-    }
 }

@@ -86,7 +86,7 @@ public static class FallHazardNodes
 
         // Convert every numeric input from the user's chosen units into document
         // units; results convert back on the way out. Originals kept for the report.
-        var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
+        var scale = NavisValues.ResolveUnitsScale(doc, units, out var unitsLabel);
         double inLevel = level, inBand = band, inCell = cellSize, inMinGap = minGap;
         level *= scale;
         band *= scale;
@@ -265,7 +265,7 @@ public static class FallHazardNodes
 
         // Convert every numeric input from the user's chosen units into document
         // units; results convert back on the way out. Originals kept for the report.
-        var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
+        var scale = NavisValues.ResolveUnitsScale(doc, units, out var unitsLabel);
         double inLevel = level, inBand = band, inCell = cellSize, inLimit = limit,
             inTolerance = handrailTolerance, inMinPassage = minPassage;
         level *= scale;
@@ -355,32 +355,6 @@ public static class FallHazardNodes
             ["safeLength"] = edges.SafeLength / scale,
             ["report"] = report,
         };
-    }
-
-    /// <summary>
-    /// The factor that converts the user's chosen input units into the document's
-    /// units (1.0 for "document"). Navisworks documents often store coordinates in
-    /// feet even when the measure tool displays metres, so letting the user name
-    /// the unit their numbers are in keeps the node's inputs and outputs honest.
-    /// </summary>
-    private static double ResolveUnitsScale(Document doc, string? units, out string unitsLabel)
-    {
-        var trimmed = (units ?? string.Empty).Trim();
-        if (trimmed.Length == 0 || trimmed.Equals("document", StringComparison.OrdinalIgnoreCase))
-        {
-            unitsLabel = doc.Units.ToString();
-            return 1.0;
-        }
-
-        if (!Enum.TryParse<Units>(trimmed, true, out var parsed))
-        {
-            throw new ArgumentException(
-                "Unknown units '" + units + "'. Use \"document\" or a Navisworks unit name " +
-                "(e.g. \"Meters\", \"Millimeters\", \"Feet\" — Units.All lists them).", nameof(units));
-        }
-
-        unitsLabel = parsed.ToString();
-        return UnitConversion.ScaleFactor(parsed, doc.Units);
     }
 
     /// <summary>A colour port value (Color, "#RRGGBB", [r,g,b], …) as a packed 0xRRGGBB int.</summary>

@@ -152,7 +152,7 @@ public static class ExportNodes
             builder.AppendLine(string.Join(",", row.Select(EscapeCsv)));
         }
 
-        EnsureDirectory(filePath);
+        NavisValues.EnsureDirectory(filePath);
         File.WriteAllText(filePath, builder.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         return new Dictionary<string, object?>
         {
@@ -255,7 +255,7 @@ public static class ExportNodes
 
         html.AppendLine("</body></html>");
 
-        EnsureDirectory(filePath);
+        NavisValues.EnsureDirectory(filePath);
         File.WriteAllText(filePath, html.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
         return new Dictionary<string, object?>
         {
@@ -309,7 +309,7 @@ public static class ExportNodes
             }
         }
 
-        EnsureDirectory(filePath);
+        NavisValues.EnsureDirectory(filePath);
 
         var state = ComApiBridge.State;
         InwOaPropertyVec? options = null;
@@ -379,7 +379,7 @@ public static class ExportNodes
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
-        EnsureDirectory(filePath);
+        NavisValues.EnsureDirectory(filePath);
         doc.SaveFile(filePath);
         return filePath;
     }
@@ -500,15 +500,6 @@ public static class ExportNodes
     private static string Html(string text)
     {
         return System.Net.WebUtility.HtmlEncode(text ?? string.Empty);
-    }
-
-    private static void EnsureDirectory(string filePath)
-    {
-        var directory = Path.GetDirectoryName(Path.GetFullPath(filePath));
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
     }
 
     private static string FormatCell(object? value)

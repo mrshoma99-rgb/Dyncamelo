@@ -77,7 +77,7 @@ public static class PropertyNodes
     [MultiReturn("names", "values")]
     public static Dictionary<string, object?> InCategory(ModelItem item, string categoryName)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(categoryName))
         {
             throw new ArgumentException("No property category name provided.", nameof(categoryName));
@@ -136,7 +136,7 @@ public static class PropertyNodes
     [return: NodeName("hasProperty")]
     public static bool HasProperty(ModelItem item, string categoryName, string propertyName)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(categoryName))
         {
             throw new ArgumentException("No property category name provided.", nameof(categoryName));
@@ -160,7 +160,7 @@ public static class PropertyNodes
     [return: NodeName("properties")]
     public static Dictionary<string, object?> AsDictionary(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         var result = new Dictionary<string, object?>(StringComparer.Ordinal);
         foreach (var category in modelItem.PropertyCategories)
         {
@@ -197,10 +197,5 @@ public static class PropertyNodes
             ["displayName"] = property.DisplayName,
             ["value"] = NavisValues.ToClrObject(property.Value),
         };
-    }
-
-    private static ModelItem RequireItem(ModelItem? item)
-    {
-        return item ?? throw new ArgumentNullException(nameof(item), "No model item provided.");
     }
 }

@@ -27,6 +27,7 @@ public static class SectionBoxNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the clip planes were applied to the current view.</returns>
     [NodeName("Viewpoint.SetSectionBox")]
+    [NodeCategory("Navisworks.Camera")]
     [NodeDescription("Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.")]
     [NodeSearchTags("section", "box", "clip", "sectioning", "viewpoint", "crop", "isolate")]
     [return: NodeName("done")]

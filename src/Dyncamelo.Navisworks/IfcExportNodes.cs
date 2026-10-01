@@ -111,7 +111,7 @@ public static class IfcExportNodes
 
         long splitLimit = splitMegabytes > 0 ? (long)(splitMegabytes * 1024 * 1024) : 0;
 
-        EnsureDirectory(filePath);
+        NavisValues.EnsureDirectory(filePath);
 
         var sm = ItemCollector.ScopeMinCorner(leaves);
         var geomMin = (sm.x * unitScale, sm.y * unitScale, sm.z * unitScale);
@@ -456,15 +456,6 @@ public static class IfcExportNodes
             case Units.Yards: return (0.9144, "yd");
             case Units.Miles: return (1609.344, "mi");
             default: return (1.0, u.ToString());
-        }
-    }
-
-    private static void EnsureDirectory(string filePath)
-    {
-        var directory = Path.GetDirectoryName(Path.GetFullPath(filePath));
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
         }
     }
 }

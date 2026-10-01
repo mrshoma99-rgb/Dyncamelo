@@ -12,7 +12,7 @@ namespace Dyncamelo.Nodes;
 /// list of column headers), the shape produced by Excel.ReadFromFile and
 /// CSV.ReadFromFile.
 /// </summary>
-[NodeCategory("List")]
+[NodeCategory("Data")]
 public static class TableNodes
 {
     /// <summary>
@@ -28,6 +28,7 @@ public static class TableNodes
     /// <param name="keyColumn">Name of the header column holding the keys.</param>
     /// <returns>Dictionary with "matchedRows" (parallel to keys; null when unmatched) and "unmatchedKeys".</returns>
     [NodeName("Table.JoinByKey")]
+    [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Create)]
     [MultiReturn("matchedRows", "unmatchedKeys")]
     [NodeDescription("Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.")]
     [NodeSearchTags("join", "lookup", "vlookup", "merge", "link", "table", "excel", "csv")]

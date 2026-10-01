@@ -32,7 +32,7 @@ public static class TransformNodes
     [return: NodeName("items")]
     public static List<ModelItem> Translate([MultiInput] IEnumerable<ModelItem> items, object vector, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.RequireItems(items);
         var delta = TransformHelpers.Translation(ToVector3D(vector));
         var doc = NavisworksContext.ResolveDocument(document);
         ApplyDelta(doc, list, delta);
@@ -57,7 +57,7 @@ public static class TransformNodes
         double degrees,
         Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.RequireItems(items);
         var delta = TransformHelpers.RotationAboutAxis(
             NavisValues.ToPoint3D(origin), ToVector3D(axis), degrees);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -76,7 +76,7 @@ public static class TransformNodes
     [return: NodeName("items")]
     public static List<ModelItem> SetTransform([MultiInput] IEnumerable<ModelItem> items, object matrix, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.RequireItems(items);
         var transform = TransformHelpers.FromMatrixValue(matrix);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.OverridePermanentTransform(list, transform, false);
@@ -159,17 +159,6 @@ public static class TransformNodes
             var composed = TransformHelpers.ComposeWithOverride(item, delta);
             doc.Models.OverridePermanentTransform(new[] { item }, composed, false);
         }
-    }
-
-    private static List<ModelItem> RequireItems(IEnumerable<ModelItem>? items)
-    {
-        var list = NavisValues.ToItemList(items);
-        if (list.Count == 0)
-        {
-            throw new ArgumentException("No model items provided.", nameof(items));
-        }
-
-        return list;
     }
 
     /// <summary>

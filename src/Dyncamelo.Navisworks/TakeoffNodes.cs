@@ -8,7 +8,7 @@ using Dyncamelo.Navisworks.Internal;
 namespace Dyncamelo.Navisworks;
 
 /// <summary>Quantity take-off rollup nodes.</summary>
-[NodeCategory("Navisworks.Takeoff")]
+[NodeCategory("Navisworks.Analysis")]
 public static class TakeoffNodes
 {
     /// <summary>Groups items by one property and sums another per group.</summary>

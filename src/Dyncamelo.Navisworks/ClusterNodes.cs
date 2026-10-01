@@ -59,7 +59,7 @@ public static class ClusterNodes
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
-        var scale = ResolveUnitsScale(doc, units, out var unitsLabel);
+        var scale = NavisValues.ResolveUnitsScale(doc, units, out var unitsLabel);
         var worldTolerance = tolerance * scale;
 
         var boxes = new List<double[]?>(list.Count);
@@ -206,28 +206,4 @@ public static class ClusterNodes
         };
     }
 
-    /// <summary>
-    /// Converts a user-facing unit choice into a scale onto document units
-    /// (same contract as the FallHazard nodes: documents often store feet even
-    /// when the measure tool displays metres).
-    /// </summary>
-    private static double ResolveUnitsScale(Document doc, string? units, out string unitsLabel)
-    {
-        var trimmed = (units ?? string.Empty).Trim();
-        if (trimmed.Length == 0 || trimmed.Equals("document", StringComparison.OrdinalIgnoreCase))
-        {
-            unitsLabel = doc.Units.ToString();
-            return 1.0;
-        }
-
-        if (!Enum.TryParse<Units>(trimmed, true, out var parsed))
-        {
-            throw new ArgumentException(
-                "Unknown units '" + units + "'. Use \"document\" or a Navisworks unit name " +
-                "(e.g. \"Meters\", \"Millimeters\", \"Feet\").", nameof(units));
-        }
-
-        unitsLabel = parsed.ToString();
-        return UnitConversion.ScaleFactor(parsed, doc.Units);
-    }
 }

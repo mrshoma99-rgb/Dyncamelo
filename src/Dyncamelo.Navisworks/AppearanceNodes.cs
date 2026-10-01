@@ -21,7 +21,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> OverrideColor([MultiInput] IEnumerable<ModelItem> items, [PortKinds("colour")] object color, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.OverridePermanentColor(list, NavisValues.ToNavisColor(color));
         return list;
@@ -47,7 +47,7 @@ public static class AppearanceNodes
                 nameof(transparency), "Transparency must be between 0 (opaque) and 1 (invisible).");
         }
 
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.OverridePermanentTransparency(list, transparency);
         return list;
@@ -63,7 +63,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> Reset([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.ResetPermanentMaterials(list);
         return list;
@@ -83,7 +83,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> OverrideColorTemporary([MultiInput] IEnumerable<ModelItem> items, [PortKinds("colour")] object color, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.OverrideTemporaryColor(list, NavisValues.ToNavisColor(color));
         return list;
@@ -112,7 +112,7 @@ public static class AppearanceNodes
                 nameof(transparency), "Transparency must be between 0 (opaque) and 1 (invisible).");
         }
 
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.OverrideTemporaryTransparency(list, transparency);
         return list;
@@ -153,7 +153,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> Hide([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.SetHidden(list, true);
         return list;
@@ -169,7 +169,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> Show([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
         doc.Models.SetHidden(list, false);
         return list;
@@ -213,7 +213,7 @@ public static class AppearanceNodes
     [return: NodeName("items")]
     public static List<ModelItem> Isolate([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
-        var list = RequireItems(items);
+        var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
 
         // Isolate means "show ONLY these", from whatever state the model is in,
@@ -248,7 +248,7 @@ public static class AppearanceNodes
         IEnumerable<object>? palette = null,
         Document? document = null)
     {
-        var itemList = RequireItems(items);
+        var itemList = NavisValues.NonNullItems(items);
         if (values == null)
         {
             throw new ArgumentNullException(nameof(values), "No values provided.");
@@ -270,7 +270,7 @@ public static class AppearanceNodes
         var allNumeric = valueList.Count > 0;
         for (int i = 0; i < itemList.Count; i++)
         {
-            var key = FormatKey(valueList[i]);
+            var key = NavisValues.FormatKey(valueList[i]);
             if (!buckets.TryGetValue(key, out var bucket))
             {
                 bucket = new List<ModelItem>();
@@ -296,19 +296,6 @@ public static class AppearanceNodes
             ["items"] = itemList,
             ["legend"] = legend,
         };
-    }
-
-    private static string FormatKey(object? value)
-    {
-        if (value == null)
-        {
-            return "(none)";
-        }
-
-        var text = value is IFormattable formattable
-            ? formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture)
-            : value.ToString();
-        return string.IsNullOrEmpty(text) ? "(empty)" : text!;
     }
 
     private static bool IsNumeric(object? value)
@@ -397,14 +384,4 @@ public static class AppearanceNodes
         Autodesk.Navisworks.Api.Color.FromByteRGB(255, 187, 120),  // light orange
         Autodesk.Navisworks.Api.Color.FromByteRGB(152, 223, 138),  // light green
     };
-
-    private static List<ModelItem> RequireItems(IEnumerable<ModelItem>? items)
-    {
-        if (items == null)
-        {
-            throw new ArgumentNullException(nameof(items), "No model items provided.");
-        }
-
-        return NavisValues.ToItemList(items);
-    }
 }

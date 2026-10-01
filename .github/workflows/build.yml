@@ -78,6 +78,9 @@ jobs:
       - name: Test Dyncamelo.Integration.Tests
         run: dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj -c Release --verbosity normal
 
+      - name: Node catalogue is current (docs/dyncamelo-nodes.json and docs/NODE_CATALOG.md)
+        run: python3 tools/generate_node_catalog.py --check
+
       - name: CLI smoke-run every runnable sample graph
         run: |
           set -e

@@ -15,7 +15,7 @@ namespace Dyncamelo.Navisworks;
 /// searchable, schedulable, and travels with the NWF/NWD (source files are
 /// never modified). Works only inside a live Navisworks session.
 /// </summary>
-[NodeCategory("Navisworks.Takeoff")]
+[NodeCategory("Navisworks.Analysis")]
 public static class ZoneNodes
 {
     /// <summary>Tags each target item with the name of the zone volume containing its bounding-box center.</summary>

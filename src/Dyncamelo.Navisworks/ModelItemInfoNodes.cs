@@ -24,7 +24,7 @@ public static class ModelItemInfoNodes
     [MultiReturn("bboxCenter", "bboxMin", "localOrigin")]
     public static Dictionary<string, object?> ReferencePoints(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
 
         var box = modelItem.BoundingBox();
         var hasBox = box != null && !box.IsEmpty;
@@ -46,7 +46,7 @@ public static class ModelItemInfoNodes
     [MultiReturn("sourceFileName", "itemType", "model")]
     public static Dictionary<string, object?> SourceInfo(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
 
         // The owning appended model: walk up to the nearest ancestor that carries one.
         Model? model = null;
@@ -169,10 +169,5 @@ public static class ModelItemInfoNodes
         }
 
         return result;
-    }
-
-    private static ModelItem RequireItem(ModelItem? item)
-    {
-        return item ?? throw new ArgumentNullException(nameof(item), "No model item provided.");
     }
 }

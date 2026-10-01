@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dyncamelo.Core.Loader;
 using Newtonsoft.Json;
 
 namespace Dyncamelo.Nodes.Portable;
@@ -41,6 +42,7 @@ public sealed class ViewpointPackageFile
     /// files written by a newer Dyncamelo both fail with a message that says
     /// what to do, never a raw serializer stack trace.
     /// </summary>
+    [NodeCategory("Navisworks.Viewpoints")]
     public static ViewpointPackageFile Parse(string json)
     {
         if (string.IsNullOrWhiteSpace(json))

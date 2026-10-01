@@ -17,7 +17,7 @@ namespace Dyncamelo.Navisworks;
 /// model has one, else the item's InstanceGuid in IFC-compressed form — lossy
 /// for sources without stable GUIDs (documented per node).
 /// </summary>
-[NodeCategory("Navisworks.Exchange")]
+[NodeCategory("Navisworks.Export")]
 public static class BcfNodes
 {
     private const int SnapshotWidth = 1280;

@@ -56,7 +56,7 @@ public static class ExcelNodes
         {
             foreach (var cell in grid[0])
             {
-                headers.Add(HeaderText(cell));
+                headers.Add(CellText.Format(cell));
             }
 
             firstDataRow = 1;
@@ -131,22 +131,6 @@ public static class ExcelNodes
     // ------------------------------------------------------------------
     // Helpers (not imported as nodes: non-public).
     // ------------------------------------------------------------------
-
-    private static string HeaderText(object? cell)
-    {
-        if (cell == null)
-        {
-            return string.Empty;
-        }
-
-        if (cell is string text)
-        {
-            return text;
-        }
-
-        return TypeCoercion.FormatValue(cell);
-    }
-
     private static IReadOnlyList<object?> ToCells(object? row)
     {
         if (row is IList cells && !(row is string))

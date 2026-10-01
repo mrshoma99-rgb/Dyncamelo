@@ -3,14 +3,22 @@
 This catalog defines the complete planned node library for Dyncamelo, the visual programming environment for Autodesk Navisworks 2024–2026. It is the **product-design source of truth** for node names, ports, behavior, and the exact Navisworks API surface each node wraps. Implementations follow this document; deviations require updating it (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
 
 > **Always-current inventory:** the shipped library has grown well past these
-> hand-written tables — **314 nodes across 37 categories** as of v0.23. The
-> machine-generated [dyncamelo-nodes.json](dyncamelo-nodes.json) (rebuilt from
-> source by `tools/generate_node_catalog.py`) inventories every node with its
-> ports, defaults and descriptions, and is browsable at
+> hand-written tables. [NODE_CATALOG.md](NODE_CATALOG.md) lists every node by
+> category with its inputs and outputs, and [dyncamelo-nodes.json](dyncamelo-nodes.json)
+> carries the same with types, defaults and descriptions; both are generated from the
+> source by `tools/generate_node_catalog.py` and CI fails when either is stale. The
+> catalogue is also browsable at
 > [bimcamel.com/plugins/dyncamelo/nodes](https://www.bimcamel.com/plugins/dyncamelo/nodes).
-> The tables below stay authoritative for design conventions and the API
-> mapping of the core set; recent waves are summarized per release in
-> [WHATS_NEW_0.23.md](WHATS_NEW_0.23.md).
+> The tables below stay authoritative for design conventions and the API mapping of the
+> core set; recent waves are summarized per release in [WHATS_NEW_0.23.md](WHATS_NEW_0.23.md).
+>
+> **Changing a node later.** Saved graphs refer to a zero-touch node by its definition id
+> (`Namespace.Class.Method@parameterTypes`) and to its wires and typed-in values by *port
+> name*. So: a display name or category can be changed freely; a changed signature needs
+> `[NodeAliases("old id")]`; a renamed input or output needs `[PortAlias("old", "new")]`;
+> and a node that should go away is marked `[NodeDeprecated("Use X")]` (it keeps loading and
+> running, and disappears from the library) rather than deleted. See
+> [EXTENDING.md](EXTENDING.md).
 
 Related reading: [ARCHITECTURE.md](ARCHITECTURE.md) for engine semantics (replication, coercion, states) and [EXTENDING.md](EXTENDING.md) for authoring your own nodes.
 

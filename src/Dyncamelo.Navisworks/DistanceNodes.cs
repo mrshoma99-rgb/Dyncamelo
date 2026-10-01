@@ -33,8 +33,8 @@ public static class DistanceNodes
         string method = "mesh",
         Document? document = null)
     {
-        var listA = RequireItems(itemsA, "itemsA");
-        var listB = RequireItems(itemsB, "itemsB");
+        var listA = NavisValues.RequireItems(itemsA, "itemsA");
+        var listB = NavisValues.RequireItems(itemsB, "itemsB");
         var mode = (method ?? string.Empty).Trim().ToLowerInvariant();
 
         switch (mode)
@@ -69,7 +69,7 @@ public static class DistanceNodes
         string method = "bbox",
         Document? document = null)
     {
-        var itemList = RequireItems(items, "items");
+        var itemList = NavisValues.RequireItems(items, "items");
         var targetList = NavisValues.ToItemList(targets); // may be empty → +∞
         var mode = (method ?? string.Empty).Trim().ToLowerInvariant();
         if (mode.Length == 0)
@@ -251,16 +251,5 @@ public static class DistanceNodes
             a = mid;
             b = mid;
         }
-    }
-
-    private static List<ModelItem> RequireItems(IEnumerable<ModelItem>? items, string parameterName)
-    {
-        var list = NavisValues.ToItemList(items);
-        if (list.Count == 0)
-        {
-            throw new ArgumentException("No model items provided for '" + parameterName + "'.", parameterName);
-        }
-
-        return list;
     }
 }

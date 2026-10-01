@@ -14,7 +14,7 @@ namespace Dyncamelo.Nodes;
 /// identically on both formats (MSP/P6 XML schedules, BCF internals,
 /// search-set XML, ...).
 /// </summary>
-[NodeCategory("File")]
+[NodeCategory("Data")]
 public static class XmlNodes
 {
     /// <summary>

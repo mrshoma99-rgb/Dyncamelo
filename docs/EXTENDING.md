@@ -15,6 +15,7 @@ Dyncamelo is designed so that adding a node is a five-minute job: **a public sta
 7. [Custom interactive nodes (NodeModel + WPF view)](#7-custom-interactive-nodes-nodemodel--wpf-view)
 8. [Conventions checklist](#8-conventions-checklist)
 9. [Making a node look right in the editor](#9-making-a-node-look-right-in-the-editor)
+10. [Changing a node that is already shipped](#10-changing-a-node-that-is-already-shipped)
 
 ---
 
@@ -268,3 +269,18 @@ Guidelines:
 - Mark a list parameter `[MultiInput]` when a caller would reasonably want to feed it from several places — "these items, and those, and the current selection". Do not use it on a list whose *nesting* matters (a list of lists that should replicate the node once per sublist): with several wires the outer level is concatenated, so each wire's sublists merge into one list of sublists.
 - In a hand-written `NodeModel`, declare the port with `AddMultiInput(name, typeof(IList<object>))` in the constructor.
 - Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).
+
+## 10. Changing a node that is already shipped
+
+Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its **definition id** — `Namespace.Class.Method@parameterTypes` — and stores each wire and each typed-in value by the **port name** (the parameter name, the `[MultiReturn]` key, or the return name). What you may change:
+
+| Change | Safe? | What to do |
+|---|---|---|
+| Display name (`[NodeName]`), category, description, search tags | Yes | Nothing: none of them is part of the id. |
+| Add, remove or retype a parameter (this changes the id) | With an alias | Put the old id on the method: `[NodeAliases("Ns.Class.Method@double,double")]`. Old files resolve to the new method and write the new id when saved. |
+| Rename an input or an output | With an alias | `[PortAlias("oldName", "newName")]` on the method, once per renamed port. A wire or value saved under the old name finds the port. |
+| Retire a node | With a replacement | Mark it `[NodeDeprecated("Use Category.Replacement")]` and have it call the replacement. It stays registered — old graphs load and run — but is left out of the library, the quick search, the CLI list and the catalogue, and its description says what to use instead. Never delete a shipped node. |
+
+Without an alias, a wire or value whose port no longer exists is dropped when the graph opens; the editor then says so in the status bar ("*N connections or values could not be restored*") instead of losing it silently.
+
+After adding, renaming or retiring a node, run `python3 tools/generate_node_catalog.py` and commit `docs/dyncamelo-nodes.json` and `docs/NODE_CATALOG.md`; CI fails when they are out of date.

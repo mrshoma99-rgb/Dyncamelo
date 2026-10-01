@@ -8,7 +8,7 @@ using Dyncamelo.Navisworks.Internal;
 namespace Dyncamelo.Navisworks;
 
 /// <summary>Model QA nodes: data completeness and duplicate-geometry audits.</summary>
-[NodeCategory("Navisworks.Audit")]
+[NodeCategory("Navisworks.Analysis")]
 public static class AuditNodes
 {
     /// <summary>Finds items that are missing a property.</summary>

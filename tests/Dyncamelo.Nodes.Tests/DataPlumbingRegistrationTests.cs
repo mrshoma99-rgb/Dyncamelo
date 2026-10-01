@@ -45,9 +45,13 @@ public class DataPlumbingRegistrationTests
 
         Assert.Equal("File", Definition(registry, "Excel.ReadFromFile").Category);
         Assert.Equal("File", Definition(registry, "Excel.WriteToFile").Category);
-        Assert.Equal("List", Definition(registry, "Table.JoinByKey").Category);
-        Assert.Equal("File", Definition(registry, "XML.Parse").Category);
-        Assert.Equal("File", Definition(registry, "Snapshot.Diff").Category);
+        Assert.Equal("Data", Definition(registry, "Table.JoinByKey").Category);
+        Assert.Equal("Data", Definition(registry, "XML.Parse").Category);
+        Assert.Equal("Data", Definition(registry, "Snapshot.Diff").Category);
+        Assert.Equal("Data", Definition(registry, "JSON.Parse").Category);
+        Assert.Equal("Data", Definition(registry, "JSON.Stringify").Category);
+        Assert.Equal("File", Definition(registry, "JSON.ReadFromFile").Category);
+        Assert.Equal(Dyncamelo.Core.Graph.NodeFunction.Create, Definition(registry, "Table.JoinByKey").Function);
         Assert.Equal("Geometry", Definition(registry, "BoundingBox.Contains").Category);
         Assert.Equal("Geometry", Definition(registry, "Point.Translate").Category);
     }

@@ -48,6 +48,7 @@ INTERACTIVE_FILES = [
     REPO / "src" / "Dyncamelo.Nodes" / "WatchListNode.cs",
     REPO / "src" / "Dyncamelo.Nodes" / "ColorPickerNode.cs",
     REPO / "src" / "Dyncamelo.Nodes" / "ListCreateNode.cs",
+    REPO / "src" / "Dyncamelo.Nodes" / "WatchImageNode.cs",
 ]
 EXCLUDED_PARTS = {"Internal", "bin", "obj"}
 
@@ -527,10 +528,64 @@ NOTE_NODE = {
 # ------------------------------------------------------------------- driver
 
 
+def first_sentence(text: str, limit: int = 170) -> str:
+    """The first sentence of a description, cut to <limit> characters, safe inside a Markdown table cell."""
+    text = " ".join(text.split())
+    cut = len(text)
+    for mark in (". ", " — ", "; "):
+        i = text.find(mark)
+        if 0 < i < cut:
+            cut = i
+    text = text[:cut].rstrip(".")
+    if len(text) > limit:
+        text = text[: limit - 1].rstrip() + "…"
+    return text.replace("|", "\\|")
+
+
+def render_markdown(catalog: dict) -> str:
+    """docs/NODE_CATALOG.md: every node by category, from the same data as the JSON."""
+    lines = [
+        "# Dyncamelo node catalogue",
+        "",
+        "> Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. "
+        "Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; "
+        "CI fails when this file or `dyncamelo-nodes.json` is out of date.",
+        "",
+        f"**{catalog['count']} nodes in {len(catalog['categories'])} categories.** "
+        "A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are not listed.",
+        "",
+        "| Category | Nodes |",
+        "|---|---|",
+    ]
+    for c in catalog["categories"]:
+        anchor = c["name"].lower().replace(".", "").replace(" ", "-")
+        lines.append(f"| [{c['name']}](#{anchor}) | {c['count']} |")
+    lines.append("")
+    by_category: dict = {}
+    for n in catalog["nodes"]:
+        by_category.setdefault(n["category"], []).append(n)
+    for c in catalog["categories"]:
+        lines += [f"## {c['name']}", "", "| Node | Inputs | Outputs | What it does |", "|---|---|---|---|"]
+        for n in by_category[c["name"]]:
+            ins = ", ".join(i["name"] + ("?" if "default" in i else "") for i in n["inputs"]) or "—"
+            outs = ", ".join(o["name"] for o in n["outputs"]) or "—"
+            kind = " *(interactive)*" if n.get("interactive") else ""
+            lines.append(f"| `{n['name']}`{kind} | {ins} | {outs} | {first_sentence(n['description'])} |")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def comparable(catalog: dict) -> dict:
+    """The parts of a catalogue that describe the nodes (not the release it was generated at)."""
+    return {k: v for k, v in catalog.items() if k != "version"}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(REPO / "docs" / "dyncamelo-nodes.json"))
+    ap.add_argument("--markdown", default=str(REPO / "docs" / "NODE_CATALOG.md"))
     ap.add_argument("--baseline", help="existing catalog to diff node names against")
+    ap.add_argument("--check", action="store_true", help="fail when the committed JSON or Markdown is not what the source generates")
     args = ap.parse_args()
 
     nodes: list[dict] = []
@@ -571,9 +626,34 @@ def main() -> int:
             print(f"ERROR: baseline nodes missing ({len(missing)}): {missing}", file=sys.stderr)
             return 1
 
+    markdown = render_markdown(catalog)
+    if args.check:
+        problems = []
+        try:
+            committed = json.load(open(args.out, encoding="utf-8"))
+        except (OSError, ValueError):
+            committed = None
+        if committed is None or comparable(committed) != comparable(catalog):
+            problems.append(args.out)
+        try:
+            if Path(args.markdown).read_text(encoding="utf-8") != markdown:
+                problems.append(args.markdown)
+        except OSError:
+            problems.append(args.markdown)
+        if problems:
+            print(
+                "ERROR: the node catalogue is out of date: " + ", ".join(problems) +
+                ". Run `python3 tools/generate_node_catalog.py` and commit the result.",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"node catalogue is current — {len(nodes)} nodes, {len(categories)} categories")
+        return 0
+
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(catalog, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    Path(args.markdown).write_text(markdown, encoding="utf-8")
     empty_desc = sum(1 for n in nodes if not n["description"])
     print(
         f"wrote {out} — {len(nodes)} nodes, {len(categories)} categories, "

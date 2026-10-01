@@ -35,7 +35,7 @@ public static class ClashNodes
     [MultiReturn("name", "status", "testType", "tolerance", "lastRun", "resultCount")]
     public static Dictionary<string, object?> Info(ClashTest test)
     {
-        var clashTest = RequireTest(test);
+        var clashTest = ClashHelpers.RequireTest(test);
         return new Dictionary<string, object?>
         {
             ["name"] = clashTest.DisplayName,
@@ -56,7 +56,7 @@ public static class ClashNodes
     [return: NodeName("results")]
     public static List<ClashResult> Results(ClashTest test)
     {
-        return FlattenResults(RequireTest(test));
+        return FlattenResults(ClashHelpers.RequireTest(test));
     }
 
     /// <summary>Summary information about a clash result.</summary>
@@ -68,7 +68,7 @@ public static class ClashNodes
     [MultiReturn("name", "status", "distance", "description", "assignedTo", "createdTime")]
     public static Dictionary<string, object?> ResultInfo(ClashResult result)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         return new Dictionary<string, object?>
         {
             ["name"] = clashResult.DisplayName,
@@ -89,7 +89,7 @@ public static class ClashNodes
     [MultiReturn("item1", "item2")]
     public static Dictionary<string, object?> ResultItems(ClashResult result)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         return new Dictionary<string, object?>
         {
             ["item1"] = clashResult.Item1,
@@ -106,7 +106,7 @@ public static class ClashNodes
     [return: NodeName("point")]
     public static Point3D Center(ClashResult result)
     {
-        return RequireResult(result).Center;
+        return ClashHelpers.RequireResult(result).Center;
     }
 
     /// <summary>The crossing angle between the two clashing elements.</summary>
@@ -123,7 +123,7 @@ public static class ClashNodes
     [return: NodeName("degrees")]
     public static double Angle(ClashResult result)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         if (!TryElementDirection(clashResult.Item1, out var d1) ||
             !TryElementDirection(clashResult.Item2, out var d2))
         {
@@ -147,7 +147,7 @@ public static class ClashNodes
     [return: NodeName("volume")]
     public static double Size(ClashResult result)
     {
-        var box = RequireResult(result).BoundingBox;
+        var box = ClashHelpers.RequireResult(result).BoundingBox;
         if (box == null)
         {
             return 0.0;
@@ -166,7 +166,7 @@ public static class ClashNodes
     [MultiReturn("hasViewpoint", "hasRedlines", "commentCount")]
     public static Dictionary<string, object?> Documentation(ClashResult result)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         return new Dictionary<string, object?>
         {
             ["hasViewpoint"] = clashResult.HasSavedViewpoint,
@@ -426,7 +426,7 @@ public static class ClashNodes
     public static List<ClashResult> ResultsByStatus(ClashTest test, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status)
     {
         var wanted = ClashHelpers.ParseResultStatuses(status);
-        return ClashHelpers.FlattenResults(RequireTest(test)).FindAll(r => wanted.Contains(r.Status));
+        return ClashHelpers.FlattenResults(ClashHelpers.RequireTest(test)).FindAll(r => wanted.Contains(r.Status));
     }
 
     /// <summary>Sets the status of a clash result.</summary>
@@ -441,7 +441,7 @@ public static class ClashNodes
     public static ClashResult SetStatus(ClashResult result, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status, Document? document = null)
     {
 #if !NAV2026
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         var wanted = ClashHelpers.ParseResultStatus(status);
         var doc = NavisworksContext.ResolveDocument(document);
         ClashHelpers.RequireClash(doc).TestsData.TestsEditResultStatus(clashResult, wanted);
@@ -467,7 +467,7 @@ public static class ClashNodes
     public static ClashResult Assign(ClashResult result, string assignedTo, Document? document = null)
     {
 #if !NAV2026
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         var doc = NavisworksContext.ResolveDocument(document);
         ClashHelpers.RequireClash(doc).TestsData.TestsEditResultAssignedTo(clashResult, assignedTo ?? string.Empty);
         return clashResult;
@@ -491,7 +491,7 @@ public static class ClashNodes
     [return: NodeName("result")]
     public static ClashResult SetDescription(ClashResult result, string description, Document? document = null)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         var doc = NavisworksContext.ResolveDocument(document);
         ClashHelpers.RequireClash(doc).TestsData.TestsEditResultDescription(clashResult, description ?? string.Empty);
         return clashResult;
@@ -508,7 +508,7 @@ public static class ClashNodes
     [return: NodeName("viewpoint")]
     public static Viewpoint ResultViewpoint(ClashResult result, bool apply = false, Document? document = null)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         var doc = NavisworksContext.ResolveDocument(document);
         var viewpoint = ClashHelpers.RequireClash(doc).TestsData.TestsViewpointForResult(clashResult);
         if (apply)
@@ -537,7 +537,7 @@ public static class ClashNodes
         [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int height = 720,
         Document? document = null)
     {
-        var clashResult = RequireResult(result);
+        var clashResult = ClashHelpers.RequireResult(result);
         if (string.IsNullOrEmpty(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
@@ -902,15 +902,5 @@ public static class ClashNodes
                 CollectResults(group.Children, results);
             }
         }
-    }
-
-    private static ClashTest RequireTest(ClashTest? test)
-    {
-        return test ?? throw new ArgumentNullException(nameof(test), "No clash test provided.");
-    }
-
-    private static ClashResult RequireResult(ClashResult? result)
-    {
-        return result ?? throw new ArgumentNullException(nameof(result), "No clash result provided.");
     }
 }

@@ -70,8 +70,8 @@ public static class ClashDeltaNodes
             for (int i = 0; i < results.Count; i++)
             {
                 var result = results[i];
-                var item1Id = ItemIdentity(result.Item1);
-                var item2Id = ItemIdentity(result.Item2);
+                var item1Id = NavisValues.ItemIdentity(result.Item1);
+                var item2Id = NavisValues.ItemIdentity(result.Item2);
                 var center = result.Center;
                 root.Results.Add(new ClashSnapshotEntry
                 {
@@ -131,20 +131,4 @@ public static class ClashDeltaNodes
         };
     }
 
-    /// <summary>
-    /// A stable identity for one clashing item: its InstanceGuid when the
-    /// source format provides one, otherwise its selection-tree path.
-    /// </summary>
-    private static string ItemIdentity(ModelItem? item)
-    {
-        if (item == null)
-        {
-            return string.Empty;
-        }
-
-        var guid = item.InstanceGuid;
-        return guid != Guid.Empty
-            ? "guid:" + guid.ToString("N")
-            : "path:" + NavisValues.ItemPath(item);
-    }
 }

@@ -101,8 +101,8 @@ public static class ClashEditNodes
         var clash = ClashHelpers.RequireClash(doc);
 
         var comment = string.IsNullOrEmpty(author)
-            ? doc.CreateCommentWithUniqueId(body, ParseCommentStatus(status))
-            : doc.CreateCommentWithUniqueId(body, ParseCommentStatus(status), author);
+            ? doc.CreateCommentWithUniqueId(body, NavisValues.ParseCommentStatus(status))
+            : doc.CreateCommentWithUniqueId(body, NavisValues.ParseCommentStatus(status), author);
 
         // Stored comments are read-only: copy the thread, append, write back.
         var comments = new CommentCollection(result.Comments);
@@ -268,26 +268,6 @@ public static class ClashEditNodes
     private static ClashTest ResolveStoredTest(DocumentClash clash, object? test)
     {
         return ClashHelpers.ResolveStoredTest(clash, test);
-    }
-
-    private static CommentStatus ParseCommentStatus(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status))
-        {
-            return CommentStatus.New;
-        }
-
-        switch (status!.Trim().ToLowerInvariant())
-        {
-            case "new": return CommentStatus.New;
-            case "active": return CommentStatus.Active;
-            case "approved": return CommentStatus.Approved;
-            case "resolved": return CommentStatus.Resolved;
-            default:
-                throw new ArgumentException(
-                    "Unknown comment status '" + status + "'. Use \"New\", \"Active\", \"Approved\" or \"Resolved\".",
-                    nameof(status));
-        }
     }
 
     /// <summary>Buckets results by a name key, keeping first-seen bucket order.</summary>

@@ -5,7 +5,7 @@ using Dyncamelo.Core.Loader;
 namespace Dyncamelo.Navisworks;
 
 /// <summary>Nodes about the running Navisworks application.</summary>
-[NodeCategory("Navisworks.Application")]
+[NodeCategory("Navisworks.Document")]
 public static class ApplicationNodes
 {
     /// <summary>The running Navisworks product name and API version.</summary>

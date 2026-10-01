@@ -339,4 +339,119 @@ internal static class NavisValues
             (byte)Math.Max(0, Math.Min(255, components[1])),
             (byte)Math.Max(0, Math.Min(255, components[2])));
     }
+
+    /// <summary>Null-checks a model item input.</summary>
+    internal static ModelItem RequireItem(ModelItem? item)
+    {
+        return item ?? throw new ArgumentNullException(nameof(item), "No model item provided.");
+    }
+
+    /// <summary>Flattens a model-item input to a list and insists it has something in it.</summary>
+    /// <param name="items">The wired items.</param>
+    /// <param name="parameterName">The input's name, for the message.</param>
+    internal static List<ModelItem> RequireItems(IEnumerable<ModelItem>? items, string parameterName = "items")
+    {
+        var list = ToItemList(items);
+        if (list.Count == 0)
+        {
+            throw new ArgumentException("No model items provided for '" + parameterName + "'.", parameterName);
+        }
+
+        return list;
+    }
+
+    /// <summary>Flattens a model-item input to a list; an empty list is fine (the node then does nothing) but a missing input is an error.</summary>
+    /// <param name="items">The wired items.</param>
+    internal static List<ModelItem> NonNullItems(IEnumerable<ModelItem>? items)
+    {
+        if (items == null)
+        {
+            throw new ArgumentNullException(nameof(items), "No model items provided.");
+        }
+
+        return ToItemList(items);
+    }
+
+    /// <summary>A stable identity for one item: its InstanceGuid when the source format provides one, otherwise its selection-tree path.</summary>
+    internal static string ItemIdentity(ModelItem? item)
+    {
+        if (item == null)
+        {
+            return string.Empty;
+        }
+
+        var guid = item.InstanceGuid;
+        return guid != Guid.Empty
+            ? "guid:" + guid.ToString("N")
+            : "path:" + ItemPath(item);
+    }
+
+    /// <summary>Creates the folder a file is about to be written into.</summary>
+    internal static void EnsureDirectory(string filePath)
+    {
+        var directory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filePath));
+        if (!string.IsNullOrEmpty(directory))
+        {
+            System.IO.Directory.CreateDirectory(directory);
+        }
+    }
+
+    /// <summary>Scale from a named unit onto document units ("document" or empty = 1); <paramref name="unitsLabel"/> names the unit used.</summary>
+    internal static double ResolveUnitsScale(Document doc, string? units, out string unitsLabel)
+    {
+        var trimmed = (units ?? string.Empty).Trim();
+        if (trimmed.Length == 0 || trimmed.Equals("document", StringComparison.OrdinalIgnoreCase))
+        {
+            unitsLabel = doc.Units.ToString();
+            return 1.0;
+        }
+
+        if (!Enum.TryParse<Units>(trimmed, true, out var parsed))
+        {
+            throw new ArgumentException(
+                "Unknown units '" + units + "'. Use \"document\" or a Navisworks unit name " +
+                "(e.g. \"Meters\", \"Millimeters\", \"Feet\" — Units.All lists them).", nameof(units));
+        }
+
+        unitsLabel = parsed.ToString();
+        return UnitConversion.ScaleFactor(parsed, doc.Units);
+    }
+
+    /// <summary>Scale from a named unit onto document units ("document" or empty = 1).</summary>
+    internal static double ResolveUnitsScale(Document doc, string? units) => ResolveUnitsScale(doc, units, out _);
+
+    /// <summary>A comment status from its name (empty = New).</summary>
+    internal static CommentStatus ParseCommentStatus(string? status)
+    {
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            return CommentStatus.New;
+        }
+
+        switch (status!.Trim().ToLowerInvariant())
+        {
+            case "new": return CommentStatus.New;
+            case "active": return CommentStatus.Active;
+            case "approved": return CommentStatus.Approved;
+            case "resolved": return CommentStatus.Resolved;
+            default:
+                throw new ArgumentException(
+                    "Unknown comment status '" + status + "'. Use \"New\", \"Active\", \"Approved\" or \"Resolved\".",
+                    nameof(status));
+        }
+    }
+
+    /// <summary>A value as the text of a grouping key: invariant culture, "(none)" for null and "(empty)" for empty text.</summary>
+    internal static string FormatKey(object? value)
+    {
+        if (value == null)
+        {
+            return "(none)";
+        }
+
+        var text = value is IFormattable formattable
+            ? formattable.ToString(null, CultureInfo.InvariantCulture)
+            : value.ToString();
+        return string.IsNullOrEmpty(text) ? "(empty)" : text!;
+    }
 }

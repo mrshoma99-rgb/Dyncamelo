@@ -19,7 +19,7 @@ public static class ModelItemNodes
     [return: NodeName("children")]
     public static List<ModelItem> Children(ModelItem item)
     {
-        return NavisValues.ToItemList(RequireItem(item).Children);
+        return NavisValues.ToItemList(NavisValues.RequireItem(item).Children);
     }
 
     /// <summary>All descendants of a model item (children, grandchildren, ...).</summary>
@@ -31,7 +31,7 @@ public static class ModelItemNodes
     [return: NodeName("descendants")]
     public static List<ModelItem> Descendants(ModelItem item)
     {
-        return NavisValues.ToItemList(RequireItem(item).Descendants);
+        return NavisValues.ToItemList(NavisValues.RequireItem(item).Descendants);
     }
 
     /// <summary>The display name of a model item.</summary>
@@ -43,7 +43,7 @@ public static class ModelItemNodes
     [return: NodeName("name")]
     public static string DisplayName(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
 
         // Anonymous geometry nodes frequently have an empty DisplayName.
         var name = modelItem.DisplayName;
@@ -59,7 +59,7 @@ public static class ModelItemNodes
     [return: NodeName("hasGeometry")]
     public static bool HasGeometry(ModelItem item)
     {
-        return RequireItem(item).HasGeometry;
+        return NavisValues.RequireItem(item).HasGeometry;
     }
 
     /// <summary>The axis-aligned bounding box of a model item.</summary>
@@ -72,7 +72,7 @@ public static class ModelItemNodes
     [return: NodeName("boundingBox")]
     public static BoundingBox3D BoundingBox(ModelItem item, bool ignoreHidden = false)
     {
-        return RequireItem(item).BoundingBox(ignoreHidden);
+        return NavisValues.RequireItem(item).BoundingBox(ignoreHidden);
     }
 
     /// <summary>
@@ -122,7 +122,7 @@ public static class ModelItemNodes
     [return: NodeName("parent")]
     public static ModelItem? Parent(ModelItem item)
     {
-        return RequireItem(item).Parent;
+        return NavisValues.RequireItem(item).Parent;
     }
 
     /// <summary>The name of the model/file an item belongs to (the root of its tree).</summary>
@@ -135,7 +135,7 @@ public static class ModelItemNodes
     [return: NodeName("modelName")]
     public static string ModelName(ModelItem item)
     {
-        var current = RequireItem(item);
+        var current = NavisValues.RequireItem(item);
         while (current.Parent != null)
         {
             current = current.Parent;
@@ -154,7 +154,7 @@ public static class ModelItemNodes
     [return: NodeName("ancestors")]
     public static List<ModelItem> Ancestors(ModelItem item, bool includeSelf = false)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         return NavisValues.ToItemList(includeSelf ? modelItem.AncestorsAndSelf : modelItem.Ancestors);
     }
 
@@ -184,7 +184,7 @@ public static class ModelItemNodes
         bool includeSelf = false,
         bool caseSensitive = false)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(text))
         {
             throw new ArgumentException("No text to look for provided.", nameof(text));
@@ -249,7 +249,7 @@ public static class ModelItemNodes
         bool includeSelf = false,
         bool caseSensitive = false)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(category))
         {
             throw new ArgumentException("No property category name provided.", nameof(category));
@@ -349,7 +349,7 @@ public static class ModelItemNodes
     [return: NodeName("object")]
     public static ModelItem ObjectAncestor(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         return modelItem.FindFirstObjectAncestor() ?? modelItem;
     }
 
@@ -418,7 +418,7 @@ public static class ModelItemNodes
     [MultiReturn("className", "classDisplayName")]
     public static Dictionary<string, object?> ClassInfo(ModelItem item)
     {
-        var modelItem = RequireItem(item);
+        var modelItem = NavisValues.RequireItem(item);
         return new Dictionary<string, object?>
         {
             ["className"] = modelItem.ClassName,
@@ -435,7 +435,7 @@ public static class ModelItemNodes
     [return: NodeName("isHidden")]
     public static bool IsHidden(ModelItem item)
     {
-        return RequireItem(item).IsHidden;
+        return NavisValues.RequireItem(item).IsHidden;
     }
 
     /// <summary>The stable instance GUID of a model item.</summary>
@@ -447,7 +447,7 @@ public static class ModelItemNodes
     [return: NodeName("guid")]
     public static string InstanceGuid(ModelItem item)
     {
-        var guid = RequireItem(item).InstanceGuid;
+        var guid = NavisValues.RequireItem(item).InstanceGuid;
         return guid == Guid.Empty ? string.Empty : guid.ToString();
     }
 
@@ -484,10 +484,5 @@ public static class ModelItemNodes
         }
 
         return leaves;
-    }
-
-    private static ModelItem RequireItem(ModelItem? item)
-    {
-        return item ?? throw new ArgumentNullException(nameof(item), "No model item provided.");
     }
 }

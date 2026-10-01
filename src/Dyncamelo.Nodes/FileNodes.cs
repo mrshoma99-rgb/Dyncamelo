@@ -108,7 +108,7 @@ public static class FileNodes
                     builder.Append(separator);
                 }
 
-                builder.Append(EscapeCsvCell(FormatCell(cell), separator));
+                builder.Append(EscapeCsvCell(CellText.Format(cell), separator));
                 first = false;
             }
 
@@ -175,6 +175,7 @@ public static class FileNodes
     /// <param name="json">The JSON text to parse.</param>
     /// <returns>The parsed value (dictionary, list, number, string, boolean or null).</returns>
     [NodeName("JSON.Parse")]
+    [NodeCategory("Data")]
     [return: NodeName("value")]
     [NodeDescription("Parses a JSON string into dictionaries, lists and values.")]
     [NodeSearchTags("json", "deserialize", "decode")]
@@ -206,6 +207,7 @@ public static class FileNodes
     /// <param name="indented">True (default) for pretty-printed output.</param>
     /// <returns>The JSON text.</returns>
     [NodeName("JSON.Stringify")]
+    [NodeCategory("Data")]
     [return: NodeName("json")]
     [NodeDescription("Serializes any value to a JSON string.")]
     [NodeSearchTags("json", "serialize", "encode", "tostring")]
@@ -420,22 +422,6 @@ public static class FileNodes
 
         return text;
     }
-
-    private static string FormatCell(object? cell)
-    {
-        if (cell == null)
-        {
-            return string.Empty;
-        }
-
-        if (cell is string text)
-        {
-            return text;
-        }
-
-        return TypeCoercion.FormatValue(cell);
-    }
-
     private static string EscapeCsvCell(string cell, char separator)
     {
         bool needsQuoting = cell.IndexOf(separator) >= 0 ||

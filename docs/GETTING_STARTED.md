@@ -72,7 +72,7 @@ Every node shows its inputs on the left edge and outputs on the right. Drag from
 A few editor shortcuts worth knowing from day one:
 
 - **Space** over the canvas opens a quick node search right where your cursor is: type to filter, ↑/↓ to choose, **Enter** inserts the node at that spot, Esc closes.
-- **Hover any port** for a tooltip that says what to connect: name, type, required/optional with its default, and a description of the input (generated from the API documentation for all 314 nodes).
+- **Hover any port** for a tooltip that says what to connect: name, type, required/optional with its default, and a description of the input (generated from the API documentation for every node).
 - **Value previews** appear under each node after a run (toggle with **Preview** in the toolbar). When a preview truncates a list ("… N more"), click the bubble to expand the full scrollable list; click again to collapse. Wire an image path into a **Watch Image** node to see pictures (like the fall-hazard heat maps) inline on the canvas.
 - **Right-click a node → Find in Library** jumps to its library entry; double-click a node's title to rename it.
 - **Ctrl+L** tidies the selected nodes into left-to-right layers (also on the canvas right-click menu as **Arrange Selection**), and **Ctrl+Shift+L** does the whole graph — the fastest way to untangle a graph that grew organically. It uses the layered layout that keeps wire crossings to a minimum; if that layout is unavailable it falls back to simple columns and the status line says so.

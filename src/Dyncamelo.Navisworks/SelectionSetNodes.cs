@@ -216,7 +216,7 @@ public static class SelectionSetNodes
                 continue;
             }
 
-            var key = FormatValue(NavisValues.ToClrObject(property.Value));
+            var key = NavisValues.FormatKey(NavisValues.ToClrObject(property.Value));
             if (!variantByValue.ContainsKey(key))
             {
                 variantByValue[key] = property.Value;
@@ -245,19 +245,6 @@ public static class SelectionSetNodes
             ["selectionSets"] = storedSets,
             ["values"] = values,
         };
-    }
-
-    private static string FormatValue(object? value)
-    {
-        if (value == null)
-        {
-            return "(none)";
-        }
-
-        var text = value is IFormattable formattable
-            ? formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture)
-            : value.ToString();
-        return string.IsNullOrEmpty(text) ? "(empty)" : text!;
     }
 
     /// <summary>Adds or replaces a top-level set and returns the STORED instance.</summary>

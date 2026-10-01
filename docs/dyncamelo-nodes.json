@@ -1,6 +1,6 @@
 {
- "version": "v0.39.0",
- "count": 366,
+ "version": "v0.43.0",
+ "count": 367,
  "categories": [
   {
    "name": "Annotation",
@@ -9,6 +9,10 @@
   {
    "name": "Color",
    "count": 9
+  },
+  {
+   "name": "Data",
+   "count": 5
   },
   {
    "name": "DateTime",
@@ -20,11 +24,11 @@
   },
   {
    "name": "Display",
-   "count": 2
+   "count": 3
   },
   {
    "name": "File",
-   "count": 15
+   "count": 11
   },
   {
    "name": "Geometry",
@@ -36,7 +40,7 @@
   },
   {
    "name": "List",
-   "count": 45
+   "count": 44
   },
   {
    "name": "Logic",
@@ -48,23 +52,15 @@
   },
   {
    "name": "Navisworks.Analysis",
-   "count": 5
+   "count": 9
   },
   {
    "name": "Navisworks.Appearance",
    "count": 12
   },
   {
-   "name": "Navisworks.Application",
-   "count": 1
-  },
-  {
-   "name": "Navisworks.Audit",
-   "count": 2
-  },
-  {
    "name": "Navisworks.Camera",
-   "count": 5
+   "count": 6
   },
   {
    "name": "Navisworks.Clash",
@@ -76,15 +72,11 @@
   },
   {
    "name": "Navisworks.Document",
-   "count": 8
-  },
-  {
-   "name": "Navisworks.Exchange",
-   "count": 2
+   "count": 9
   },
   {
    "name": "Navisworks.Export",
-   "count": 12
+   "count": 14
   },
   {
    "name": "Navisworks.Grids",
@@ -119,10 +111,6 @@
    "count": 11
   },
   {
-   "name": "Navisworks.Takeoff",
-   "count": 2
-  },
-  {
    "name": "Navisworks.TimeLiner",
    "count": 7
   },
@@ -137,10 +125,6 @@
   {
    "name": "Navisworks.Viewpoints",
    "count": 22
-  },
-  {
-   "name": "Portable.ViewpointPackageFile",
-   "count": 1
   },
   {
    "name": "String",
@@ -484,6 +468,186 @@
      "name": "colors",
      "type": "Color[]",
      "description": "The colors."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "JSON.Parse",
+   "category": "Data",
+   "description": "Parses a JSON string into dictionaries, lists and values.",
+   "tags": [
+    "json",
+    "deserialize",
+    "decode"
+   ],
+   "inputs": [
+    {
+     "name": "json",
+     "type": "string",
+     "description": "The JSON text to parse."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The parsed value (dictionary, list, number, string, boolean or null)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "JSON.Stringify",
+   "category": "Data",
+   "description": "Serializes any value to a JSON string.",
+   "tags": [
+    "json",
+    "serialize",
+    "encode",
+    "tostring"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to serialize."
+    },
+    {
+     "name": "indented",
+     "type": "boolean",
+     "description": "True (default) for pretty-printed output.",
+     "default": "true"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "json",
+     "type": "string",
+     "description": "The JSON text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Snapshot.Diff",
+   "category": "Data",
+   "description": "Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality; nested dictionary key order is ignored).",
+   "tags": [
+    "compare",
+    "delta",
+    "difference",
+    "version",
+    "changes",
+    "model compare"
+   ],
+   "inputs": [
+    {
+     "name": "oldValue",
+     "type": "IDictionary",
+     "description": "The older snapshot dictionary."
+    },
+    {
+     "name": "newValue",
+     "type": "IDictionary",
+     "description": "The newer snapshot dictionary."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "addedKeys",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "removedKeys",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "changedKeys",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"addedKeys\", \"removedKeys\" and \"changedKeys\"."
+  },
+  {
+   "name": "Table.JoinByKey",
+   "category": "Data",
+   "description": "Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.",
+   "tags": [
+    "join",
+    "lookup",
+    "vlookup",
+    "merge",
+    "link",
+    "table",
+    "excel",
+    "csv"
+   ],
+   "inputs": [
+    {
+     "name": "rows",
+     "type": "any[]",
+     "description": "Table rows; each row a list of cells (e.g. from Excel.ReadFromFile)."
+    },
+    {
+     "name": "headers",
+     "type": "any[]",
+     "description": "Column headers, one per cell column."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "Keys to look up, e.g. element GUIDs or mark values."
+    },
+    {
+     "name": "keyColumn",
+     "type": "string",
+     "description": "Name of the header column holding the keys."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "matchedRows",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "unmatchedKeys",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"matchedRows\" (parallel to keys; null when unmatched) and \"unmatchedKeys\"."
+  },
+  {
+   "name": "XML.Parse",
+   "category": "Data",
+   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").",
+   "tags": [
+    "xml",
+    "parse",
+    "deserialize",
+    "decode",
+    "markup",
+    "schedule",
+    "msp",
+    "p6"
+   ],
+   "inputs": [
+    {
+     "name": "xml",
+     "type": "string",
+     "description": "The XML text to parse."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The parsed value (dictionary of dictionaries/lists/strings)."
     }
    ],
    "returns": ""
@@ -840,6 +1004,28 @@
    "interactive": true
   },
   {
+   "name": "Watch Image",
+   "category": "Display",
+   "description": "Displays the image file at the incoming path (PNG, JPG, BMP).",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "imagePath",
+     "type": "any",
+     "description": "Path of the image file to display."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "imagePath",
+     "type": "any",
+     "description": "The incoming path, passed through."
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
    "name": "Watch List",
    "category": "Display",
    "description": "Displays the elements of a list, one per line.",
@@ -1091,31 +1277,6 @@
    "returns": ""
   },
   {
-   "name": "JSON.Parse",
-   "category": "File",
-   "description": "Parses a JSON string into dictionaries, lists and values.",
-   "tags": [
-    "json",
-    "deserialize",
-    "decode"
-   ],
-   "inputs": [
-    {
-     "name": "json",
-     "type": "string",
-     "description": "The JSON text to parse."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "value",
-     "type": "any",
-     "description": "The parsed value (dictionary, list, number, string, boolean or null)."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "JSON.ReadFromFile",
    "category": "File",
    "description": "Reads a JSON file into dictionaries, lists and values.",
@@ -1136,38 +1297,6 @@
      "name": "data",
      "type": "any",
      "description": "The parsed value (dictionary, list, number, string, boolean or null)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "JSON.Stringify",
-   "category": "File",
-   "description": "Serializes any value to a JSON string.",
-   "tags": [
-    "json",
-    "serialize",
-    "encode",
-    "tostring"
-   ],
-   "inputs": [
-    {
-     "name": "value",
-     "type": "any",
-     "description": "The value to serialize."
-    },
-    {
-     "name": "indented",
-     "type": "boolean",
-     "description": "True (default) for pretty-printed output.",
-     "default": "true"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "json",
-     "type": "string",
-     "description": "The JSON text."
     }
    ],
    "returns": ""
@@ -1240,49 +1369,6 @@
    "returns": ""
   },
   {
-   "name": "Snapshot.Diff",
-   "category": "File",
-   "description": "Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality; nested dictionary key order is ignored).",
-   "tags": [
-    "compare",
-    "delta",
-    "difference",
-    "version",
-    "changes",
-    "model compare"
-   ],
-   "inputs": [
-    {
-     "name": "oldValue",
-     "type": "IDictionary",
-     "description": "The older snapshot dictionary."
-    },
-    {
-     "name": "newValue",
-     "type": "IDictionary",
-     "description": "The newer snapshot dictionary."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "addedKeys",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "removedKeys",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "changedKeys",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Dictionary with \"addedKeys\", \"removedKeys\" and \"changedKeys\"."
-  },
-  {
    "name": "Text.ReadFromFile",
    "category": "File",
    "description": "Reads the entire content of a text file.",
@@ -1335,36 +1421,6 @@
      "name": "path",
      "type": "string",
      "description": "The path that was written, for sequencing further file nodes."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "XML.Parse",
-   "category": "File",
-   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").",
-   "tags": [
-    "xml",
-    "parse",
-    "deserialize",
-    "decode",
-    "markup",
-    "schedule",
-    "msp",
-    "p6"
-   ],
-   "inputs": [
-    {
-     "name": "xml",
-     "type": "string",
-     "description": "The XML text to parse."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "value",
-     "type": "any",
-     "description": "The parsed value (dictionary of dictionaries/lists/strings)."
     }
    ],
    "returns": ""
@@ -3296,56 +3352,6 @@
    "returns": ""
   },
   {
-   "name": "Table.JoinByKey",
-   "category": "List",
-   "description": "Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.",
-   "tags": [
-    "join",
-    "lookup",
-    "vlookup",
-    "merge",
-    "link",
-    "table",
-    "excel",
-    "csv"
-   ],
-   "inputs": [
-    {
-     "name": "rows",
-     "type": "any[]",
-     "description": "Table rows; each row a list of cells (e.g. from Excel.ReadFromFile)."
-    },
-    {
-     "name": "headers",
-     "type": "any[]",
-     "description": "Column headers, one per cell column."
-    },
-    {
-     "name": "keys",
-     "type": "any[]",
-     "description": "Keys to look up, e.g. element GUIDs or mark values."
-    },
-    {
-     "name": "keyColumn",
-     "type": "string",
-     "description": "Name of the header column holding the keys."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "matchedRows",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "unmatchedKeys",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Dictionary with \"matchedRows\" (parallel to keys; null when unmatched) and \"unmatchedKeys\"."
-  },
-  {
    "name": "And",
    "category": "Logic",
    "description": "Returns true only when both inputs are true.",
@@ -4135,6 +4141,113 @@
    "returns": ""
   },
   {
+   "name": "Audit.DuplicateItems",
+   "category": "Navisworks.Analysis",
+   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.",
+   "tags": [
+    "audit",
+    "duplicate",
+    "geometry",
+    "double",
+    "export",
+    "qa"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to audit.",
+     "multiInput": true
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "Duplicate tolerance in document units.",
+     "default": "0.001"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items1",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "items2",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Index-aligned lists of duplicate pairs and the pair count."
+  },
+  {
+   "name": "Audit.MissingProperty",
+   "category": "Navisworks.Analysis",
+   "description": "Finds every item that does NOT carry the given property — the data-completeness audit. Lace over a property list to batch-audit.",
+   "tags": [
+    "audit",
+    "missing",
+    "property",
+    "qa",
+    "completeness",
+    "not defined"
+   ],
+   "inputs": [
+    {
+     "name": "categoryName",
+     "type": "string",
+     "description": "Category display name (e.g. \"Element\"). Internal names do not match."
+    },
+    {
+     "name": "propertyName",
+     "type": "string",
+     "description": "Property display name (e.g. \"Level\"). Internal names do not match."
+    },
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "Items to audit (defaults to the whole model).",
+     "default": "null"
+    },
+    {
+     "name": "geometryOnly",
+     "type": "boolean",
+     "description": "True to report only geometry-bearing items (skips containers).",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The offending items and how many there are."
+  },
+  {
    "name": "Distance.BetweenItems",
    "category": "Navisworks.Analysis",
    "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.",
@@ -4622,6 +4735,123 @@
    "returns": ""
   },
   {
+   "name": "Takeoff.SumPropertyByGroup",
+   "category": "Navisworks.Analysis",
+   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".",
+   "tags": [
+    "takeoff",
+    "qto",
+    "quantity",
+    "sum",
+    "group",
+    "rollup",
+    "pivot"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to roll up.",
+     "multiInput": true
+    },
+    {
+     "name": "groupCategoryName",
+     "type": "string",
+     "description": "Category of the grouping property (e.g. \"Element\")."
+    },
+    {
+     "name": "groupPropertyName",
+     "type": "string",
+     "description": "Grouping property (e.g. \"Level\" or \"System Type\")."
+    },
+    {
+     "name": "valueCategoryName",
+     "type": "string",
+     "description": "Category of the quantity property (e.g. \"Element\")."
+    },
+    {
+     "name": "valuePropertyName",
+     "type": "string",
+     "description": "Numeric quantity property to sum (e.g. \"Volume\", \"Length\", \"Area\")."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "keys",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "sums",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "counts",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Index-aligned group keys, per-group sums and per-group item counts."
+  },
+  {
+   "name": "Zone.AssignByVolumes",
+   "category": "Navisworks.Analysis",
+   "description": "Tags each target with the name of the zone volume containing its bounding-box center — the iConstruct Zone Tool as one node. The first zone (in list order) that contains an item wins; items inside no zone are left untouched. Written as a searchable user property tab (persists in NWF/NWD only).",
+   "tags": [
+    "zone",
+    "assign",
+    "volume",
+    "room",
+    "area",
+    "tag",
+    "spatial",
+    "contains"
+   ],
+   "inputs": [
+    {
+     "name": "zoneItems",
+     "type": "ModelItem[]",
+     "description": "The zone volume items (e.g. rooms, provisional spaces or mass elements)."
+    },
+    {
+     "name": "zoneNames",
+     "type": "string[]",
+     "description": "Zone names, index-aligned with zoneItems (null/empty falls back to each zone item's display name)."
+    },
+    {
+     "name": "targetItems",
+     "type": "ModelItem[]",
+     "description": "The items to tag."
+    },
+    {
+     "name": "tabName",
+     "type": "string",
+     "description": "User-visible property tab name the zone value is written to.",
+     "default": "\"Zones\""
+    },
+    {
+     "name": "propertyName",
+     "type": "string",
+     "description": "Property name inside the tab that carries the zone name.",
+     "default": "\"Zone\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "assignedCount",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "The target items (pass-through) and how many of them landed inside a zone."
+  },
+  {
    "name": "Appearance.ColorByValues",
    "category": "Navisworks.Appearance",
    "description": "One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.",
@@ -5067,139 +5297,6 @@
    "returns": ""
   },
   {
-   "name": "Application.Version",
-   "category": "Navisworks.Application",
-   "description": "The running Navisworks product name and API version (report headers, compatibility checks).",
-   "tags": [
-    "application",
-    "version",
-    "product",
-    "api",
-    "navisworks"
-   ],
-   "inputs": [],
-   "outputs": [
-    {
-     "name": "product",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "apiVersion",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Product name (e.g. \"Navisworks Manage 2024\") and \"major.minor\" API version."
-  },
-  {
-   "name": "Audit.DuplicateItems",
-   "category": "Navisworks.Audit",
-   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.",
-   "tags": [
-    "audit",
-    "duplicate",
-    "geometry",
-    "double",
-    "export",
-    "qa"
-   ],
-   "inputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The model items to audit.",
-     "multiInput": true
-    },
-    {
-     "name": "tolerance",
-     "type": "number",
-     "description": "Duplicate tolerance in document units.",
-     "default": "0.001"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items1",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "items2",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "count",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Index-aligned lists of duplicate pairs and the pair count."
-  },
-  {
-   "name": "Audit.MissingProperty",
-   "category": "Navisworks.Audit",
-   "description": "Finds every item that does NOT carry the given property — the data-completeness audit. Lace over a property list to batch-audit.",
-   "tags": [
-    "audit",
-    "missing",
-    "property",
-    "qa",
-    "completeness",
-    "not defined"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"Element\"). Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name (e.g. \"Level\"). Internal names do not match."
-    },
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "Items to audit (defaults to the whole model).",
-     "default": "null"
-    },
-    {
-     "name": "geometryOnly",
-     "type": "boolean",
-     "description": "True to report only geometry-bearing items (skips containers).",
-     "default": "true"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "count",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "The offending items and how many there are."
-  },
-  {
    "name": "Camera.Current",
    "category": "Navisworks.Camera",
    "description": "The current camera position, focal distance and vertical field height.",
@@ -5381,6 +5478,47 @@
      "name": "done",
      "type": "boolean",
      "description": "True when the camera was moved."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Viewpoint.SetSectionBox",
+   "category": "Navisworks.Camera",
+   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.",
+   "tags": [
+    "section",
+    "box",
+    "clip",
+    "sectioning",
+    "viewpoint",
+    "crop",
+    "isolate"
+   ],
+   "inputs": [
+    {
+     "name": "boundingBox",
+     "type": "any",
+     "description": "The box region, in document units (e.g. from ModelItem.BoundingBox or BoundingBox.ByCorners). Ignored when enabled is false."
+    },
+    {
+     "name": "enabled",
+     "type": "boolean",
+     "description": "True to section to the box, false to disable sectioning.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "done",
+     "type": "boolean",
+     "description": "True when the clip planes were applied to the current view."
     }
    ],
    "returns": ""
@@ -7590,6 +7728,32 @@
    "returns": "Index-aligned comment bodies, authors, statuses and creation dates."
   },
   {
+   "name": "Application.Version",
+   "category": "Navisworks.Document",
+   "description": "The running Navisworks product name and API version (report headers, compatibility checks).",
+   "tags": [
+    "application",
+    "version",
+    "product",
+    "api",
+    "navisworks"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "product",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "apiVersion",
+     "type": "any",
+     "description": ""
+    }
+   ],
+   "returns": "Product name (e.g. \"Navisworks Manage 2024\") and \"major.minor\" API version."
+  },
+  {
    "name": "Document.AppendFiles",
    "category": "Navisworks.Document",
    "description": "Appends design files to the document — Directory.GetFiles → Document.AppendFiles → Export.NWD is the Navisworks Batch Utility in three nodes. Cached model items from earlier runs are invalidated.",
@@ -7853,7 +8017,7 @@
   },
   {
    "name": "BCF.ExportIssues",
-   "category": "Navisworks.Exchange",
+   "category": "Navisworks.Export",
    "description": "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention.",
    "tags": [
     "bcf",
@@ -7919,7 +8083,7 @@
   },
   {
    "name": "BCF.ImportIssues",
-   "category": "Navisworks.Exchange",
+   "category": "Navisworks.Export",
    "description": "Reads a BCF 2.0/2.1 package: per topic title/status/description/comments/component GUIDs/camera, plus the model items each topic's components resolve to (matched by IFC GlobalId, then InstanceGuid). Optionally applies one topic's camera to the current view — feeds ClashResult.SetStatus and Selection.SetCurrent for the issue-sync return leg.",
    "tags": [
     "bcf",
@@ -11411,123 +11575,6 @@
    "returns": ""
   },
   {
-   "name": "Takeoff.SumPropertyByGroup",
-   "category": "Navisworks.Takeoff",
-   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".",
-   "tags": [
-    "takeoff",
-    "qto",
-    "quantity",
-    "sum",
-    "group",
-    "rollup",
-    "pivot"
-   ],
-   "inputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The model items to roll up.",
-     "multiInput": true
-    },
-    {
-     "name": "groupCategoryName",
-     "type": "string",
-     "description": "Category of the grouping property (e.g. \"Element\")."
-    },
-    {
-     "name": "groupPropertyName",
-     "type": "string",
-     "description": "Grouping property (e.g. \"Level\" or \"System Type\")."
-    },
-    {
-     "name": "valueCategoryName",
-     "type": "string",
-     "description": "Category of the quantity property (e.g. \"Element\")."
-    },
-    {
-     "name": "valuePropertyName",
-     "type": "string",
-     "description": "Numeric quantity property to sum (e.g. \"Volume\", \"Length\", \"Area\")."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "keys",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "sums",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "counts",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Index-aligned group keys, per-group sums and per-group item counts."
-  },
-  {
-   "name": "Zone.AssignByVolumes",
-   "category": "Navisworks.Takeoff",
-   "description": "Tags each target with the name of the zone volume containing its bounding-box center — the iConstruct Zone Tool as one node. The first zone (in list order) that contains an item wins; items inside no zone are left untouched. Written as a searchable user property tab (persists in NWF/NWD only).",
-   "tags": [
-    "zone",
-    "assign",
-    "volume",
-    "room",
-    "area",
-    "tag",
-    "spatial",
-    "contains"
-   ],
-   "inputs": [
-    {
-     "name": "zoneItems",
-     "type": "ModelItem[]",
-     "description": "The zone volume items (e.g. rooms, provisional spaces or mass elements)."
-    },
-    {
-     "name": "zoneNames",
-     "type": "string[]",
-     "description": "Zone names, index-aligned with zoneItems (null/empty falls back to each zone item's display name)."
-    },
-    {
-     "name": "targetItems",
-     "type": "ModelItem[]",
-     "description": "The items to tag."
-    },
-    {
-     "name": "tabName",
-     "type": "string",
-     "description": "User-visible property tab name the zone value is written to.",
-     "default": "\"Zones\""
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property name inside the tab that carries the zone name.",
-     "default": "\"Zone\""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "assignedCount",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "The target items (pass-through) and how many of them landed inside a zone."
-  },
-  {
    "name": "TimeLiner.AutoAttachByProperty",
    "category": "Navisworks.TimeLiner",
    "description": "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks.",
@@ -12563,47 +12610,6 @@
    "returns": ""
   },
   {
-   "name": "Viewpoint.SetSectionBox",
-   "category": "Navisworks.Viewpoints",
-   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.",
-   "tags": [
-    "section",
-    "box",
-    "clip",
-    "sectioning",
-    "viewpoint",
-    "crop",
-    "isolate"
-   ],
-   "inputs": [
-    {
-     "name": "boundingBox",
-     "type": "any",
-     "description": "The box region, in document units (e.g. from ModelItem.BoundingBox or BoundingBox.ByCorners). Ignored when enabled is false."
-    },
-    {
-     "name": "enabled",
-     "type": "boolean",
-     "description": "True to section to the box, false to disable sectioning.",
-     "default": "true"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "done",
-     "type": "boolean",
-     "description": "True when the clip planes were applied to the current view."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Viewpoint.VisibleItems",
    "category": "Navisworks.Viewpoints",
    "description": "Checks which of the given items a viewpoint can see (bounding box vs the camera frustum). Feed it a list of items, a selection/search set, a set name or one item; the viewpoint input accepts a saved viewpoint, a viewpoint name, or nothing for the current view. Note: this is a framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.",
@@ -12671,6 +12677,27 @@
     }
    ],
    "returns": "visibleItems / outsideItems split, a boolean mask over the input order, whether anything is visible, and a diagnostic report."
+  },
+  {
+   "name": "ViewpointPackageFile.Parse",
+   "category": "Navisworks.Viewpoints",
+   "description": "Parses a package from JSON with node-friendly errors: malformed text and files written by a newer Dyncamelo both fail with a message that says what to do, never a raw serializer stack trace.",
+   "tags": [],
+   "inputs": [
+    {
+     "name": "json",
+     "type": "string",
+     "description": ""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "ViewpointPackageFile",
+     "description": ""
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "Viewpoints.All",
@@ -13064,27 +13091,6 @@
      "name": "folder",
      "type": "FolderItem",
      "description": "The sorted folder (null when the top level was sorted)."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ViewpointPackageFile.Parse",
-   "category": "Portable.ViewpointPackageFile",
-   "description": "Parses a package from JSON with node-friendly errors: malformed text and files written by a newer Dyncamelo both fail with a message that says what to do, never a raw serializer stack trace.",
-   "tags": [],
-   "inputs": [
-    {
-     "name": "json",
-     "type": "string",
-     "description": ""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "result",
-     "type": "ViewpointPackageFile",
-     "description": ""
     }
    ],
    "returns": ""

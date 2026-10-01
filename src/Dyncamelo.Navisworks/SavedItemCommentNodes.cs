@@ -41,7 +41,7 @@ public static class SavedItemCommentNodes
         }
 
         var doc = NavisworksContext.ResolveDocument(document);
-        var commentStatus = ParseStatus(status);
+        var commentStatus = NavisValues.ParseCommentStatus(status);
         var stored = ResolveOwningPart(doc, item, out var inViewpointsTree);
 
         var comment = string.IsNullOrEmpty(author)
@@ -172,24 +172,4 @@ public static class SavedItemCommentNodes
             "Comments on clash tests/results use the ClashResult comment nodes instead.");
     }
 
-    /// <summary>Parses a status port value ("" and null mean New).</summary>
-    private static CommentStatus ParseStatus(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status))
-        {
-            return CommentStatus.New;
-        }
-
-        switch (status!.Trim().ToLowerInvariant())
-        {
-            case "new": return CommentStatus.New;
-            case "active": return CommentStatus.Active;
-            case "approved": return CommentStatus.Approved;
-            case "resolved": return CommentStatus.Resolved;
-            default:
-                throw new ArgumentException(
-                    "Unknown comment status '" + status + "'. Use \"New\", \"Active\", \"Approved\" or \"Resolved\".",
-                    nameof(status));
-        }
-    }
 }

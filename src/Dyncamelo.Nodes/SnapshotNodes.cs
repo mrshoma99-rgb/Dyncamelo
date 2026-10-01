@@ -13,7 +13,7 @@ namespace Dyncamelo.Nodes;
 /// the engine behind model-version compare and clash-delta reports
 /// (snapshot A → JSON.WriteToFile, later JSON.ReadFromFile → Snapshot.Diff).
 /// </summary>
-[NodeCategory("File")]
+[NodeCategory("Data")]
 public static class SnapshotNodes
 {
     /// <summary>
