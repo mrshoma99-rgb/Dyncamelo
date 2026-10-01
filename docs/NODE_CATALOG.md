@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**555 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**567 nodes in 47 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -14,6 +14,7 @@
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
+| [IFC](#ifc) | 2 |
 | [Input](#input) | 10 |
 | [List](#list) | 51 |
 | [List.Statistics](#liststatistics) | 12 |
@@ -32,12 +33,12 @@
 | [Navisworks.Export](#navisworksexport) | 14 |
 | [Navisworks.Grids](#navisworksgrids) | 3 |
 | [Navisworks.Markup](#navisworksmarkup) | 6 |
-| [Navisworks.Model](#navisworksmodel) | 3 |
-| [Navisworks.ModelItem](#navisworksmodelitem) | 19 |
-| [Navisworks.Properties](#navisworksproperties) | 11 |
-| [Navisworks.Search](#navisworkssearch) | 4 |
-| [Navisworks.Selection](#navisworksselection) | 7 |
-| [Navisworks.SelectionSets](#navisworksselectionsets) | 11 |
+| [Navisworks.Model](#navisworksmodel) | 5 |
+| [Navisworks.ModelItem](#navisworksmodelitem) | 20 |
+| [Navisworks.Properties](#navisworksproperties) | 13 |
+| [Navisworks.Search](#navisworkssearch) | 5 |
+| [Navisworks.Selection](#navisworksselection) | 9 |
+| [Navisworks.SelectionSets](#navisworksselectionsets) | 13 |
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 7 |
 | [Navisworks.Transform](#navisworkstransform) | 5 |
 | [Navisworks.Units](#navisworksunits) | 4 |
@@ -230,6 +231,13 @@
 | `Vector.XAxis` | — | vector | The unit vector along the X axis, (1, 0, 0) |
 | `Vector.YAxis` | — | vector | The unit vector along the Y axis, (0, 1, 0) |
 | `Vector.ZAxis` | — | vector | The unit vector along the Z axis, (0, 0, 1) |
+
+## IFC
+
+| Node | Inputs | Outputs | What it does |
+|---|---|---|---|
+| `IFC.GuidDecode` | globalId | guid | Converts a 22-character IFC GlobalId such as "0$WU4A9R19$vKWO$AdOnKA" back to a standard lower-case hyphenated GUID |
+| `IFC.GuidEncode` | guid | globalId | Converts a standard GUID such as "3f81e10a-25b0-49ff-9520-63f2a763150a" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) |
 
 ## Input
 
@@ -562,6 +570,8 @@
 |---|---|---|---|
 | `Model.Info` | model | fileName, sourceFileName, units, rootItem | The cached and original source file paths of a model, its native units (unit-mismatch audits across appended files) and its root model item |
 | `Model.Remove` | model, document? | removed | Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name) |
+| `Model.Snapshot` | items, properties | snapshot | Captures the named properties of the given items as a dictionary keyed by each item's instance GUID (items without one are keyed "path:" plus their tree path) |
+| `Model.Statistics` | items?, by?, document? | table | Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items |
 | `Models.RootItems` | document? | rootItems | The root model items of every model loaded in a document |
 
 ## Navisworks.ModelItem
@@ -580,6 +590,7 @@
 | `ModelItem.DisplayName` | item | name | The display name of a model item (falls back to its class name when unnamed) |
 | `ModelItem.GeometryLeaves` | items | leaves | Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want) |
 | `ModelItem.HasGeometry` | item | hasGeometry | True when the model item carries geometry |
+| `ModelItem.IfcGuid` | item | ifcGuid | The 22-character IFC GlobalId of an item: the value of its GlobalId / IfcGUID / IFC GUID / Guid property when it has one (as the Navisworks IFC import creates it), other… |
 | `ModelItem.InstanceGuid` | item | guid | The stable instance GUID of a model item ("" when absent) |
 | `ModelItem.IsHidden` | item | isHidden | True when the model item is currently hidden in the viewport |
 | `ModelItem.ModelName` | item | modelName | The name of the model/file an item comes from (the root of its selection tree, e.g |
@@ -595,11 +606,13 @@
 | `Properties.AsDictionary` | item | properties | Every property of an item flattened to a "Category.Property" → value dictionary (full data dump) |
 | `Properties.Categories` | item | categories | The property category names available on a model item |
 | `Properties.CustomTabs` | modelItem | tabNames | The user-defined property tabs on an item (discovery/QA before SetCustom or RemoveCustomTab) |
+| `Properties.Discover` | items, maxSamples? | table | Lists every property the given items carry, one row per category and property with how many items have it (Items), how many different values it holds (Distinct, counted… |
 | `Properties.HasProperty` | item, categoryName, propertyName | hasProperty | True when the item carries the property |
 | `Properties.InCategory` | item, categoryName | names, values | All property names and values inside one category of an item |
 | `Properties.RemoveCustomTab` | modelItems, tabName | modelItems, removedCount | Removes a user-defined property tab from items |
 | `Properties.RenameCustomTab` | modelItems, tabName, newTabName | modelItems | Renames a user-defined property tab in place (same properties, same internal name |
 | `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes a user-defined property tab onto items |
+| `Properties.ToTable` | items, properties | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
 | `Properties.Value` | item, categoryName, propertyName | value | Reads a property value from a model item, converted to a plain value |
 | `Properties.ValueAsString` | item, categoryName, propertyName | text | Reads a property value as text |
 | `Property.Info` | property | name, displayName, value | The internal name, display name and plain value of a raw data property |
@@ -608,6 +621,7 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
+| `Search.ByGuid` | guids, document? | items, missing | Finds the items whose instance GUID equals any of the given GUIDs (text, a 22-character IFC GlobalId, or GUID values) in one pass over the model |
 | `Search.ByProperty` | categoryName, propertyName, value, mode?, resolveTo?, document? | items | Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, <… |
 | `Search.HasCategory` | categoryName, resolveTo?, document? | items | Finds every model item that carries a property tab (e.g |
 | `Search.HasProperty` | categoryName, propertyName, resolveTo?, document? | items | Finds every model item that carries the property at all, regardless of value |
@@ -621,6 +635,8 @@
 | `Selection.AddToCurrent` | items, document? | items | Adds items to the existing Navisworks selection (union) and returns the result |
 | `Selection.Clear` | document? | cleared | Clears the interactive Navisworks selection |
 | `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks |
+| `Selection.Invert` | document? | items | The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each) |
+| `Selection.Remove` | items, document? | items | Takes the given items out of the current Navisworks selection and returns what is still selected |
 | `Selection.Resolve` | modelItems, level? | items | Re-selects items at another selection-tree level |
 | `Selection.SelectAll` | document? | items | Selects everything in the Navisworks UI and returns the selected items |
 | `Selection.SetCurrent` | items, document? | items | Replaces the interactive Navisworks selection with the given items |
@@ -633,6 +649,8 @@
 | `SelectionSet.Create` | name, items, document? | selectionSet | Creates a saved selection set from the given items |
 | `SelectionSet.CreateFromSearch` | name, categoryName, propertyName, value, document? | selectionSet | Creates a live SEARCH set from a property-equals rule |
 | `SelectionSet.Delete` | name, document? | deleted | Deletes a saved selection or search set by name (searches folders too) |
+| `SelectionSet.Duplicate` | selectionSet, newName?, document? | selectionSet | Duplicates a saved selection or search set in its folder (a search set stays a live search) |
+| `SelectionSet.Info` | selectionSet, document? | name, kind, itemCount, folder | What a saved set is: its name, whether it is a fixed "selection" or a live "search" set, how many items it selects right now (a search set is evaluated once to count) an… |
 | `SelectionSet.Items` | selectionSet, document? | items | The model items a saved set selects |
 | `SelectionSet.MoveToFolder` | selectionSet, folder, document? | selectionSet | Moves a saved selection or search set into a folder (appended at the end) |
 | `SelectionSet.Name` | selectionSet | name | The display name of a saved selection or search set |

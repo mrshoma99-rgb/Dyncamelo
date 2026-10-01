@@ -1,6 +1,6 @@
 {
  "version": "v0.44.0",
- "count": 555,
+ "count": 567,
  "categories": [
   {
    "name": "Annotation",
@@ -33,6 +33,10 @@
   {
    "name": "Geometry",
    "count": 43
+  },
+  {
+   "name": "IFC",
+   "count": 2
   },
   {
    "name": "Input",
@@ -108,27 +112,27 @@
   },
   {
    "name": "Navisworks.Model",
-   "count": 3
+   "count": 5
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 19
+   "count": 20
   },
   {
    "name": "Navisworks.Properties",
-   "count": 11
+   "count": 13
   },
   {
    "name": "Navisworks.Search",
-   "count": 4
+   "count": 5
   },
   {
    "name": "Navisworks.Selection",
-   "count": 7
+   "count": 9
   },
   {
    "name": "Navisworks.SelectionSets",
-   "count": 11
+   "count": 13
   },
   {
    "name": "Navisworks.TimeLiner",
@@ -4734,6 +4738,66 @@
      "name": "vector",
      "type": "Vector",
      "description": "The Z axis direction."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.GuidDecode",
+   "category": "IFC",
+   "description": "Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID.",
+   "tags": [
+    "ifc",
+    "guid",
+    "globalid",
+    "uuid",
+    "decode",
+    "expand",
+    "base64",
+    "22"
+   ],
+   "inputs": [
+    {
+     "name": "globalId",
+     "type": "string",
+     "description": "The IFC GlobalId, e.g. \"0$WU4A9R19$vKWO$AdOnKA\"."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "guid",
+     "type": "string",
+     "description": "The GUID in lower-case hyphenated form, e.g. \"3f81e10a-25b0-49ff-9520-63f2a763150a\"."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.GuidEncode",
+   "category": "IFC",
+   "description": "Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references.",
+   "tags": [
+    "ifc",
+    "guid",
+    "globalid",
+    "uuid",
+    "encode",
+    "compress",
+    "base64",
+    "22"
+   ],
+   "inputs": [
+    {
+     "name": "guid",
+     "type": "string",
+     "description": "The GUID, e.g. \"3f81e10a-25b0-49ff-9520-63f2a763150a\" (with or without hyphens or braces)."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "globalId",
+     "type": "string",
+     "description": "The IFC GlobalId, e.g. \"0$WU4A9R19$vKWO$AdOnKA\"."
     }
    ],
    "returns": ""
@@ -13781,6 +13845,93 @@
    "returns": ""
   },
   {
+   "name": "Model.Snapshot",
+   "category": "Navisworks.Model",
+   "description": "Captures the named properties of the given items as a dictionary keyed by each item's instance GUID (items without one are keyed \"path:\" plus their tree path) — the input Snapshot.Diff compares, so save one with JSON.WriteToFile now and diff it against a later run to see added, removed and changed items. Nothing in the model is changed.",
+   "tags": [
+    "snapshot",
+    "version",
+    "compare",
+    "delta",
+    "diff",
+    "baseline",
+    "history",
+    "changes",
+    "guid",
+    "properties"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to capture.",
+     "multiInput": true
+    },
+    {
+     "name": "properties",
+     "type": "any[]",
+     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "snapshot",
+     "type": "dict",
+     "description": "A dictionary from each item's instance GUID text to a dictionary of property text to value."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Model.Statistics",
+   "category": "Navisworks.Model",
+   "description": "Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item.",
+   "tags": [
+    "model",
+    "statistics",
+    "count",
+    "health",
+    "inventory",
+    "summary",
+    "items",
+    "geometry",
+    "class",
+    "layer",
+    "file",
+    "size",
+    "breakdown"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The items to count; leave empty (or unwired) to count every item of the document.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "by",
+     "type": "string",
+     "description": "What to group by: \"model\" (the file the item belongs to), \"class\" (its class name, such as Layer or Geometry) or \"layer\" (its Item > Layer property).",
+     "default": "\"model\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document); only used when no items are given.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "A table with the columns Group, Items, WithGeometry and Share (percent of all items, one decimal), the biggest group first."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Models.RootItems",
    "category": "Navisworks.Model",
    "description": "The root model items of every model loaded in a document.",
@@ -14254,6 +14405,36 @@
    "returns": ""
   },
   {
+   "name": "ModelItem.IfcGuid",
+   "category": "Navisworks.ModelItem",
+   "description": "The 22-character IFC GlobalId of an item: the value of its GlobalId / IfcGUID / IFC GUID / Guid property when it has one (as the Navisworks IFC import creates it), otherwise its InstanceGuid encoded the same way; null when it has neither. Wire a list of items to get one id per item.",
+   "tags": [
+    "ifc",
+    "guid",
+    "globalid",
+    "identity",
+    "id",
+    "bim",
+    "bcf",
+    "item"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "ifcGuid",
+     "type": "string",
+     "description": "The 22-character IFC GlobalId, or null when the item has none."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ModelItem.InstanceGuid",
    "category": "Navisworks.ModelItem",
    "description": "The stable instance GUID of a model item (\"\" when absent) — cross-run identity for reports.",
@@ -14554,6 +14735,46 @@
    "returns": ""
   },
   {
+   "name": "Properties.Discover",
+   "category": "Navisworks.Properties",
+   "description": "Lists every property the given items carry, one row per category and property with how many items have it (Items), how many different values it holds (Distinct, counted up to 10000) and the first few values (Samples) — the answer to \"what data does this model actually have?\". Reads every property of every item once, so cost grows with items times properties.",
+   "tags": [
+    "properties",
+    "discover",
+    "explore",
+    "schema",
+    "catalog",
+    "what data",
+    "categories",
+    "values",
+    "profile",
+    "audit",
+    "inventory"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to look at (their own properties only, not their children's).",
+     "multiInput": true
+    },
+    {
+     "name": "maxSamples",
+     "type": "integer",
+     "description": "How many distinct sample values to show per property (0 to 50).",
+     "default": "3"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "A table with the columns Category, Property, Items, Distinct and Samples."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Properties.HasProperty",
    "category": "Navisworks.Properties",
    "description": "True when the item carries the property — drives model-QA missing-data masks.",
@@ -14761,6 +14982,45 @@
    "returns": ""
   },
   {
+   "name": "Properties.ToTable",
+   "category": "Navisworks.Properties",
+   "description": "Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values.",
+   "tags": [
+    "properties",
+    "table",
+    "export",
+    "rows",
+    "columns",
+    "excel",
+    "csv",
+    "dataframe",
+    "report",
+    "schedule",
+    "quantities"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items, one table row each.",
+     "multiInput": true
+    },
+    {
+     "name": "properties",
+     "type": "any[]",
+     "description": "The columns: \"Category.Property\" or \"Category|Property\" (split at the first \"|\" if there is one, otherwise at the first \".\"), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "DyncameloTable",
+     "description": "A table with one column per entry of properties, headed with the text as written."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Properties.Value",
    "category": "Navisworks.Properties",
    "description": "Reads a property value from a model item, converted to a plain value. Returns null when the property is absent.",
@@ -14870,6 +15130,49 @@
     }
    ],
    "returns": "Internal name, display name, and the plain value."
+  },
+  {
+   "name": "Search.ByGuid",
+   "category": "Navisworks.Search",
+   "description": "Finds the items whose instance GUID equals any of the given GUIDs (text, a 22-character IFC GlobalId, or GUID values) in one pass over the model — not one search per GUID — and lists the GUIDs that matched nothing; walks every item of the document once (O(items)).",
+   "tags": [
+    "search",
+    "find",
+    "guid",
+    "uuid",
+    "id",
+    "instance",
+    "lookup",
+    "ifc",
+    "globalid",
+    "missing"
+   ],
+   "inputs": [
+    {
+     "name": "guids",
+     "type": "any[]",
+     "description": "The GUIDs: text such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" (or a 22-character IFC GlobalId) or GUID values."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document to search (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": ""
+    },
+    {
+     "name": "missing",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "The items found, in the order of the GUIDs, and the GUIDs that matched no item."
   },
   {
    "name": "Search.ByProperty",
@@ -15188,6 +15491,73 @@
    "returns": ""
   },
   {
+   "name": "Selection.Invert",
+   "category": "Navisworks.Selection",
+   "description": "The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each); it does not change the selection — wire it into Selection.SetCurrent to select them.",
+   "tags": [
+    "selection",
+    "invert",
+    "inverse",
+    "opposite",
+    "except",
+    "everything else",
+    "not selected",
+    "complement"
+   ],
+   "inputs": [
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "Everything except the current selection, as branch-level items (like Navisworks' own Invert Selection)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Selection.Remove",
+   "category": "Navisworks.Selection",
+   "description": "Takes the given items out of the current Navisworks selection and returns what is still selected; items that are not selected themselves (for example children of a selected parent) are ignored.",
+   "tags": [
+    "selection",
+    "remove",
+    "deselect",
+    "subtract",
+    "exclude",
+    "minus",
+    "unselect"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to deselect.",
+     "multiInput": true
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "A snapshot of the selection that remains."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Selection.Resolve",
    "category": "Navisworks.Selection",
    "description": "Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection).",
@@ -15440,6 +15810,98 @@
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "SelectionSet.Duplicate",
+   "category": "Navisworks.SelectionSets",
+   "description": "Duplicates a saved selection or search set in its folder (a search set stays a live search); the copy is named \"<name> copy\" unless newName is given. Running it again adds another copy.",
+   "tags": [
+    "selection",
+    "set",
+    "duplicate",
+    "copy",
+    "clone",
+    "backup"
+   ],
+   "inputs": [
+    {
+     "name": "selectionSet",
+     "type": "SelectionSet",
+     "description": "The set to copy."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "Name for the copy (empty uses \"<name> copy\").",
+     "default": "\"\""
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "selectionSet",
+     "type": "SelectionSet",
+     "description": "The new stored set."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SelectionSet.Info",
+   "category": "Navisworks.SelectionSets",
+   "description": "What a saved set is: its name, whether it is a fixed \"selection\" or a live \"search\" set, how many items it selects right now (a search set is evaluated once to count) and its folder path (\"\" at the top level).",
+   "tags": [
+    "selection",
+    "set",
+    "info",
+    "kind",
+    "count",
+    "size",
+    "folder",
+    "search set",
+    "audit"
+   ],
+   "inputs": [
+    {
+     "name": "selectionSet",
+     "type": "SelectionSet",
+     "description": "The selection or search set."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "kind",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "itemCount",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "folder",
+     "type": "string",
+     "description": ""
+    }
+   ],
+   "returns": "The set's name, its kind (\"selection\" or \"search\"), how many items it selects and its folder path."
   },
   {
    "name": "SelectionSet.Items",
