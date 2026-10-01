@@ -36,7 +36,8 @@ public class MultiOutputKindsTests
                     continue;
                 }
 
-                var text = File.ReadAllText(file);
+                // A Windows checkout has CRLF line endings; the block logic below looks for blank lines.
+                var text = File.ReadAllText(file).Replace("\r\n", "\n");
                 foreach (Match match in MultiReturn.Matches(text))
                 {
                     // The attributes of the same method: the lines around [MultiReturn] up to the method itself.

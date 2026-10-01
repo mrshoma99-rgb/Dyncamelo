@@ -34,7 +34,7 @@ public class RetiredNodesTests
                     continue;
                 }
 
-                foreach (Match match in Retired.Matches(File.ReadAllText(file)))
+                foreach (Match match in Retired.Matches(File.ReadAllText(file).Replace("\r\n", "\n")))
                 {
                     found.Add((match.Groups["name"].Value, match.Groups["replacement"].Value, Path.GetFileName(file)));
                 }
