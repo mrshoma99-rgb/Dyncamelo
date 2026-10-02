@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using Dyncamelo.Core.Execution;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Types;
 using Dyncamelo.Nodes.Internal;
 using Newtonsoft.Json.Linq;
@@ -98,6 +99,7 @@ public class WatchTableNode : NodeModel, Dyncamelo.Core.Player.IPlayerOutputNode
 
     /// <summary>Turns whatever arrives into a table to draw.</summary>
     /// <param name="value">A table, a list of rows, a list of dictionaries, or any other value.</param>
+    [IsVisibleInLibrary(false)]
     public static DyncameloTable ToTable(object? value)
     {
         switch (value)

@@ -1,6 +1,6 @@
 {
  "version": "v0.45.1",
- "count": 580,
+ "count": 579,
  "categories": [
   {
    "name": "Annotation",
@@ -176,10 +176,6 @@
   },
   {
    "name": "Utility",
-   "count": 1
-  },
-  {
-   "name": "WatchTableNode",
    "count": 1
   },
   {
@@ -20948,27 +20944,6 @@
    ],
    "returns": "",
    "interactive": true
-  },
-  {
-   "name": "WatchTableNode.ToTable",
-   "category": "WatchTableNode",
-   "description": "Turns whatever arrives into a table to draw.",
-   "tags": [],
-   "inputs": [
-    {
-     "name": "value",
-     "type": "any",
-     "description": "A table, a list of rows, a list of dictionaries, or any other value."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "result",
-     "type": "DyncameloTable",
-     "description": ""
-    }
-   ],
-   "returns": ""
   },
   {
    "name": "Flow.Then",

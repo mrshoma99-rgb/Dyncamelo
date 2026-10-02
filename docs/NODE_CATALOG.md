@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
 
-**580 nodes in 47 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -50,7 +50,6 @@
 | [System](#system) | 5 |
 | [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
-| [WatchTableNode](#watchtablenode) | 1 |
 | [Workflow](#workflow) | 7 |
 | [Workflow.Actions](#workflowactions) | 9 |
 
@@ -836,12 +835,6 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Reroute` *(interactive)* | in | out | A wire waypoint that passes its value through unchanged |
-
-## WatchTableNode
-
-| Node | Inputs | Outputs | What it does |
-|---|---|---|---|
-| `WatchTableNode.ToTable` | value | result | Turns whatever arrives into a table to draw |
 
 ## Workflow
 
