@@ -17,6 +17,14 @@ name: release
 # dist/Dyncamelo.bundle supplies the template pieces (PackageContents.xml,
 # en-US ribbon layout, icons) and dist/ supplies install-dyncamelo.bat and the
 # bundle README. Committed DLLs under dist/ are never shipped.
+#
+# Before anything is published the installer is smoke-tested on the runner (tools/smoke-test-installer.ps1:
+# silent install, byte-for-byte payload check, upgrade over the top, uninstall). Dyncamelo's own DLLs and the installer are
+# signed when the secrets SIGNING_PFX_BASE64 and SIGNING_PFX_PASSWORD hold a code-signing certificate (tools/sign-files.ps1);
+# without them the release is unsigned, as before.
+#
+# A dry run (Actions -> release -> Run workflow, tick "dry_run") does all of it for the version in dist/RELEASE_VERSION and
+# publishes nothing, so the pipeline can be tested without making a release.
 
 on:
   push:
@@ -25,8 +33,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version tag (e.g. v0.2.0)"
-        required: true
+        description: "Release version tag (e.g. v0.2.0); leave empty to use dist/RELEASE_VERSION"
+        required: false
+      dry_run:
+        description: "Build, sign (self-signed) and smoke-test everything, publish nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -46,16 +58,25 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_VERSION: ${{ inputs.version }}
+          INPUT_DRYRUN: ${{ inputs.dry_run }}
         run: |
-          $version = if ($env:INPUT_VERSION) { $env:INPUT_VERSION.Trim() } else { (Get-Content dist/RELEASE_VERSION -Raw).Trim() }
+          $dry = ($env:INPUT_DRYRUN -eq 'true')
+          # A dry run always uses the version in the repository, so the assemblies (built with Directory.Build.props) match it.
+          $version = if ($env:INPUT_VERSION -and -not $dry) { $env:INPUT_VERSION.Trim() } else { (Get-Content dist/RELEASE_VERSION -Raw).Trim() }
           if ($version -notmatch '^v\d+\.\d+\.\d+$') {
             Write-Host "::error::'$version' is not a valid version tag (expected v<major>.<minor>.<patch>)"
             exit 1
           }
-          gh release view $version --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $version already exists — nothing to do."
-            Add-Content -Path $env:GITHUB_ENV -Value "SKIP=true"
+          if ($dry) {
+            Write-Host "Dry run for $version: nothing will be published."
+            Add-Content -Path $env:GITHUB_ENV -Value "DRYRUN=true"
+          }
+          else {
+            gh release view $version --repo $env:GITHUB_REPOSITORY *> $null
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Release $version already exists — nothing to do."
+              Add-Content -Path $env:GITHUB_ENV -Value "SKIP=true"
+            }
           }
           Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$version"
           exit 0
@@ -144,6 +165,17 @@ jobs:
           Copy-Item "THIRD-PARTY-NOTICES.md"     -Destination $staging
           Copy-Item "LICENSE"                    -Destination $staging
 
+      - name: Sign Dyncamelo assemblies (when a certificate is configured)
+        if: env.SKIP != 'true'
+        env:
+          PFX_BASE64: ${{ secrets.SIGNING_PFX_BASE64 }}
+          PFX_PASSWORD: ${{ secrets.SIGNING_PFX_PASSWORD }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $own = @(Get-ChildItem "staging/Dyncamelo.bundle" -Recurse -Filter 'Dyncamelo.*.dll' | ForEach-Object { $_.FullName })
+          if ($own.Count -lt 15) { throw "Expected Dyncamelo's own DLLs in three year folders, found $($own.Count)." }
+          if ($env:DRYRUN -eq 'true') { ./tools/sign-files.ps1 -Path $own -AllowSelfSigned } else { ./tools/sign-files.ps1 -Path $own }
+
       - name: Build graphical installer (DyncameloSetup.exe)
         if: env.SKIP != 'true'
         run: |
@@ -179,6 +211,24 @@ jobs:
           # sibling Dyncamelo.bundle folder when run without a payload.
           Copy-Item "installer-out/DyncameloSetup.exe" "staging/DyncameloSetup.exe"
 
+      - name: Sign the installer (when a certificate is configured)
+        if: env.SKIP != 'true'
+        env:
+          PFX_BASE64: ${{ secrets.SIGNING_PFX_BASE64 }}
+          PFX_PASSWORD: ${{ secrets.SIGNING_PFX_PASSWORD }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:DRYRUN -eq 'true') { ./tools/sign-files.ps1 -Path (Resolve-Path DyncameloSetup.exe).Path -AllowSelfSigned } else { ./tools/sign-files.ps1 -Path (Resolve-Path DyncameloSetup.exe).Path }
+          # The zip distribution carries the same (now signed) exe.
+          Copy-Item "DyncameloSetup.exe" "staging/DyncameloSetup.exe" -Force
+
+      - name: Smoke-test the installer (install, upgrade over the top, uninstall)
+        if: env.SKIP != 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # A self-signed dry-run signature is not trusted, so only a real certificate is checked for validity.
+          ./tools/smoke-test-installer.ps1 -Installer DyncameloSetup.exe -StagedBundle staging/Dyncamelo.bundle -Version $env:VERSION
+
       - name: Package bundle zip
         if: env.SKIP != 'true'
         run: |
@@ -195,7 +245,7 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "ZIP=$zip"
 
       - name: Create GitHub release
-        if: env.SKIP != 'true'
+        if: env.SKIP != 'true' && env.DRYRUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -240,8 +290,20 @@ jobs:
       # Always expose the latest release zip as a workflow artifact (even when
       # the release already existed and packaging was skipped) so tooling can
       # relay it to the public dyncamelo-releases repo without extra tokens.
+      - name: Keep the dry-run output
+        if: env.DRYRUN == 'true' && always()
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: dry-run-release
+          path: |
+            DyncameloSetup.exe
+            Dyncamelo-*-navisworks.zip
+            *.sha256
+          retention-days: 3
+
       - name: Expose latest release zip as artifact
-        if: always() && env.VERSION != ''
+        if: always() && env.VERSION != '' && env.DRYRUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -250,7 +312,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { Write-Host "No release to relay" }
           exit 0
       - uses: actions/upload-artifact@v4
-        if: always() && env.VERSION != ''
+        if: always() && env.VERSION != '' && env.DRYRUN != 'true'
         continue-on-error: true
         with:
           name: release-zip
@@ -264,7 +326,7 @@ jobs:
       # fine-grained PAT with contents:write on mrshoma99-rgb/bimcamel is
       # stored as the SITE_REPO_TOKEN secret; without the secret it skips.
       - name: Update website download asset (bimcamel repo)
-        if: always() && env.VERSION != ''
+        if: always() && env.VERSION != '' && env.DRYRUN != 'true'
         env:
           SITETOKEN: ${{ secrets.SITE_REPO_TOKEN }}
         run: |

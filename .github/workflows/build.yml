@@ -39,7 +39,20 @@ jobs:
       # (wire anchors, collapse, overview zoom, classic layout, reroutes).
       - name: Test Dyncamelo.UI.Tests
         # --blame-hang names the test that hangs (a stuck WPF dispatcher would otherwise hold the job for hours).
+        # The screenshot folder makes EditorScreenshotTests render the editor to PNG files (kept as a build artifact).
+        env:
+          DYNCAMELO_SCREENSHOT_DIR: ${{ github.workspace }}\screenshots
         run: dotnet test tests/Dyncamelo.UI.Tests/Dyncamelo.UI.Tests.csproj -c Release --no-build --verbosity normal --blame-hang-timeout 4m --blame-hang-dump-type none
+
+      - name: Keep the editor screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: editor-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
 
   linux:
     name: Linux (non-WPF projects)
