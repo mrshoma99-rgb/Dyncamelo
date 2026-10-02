@@ -89,8 +89,6 @@ Size: PNG, at most 2000 x 2000 pixels and 20 MB each. The pictures made by the b
 | 9 | Settings | Settings for appearance, canvas, editing, shortcuts and privacy | `settings.png` |
 | 10 | The light theme | A light and a dark theme | `editor-light.png` |
 
-Put 1 and 2 first: they are what a customer looks at first, and until you have them the listing is weaker than it could be.
-
 ## Quick start (the form builds the help page from these fields)
 
 The package already contains the finished page, `Contents/Resources/Help/index.html`; if the form asks for the same content as separate fields, use these.
@@ -115,4 +113,4 @@ Use the entry for the version in `CHANGELOG.md`; the form asks for a version num
 
 Autodesk gives every store app its standard end-user licence agreement; you do not need your own, and the FAQ says not to add terms that conflict with it. Dyncamelo's own licence (PolyForm Noncommercial 1.0.0, in `LICENSE`) is shipped in the package under `Contents/Resources` and stated in the description above, because the FAQ asks for extra conditions to be written in the description or the help file.
 
-**This is the most likely thing to be questioned.** The store's EULA is written for customers who use apps in their work; a listing that is free but forbids commercial use can read as misleading to the reviewer and to the many Navisworks users who work for companies. Ask appsubmissions@autodesk.com **before** submitting whether a free listing with a noncommercial licence is accepted. If it is not, the choices are a paid listing for commercial users (the store supports paid apps through PayPal; you set the price), or a store build under a licence that allows commercial use. See `appstore/README.md`.
+Whether a free listing with a noncommercial licence is accepted next to the standard EULA is for Autodesk to say; the publisher asks before submitting.

@@ -6,7 +6,7 @@
 [![Release](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml)
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
-[![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
+[![Releases: source code](https://img.shields.io/badge/releases-source%20code-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
 > ## Part of CamelWorks
 > Dyncamelo ships inside **[CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin)**,
@@ -30,6 +30,8 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 *The editor with the "Table Summary from Text" sample after a run: nodes, wires, the values under each node and a Watch Table. The same editor has a [light theme](docs/images/editor-screenshot-light.png). It docks inside Navisworks as a pane.*
 
+More pictures: [light theme](docs/images/editor-screenshot-light.png) · [quick node search](docs/images/quick-search.png) · [command palette](docs/images/command-palette.png) · [keyboard and mouse sheet](docs/images/shortcuts.png) · [settings](docs/images/settings.png) · [Script Player](docs/images/player.png)
+
 ---
 
 ## What's new in v0.12–v0.23 — site safety & spatial analysis
@@ -42,7 +44,7 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 - **Editor quality of life** — Space-bar quick node search at the cursor, port tooltips generated from the API docs on all **314 nodes**, an inline **Watch Image** node for the analysis PNGs, an index gutter on Watch List, click-to-expand preview bubbles, a proper Boolean switch, and Create/Modify/Info grouping with symbols throughout the library.
 - **BIMCamel ribbon tab** — Dyncamelo, Player and About buttons, a unified About window, and an update check when the editor opens.
 
-The newest release is 0.45.1 ([a fix for picking from the node library](docs/WHATS_NEW_0.45.1.md)); 0.45 (tables, conditional flow, about 220 new nodes) is described in [docs/WHATS_NEW_0.45.md](docs/WHATS_NEW_0.45.md), with role-by-role [recipes](docs/RECIPES.md). Full details of the 0.23 wave in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
+The newest release is 0.46.0 (source code only; a new licence, a question before running graphs from files, Help > Run Self-Test, Copy Diagnostics and Privacy Policy: see [CHANGELOG.md](CHANGELOG.md)); 0.45.1 was [a fix for picking from the node library](docs/WHATS_NEW_0.45.1.md); 0.45 (tables, conditional flow, about 220 new nodes) is described in [docs/WHATS_NEW_0.45.md](docs/WHATS_NEW_0.45.md), with role-by-role [recipes](docs/RECIPES.md). Full details of the 0.23 wave in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
 
 ## Features
 
@@ -101,11 +103,9 @@ graph TD
 - **To run:** Autodesk Navisworks Manage or Simulate **2024, 2025, or 2026** on Windows.
 - **To build:** Windows 10/11 with **Visual Studio 2022** (with ".NET desktop development" workload) or the **.NET 8 SDK**. No Navisworks installation is needed to build — the Navisworks API is referenced through compile-time-only NuGet packages.
 
-## Install (recommended)
+## Install
 
-Download **[`DyncameloSetup.exe`](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)** from the latest release and run it. The graphical installer places the bundle in `%APPDATA%\Autodesk\ApplicationPlugins` (per-user, no admin rights) and registers an Add/Remove Programs entry. If Windows SmartScreen appears (unsigned download), choose **More info → Run anyway**. Start Navisworks 2024/2025/2026 and open **Dyncamelo** from the **BIMCamel** ribbon tab.
-
-Silent install/uninstall: `DyncameloSetup.exe /silent` and `DyncameloSetup.exe /uninstall /silent`.
+GitHub releases carry the **source code only** at the moment: there is no installer and no ready-to-install bundle to download. To use Dyncamelo, build it from source (next section). A Debug build of the solution puts the whole bundle in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` for you (see [`dist/README.md`](dist/README.md)); start Navisworks 2024, 2025 or 2026 and open **Dyncamelo** from the **BIMCamel** ribbon tab. If Navisworks reports `PLUGIN_LOAD_02`, see [Troubleshooting](docs/TROUBLESHOOTING.md).
 
 **Licence.** In plain words: Dyncamelo is free for personal use and other noncommercial use (hobby, learning, research, charities, schools, public bodies). Using it for work at a company, or in a paid project or product, needs a commercial licence from BIMCamel. The text of [LICENSE](LICENSE) is what counts; this is a summary, not legal advice. If you are not sure whether your use is commercial, ask BIMCamel before you rely on it. The third-party parts keep their own licences ([THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
@@ -139,7 +139,7 @@ Or open `Dyncamelo.sln` in Visual Studio 2022 and build the `Release` configurat
 > ```
 > See [samples/README.md](samples/README.md) for the bundled example graphs.
 
-To run a source build in Navisworks without the installer, use the application-bundle layout under `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` (see [`dist/README.md`](dist/README.md)); the released `DyncameloSetup.exe` sets this up for you.
+To run a source build in Navisworks, use the application-bundle layout under `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` (see [`dist/README.md`](dist/README.md)); a Debug build sets it up for you.
 
 ## Your first graph
 

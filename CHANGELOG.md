@@ -2,18 +2,24 @@
 
 All notable changes to Dyncamelo are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
 
-Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
+Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.46.0](dist/RELEASE_NOTES.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
 
 ## Unreleased
+
+Nothing yet.
+
+## 0.46.0 - 2026-10-02
+
+A source-code release: GitHub carries no installer or bundle for this version.
 
 ### Added
 * **Help > Run Self-Test** runs 29 read-only checks on the Navisworks nodes against the open model (application and document, saved items, the model, model items, properties) and shows pass, fail or skip for each, with the node's own error. The report goes to the clipboard. It cannot change anything: it only uses nodes on a reviewed read-only list.
 * **Help > Copy Diagnostics** copies the Dyncamelo and Navisworks versions, the installed Autodesk plug-in bundles, which copies of Nodify and Newtonsoft.Json are loaded and from where, and the end of `errors.log`. The user name, computer name and profile folder are replaced, so it is safe to post in an issue.
 * **A question before a graph from a file runs** nodes that run programs, use the network, or delete, move or overwrite files. It is asked once per file and again only if the file changes. A graph saved with run mode Automatic is no longer run when it is opened from a file; the status bar says so. Graphs made in the editor and the built-in samples never ask. A new setting, **Ask before running graphs from files**, turns it off. Nodes declare what they do with the new `[NodeEffects]` attribute; nine library nodes do.
 * **Help > Privacy Policy** shows the privacy policy (`PRIVACY.md`, embedded in the app), and **Settings > Privacy > Check for a newer version once a day** switches the only network request Dyncamelo makes off.
-* Files for an Autodesk App Store listing in `appstore/` and a package builder, `tools/build_store_package.py`, which the release workflow runs and keeps as a build artifact (it is not published). A copy installed from the store never checks GitHub for updates.
+* Files for an Autodesk App Store listing in `appstore/` and a package builder, `tools/build_store_package.py`, which the release workflow runs only when asked (`[store]` in the commit message) and keeps as a build artifact (it is never published). A copy installed from the store never checks GitHub for updates.
 * Documents: [SECURITY.md](SECURITY.md), this changelog, [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md), [docs/QA_CHECKLIST.md](docs/QA_CHECKLIST.md), issue forms and a pull request template.
 
 ### Fixed

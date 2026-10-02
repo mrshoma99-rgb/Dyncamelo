@@ -7,7 +7,7 @@ This guide takes you from a fresh Navisworks installation to your first working 
 ## 1. What you need
 
 - Autodesk **Navisworks Manage or Simulate 2024, 2025 or 2026** (Windows).
-- The Dyncamelo plugin files — either a [release zip](https://github.com/mrshoma99-rgb/dyncamelo/releases) or your own build (see the [README](../README.md#quick-start)).
+- The Dyncamelo plugin files: your own build of the source (see the [README](../README.md#build-from-source-windows)). GitHub releases carry the source code only at the moment.
 - Any model to play with (`.nwd`, `.nwf`, or an appended `.rvt`/`.ifc`/`.dwg`).
 
 ## 2. Install

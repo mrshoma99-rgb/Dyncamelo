@@ -2,6 +2,8 @@
 
 Find the symptom, read the cause, try the fix. If nothing here helps, [collect diagnostics](#how-to-collect-diagnostics) and open an issue with the bug report form.
 
+GitHub releases carry the source code only at the moment, so where this page mentions `DyncameloSetup.exe` it means an installer you built yourself or got elsewhere; a Debug build of the solution puts the bundle in the right folder for you.
+
 Everything below comes from the Dyncamelo source and docs. Where a behaviour has **not** been seen inside a real Navisworks yet, the text says so. See [Known issues](#known-issues).
 
 ## Symptoms
@@ -191,13 +193,13 @@ Uninstalling removes the bundle folder and the Apps entry. It **leaves** your `.
 
 These are open at the time of writing. Items marked *not yet verified* have not been seen inside a real Navisworks.
 
-* **Color Picker.** A report of Navisworks closing while using the Color Picker node has **not been confirmed fixed in v0.45.1** (that release fixed a different crash, in the node library). If it happens to you, please send `errors.log`. A workaround that avoids the node: wire a **String** node holding a hex colour such as `#FF0000` into the colour input, as the sample *Clash Group Viewpoints per Test* does.
+* **Color Picker.** A report of Navisworks closing while using the Color Picker node has **not been confirmed fixed in v0.45.1 or v0.46.0** (that release fixed a different crash, in the node library). If it happens to you, please send `errors.log`. A workaround that avoids the node: wire a **String** node holding a hex colour such as `#FF0000` into the colour input, as the sample *Clash Group Viewpoints per Test* does.
 * **Performance report shortcut.** `Ctrl+Shift+F12` (the Performance HUD and its **Copy report** button) is not yet verified in Navisworks. If nothing happens, use **View > Performance HUD** or the command palette (`Ctrl+Shift+P`).
 * **Navisworks nodes have never been run automatically.** Nothing can run the Navisworks API outside Navisworks, so these nodes are compiled and their logic is unit-tested, but their behaviour in Navisworks is checked only by hand. The nodes added in 0.45 are the least tried; the list to try first is under "For the Navisworks side" in [WHATS_NEW_0.45.md](WHATS_NEW_0.45.md#for-the-navisworks-side).
 * **Only Navisworks Manage 2024 has been observed in the field.** The 2025 and 2026 builds, and Simulate, are built and installed the same way but have not been seen running.
 * **Undo in Navisworks.** The editor's own Undo (`Ctrl+Z` while the pane has focus) changes the graph only, and says so. Whether one Navisworks **Undo** reverses a whole run is **unknown**: node descriptions call permanent overrides undoable, but the source has no code that groups a run into one undo step. Do not rely on it; save the model first.
-* **Automatic run on open.** A graph saved with run mode Automatic starts running when you open it. Release 1.0 adds a warning before running a graph opened from a file that contains nodes that run programs, use the network, or delete or move files ([SECURITY.md](../SECURITY.md)).
-* **Unsigned installer.** `DyncameloSetup.exe` is not code-signed. Windows SmartScreen shows a warning; choose **More info**, then **Run anyway**.
+* **Automatic run on open.** A graph saved with run mode Automatic is **not** run when you open it from a file: the status bar says so, and nothing runs until you press Run. Before Run, a graph from a file that contains nodes that run programs, use the network, or delete or move files lists them and asks once ([SECURITY.md](../SECURITY.md)).
+* **Unsigned installer.** An installer built from this source is not code-signed unless you configure a certificate (see the release workflow). Windows SmartScreen shows a warning for it; choose **More info**, then **Run anyway**.
 
 ## Still stuck?
 
