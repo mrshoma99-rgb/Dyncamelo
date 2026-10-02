@@ -1,0 +1,512 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.9.1"
+  },
+  "Uuid": "7bafad4095c742bbae439749390d90fc",
+  "Name": "Spotlight Viewpoints per Item",
+  "Description": "For every found item, in order: ghost the rest, highlight it, frame it, and save a viewpoint with the highlight baked in (each view keeps its own colors). Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "d9f27722d9f44b8fb2d61f914fe32e2f",
+      "NodeType": "StringInput",
+      "Name": "Category",
+      "X": -160.0,
+      "Y": -150.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "468053535ba54850b663c094d98137cd",
+      "NodeType": "StringInput",
+      "Name": "Property",
+      "X": -160.0,
+      "Y": -30.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Type"
+      }
+    },
+    {
+      "Id": "5f785c1da530438ab169ea7541dcbec3",
+      "NodeType": "StringInput",
+      "Name": "Value",
+      "X": -160.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "3D Solid"
+      }
+    },
+    {
+      "Id": "e92b745a7464445c8479ae94df24206f",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyValue@string,string,object,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyValue",
+      "X": 150.0,
+      "Y": -30.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e4057c2a03e249ca8a7515394173c4f2",
+      "NodeType": "ColorPicker",
+      "Name": "Highlight color",
+      "X": 150.0,
+      "Y": 250.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "color"
+        }
+      ],
+      "Data": {
+        "A": 255,
+        "R": 220,
+        "G": 30,
+        "B": 30
+      }
+    },
+    {
+      "Id": "cb420740be844b3598232f3fad9e03b4",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.ResetTemporaryAppearance",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.ResetTemporaryAppearance",
+      "X": 560.0,
+      "Y": -230.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "cfbad14c353b423199f46834d3e58c51",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.Ghost@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.Ghost",
+      "X": 560.0,
+      "Y": -110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "transparency",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "78fe9fab8772463cb0b05f85e8fe4ce1",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.Highlight@object,double",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.Highlight",
+      "X": 560.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "color",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "transparency",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "2dcdafca09924fd1a41e907c10ce490c",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.ZoomTo@double",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.ZoomTo",
+      "X": 560.0,
+      "Y": 190.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "paddingFactor",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "7030836a5e2548f292fa30aae48f74c4",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.SaveViewpoint",
+      "X": 560.0,
+      "Y": 310.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "name",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "folder",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "bakeOverrides",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "c1f6a8ca24b242e28a86a7afde676a26",
+      "NodeType": "ListCreate",
+      "Name": "List.Create",
+      "X": 880.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item0",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item1",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item2",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item3",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item4",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ItemCount": 5
+      }
+    },
+    {
+      "Id": "b9bbcd6cd8224eceb7ab4525f4920819",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Workflow.ForEach",
+      "X": 1160.0,
+      "Y": 20.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "actions",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e1b9774fa47445cf9b1f17c96ee14023",
+      "NodeType": "Watch",
+      "Name": "Viewpoints created",
+      "X": 1440.0,
+      "Y": 20.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "a9cedca5ae9a4740b6e9bfe360599ad9",
+      "FromNode": "d9f27722d9f44b8fb2d61f914fe32e2f",
+      "FromPort": "value",
+      "ToNode": "e92b745a7464445c8479ae94df24206f",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "31d8562c0c1441948e16df2a8ccf8f0c",
+      "FromNode": "468053535ba54850b663c094d98137cd",
+      "FromPort": "value",
+      "ToNode": "e92b745a7464445c8479ae94df24206f",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "c9a13ac7efd241e5a29ec26f82db8f02",
+      "FromNode": "5f785c1da530438ab169ea7541dcbec3",
+      "FromPort": "value",
+      "ToNode": "e92b745a7464445c8479ae94df24206f",
+      "ToPort": "value"
+    },
+    {
+      "Id": "d907be9e7c2f463e966d581dc58e0af6",
+      "FromNode": "e4057c2a03e249ca8a7515394173c4f2",
+      "FromPort": "color",
+      "ToNode": "78fe9fab8772463cb0b05f85e8fe4ce1",
+      "ToPort": "color"
+    },
+    {
+      "Id": "9b0c107e777a455e9e9d188ae9eb79a9",
+      "FromNode": "cfbad14c353b423199f46834d3e58c51",
+      "FromPort": "action",
+      "ToNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "ToPort": "item1"
+    },
+    {
+      "Id": "5885f1abd0974ea0a58cef720cd40c9a",
+      "FromNode": "cb420740be844b3598232f3fad9e03b4",
+      "FromPort": "action",
+      "ToNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "ToPort": "item0"
+    },
+    {
+      "Id": "1c81975224524bf0a9a01aca91382a71",
+      "FromNode": "78fe9fab8772463cb0b05f85e8fe4ce1",
+      "FromPort": "action",
+      "ToNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "ToPort": "item2"
+    },
+    {
+      "Id": "8de32872836c40b2a36a4dce74e3d841",
+      "FromNode": "2dcdafca09924fd1a41e907c10ce490c",
+      "FromPort": "action",
+      "ToNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "ToPort": "item3"
+    },
+    {
+      "Id": "8a1c926a63f64fb29957f1604c0d97ee",
+      "FromNode": "7030836a5e2548f292fa30aae48f74c4",
+      "FromPort": "action",
+      "ToNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "ToPort": "item4"
+    },
+    {
+      "Id": "d29f80e2825f41caa45b7552200633ab",
+      "FromNode": "c1f6a8ca24b242e28a86a7afde676a26",
+      "FromPort": "list",
+      "ToNode": "b9bbcd6cd8224eceb7ab4525f4920819",
+      "ToPort": "actions"
+    },
+    {
+      "Id": "10d9ddc03bd845da8cbcbfbe0509e46a",
+      "FromNode": "b9bbcd6cd8224eceb7ab4525f4920819",
+      "FromPort": "results",
+      "ToNode": "e1b9774fa47445cf9b1f17c96ee14023",
+      "ToPort": "value"
+    },
+    {
+      "Id": "ad097f2d0e09452289d29b26d650a714",
+      "FromNode": "e92b745a7464445c8479ae94df24206f",
+      "FromPort": "items",
+      "ToNode": "b9bbcd6cd8224eceb7ab4525f4920819",
+      "ToPort": "items"
+    },
+    {
+      "Id": "b1e59b1fadeb4fa7839543a95d757ff4",
+      "FromNode": "e92b745a7464445c8479ae94df24206f",
+      "FromPort": "items",
+      "ToNode": "cfbad14c353b423199f46834d3e58c51",
+      "ToPort": "items"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "4d794eb2cfa24230ac6763334db64f27",
+      "Text": "Each viewpoint stores its OWN temporary color/transparency (via Action.SaveViewpoint -> CaptureRuntimeOverrides), so recalling one restores that exact spotlight. Uses TEMPORARY overrides (not the global permanent Appearance.OverrideColor), which is what viewpoints can bake in. Order in List.Create = the per-item sequence.",
+      "X": 560,
+      "Y": 460
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

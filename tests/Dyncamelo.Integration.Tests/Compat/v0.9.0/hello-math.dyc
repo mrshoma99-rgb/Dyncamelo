@@ -1,0 +1,252 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.1.0"
+  },
+  "Uuid": "0a2a394817d54513b25d8227df0c276b",
+  "Name": "Hello Math",
+  "Description": "A slider and two number literals flowing through Add, Multiply and Round into a Watch node.",
+  "Nodes": [
+    {
+      "Id": "87f2edf24260443e8b425c966dbe2b32",
+      "NodeType": "NumberSlider",
+      "Name": "Length",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 12.5,
+        "Min": 0.0,
+        "Max": 100.0,
+        "Step": 0.5
+      }
+    },
+    {
+      "Id": "c8f63e7dc5e2409a94814bd5db502650",
+      "NodeType": "NumberInput",
+      "Name": "Offset",
+      "X": 0.0,
+      "Y": 180.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 30.0
+      }
+    },
+    {
+      "Id": "85741b3bcb3a405ab793373035d40e45",
+      "NodeType": "NumberInput",
+      "Name": "Factor",
+      "X": 320.0,
+      "Y": 180.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 2.0
+      }
+    },
+    {
+      "Id": "302e585a9d0b4bcbad82074b40ddacdc",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Add@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Add",
+      "X": 320.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e75dbcdb23bc4428b8bbf132deb76d7a",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Multiply@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Multiply",
+      "X": 620.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "a",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "b",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "5cf8b3c0dfaa43589a636ff8f3ef1912",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Round@double,int",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Math.Round",
+      "X": 900.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "number",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "digits",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "ab78d28c5818456c9ed5f0ff49914019",
+      "NodeType": "Watch",
+      "Name": "Result",
+      "X": 1160.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "60fd957fc3474b58b61aae1357a4401b",
+      "FromNode": "87f2edf24260443e8b425c966dbe2b32",
+      "FromPort": "value",
+      "ToNode": "302e585a9d0b4bcbad82074b40ddacdc",
+      "ToPort": "a"
+    },
+    {
+      "Id": "5241d0f8584f4b108c47a219d64c8076",
+      "FromNode": "c8f63e7dc5e2409a94814bd5db502650",
+      "FromPort": "value",
+      "ToNode": "302e585a9d0b4bcbad82074b40ddacdc",
+      "ToPort": "b"
+    },
+    {
+      "Id": "27785fffcef14573bfa21d02b3d67a86",
+      "FromNode": "302e585a9d0b4bcbad82074b40ddacdc",
+      "FromPort": "result",
+      "ToNode": "e75dbcdb23bc4428b8bbf132deb76d7a",
+      "ToPort": "a"
+    },
+    {
+      "Id": "ffc959178ec14d1498a6cceb3eea37eb",
+      "FromNode": "85741b3bcb3a405ab793373035d40e45",
+      "FromPort": "value",
+      "ToNode": "e75dbcdb23bc4428b8bbf132deb76d7a",
+      "ToPort": "b"
+    },
+    {
+      "Id": "5e7ebf8c17bc4d268a749a7a99d06914",
+      "FromNode": "e75dbcdb23bc4428b8bbf132deb76d7a",
+      "FromPort": "result",
+      "ToNode": "5cf8b3c0dfaa43589a636ff8f3ef1912",
+      "ToPort": "number"
+    },
+    {
+      "Id": "7e20f96364c14caf8e2dc16cb37569da",
+      "FromNode": "5cf8b3c0dfaa43589a636ff8f3ef1912",
+      "FromPort": "result",
+      "ToNode": "ab78d28c5818456c9ed5f0ff49914019",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "77dcf2d7c87747c99b415910be62f60a",
+      "Text": "(Length + Offset) * Factor, rounded. The Round node's 'digits' input is left on its default (0).",
+      "X": 0.0,
+      "Y": -120.0
+    }
+  ],
+  "View": {
+    "RunType": "Automatic",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

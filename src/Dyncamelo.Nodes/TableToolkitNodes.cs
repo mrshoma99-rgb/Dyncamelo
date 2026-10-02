@@ -18,6 +18,9 @@ namespace Dyncamelo.Nodes;
 [NodeCategory("Table")]
 public static class TableToolkitNodes
 {
+    // One boxed 0 shared by every empty count/sum cell of a pivot (boxed numbers are never changed in place).
+    private static readonly object BoxedZero = 0d;
+
     // ------------------------------------------------------------------ Build
 
     /// <summary>Makes a table from rows of cells and column names.</summary>
@@ -687,10 +690,13 @@ public static class TableToolkitNodes
         var spec = new AggregationSpec(function, valueIndex, function);
         var headers = new List<string?> { table.Headers[rowIndex] };
         headers.AddRange(columnKeys.Select(k => (string?)CellOrBlank(k)));
+        // A cell nothing fell into is 0 for count and sum, empty otherwise. The pivot is rows x columns cells, mostly empty for
+        // high-cardinality keys, so box that zero once instead of once per cell, and size each row for its cells up front.
+        object? emptyCell = function == "count" || function == "sum" ? BoxedZero : null;
         var rows = new List<IReadOnlyList<object?>>(rowKeys.Count);
         for (int r = 0; r < rowKeys.Count; r++)
         {
-            var cells = new List<object?> { rowKeys[r] };
+            var cells = new List<object?>(columnKeys.Count + 1) { rowKeys[r] };
             for (int c = 0; c < columnKeys.Count; c++)
             {
                 if (cellRows.TryGetValue((r, c), out var bucket))
@@ -699,7 +705,7 @@ public static class TableToolkitNodes
                 }
                 else
                 {
-                    cells.Add(function == "count" || function == "sum" ? (object)0d : null);
+                    cells.Add(emptyCell);
                 }
             }
 

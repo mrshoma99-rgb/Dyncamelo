@@ -1,0 +1,257 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.3.2"
+  },
+  "Uuid": "cd4037be50da9d889a00b847d19ceab1",
+  "Name": "Bulk Selection Sets from Values",
+  "Description": "Creates one live search set per distinct value of a property (for example one set per Level), filed under a folder in the Sets window. Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "d6413414af3e9042d2593a70e52d402d",
+      "NodeType": "StringInput",
+      "Name": "Property category",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Element"
+      }
+    },
+    {
+      "Id": "18a985db78e1f9a2fd321f77aa570dbe",
+      "NodeType": "StringInput",
+      "Name": "Property name",
+      "X": 0.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Level"
+      }
+    },
+    {
+      "Id": "1341b0cac4d95764325aa3422ee4aca4",
+      "NodeType": "StringInput",
+      "Name": "Folder name",
+      "X": 0.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Dyncamelo - By Level"
+      }
+    },
+    {
+      "Id": "9f57c75112166703f6b7f5f9c852e90f",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "SelectionSets.BulkByPropertyValues",
+      "X": 380.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "folderName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "selectionSets"
+        },
+        {
+          "Name": "values"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "160078057e8b8b46c84e8282115e259d",
+      "NodeType": "WatchList",
+      "Name": "Distinct values",
+      "X": 760.0,
+      "Y": 220.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b2fcc64175e655fd29bc51856fa97023",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "List.Count",
+      "X": 760.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "d0113a419268e7689d25f3ea359b03e0",
+      "NodeType": "Watch",
+      "Name": "Sets created",
+      "X": 1040.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "6349d9954f6e030e530251e1498d45e0",
+      "FromNode": "d6413414af3e9042d2593a70e52d402d",
+      "FromPort": "value",
+      "ToNode": "9f57c75112166703f6b7f5f9c852e90f",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "33b229ead44c76d77f7d77ab30b0ff37",
+      "FromNode": "18a985db78e1f9a2fd321f77aa570dbe",
+      "FromPort": "value",
+      "ToNode": "9f57c75112166703f6b7f5f9c852e90f",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "549280e4476ff10dd193aa52ed3647a1",
+      "FromNode": "1341b0cac4d95764325aa3422ee4aca4",
+      "FromPort": "value",
+      "ToNode": "9f57c75112166703f6b7f5f9c852e90f",
+      "ToPort": "folderName"
+    },
+    {
+      "Id": "869368d437a7598ac987327671bbf867",
+      "FromNode": "9f57c75112166703f6b7f5f9c852e90f",
+      "FromPort": "selectionSets",
+      "ToNode": "b2fcc64175e655fd29bc51856fa97023",
+      "ToPort": "list"
+    },
+    {
+      "Id": "5dab47ad4ad4608d3f0a6ea27fa843d4",
+      "FromNode": "9f57c75112166703f6b7f5f9c852e90f",
+      "FromPort": "values",
+      "ToNode": "160078057e8b8b46c84e8282115e259d",
+      "ToPort": "list"
+    },
+    {
+      "Id": "3b7cd9dab208e8c66c593642f174347c",
+      "FromNode": "b2fcc64175e655fd29bc51856fa97023",
+      "FromPort": "count",
+      "ToNode": "d0113a419268e7689d25f3ea359b03e0",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "c43e1e330c17ec21d94009e8c3bfce75",
+      "Text": "HOW TO USE: 1) Point the two inputs at a property whose values partition the model - \"Element\">\"Level\" for Revit-sourced models, or try \"Item\">\"Source File\" on any federated model. 2) Optionally rename the folder. 3) Press Run, then open the Sets window.",
+      "X": 0.0,
+      "Y": -190.0
+    },
+    {
+      "Id": "90e970ff302b11bb030254bbc8dfe3a6",
+      "Text": "The generated sets are LIVE search sets, not static selections: they re-evaluate as the model changes. Re-running replaces same-named sets in the folder instead of duplicating them.",
+      "X": 680.0,
+      "Y": 360.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

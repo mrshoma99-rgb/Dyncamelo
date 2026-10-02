@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Core.Types;
+using Dyncamelo.Nodes.Internal;
 
 namespace Dyncamelo.Nodes;
 
@@ -798,7 +799,7 @@ public static class StringExtraNodes
         try
         {
             var options = RegexOptions.CultureInvariant | (ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
-            return new Regex(pattern, options, RegexTimeout);
+            return RegexCache.Get(pattern, options, RegexTimeout);
         }
         catch (ArgumentException ex)
         {

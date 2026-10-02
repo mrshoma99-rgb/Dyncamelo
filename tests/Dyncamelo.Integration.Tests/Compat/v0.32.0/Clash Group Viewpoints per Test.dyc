@@ -1,0 +1,813 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.32.0"
+  },
+  "Uuid": "6b1f0c9a7d2e4f1885c3a90e77d41b02",
+  "Name": "Clash Group Viewpoints per Test",
+  "Description": "For every result group of every clash test: isolate the group's clashing elements, colour each clash's first element red and its second green, and save a viewpoint named after the group inside a folder named after its test. Needs an open model with run clash tests that have groups.",
+  "Nodes": [
+    {
+      "Id": "70000000000000000000000000000001",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashTriageNodes.AllGroups@Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.AllGroups",
+      "X": -420.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "groups"
+        },
+        {
+          "Name": "names"
+        },
+        {
+          "Name": "testNames"
+        },
+        {
+          "Name": "counts"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000002",
+      "NodeType": "LoopItem",
+      "Name": "Loop.Item",
+      "X": -180.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "item"
+        },
+        {
+          "Name": "index"
+        },
+        {
+          "Name": "count"
+        },
+        {
+          "Name": "loop"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000003",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashTriageNodes.GroupInfo@Autodesk.Navisworks.Api.Clash.ClashResultGroup",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ClashGroup.Info",
+      "X": 60.0,
+      "Y": -40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "group",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        },
+        {
+          "Name": "name"
+        },
+        {
+          "Name": "status"
+        },
+        {
+          "Name": "count"
+        },
+        {
+          "Name": "test"
+        },
+        {
+          "Name": "testName"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000004",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashTriageNodes.Focus@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,bool,bool,bool,double,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ClashResult.Focus",
+      "X": 330.0,
+      "Y": -140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "results",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "isolate",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "zoom",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "select",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "paddingFactor",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000005",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.ResultItems@Autodesk.Navisworks.Api.Clash.ClashResult",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ClashResult.Items",
+      "X": 330.0,
+      "Y": 40.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "result",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "item1"
+        },
+        {
+          "Name": "item2"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000006",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Clean@System.Collections.Generic.IList<object>,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "List.Clean",
+      "X": 560.0,
+      "Y": 10.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "removeEmptyLists",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000007",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Clean@System.Collections.Generic.IList<object>,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "List.Clean",
+      "X": 560.0,
+      "Y": 110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "removeEmptyLists",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000008",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Then@object,object,object,object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Flow.Then",
+      "X": 780.0,
+      "Y": 10.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after2",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after3",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000009",
+      "NodeType": "StringInput",
+      "Name": "Red",
+      "X": 780.0,
+      "Y": 120.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "#FF0000"
+      }
+    },
+    {
+      "Id": "70000000000000000000000000000010",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.OverrideColorTemporary@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.OverrideColorTemporary",
+      "X": 1010.0,
+      "Y": 10.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "color",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000011",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Then@object,object,object,object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Flow.Then",
+      "X": 1010.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after2",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after3",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000012",
+      "NodeType": "StringInput",
+      "Name": "Green",
+      "X": 1010.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "#00FF00"
+      }
+    },
+    {
+      "Id": "70000000000000000000000000000013",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.OverrideColorTemporary@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.OverrideColorTemporary",
+      "X": 1240.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "color",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000014",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Then@object,object,object,object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Flow.Then",
+      "X": 1470.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after2",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "after3",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000015",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ViewpointNodes.SaveWithOverrides@string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Viewpoint.SaveWithOverrides",
+      "X": 1700.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "name",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "folderName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "viewpoint"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000016",
+      "NodeType": "LoopCollect",
+      "Name": "Loop.Collect",
+      "X": 1940.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "loop",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70000000000000000000000000000017",
+      "NodeType": "WatchList",
+      "Name": "Viewpoints created",
+      "X": 2160.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "80000000000000000000000000000001",
+      "FromNode": "70000000000000000000000000000001",
+      "FromPort": "groups",
+      "ToNode": "70000000000000000000000000000002",
+      "ToPort": "items"
+    },
+    {
+      "Id": "80000000000000000000000000000002",
+      "FromNode": "70000000000000000000000000000002",
+      "FromPort": "item",
+      "ToNode": "70000000000000000000000000000003",
+      "ToPort": "group"
+    },
+    {
+      "Id": "80000000000000000000000000000003",
+      "FromNode": "70000000000000000000000000000003",
+      "FromPort": "results",
+      "ToNode": "70000000000000000000000000000004",
+      "ToPort": "results"
+    },
+    {
+      "Id": "80000000000000000000000000000004",
+      "FromNode": "70000000000000000000000000000003",
+      "FromPort": "results",
+      "ToNode": "70000000000000000000000000000005",
+      "ToPort": "result"
+    },
+    {
+      "Id": "80000000000000000000000000000005",
+      "FromNode": "70000000000000000000000000000005",
+      "FromPort": "item1",
+      "ToNode": "70000000000000000000000000000006",
+      "ToPort": "list"
+    },
+    {
+      "Id": "80000000000000000000000000000006",
+      "FromNode": "70000000000000000000000000000005",
+      "FromPort": "item2",
+      "ToNode": "70000000000000000000000000000007",
+      "ToPort": "list"
+    },
+    {
+      "Id": "80000000000000000000000000000007",
+      "FromNode": "70000000000000000000000000000006",
+      "FromPort": "list",
+      "ToNode": "70000000000000000000000000000008",
+      "ToPort": "value"
+    },
+    {
+      "Id": "80000000000000000000000000000008",
+      "FromNode": "70000000000000000000000000000004",
+      "FromPort": "items",
+      "ToNode": "70000000000000000000000000000008",
+      "ToPort": "after"
+    },
+    {
+      "Id": "80000000000000000000000000000009",
+      "FromNode": "70000000000000000000000000000008",
+      "FromPort": "value",
+      "ToNode": "70000000000000000000000000000010",
+      "ToPort": "items"
+    },
+    {
+      "Id": "80000000000000000000000000000010",
+      "FromNode": "70000000000000000000000000000009",
+      "FromPort": "value",
+      "ToNode": "70000000000000000000000000000010",
+      "ToPort": "color"
+    },
+    {
+      "Id": "80000000000000000000000000000011",
+      "FromNode": "70000000000000000000000000000007",
+      "FromPort": "list",
+      "ToNode": "70000000000000000000000000000011",
+      "ToPort": "value"
+    },
+    {
+      "Id": "80000000000000000000000000000012",
+      "FromNode": "70000000000000000000000000000010",
+      "FromPort": "items",
+      "ToNode": "70000000000000000000000000000011",
+      "ToPort": "after"
+    },
+    {
+      "Id": "80000000000000000000000000000013",
+      "FromNode": "70000000000000000000000000000011",
+      "FromPort": "value",
+      "ToNode": "70000000000000000000000000000013",
+      "ToPort": "items"
+    },
+    {
+      "Id": "80000000000000000000000000000014",
+      "FromNode": "70000000000000000000000000000012",
+      "FromPort": "value",
+      "ToNode": "70000000000000000000000000000013",
+      "ToPort": "color"
+    },
+    {
+      "Id": "80000000000000000000000000000015",
+      "FromNode": "70000000000000000000000000000003",
+      "FromPort": "name",
+      "ToNode": "70000000000000000000000000000014",
+      "ToPort": "value"
+    },
+    {
+      "Id": "80000000000000000000000000000016",
+      "FromNode": "70000000000000000000000000000013",
+      "FromPort": "items",
+      "ToNode": "70000000000000000000000000000014",
+      "ToPort": "after"
+    },
+    {
+      "Id": "80000000000000000000000000000017",
+      "FromNode": "70000000000000000000000000000014",
+      "FromPort": "value",
+      "ToNode": "70000000000000000000000000000015",
+      "ToPort": "name"
+    },
+    {
+      "Id": "80000000000000000000000000000018",
+      "FromNode": "70000000000000000000000000000003",
+      "FromPort": "testName",
+      "ToNode": "70000000000000000000000000000015",
+      "ToPort": "folderName"
+    },
+    {
+      "Id": "80000000000000000000000000000019",
+      "FromNode": "70000000000000000000000000000002",
+      "FromPort": "loop",
+      "ToNode": "70000000000000000000000000000016",
+      "ToPort": "loop"
+    },
+    {
+      "Id": "80000000000000000000000000000020",
+      "FromNode": "70000000000000000000000000000015",
+      "FromPort": "viewpoint",
+      "ToNode": "70000000000000000000000000000016",
+      "ToPort": "value"
+    },
+    {
+      "Id": "80000000000000000000000000000021",
+      "FromNode": "70000000000000000000000000000016",
+      "FromPort": "results",
+      "ToNode": "70000000000000000000000000000017",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "90000000000000000000000000000000",
+      "Text": "WHOLE-PROJECT CLASH GROUP VIEWPOINTS\nClash.AllGroups gathers every result group of every clash test as one flat list, so a single loop covers the whole project (nested loops are not supported). Each iteration: ClashGroup.Info hands out that group's results, its name and its test's name.",
+      "X": -430,
+      "Y": -230,
+      "Width": 430,
+      "Height": 110
+    },
+    {
+      "Id": "90000000000000000000000000000001",
+      "Text": "PER GROUP: isolate + zoom the whole group (ClashResult.Focus), colour side 1 of every clash red and side 2 green as TEMPORARY overrides, then save. Viewpoint.SaveWithOverrides bakes the isolate and the colours into the view and files it in a folder named after the test \u2014 creating that folder if it does not exist.",
+      "X": 330,
+      "Y": -300,
+      "Width": 620,
+      "Height": 120
+    },
+    {
+      "Id": "90000000000000000000000000000002",
+      "Text": "ORDERING: the Flow.Then chain is what forces isolate -> zoom -> red -> green -> save inside each iteration. Without it those side effects would run in an undefined order and every viewpoint would capture the same camera. Colours stay on the live model afterwards; run Appearance.ResetTemporary and Appearance.ShowAll to clear the session (the saved views keep their own frozen state).",
+      "X": 1010,
+      "Y": 330,
+      "Width": 620,
+      "Height": 130
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

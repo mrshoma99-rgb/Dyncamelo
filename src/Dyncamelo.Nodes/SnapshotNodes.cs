@@ -118,7 +118,7 @@ public static class SnapshotNodes
     /// ordinally (so key order never causes a false "changed"), lists in
     /// order, scalars via Newtonsoft's invariant serialization.
     /// </summary>
-    private static string CanonicalJson(object? value)
+    internal static string CanonicalJson(object? value)
     {
         var builder = new StringBuilder();
         AppendCanonicalJson(builder, value);
@@ -145,7 +145,7 @@ public static class SnapshotNodes
                     builder.Append(',');
                 }
 
-                builder.Append(JsonConvert.SerializeObject(pairs[i].Key)).Append(':');
+                builder.Append(JsonConvert.ToString(pairs[i].Key)).Append(':');
                 AppendCanonicalJson(builder, pairs[i].Value);
             }
 
@@ -170,7 +170,38 @@ public static class SnapshotNodes
         }
         else
         {
-            builder.Append(JsonConvert.SerializeObject(value));
+            AppendScalar(builder, value);
+        }
+    }
+
+    // JsonConvert.SerializeObject builds a serializer, a writer and a string for every call; a snapshot of a big model compares
+    // hundreds of thousands of scalars (1.6 GB of garbage for 100 000 small items). The common scalars have a direct, allocation-free
+    // spelling that is character for character what SerializeObject writes; anything else still goes through it.
+    private static void AppendScalar(StringBuilder builder, object? value)
+    {
+        switch (value)
+        {
+            case null:
+                builder.Append("null");
+                return;
+            case string text:
+                builder.Append(JsonConvert.ToString(text));
+                return;
+            case bool flag:
+                builder.Append(flag ? "true" : "false");
+                return;
+            case int whole:
+                builder.Append(JsonConvert.ToString(whole));
+                return;
+            case long wide:
+                builder.Append(JsonConvert.ToString(wide));
+                return;
+            case double number when !double.IsNaN(number) && !double.IsInfinity(number):
+                builder.Append(JsonConvert.ToString(number));
+                return;
+            default:
+                builder.Append(JsonConvert.SerializeObject(value));
+                return;
         }
     }
 }

@@ -1,0 +1,389 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.7.0"
+  },
+  "Uuid": "2199a49ec25a42c2a486b651e349c84f",
+  "Name": "Isolated Viewpoints per Item",
+  "Description": "For every found item, in order: isolate it, frame it in the view, and save a viewpoint named after it with the isolation baked in. Demonstrates Workflow.ForEach + Action.* — a per-item stateful loop that wiring and lacing cannot express. Needs an open Navisworks model.",
+  "Nodes": [
+    {
+      "Id": "9555929b095b4189a565ce774075e964",
+      "NodeType": "StringInput",
+      "Name": "Property category",
+      "X": 0.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Item"
+      }
+    },
+    {
+      "Id": "c8d3e2db7b454e4c9b9c55c21f016bcf",
+      "NodeType": "StringInput",
+      "Name": "Property name",
+      "X": 0.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Name"
+      }
+    },
+    {
+      "Id": "cb12ea4396334eccab56b26272e468e2",
+      "NodeType": "StringInput",
+      "Name": "Search text",
+      "X": 0.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Room"
+      }
+    },
+    {
+      "Id": "5ece50aca61b45d39c98eeea514ba8e2",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByPropertyContains",
+      "X": 340.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "861486ddfffd4235927a2e7616781ffd",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.Isolate",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.Isolate",
+      "X": 700.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "6aa558d385b5473f850298e6239165e4",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.ZoomTo@double",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.ZoomTo",
+      "X": 700.0,
+      "Y": 150.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "paddingFactor",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "5c77d0806a0440a9be56bf84a0469bef",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Action.SaveViewpoint",
+      "X": 700.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "name",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "folder",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "bakeVisibility",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "action"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "c0183ab98bf54e199cd145117e4a4315",
+      "NodeType": "ListCreate",
+      "Name": "List.Create",
+      "X": 1000.0,
+      "Y": 150.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item0",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item1",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "item2",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ItemCount": 3
+      }
+    },
+    {
+      "Id": "a78513c68f3344a3ae2b9655af70885b",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Workflow.ForEach",
+      "X": 1320.0,
+      "Y": 110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "actions",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "26083ab73d2f41efa0756a2db60458cb",
+      "NodeType": "Watch",
+      "Name": "Viewpoints created",
+      "X": 1620.0,
+      "Y": 110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "10bad32c85934df9a07b0d9e113a9c01",
+      "FromNode": "9555929b095b4189a565ce774075e964",
+      "FromPort": "value",
+      "ToNode": "5ece50aca61b45d39c98eeea514ba8e2",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "1ffe4afc0e5145faa5e7bbcb61b79fc1",
+      "FromNode": "c8d3e2db7b454e4c9b9c55c21f016bcf",
+      "FromPort": "value",
+      "ToNode": "5ece50aca61b45d39c98eeea514ba8e2",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "9d44de2578244d5183aaa5a82edfadf1",
+      "FromNode": "cb12ea4396334eccab56b26272e468e2",
+      "FromPort": "value",
+      "ToNode": "5ece50aca61b45d39c98eeea514ba8e2",
+      "ToPort": "value"
+    },
+    {
+      "Id": "d22dc5f890114aba925a4b1c96006398",
+      "FromNode": "861486ddfffd4235927a2e7616781ffd",
+      "FromPort": "action",
+      "ToNode": "c0183ab98bf54e199cd145117e4a4315",
+      "ToPort": "item0"
+    },
+    {
+      "Id": "25571524cd734da58a8a375ba666aac8",
+      "FromNode": "6aa558d385b5473f850298e6239165e4",
+      "FromPort": "action",
+      "ToNode": "c0183ab98bf54e199cd145117e4a4315",
+      "ToPort": "item1"
+    },
+    {
+      "Id": "10aec00c9c7b47c29e60bd49ea7df336",
+      "FromNode": "5c77d0806a0440a9be56bf84a0469bef",
+      "FromPort": "action",
+      "ToNode": "c0183ab98bf54e199cd145117e4a4315",
+      "ToPort": "item2"
+    },
+    {
+      "Id": "86966bbd4ca54175aa73d866778101d7",
+      "FromNode": "5ece50aca61b45d39c98eeea514ba8e2",
+      "FromPort": "items",
+      "ToNode": "a78513c68f3344a3ae2b9655af70885b",
+      "ToPort": "items"
+    },
+    {
+      "Id": "19df7e5a42f94d9d8ea292803fe7589a",
+      "FromNode": "c0183ab98bf54e199cd145117e4a4315",
+      "FromPort": "list",
+      "ToNode": "a78513c68f3344a3ae2b9655af70885b",
+      "ToPort": "actions"
+    },
+    {
+      "Id": "a89f147a07044eb39131c5d79e11468d",
+      "FromNode": "a78513c68f3344a3ae2b9655af70885b",
+      "FromPort": "results",
+      "ToNode": "26083ab73d2f41efa0756a2db60458cb",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "2b1e7c9a4d8f4a1e9c3b6d5e0f7a8c21",
+      "Text": "HOW TO USE: 1) Set the three inputs to find the items you want a viewpoint for (defaults find items whose Item>Name contains \"Room\"). 2) Press Run. One saved viewpoint is created per found item under the \"Dyncamelo Views\" folder, framed and isolated on that item.",
+      "X": 0.0,
+      "Y": -210.0
+    },
+    {
+      "Id": "3c2f8d0b5e9a4b2f0d4c7e6f1a8b9d32",
+      "Text": "WHY ForEach: the actions run one item at a time, in order (isolate -> zoom -> save), so each viewpoint captures that item's own isolation. Wiring the isolate/zoom/save nodes directly and lacing them would run every isolate, then every zoom, then every save - so all viewpoints would show the last item. Reorder the List.Create inputs to change the per-item sequence.",
+      "X": 700.0,
+      "Y": 470.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
