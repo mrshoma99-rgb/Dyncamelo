@@ -611,7 +611,7 @@
       "IsFrozen": false,
       "InputPorts": [
         {
-          "Name": "value",
+          "Name": "list",
           "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
@@ -620,7 +620,7 @@
       ],
       "OutputPorts": [
         {
-          "Name": "value"
+          "Name": "list"
         }
       ],
       "Data": {}
@@ -808,7 +808,7 @@
       "FromNode": "70000000000000000000000000000016",
       "FromPort": "results",
       "ToNode": "70000000000000000000000000000017",
-      "ToPort": "value"
+      "ToPort": "list"
     },
     {
       "Id": "80000000000000000000000000009001",

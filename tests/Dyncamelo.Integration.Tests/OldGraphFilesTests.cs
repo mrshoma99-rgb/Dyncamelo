@@ -52,12 +52,11 @@ public class OldGraphFilesTests
         // Not an upgrade regression but a defect in the sample since it was written (v0.32.0), still there today: the
         // "Viewpoints created" WatchList node was saved with an input and an output called "value", but WatchList has always called
         // both "list" (the v0.9.0 files say so). The wire Loop.Collect.results -> Viewpoints created is dropped on every open, in
-        // every release, and the node shows nothing. Fix for the lead (data only): rename that node's two ports to "list" in
+        // every release, and the node shows nothing. Fixed in the current sample (its two ports are now "list"); these old copies keep the defect. A user who saved their own copy has the same file; honouring "value" for them needs a port alias on a hand-written NodeModel, which only Core can offer (PortModel.Aliases has an internal setter). Original note: rename that node's two ports to "list" in
         // samples/Clash Group Viewpoints per Test.dyc. A user who saved their own copy has the same file; honouring "value" for
         // them needs a port alias on a hand-written NodeModel, which only Core can offer (PortModel.Aliases has an internal setter).
         ["v0.32.0/Clash Group Viewpoints per Test.dyc"] = new[] { "wires, the graph", "Viewpoints created" },
         ["v0.33.3/Clash Group Viewpoints per Test.dyc"] = new[] { "wires, the graph", "Viewpoints created" },
-        ["samples/Clash Group Viewpoints per Test.dyc"] = new[] { "wires, the graph", "Viewpoints created" },
     };
 
     // ------------------------------------------------------------------
