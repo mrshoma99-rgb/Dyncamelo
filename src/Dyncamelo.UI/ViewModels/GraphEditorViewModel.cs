@@ -195,6 +195,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         _paletteId = _settings.PaletteId;
         _previewSelection = _settings.PreviewSelection;
         _confirmUntrustedRuns = _settings.ConfirmUntrustedRuns;
+        _checkForUpdates = _settings.CheckForUpdates;
         UpdateChoiceSelection();
         InitCommandSurface();
 

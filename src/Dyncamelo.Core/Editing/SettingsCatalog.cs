@@ -95,7 +95,7 @@ public sealed class SettingDescriptor
 public static class SettingsCatalog
 {
     /// <summary>The Settings page sections, in order. Shortcuts and Diagnostics are built from other sources.</summary>
-    public static readonly IReadOnlyList<string> Sections = new[] { "Appearance", "Canvas", "Editing", "Shortcuts", "Diagnostics" };
+    public static readonly IReadOnlyList<string> Sections = new[] { "Appearance", "Canvas", "Editing", "Shortcuts", "Privacy", "Diagnostics" };
 
     /// <summary>All toggle and choice preferences.</summary>
     public static readonly IReadOnlyList<SettingDescriptor> All = new[]
@@ -152,6 +152,8 @@ public static class SettingsCatalog
             "Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current.", false),
         new SettingDescriptor("confirmUntrustedRuns", "Editing", "Ask before running graphs from files",
             "A graph opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask.", true),
+        new SettingDescriptor("checkForUpdates", "Privacy", "Check for a newer version once a day",
+            "When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name Dyncamelo-UpdateCheck, nothing about you or your models. Off means Dyncamelo makes no network request of its own. The full policy is under Help > Privacy Policy.", true),
         new SettingDescriptor("doubleClick", "Editing", "Double-click empty canvas", "What double-clicking the empty canvas does.", "string",
             new SettingOption("string", "Insert a String node"), new SettingOption("number", "Insert a Number node"),
             new SettingOption("note", "Add a note"), new SettingOption("none", "Do nothing")),

@@ -15,6 +15,20 @@ namespace Dyncamelo.UI.ViewModels;
 public partial class GraphEditorViewModel
 {
     private ICommand? _copyDiagnosticsCommand;
+    private bool _checkForUpdates = true;
+
+    /// <summary>True (the default) to ask GitHub for the newest release number once a day when the editor opens. The host reads this before it starts the check.</summary>
+    public bool CheckForUpdates
+    {
+        get => _checkForUpdates;
+        set
+        {
+            if (SetProperty(ref _checkForUpdates, value))
+            {
+                _settings.SetCheckForUpdates(value);
+            }
+        }
+    }
 
     /// <summary>
     /// Set by the host: describes the host application ("Autodesk Navisworks Manage 2024 (API 21.0)") for the diagnostics.

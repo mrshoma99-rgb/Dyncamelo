@@ -240,6 +240,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Keyboard & Mouse Shortcuts | `F1` | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |
+| Privacy Policy | — | Canvas |
 
 ## Mouse and gestures
 
@@ -321,6 +322,12 @@ The **colour palette** of the whole editor is chosen here too.
 ### Shortcuts
 
 The table of every command with its shortcut; see [Changing shortcuts](#changing-shortcuts).
+
+### Privacy
+
+| Setting | Values | Default | What it does |
+|---|---|---|---|
+| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name Dyncamelo-UpdateCheck, nothing about you or your models. Off means Dyncamelo makes no network request of its own. The full policy is under Help > Privacy Policy. |
 
 ### Diagnostics
 

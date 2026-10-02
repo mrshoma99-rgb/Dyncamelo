@@ -26,6 +26,7 @@ public class UiSettingsService
     private readonly Dictionary<string, string> _playerConfirmed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _editorConfirmed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     private bool _confirmUntrustedRuns = true;
+    private bool _checkForUpdates = true;
     private readonly Dictionary<string, JObject> _playerValues = new Dictionary<string, JObject>(StringComparer.OrdinalIgnoreCase);
     private string _playerLastScript = string.Empty;
     private bool _showLibraryDescriptions = true;
@@ -130,6 +131,20 @@ public class UiSettingsService
 
     /// <summary>True (the default) to ask before running a graph opened from a file that starts programs, uses the network or changes existing files.</summary>
     public bool ConfirmUntrustedRuns => _confirmUntrustedRuns;
+
+    /// <summary>True (the default) to ask GitHub for the newest release number once a day when the editor opens.</summary>
+    public bool CheckForUpdates => _checkForUpdates;
+
+    /// <summary>Persists the "check for a newer version" preference.</summary>
+    /// <param name="enabled">True to check.</param>
+    public void SetCheckForUpdates(bool enabled)
+    {
+        if (_checkForUpdates != enabled)
+        {
+            _checkForUpdates = enabled;
+            Save();
+        }
+    }
 
     /// <summary>Persists the "ask before running graphs from files" preference.</summary>
     /// <param name="enabled">True to ask.</param>
@@ -369,6 +384,7 @@ public class UiSettingsService
         _doubleClickAction = "string";
         _previewSelection = false;
         _confirmUntrustedRuns = true;
+        _checkForUpdates = true;
         _paletteId = "DyncameloDark";
         _liveScrubEvaluation = false;
         _values.Clear();
@@ -469,6 +485,7 @@ public class UiSettingsService
                 PlayerConfirmed = new Dictionary<string, string>(_playerConfirmed),
                 EditorConfirmed = new Dictionary<string, string>(_editorConfirmed),
                 ConfirmUntrustedRuns = _confirmUntrustedRuns,
+                CheckForUpdates = _checkForUpdates,
                 PlayerValues = new Dictionary<string, JObject>(_playerValues),
                 PlayerLastScript = _playerLastScript,
                 ShowLibraryDescriptions = _showLibraryDescriptions,
@@ -531,6 +548,7 @@ public class UiSettingsService
         _playerConfirmed.Clear();
         _editorConfirmed.Clear();
         _confirmUntrustedRuns = true;
+        _checkForUpdates = true;
         _playerValues.Clear();
         _playerLastScript = string.Empty;
         _showLibraryDescriptions = true;
@@ -571,6 +589,7 @@ public class UiSettingsService
         _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
         _previewSelection = data.PreviewSelection ?? false;
         _confirmUntrustedRuns = data.ConfirmUntrustedRuns ?? true;
+        _checkForUpdates = data.CheckForUpdates ?? true;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
         _liveScrubEvaluation = data.LiveScrubEvaluation ?? false;
 
@@ -742,6 +761,9 @@ public class UiSettingsService
 
         [JsonProperty("confirmUntrustedRuns")]
         public bool? ConfirmUntrustedRuns { get; set; }
+
+        [JsonProperty("checkForUpdates")]
+        public bool? CheckForUpdates { get; set; }
 
         [JsonProperty("playerValues")]
         public Dictionary<string, JObject>? PlayerValues { get; set; }

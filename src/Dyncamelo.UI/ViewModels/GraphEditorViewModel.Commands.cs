@@ -148,6 +148,12 @@ public partial class GraphEditorViewModel
             OnPropertyChanged(nameof(ConfirmUntrustedRuns));
         }
 
+        if (_checkForUpdates != _settings.CheckForUpdates)
+        {
+            _checkForUpdates = _settings.CheckForUpdates;
+            OnPropertyChanged(nameof(CheckForUpdates));
+        }
+
         if (Library.ShowDescriptions != _settings.ShowLibraryDescriptions)
         {
             Library.ShowDescriptions = _settings.ShowLibraryDescriptions;
@@ -568,6 +574,7 @@ public partial class GraphEditorViewModel
             case "emptyHints": return ShowEmptyCanvasHints;
             case "previewSelection": return PreviewSelection;
             case "confirmUntrustedRuns": return ConfirmUntrustedRuns;
+            case "checkForUpdates": return CheckForUpdates;
             case "doubleClick": return DoubleClickAction;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));
         }
@@ -601,6 +608,7 @@ public partial class GraphEditorViewModel
             case "emptyHints": ShowEmptyCanvasHints = (bool)value; break;
             case "previewSelection": PreviewSelection = (bool)value; break;
             case "confirmUntrustedRuns": ConfirmUntrustedRuns = (bool)value; break;
+            case "checkForUpdates": CheckForUpdates = (bool)value; break;
             case "doubleClick": DoubleClickAction = (string)value; break;
             default: throw new ArgumentException("Unknown setting '" + id + "'.", nameof(id));
         }

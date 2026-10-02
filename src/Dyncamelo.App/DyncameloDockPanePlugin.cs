@@ -86,7 +86,7 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         }
 
         // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists.
-        UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action));
+        UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action), () => _viewModel?.CheckForUpdates ?? true);
 
         return host;
     }

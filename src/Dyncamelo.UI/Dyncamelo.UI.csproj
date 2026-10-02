@@ -17,6 +17,8 @@
   <ItemGroup>
     <!-- Embedded WPF resources (pack://application:,,,/Dyncamelo.UI;component/Assets/...). -->
     <Resource Include="Assets\**\*.png" />
+    <!-- The privacy policy shown by Help > Privacy Policy: the repository's own PRIVACY.md, so the two cannot drift apart. -->
+    <EmbeddedResource Include="..\..\PRIVACY.md" LogicalName="Dyncamelo.UI.PRIVACY.md" />
   </ItemGroup>
 
   <ItemGroup>

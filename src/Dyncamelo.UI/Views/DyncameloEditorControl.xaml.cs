@@ -372,6 +372,7 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             case "help.keys": return vm.ToggleHelpCommand;
             case "help.diagnostics": return vm.CopyDiagnosticsCommand;
             case "help.selftest": return vm.RunSelfTestCommand;
+            case "help.privacy": return _privacyCommand ??= new RelayCommand(() => PrivacyWindow.Show(Window.GetWindow(this)));
             case "view.hud": return _hudCommand;
             case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);
             case "view.settings": return vm.ToggleSettingsCommand;
@@ -457,6 +458,8 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
         };
         file.Items.Add(samples);
     }
+
+    private ICommand? _privacyCommand;
 
     private static void OpenGuide()
     {

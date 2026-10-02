@@ -34,9 +34,10 @@ internal static class UpdateCheck
     /// Kicks off the background check. <paramref name="onUiThread"/> marshals the prompt back
     /// to the UI thread (the caller passes its Dispatcher's Invoke).
     /// </summary>
-    public static void Run(Action<Action> onUiThread)
+    public static void Run(Action<Action> onUiThread, Func<bool>? enabled = null)
     {
-        if (_ranThisSession)
+        // Switched off in Settings > Privacy: no request at all (and the session's one chance is kept for when it is switched on).
+        if (_ranThisSession || (enabled != null && !enabled()))
         {
             return;
         }
