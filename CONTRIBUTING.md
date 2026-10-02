@@ -6,18 +6,28 @@ Dyncamelo is source-available under the Apache License 2.0 with the Commons Clau
 
 ## Ways to contribute
 
-- **Nodes** — the [node catalog](docs/NODE_LIBRARY.md) lists every planned node with its tier. Unclaimed MVP/Beta nodes are great first issues.
+- **Nodes** — the generated [node catalogue](docs/NODE_CATALOG.md) lists every node that exists; [docs/NODE_LIBRARY.md](docs/NODE_LIBRARY.md) holds the design and the tiers. Unclaimed MVP/Beta nodes are great first issues.
 - **Engine** — the dataflow engine in `Dyncamelo.Core` (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)) has a well-defined spec and a Linux-runnable test suite.
 - **Docs and samples** — tutorials, sample `.dyc` graphs, screenshots.
-- **Bug reports** — include Navisworks version, the graph (`.dyc` attaches nicely to issues), and the node error text.
+- **Bug reports** — use the [bug report form](https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose). It asks for the Dyncamelo and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the output of **Help > Copy diagnostics**; the graph (`.dyc` attaches nicely to issues) and the node error text help too. [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) covers the common problems.
 
 ## Development environment
 
 | You want to work on | You need |
 |---|---|
-| `Dyncamelo.Core`, `Dyncamelo.Nodes`, tests | Any OS with the .NET 8 SDK — Linux and macOS work fully |
-| `Dyncamelo.Navisworks` | Any OS (compiles against reference-only NuGet packages); Windows + Navisworks 2024 to actually run it |
-| `Dyncamelo.UI`, `Dyncamelo.App` (WPF) | Windows with Visual Studio 2022 or the .NET 8 SDK |
+| `Dyncamelo.Core`, `Dyncamelo.Nodes`, `Dyncamelo.Cli`, `Core.Tests`, `Nodes.Tests`, `Integration.Tests` | Any OS with the .NET 8 SDK — Linux and macOS work fully |
+| `Dyncamelo.Navisworks` | Any OS (compiles against reference-only NuGet packages); Windows + Navisworks to actually run it |
+| `Dyncamelo.UI`, `Dyncamelo.App`, `Dyncamelo.Installer` (WPF, net48), `UI.Tests`, `UI.HostProbe` | Windows with Visual Studio 2022 or the .NET 8 SDK |
+
+The projects in `tests/`:
+
+| Project | What it checks |
+|---|---|
+| `Dyncamelo.Core.Tests` | Engine, graph model, loader, serialization, editing logic, the command and settings catalogues |
+| `Dyncamelo.Nodes.Tests` | The general nodes and the pure logic extracted from the Navisworks nodes |
+| `Dyncamelo.Integration.Tests` | Whole graphs end to end, including every sample in `samples/` |
+| `Dyncamelo.UI.Tests` | The editor and the Player in real WPF windows (Windows only) |
+| `Dyncamelo.UI.HostProbe` | Not a test project: a small net48 program that hosts the editor the way Navisworks does (a WinForms `ElementHost`, no WPF `Application`). `UI.Tests` starts it as a child process; you do not run it yourself. |
 
 ### Build and test
 
@@ -26,8 +36,11 @@ Dyncamelo is source-available under the Apache License 2.0 with the Commons Clau
 dotnet build src/Dyncamelo.Core/Dyncamelo.Core.csproj
 dotnet build src/Dyncamelo.Nodes/Dyncamelo.Nodes.csproj
 dotnet build src/Dyncamelo.Navisworks/Dyncamelo.Navisworks.csproj
+dotnet build src/Dyncamelo.Cli/Dyncamelo.Cli.csproj
 dotnet test tests/Dyncamelo.Core.Tests/Dyncamelo.Core.Tests.csproj
 dotnet test tests/Dyncamelo.Nodes.Tests/Dyncamelo.Nodes.Tests.csproj
+dotnet test tests/Dyncamelo.Integration.Tests/Dyncamelo.Integration.Tests.csproj
+python3 tools/generate_node_catalog.py --check   # the node catalogue is current
 ```
 
 ```powershell
@@ -36,11 +49,13 @@ dotnet build Dyncamelo.sln -c Release
 dotnet test Dyncamelo.sln -c Release
 ```
 
-CI builds the full solution on `windows-latest` and runs the test projects on Linux, so a PR must keep **both** green.
+CI builds the full solution and runs all four test projects (including `UI.Tests`) on `windows-latest`, and builds and tests the non-WPF projects on Linux, where it also checks the node catalogue and runs the samples that do not need Navisworks. A PR must keep **both** jobs green.
 
 ### Running inside Navisworks
 
-Copy the `Dyncamelo.App` output to `C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\` (folder name must match the DLL name) and start Navisworks. See the [Getting Started guide](docs/GETTING_STARTED.md). For changes that touch Navisworks nodes or the editor, run the [manual smoke checklist](docs/IMPLEMENTATION_PLAN.md#manual-smoke-checklist-inside-navisworks) before opening the PR and note the result in the PR description.
+On Windows, a **Debug** build deploys the whole application bundle (DLLs, ribbon layout, icons, samples and `PackageContents.xml`) to `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\<year>` (the `DeployToBundle` target in `src/Dyncamelo.App/Dyncamelo.App.csproj`). Restart Navisworks to load it. The build targets Navisworks 2024 unless you pass `-p:NavisworksYear=2025` or `2026` (run `dotnet restore` with the same property first, because the API package differs by year). Or install a release with `DyncameloSetup.exe`. The older `Plugins\Dyncamelo.App\` folder layout still works; see the [Getting Started guide](docs/GETTING_STARTED.md).
+
+For changes that touch Navisworks nodes, the editor or the installer, run the rows of the [release QA checklist](docs/QA_CHECKLIST.md) that apply (and the [manual smoke checklist](docs/IMPLEMENTATION_PLAN.md#manual-smoke-checklist-inside-navisworks) for the basics) before opening the PR, and note the result in the PR description. Say plainly when you could not try a change in Navisworks.
 
 ## Code style
 
@@ -52,7 +67,7 @@ Style is enforced by [.editorconfig](.editorconfig); your IDE will pick it up au
 - 4-space indentation, braces on new lines (Allman), `using` directives outside the namespace, `System` usings first.
 - Private fields `_camelCase`, everything public `PascalCase`, interfaces `IPascalCase`.
 - **XML doc comments on all public API** — for zero-touch nodes the `<summary>` doubles as user-facing help, so write it for end users, not implementers.
-- Keep dependencies at zero: **do not add NuGet packages.** The allowed set is fixed and documented in the [engineering decisions table](docs/IMPLEMENTATION_PLAN.md#engineering-decisions). If you believe a new dependency is justified, open an issue first.
+- Keep dependencies at zero: **do not add NuGet packages.** The allowed set is fixed (at the moment Newtonsoft.Json in `Core` and `Nodes`, AutomaticGraphLayout in `Core`, Nodify in `UI`, the compile-time-only Navisworks API packages, and the test packages; the [engineering decisions table](docs/IMPLEMENTATION_PLAN.md#engineering-decisions) predates AutomaticGraphLayout). If you believe a new dependency is justified, open an issue first.
 
 ## Project boundaries (important)
 
@@ -60,29 +75,42 @@ The layering is strict — the build enforces most of it, reviewers enforce the 
 
 - `Dyncamelo.Core` — **no** UI or Navisworks types. Graph model, engine, loader, serialization only.
 - `Dyncamelo.Nodes` — references `Core` **only**. Pure .NET nodes.
-- `Dyncamelo.Navisworks` — references `Core` plus the compile-time-only Navisworks API packages. Every Navisworks API call must be safe on the host main thread and must go through the documented transaction/undo scoping for writes.
-- `Dyncamelo.UI` — WPF/Nodify editor; no Navisworks types.
-- `Dyncamelo.App` — the thin add-in shell that composes everything inside Navisworks.
+- `Dyncamelo.Navisworks` — references `Core` and `Nodes` plus the compile-time-only Navisworks API packages. Every Navisworks API call must be safe on the host main thread. Writes should be undoable in Navisworks where its API allows it; whether one Navisworks Undo reverses a whole run is not known yet (see section 8 of the [QA checklist](docs/QA_CHECKLIST.md)).
+- `Dyncamelo.UI` — WPF/Nodify editor and Script Player; no Navisworks types.
+- `Dyncamelo.App` — the thin add-in shell that composes everything inside Navisworks (ribbon, panes, update check).
+- `Dyncamelo.Cli` — the headless runner (`run`, `validate`, `list-nodes`, `write-samples`); references `Core` and `Nodes` only, so it cannot run Navisworks nodes.
+- `Dyncamelo.Installer` — `DyncameloSetup.exe`; no references to the other projects.
+
+### Commands and settings
+
+Every editor command (a menu item, a shortcut, a palette entry) is declared **once**, in `CommandCatalog` (`src/Dyncamelo.Core/Editing/CommandCatalog.cs`). The menus, the shortcut table, the `F1` help, the command palette and [docs/UI_GUIDE.md](docs/UI_GUIDE.md) are all generated from it, so **a new command goes through `CommandCatalog`**, not straight into a menu or a key handler. Settings work the same way through `SettingsCatalog`. A test fails when `docs/UI_GUIDE.md` is out of date; regenerate it with:
+
+```bash
+DYNCAMELO_REGEN_DOCS=1 dotnet test tests/Dyncamelo.Core.Tests --filter UiGuideTests
+```
 
 ## Adding a node — checklist
 
-1. Check the [node catalog](docs/NODE_LIBRARY.md) for the agreed name, category, ports, and behavior. If your node is not in the catalog, propose it in an issue first.
+1. Check [docs/NODE_LIBRARY.md](docs/NODE_LIBRARY.md) for the agreed name, category, ports, and behavior, and the [node catalogue](docs/NODE_CATALOG.md) for what already exists. If your node is not in the design catalog, propose it in an issue first.
 2. Implement it zero-touch (static method + attributes) unless it genuinely needs interactive UI — see [docs/EXTENDING.md](docs/EXTENDING.md).
 3. Follow the error convention: **throw** for real failures (engine surfaces Error state), **warn and return null** for recoverable issues. Never swallow exceptions silently, never crash the run.
-4. General-purpose node (`Dyncamelo.Nodes`)? Add xunit tests in `tests/Dyncamelo.Nodes.Tests` — they must pass on Linux.
-5. Navisworks node? Unit-test any pure logic you can extract; cover the rest via the manual smoke checklist.
-6. Update `docs/NODE_LIBRARY.md` if ports/behavior deviate from the catalog (with reviewer agreement).
+4. **A node that changes the model, writes or deletes a file, starts a program or sends data must be marked `[NodeFunction(NodeFunction.Modify)]`.** The Script Player decides whether to ask for confirmation from that mark, and the name-based guess is not reliable for this. Reading nodes are `Info`.
+5. General-purpose node (`Dyncamelo.Nodes`)? Add xunit tests in `tests/Dyncamelo.Nodes.Tests` — they must pass on Linux.
+6. Navisworks node? Unit-test any pure logic you can extract; cover the rest via the [QA checklist](docs/QA_CHECKLIST.md) (add a row for it) and say in the PR whether you tried it in Navisworks.
+7. **Regenerate the node catalogue** and commit the result: `python3 tools/generate_node_catalog.py` (it rewrites `docs/NODE_CATALOG.md` and `docs/dyncamelo-nodes.json`; CI runs it with `--check` and fails when they are out of date). Do this whenever you add, rename or retire a node.
+8. Changing a node that has already shipped? Saved graphs must keep loading: keep an old definition id with `[NodeAliases]`, a renamed port with `[PortAlias]`, and retire a node with `[NodeDeprecated]` instead of deleting it. See [docs/EXTENDING.md](docs/EXTENDING.md#10-changing-a-node-that-is-already-shipped).
+9. Update `docs/NODE_LIBRARY.md` if ports/behavior deviate from the design catalog (with reviewer agreement), and add a line to [CHANGELOG.md](CHANGELOG.md) for a user-visible change.
 
 ## Git workflow
 
 - Branch from `main`; use descriptive branch names (`feature/list-groupbykey`, `fix/lacing-empty-list`).
 - Keep commits focused; write imperative-mood commit messages ("Add List.GroupByKey node").
-- Open a PR with: what/why, test evidence (CI plus smoke checklist result if applicable), and screenshots/GIFs for UI changes.
+- Open a PR with: what/why, test evidence (CI plus QA checklist rows if applicable), and screenshots/GIFs for UI changes. The [pull request template](.github/pull_request_template.md) lists what to tick.
 - One approving review is required. Maintainers squash-merge by default.
 
 ## Reporting security issues
 
-Please do not open public issues for security-sensitive reports (e.g., anything enabling code execution through a `.dyc` file). Email the maintainers instead — addresses are listed on the GitHub organization profile.
+Please do not open public issues for security-sensitive reports (e.g., anything enabling code execution through a `.dyc` file). Report them privately through a GitHub security advisory, as described in [SECURITY.md](SECURITY.md).
 
 ## Code of conduct
 

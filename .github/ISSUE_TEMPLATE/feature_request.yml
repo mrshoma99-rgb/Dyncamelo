@@ -1,0 +1,66 @@
+name: Feature request
+description: Suggest a new node, a change to the editor, or another improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please describe the job you are trying to get done before the solution you have in mind. That makes it much easier to find the right answer, which is sometimes a recipe with nodes that already exist (see the [recipes](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/RECIPES.md) and the [node catalogue](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/NODE_CATALOG.md)).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: What is it about?
+      options:
+        - A new node
+        - A change to an existing node
+        - The node editor (canvas, library, menus, settings)
+        - The Script Player
+        - The installer or the ribbon
+        - Documentation or samples
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: "Describe the job and where you are stuck. For a Navisworks job, say what is in the model and what you want at the end."
+      placeholder: "I have a federated model and I want to list every pipe without a system name, and export the list to Excel."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Dyncamelo to do?
+      description: "If you suggest a node, give it a name in the Category.Name style used in the library, and list its inputs and outputs."
+    validations:
+      required: false
+
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you do it today?
+      description: "Another tool, a manual process, or a graph that comes close. If you have the graph, attach it."
+    validations:
+      required: false
+
+  - type: input
+    id: navisworks-version
+    attributes:
+      label: Navisworks product and year
+      description: "Manage or Simulate, and 2024, 2025 or 2026. Some Navisworks features differ between years."
+      placeholder: "Manage 2025"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I can test a build of this in Navisworks.
+        - label: I would like to work on it myself (see CONTRIBUTING.md).
