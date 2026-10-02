@@ -20,8 +20,8 @@ namespace Dyncamelo.UI.Tests;
 /// </summary>
 public class EditorScreenshotTests
 {
-    private const double ShotWidth = 1600d;
-    private const double ShotHeight = 900d;
+    private const double ShotWidth = 1900d;
+    private const double ShotHeight = 1000d;
 
     [Theory]
     [InlineData("DyncameloDark", "editor-screenshot.png")]
@@ -73,7 +73,9 @@ public class EditorScreenshotTests
         {
             var vm = control!.ViewModel!;
             vm.SelectedItems.Clear();
-            foreach (var item in vm.Items.OfType<NodeViewModel>().Where(n => n.Model.X >= 860d))
+            var nodes = vm.Items.OfType<NodeViewModel>().ToList();
+            var firstColumn = nodes.Single(n => n.Model.Name == "Table.FromRows").Model.X;
+            foreach (var item in nodes.Where(n => n.Model.X >= firstColumn))
             {
                 vm.SelectedItems.Add(item);
             }

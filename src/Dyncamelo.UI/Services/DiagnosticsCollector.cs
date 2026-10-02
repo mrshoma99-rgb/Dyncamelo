@@ -213,6 +213,7 @@ public static class DiagnosticsCollector
         var lines = new List<string>();
         try
         {
+            lines.Add("Installed from: " + DistributionChannel.Detect(System.IO.Path.GetDirectoryName(typeof(DiagnosticsCollector).Assembly.Location)));
             lines.Add("Node library: " + (editor.Registry.Definitions.Count + editor.Registry.NodeTypes.Count) + " nodes");
             lines.Add("Palette: " + editor.PaletteId + "; UI scale: " + editor.UiScale);
             lines.Add("Ask before running graphs from files: " + (editor.ConfirmUntrustedRuns ? "on" : "off"));

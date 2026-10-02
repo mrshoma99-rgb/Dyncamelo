@@ -94,6 +94,9 @@ jobs:
       - name: Node catalogue is current (docs/dyncamelo-nodes.json and docs/NODE_CATALOG.md)
         run: python3 tools/generate_node_catalog.py --check
 
+      - name: Autodesk App Store package builder works (tools/build_store_package.py)
+        run: python3 tools/build_store_package.py --self-test
+
       - name: CLI smoke-run every runnable sample graph
         run: |
           set -e

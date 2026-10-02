@@ -231,6 +231,24 @@ jobs:
           # A self-signed dry-run signature is not trusted, so only a real certificate is checked for validity.
           ./tools/smoke-test-installer.ps1 -Installer DyncameloSetup.exe -StagedBundle staging/Dyncamelo.bundle -Version $env:VERSION
 
+      # The Autodesk App Store wants a different layout (Contents/v21..v23) and manifest. Built here from the same signed files, kept as a
+      # build artifact (never a release asset: it is a draft until appstore/publisher.json has a support email). See appstore/README.md.
+      - name: Build the Autodesk App Store package
+        if: env.SKIP != 'true'
+        continue-on-error: true
+        run: |
+          python tools/build_store_package.py --staging staging/Dyncamelo.bundle --version $env:VERSION --out store-package
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Keep the Autodesk App Store package
+        if: env.SKIP != 'true' && always()
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: appstore-package
+          path: store-package/
+          retention-days: 30
+
       - name: Package bundle zip
         if: env.SKIP != 'true'
         run: |

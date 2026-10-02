@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Plugins;
+using Dyncamelo.Core.Editing;
 using Dyncamelo.Navisworks;
 using Dyncamelo.UI.ViewModels;
 using Dyncamelo.UI.Views;
@@ -23,6 +24,9 @@ public class DyncameloDockPanePlugin : DockPanePlugin
 {
     /// <summary>Plugin id used with SetDockPanePluginVisibility.</summary>
     public const string PluginId = "Dyncamelo.DockPane.DYNC";
+
+    private static readonly string InstallFolder =
+        System.IO.Path.GetDirectoryName(typeof(DyncameloDockPanePlugin).Assembly.Location) ?? string.Empty;
 
     private GraphEditorViewModel? _viewModel;
     private PaneKeyGuard? _keyGuard;
@@ -85,8 +89,11 @@ public class DyncameloDockPanePlugin : DockPanePlugin
             editor.Dispatcher.BeginInvoke(new Action(() => _viewModel?.OpenDroppedFiles(new[] { pending })));
         }
 
-        // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists.
-        UpdateCheck.Run(action => editor.Dispatcher.BeginInvoke(action), () => _viewModel?.CheckForUpdates ?? true);
+        // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists. A copy installed from the
+        // Autodesk App Store is updated by the store, so it never offers the GitHub download.
+        UpdateCheck.Run(
+            action => editor.Dispatcher.BeginInvoke(action),
+            () => !DistributionChannel.IsAppStore(InstallFolder) && (_viewModel?.CheckForUpdates ?? true));
 
         return host;
     }

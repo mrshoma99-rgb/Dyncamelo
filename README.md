@@ -26,10 +26,9 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 > Search a federated model by property, color-code it by system, bulk-create selection sets, dump quantities to CSV, triage clashes by rule, and batch-generate viewpoints — as reusable, shareable `.dyc` graph files.
 
-<!-- SCREENSHOT PLACEHOLDER: replace with a canvas screenshot once the editor is running in Navisworks.
-![Dyncamelo editor docked in Navisworks 2024](docs/images/editor-screenshot.png)
--->
-*Screenshot coming soon — the editor is under active development.*
+![The Dyncamelo editor with a sample graph](docs/images/editor-screenshot.png)
+
+*The editor with the "Table Summary from Text" sample after a run: nodes, wires, the values under each node and a Watch Table. The same editor has a [light theme](docs/images/editor-screenshot-light.png). It docks inside Navisworks as a pane.*
 
 ---
 
