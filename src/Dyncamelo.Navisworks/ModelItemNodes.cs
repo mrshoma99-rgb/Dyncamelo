@@ -243,8 +243,8 @@ public static class ModelItemNodes
     [PortKinds("boolean", "item", "")]
     public static Dictionary<string, object?> AncestorPropertyMatches(
         ModelItem item,
-        string category,
-        string property,
+        [NodeTabChoice("item", IncludeAncestors = true)] string category,
+        [NodePropertyChoice("item", "category", IncludeAncestors = true)] string property,
         string text,
         [NodeChoices("contains", "doesn't contain", "starts with", "doesn't start with", "ends with", "doesn't end with")]
         string mode = "contains",

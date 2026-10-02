@@ -132,6 +132,55 @@ public sealed class NodeChoicesAttribute : Attribute
 }
 
 /// <summary>
+/// Marks a text parameter as the name of a property tab (category) of the model element carried by another input of the same node.
+/// The editor then shows a small search button next to the text box; pressing it lists the tabs of THAT element (never of the whole
+/// model) in a drop-down. Typing the name by hand always works and nothing is read until the button is pressed. Purely advisory — the
+/// parameter stays a string, so saved graphs and definition ids are unchanged.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodeTabChoiceAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="from">The name of the input (parameter) that carries the element or elements.</param>
+    public NodeTabChoiceAttribute(string from)
+    {
+        From = from ?? throw new ArgumentNullException(nameof(from));
+    }
+
+    /// <summary>The input that carries the element or elements to read.</summary>
+    public string From { get; }
+
+    /// <summary>True when the node also looks at the element's parents, so their tabs are offered too.</summary>
+    public bool IncludeAncestors { get; set; }
+}
+
+/// <summary>
+/// Marks a text parameter as the name of a property inside the tab chosen on another input, of the model element carried by a third
+/// input of the same node. The search button lists the properties of that tab on THAT element only (see <see cref="NodeTabChoiceAttribute"/>).
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodePropertyChoiceAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="from">The name of the input (parameter) that carries the element or elements.</param>
+    /// <param name="tab">The name of the input (parameter) that holds the tab.</param>
+    public NodePropertyChoiceAttribute(string from, string tab)
+    {
+        From = from ?? throw new ArgumentNullException(nameof(from));
+        Tab = tab ?? throw new ArgumentNullException(nameof(tab));
+    }
+
+    /// <summary>The input that carries the element or elements to read.</summary>
+    public string From { get; }
+
+    /// <summary>The input that holds the tab.</summary>
+    public string Tab { get; }
+
+    /// <summary>True when the node also looks at the element's parents, so their properties are offered too.</summary>
+    public bool IncludeAncestors { get; set; }
+}
+
+/// <summary>
 /// Gives a <c>string</c> parameter a dropdown made of the names of an enum, optionally preceded by extra values of its own
 /// (e.g. <c>"document"</c> before the unit names). The parameter stays a string, so its definition id does not change and a wired
 /// text still works.

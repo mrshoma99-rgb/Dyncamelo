@@ -8,11 +8,14 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 
 ## Unreleased
 
+### Added
+* **A small search button next to tab and property names.** On the nodes that read a property of an element (Properties.Value, ValueAsString, HasProperty and InCategory, ModelItem.AncestorPropertyMatches, Audit.MissingProperty, Takeoff.SumPropertyByGroup) the category and property inputs stay plain text boxes you can type in; a magnifier beside each lists the tabs, or the properties of the chosen tab, **of that node's own element** — the one picked on it or wired in — and a click fills the box. Nothing is read until the button is pressed, only that one element is read (the first 100 of a longer list), and what you typed narrows the list. Nodes that search the whole model (Search.ByProperty and the like) are unchanged. Node authors get `[NodeTabChoice]` and `[NodePropertyChoice]` for it (see docs/EXTENDING.md).
+
 ### Changed
 * **The Script Player has a new layout.** A script bar names the open script and unfolds the list (search, ↻), the form is a card of labelled fields with an on/off switch beside its label, the results sit in a card of their own, and **Run**, **Reset**, *Edit* and *File* stay at the bottom in view however long the form is. The list folds away once a script is chosen, `Enter` in it chooses and puts the focus on Run, and typing in the search box no longer closes the open script or loses its values.
 
 ### Fixed
-* **Text fields in the Script Player no longer cut their text off.** A long or multi-line value (a pasted table, a sentence) was shown in a box one line high, with the second line half hidden. The field now wraps and grows with its text up to a limit, then scrolls; fields are taller (28 pixels) so the text is centred in them.
+* **Text boxes no longer cut their text off.** The themed text box counted its padding twice, so every one was taller than intended with its text further in than asked, and a box with a fixed height clipped what it held. The padding now counts once everywhere (the library and quick search boxes, property fields, the text inputs on nodes, the Script Player). In the Script Player a long or multi-line value (a pasted table, a sentence) was shown in a box one line high with the second line half hidden; the field now wraps and grows with its text up to a limit, then scrolls.
 
 ## 0.46.0 - 2026-10-02
 

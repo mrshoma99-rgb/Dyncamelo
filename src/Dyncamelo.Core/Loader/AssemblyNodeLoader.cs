@@ -450,6 +450,23 @@ public static class AssemblyNodeLoader
             }
         }
 
+        // The search button of a name input: only on a string parameter (it stays a plain text input otherwise).
+        if (parameter.ParameterType == typeof(string))
+        {
+            var tabChoice = parameter.GetCustomAttribute<NodeTabChoiceAttribute>();
+            var propertyChoice = parameter.GetCustomAttribute<NodePropertyChoiceAttribute>();
+            if (tabChoice != null)
+            {
+                descriptor.DataChoice = new Dyncamelo.Core.Editing.ModelDataChoice(
+                    Dyncamelo.Core.Editing.ModelDataKind.Tab, tabChoice.From, null, tabChoice.IncludeAncestors);
+            }
+            else if (propertyChoice != null)
+            {
+                descriptor.DataChoice = new Dyncamelo.Core.Editing.ModelDataChoice(
+                    Dyncamelo.Core.Editing.ModelDataKind.Property, propertyChoice.From, propertyChoice.Tab, propertyChoice.IncludeAncestors);
+            }
+        }
+
         descriptor.Range = parameter.GetCustomAttribute<NodeRangeAttribute>();
         var panel = parameter.GetCustomAttribute<NodePanelAttribute>();
         if (panel != null)

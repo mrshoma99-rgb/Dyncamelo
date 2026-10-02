@@ -97,6 +97,12 @@ public class PortModel : INotifyPropertyChanged
     /// </summary>
     public System.Collections.Generic.IReadOnlyList<string>? Choices { get; internal set; }
 
+    /// <summary>
+    /// Set on a text input that can be filled from the tabs or properties of the element on another input of the node (from
+    /// <c>[NodeTabChoice]</c> / <c>[NodePropertyChoice]</c>): the editor then shows a search button. Static (not serialized).
+    /// </summary>
+    public Dyncamelo.Core.Editing.ModelDataChoice? DataChoice { get; internal set; }
+
     /// <summary>Numeric range/step metadata for the inline scrub field, or null. Static (not serialized).</summary>
     public Dyncamelo.Core.Loader.NodeRangeAttribute? Range { get; internal set; }
 

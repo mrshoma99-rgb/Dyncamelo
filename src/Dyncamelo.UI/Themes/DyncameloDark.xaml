@@ -409,9 +409,11 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="6">
                         <!-- No forced VerticalAlignment: single-line boxes centre via
-                             VerticalContentAlignment; multiline Watch boxes fill and scroll. -->
-                        <ScrollViewer x:Name="PART_ContentHost"
-                                      Margin="{TemplateBinding Padding}" />
+                             VerticalContentAlignment; multiline Watch boxes fill and scroll.
+                             No Margin from Padding either: a TextBox applies its Padding to the text itself, so a margin as well
+                             counted it twice — every box was taller and its text further in than the Padding asked for, and a box with a
+                             fixed Height cut its text off. -->
+                        <ScrollViewer x:Name="PART_ContentHost" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">
@@ -2035,6 +2037,96 @@
                  ToolTip="{Binding ToolTip}" />
     </DataTemplate>
 
+    <!-- A choice in the drop-down of a tab / property search. -->
+    <Style x:Key="Dyc.DataChoiceButton" TargetType="{x:Type Button}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd" Background="Transparent" Padding="10,4">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The list a search button opens: what the node's element carries, to click one. Nothing here reads the model; the view model
+         filled the list when the button was pressed. -->
+    <DataTemplate x:Key="Editor.DataChoiceList">
+        <Border Background="{DynamicResource Dyc.PanelBrush}"
+                BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                MinWidth="180"
+                MaxWidth="360">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="{Binding DataStatus}"
+                           TextWrapping="Wrap"
+                           FontSize="10.5"
+                           Margin="10,7,10,5"
+                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding DataItems}" IsTabStop="False" Margin="0,0,0,4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource Dyc.DataChoiceButton}"
+                                        Content="{Binding}"
+                                        CommandParameter="{Binding}"
+                                        Command="{Binding DataContext.ChooseDataCommand, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </DataTemplate>
+
+    <!-- A text input with a search button: type the name, or press the magnifier to choose from what the node's element carries. -->
+    <DataTemplate x:Key="Editor.TextSearch">
+        <DockPanel x:Name="Field">
+            <!-- first, so it takes no room: the text box is the last child and fills the row -->
+            <Popup IsOpen="{Binding IsDataListOpen, Mode=TwoWay}"
+                   PlacementTarget="{Binding ElementName=Field}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   PopupAnimation="Fade">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource Editor.DataChoiceList}" Margin="0,2,8,8" Focusable="False" />
+            </Popup>
+            <Button DockPanel.Dock="Right"
+                    Width="22" Height="22"
+                    Margin="3,0,0,0"
+                    Padding="0"
+                    Focusable="False"
+                    Style="{StaticResource Dyc.SmallButton}"
+                    Command="{Binding SearchDataCommand}"
+                    ToolTip="{Binding DataSearchToolTip}">
+                <Path Width="11" Height="11" Stretch="Uniform"
+                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                      Data="{StaticResource Dyc.Icon.Search}" />
+            </Button>
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     Height="22"
+                     MinWidth="60"
+                     Padding="6,0"
+                     FontSize="11"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                     ToolTip="{Binding ToolTip}" />
+        </DockPanel>
+    </DataTemplate>
+
     <DataTemplate x:Key="Editor.Colour">
         <views:ColorSwatchPicker Hex="{Binding ColourHex, Mode=TwoWay}" />
     </DataTemplate>
@@ -2180,6 +2272,15 @@
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Text" />
+                    <Condition Binding="{Binding Connector.HasDataSearch}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource Editor.TextSearch}" />
+                <Setter Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
                     <Condition Binding="{Binding Connector.EditorKind}" Value="Colour" />
                 </MultiDataTrigger.Conditions>
                 <Setter Property="ContentTemplate" Value="{StaticResource Editor.Colour}" />
@@ -2245,6 +2346,44 @@
                  AcceptsReturn="{Binding AllowsLineBreaks, Mode=OneWay}"
                  Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
                  ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerEditor.TextSearch">
+        <DockPanel x:Name="Field">
+            <!-- first, so it takes no room: the text box is the last child and fills the row -->
+            <Popup IsOpen="{Binding IsDataListOpen, Mode=TwoWay}"
+                   PlacementTarget="{Binding ElementName=Field}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   PopupAnimation="Fade">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource Editor.DataChoiceList}" Margin="0,2,8,8" Focusable="False" />
+            </Popup>
+            <Button DockPanel.Dock="Right"
+                    Width="28" Height="28"
+                    Margin="4,0,0,0"
+                    Padding="0"
+                    VerticalAlignment="Top"
+                    Focusable="False"
+                    Style="{StaticResource Dyc.SmallButton}"
+                    Command="{Binding SearchDataCommand}"
+                    ToolTip="{Binding DataSearchToolTip}">
+                <Path Width="12" Height="12" Stretch="Uniform"
+                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                      Data="{StaticResource Dyc.Icon.Search}" />
+            </Button>
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     MinHeight="28"
+                     MaxHeight="180"
+                     Padding="8,5"
+                     FontSize="12"
+                     TextWrapping="Wrap"
+                     VerticalContentAlignment="Center"
+                     VerticalScrollBarVisibility="Auto"
+                     AcceptsReturn="{Binding AllowsLineBreaks, Mode=OneWay}"
+                     Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                     ToolTip="{Binding ToolTip}" />
+        </DockPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="PlayerEditor.Dropdown">
@@ -2348,6 +2487,14 @@
                     <Condition Binding="{Binding Connector.EditorKind}" Value="Text" />
                 </MultiDataTrigger.Conditions>
                 <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Text}" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Text" />
+                    <Condition Binding="{Binding Connector.HasDataSearch}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.TextSearch}" />
             </MultiDataTrigger>
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>

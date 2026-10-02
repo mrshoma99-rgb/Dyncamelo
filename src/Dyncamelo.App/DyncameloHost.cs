@@ -229,6 +229,7 @@ internal static class DyncameloHost
 
         // Lets model-element inputs on nodes read, describe and re-select the live Navisworks selection.
         Dyncamelo.Core.Editing.ModelPickerHost.Current = new Dyncamelo.Navisworks.NavisworksModelPicker();
+        Dyncamelo.Core.Editing.ModelPropertyHost.Current = new Dyncamelo.Navisworks.NavisworksPropertyCatalog();
 
         // General-purpose nodes (math/logic/string/list/... plus List.Create,
         // Watch List and Color Picker interactive nodes).

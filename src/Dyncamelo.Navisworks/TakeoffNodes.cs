@@ -25,10 +25,10 @@ public static class TakeoffNodes
     [PortKinds("text*", "number*", "integer*")]
     public static Dictionary<string, object?> SumPropertyByGroup(
         [MultiInput] IEnumerable<ModelItem> items,
-        string groupCategoryName,
-        string groupPropertyName,
-        string valueCategoryName,
-        string valuePropertyName)
+        [NodeTabChoice("items")] string groupCategoryName,
+        [NodePropertyChoice("items", "groupCategoryName")] string groupPropertyName,
+        [NodeTabChoice("items")] string valueCategoryName,
+        [NodePropertyChoice("items", "valueCategoryName")] string valuePropertyName)
     {
         if (items == null)
         {

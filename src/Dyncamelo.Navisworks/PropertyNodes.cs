@@ -19,7 +19,10 @@ public static class PropertyNodes
     [NodeDescription("Reads a property value from a model item, converted to a plain value. Returns null when the property is absent.")]
     [NodeSearchTags("property", "value", "parameter", "attribute", "data")]
     [return: NodeName("value")]
-    public static object? Value(ModelItem item, string categoryName, string propertyName)
+    public static object? Value(
+        ModelItem item,
+        [NodeTabChoice("item")] string categoryName,
+        [NodePropertyChoice("item", "categoryName")] string propertyName)
     {
         if (item == null)
         {
@@ -76,7 +79,7 @@ public static class PropertyNodes
     [NodeSearchTags("property", "category", "all", "names", "values", "tab")]
     [MultiReturn("names", "values")]
     [PortKinds("text*", "")]
-    public static Dictionary<string, object?> InCategory(ModelItem item, string categoryName)
+    public static Dictionary<string, object?> InCategory(ModelItem item, [NodeTabChoice("item")] string categoryName)
     {
         var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(categoryName))
@@ -113,7 +116,10 @@ public static class PropertyNodes
     [NodeDescription("Reads a property value as text. Returns \"\" when the property is absent.")]
     [NodeSearchTags("property", "value", "string", "text", "display")]
     [return: NodeName("text")]
-    public static string ValueAsString(ModelItem item, string categoryName, string propertyName)
+    public static string ValueAsString(
+        ModelItem item,
+        [NodeTabChoice("item")] string categoryName,
+        [NodePropertyChoice("item", "categoryName")] string propertyName)
     {
         var value = Value(item, categoryName, propertyName);
         if (value == null)
@@ -135,7 +141,10 @@ public static class PropertyNodes
     [NodeDescription("True when the item carries the property — drives model-QA missing-data masks.")]
     [NodeSearchTags("property", "has", "exists", "qa", "missing")]
     [return: NodeName("hasProperty")]
-    public static bool HasProperty(ModelItem item, string categoryName, string propertyName)
+    public static bool HasProperty(
+        ModelItem item,
+        [NodeTabChoice("item")] string categoryName,
+        [NodePropertyChoice("item", "categoryName")] string propertyName)
     {
         var modelItem = NavisValues.RequireItem(item);
         if (string.IsNullOrEmpty(categoryName))

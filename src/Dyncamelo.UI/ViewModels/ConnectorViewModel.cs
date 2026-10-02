@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -77,6 +78,8 @@ public class ConnectorViewModel : ObservableObject
         NumberSpec = EditorKind == PortEditorKind.Number ? NumberEditSpec.FromPort(port) : null;
         ResetCommand = new RelayCommand(() => Port.ClearUserValue(), () => Port.HasUserValue);
         BrowseCommand = new RelayCommand(BrowsePath);
+        SearchDataCommand = new RelayCommand(SearchData);
+        ChooseDataCommand = new RelayCommand<string>(ChooseData);
         CaptureModelCommand = new RelayCommand(CaptureModel, () => ModelPickerHost.Current != null);
         RevealModelCommand = new RelayCommand(RevealModel, () => HasModelValue && ModelPickerHost.Current != null);
         DisconnectCommand = new RelayCommand(
@@ -130,7 +133,7 @@ public class ConnectorViewModel : ObservableObject
             nameof(Title), nameof(ToolTip), nameof(Kind), nameof(Family), nameof(Depth), nameof(FamilyBrush), nameof(SocketGlyph),
             nameof(SocketGeometry), nameof(KindText), nameof(EditorKind), nameof(NumberSpec), nameof(ShowEditor), nameof(ShowPlainLabel),
             nameof(NumberMin), nameof(NumberMax), nameof(NumberSoftMin), nameof(NumberSoftMax), nameof(NumberStep), nameof(NumberIsInteger),
-            nameof(NumberUnit), nameof(NumberValue),
+            nameof(NumberUnit), nameof(NumberValue), nameof(HasDataSearch),
         })
         {
             OnPropertyChanged(name);
@@ -634,6 +637,125 @@ public class ConnectorViewModel : ObservableObject
         {
             PortEditors.SetText(Port, chosen);
         }
+    }
+
+    // ----- the search button of a tab / property input ----------------------------------------------
+
+    private List<string> _dataAll = new List<string>();
+    private bool _isDataListOpen;
+    private string _dataStatus = string.Empty;
+
+    /// <summary>
+    /// True for a text input that can be filled from the tabs or properties of the element on another input of its node: a small
+    /// search button then sits next to the text box. The box itself is always there — the name can be typed by hand.
+    /// </summary>
+    public bool HasDataSearch => Port.DataChoice != null && EditorKind == PortEditorKind.Text;
+
+    /// <summary>What the search button says when hovered.</summary>
+    public string DataSearchToolTip
+    {
+        get
+        {
+            var choice = Port.DataChoice;
+            if (choice == null)
+            {
+                return string.Empty;
+            }
+
+            return choice.Kind == ModelDataKind.Tab
+                ? "Choose from the tabs of the element on '" + choice.From + "'. Only that element is read, and only when you press this. You can also type the name."
+                : "Choose from the properties in the '" + choice.Tab + "' tab of the element on '" + choice.From + "'. Only that element is read, and only when you press this. You can also type the name.";
+        }
+    }
+
+    /// <summary>The names the last search found (narrowed by what was typed), shown in the drop-down.</summary>
+    public ObservableCollection<string> DataItems { get; } = new ObservableCollection<string>();
+
+    /// <summary>What the last search found, or why it found nothing.</summary>
+    public string DataStatus
+    {
+        get => _dataStatus;
+        private set => SetProperty(ref _dataStatus, value);
+    }
+
+    /// <summary>True while the drop-down of the search is open.</summary>
+    public bool IsDataListOpen
+    {
+        get => _isDataListOpen;
+        set => SetProperty(ref _isDataListOpen, value);
+    }
+
+    /// <summary>Reads the element on the node's element input (that one only) and opens the drop-down with what it carries.</summary>
+    public ICommand SearchDataCommand { get; }
+
+    /// <summary>Puts a name from the drop-down into the text box.</summary>
+    public ICommand ChooseDataCommand { get; }
+
+    private void SearchData()
+    {
+        var listing = ModelDataScope.Search(Port);
+        _dataAll = listing.Names.ToList();
+
+        // What is already typed narrows the list — unless it already is one of the names, when the user wants the others to choose from.
+        var typed = TextValue.Trim();
+        var shown = _dataAll;
+        var narrowed = false;
+        if (typed.Length > 0 && !_dataAll.Any(n => string.Equals(n, typed, StringComparison.OrdinalIgnoreCase)))
+        {
+            var hits = _dataAll.Where(n => n.IndexOf(typed, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+            if (hits.Count > 0)
+            {
+                shown = hits;
+                narrowed = true;
+            }
+        }
+
+        DataItems.Clear();
+        foreach (var name in shown)
+        {
+            DataItems.Add(name);
+        }
+
+        DataStatus = DescribeListing(listing, shown.Count, narrowed, typed);
+        IsDataListOpen = true;
+    }
+
+    private string DescribeListing(ModelDataListing listing, int shown, bool narrowed, string typed)
+    {
+        var choice = Port.DataChoice;
+        if (listing.Problem.Length > 0)
+        {
+            return listing.Problem;
+        }
+
+        var isTab = choice != null && choice.Kind == ModelDataKind.Tab;
+        string Plural(int n) => isTab ? (n == 1 ? "tab" : "tabs") : (n == 1 ? "property" : "properties");
+        if (listing.Names.Count == 0)
+        {
+            return isTab
+                ? "The element has no property tabs."
+                : "The '" + ModelDataScope.TabOf(Port) + "' tab has no properties on the element.";
+        }
+
+        var text = narrowed
+            ? shown.ToString(System.Globalization.CultureInfo.InvariantCulture) + " of " + listing.Names.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+              " " + Plural(listing.Names.Count) + " contain '" + typed + "'"
+            : listing.Names.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " " + Plural(listing.Names.Count);
+        text += listing.Total > listing.Scanned
+            ? " on the first " + listing.Scanned.ToString(System.Globalization.CultureInfo.InvariantCulture) + " of " +
+              listing.Total.ToString(System.Globalization.CultureInfo.InvariantCulture) + " elements"
+            : listing.Scanned > 1 ? " on " + listing.Scanned.ToString(System.Globalization.CultureInfo.InvariantCulture) + " elements" : " on the element";
+        return text;
+    }
+
+    private void ChooseData(string? name)
+    {
+        if (!string.IsNullOrEmpty(name))
+        {
+            TextValue = name!;
+        }
+
+        IsDataListOpen = false;
     }
 
     private void RaiseValueChanged()

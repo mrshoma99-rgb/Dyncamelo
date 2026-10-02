@@ -37,6 +37,7 @@ public class ZeroTouchNodeModel : NodeModel
                 port.Choices = input.Choices;
             }
 
+            port.DataChoice = input.DataChoice;
             port.Range = input.Range;
             port.Panel = input.Panel;
             port.PanelDefaultOpen = input.PanelDefaultOpen;

@@ -41,6 +41,9 @@ public class PortDescriptor
     /// </summary>
     public IReadOnlyList<string>? Choices { get; set; }
 
+    /// <summary>The tab / property search of a name parameter (from <see cref="NodeTabChoiceAttribute"/> or <see cref="NodePropertyChoiceAttribute"/>), or null.</summary>
+    public Dyncamelo.Core.Editing.ModelDataChoice? DataChoice { get; set; }
+
     /// <summary>Numeric range metadata from <see cref="NodeRangeAttribute"/>, or null.</summary>
     public NodeRangeAttribute? Range { get; set; }
 

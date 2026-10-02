@@ -24,8 +24,8 @@ public static class AuditNodes
     [MultiReturn("items", "count")]
     [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> MissingProperty(
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice("items")] string categoryName,
+        [NodePropertyChoice("items", "categoryName")] string propertyName,
         IEnumerable<ModelItem>? items = null,
         bool geometryOnly = true,
         Document? document = null)
