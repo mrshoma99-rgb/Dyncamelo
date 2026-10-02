@@ -150,6 +150,8 @@ public static class SettingsCatalog
             "Keep a copy of a graph with unsaved changes once a minute, and offer it back if Navisworks closed or crashed before you saved. The copy is deleted when you save.", true),
         new SettingDescriptor("previewSelection", "Editing", "Highlight selected node in Navisworks",
             "Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current.", false),
+        new SettingDescriptor("confirmUntrustedRuns", "Editing", "Ask before running graphs from files",
+            "A graph opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask.", true),
         new SettingDescriptor("doubleClick", "Editing", "Double-click empty canvas", "What double-clicking the empty canvas does.", "string",
             new SettingOption("string", "Insert a String node"), new SettingOption("number", "Insert a Number node"),
             new SettingOption("note", "Add a note"), new SettingOption("none", "Do nothing")),

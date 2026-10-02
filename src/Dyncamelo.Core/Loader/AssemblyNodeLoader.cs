@@ -262,6 +262,7 @@ public static class AssemblyNodeLoader
             Name = name,
             Category = category,
             Function = ResolveFunction(method, name, category),
+            Effects = method.GetCustomAttribute<NodeEffectsAttribute>()?.Effects ?? Dyncamelo.Core.Graph.NodeEffects.None,
             Description = method.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? type.GetCustomAttribute<NodeDescriptionAttribute>()?.Description
                 ?? docs?.Summary

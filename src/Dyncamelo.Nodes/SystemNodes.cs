@@ -59,6 +59,7 @@ public static class SystemNodes
     /// <param name="reveal">True to show the item in Explorer (Windows) / open its containing folder (other systems) instead of opening it.</param>
     /// <returns>The path that was opened, for sequencing further nodes.</returns>
     [NodeName("System.OpenPath")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.RunsPrograms)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("path")]
     [NodeDescription("Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true.")]
@@ -96,6 +97,7 @@ public static class SystemNodes
     /// <param name="timeoutSeconds">How long to wait before stopping the program (1 to 3600 seconds).</param>
     /// <returns>Dictionary with "exitCode", "output" (standard output) and "error" (standard error).</returns>
     [NodeName("System.Run")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.RunsPrograms)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [MultiReturn("exitCode", "output", "error")]
     [PortKinds("integer", "text", "text")]
@@ -123,6 +125,7 @@ public static class SystemNodes
     /// <param name="timeoutSeconds">How long to wait for the answer (1 to 600 seconds).</param>
     /// <returns>Dictionary with "status" (HTTP code), "body" (response text) and "ok" (true for 2xx).</returns>
     [NodeName("Web.Get")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.UsesNetwork)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Info)]
     [MultiReturn("status", "body", "ok")]
     [PortKinds("integer", "text", "boolean")]
@@ -145,6 +148,7 @@ public static class SystemNodes
     /// <param name="timeoutSeconds">How long to wait for the answer (1 to 600 seconds).</param>
     /// <returns>Dictionary with "status" (HTTP code), "body" (response text) and "ok" (true for 2xx).</returns>
     [NodeName("Web.Post")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.UsesNetwork)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [MultiReturn("status", "body", "ok")]
     [PortKinds("integer", "text", "boolean")]

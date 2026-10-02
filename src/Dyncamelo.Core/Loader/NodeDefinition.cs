@@ -43,6 +43,9 @@ public class NodeDefinition
     /// <summary>Functional role (Create / Modify / Info) for library grouping and node tint.</summary>
     public Dyncamelo.Core.Graph.NodeFunction Function { get; set; } = Dyncamelo.Core.Graph.NodeFunction.Modify;
 
+    /// <summary>What the node can do outside the model and the graph (programs, network, existing files); none for almost every node.</summary>
+    public Dyncamelo.Core.Graph.NodeEffects Effects { get; set; }
+
     /// <summary>Description for the library browser and tooltips.</summary>
     public string Description { get; set; } = string.Empty;
 

@@ -24,6 +24,8 @@ public class UiSettingsService
     private readonly List<string> _recentNodeIds = new List<string>();
     private readonly List<string> _playerFolders = new List<string>();
     private readonly Dictionary<string, string> _playerConfirmed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _editorConfirmed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private bool _confirmUntrustedRuns = true;
     private readonly Dictionary<string, JObject> _playerValues = new Dictionary<string, JObject>(StringComparer.OrdinalIgnoreCase);
     private string _playerLastScript = string.Empty;
     private bool _showLibraryDescriptions = true;
@@ -104,6 +106,40 @@ public class UiSettingsService
         _playerConfirmed[path] = hash;
         Trim(_playerConfirmed, MaxPlayerMemory);
         Save();
+    }
+
+    /// <summary>The hash of the graph file as it was when the user last agreed to run it in the editor (or saved it from there), or empty.</summary>
+    /// <param name="path">The graph's full path.</param>
+    public string EditorConfirmedHash(string path) =>
+        _editorConfirmed.TryGetValue(path, out var hash) ? hash : string.Empty;
+
+    /// <summary>Records that the user agreed to run the graph file as it is now (or saved it themselves).</summary>
+    /// <param name="path">The graph's full path.</param>
+    /// <param name="hash">The file's hash.</param>
+    public void SetEditorConfirmed(string path, string hash)
+    {
+        if (_editorConfirmed.TryGetValue(path, out var current) && current == hash)
+        {
+            return;
+        }
+
+        _editorConfirmed[path] = hash;
+        Trim(_editorConfirmed, MaxPlayerMemory);
+        Save();
+    }
+
+    /// <summary>True (the default) to ask before running a graph opened from a file that starts programs, uses the network or changes existing files.</summary>
+    public bool ConfirmUntrustedRuns => _confirmUntrustedRuns;
+
+    /// <summary>Persists the "ask before running graphs from files" preference.</summary>
+    /// <param name="enabled">True to ask.</param>
+    public void SetConfirmUntrustedRuns(bool enabled)
+    {
+        if (_confirmUntrustedRuns != enabled)
+        {
+            _confirmUntrustedRuns = enabled;
+            Save();
+        }
     }
 
     /// <summary>The values last used in the script's form, or null.</summary>
@@ -332,6 +368,7 @@ public class UiSettingsService
         _showLibraryDescriptions = true;
         _doubleClickAction = "string";
         _previewSelection = false;
+        _confirmUntrustedRuns = true;
         _paletteId = "DyncameloDark";
         _liveScrubEvaluation = false;
         _values.Clear();
@@ -430,6 +467,8 @@ public class UiSettingsService
                 RecentNodeIds = new List<string>(_recentNodeIds),
                 PlayerFolders = new List<string>(_playerFolders),
                 PlayerConfirmed = new Dictionary<string, string>(_playerConfirmed),
+                EditorConfirmed = new Dictionary<string, string>(_editorConfirmed),
+                ConfirmUntrustedRuns = _confirmUntrustedRuns,
                 PlayerValues = new Dictionary<string, JObject>(_playerValues),
                 PlayerLastScript = _playerLastScript,
                 ShowLibraryDescriptions = _showLibraryDescriptions,
@@ -490,6 +529,8 @@ public class UiSettingsService
         _recentNodeIds.Clear();
         _playerFolders.Clear();
         _playerConfirmed.Clear();
+        _editorConfirmed.Clear();
+        _confirmUntrustedRuns = true;
         _playerValues.Clear();
         _playerLastScript = string.Empty;
         _showLibraryDescriptions = true;
@@ -529,6 +570,7 @@ public class UiSettingsService
         _showLibraryDescriptions = data.ShowLibraryDescriptions ?? true;
         _doubleClickAction = string.IsNullOrEmpty(data.DoubleClickAction) ? "string" : data.DoubleClickAction!;
         _previewSelection = data.PreviewSelection ?? false;
+        _confirmUntrustedRuns = data.ConfirmUntrustedRuns ?? true;
         _paletteId = string.IsNullOrEmpty(data.PaletteId) ? "DyncameloDark" : data.PaletteId!;
         _liveScrubEvaluation = data.LiveScrubEvaluation ?? false;
 
@@ -572,6 +614,17 @@ public class UiSettingsService
                 if (!string.IsNullOrEmpty(pair.Key) && !string.IsNullOrEmpty(pair.Value))
                 {
                     _playerConfirmed[pair.Key] = pair.Value;
+                }
+            }
+        }
+
+        if (data.EditorConfirmed != null)
+        {
+            foreach (var pair in data.EditorConfirmed)
+            {
+                if (!string.IsNullOrEmpty(pair.Key) && !string.IsNullOrEmpty(pair.Value))
+                {
+                    _editorConfirmed[pair.Key] = pair.Value;
                 }
             }
         }
@@ -683,6 +736,12 @@ public class UiSettingsService
 
         [JsonProperty("playerConfirmed")]
         public Dictionary<string, string>? PlayerConfirmed { get; set; }
+
+        [JsonProperty("editorConfirmed")]
+        public Dictionary<string, string>? EditorConfirmed { get; set; }
+
+        [JsonProperty("confirmUntrustedRuns")]
+        public bool? ConfirmUntrustedRuns { get; set; }
 
         [JsonProperty("playerValues")]
         public Dictionary<string, JObject>? PlayerValues { get; set; }

@@ -92,6 +92,24 @@ public sealed class NodeFunctionAttribute : Attribute
 }
 
 /// <summary>
+/// Declares what a node can do outside the model and the graph (starts programs, uses the network, changes existing files), so the
+/// editor can warn before a graph from a file runs such a node. Put it on every node that does any of these.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class NodeEffectsAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="effects">What the node can do.</param>
+    public NodeEffectsAttribute(Dyncamelo.Core.Graph.NodeEffects effects)
+    {
+        Effects = effects;
+    }
+
+    /// <summary>What the node can do.</summary>
+    public Dyncamelo.Core.Graph.NodeEffects Effects { get; }
+}
+
+/// <summary>
 /// Declares a fixed set of allowed string values for a parameter, so the editor
 /// can offer a dropdown instead of a free-text box (e.g. selection-resolution
 /// levels, clash test types, export schemas). The values are the canonical

@@ -227,11 +227,7 @@ public sealed class ScriptSession
         }
 
         var bytes = File.ReadAllBytes(path);
-        string hash;
-        using (var sha = SHA256.Create())
-        {
-            hash = string.Concat(sha.ComputeHash(bytes).Select(b => b.ToString("x2", CultureInfo.InvariantCulture)));
-        }
+        var hash = Dyncamelo.Core.Editing.FileFingerprint.Of(bytes);
 
         var graph = new GraphSerializer(registry).Deserialize(System.Text.Encoding.UTF8.GetString(bytes));
         return new ScriptSession(path, graph, hash);

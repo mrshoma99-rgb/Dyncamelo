@@ -237,6 +237,7 @@ public partial class GraphEditorViewModel
             var graph = new GraphSerializer(Registry).LoadFromFile(candidate.GraphPath);
             var original = candidate.OriginalPath;
             LoadGraph(graph, original != null && System.IO.File.Exists(original) ? original : null);
+            DistrustLoadedGraph();   // whatever was open when Navisworks closed may have come from somebody else's file
             MarkUnsaved();
             Recovery.Discard(candidate);
             StatusMessage = "Restored the unsaved graph" + (original != null ? " — Save writes it to " + System.IO.Path.GetFileName(original) + "." : " — use Save to keep it.");

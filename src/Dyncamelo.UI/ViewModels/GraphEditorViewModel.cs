@@ -194,6 +194,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         _doubleClickAction = _settings.DoubleClickAction;
         _paletteId = _settings.PaletteId;
         _previewSelection = _settings.PreviewSelection;
+        _confirmUntrustedRuns = _settings.ConfirmUntrustedRuns;
         UpdateChoiceSelection();
         InitCommandSurface();
 
@@ -1014,6 +1015,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         DetachGraph();
         ResetGroupNavigation();
         _graph = graph;
+        ResetRunTrust(filePath);
         AttachGraph(graph);
         WatchNodeGroups(graph.NodeGroups);
         CurrentFilePath = filePath;
@@ -1045,6 +1047,11 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
     {
         _autoRunTimer.Stop();
         if (_engine.IsRunning)
+        {
+            return;
+        }
+
+        if (!AllowRun(interactive))
         {
             return;
         }
@@ -2023,8 +2030,18 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         try
         {
             var serializer = new GraphSerializer(Registry);
-            var graph = serializer.LoadFromFile(path);
+
+            // Read the file once: the graph that is loaded and the hash the user's agreement is remembered against are the same bytes.
+            var bytes = System.IO.File.ReadAllBytes(path);
+            string text;
+            using (var reader = new System.IO.StreamReader(new System.IO.MemoryStream(bytes), System.Text.Encoding.UTF8, true))
+            {
+                text = reader.ReadToEnd();
+            }
+
+            var graph = serializer.Deserialize(text);
             LoadGraph(graph, path);
+            TrustOpenedFile(path, bytes);
             StatusMessage = "Opened " + System.IO.Path.GetFileName(path) + "." + DescribeLoadWarnings(serializer.LoadWarnings);
             RecordRecentFile(path);
             return true;
@@ -2183,6 +2200,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 
         if (OpenFromPath(sample.FilePath))
         {
+            TrustBuiltInSample();
             // Samples are read-only templates: detach the file path so Ctrl+S
             // becomes Save As instead of silently overwriting the shipped
             // sample (which the Samples menu would then serve to every
@@ -2264,6 +2282,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
             }
 
             CurrentFilePath = newPath;   // setter refreshes Title
+            NoteRenamedFile(newPath);
             StatusMessage = "Renamed to " + name + ".";
             RecordRecentFile(newPath);
         }
@@ -2317,6 +2336,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
             var serializer = new GraphSerializer(Registry);
             serializer.SaveToFile(DocumentGraph, path);
             CurrentFilePath = path;
+            NoteSavedFile(path);
             MarkSaved();
             OnPropertyChanged(nameof(Title));
             StatusMessage = "Saved " + System.IO.Path.GetFileName(path) + ".";

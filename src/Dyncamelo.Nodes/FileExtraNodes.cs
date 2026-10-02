@@ -94,6 +94,7 @@ public static class FileExtraNodes
     /// <param name="overwrite">True to replace an existing destination file; false (default) to fail instead.</param>
     /// <returns>The destination path, for sequencing further file nodes.</returns>
     [NodeName("File.Copy")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.ChangesFiles)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("path")]
     [NodeDescription("Copies a file to a new path (creates the destination folder; refuses to replace an existing file unless overwrite is true).")]
@@ -118,6 +119,7 @@ public static class FileExtraNodes
     /// <param name="overwrite">True to replace an existing destination file; false (default) to fail instead.</param>
     /// <returns>The destination path, for sequencing further file nodes.</returns>
     [NodeName("File.Move")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.ChangesFiles)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("path")]
     [NodeDescription("Moves or renames a file (creates the destination folder; refuses to replace an existing file unless overwrite is true).")]
@@ -146,6 +148,7 @@ public static class FileExtraNodes
     /// <param name="path">The file to delete.</param>
     /// <returns>True when a file was deleted; false when there was no such file.</returns>
     [NodeName("File.Delete")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.ChangesFiles)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("deleted")]
     [NodeDescription("Deletes a file; returns true when it was deleted and false when it did not exist.")]
@@ -277,6 +280,7 @@ public static class FileExtraNodes
     /// <param name="recursive">True to delete the folder together with everything inside it.</param>
     /// <returns>True when a folder was deleted; false when there was no such folder.</returns>
     [NodeName("Directory.Delete")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.ChangesFiles)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("deleted")]
     [NodeDescription("Deletes a folder (an empty one, or with its whole content when recursive is true); returns false when it did not exist.")]
@@ -520,6 +524,7 @@ public static class FileExtraNodes
     /// <param name="overwrite">True to replace files that already exist; false (default) to fail instead.</param>
     /// <returns>The destination folder, for sequencing further file nodes.</returns>
     [NodeName("Zip.Extract")]
+    [NodeEffects(Dyncamelo.Core.Graph.NodeEffects.ChangesFiles)]
     [NodeFunction(Dyncamelo.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("directory")]
     [NodeDescription("Unpacks a zip archive into a folder; refuses entries that would escape the folder and files that already exist unless overwrite is true.")]

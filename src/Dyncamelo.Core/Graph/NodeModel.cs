@@ -63,6 +63,9 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// </summary>
     public virtual NodeFunction Function => NodeFunction.Modify;
 
+    /// <summary>What the node can do outside the model and the graph (starts programs, uses the network, changes existing files). None by default.</summary>
+    public virtual NodeEffects Effects => NodeEffects.None;
+
     /// <summary>
     /// True when the node runs even though a node feeding it failed; the failed inputs then arrive as
     /// <see cref="Dyncamelo.Core.Execution.UpstreamError"/> values (zero-touch: <see cref="Dyncamelo.Core.Loader.CatchesUpstreamErrorsAttribute"/>).
