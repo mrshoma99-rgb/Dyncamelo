@@ -23,6 +23,8 @@ public class EditorScreenshotTests
 {
     private const double ShotWidth = 1900d;
     private const double ShotHeight = 1000d;
+    private const double PlayerWidth = 560d;
+    private const double PlayerHeight = 1400d;
 
     [Theory]
     [InlineData("DyncameloDark", "editor-screenshot.png")]
@@ -74,7 +76,9 @@ public class EditorScreenshotTests
         }
 
         Directory.CreateDirectory(folder);
-        var scripts = Path.Combine(Path.GetTempPath(), "dyc-shot-scripts-" + Guid.NewGuid().ToString("N"));
+        // The folder's name is shown in the list, so it gets a name worth showing.
+        var root = Path.Combine(Path.GetTempPath(), "dyc-shot-player-" + Guid.NewGuid().ToString("N"));
+        var scripts = Path.Combine(root, "Dyncamelo Scripts");
         Directory.CreateDirectory(scripts);
         foreach (var name in new[] { "Table Summary from Text.dyc", "Getting Started - Math and Watch.dyc", "string-report.dyc", "csv-roundtrip.dyc", "list-lacing.dyc" })
         {
@@ -89,18 +93,18 @@ public class EditorScreenshotTests
             {
                 var registry = NodeRegistry.CreateDefault();
                 NodeLibrary.RegisterAll(registry);
-                var settings = new UiSettingsService(Path.Combine(scripts, "settings.json"));
+                var settings = new UiSettingsService(Path.Combine(root, "settings.json"));
                 settings.SetPlayerFolders(new[] { scripts });
                 var player = new PlayerViewModel(registry, new StubDialogs(), settings) { CancelPoll = () => false };
                 player.Refresh();
 
-                control = new PlayerControl { ViewModel = player, Width = 560, Height = 1000 };
+                control = new PlayerControl { ViewModel = player, Width = PlayerWidth, Height = PlayerHeight };
                 var canvas = new Canvas();
                 canvas.Children.Add(control);
                 window = new Window
                 {
-                    Width = 560,
-                    Height = 1000,
+                    Width = PlayerWidth,
+                    Height = PlayerHeight,
                     Content = canvas,
                     ShowInTaskbar = false,
                     ShowActivated = false,
@@ -113,7 +117,7 @@ public class EditorScreenshotTests
             StaHost.Flush();
             StaHost.Flush();
 
-            Save(control!, folder, "player.png", 560, 1000);
+            Save(control!, folder, "player.png", (int)PlayerWidth, (int)PlayerHeight);
         }
         finally
         {
@@ -124,7 +128,7 @@ public class EditorScreenshotTests
 
             try
             {
-                Directory.Delete(scripts, true);
+                Directory.Delete(root, true);
             }
             catch (IOException)
             {
