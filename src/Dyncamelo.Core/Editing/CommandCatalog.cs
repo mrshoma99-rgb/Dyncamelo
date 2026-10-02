@@ -157,6 +157,7 @@ public static class CommandCatalog
         new CommandInfo("help.palette", "Command Palette…", "Help", "Ctrl+Shift+P", CommandScope.Global, keywords: "search run any command"),
         new CommandInfo("help.guide", "UI Guide (online)", "Help", null, keywords: "documentation manual"),
         new CommandInfo("help.keys", "Keyboard & Mouse Shortcuts", "Help", "F1", CommandScope.Global, keywords: "help keys shortcuts gestures cheat sheet"),
+        new CommandInfo("help.diagnostics", "Copy Diagnostics", "Help", null, keywords: "report problem bug issue support version log errors paste"),
         new CommandInfo("graph.addnode", "Add Node…", "Graph", "Space", keywords: "search quick library"),
     };
 

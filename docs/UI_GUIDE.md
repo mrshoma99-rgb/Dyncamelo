@@ -238,6 +238,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Command Palette… | `Ctrl+Shift+P` | Everywhere |
 | UI Guide (online) | — | Canvas |
 | Keyboard & Mouse Shortcuts | `F1` | Everywhere |
+| Copy Diagnostics | — | Canvas |
 
 ## Mouse and gestures
 

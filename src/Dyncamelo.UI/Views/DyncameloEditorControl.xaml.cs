@@ -370,6 +370,7 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             case "wire.reroute": return vm.RerouteSelectedWiresCommand;
             case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
             case "help.keys": return vm.ToggleHelpCommand;
+            case "help.diagnostics": return vm.CopyDiagnosticsCommand;
             case "view.hud": return _hudCommand;
             case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);
             case "view.settings": return vm.ToggleSettingsCommand;

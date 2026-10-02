@@ -37,6 +37,7 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         _viewModel = new GraphEditorViewModel(DyncameloHost.Registry, settings: DyncameloHost.Settings, preview: new NavisworksPreviewService())
         {
             EvaluationContextFactory = DyncameloHost.CreateEvaluationContext,
+            HostDescriptionProvider = DyncameloHost.DescribeHost,
         };
         DyncameloHost.Editor = _viewModel;
         _viewModel.OpenPlayerRequested += (_, _) => DyncameloPlayerDockPanePlugin.Show();

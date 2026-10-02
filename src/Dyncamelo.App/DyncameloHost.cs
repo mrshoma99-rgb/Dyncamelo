@@ -201,6 +201,16 @@ internal static class DyncameloHost
     }
 
     /// <summary>
+    /// The running Navisworks product and API version, for the diagnostics report ("Autodesk Navisworks Manage 2024 (API 21.0)").
+    /// Uses the same members as the Application.Version node.
+    /// </summary>
+    public static string DescribeHost()
+    {
+        var version = Autodesk.Navisworks.Api.Application.Version;
+        return version.RuntimeProductName + " (API " + version.ApiMajor + "." + version.ApiMinor + ")";
+    }
+
+    /// <summary>
     /// Creates the per-run <see cref="EvaluationContext"/> with the Navisworks
     /// document provider registered. Also (re)publishes the provider for
     /// zero-touch static nodes, which cannot see the context.

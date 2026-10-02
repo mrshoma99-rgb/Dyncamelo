@@ -1000,6 +1000,9 @@
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.keys" />
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Open the user guide"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.guide" />
+                                        <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Copy diagnostics"
+                                                ToolTip="Versions, installed plug-ins and the end of the error log, ready to paste into a bug report"
+                                                Command="{Binding RunCommandIdCommand}" CommandParameter="help.diagnostics" />
                                     </WrapPanel>
                                     <TextBlock Text="Reset"
                                                Margin="0,14,0,2"
