@@ -232,14 +232,14 @@ internal static class ValueTests
     private static Regex Wildcard(string pattern, bool ignoreCase)
     {
         var expression = "^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".") + "$";
-        return new Regex(expression, (ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None) | RegexOptions.Singleline, TimeSpan.FromSeconds(2));
+        return RegexCache.Get(expression, (ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None) | RegexOptions.Singleline, TimeSpan.FromSeconds(2));
     }
 
     private static Regex RegexFor(string pattern, bool ignoreCase, string nodeName)
     {
         try
         {
-            return new Regex(pattern, ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None, TimeSpan.FromSeconds(2));
+            return RegexCache.Get(pattern, ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None, TimeSpan.FromSeconds(2));
         }
         catch (ArgumentException ex)
         {

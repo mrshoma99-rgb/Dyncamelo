@@ -48,9 +48,11 @@ public static class BoxClusterer
 
         var tol = Math.Max(0, tolerance);
 
-        // Sweep along X: after sorting by minX, box j can only touch box i
-        // while boxes[j].minX <= boxes[i].maxX + tol — prunes the pair test
-        // from all-pairs to near-neighbours.
+        // Sweep along one axis: after sorting by that axis' minimum, box j can only touch box i while
+        // boxes[j].min <= boxes[i].max + tol — prunes the pair test from all-pairs to near-neighbours. The axis is the one the boxes
+        // are spread over the most (X unless another is strictly longer): a model that is long in Y and narrow in X, swept along X,
+        // would put thousands of boxes in the way of every box and test nearly all pairs (13 s for 198 000 boxes). Every touching pair
+        // is still found whatever the axis, so the clusters are the same.
         var order = new List<int>(count);
         for (int i = 0; i < count; i++)
         {
@@ -60,7 +62,10 @@ public static class BoxClusterer
             }
         }
 
-        order.Sort((a, b) => boxes[a]![0].CompareTo(boxes[b]![0]));
+        var axis = WidestAxis(boxes, order);
+        var p = (axis + 1) % 3;
+        var q = (axis + 2) % 3;
+        order.Sort((u, v) => boxes[u]![axis].CompareTo(boxes[v]![axis]));
 
         for (int si = 0; si < order.Count; si++)
         {
@@ -70,13 +75,13 @@ public static class BoxClusterer
             {
                 var j = order[sj];
                 var b = boxes[j]!;
-                if (b[0] > a[3] + tol)
+                if (b[axis] > a[axis + 3] + tol)
                 {
                     break;
                 }
 
-                if (b[1] <= a[4] + tol && a[1] <= b[4] + tol &&
-                    b[2] <= a[5] + tol && a[2] <= b[5] + tol)
+                if (b[p] <= a[p + 3] + tol && a[p] <= b[p + 3] + tol &&
+                    b[q] <= a[q + 3] + tol && a[q] <= b[q + 3] + tol)
                 {
                     if (verifyTouch == null)
                     {
@@ -112,6 +117,48 @@ public static class BoxClusterer
         }
 
         return result;
+    }
+
+    /// <summary>0 (X), 1 (Y) or 2 (Z): the axis along which the valid boxes span the greatest distance; X when none is strictly greater.</summary>
+    private static int WidestAxis(IReadOnlyList<double[]?> boxes, List<int> valid)
+    {
+        if (valid.Count < 2)
+        {
+            return 0;
+        }
+
+        var low = new[] { double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity };
+        var high = new[] { double.NegativeInfinity, double.NegativeInfinity, double.NegativeInfinity };
+        foreach (var index in valid)
+        {
+            var box = boxes[index]!;
+            for (int d = 0; d < 3; d++)
+            {
+                if (box[d] < low[d])
+                {
+                    low[d] = box[d];
+                }
+
+                if (box[d + 3] > high[d])
+                {
+                    high[d] = box[d + 3];
+                }
+            }
+        }
+
+        var best = 0;
+        var bestSpan = high[0] - low[0];
+        for (int d = 1; d < 3; d++)
+        {
+            var span = high[d] - low[d];
+            if (span > bestSpan)
+            {
+                best = d;
+                bestSpan = span;
+            }
+        }
+
+        return best;
     }
 
     private static int Find(int[] parent, int i)

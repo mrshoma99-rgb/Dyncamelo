@@ -20,6 +20,10 @@ public sealed class SnapshotBuilder
 
     private readonly Dictionary<string, object?> _snapshot = new Dictionary<string, object?>(StringComparer.Ordinal);
 
+    // The next " #n" to try for a key that was already taken. Items keep arriving with the same key (every item without a GUID
+    // and with the same path, thousands of times in a big model); restarting at " #2" each time would make N repeats cost N^2 lookups.
+    private readonly Dictionary<string, int> _nextSuffix = new Dictionary<string, int>(StringComparer.Ordinal);
+
     /// <summary>The snapshot built so far (GUID text to property dictionary).</summary>
     public Dictionary<string, object?> Snapshot => _snapshot;
 
@@ -46,7 +50,7 @@ public sealed class SnapshotBuilder
             throw new ArgumentException("There must be one value per header.", nameof(values));
         }
 
-        var key = MakeKey(instanceGuid, path, _snapshot);
+        var key = MakeKey(instanceGuid, path, _snapshot, _nextSuffix, out var baseKey, out var nextSuffix);
         var properties = new Dictionary<string, object?>(headers.Count, StringComparer.Ordinal);
         for (int i = 0; i < headers.Count; i++)
         {
@@ -54,6 +58,11 @@ public sealed class SnapshotBuilder
         }
 
         _snapshot[key] = properties;
+        if (key != baseKey)
+        {
+            _nextSuffix[baseKey] = nextSuffix;
+        }
+
         return key;
     }
 
@@ -67,22 +76,37 @@ public sealed class SnapshotBuilder
     /// <returns>A key that is not in <paramref name="used"/>.</returns>
     public static string MakeKey(Guid instanceGuid, Func<string>? path, IDictionary<string, object?> used)
     {
+        return MakeKey(instanceGuid, path, used, null, out _, out _);
+    }
+
+    // Keys are never removed from the snapshot, so the suffixes a base key already went through stay taken: carrying on from the
+    // one after the last used finds the same key as starting again from " #2", without probing them all. The caller records
+    // nextSuffix once the key is really stored.
+    private static string MakeKey(
+        Guid instanceGuid,
+        Func<string>? path,
+        IDictionary<string, object?> used,
+        Dictionary<string, int>? remembered,
+        out string baseKey,
+        out int nextSuffix)
+    {
         if (used == null)
         {
             throw new ArgumentNullException(nameof(used));
         }
 
-        var baseKey = instanceGuid != Guid.Empty
+        baseKey = instanceGuid != Guid.Empty
             ? instanceGuid.ToString("D", CultureInfo.InvariantCulture)
             : PathKeyPrefix + (path == null ? string.Empty : path());
         var key = baseKey;
-        var suffix = 2;
+        var suffix = remembered != null && remembered.TryGetValue(baseKey, out var carryOn) ? carryOn : 2;
         while (used.ContainsKey(key))
         {
             key = baseKey + " #" + suffix.ToString(CultureInfo.InvariantCulture);
             suffix++;
         }
 
+        nextSuffix = suffix;
         return key;
     }
 

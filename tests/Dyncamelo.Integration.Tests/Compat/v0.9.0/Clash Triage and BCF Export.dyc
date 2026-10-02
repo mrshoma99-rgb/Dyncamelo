@@ -1,0 +1,477 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.3.2"
+  },
+  "Uuid": "bea89f795faed9c6eb7dc596a6aa6374",
+  "Name": "Clash Triage and BCF Export",
+  "Description": "Groups the results of a clash test by status, exports the grouped results as BCF issues and writes a summary CSV of every test. Needs a model with clash tests (run them first).",
+  "Nodes": [
+    {
+      "Id": "9ac5ca7bfc0e7e74f3c67e5cd06a4b18",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Tests@Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.Tests",
+      "X": 0.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "tests"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "6aeefef7f07b64f55d4f8bf054a702b9",
+      "NodeType": "IntegerSlider",
+      "Name": "Test number",
+      "X": 0.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": 0,
+        "Min": 0,
+        "Max": 20,
+        "Step": 1
+      }
+    },
+    {
+      "Id": "83eabf5d650506eda7c63da886126951",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Pick one test",
+      "X": 360.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "index",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "item"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9739997c9f22fe3ec84d2bb8b14f351f",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashEditNodes.GroupResultsByStatus@Autodesk.Navisworks.Api.Clash.ClashTest,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.GroupResultsByStatus",
+      "X": 700.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "test",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "test"
+        },
+        {
+          "Name": "groupCount"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9ac4109b10a39434022b06476415df9b",
+      "NodeType": "Watch",
+      "Name": "Groups created",
+      "X": 1060.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "cfd5bba8a2228e250e1035fd93796a6d",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Results@Autodesk.Navisworks.Api.Clash.ClashTest",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ClashTest.Results",
+      "X": 1060.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "test",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "bcafd20a2a3cbf74c51eb24de1f2a727",
+      "NodeType": "FilePath",
+      "Name": "BCF output",
+      "X": 1060.0,
+      "Y": -110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "C:\\Temp\\clash-triage.bcfzip"
+      }
+    },
+    {
+      "Id": "0973802731b91ad193fd1c11d6dfb294",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "BCF.ExportIssues",
+      "X": 1420.0,
+      "Y": 20.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "filePath",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "results",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "viewpoints",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "includeSnapshots",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "statusMap",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "filePath"
+        },
+        {
+          "Name": "topicCount"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "9094bd45b6fb46f31639b98d046aa216",
+      "NodeType": "Watch",
+      "Name": "BCF topics",
+      "X": 1780.0,
+      "Y": 60.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "5f3ef008a553a1d7f3af85193bf7d4d2",
+      "NodeType": "FilePath",
+      "Name": "CSV output",
+      "X": 360.0,
+      "Y": 560.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "C:\\Temp\\clash-summary.csv"
+      }
+    },
+    {
+      "Id": "39ee77af89b90e371701af3b86af5f11",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ExportNodes.ClashReportCsv@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Export.ClashReportCsv",
+      "X": 700.0,
+      "Y": 520.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "filePath",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "tests",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "filePath"
+        },
+        {
+          "Name": "rowCount"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "0e9b1869da7d0989f9b1ccaf6762852a",
+      "NodeType": "Watch",
+      "Name": "CSV rows",
+      "X": 1060.0,
+      "Y": 560.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "f2310fbff840926401a52b07f6aeeb9f",
+      "FromNode": "9ac5ca7bfc0e7e74f3c67e5cd06a4b18",
+      "FromPort": "tests",
+      "ToNode": "83eabf5d650506eda7c63da886126951",
+      "ToPort": "list"
+    },
+    {
+      "Id": "40c74a0efb0c46ec71b04d952b91708f",
+      "FromNode": "6aeefef7f07b64f55d4f8bf054a702b9",
+      "FromPort": "value",
+      "ToNode": "83eabf5d650506eda7c63da886126951",
+      "ToPort": "index"
+    },
+    {
+      "Id": "7fb409c33b3202e15e59882d1e681ade",
+      "FromNode": "83eabf5d650506eda7c63da886126951",
+      "FromPort": "item",
+      "ToNode": "9739997c9f22fe3ec84d2bb8b14f351f",
+      "ToPort": "test"
+    },
+    {
+      "Id": "c5509ede9cb2515f780a008e23ffe52e",
+      "FromNode": "9739997c9f22fe3ec84d2bb8b14f351f",
+      "FromPort": "groupCount",
+      "ToNode": "9ac4109b10a39434022b06476415df9b",
+      "ToPort": "value"
+    },
+    {
+      "Id": "e5dc4a6f2cde46be442bb2b8fb3d1829",
+      "FromNode": "9739997c9f22fe3ec84d2bb8b14f351f",
+      "FromPort": "test",
+      "ToNode": "cfd5bba8a2228e250e1035fd93796a6d",
+      "ToPort": "test"
+    },
+    {
+      "Id": "7e826183e493d7c868ee38194f7712a2",
+      "FromNode": "bcafd20a2a3cbf74c51eb24de1f2a727",
+      "FromPort": "path",
+      "ToNode": "0973802731b91ad193fd1c11d6dfb294",
+      "ToPort": "filePath"
+    },
+    {
+      "Id": "97ff7cfb9fa76cbb9a6f425478436049",
+      "FromNode": "cfd5bba8a2228e250e1035fd93796a6d",
+      "FromPort": "results",
+      "ToNode": "0973802731b91ad193fd1c11d6dfb294",
+      "ToPort": "results"
+    },
+    {
+      "Id": "7f1d30d56e7a6286972bb2e4051cdb99",
+      "FromNode": "0973802731b91ad193fd1c11d6dfb294",
+      "FromPort": "topicCount",
+      "ToNode": "9094bd45b6fb46f31639b98d046aa216",
+      "ToPort": "value"
+    },
+    {
+      "Id": "fa11ce1422b7983a14d63c9e4204ee43",
+      "FromNode": "5f3ef008a553a1d7f3af85193bf7d4d2",
+      "FromPort": "path",
+      "ToNode": "39ee77af89b90e371701af3b86af5f11",
+      "ToPort": "filePath"
+    },
+    {
+      "Id": "9e8c1ab116f9c740a69c14048c7a754f",
+      "FromNode": "9ac5ca7bfc0e7e74f3c67e5cd06a4b18",
+      "FromPort": "tests",
+      "ToNode": "39ee77af89b90e371701af3b86af5f11",
+      "ToPort": "tests"
+    },
+    {
+      "Id": "de0c4f68aea1d4bec9b0f3af8ca52c04",
+      "FromNode": "39ee77af89b90e371701af3b86af5f11",
+      "FromPort": "rowCount",
+      "ToNode": "0e9b1869da7d0989f9b1ccaf6762852a",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "f496faecc3a2c9018173b63d13448064",
+      "Text": "HOW TO USE: 1) Make sure Clash Detective has at least one RUN test. 2) Pick which test to triage with the Test number slider (0 = first test). 3) Set the two output paths. 4) Press Run. The .bcfzip opens in any BCF tool; the CSV summarises every test.",
+      "X": 0.0,
+      "Y": -210.0
+    },
+    {
+      "Id": "9458483e49508e55f4b9a1ef813ee15e",
+      "Text": "Clash.GroupResultsByStatus folders the test's results into one group per status (New, Active, Reviewed, ...) inside Clash Detective - the same grouping you would do by hand. Swap in Clash.GroupResultsByProximity or GroupResultsByGridIntersection for spatial triage.",
+      "X": 360.0,
+      "Y": 330.0
+    },
+    {
+      "Id": "eebefb3b768259315a996a40c7cd125c",
+      "Text": "BCF.ExportIssues writes one topic per result/group, including snapshots and camera positions, so issues land in Revit/Solibri/BIMcollab exactly where the clash is.",
+      "X": 1060.0,
+      "Y": 380.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}
