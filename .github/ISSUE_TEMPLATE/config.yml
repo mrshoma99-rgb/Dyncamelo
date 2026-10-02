@@ -1,0 +1,9 @@
+# Blank issues stay allowed: not every question fits a form.
+blank_issues_enabled: true
+contact_links:
+  - name: Troubleshooting guide
+    url: https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/TROUBLESHOOTING.md
+    about: Common problems and their fixes - missing ribbon tab, PLUGIN_LOAD_02, red nodes, "Something went wrong". Check here before you open an issue.
+  - name: Report a security problem (private)
+    url: https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new
+    about: Please do not open a public issue for a vulnerability. Read SECURITY.md first.

@@ -108,6 +108,8 @@ Download **[`DyncameloSetup.exe`](https://github.com/mrshoma99-rgb/dyncamelo/rel
 
 Silent install/uninstall: `DyncameloSetup.exe /silent` and `DyncameloSetup.exe /uninstall /silent`.
 
+**Licence.** In plain words: Dyncamelo is free to use, at home or at work, companies included. You can read the source, change it and share it for free. You may not *sell* it, or sell a product or service whose value comes mostly from it. The Commons Clause in [LICENSE](LICENSE) counts hosting, consulting and support fees for the software as selling. This is a summary, not legal advice: the text of [LICENSE](LICENSE) is what counts, and if you are not sure, ask BIMCamel. The third-party parts keep their own licences ([THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
+
 ## Build from source (Windows)
 
 ```powershell
@@ -156,6 +158,8 @@ Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon
 | [Architecture](docs/ARCHITECTURE.md) | Projects, engine pipeline, zero-touch loading, `.dyc` format, threading |
 | [Extending Dyncamelo](docs/EXTENDING.md) | Write your own node pack; custom NodeModel nodes with custom UI |
 | [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Vision, milestones M0-M5, engineering decisions, testing strategy, risks |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Symptom, cause and fix: missing ribbon tab, `PLUGIN_LOAD_02`, red nodes, slow runs, diagnostics, uninstalling, known issues |
+| [Changelog](CHANGELOG.md) | What changed in each release, newest first |
 | [Contributing](CONTRIBUTING.md) | Dev setup, code style, PR workflow |
 
 ## Roadmap summary
@@ -170,6 +174,10 @@ Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon
 | **M5 Community** | Ecosystem | Package manager, sample graph gallery |
 
 Full milestone breakdown with exit criteria and risks: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+
+## Status and support
+
+Dyncamelo supports Autodesk Navisworks Manage and Simulate **2024, 2025 and 2026** on Windows. Navisworks cannot be run in the automated tests, so the nodes that talk to Navisworks are checked by hand, and so far only Navisworks Manage 2024 has been used in the field; the 2025 and 2026 builds are not yet verified in Navisworks (see the [known issues](docs/TROUBLESHOOTING.md#known-issues)). To report a problem, first look in the [troubleshooting guide](docs/TROUBLESHOOTING.md), then open an issue with the [bug report form](https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose). It asks for your versions, `%APPDATA%\Dyncamelo\errors.log` and the output of **Help > Copy diagnostics**. Report a security problem privately, as described in [SECURITY.md](SECURITY.md), and read there what a `.dyc` graph file can do before you run one from someone else.
 
 ## Feedback
 

@@ -1,0 +1,116 @@
+name: Bug report
+description: Something does not work, an error appears, or Navisworks closes.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. A good report lets us reproduce the problem without asking you more questions.
+
+        Before you start, please look at the [troubleshooting guide](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/TROUBLESHOOTING.md). It covers the most common problems (the ribbon tab is missing, `PLUGIN_LOAD_02`, a red node, "Something went wrong").
+
+        **Security problems:** do not report them here. Use a [private security advisory](https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new) (see [SECURITY.md](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/SECURITY.md)).
+
+  - type: input
+    id: dyncamelo-version
+    attributes:
+      label: Dyncamelo version
+      description: "On the BIMCamel ribbon tab, click About. The version is at the bottom of the window (for example 0.45.1)."
+      placeholder: "0.45.1"
+    validations:
+      required: true
+
+  - type: input
+    id: navisworks-version
+    attributes:
+      label: Navisworks product and year
+      description: "Manage or Simulate, and 2024, 2025 or 2026. Add the update number if you know it."
+      placeholder: "Manage 2024"
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      description: "For example Windows 11 23H2 or Windows 10 22H2. Press Win+R, type winver and press Enter to see it."
+      placeholder: "Windows 11 23H2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do?
+      description: "Numbered steps, starting from an open model. Name the nodes you used, for example Search.ByProperty then Appearance.OverrideColor. Say how big the model is if it may matter."
+      placeholder: |
+        1. Open the model.
+        2. Open Dyncamelo from the BIMCamel tab.
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: "Include any message you saw, word for word. A screenshot helps (paste it here). Say if Navisworks closed."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: sample-graph
+    attributes:
+      label: Does it happen with a sample graph?
+      description: "The samples are under File > Sample Graphs in the editor. If a sample shows the problem, please name it below."
+      options:
+        - "Yes - with a sample graph that comes with Dyncamelo"
+        - "No - only with my own graph"
+        - "I have not tried a sample graph"
+        - "Not relevant - no graph is involved (installer, ribbon, About, ...)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-log
+    attributes:
+      label: End of errors.log
+      description: |
+        Dyncamelo writes failures to `%APPDATA%\Dyncamelo\errors.log` (paste that into the Windows Explorer address bar to open the folder). Paste the last entries, or the ones from the time of the problem. If the file does not exist, write "no file".
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Output of Help > Copy diagnostics
+      description: 'In the Dyncamelo editor choose Help > Copy diagnostics, then paste the result here. It lists the Dyncamelo and Navisworks versions and the installed Navisworks plug-ins. If the editor will not open, write: editor does not open.'
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: self-test
+    attributes:
+      label: Report of Help > Run self-test (optional)
+      description: "With a model open, choose Help > Run self-test and paste the report. It helps most when a Navisworks node behaves oddly."
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: graph
+    attributes:
+      label: Graph file (optional)
+      description: "Drag a `.dyc` file or a zip of it into this box. Open it in a text editor first: graphs can contain file paths, names and values you may not want to share."
+    validations:
+      required: false
