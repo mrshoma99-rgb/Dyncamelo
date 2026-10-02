@@ -1003,6 +1003,9 @@
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Copy diagnostics"
                                                 ToolTip="Versions, installed plug-ins and the end of the error log, ready to paste into a bug report"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.diagnostics" />
+                                        <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Run self-test"
+                                                ToolTip="Runs read-only Navisworks nodes on the open model and reports which work. Changes nothing."
+                                                Command="{Binding RunCommandIdCommand}" CommandParameter="help.selftest" />
                                     </WrapPanel>
                                     <TextBlock Text="Reset"
                                                Margin="0,14,0,2"

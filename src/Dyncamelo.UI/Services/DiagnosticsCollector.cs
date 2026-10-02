@@ -41,7 +41,7 @@ public static class DiagnosticsCollector
     {
         var info = new DiagnosticsInfo
         {
-            DyncameloVersion = Version(),
+            DyncameloVersion = DyncameloVersion(),
             Host = string.IsNullOrWhiteSpace(hostDescription) ? "no host application reported (Dyncamelo running on its own)" : hostDescription!,
             Process = Attempt(() => Process.GetCurrentProcess().ProcessName + ", " + (Environment.Is64BitProcess ? "64-bit" : "32-bit")),
             OperatingSystem = Attempt(() => Environment.OSVersion.VersionString),
@@ -114,7 +114,8 @@ public static class DiagnosticsCollector
         }
     }
 
-    private static string Version()
+    /// <summary>The Dyncamelo version as shown in About ("0.45.1").</summary>
+    public static string DyncameloVersion()
     {
         var version = typeof(DiagnosticsCollector).Assembly.GetName().Version;
         return version == null ? "unknown" : version.Major + "." + version.Minor + "." + Math.Max(version.Build, 0);

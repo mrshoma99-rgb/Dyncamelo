@@ -39,6 +39,7 @@ public sealed class RiskyNode : NodeModel
 internal sealed class RecordingDialogs : IDialogService
 {
     public readonly List<string> Confirmations = new List<string>();
+    public readonly List<string> Errors = new List<string>();
     public bool Answer = true;
     public string? SavePath;
 
@@ -56,6 +57,7 @@ internal sealed class RecordingDialogs : IDialogService
 
     public void ShowError(string message, string title)
     {
+        Errors.Add(message);
     }
 
     public string? Prompt(string message, string title, string defaultValue) => null;

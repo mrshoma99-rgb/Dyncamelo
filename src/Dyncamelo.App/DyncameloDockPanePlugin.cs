@@ -38,6 +38,11 @@ public class DyncameloDockPanePlugin : DockPanePlugin
         {
             EvaluationContextFactory = DyncameloHost.CreateEvaluationContext,
             HostDescriptionProvider = DyncameloHost.DescribeHost,
+            ModelAvailableProvider = () =>
+            {
+                var document = GetActiveDocument();
+                return document != null && document.Models.Count > 0;
+            },
         };
         DyncameloHost.Editor = _viewModel;
         _viewModel.OpenPlayerRequested += (_, _) => DyncameloPlayerDockPanePlugin.Show();
