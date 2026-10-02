@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Dyncamelo.Core.Loader;
@@ -18,6 +20,9 @@ namespace Dyncamelo.UI.Tests;
 /// </summary>
 public class EditorScreenshotTests
 {
+    private const double ShotWidth = 1600d;
+    private const double ShotHeight = 900d;
+
     [Theory]
     [InlineData("DyncameloDark", "editor-screenshot.png")]
     [InlineData("Light", "editor-screenshot-light.png")]
@@ -45,12 +50,15 @@ public class EditorScreenshotTests
             vm.IsAutoRun = false;
             vm.RunGraph();
 
-            control = new DyncameloEditorControl { ViewModel = vm };
+            // A fixed size on a canvas, not the window's: a CI machine's small screen would otherwise cut the picture.
+            control = new DyncameloEditorControl { ViewModel = vm, Width = ShotWidth, Height = ShotHeight };
+            var canvas = new Canvas();
+            canvas.Children.Add(control);
             window = new Window
             {
-                Width = 1500,
-                Height = 900,
-                Content = control,
+                Width = ShotWidth,
+                Height = ShotHeight,
+                Content = canvas,
                 ShowInTaskbar = false,
                 ShowActivated = false,
                 WindowStyle = WindowStyle.None,
@@ -60,6 +68,23 @@ public class EditorScreenshotTests
         StaHost.Flush();
         StaHost.Flush();
 
+        // Frame the half that has the results (the tables and the Watch Table), so the text is readable at the picture's size.
+        StaHost.Run(() =>
+        {
+            var vm = control!.ViewModel!;
+            vm.SelectedItems.Clear();
+            foreach (var item in vm.Items.OfType<NodeViewModel>().Where(n => n.Model.X >= 860d))
+            {
+                vm.SelectedItems.Add(item);
+            }
+
+            vm.FrameSelected();
+        });
+        StaHost.Flush();
+        StaHost.Flush();
+        StaHost.Run(() => control!.ViewModel!.SelectedItems.Clear());
+        StaHost.Flush();
+
         try
         {
             StaHost.Run(() =>
@@ -67,7 +92,7 @@ public class EditorScreenshotTests
                 control!.UpdateLayout();
                 var width = (int)Math.Ceiling(control.ActualWidth);
                 var height = (int)Math.Ceiling(control.ActualHeight);
-                Assert.True(width > 600 && height > 400, "the editor was not laid out (" + width + " x " + height + ")");
+                Assert.True(width == (int)ShotWidth && height == (int)ShotHeight, "the editor was not laid out at its size (" + width + " x " + height + ")");
 
                 var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
                 bitmap.Render(control);
