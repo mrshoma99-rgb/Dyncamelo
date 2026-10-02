@@ -23,13 +23,14 @@ name: release
 # signed when the secrets SIGNING_PFX_BASE64 and SIGNING_PFX_PASSWORD hold a code-signing certificate (tools/sign-files.ps1);
 # without them the release is unsigned, as before.
 #
-# A dry run (Actions -> release -> Run workflow, tick "dry_run") does all of it for the version in dist/RELEASE_VERSION and
-# publishes nothing, so the pipeline can be tested without making a release.
+# A dry run does all of it for the version in dist/RELEASE_VERSION and publishes nothing, so the pipeline can be tested without
+# making a release. Start one with Actions -> release -> Run workflow (tick "dry_run"), or by pushing a commit whose message
+# contains [dry-run] and that changes dist/DRY_RUN (any edit; it is only a trigger).
 
 on:
   push:
     branches: ['**']
-    paths: ['dist/RELEASE_VERSION']
+    paths: ['dist/RELEASE_VERSION', 'dist/DRY_RUN']
   workflow_dispatch:
     inputs:
       version:
@@ -59,8 +60,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INPUT_VERSION: ${{ inputs.version }}
           INPUT_DRYRUN: ${{ inputs.dry_run }}
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          $dry = ($env:INPUT_DRYRUN -eq 'true')
+          $dry = ($env:INPUT_DRYRUN -eq 'true') -or ($env:HEAD_MESSAGE -match '\[dry-run\]')
           # A dry run always uses the version in the repository, so the assemblies (built with Directory.Build.props) match it.
           $version = if ($env:INPUT_VERSION -and -not $dry) { $env:INPUT_VERSION.Trim() } else { (Get-Content dist/RELEASE_VERSION -Raw).Trim() }
           if ($version -notmatch '^v\d+\.\d+\.\d+$') {

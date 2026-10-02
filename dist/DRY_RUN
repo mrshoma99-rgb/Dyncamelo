@@ -1,0 +1,8 @@
+Trigger file for a dry run of the release workflow (.github/workflows/release.yml).
+
+Edit this file in a commit whose message contains [dry-run] and push it: the release pipeline builds the three per-year bundles, signs
+them with a throw-away certificate, builds the installer, smoke-tests it (install, upgrade, uninstall) and keeps the output as a build
+artifact. It publishes nothing. Without [dry-run] in the message a push that touches only this file does nothing, because the version in
+dist/RELEASE_VERSION already has its release.
+
+Last dry run requested: 2026-10-02 (first, to test the smoke test and the signing steps)
