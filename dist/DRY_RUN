@@ -5,4 +5,4 @@ them with a throw-away certificate, builds the installer, smoke-tests it (instal
 artifact. It publishes nothing. Without [dry-run] in the message a push that touches only this file does nothing, because the version in
 dist/RELEASE_VERSION already has its release.
 
-Last dry run requested: 2026-10-02 (first, to test the smoke test and the signing steps)
+Last dry run requested: 2026-10-02 (second: the first stopped in "Resolve version" on a PowerShell parse error)

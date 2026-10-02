@@ -70,7 +70,7 @@ jobs:
             exit 1
           }
           if ($dry) {
-            Write-Host "Dry run for $version: nothing will be published."
+            Write-Host "Dry run for ${version}: nothing will be published."
             Add-Content -Path $env:GITHUB_ENV -Value "DRYRUN=true"
           }
           else {
