@@ -21,7 +21,7 @@ Sources are Autodesk's Navisworks publisher guidelines (aps.autodesk.com/app-sto
 | One build per Navisworks release (the .NET API works within one major version) | Done (three builds) |
 | PackageContents.xml attributes a download needs: SchemaVersion, AppVersion, Author, Name, Description, Icon, HelpFile, ProductCode, UpgradeCode; CompanyDetails Name and Email | Done, except the Email (yours) |
 | Works straight after install, no manual copying or registration | Done: the bundle needs nothing else |
-| Bundle name unique among Autodesk bundles | `Dyncamelo.bundle`; see [CamelWorks](#overlap-with-camelworks) |
+| Bundle name unique among Autodesk bundles | `Dyncamelo.bundle` |
 | Each DLL name unique within a Navisworks session | **Open**, see [DLL names](#dll-names) |
 | F1 opens your own help | In the editor F1 opens Dyncamelo's shortcut sheet (not Navisworks' help); the Help menu opens the online guide. Check it in Navisworks (QA checklist) |
 | Privacy policy: link on the listing **and** the text inside the app; says what is collected, shared, kept, how to withdraw consent | Done: `PRIVACY.md`, Help > Privacy Policy, link in `listing.md` |
@@ -31,7 +31,7 @@ Sources are Autodesk's Navisworks publisher guidelines (aps.autodesk.com/app-sto
 | Logo 80 x 80 recommended, screenshots up to 10 (2000 x 2000, 20 MB, each with a text), long description up to 4000 characters, up to 4 categories per product | Done for logo and text; screenshots from Navisworks are yours |
 | Installer | Autodesk builds the MSI from the package ("standard installer"); you may supply your own MSI or a merge module instead. Not needed |
 | Code signing | Optional ("recommended"). The DLLs in the package are signed when the release workflow has a certificate |
-| Licence | Autodesk's standard EULA applies; extra conditions go in the description (done). **Ask** about the Commons Clause, see below |
+| Licence | Autodesk's standard EULA applies; extra conditions go in the description (done). Dyncamelo's licence is PolyForm Noncommercial (free for personal and other noncommercial use, commercial use needs a licence from BIMCamel). **Ask Autodesk first**, see [The licence and the store](#the-licence-and-the-store) |
 | Support | You must support every Navisworks release you tick. The form asks which ones you tested |
 
 ## The package
@@ -58,15 +58,20 @@ A package built while `supportEmail` is empty is named `...-DRAFT.zip`. `--submi
 
 1. **Autodesk account and publisher profile** at apps.autodesk.com (Publisher Corner). Accept the Publisher Agreement. A free app needs no PayPal account. Check which publisher name and legal details the profile asks for; the package says "BIMCamel".
 2. **Support email**: put an address you read into `appstore/publisher.json` (`supportEmail`). The store requires it in the package and the listing. It is also shown in the help page.
-3. **Ask Autodesk first** (appsubmissions@autodesk.com, they answer within about a day or two): (a) whether the licence, Apache 2.0 with the Commons Clause (no selling), is acceptable next to the standard EULA and the Publisher Agreement's minimum terms; (b) whether the Ribbon tab merging described below is acceptable; (c) what happens to the BIMCamel bundle and CamelWorks (below).
+3. **Ask Autodesk first** (appsubmissions@autodesk.com): whether a free listing under a noncommercial licence is accepted next to the standard EULA and the Publisher Agreement's minimum terms (see [The licence and the store](#the-licence-and-the-store)), and whether the keyboard hook described under [Review risks](#review-risks) is acceptable.
 4. **Test in real Navisworks**: Help > Run Self-Test and `docs/QA_CHECKLIST.md` on each release you will tick (2024, 2025, 2026; Manage and Simulate if you tick both). The form makes you commit to support for each. Only tick what you have seen working.
 5. **Screenshots from Navisworks** (shot list in `listing.md`): the editor docked next to a model, and a model coloured by a graph. The build machine's pictures are in `assets/screenshots/`.
 6. **Download the `appstore-package` artifact** of a release run made after you set the email, check `package-report.txt` shows no problems, and **submit**: the form asks for the app file (the zip), logo, screenshots with texts, descriptions, categories, compatible products, price (free), privacy policy link and the publisher privacy policy.
 7. **Review**: Autodesk reviews within about two weeks, builds the installer and sends you the final package to check. Answer their questions by email. After approval, each update goes through the same review while the live version stays online.
 
-## Overlap with CamelWorks
+## The licence and the store
 
-The README says CamelWorks installs its own copy of Dyncamelo (bundle name `Dyncamelo.bundle`) next to the BIMCamel IFC exporter. A person with the store version and CamelWorks would have two bundles of the same name and the same DLL names. Decide which way it goes before submitting: for instance CamelWorks skips its copy when the store version is present, or the store build gets its own bundle name and DLL prefix. This cannot be settled from this repository.
+Dyncamelo is licensed under PolyForm Noncommercial 1.0.0: free for personal and other noncommercial use, a commercial licence from BIMCamel for everything else. The Autodesk App Store is mostly used by people who work for companies, and the standard EULA that comes with every store app is written for that. Two things can go wrong:
+
+* The reviewer may find a free listing that forbids commercial use misleading, or in conflict with the EULA or the Publisher Agreement's minimum terms (Exhibit A).
+* Customers may install a "free" app from the store and then be in breach of the licence without knowing it. The listing and the help page both say plainly who needs a commercial licence, but a store page is read quickly.
+
+Options, for you to choose between after you have Autodesk's answer: (1) keep the free listing as it is if Autodesk accepts it; (2) list a paid edition for commercial users (the store supports paid apps through PayPal and lets you set the price; a free app and a paid app are separate listings); (3) put a store build under a licence that allows commercial use, which is your call as the owner. Nothing in the package or the listing has to change for (1) or (2) beyond the price.
 
 ## DLL names
 
@@ -74,12 +79,9 @@ The store requires every DLL name to be unique within a Navisworks session. Dync
 
 ## Review risks
 
-Autodesk rejects apps that "use undocumented API calls" or "alter the behaviour of Autodesk products". Two parts of Dyncamelo deserve a look:
+Autodesk rejects apps that "use undocumented API calls" or "alter the behaviour of Autodesk products". Dyncamelo no longer merges its ribbon tab with other BIMCamel tools (that reflection code, which touched Autodesk's ribbon assembly, was removed). What is left to mention to the reviewer:
 
-* `Dyncamelo.App/RibbonTabMerger.cs` joins the BIMCamel ribbon tab with the one the IFC exporter creates, using reflection on Autodesk's ribbon assembly (`AdWindows`), which is not a public API. If the store rejects it, the fallback is two separate tabs (one per plug-in).
-* `Dyncamelo.App/PaneKeyGuard.cs` installs a keyboard hook (`WH_GETMESSAGE`) while the Dyncamelo pane has the focus, so that Navisworks' own shortcuts (Ctrl+Z, Delete, F1) do not take keys the editor needs. It only acts while the pane has the keyboard focus.
-
-Neither is hidden: the reviewer can read the source. Mention both in your message to Autodesk.
+* `Dyncamelo.App/PaneKeyGuard.cs` installs a keyboard hook (`WH_GETMESSAGE`) while the Dyncamelo pane has the focus, so that Navisworks' own shortcuts (Ctrl+Z, Delete, F1) do not take keys the editor needs. It only acts while the pane has the keyboard focus. The source is open for the reviewer to read.
 
 ## Keeping the store version current
 

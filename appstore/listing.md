@@ -53,7 +53,7 @@ PRIVACY
 Dyncamelo has no account, no analytics and no licence server, and it sends nothing about you or your models anywhere. The privacy policy is inside the app under Help > Privacy Policy.
 
 LICENCE AND SUPPORT
-Free to use, at home or at work. Licence: Apache 2.0 with the Commons Clause, which means you may use, change and share it but not sell it. Help is in the app (F1 and Help > Run Self-Test), in the quick-start page that comes with the download and at github.com/mrshoma99-rgb/Dyncamelo.
+Free for personal and other noncommercial use: hobby projects, learning, research, charities, schools, public bodies. Using Dyncamelo for work at a company, or in a paid project, needs a commercial licence from BIMCamel; ask through the support contact on this page. Licence: PolyForm Noncommercial 1.0.0, the text is in the download and at github.com/mrshoma99-rgb/Dyncamelo. Help is in the app (F1 and Help > Run Self-Test), in the quick-start page that comes with the download and at the same address.
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.
 ```
@@ -109,4 +109,6 @@ Use the entry for the version in `CHANGELOG.md`; the form asks for a version num
 
 ## EULA and licence
 
-Autodesk gives every store app its standard end-user licence agreement; you do not need your own. Dyncamelo's own licence (Apache 2.0 with the Commons Clause, in `LICENSE`) is shipped in the package under `Contents/Resources` and stated in the description above, because the FAQ asks for extra conditions to be written in the description or the help file. Whether the Commons Clause (no selling) fits the publisher agreement's minimum terms (Exhibit A) is a question for appsubmissions@autodesk.com **before** submitting; see `appstore/README.md`.
+Autodesk gives every store app its standard end-user licence agreement; you do not need your own, and the FAQ says not to add terms that conflict with it. Dyncamelo's own licence (PolyForm Noncommercial 1.0.0, in `LICENSE`) is shipped in the package under `Contents/Resources` and stated in the description above, because the FAQ asks for extra conditions to be written in the description or the help file.
+
+**This is the most likely thing to be questioned.** The store's EULA is written for customers who use apps in their work; a listing that is free but forbids commercial use can read as misleading to the reviewer and to the many Navisworks users who work for companies. Ask appsubmissions@autodesk.com **before** submitting whether a free listing with a noncommercial licence is accepted. If it is not, the choices are a paid listing for commercial users (the store supports paid apps through PayPal; you set the price), or a store build under a licence that allows commercial use. See `appstore/README.md`.

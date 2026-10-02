@@ -4,7 +4,7 @@
 
 [![Build](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/build.yml)
 [![Release](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml/badge.svg)](https://github.com/mrshoma99-rgb/dyncamelo/actions/workflows/release.yml)
-[![License: Apache 2.0 + Commons Clause](https://img.shields.io/badge/license-Apache%202.0%20%2B%20Commons%20Clause-blue)](LICENSE)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE)
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
 [![Download](https://img.shields.io/badge/download-DyncameloSetup.exe-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
@@ -17,10 +17,10 @@
 >
 > **Install [CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin/releases/latest)
 > to get all three.** Dyncamelo on its own, from this repository's releases, works exactly as it
-> always has — the bundles sit side by side and share the ribbon tab either way.
+> always has — the bundles sit side by side.
 
-> ## Source-available — free to use, not to sell
-> Dyncamelo is licensed under **Apache 2.0 with the Commons Clause** (see [LICENSE](LICENSE)). In plain words: **use it freely — at home or at work, companies included** — read the source, modify it, contribute, and share it for free. What you may **not** do is *sell* it: selling Dyncamelo itself, or a product or service whose value derives substantially from it, requires a written agreement with BIMCamel. (Because of the selling restriction this is "source-available" rather than OSI-certified open source.)
+> ## Source-available — free for personal use, not for commercial use
+> Dyncamelo is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**. In plain words: **it is free for personal use** (learning, hobby projects, research and testing) and for charities, schools and universities, public research bodies and government institutions. You can read the source, change it and share it on those terms. **Using it for your job** — at a contractor, consultancy, design office or any company — **or inside a paid project or product is commercial use and needs a commercial licence from BIMCamel**: [open an issue titled "Commercial licence"](https://github.com/mrshoma99-rgb/Dyncamelo/issues/new/choose) or get in touch through [bimcamel.com](https://www.bimcamel.com). (Because of the commercial-use restriction this is "source-available" rather than OSI-certified open source.) Releases up to v0.45.1 were published under Apache 2.0 with the Commons Clause, and copies you already have stay under that licence ([details](docs/licenses/README.md)).
 
 Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revit to **Autodesk Navisworks 2024, 2025 & 2026**. Wire nodes together on a canvas, watch data flow from outputs into inputs, and let the dataflow engine run your graph against the live Navisworks document — no code, no macros, no SDK boilerplate.
 
@@ -40,7 +40,7 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 - **Color toolkit** — seeded `Color.Random` / `Color.RandomList` (stable across re-runs, golden-angle distinct), `Color.Gradient` between two colors, and `Color.ByValues` + `Appearance.ColorByValues` for one-node color-coding by parameter value with a legend.
 - **Ordering, the industry way** — `Flow.Then` pins the execution order of side-effect nodes as a real data dependency (the Dynamo Passthrough pattern); a Captured Selection node snapshots the live selection and replays it every run.
 - **Editor quality of life** — Space-bar quick node search at the cursor, port tooltips generated from the API docs on all **314 nodes**, an inline **Watch Image** node for the analysis PNGs, an index gutter on Watch List, click-to-expand preview bubbles, a proper Boolean switch, and Create/Modify/Info grouping with symbols throughout the library.
-- **One BIMCamel ribbon** — a single tab shared with the IFC exporter, unified About window, and an update check when the editor opens.
+- **BIMCamel ribbon tab** — Dyncamelo, Player and About buttons, a unified About window, and an update check when the editor opens.
 
 The newest release is 0.45.1 ([a fix for picking from the node library](docs/WHATS_NEW_0.45.1.md)); 0.45 (tables, conditional flow, about 220 new nodes) is described in [docs/WHATS_NEW_0.45.md](docs/WHATS_NEW_0.45.md), with role-by-role [recipes](docs/RECIPES.md). Full details of the 0.23 wave in [docs/WHATS_NEW_0.23.md](docs/WHATS_NEW_0.23.md). Earlier waves: v0.10–0.11 universal loops, live element preview & viewpoint organizing; v0.4 instant library search & curated samples; v0.3 "plugin parity"; v0.2 editor quality-of-life — see [docs/](docs/).
 
@@ -55,7 +55,7 @@ The newest release is 0.45.1 ([a fix for picking from the node library](docs/WHA
 - **Deep Navisworks node library** — properties/QTO extraction and custom property writing, Find-Items-grade search, selection sets, color/transparency/hide overrides (permanent and viewpoint-scoped), transforms, saved viewpoints (incl. experimental redline markups), IFC export, clash triage/grouping/deltas, BCF 2.1 exchange, grids, TimeLiner, CSV/Excel/report export. See the generated [node catalogue](docs/NODE_CATALOG.md) — every node by category with its inputs and outputs, kept current by CI (also as [JSON](docs/dyncamelo-nodes.json)) — and [NODE_LIBRARY.md](docs/NODE_LIBRARY.md) for the design conventions.
 - **Zero-touch extensibility** — write a `public static` C# method, tag it with `[NodeName]`/`[NodeCategory]`, drop the DLL in the Packages folder, and it appears in the library. No base classes required. See [Extending Dyncamelo](docs/EXTENDING.md).
 - **Portable graphs** — graphs are saved as versioned JSON (`.dyc`) that is friendly to diffing and source control.
-- **Source-available** — Apache 2.0 + Commons Clause: free to use, including commercially at work; only *selling* Dyncamelo or products built from it is reserved to BIMCamel. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
+- **Source-available** — PolyForm Noncommercial 1.0.0: free for personal and other noncommercial use; commercial use needs a licence from BIMCamel. Third-party components ship under their own permissive licenses (see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
 ## Part of the BIMCamel toolset
 
@@ -68,7 +68,7 @@ The newest release is 0.45.1 ([a fix for picking from the node library](docs/WHA
   **Navisworks → IFC** export (IFC4 / IFC2x3): streaming engine, geometry instancing, property
   sets, classifications and georeferencing. Website:
   [bimcamel.com/Export-Navisworks-to-Ifc](https://www.bimcamel.com/Export-Navisworks-to-Ifc).
-  Both plug-ins install the same way and share the **BIMCamel** ribbon tab when installed together.
+  Both plug-ins install the same way; installed together, each adds its own **BIMCamel** tab.
 - **[bimcamel.com](https://www.bimcamel.com)** — browser-based IFC tools (validate, compare,
   upgrade / downgrade schema…).
 
@@ -107,7 +107,7 @@ Download **[`DyncameloSetup.exe`](https://github.com/mrshoma99-rgb/dyncamelo/rel
 
 Silent install/uninstall: `DyncameloSetup.exe /silent` and `DyncameloSetup.exe /uninstall /silent`.
 
-**Licence.** In plain words: Dyncamelo is free to use, at home or at work, companies included. You can read the source, change it and share it for free. You may not *sell* it, or sell a product or service whose value comes mostly from it. The Commons Clause in [LICENSE](LICENSE) counts hosting, consulting and support fees for the software as selling. This is a summary, not legal advice: the text of [LICENSE](LICENSE) is what counts, and if you are not sure, ask BIMCamel. The third-party parts keep their own licences ([THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
+**Licence.** In plain words: Dyncamelo is free for personal use and other noncommercial use (hobby, learning, research, charities, schools, public bodies). Using it for work at a company, or in a paid project or product, needs a commercial licence from BIMCamel. The text of [LICENSE](LICENSE) is what counts; this is a summary, not legal advice. If you are not sure whether your use is commercial, ask BIMCamel before you rely on it. The third-party parts keep their own licences ([THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
 
 ## Build from source (Windows)
 
@@ -184,6 +184,6 @@ Dyncamelo is developed by BIMCamel and is open to the community: bug reports, fe
 
 ## License
 
-Dyncamelo is **source-available** under the **Apache License 2.0 with the Commons Clause** (see [LICENSE](LICENSE)): you may use it freely — personally and professionally, companies included — modify it, and redistribute it for free, but the right to **sell** the software, or any product or service whose value derives substantially from it, is reserved to BIMCamel (contact us for a commercial agreement). Licensing history: releases up to v0.1.1 were MIT-licensed and v0.1.2–v0.26.1 were proprietary; each grant applies to copies obtained while it was in effect. Third-party components ship under their own licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Dyncamelo is **source-available** under the **PolyForm Noncommercial License 1.0.0** (see [LICENSE](LICENSE)): you may use it for personal and other noncommercial purposes — study, hobby projects, research, charities, schools, public research and government bodies — modify it and share it on those terms. Any commercial use needs a commercial licence from BIMCamel (see the box at the top of this page for how to ask). Licensing history: releases up to v0.1.1 were MIT-licensed, v0.1.2–v0.26.1 proprietary and v0.26.2–v0.45.1 Apache 2.0 with the Commons Clause; each grant applies to copies obtained while it was in effect ([texts](docs/licenses/README.md)). Third-party components ship under their own licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit, and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at runtime the API is provided by your licensed Navisworks installation.

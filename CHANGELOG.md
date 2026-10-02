@@ -20,6 +20,8 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 * The node library no longer lists a stray "WatchTableNode" category (a helper method of the Watch Table node was offered as a node).
 
 ### Changed
+* **New licence: the PolyForm Noncommercial License 1.0.0.** Dyncamelo is free for personal and other noncommercial use (hobby, learning, research, charities, schools, public bodies); using it for work at a company or in a paid project needs a commercial licence from BIMCamel. Releases up to 0.45.1 were published under Apache 2.0 with the Commons Clause and copies you already have stay under that licence; its text is kept in [docs/licenses](docs/licenses/README.md).
+* Dyncamelo no longer merges its ribbon tab with the one of other BIMCamel tools. The merge used code that reached into Autodesk's ribbon assembly, which is not a public API. With the IFC exporter installed as well, Navisworks may now show two BIMCamel tabs.
 * The "Table Summary from Text" sample is spaced out so the wires between its columns can be seen.
 * The Script Player now also asks about a script whose only risky nodes run programs or use the network (for example `Web.Get`), not only about nodes that change the model or write files.
 * The release pipeline installs the installer on a clean runner before publishing and checks the files, the version, the upgrade over an existing install and the uninstall. It signs Dyncamelo's own DLLs and the installer when a code-signing certificate is configured; until then downloads stay unsigned.

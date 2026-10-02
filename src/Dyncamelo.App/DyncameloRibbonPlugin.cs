@@ -4,8 +4,7 @@ using Autodesk.Navisworks.Api.Plugins;
 namespace Dyncamelo.App;
 
 /// <summary>
-/// Ribbon commands for Dyncamelo, presented on the shared "BIMCamel" ribbon tab
-/// (same tab id as the other BIMCamel tools so their panels co-locate).
+/// Ribbon commands for Dyncamelo, presented on the "BIMCamel" ribbon tab.
 /// The ribbon layout (Dyncamelo.xaml) must deploy to an en-US\ subfolder next to
 /// the plugin DLL, and the icons to a Resources\ subfolder — the
 /// LayoutNavisworksPlugin / DeployToBundle build targets arrange both.
@@ -40,8 +39,6 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
     /// <inheritdoc />
     public override int ExecuteCommand(string commandId, params string[] parameters)
     {
-        RibbonTabMerger.Install(); // idempotent fallback if the startup plugin didn't load
-
         try
         {
             if (commandId == "ID_Button_DyncameloPlayer")
