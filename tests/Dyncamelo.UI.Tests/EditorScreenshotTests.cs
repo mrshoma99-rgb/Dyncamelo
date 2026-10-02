@@ -15,8 +15,9 @@ using Xunit;
 namespace Dyncamelo.UI.Tests;
 
 /// <summary>
-/// Renders the editor with a runnable sample graph to PNG files, for the README. Does nothing unless DYNCAMELO_SCREENSHOT_DIR names a
-/// folder (the Windows CI job sets it and keeps the folder as a build artifact), so an ordinary test run writes nothing.
+/// Renders the editor and the Script Player with a runnable sample graph to PNG files, for the README and the Autodesk App Store listing.
+/// Does nothing unless DYNCAMELO_SCREENSHOT_DIR names a folder (the Windows CI job sets it and keeps the folder as a build artifact), so an
+/// ordinary test run writes nothing. The pictures show Dyncamelo on its own: pictures with a model behind it have to be taken in Navisworks.
 /// </summary>
 public class EditorScreenshotTests
 {
@@ -27,6 +28,111 @@ public class EditorScreenshotTests
     [InlineData("DyncameloDark", "editor-screenshot.png")]
     [InlineData("Light", "editor-screenshot-light.png")]
     public void RenderTheEditorWithASampleGraph(string palette, string fileName)
+    {
+        RenderEditor(palette, fileName, null);
+    }
+
+    [Fact]
+    public void RenderTheQuickNodeSearch()
+    {
+        RenderEditor("DyncameloDark", "editor-quick-search.png", vm =>
+        {
+            vm.OpenQuickSearch(new Point(0, 0));
+            vm.QuickSearchText = "table";
+        });
+    }
+
+    [Fact]
+    public void RenderTheCommandPalette()
+    {
+        RenderEditor("DyncameloDark", "editor-command-palette.png", vm =>
+        {
+            vm.IsPaletteOpen = true;
+            vm.PaletteQuery = "arrange";
+        });
+    }
+
+    [Fact]
+    public void RenderTheShortcutSheet()
+    {
+        RenderEditor("DyncameloDark", "editor-shortcuts.png", vm => vm.IsHelpOpen = true);
+    }
+
+    [Fact]
+    public void RenderTheSettings()
+    {
+        RenderEditor("DyncameloDark", "editor-settings.png", vm => vm.IsSettingsOpen = true);
+    }
+
+    [Fact]
+    public void RenderTheScriptPlayerWithAScriptAndItsResults()
+    {
+        var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");
+        if (string.IsNullOrWhiteSpace(folder))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(folder);
+        var scripts = Path.Combine(Path.GetTempPath(), "dyc-shot-scripts-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(scripts);
+        foreach (var name in new[] { "Table Summary from Text.dyc", "Getting Started - Math and Watch.dyc", "string-report.dyc", "csv-roundtrip.dyc", "list-lacing.dyc" })
+        {
+            File.Copy(Path.Combine(RepoRoot(), "samples", name), Path.Combine(scripts, name));
+        }
+
+        Window? window = null;
+        PlayerControl? control = null;
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var registry = NodeRegistry.CreateDefault();
+                NodeLibrary.RegisterAll(registry);
+                var settings = new UiSettingsService(Path.Combine(scripts, "settings.json"));
+                settings.SetPlayerFolders(new[] { scripts });
+                var player = new PlayerViewModel(registry, new StubDialogs(), settings) { CancelPoll = () => false };
+                player.Refresh();
+
+                control = new PlayerControl { ViewModel = player, Width = 560, Height = 1000 };
+                var canvas = new Canvas();
+                canvas.Children.Add(control);
+                window = new Window
+                {
+                    Width = 560,
+                    Height = 1000,
+                    Content = canvas,
+                    ShowInTaskbar = false,
+                    ShowActivated = false,
+                    WindowStyle = WindowStyle.None,
+                };
+                window.Show();
+                player.SelectedScript = player.Scripts.Single(s => s.Name == "Table Summary from Text");
+                Assert.True(player.Run());
+            });
+            StaHost.Flush();
+            StaHost.Flush();
+
+            Save(control!, folder, "player.png", 560, 1000);
+        }
+        finally
+        {
+            if (window != null)
+            {
+                StaHost.Run(() => window.Close());
+            }
+
+            try
+            {
+                Directory.Delete(scripts, true);
+            }
+            catch (IOException)
+            {
+            }
+        }
+    }
+
+    private static void RenderEditor(string palette, string fileName, Action<GraphEditorViewModel>? state)
     {
         var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");
         if (string.IsNullOrWhiteSpace(folder))
@@ -68,50 +174,62 @@ public class EditorScreenshotTests
         StaHost.Flush();
         StaHost.Flush();
 
-        // Frame the half that has the results (the tables and the Watch Table), so the text is readable at the picture's size.
-        StaHost.Run(() =>
-        {
-            var vm = control!.ViewModel!;
-            vm.SelectedItems.Clear();
-            var nodes = vm.Items.OfType<NodeViewModel>().ToList();
-            var firstColumn = nodes.Single(n => n.Model.Name == "Table.FromRows").Model.X;
-            foreach (var item in nodes.Where(n => n.Model.X >= firstColumn))
-            {
-                vm.SelectedItems.Add(item);
-            }
-
-            vm.FrameSelected();
-        });
-        StaHost.Flush();
-        StaHost.Flush();
-        StaHost.Run(() => control!.ViewModel!.SelectedItems.Clear());
-        StaHost.Flush();
-
         try
         {
+            // Frame the half that has the results (the tables and the Watch Table), so the text is readable at the picture's size.
             StaHost.Run(() =>
             {
-                control!.UpdateLayout();
-                var width = (int)Math.Ceiling(control.ActualWidth);
-                var height = (int)Math.Ceiling(control.ActualHeight);
-                Assert.True(width == (int)ShotWidth && height == (int)ShotHeight, "the editor was not laid out at its size (" + width + " x " + height + ")");
-
-                var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-                bitmap.Render(control);
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                using (var stream = File.Create(Path.Combine(folder, fileName)))
+                var vm = control!.ViewModel!;
+                vm.SelectedItems.Clear();
+                var nodes = vm.Items.OfType<NodeViewModel>().ToList();
+                var firstColumn = nodes.Single(n => n.Model.Name == "Table.FromRows").Model.X;
+                foreach (var item in nodes.Where(n => n.Model.X >= firstColumn))
                 {
-                    encoder.Save(stream);
+                    vm.SelectedItems.Add(item);
                 }
+
+                vm.FrameSelected();
             });
+            StaHost.Flush();
+            StaHost.Flush();
+            StaHost.Run(() => control!.ViewModel!.SelectedItems.Clear());
+            StaHost.Flush();
+
+            if (state != null)
+            {
+                StaHost.Run(() => state(control!.ViewModel!));
+                StaHost.Flush();
+                StaHost.Flush();
+            }
+
+            Save(control!, folder, fileName, (int)ShotWidth, (int)ShotHeight);
         }
         finally
         {
             StaHost.Run(() => window!.Close());
         }
+    }
 
-        Assert.True(new FileInfo(Path.Combine(folder, fileName)).Length > 10000, "the screenshot is empty");
+    private static void Save(FrameworkElement control, string folder, string fileName, int expectedWidth, int expectedHeight)
+    {
+        StaHost.Run(() =>
+        {
+            control.UpdateLayout();
+            var width = (int)Math.Ceiling(control.ActualWidth);
+            var height = (int)Math.Ceiling(control.ActualHeight);
+            Assert.True(width == expectedWidth && height == expectedHeight, "the control was not laid out at its size (" + width + " x " + height + ")");
+
+            var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(control);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (var stream = File.Create(Path.Combine(folder, fileName)))
+            {
+                encoder.Save(stream);
+            }
+        });
+
+        Assert.True(new FileInfo(Path.Combine(folder, fileName)).Length > 10000, "the screenshot is empty: " + fileName);
     }
 
     private static string RepoRoot()
