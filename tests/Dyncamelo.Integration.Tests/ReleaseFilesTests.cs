@@ -31,7 +31,7 @@ public class ReleaseFilesTests
     [Fact]
     public void TheChangelogHasAnEntryForTheReleaseVersion()
     {
-        Assert.Matches("(?m)^## " + Regex.Escape(ReleaseVersion().Substring(1)) + " - \\d{4}-\\d{2}-\\d{2}$", Read("CHANGELOG.md"));
+        Assert.Matches("(?m)^## " + Regex.Escape(ReleaseVersion().Substring(1)) + " - \\d{4}-\\d{2}-\\d{2}\\r?$", Read("CHANGELOG.md"));
     }
 
     [Fact]
