@@ -69,7 +69,7 @@ public class PrivacyPolicyContentTests
         Assert.Contains("Dyncamelo-UpdateCheck", updateSource);
 
         // "Dyncamelo makes no network request of its own" holds only while the first network use in the app is the update check.
-        var network = new[] { "HttpClient", "WebClient", "WebRequest.Create", "HttpWebRequest", "TcpClient", "Socket(" };
+        var network = new[] { "HttpClient", "WebClient", "WebRequest.Create", "HttpWebRequest", "TcpClient", "System.Net.Sockets", "new Socket(" };
         var offenders = Directory.GetFiles(Path.Combine(root, "src"), "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))
             .Where(f => network.Any(n => File.ReadAllText(f).Contains(n)))
