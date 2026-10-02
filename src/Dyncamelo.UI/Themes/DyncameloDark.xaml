@@ -2212,6 +2212,163 @@
         </Style.Triggers>
     </Style>
 
+    <!-- ===== The Script Player's fields =====
+         The Player has room the node editor does not: its fields are taller, and a text field wraps and grows with its text
+         (up to a limit, then it scrolls) instead of cutting a long or multi-line value off at one line. Same view models and
+         bindings as the node editors; only the templates differ. -->
+    <DataTemplate x:Key="PlayerEditor.Number">
+        <views:ScrubNumberBox FieldHeight="28"
+                              Label="{Binding Title}"
+                              Value="{Binding NumberValue, Mode=TwoWay}"
+                              Minimum="{Binding NumberMin}"
+                              Maximum="{Binding NumberMax}"
+                              SoftMinimum="{Binding NumberSoftMin}"
+                              SoftMaximum="{Binding NumberSoftMax}"
+                              Step="{Binding NumberStep}"
+                              IsInteger="{Binding NumberIsInteger}"
+                              Unit="{Binding NumberUnit}"
+                              IsModified="{Binding IsModified}"
+                              IsUnset="{Binding IsUnset}"
+                              ResetCommand="{Binding ResetCommand}"
+                              ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerEditor.Text">
+        <TextBox Style="{StaticResource Dyc.TextBox}"
+                 MinHeight="28"
+                 MaxHeight="180"
+                 Padding="8,5"
+                 FontSize="12"
+                 TextWrapping="Wrap"
+                 VerticalContentAlignment="Center"
+                 VerticalScrollBarVisibility="Auto"
+                 AcceptsReturn="{Binding AllowsLineBreaks, Mode=OneWay}"
+                 Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                 ToolTip="{Binding ToolTip}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerEditor.Dropdown">
+        <ComboBox Style="{StaticResource Dyc.ComboBox}"
+                  Height="28"
+                  FontSize="12"
+                  ItemsSource="{Binding Choices}"
+                  SelectedItem="{Binding SelectedChoice, Mode=TwoWay}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerEditor.Path">
+        <DockPanel>
+            <Button DockPanel.Dock="Right"
+                    Content="…"
+                    Width="28" Height="28"
+                    Margin="4,0,0,0"
+                    Focusable="False"
+                    Command="{Binding BrowseCommand}"
+                    Style="{StaticResource Dyc.SmallButton}"
+                    ToolTip="Browse" />
+            <TextBox Style="{StaticResource Dyc.TextBox}"
+                     MinHeight="28"
+                     Padding="8,0"
+                     FontSize="12"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding TextValue, UpdateSourceTrigger=LostFocus}"
+                     ToolTip="{Binding TextValue}" />
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerEditor.Model">
+        <Grid Height="28">
+            <Button x:Name="Empty"
+                    Style="{StaticResource Dyc.ModelFieldButton}"
+                    FontSize="12"
+                    HorizontalContentAlignment="Left"
+                    Command="{Binding CaptureModelCommand}"
+                    ToolTip="Use the elements currently selected in Navisworks">
+                <StackPanel Orientation="Horizontal">
+                    <Path Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"
+                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                          Data="{StaticResource Dyc.Icon.Pick}" />
+                    <TextBlock Text="Pick from selection" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                </StackPanel>
+            </Button>
+            <Grid x:Name="Filled" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        FontSize="12"
+                        HorizontalContentAlignment="Left"
+                        Command="{Binding RevealModelCommand}"
+                        ToolTip="{Binding ModelSummary}">
+                    <TextBlock Text="{Binding ModelSummary}" TextTrimming="CharacterEllipsis" />
+                </Button>
+                <Button Grid.Column="1"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        Width="28" Margin="4,0,0,0"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding CaptureModelCommand}"
+                        ToolTip="Pick again from the current selection">
+                    <Path Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                          Data="{StaticResource Dyc.Icon.Pick}" />
+                </Button>
+                <Button Grid.Column="2"
+                        Style="{StaticResource Dyc.ModelFieldButton}"
+                        Width="28" Margin="4,0,0,0"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding ResetCommand}"
+                        ToolTip="Clear">
+                    <TextBlock Text="✕" FontSize="10" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                </Button>
+            </Grid>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding HasModelValue}" Value="True">
+                <Setter TargetName="Empty" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="Filled" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <!-- The editor host for the Player: the node editor's, with the roomy templates above. -->
+    <Style x:Key="Dyc.PlayerEditorHost" TargetType="{x:Type ContentControl}" BasedOn="{StaticResource Dyc.EditorHost}">
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Number" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Number}" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Text" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Text}" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Path" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Path}" />
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Connector.ShowEditor}" Value="True" />
+                    <Condition Binding="{Binding Connector.EditorKind}" Value="Model" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Model}" />
+            </MultiDataTrigger>
+            <DataTrigger Binding="{Binding Connector.ShowDropdownChoices}" Value="True">
+                <Setter Property="ContentTemplate" Value="{StaticResource PlayerEditor.Dropdown}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <DataTemplate x:Key="Row.Output">
         <Grid MinHeight="{Binding RowMinHeight}" Height="{Binding RowHeight}">
             <TextBlock Text="{Binding Connector.Title}"

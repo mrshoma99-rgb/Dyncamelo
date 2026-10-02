@@ -64,6 +64,19 @@ public partial class PlayerControl : UserControl, IHostKeyTarget
     // A run blocks the UI thread, so the pane is painted first (progress text, wait cursor) and repainted between the steps.
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(PlayerViewModel.IsListOpen) && ViewModel != null && ViewModel.IsListOpen)
+        {
+            // Unfolded: typing filters at once.
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (SearchBox.IsVisible)
+                {
+                    SearchBox.Focus();
+                    SearchBox.SelectAll();
+                }
+            }), System.Windows.Threading.DispatcherPriority.Input);
+        }
+
         if (e.PropertyName == nameof(PlayerViewModel.IsRunning) && ViewModel != null)
         {
             if (ViewModel.IsRunning)
@@ -134,24 +147,75 @@ public partial class PlayerControl : UserControl, IHostKeyTarget
         }
     }
 
+    // Enter or Esc in the list; the arrow keys move the selection as in any list.
     private void OnScriptListKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && ViewModel != null && ViewModel.RunCommand.CanExecute(null))
+        if (ViewModel == null)
         {
-            ViewModel.RunCommand.Execute(null);
+            return;
+        }
+
+        if (e.Key == Key.Enter && ScriptList.SelectedItem != null)
+        {
+            ChooseScript();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && ViewModel.HasScript)
+        {
+            ViewModel.CloseList();
             e.Handled = true;
         }
     }
 
-    private void OnScriptListDoubleClick(object sender, MouseButtonEventArgs e)
+    // Down leaves the search box for the list, Enter chooses the first match, Esc folds the list.
+    private void OnSearchBoxKeyDown(object sender, KeyEventArgs e)
     {
-        // Only a click on a script (not the group header or empty space) runs it.
-        if (ViewModel != null && ScriptList.SelectedItem != null && e.OriginalSource is DependencyObject source &&
-            ItemsControl.ContainerFromElement(ScriptList, source) is ListBoxItem &&
-            ViewModel.RunCommand.CanExecute(null))
+        if (ViewModel == null)
         {
-            ViewModel.RunCommand.Execute(null);
+            return;
+        }
+
+        if (e.Key == Key.Down && ScriptList.Items.Count > 0)
+        {
+            if (ScriptList.SelectedItem == null)
+            {
+                ScriptList.SelectedIndex = 0;
+            }
+
+            (ScriptList.ItemContainerGenerator.ContainerFromItem(ScriptList.SelectedItem) as ListBoxItem)?.Focus();
             e.Handled = true;
         }
+        else if (e.Key == Key.Enter && ScriptList.Items.Count > 0)
+        {
+            if (!(ScriptList.SelectedItem is ScriptListItem chosen) || !ViewModel.Scripts.Contains(chosen))
+            {
+                ScriptList.SelectedIndex = 0;
+            }
+
+            ChooseScript();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && ViewModel.HasScript)
+        {
+            ViewModel.CloseList();
+            e.Handled = true;
+        }
+    }
+
+    // A click on a script chooses it; a click on a group's name or on empty space does not.
+    private void OnScriptListMouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (ViewModel != null && ScriptList.SelectedItem != null && e.OriginalSource is DependencyObject source &&
+            ItemsControl.ContainerFromElement(ScriptList, source) is ListBoxItem)
+        {
+            ViewModel.CloseList();
+        }
+    }
+
+    // The list folds away and the Run button is next, so Enter again runs the script.
+    private void ChooseScript()
+    {
+        ViewModel?.CloseList();
+        RunButton.Focus();
     }
 }

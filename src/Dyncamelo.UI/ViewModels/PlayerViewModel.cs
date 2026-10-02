@@ -169,6 +169,8 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
     private bool _resultSucceeded = true;
     private bool _isRunning;
     private bool _isFoldersOpen;
+    private bool _isListOpen = true;
+    private bool _filtering;
     private bool _hasScanned;
     private ScriptResult? _lastResult;
     private CancellationTokenSource? _cancellation;
@@ -188,6 +190,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         Problems = new ObservableCollection<PlayerProblemViewModel>();
         Folders = new ObservableCollection<PlayerFolderItem>();
         RefreshCommand = new RelayCommand(Refresh);
+        ToggleListCommand = new RelayCommand(() => IsListOpen = !IsListOpen);
         RunCommand = new RelayCommand(() => Run(), () => _session != null && !_isRunning);
         ResetCommand = new RelayCommand(ResetFields, () => _session != null && Fields.Count > 0);
         CopyResultsCommand = new RelayCommand(CopyResults, () => _lastResult != null);
@@ -253,7 +256,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         {
             if (SetProperty(ref _search, value ?? string.Empty))
             {
-                ApplyFilter();
+                ApplyFilter(keepSelection: true);
             }
         }
     }
@@ -264,10 +267,58 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         get => _selected;
         set
         {
+            if (_filtering)
+            {
+                // The list is being rebuilt: its box reports "nothing selected" for a moment. The script stays.
+                return;
+            }
+
             if (SetProperty(ref _selected, value))
             {
                 LoadScript(value?.Entry);
+                if (value == null)
+                {
+                    // Nothing chosen: the list is what there is to show.
+                    IsListOpen = true;
+                }
             }
+        }
+    }
+
+    /// <summary>True while the list of scripts is unfolded (it is until a script is chosen; the user folds and unfolds it).</summary>
+    public bool IsListOpen
+    {
+        get => _isListOpen;
+        set => SetProperty(ref _isListOpen, value);
+    }
+
+    /// <summary>Unfolds or folds the list of scripts.</summary>
+    public ICommand ToggleListCommand { get; }
+
+    /// <summary>Folds the list: the user has chosen the script (by clicking it or pressing Enter).</summary>
+    public void CloseList() => IsListOpen = false;
+
+    /// <summary>The name shown on the script bar: the open script's, or an invitation to choose one.</summary>
+    public string PickerTitle => _session != null ? Title : _selected?.Name ?? "Choose a script";
+
+    /// <summary>The line under the name on the script bar: the script's folder, or how many scripts there are.</summary>
+    public string PickerSubtitle
+    {
+        get
+        {
+            if (_selected != null)
+            {
+                return _selected.Folder;
+            }
+
+            if (_session != null)
+            {
+                return Path.GetDirectoryName(_session.Path) ?? string.Empty;
+            }
+
+            return _all.Count == 0
+                ? "No scripts found yet"
+                : _all.Count == 1 ? "1 script" : _all.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " scripts";
         }
     }
 
@@ -290,11 +341,13 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         _all.Clear();
         _all.AddRange(ScriptCatalog.Scan(FolderPaths));
         _hasScanned = true;
-        ApplyFilter();
+        ApplyFilter(keepSelection: false);
         if (keep != null)
         {
             SelectedScript = Scripts.FirstOrDefault(s => string.Equals(s.Path, keep, StringComparison.OrdinalIgnoreCase));
         }
+
+        OnPropertyChanged(nameof(PickerSubtitle));
     }
 
     /// <summary>Scans the folders the first time the Player is shown.</summary>
@@ -306,22 +359,45 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         }
     }
 
-    private void ApplyFilter()
+    // keepSelection: typing in the search box must not close the script that is open (it may not even match what is typed); a refresh
+    // does let go of it, because the file may have changed and the caller opens it again.
+    private void ApplyFilter(bool keepSelection)
     {
         var words = _search.ToLowerInvariant().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         var shown = _all
             .Where(e => words.All(w => (e.Name + " " + e.Folder).ToLowerInvariant().Contains(w)))
             .Select(e => new ScriptListItem(e))
             .ToList();
-        Scripts.Clear();
-        foreach (var item in shown)
+        var keep = _selected?.Path;
+        _filtering = true;
+        try
         {
-            Scripts.Add(item);
+            Scripts.Clear();
+            foreach (var item in shown)
+            {
+                Scripts.Add(item);
+            }
+        }
+        finally
+        {
+            _filtering = false;
         }
 
         OnPropertyChanged(nameof(IsListEmpty));
         OnPropertyChanged(nameof(EmptyListText));
-        if (_selected != null && !Scripts.Any(s => s.Path == _selected.Path))
+        if (keep == null)
+        {
+            return;
+        }
+
+        var again = keepSelection ? Scripts.FirstOrDefault(s => string.Equals(s.Path, keep, StringComparison.OrdinalIgnoreCase)) : null;
+        if (again != null)
+        {
+            // The same script, as a new list item: no reload, so the form keeps its values.
+            _selected = again;
+            OnPropertyChanged(nameof(SelectedScript));
+        }
+        else if (!keepSelection)
         {
             SelectedScript = null;
         }
@@ -518,7 +594,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         foreach (var name in new[]
         {
             nameof(Session), nameof(HasScript), nameof(Title), nameof(Description), nameof(HasDescription), nameof(HasFields),
-            nameof(ModifiesText), nameof(HasModifies), nameof(MissingText), nameof(HasMissing),
+            nameof(ModifiesText), nameof(HasModifies), nameof(MissingText), nameof(HasMissing), nameof(PickerTitle), nameof(PickerSubtitle),
         })
         {
             OnPropertyChanged(name);
@@ -776,12 +852,14 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         if (item != null)
         {
             SelectedScript = item;
+            CloseList();
         }
         else
         {
             // Not in any listed folder: load it directly.
             _selected = null;
             OnPropertyChanged(nameof(SelectedScript));
+            CloseList();
             LoadScript(new ScriptEntry(LastScriptPath, Path.GetFileNameWithoutExtension(LastScriptPath), string.Empty, DateTime.UtcNow));
         }
 
@@ -801,6 +879,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
 
         _selected = null;
         OnPropertyChanged(nameof(SelectedScript));
+        CloseList();
         LoadScript(new ScriptEntry(path, Path.GetFileNameWithoutExtension(path), string.Empty, File.GetLastWriteTimeUtc(path)));
         return Run() && _lastResult != null && _lastResult.Succeeded;
     }

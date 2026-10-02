@@ -8,7 +8,11 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 
 ## Unreleased
 
-Nothing yet.
+### Changed
+* **The Script Player has a new layout.** A script bar names the open script and unfolds the list (search, ↻), the form is a card of labelled fields with an on/off switch beside its label, the results sit in a card of their own, and **Run**, **Reset**, *Edit* and *File* stay at the bottom in view however long the form is. The list folds away once a script is chosen, `Enter` in it chooses and puts the focus on Run, and typing in the search box no longer closes the open script or loses its values.
+
+### Fixed
+* **Text fields in the Script Player no longer cut their text off.** A long or multi-line value (a pasted table, a sentence) was shown in a box one line high, with the second line half hidden. The field now wraps and grows with its text up to a limit, then scrolls; fields are taller (28 pixels) so the text is centred in them.
 
 ## 0.46.0 - 2026-10-02
 

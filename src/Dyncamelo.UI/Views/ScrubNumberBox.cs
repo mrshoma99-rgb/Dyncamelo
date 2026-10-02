@@ -110,7 +110,11 @@ public sealed class ScrubNumberBox : Decorator
     /// <summary>Outline drawn after rejected input.</summary>
     public static readonly DependencyProperty ErrorBrushProperty = BrushProperty(nameof(ErrorBrush), Brushes.IndianRed);
 
-    private const double FieldHeight = 20d;
+    /// <summary>Height of the field: 20 in a node, more where there is room (the Script Player).</summary>
+    public static readonly DependencyProperty FieldHeightProperty = DependencyProperty.Register(
+        nameof(FieldHeight), typeof(double), typeof(ScrubNumberBox),
+        new FrameworkPropertyMetadata(20d, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
+
     private const double ArrowZone = 14d;
     private const double DragThreshold = 3d;
     private static bool _tabbedIn;
@@ -191,6 +195,9 @@ public sealed class ScrubNumberBox : Decorator
     /// <inheritdoc cref="PixelsPerStepProperty" />
     public double PixelsPerStep { get => (double)GetValue(PixelsPerStepProperty); set => SetValue(PixelsPerStepProperty, value); }
 
+    /// <inheritdoc cref="FieldHeightProperty" />
+    public double FieldHeight { get => (double)GetValue(FieldHeightProperty); set => SetValue(FieldHeightProperty, value); }
+
     /// <inheritdoc cref="LiveCommitProperty" />
     public bool LiveCommit { get => (bool)GetValue(LiveCommitProperty); set => SetValue(LiveCommitProperty, value); }
 
@@ -257,8 +264,9 @@ public sealed class ScrubNumberBox : Decorator
     protected override Size MeasureOverride(Size constraint)
     {
         var width = double.IsInfinity(constraint.Width) ? 120d : constraint.Width;
-        Child?.Measure(new Size(width, FieldHeight));
-        return new Size(width, FieldHeight);
+        var height = FieldHeight;
+        Child?.Measure(new Size(width, height));
+        return new Size(width, height);
     }
 
     /// <inheritdoc />

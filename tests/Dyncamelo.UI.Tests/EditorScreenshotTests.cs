@@ -66,8 +66,11 @@ public class EditorScreenshotTests
         RenderEditor("DyncameloDark", "editor-settings.png", vm => vm.IsSettingsOpen = true);
     }
 
-    [Fact]
-    public void RenderTheScriptPlayerWithAScriptAndItsResults()
+    [Theory]
+    [InlineData("DyncameloDark", "player.png", false)]
+    [InlineData("Light", "player-light.png", false)]
+    [InlineData("DyncameloDark", "player-list.png", true)]
+    public void RenderTheScriptPlayerWithAScriptAndItsResults(string palette, string fileName, bool listOpen)
     {
         var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");
         if (string.IsNullOrWhiteSpace(folder))
@@ -95,6 +98,7 @@ public class EditorScreenshotTests
                 NodeLibrary.RegisterAll(registry);
                 var settings = new UiSettingsService(Path.Combine(root, "settings.json"));
                 settings.SetPlayerFolders(new[] { scripts });
+                settings.SetPaletteId(palette);
                 var player = new PlayerViewModel(registry, new StubDialogs(), settings) { CancelPoll = () => false };
                 player.Refresh();
 
@@ -113,11 +117,19 @@ public class EditorScreenshotTests
                 window.Show();
                 player.SelectedScript = player.Scripts.Single(s => s.Name == "Table Summary from Text");
                 Assert.True(player.Run());
+                if (listOpen)
+                {
+                    player.IsListOpen = true;
+                }
+                else
+                {
+                    player.CloseList();
+                }
             });
             StaHost.Flush();
             StaHost.Flush();
 
-            Save(control!, folder, "player.png", (int)PlayerWidth, (int)PlayerHeight);
+            Save(control!, folder, fileName, (int)PlayerWidth, (int)PlayerHeight);
         }
         finally
         {

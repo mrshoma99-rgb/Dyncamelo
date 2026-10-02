@@ -111,6 +111,66 @@ public class PlayerUiTests : IDisposable
     }
 
     [Fact]
+    public void TheScriptListStaysUnfoldedUntilAScriptIsChosen()
+    {
+        StaHost.Run(() =>
+        {
+            SaveSumScript("alpha.dyc");
+            SaveSumScript("beta.dyc", "Clash");
+            var player = NewPlayer();
+            player.Refresh();
+
+            Assert.True(player.IsListOpen);
+            Assert.Equal("Choose a script", player.PickerTitle);
+            Assert.Equal("2 scripts", player.PickerSubtitle);
+
+            player.SelectedScript = player.Scripts.Single(s => s.Name == "alpha");
+            Assert.True(player.IsListOpen);              // the arrow keys select while the list is unfolded: it must not fold under them
+            Assert.Equal("Sum of two", player.PickerTitle);
+            Assert.Equal(player.SelectedScript.Folder, player.PickerSubtitle);
+
+            player.CloseList();
+            Assert.False(player.IsListOpen);
+            player.ToggleListCommand.Execute(null);
+            Assert.True(player.IsListOpen);
+            player.ToggleListCommand.Execute(null);
+            Assert.False(player.IsListOpen);
+
+            player.SelectedScript = null;                // nothing chosen: the list is what there is to show
+            Assert.True(player.IsListOpen);
+            Assert.Equal("Choose a script", player.PickerTitle);
+        });
+    }
+
+    [Fact]
+    public void TypingInTheSearchBoxKeepsTheOpenScriptAndWhatWasTypedInItsForm()
+    {
+        StaHost.Run(() =>
+        {
+            SaveSumScript("alpha.dyc");
+            SaveSumScript("beta.dyc", "Clash");
+            var player = NewPlayer();
+            player.Refresh();
+            player.SelectedScript = player.Scripts.Single(s => s.Name == "alpha");
+            player.Fields[0].Connector.NumberValue = 9;
+
+            player.SearchText = "bet";                   // hides the open script from the list; the form stays
+            Assert.True(player.HasScript);
+            Assert.Equal("beta", Assert.Single(player.Scripts).Name);
+            Assert.Equal(9d, player.Fields[0].Connector.NumberValue);
+
+            player.SearchText = "alp";                   // and it is the selected entry again, with its values
+            Assert.True(player.HasScript);
+            Assert.Same(player.Scripts.Single(), player.SelectedScript);
+            Assert.Equal(9d, player.Fields[0].Connector.NumberValue);
+
+            player.SearchText = string.Empty;
+            player.Refresh();                            // a refresh does read the file again
+            Assert.Equal(2d, player.Fields[0].Connector.NumberValue);
+        });
+    }
+
+    [Fact]
     public void SelectingAScriptShowsItsFormAndRunningGivesTheResult()
     {
         StaHost.Run(() =>
@@ -318,6 +378,7 @@ public class PlayerUiTests : IDisposable
             Assert.True(again.RunLast());
             Assert.Equal(second, again.SelectedScript!.Path);
             Assert.True(again.HasResult);
+            Assert.False(again.IsListOpen);
         });
     }
 
@@ -330,6 +391,8 @@ public class PlayerUiTests : IDisposable
             var player = NewPlayer();
 
             Assert.True(player.RunScript(path));
+            Assert.False(player.IsListOpen);
+            Assert.Equal("Sum of two", player.PickerTitle);
             Assert.Equal("Total", player.Outputs.Single().Label);
             Assert.Equal("4", player.Outputs.Single().Text);   // the saved width, 2, plus the sum node's second input, 2
             Assert.False(player.RunScript(Path.Combine(Scripts, "missing.dyc")));
@@ -427,6 +490,138 @@ public class PlayerUiTests : IDisposable
         finally
         {
             StaHost.Run(() => window!.Close());
+        }
+    }
+
+    private (Window Window, PlayerViewModel Player) ShowPlayerWith(GraphModel graph, double width = 420, double height = 900)
+    {
+        Window? window = null;
+        PlayerViewModel? player = null;
+        StaHost.Run(() =>
+        {
+            new GraphSerializer(Registry()).SaveToFile(graph, Path.Combine(Scripts, "form.dyc"));
+            player = NewPlayer();
+            player.Refresh();
+            window = new Window
+            {
+                Width = width,
+                Height = height,
+                Content = new PlayerControl { ViewModel = player },
+                ShowInTaskbar = false,
+                ShowActivated = false,
+                WindowStyle = WindowStyle.None,
+            };
+            window.Show();
+            player.SelectedScript = player.Scripts.Single();
+            player.CloseList();
+        });
+        StaHost.Flush();
+        StaHost.Flush();
+        return (window!, player!);
+    }
+
+    private static System.Windows.Controls.ScrollViewer ContentHostOf(System.Windows.Controls.TextBox box) =>
+        (System.Windows.Controls.ScrollViewer)box.Template.FindName("PART_ContentHost", box);
+
+    [Fact]
+    public void ATextFieldGrowsWithItsTextInsteadOfCuttingItOff()
+    {
+        var multiline = "Level,Category,Length\nL1,Wall,3000\nL1,Pipe,1200\nL2,Wall,4500\nL2,Door,900";
+        var longLine = string.Join(" ", Enumerable.Repeat("a rather long sentence that cannot fit on one line", 4));
+        var graph = new GraphModel { Name = "Text" };
+        graph.AddNode(new StringInputNode { Name = "Rows", Value = multiline, Y = 0 });
+        graph.AddNode(new StringInputNode { Name = "Sentence", Value = longLine, Y = 100 });
+        graph.AddNode(new StringInputNode { Name = "Separator", Value = ",", Y = 200 });
+        var (window, _) = ShowPlayerWith(graph);
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var boxes = Descendants<System.Windows.Controls.TextBox>(window).ToList();
+                var rows = boxes.Single(t => t.Text == multiline);
+                var sentence = boxes.Single(t => t.Text == longLine);
+                var separator = boxes.Single(t => t.Text == ",");
+
+                // Tall enough for every line: five lines of a 12 pt face are well over 60 pixels, a clipped box was 22.
+                Assert.True(rows.ActualHeight > 60, "the multi-line box was cut to " + rows.ActualHeight);
+                Assert.True(rows.AcceptsReturn);
+                Assert.True(sentence.ActualHeight > separator.ActualHeight + 14, "the long line did not wrap");
+                Assert.True(separator.ActualHeight >= 28 && separator.ActualHeight < 40, "a short value is one line high: " + separator.ActualHeight);
+
+                // Nothing is hidden: the text fits the box's own viewport, so it needs no scrolling.
+                foreach (var box in new[] { rows, sentence, separator })
+                {
+                    var host = ContentHostOf(box);
+                    Assert.True(host.ExtentHeight <= host.ViewportHeight + 0.5, "'" + (box.Text.Length > 5 ? box.Text.Substring(0, 5) : box.Text) + "' is cut off: " + host.ExtentHeight + " > " + host.ViewportHeight);
+                }
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
+        }
+    }
+
+    [Fact]
+    public void AnOnOffSwitchSharesTheRowOfItsLabelAndEveryFieldIsTheSameHeight()
+    {
+        var graph = new GraphModel { Name = "Form" };
+        graph.AddNode(new BooleanToggleNode { Name = "Strict", Value = true, Y = 0 });
+        graph.AddNode(new NumberInputNode { Name = "Gap", Value = 2, Y = 100 });
+        graph.AddNode(new StringInputNode { Name = "Test name", Value = "Floors", Y = 200 });
+        var (window, _) = ShowPlayerWith(graph);
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var label = Descendants<System.Windows.Controls.TextBlock>(window).First(t => t.Text == "Strict");
+                var toggle = Assert.Single(Descendants<System.Windows.Controls.CheckBox>(window));
+                var labelMiddle = label.TransformToAncestor(window).Transform(new Point(0, label.ActualHeight / 2)).Y;
+                var toggleMiddle = toggle.TransformToAncestor(window).Transform(new Point(0, toggle.ActualHeight / 2)).Y;
+                Assert.True(Math.Abs(labelMiddle - toggleMiddle) < 4, "the switch is not on its label's row: " + labelMiddle + " vs " + toggleMiddle);
+
+                var number = Assert.Single(Descendants<ScrubNumberBox>(window));
+                var text = Descendants<System.Windows.Controls.TextBox>(window).Single(t => t.Text == "Floors");
+                Assert.Equal(28d, number.ActualHeight);
+                Assert.Equal(28d, text.ActualHeight);
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
+        }
+    }
+
+    [Fact]
+    public void TheScriptBarNamesTheScriptAndTheListFoldsAwayWithIt()
+    {
+        var graph = new GraphModel { Name = "Folding" };
+        graph.AddNode(new NumberInputNode { Name = "Gap", Value = 2 });
+        var (window, player) = ShowPlayerWith(graph);
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var search = Descendants<System.Windows.Controls.TextBox>(window).First(t => t.Name == "SearchBox");
+                Assert.False(player.IsListOpen);
+                Assert.False(search.IsVisible);
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(window), t => t.Text == "Folding" && t.IsVisible);
+
+                player.ToggleListCommand.Execute(null);
+                window.UpdateLayout();
+                Assert.True(search.IsVisible);
+
+                player.CloseList();
+                window.UpdateLayout();
+                Assert.False(search.IsVisible);
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
         }
     }
 

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Graph;
+using Dyncamelo.Core.Nodes;
 using Dyncamelo.Core.Player;
 using Dyncamelo.Core.Types;
 using Dyncamelo.UI.Mvvm;
@@ -499,6 +500,12 @@ public class ConnectorViewModel : ObservableObject
         set => PortEditors.SetText(Port, value);
     }
 
+    /// <summary>
+    /// True when Enter should add a line in the text editor of a roomy form (the Script Player): the value already spans lines, or it is a
+    /// text input node (which is a multi-line box in the editor as well). Other text fields keep Enter for committing, as a form does.
+    /// </summary>
+    public bool AllowsLineBreaks => Port.Owner is StringInputNode || TextValue.IndexOf('\n') >= 0;
+
     /// <summary>The colour as #AARRGGBB, or empty when unset.</summary>
     public string ColourHex
     {
@@ -635,6 +642,7 @@ public class ConnectorViewModel : ObservableObject
         OnPropertyChanged(nameof(NumberValue));
         OnPropertyChanged(nameof(BoolValue));
         OnPropertyChanged(nameof(TextValue));
+        OnPropertyChanged(nameof(AllowsLineBreaks));
         OnPropertyChanged(nameof(ColourHex));
         OnPropertyChanged(nameof(ColourBrush));
         OnPropertyChanged(nameof(ModelSummary));
