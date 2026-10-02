@@ -16,6 +16,25 @@ using Xunit;
 namespace Dyncamelo.Core.Tests;
 
 /// <summary>A node that changes the model (so a script holding it needs confirming).</summary>
+/// <summary>Reads only (Info), but reaches out over the network: the Player must still ask about it.</summary>
+public sealed class EffectsTestNode : NodeModel
+{
+    public EffectsTestNode()
+    {
+        Name = "Fetch Page";
+        AddInput("in", typeof(object), (object?)null);
+        AddOutput("out", typeof(object));
+    }
+
+    public override string NodeType => "TestEffects";
+
+    public override NodeFunction Function => NodeFunction.Info;
+
+    public override NodeEffects Effects => NodeEffects.UsesNetwork;
+
+    public override object?[] Evaluate(object?[] inputs, EvaluationContext context) => new[] { inputs[0] };
+}
+
 public sealed class ModifyingTestNode : NodeModel
 {
     public ModifyingTestNode()
@@ -53,6 +72,7 @@ public sealed class PlayerTests : IDisposable
     {
         var registry = NodeRegistry.CreateDefault();
         registry.RegisterNodeType("TestModifying", () => new ModifyingTestNode());
+        registry.RegisterNodeType("TestEffects", () => new EffectsTestNode());
         registry.RegisterAssembly(typeof(MathFixtures).Assembly);
         return registry;
     }
@@ -455,6 +475,18 @@ public sealed class PlayerTests : IDisposable
         var session = Load(Save(graph));
 
         Assert.Equal(new[] { "Isolate Walls" }, session.ModifyingNodes.ToArray());
+    }
+
+    [Fact]
+    public void AScriptThatOnlyReadsButUsesTheNetworkOrRunsProgramsIsAskedAboutToo()
+    {
+        var graph = new GraphModel();
+        graph.AddNode(new EffectsTestNode { Name = "Fetch Page" });
+        graph.AddNode(new EffectsTestNode { Name = "Muted fetch", IsMuted = true });
+
+        var session = Load(Save(graph));
+
+        Assert.Equal(new[] { "Fetch Page" }, session.ModifyingNodes.ToArray());
     }
 
     [Fact]

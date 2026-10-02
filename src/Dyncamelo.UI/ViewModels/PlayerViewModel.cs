@@ -429,11 +429,11 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
     /// <summary>True when the form has fields.</summary>
     public bool HasFields => Fields.Count > 0;
 
-    /// <summary>"Changes the model or writes files: A, B" — or empty for a script that only reads.</summary>
+    /// <summary>"Changes the model, writes files, runs programs or uses the network: A, B" — or empty for a script that only reads.</summary>
     public string ModifiesText =>
         _session == null || _session.ModifyingNodes.Count == 0
             ? string.Empty
-            : "Changes the model or writes files: " + string.Join(", ", _session.ModifyingNodes.Take(6)) +
+            : "Changes the model, writes files, runs programs or uses the network: " + string.Join(", ", _session.ModifyingNodes.Take(6)) +
               (_session.ModifyingNodes.Count > 6 ? ", … +" + (_session.ModifyingNodes.Count - 6).ToString(CultureInfo.InvariantCulture) : string.Empty);
 
     /// <summary>True when the script changes things.</summary>
@@ -675,7 +675,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
 
         if (session.ModifyingNodes.Count > 0 && _settings.PlayerConfirmedHash(session.Path) != session.Hash)
         {
-            var message = "'" + session.Name + "' changes the model or writes files, through:\n\n  • " +
+            var message = "'" + session.Name + "' changes the model, writes files, runs programs or uses the network, through:\n\n  • " +
                           string.Join("\n  • ", session.ModifyingNodes.Take(10)) +
                           (session.ModifyingNodes.Count > 10 ? "\n  • …" : string.Empty) +
                           "\n\nRun it? You are asked again only if the script file changes.";

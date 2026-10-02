@@ -9,7 +9,7 @@ Dyncamelo is source-available under the Apache License 2.0 with the Commons Clau
 - **Nodes** — the generated [node catalogue](docs/NODE_CATALOG.md) lists every node that exists; [docs/NODE_LIBRARY.md](docs/NODE_LIBRARY.md) holds the design and the tiers. Unclaimed MVP/Beta nodes are great first issues.
 - **Engine** — the dataflow engine in `Dyncamelo.Core` (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)) has a well-defined spec and a Linux-runnable test suite.
 - **Docs and samples** — tutorials, sample `.dyc` graphs, screenshots.
-- **Bug reports** — use the [bug report form](https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose). It asks for the Dyncamelo and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the output of **Help > Copy diagnostics**; the graph (`.dyc` attaches nicely to issues) and the node error text help too. [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) covers the common problems.
+- **Bug reports** — use the [bug report form](https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose). It asks for the Dyncamelo and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the output of **Help > Copy Diagnostics**; the graph (`.dyc` attaches nicely to issues) and the node error text help too. [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) covers the common problems.
 
 ## Development environment
 

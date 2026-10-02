@@ -92,8 +92,8 @@ body:
   - type: textarea
     id: diagnostics
     attributes:
-      label: Output of Help > Copy diagnostics
-      description: 'In the Dyncamelo editor choose Help > Copy diagnostics, then paste the result here. It lists the Dyncamelo and Navisworks versions and the installed Navisworks plug-ins. If the editor will not open, write: editor does not open.'
+      label: Output of Help > Copy Diagnostics
+      description: 'In the Dyncamelo editor choose Help > Copy Diagnostics, then paste the result here. It lists the Dyncamelo and Navisworks versions and the installed Navisworks plug-ins. If the editor will not open, write: editor does not open.'
       render: text
     validations:
       required: true
@@ -101,8 +101,8 @@ body:
   - type: textarea
     id: self-test
     attributes:
-      label: Report of Help > Run self-test (optional)
-      description: "With a model open, choose Help > Run self-test and paste the report. It helps most when a Navisworks node behaves oddly."
+      label: Report of Help > Run Self-Test (optional)
+      description: "With a model open, choose Help > Run Self-Test and paste the report. It helps most when a Navisworks node behaves oddly."
       render: text
     validations:
       required: false

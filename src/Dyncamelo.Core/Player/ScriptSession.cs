@@ -200,7 +200,10 @@ public sealed class ScriptSession
     /// <summary>The nodes whose result is shown.</summary>
     public IReadOnlyList<NodeModel> OutputNodes => _outputNodes;
 
-    /// <summary>Names of the nodes that change the model or write files (distinct, muted and frozen ones left out).</summary>
+    /// <summary>
+    /// Names of the nodes that change the model, write files, run programs or use the network (distinct, muted and frozen ones left out):
+    /// the nodes the Player asks about before it first runs a script.
+    /// </summary>
     public IReadOnlyList<string> ModifyingNodes { get; private set; } = new List<string>();
 
     /// <summary>Number of nodes whose type is not installed (the script cannot run fully).</summary>
@@ -286,7 +289,8 @@ public sealed class ScriptSession
             {
                 missing++;
             }
-            else if (!node.IsMuted && !node.IsFrozen && !(node is GroupInstanceNode) && node.Function == NodeFunction.Modify)
+            else if (!node.IsMuted && !node.IsFrozen && !(node is GroupInstanceNode) &&
+                     (node.Function == NodeFunction.Modify || node.Effects != NodeEffects.None))
             {
                 modifying.Add(node.Name);
             }

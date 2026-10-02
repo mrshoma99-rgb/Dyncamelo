@@ -26,7 +26,7 @@ At startup, Dyncamelo's zero-touch loader (in `Dyncamelo.Core`) reflects over no
 From v0.2, the loader also scans:
 
 ```
-%APPDATA%\Dyncamelo\Packages\<YourPackName>\
+%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\<year>\Packages\<YourPackName>\
     YourPack.dll            (plus any private dependencies)
 ```
 
@@ -106,7 +106,7 @@ public void BarWeight_D16_1m_IsAboutOnePoint58Kg()
 Copy the build output to the Packages folder and restart the editor (or use the library's refresh action):
 
 ```
-%APPDATA%\Dyncamelo\Packages\RebarToolkit\RebarToolkit.dll
+%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\2024\Packages\RebarToolkit\RebarToolkit.dll
 ```
 
 Your nodes appear under *RebarToolkit → Rebar* in the node browser, with your descriptions as tooltips. Done.

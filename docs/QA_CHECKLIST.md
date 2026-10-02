@@ -9,10 +9,10 @@ Nothing can run the Navisworks API outside Navisworks, so the automated tests (s
 1. Copy the [results template](#results-template) into a text file. Fill it in as you go and paste it into an issue (or the release checklist) when you finish.
 2. Do the sections in order. Use a fresh Navisworks session for each year.
 3. In the **Result** column write `Pass`, `Fail`, `N/A` or `?`. Where **Expected** says **Unknown**, nobody knows the answer yet. Do not judge: write down what you see. That is the point of the row.
-4. For every `Fail`: note the row number, save the end of `%APPDATA%\Dyncamelo\errors.log`, and run **Help > Copy diagnostics**. See [Troubleshooting](TROUBLESHOOTING.md#how-to-collect-diagnostics).
+4. For every `Fail`: note the row number, save the end of `%APPDATA%\Dyncamelo\errors.log`, and run **Help > Copy Diagnostics**. See [Troubleshooting](TROUBLESHOOTING.md#how-to-collect-diagnostics).
 5. Expected results marked *(intended)* come from a node's description in the [node catalogue](NODE_CATALOG.md), not from having seen it work.
 
-New in this release, and not yet seen working: **Help > Run self-test**, **Help > Copy diagnostics**, and the warning before running a graph opened from a file (sections 5 and 6). Their rows are written from the release plan. If the real behaviour differs, write down what you see.
+New in this release, and not yet seen working: **Help > Run Self-Test**, **Help > Copy Diagnostics**, and the warning before running a graph opened from a file (sections 5 and 6). Their rows are written from the release plan. If the real behaviour differs, write down what you see.
 
 ## What you need
 
@@ -207,13 +207,13 @@ New in this release. Open the small model first.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 5.1 | **Help > Run self-test**. | A battery of read-only Navisworks nodes runs against the open model. Each node shows pass or fail. | |
+| 5.1 | **Help > Run Self-Test**. | A battery of read-only Navisworks nodes runs against the open model. Each node shows pass or fail. | |
 | 5.2 | Copy the report and paste it into your results file. **Attach it to the results.** | The report can be copied. List every failed node; ask whether the model explains it (no clash tests, no TimeLiner tasks, no grids). | |
 | 5.3 | After the self-test, look at the model. | Nothing changed: no overrides, hidden items, new sets, viewpoints or properties. (The nodes are read-only.) | |
 | 5.4 | Run the self-test twice. | The same result both times. | |
-| 5.5 | Run the self-test with no model open. | **Unknown:** record what it says. Navisworks must stay open. | |
-| 5.6 | **Help > Copy diagnostics**, paste into a text editor. | The Dyncamelo version, the Navisworks version, the installed Navisworks plug-ins and the end of `errors.log`. The versions match **About** and the Navisworks year. | |
-| 5.7 | Rename `%APPDATA%\Dyncamelo\errors.log` and run **Copy diagnostics** again. | **Unknown:** it should still copy the versions. Record what it does about the missing log. (Rename it back.) | |
+| 5.5 | Run the self-test with no model open. | The checks that need a model show "skipped: open a model first"; the others still run. Navisworks stays open. | |
+| 5.6 | **Help > Copy Diagnostics**, paste into a text editor. | The Dyncamelo version, the Navisworks version, the installed Navisworks plug-ins and the end of `errors.log`. The versions match **About** and the Navisworks year. | |
+| 5.7 | Rename `%APPDATA%\Dyncamelo\errors.log` and run **Copy Diagnostics** again. | **Unknown:** it should still copy the versions. Record what it does about the missing log. (Rename it back.) | |
 | 5.8 | Open the Performance HUD with `Ctrl+Shift+F12` and click **Copy report**. | **Unknown:** the HUD appears over the canvas; the report holds frame rate, visuals, node count and render tier. | |
 
 ## 6. Questions before a graph runs
@@ -225,11 +225,11 @@ New in this release. Open the small model first.
 | 6.3 | Press **Run** again, trust the file. | It runs. Close and open the same file, press **Run**: no warning ("trust this file until it changes"). | |
 | 6.4 | Edit the file (change a value and save). Open it again and press **Run**. | The warning is back. | |
 | 6.5 | Repeat 6.2 with `Web.Get`, `File.Delete` and `File.Move`. | The warning names each of them. | |
-| 6.6 | Save the same graph in **Automatic** run mode and open it. | The warning appears **before** anything runs. Answer **no**: nothing runs. (Without the warning, an Automatic graph runs on open.) | |
+| 6.6 | Save the same graph in **Automatic** run mode and open it from the file (new trust: rename the file first). | Nothing runs on opening and no dialog appears; the status bar says "Not run automatically: this graph came from a file …". Press **Run**: the warning appears. | |
 | 6.7 | Open *Getting Started - Math and Watch*. | No warning (it has no such nodes). | |
-| 6.8 | Put a graph with `Appearance.OverrideColor` in `Documents\Dyncamelo\Scripts`. Open the Player, pick it. | The Player says "Changes the model or writes files: Appearance.OverrideColor" above the form. | |
+| 6.8 | Put a graph with `Appearance.OverrideColor` in `Documents\Dyncamelo\Scripts`. Open the Player, pick it. | The Player says "Changes the model, writes files, runs programs or uses the network: Appearance.OverrideColor" above the form. | |
 | 6.9 | Run it. | A question lists the node; after **yes** it runs. Run it again: no question. Edit and save the file: the question is back. | |
-| 6.10 | A script whose only risky node is `Web.Get`. | **Unknown, expected: no question** (`Web.Get` is a reading node). Record it. | |
+| 6.10 | A script whose only risky node is `Web.Get`. | The Player lists `Web.Get` above the form and asks the first time (it uses the network). | |
 | 6.11 | A script with a node that is not installed (rename a node's id in the file). | The Player says nodes are missing and does not run it. | |
 
 ## 7. Sample graphs
@@ -387,5 +387,5 @@ Answers to the "Unknown" rows:
 Large-model timings (ms): Model.Statistics model/class/layer = / / ; Search.ByProperty = ; Properties.ToTable(1000) = ;
   OverrideColor = ; Reset = ; Search.ByGuid(100) = ; BulkByPropertyValues = ; Esc to stop = ; memory before/after = / .
 
-Attached: self-test report (5.2) | Help > Copy diagnostics (5.6) | end of errors.log | graphs that failed
+Attached: self-test report (5.2) | Help > Copy Diagnostics (5.6) | end of errors.log | graphs that failed
 ````

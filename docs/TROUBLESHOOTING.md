@@ -126,7 +126,7 @@ If you measure a slow case, please add the model size, the node and the time to 
 
 ## The Script Player asks me to confirm a script
 
-**Cause.** The script contains nodes that change things: the model, a file on disk, a program, or data sent to the web. The Player lists them by name above the form ("Changes the model or writes files: ...") and asks the first time you run the script. This is a safety question, not an error. See [SECURITY.md](../SECURITY.md#what-a-graph-file-can-do).
+**Cause.** The script contains nodes that change things: the model, a file on disk, a program, or data sent to the web. The Player lists them by name above the form ("Changes the model, writes files, runs programs or uses the network: ...") and asks the first time you run the script. This is a safety question, not an error. See [SECURITY.md](../SECURITY.md#what-a-graph-file-can-do).
 
 * The answer is remembered **for that file as it is now**. If the script file changes, the question comes back.
 * Scripts that only read are never asked about.
@@ -165,9 +165,9 @@ When you report a problem, include:
 
 1. **Dyncamelo version.** On the **BIMCamel** ribbon tab, click **About**. The version is at the bottom of the window.
 2. **Navisworks product and year** (Manage or Simulate, 2024, 2025 or 2026) and your Windows version.
-3. **Help > Copy diagnostics** in the editor. It copies the Dyncamelo and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`. Paste it into the issue.
+3. **Help > Copy Diagnostics** in the editor. It copies the Dyncamelo and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`. Paste it into the issue.
 4. **The end of `%APPDATA%\Dyncamelo\errors.log`**, if the problem produced an error.
-5. **Help > Run self-test** with a model open, if a Navisworks node behaves oddly. It runs a set of read-only Navisworks nodes and shows pass or fail for each. The report can be copied.
+5. **Help > Run Self-Test** with a model open, if a Navisworks node behaves oddly. It runs a set of read-only Navisworks nodes and shows pass or fail for each. The report can be copied.
 6. **The graph** (`.dyc`), if you can share it. Open it in a text editor first: it can hold file paths, names and values.
 7. **Does it happen with a sample graph?** Samples are under **File > Sample Graphs**. If one shows the problem, say which.
 

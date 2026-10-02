@@ -9,10 +9,14 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 ## Unreleased
 
 ### Added
-* **Help > Run self-test** runs a set of read-only Navisworks nodes against the open model and shows pass or fail for each node. The report can be copied.
-* **Help > Copy diagnostics** copies the Dyncamelo and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`.
-* A warning before running a graph opened from a file that contains nodes that run programs, use the network, or delete or move files. A file can be trusted until it changes.
+* **Help > Run Self-Test** runs 29 read-only checks on the Navisworks nodes against the open model (application and document, saved items, the model, model items, properties) and shows pass, fail or skip for each, with the node's own error. The report goes to the clipboard. It cannot change anything: it only uses nodes on a reviewed read-only list.
+* **Help > Copy Diagnostics** copies the Dyncamelo and Navisworks versions, the installed Autodesk plug-in bundles, which copies of Nodify and Newtonsoft.Json are loaded and from where, and the end of `errors.log`. The user name, computer name and profile folder are replaced, so it is safe to post in an issue.
+* **A question before a graph from a file runs** nodes that run programs, use the network, or delete, move or overwrite files. It is asked once per file and again only if the file changes. A graph saved with run mode Automatic is no longer run when it is opened from a file; the status bar says so. Graphs made in the editor and the built-in samples never ask. A new setting, **Ask before running graphs from files**, turns it off. Nodes declare what they do with the new `[NodeEffects]` attribute; nine library nodes do.
 * Documents: [SECURITY.md](SECURITY.md), this changelog, [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md), [docs/QA_CHECKLIST.md](docs/QA_CHECKLIST.md), issue forms and a pull request template.
+
+### Changed
+* The Script Player now also asks about a script whose only risky nodes run programs or use the network (for example `Web.Get`), not only about nodes that change the model or write files.
+* The release pipeline installs the installer on a clean runner before publishing and checks the files, the version, the upgrade over an existing install and the uninstall. It signs Dyncamelo's own DLLs and the installer when a code-signing certificate is configured; until then downloads stay unsigned.
 
 ## 0.45.1 - 2026-10-01
 

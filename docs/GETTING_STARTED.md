@@ -6,7 +6,7 @@ This guide takes you from a fresh Navisworks installation to your first working 
 
 ## 1. What you need
 
-- Autodesk **Navisworks Manage or Simulate 2024** (Windows).
+- Autodesk **Navisworks Manage or Simulate 2024, 2025 or 2026** (Windows).
 - The Dyncamelo plugin files — either a [release zip](https://github.com/mrshoma99-rgb/dyncamelo/releases) or your own build (see the [README](../README.md#quick-start)).
 - Any model to play with (`.nwd`, `.nwf`, or an appended `.rvt`/`.ifc`/`.dwg`).
 
@@ -114,7 +114,7 @@ The Watch List fills with every matching item. If it is empty, re-check the cate
 3. Wire `Search.ByPropertyContains → modelItems` into `modelItems`, and the Color Picker into `color`.
 4. Press **Run** — every concrete item in the viewport turns red.
 
-This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and one **Undo** in Navisworks reverts the whole run. To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
+This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (whether a single Undo reverts a whole run has not been checked yet; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
 
 ### Step 4 — save the selection set
 

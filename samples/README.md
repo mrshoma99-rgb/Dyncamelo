@@ -5,7 +5,7 @@ Two families of `.dyc` graphs live here:
 - **Developer samples** (lower-case file names) — four small graphs that
   exercise the headless pipeline end to end. None of them need Navisworks or
   WPF; they run anywhere the `dyncamelo` CLI runs, including Linux and CI.
-- **In-app example workflows** (Title Case file names) — ten teaching graphs
+- **In-app example workflows** (Title Case file names) — fourteen teaching graphs
   that ship with the Navisworks plugin (the build stages every Title-Case
   graph — the four lower-case developer graphs are excluded — into a
   `Samples` folder next to the plugin DLL, where the UI's Samples menu finds
