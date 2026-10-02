@@ -20,6 +20,11 @@ public static class DataSearchFixtures
 
     public static string Plain(string text) => text;
 
+    public static string Find(
+        [NodeTabChoice(NodeDataSource.Selection)] string tab,
+        [NodePropertyChoice(NodeDataSource.Selection, "tab")] string property,
+        object value) => tab + "/" + property + "/" + value;
+
     public static string Ancestors(
         object element,
         [NodeTabChoice("element", IncludeAncestors = true)] string tab) => tab;
@@ -188,6 +193,41 @@ public class ModelDataSearchTests : IDisposable
         ModelDataScope.Search(In(read, "property"));
 
         Assert.Equal("Item", Assert.Single(_catalog.Calls).Tab);
+    }
+
+    [Fact]
+    public void ANodeThatSearchesTheWholeModelOffersTheTabsAndPropertiesOfTheSelectionOnly()
+    {
+        var find = Node("Find");
+        new GraphModel().AddNode(find);
+        var tab = In(find, "tab").DataChoice!;
+
+        Assert.True(tab.FromSelection);
+        Assert.True(In(find, "property").DataChoice!.FromSelection);
+        Assert.Null(ModelDataScope.ScopePort(In(find, "tab")));     // there is no element input to read
+        Assert.Null(In(find, "value").DataChoice);
+
+        var tabs = ModelDataScope.Search(In(find, "tab"));
+        Assert.Same(ModelSelectionSource.Current, Assert.Single(_catalog.Calls).Source);
+        Assert.Equal(new[] { "Element", "Item", "TimeLiner" }, tabs.Names.ToArray());
+
+        PortEditors.SetText(In(find, "tab"), "Element");
+        ModelDataScope.Search(In(find, "property"));
+        Assert.Equal(2, _catalog.Calls.Count);
+        Assert.Same(ModelSelectionSource.Current, _catalog.Calls[1].Source);
+        Assert.Equal("Element", _catalog.Calls[1].Tab);
+    }
+
+    [Fact]
+    public void TheSelectionSearchStillWantsATabBeforeProperties()
+    {
+        var find = Node("Find");
+        new GraphModel().AddNode(find);
+
+        var listing = ModelDataScope.Search(In(find, "property"));
+
+        Assert.Empty(_catalog.Calls);
+        Assert.Contains("Choose the tab first", listing.Problem);
     }
 
     [Fact]

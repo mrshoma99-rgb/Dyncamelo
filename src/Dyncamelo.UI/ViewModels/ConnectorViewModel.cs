@@ -662,9 +662,12 @@ public class ConnectorViewModel : ObservableObject
                 return string.Empty;
             }
 
+            var of = choice.FromSelection
+                ? "the elements selected in Navisworks right now. Only those are read (the model is not searched), and only when you press this."
+                : "the element on '" + choice.From + "'. Only that element is read, and only when you press this.";
             return choice.Kind == ModelDataKind.Tab
-                ? "Choose from the tabs of the element on '" + choice.From + "'. Only that element is read, and only when you press this. You can also type the name."
-                : "Choose from the properties in the '" + choice.Tab + "' tab of the element on '" + choice.From + "'. Only that element is read, and only when you press this. You can also type the name.";
+                ? "Choose from the tabs of " + of + " You can also type the name."
+                : "Choose from the properties in the '" + choice.Tab + "' tab of " + of + " You can also type the name.";
         }
     }
 

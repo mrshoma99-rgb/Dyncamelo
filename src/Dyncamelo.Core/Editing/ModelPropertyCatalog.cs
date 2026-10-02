@@ -39,14 +39,28 @@ public sealed class ModelDataChoice
     /// <summary>Tabs, or the properties of one tab.</summary>
     public ModelDataKind Kind { get; }
 
-    /// <summary>The input that carries the element to read.</summary>
+    /// <summary>The input that carries the element to read, or <see cref="Dyncamelo.Core.Loader.NodeDataSource.Selection"/>.</summary>
     public string From { get; }
+
+    /// <summary>True when the search reads the elements selected in the host right now instead of an input of the node.</summary>
+    public bool FromSelection => string.Equals(From, Dyncamelo.Core.Loader.NodeDataSource.Selection, StringComparison.Ordinal);
 
     /// <summary>For properties: the input that holds the tab.</summary>
     public string Tab { get; }
 
     /// <summary>True when the element's parents are read as well.</summary>
     public bool IncludeAncestors { get; }
+}
+
+/// <summary>Stands for "the elements selected in the host right now" as the source of a search; the host's catalog reads the selection.</summary>
+public sealed class ModelSelectionSource
+{
+    private ModelSelectionSource()
+    {
+    }
+
+    /// <summary>The one instance.</summary>
+    public static ModelSelectionSource Current { get; } = new ModelSelectionSource();
 }
 
 /// <summary>What a search of one element's data found.</summary>
@@ -147,7 +161,9 @@ public static class ModelDataScope
         }
 
         var choice = port.DataChoice;
-        return choice == null ? null : port.Owner.InPorts.FirstOrDefault(p => string.Equals(p.Name, choice.From, StringComparison.Ordinal));
+        return choice == null || choice.FromSelection
+            ? null
+            : port.Owner.InPorts.FirstOrDefault(p => string.Equals(p.Name, choice.From, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -159,6 +175,11 @@ public static class ModelDataScope
     public static object? Source(PortModel port, out string problem)
     {
         problem = string.Empty;
+        if (port.DataChoice != null && port.DataChoice.FromSelection)
+        {
+            return ModelSelectionSource.Current;
+        }
+
         var scope = ScopePort(port);
         if (scope == null)
         {

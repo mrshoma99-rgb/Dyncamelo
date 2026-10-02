@@ -22,7 +22,7 @@ public static class SelfTestCatalog
         "Application.Version", "Document.Current", "Document.Info", "Document.Models", "Models.RootItems", "Model.Info",
         "Units.Current", "Units.All", "Export.IfcClasses", "Camera.Current",
         "Selection.Current", "SelectionSets.All", "Viewpoints.All", "TimeLiner.Tasks", "Clash.Tests", "Clash.SummaryTable",
-        "Search.ByProperty",
+        "Search.ByProperty", "List.FirstItem", "Properties.Value",
         "ModelItem.DisplayName", "ModelItem.ClassInfo", "ModelItem.ModelName", "ModelItem.SourceInfo", "ModelItem.HasGeometry",
         "ModelItem.BoundingBox", "ModelItem.Children", "ModelItem.IfcGuid",
         "Properties.Categories", "Properties.AsDictionary", "Properties.Discover", "Properties.ToTable",
@@ -110,6 +110,20 @@ public static class SelfTestCatalog
         {
             NeedsModel = true,
             Check = n => Count(n[0], "items") == 0 ? null : "a search for a name nobody has found " + Count(n[0], "items") + " item(s)",
+        });
+
+        // The search nodes try a value as every data type it could be stored as, in ONE search with the types as alternatives. If that ever
+        // matched nothing (the alternatives mis-combined), a search for a name that certainly exists would come back empty.
+        cases.Add(new SelfTestCase("Model", "search that finds an item by its own name",
+            new SelfTestStep("Models.RootItems"),
+            new SelfTestStep("List.FirstItem").From("list", 0, "rootItems"),
+            new SelfTestStep("Properties.Value").From("item", 1, "item").With("categoryName", "Item").With("propertyName", "Name"),
+            new SelfTestStep("Search.ByProperty").With("categoryName", "Item").With("propertyName", "Name").From("value", 2, "value"))
+        {
+            NeedsModel = true,
+            Check = n => Count(n[3], "items") >= 1
+                ? null
+                : "a search for the name of the first model's root item ('" + (Value(n[2], "value") ?? "") + "') found nothing, but that item has it",
         });
 
         // ----- model items: each node run on the root item of every model --------------------------------------------------

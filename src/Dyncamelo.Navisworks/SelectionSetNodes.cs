@@ -119,8 +119,8 @@ public static class SelectionSetNodes
     [return: NodeName("selectionSet")]
     public static SelectionSet CreateFromSearch(
         string name,
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice(NodeDataSource.Selection)] string categoryName,
+        [NodePropertyChoice(NodeDataSource.Selection, "categoryName")] string propertyName,
         object value,
         Document? document = null)
     {
@@ -196,8 +196,8 @@ public static class SelectionSetNodes
     [MultiReturn("selectionSets", "values")]
     [PortKinds("selection*", "")]
     public static Dictionary<string, object?> BulkByPropertyValues(
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice(NodeDataSource.Selection)] string categoryName,
+        [NodePropertyChoice(NodeDataSource.Selection, "categoryName")] string propertyName,
         string? folderName = null,
         Document? document = null)
     {

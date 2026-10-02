@@ -31,7 +31,9 @@ public sealed class NavisworksPropertyCatalog : IModelPropertyCatalog
         if (items.Count == 0)
         {
             return ModelDataListing.None(total == 0
-                ? "There is no element to read yet. Pick one, or wire one in and run the graph."
+                ? source is ModelSelectionSource
+                    ? "Nothing is selected in Navisworks. Select an element, then search."
+                    : "There is no element to read yet. Pick one, or wire one in and run the graph."
                 : "The element could not be found in the open model any more.");
         }
 
@@ -94,6 +96,12 @@ public sealed class NavisworksPropertyCatalog : IModelPropertyCatalog
         switch (value)
         {
             case null:
+                return;
+            case ModelSelectionSource _:
+                // What is selected in Navisworks right now: counted, and only the first elements are read.
+                var selected = NavisworksContext.ResolveDocument(null).CurrentSelection.SelectedItems;
+                total += selected.Count;
+                items.AddRange(selected.Take(Math.Max(0, ModelPropertyHost.MaxElementsRead - items.Count)));
                 return;
             case ModelItem item:
                 total++;

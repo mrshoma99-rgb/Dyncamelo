@@ -131,6 +131,16 @@ public sealed class NodeChoicesAttribute : Attribute
     public string[] Choices { get; }
 }
 
+/// <summary>Where the tab / property search of a name input reads from, besides the element input of the same node.</summary>
+public static class NodeDataSource
+{
+    /// <summary>
+    /// The elements selected in the host application right now. For nodes that search the whole model and so have no element input:
+    /// the search button then lists the tabs or properties of what is selected (and of nothing else) to pick a name from.
+    /// </summary>
+    public const string Selection = "@selection";
+}
+
 /// <summary>
 /// Marks a text parameter as the name of a property tab (category) of the model element carried by another input of the same node.
 /// The editor then shows a small search button next to the text box; pressing it lists the tabs of THAT element (never of the whole
@@ -141,7 +151,7 @@ public sealed class NodeChoicesAttribute : Attribute
 public sealed class NodeTabChoiceAttribute : Attribute
 {
     /// <summary>Creates the attribute.</summary>
-    /// <param name="from">The name of the input (parameter) that carries the element or elements.</param>
+    /// <param name="from">The name of the input (parameter) that carries the element or elements, or <see cref="NodeDataSource.Selection"/>.</param>
     public NodeTabChoiceAttribute(string from)
     {
         From = from ?? throw new ArgumentNullException(nameof(from));
@@ -162,7 +172,7 @@ public sealed class NodeTabChoiceAttribute : Attribute
 public sealed class NodePropertyChoiceAttribute : Attribute
 {
     /// <summary>Creates the attribute.</summary>
-    /// <param name="from">The name of the input (parameter) that carries the element or elements.</param>
+    /// <param name="from">The name of the input (parameter) that carries the element or elements, or <see cref="NodeDataSource.Selection"/>.</param>
     /// <param name="tab">The name of the input (parameter) that holds the tab.</param>
     public NodePropertyChoiceAttribute(string from, string tab)
     {

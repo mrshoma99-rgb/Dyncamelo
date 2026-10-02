@@ -23,8 +23,8 @@ public static class SearchNodes
     [NodeSearchTags("search", "find", "filter", "property", "equals", "contains", "wildcard", "pattern", "compare", "greater", "less", "numeric", "text", "query")]
     [return: NodeName("items")]
     public static List<ModelItem> ByProperty(
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice(NodeDataSource.Selection)] string categoryName,
+        [NodePropertyChoice(NodeDataSource.Selection, "categoryName")] string propertyName,
         object value,
         [NodeChoices("equals", "contains", "wildcard", ">", ">=", "<", "<=")]
         string mode = "equals",
@@ -77,21 +77,7 @@ public static class SearchNodes
     {
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        var results = new List<ModelItem>();
-        var seen = new HashSet<ModelItem>();
-        foreach (var variant in BuildEqualityVariants(value))
-        {
-            var condition = BuildPropertyCondition(categoryName, propertyName).EqualValue(variant);
-            foreach (var item in RunSearch(doc, condition))
-            {
-                if (seen.Add(item))
-                {
-                    results.Add(item);
-                }
-            }
-        }
-
-        return SelectionLevels.Resolve(results, level);
+        return ResolveFound(RunEqualitySearch(doc, null, categoryName, propertyName, value), level);
     }
 
     /// <summary>Finds every model item whose property display string contains a substring.</summary>
@@ -125,7 +111,7 @@ public static class SearchNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var condition = BuildPropertyCondition(categoryName, propertyName)
             .DisplayStringContains(value);
-        return SelectionLevels.Resolve(RunSearch(doc, condition), level);
+        return ResolveFound(RunSearch(doc, condition), level);
     }
 
     /// <summary>Finds every model item whose property display string matches a wildcard pattern.</summary>
@@ -159,7 +145,7 @@ public static class SearchNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var condition = BuildPropertyCondition(categoryName, propertyName)
             .DisplayStringWildcard(pattern);
-        return SelectionLevels.Resolve(RunSearch(doc, condition), level);
+        return ResolveFound(RunSearch(doc, condition), level);
     }
 
     /// <summary>Finds every model item whose numeric property compares against a value.</summary>
@@ -190,12 +176,9 @@ public static class SearchNodes
         var level = SelectionLevels.Parse(resolveTo);
         var comparisonKind = ParseComparison(comparison);
         var doc = NavisworksContext.ResolveDocument(document);
-        var results = new List<ModelItem>();
-        var seen = new HashSet<ModelItem>();
 
-        // The variant's data type must equal the stored property's data type, so
-        // the comparison runs once per plausible numeric storage type and the
-        // results are unioned (same technique as Search.ByPropertyValue).
+        // The variant's data type must equal the stored property's data type, so the comparison is tried against every plausible
+        // numeric storage type (as alternatives of ONE search, see RunAlternativesSearch).
         var variants = new List<VariantData>();
         AddNumericVariants(variants, value);
         if (value >= int.MinValue && value <= int.MaxValue && value == Math.Floor(value))
@@ -203,20 +186,8 @@ public static class SearchNodes
             variants.Add(VariantData.FromInt32((int)value));
         }
 
-        foreach (var variant in variants)
-        {
-            var condition = BuildPropertyCondition(categoryName, propertyName)
-                .CompareWith(comparisonKind, variant);
-            foreach (var item in RunSearch(doc, condition))
-            {
-                if (seen.Add(item))
-                {
-                    results.Add(item);
-                }
-            }
-        }
-
-        return SelectionLevels.Resolve(results, level);
+        var found = RunAlternativesSearch(doc, null, categoryName, propertyName, variants, (condition, variant) => condition.CompareWith(comparisonKind, variant));
+        return ResolveFound(found, level);
     }
 
     /// <summary>Finds every model item that carries a property at all.</summary>
@@ -232,15 +203,15 @@ public static class SearchNodes
     [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> HasProperty(
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice(NodeDataSource.Selection)] string categoryName,
+        [NodePropertyChoice(NodeDataSource.Selection, "categoryName")] string propertyName,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
     {
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        return SelectionLevels.Resolve(RunSearch(doc, BuildPropertyCondition(categoryName, propertyName)), level);
+        return ResolveFound(RunSearch(doc, BuildPropertyCondition(categoryName, propertyName)), level);
     }
 
     /// <summary>Finds every model item that carries a property category (tab).</summary>
@@ -255,7 +226,7 @@ public static class SearchNodes
     [NodeAliases("Dyncamelo.Navisworks.SearchNodes.HasCategory@string,Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
     public static List<ModelItem> HasCategory(
-        string categoryName,
+        [NodeTabChoice(NodeDataSource.Selection)] string categoryName,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
         Document? document = null)
@@ -267,7 +238,7 @@ public static class SearchNodes
 
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        return SelectionLevels.Resolve(RunSearch(doc, SearchCondition.HasCategoryByDisplayName(categoryName)), level);
+        return ResolveFound(RunSearch(doc, SearchCondition.HasCategoryByDisplayName(categoryName)), level);
     }
 
     /// <summary>Runs the property-equals test only inside the given items.</summary>
@@ -286,8 +257,8 @@ public static class SearchNodes
     [return: NodeName("items")]
     public static List<ModelItem> InItems(
         [MultiInput] IEnumerable<ModelItem> items,
-        string categoryName,
-        string propertyName,
+        [NodeTabChoice("items")] string categoryName,
+        [NodePropertyChoice("items", "categoryName")] string propertyName,
         object value,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string resolveTo = "Self",
@@ -300,27 +271,7 @@ public static class SearchNodes
 
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);
-        var scope = NavisValues.ToItemCollection(items);
-        var results = new List<ModelItem>();
-        var seen = new HashSet<ModelItem>();
-        foreach (var variant in BuildEqualityVariants(value))
-        {
-            var search = new Search();
-            search.Selection.CopyFrom(scope);
-            search.Locations = SearchLocations.DescendantsAndSelf;
-            search.SearchConditions.Add(BuildPropertyCondition(categoryName, propertyName).EqualValue(variant));
-
-            // reportProgress must stay false: progress pumping can re-enter the host.
-            foreach (var item in NavisValues.ToItemList(search.FindAll(doc, false)))
-            {
-                if (seen.Add(item))
-                {
-                    results.Add(item);
-                }
-            }
-        }
-
-        return SelectionLevels.Resolve(results, level);
+        return ResolveFound(RunEqualitySearch(doc, NavisValues.ToItemCollection(items), categoryName, propertyName, value), level);
     }
 
     /// <summary>
@@ -333,17 +284,7 @@ public static class SearchNodes
         var search = new Search();
         search.Selection.SelectAll();
         search.Locations = SearchLocations.DescendantsAndSelf;
-
-        var first = true;
-        foreach (var variant in BuildEqualityVariants(value))
-        {
-            var condition = BuildPropertyCondition(categoryName, propertyName).EqualValue(variant);
-            // Conditions are ANDed by default; StartGroup opens a new OR-group,
-            // so each variant after the first becomes an OR alternative.
-            search.SearchConditions.Add(first ? condition : condition.StartGroup());
-            first = false;
-        }
-
+        AddAlternatives(search, categoryName, propertyName, BuildEqualityVariants(value), (condition, variant) => condition.EqualValue(variant));
         return search;
     }
 
@@ -493,4 +434,63 @@ public static class SearchNodes
         // reportProgress must stay false: progress pumping can re-enter the host.
         return NavisValues.ToItemList(search.FindAll(doc, false));
     }
+
+    /// <summary>
+    /// Adds the property rule once per alternative to the search: the first as it is, every other one opening a new OR-group (conditions
+    /// are ANDed inside a group, the groups are ORed). An item that matches any alternative is found, once.
+    /// </summary>
+    private static void AddAlternatives(
+        Search search,
+        string categoryName,
+        string propertyName,
+        IReadOnlyList<VariantData> variants,
+        Func<SearchCondition, VariantData, SearchCondition> rule)
+    {
+        for (var i = 0; i < variants.Count; i++)
+        {
+            var condition = rule(BuildPropertyCondition(categoryName, propertyName), variants[i]);
+            search.SearchConditions.Add(i == 0 ? condition : condition.StartGroup());
+        }
+    }
+
+    /// <summary>
+    /// ONE search for a property matching any of several data-type variants of a value. Navisworks only matches a value whose type equals the
+    /// stored one, so a plain number has to be tried as double, length, area, volume, angle (and integer) and a text as display and identifier
+    /// string; running a search per variant walked the whole model that many times. As alternatives of a single search the model is walked
+    /// once and each item is tried against them.
+    /// </summary>
+    private static List<ModelItem> RunAlternativesSearch(
+        Document doc,
+        ModelItemCollection? scope,
+        string categoryName,
+        string propertyName,
+        IReadOnlyList<VariantData> variants,
+        Func<SearchCondition, VariantData, SearchCondition> rule)
+    {
+        var search = new Search();
+        if (scope == null)
+        {
+            search.Selection.SelectAll();
+        }
+        else
+        {
+            search.Selection.CopyFrom(scope);
+        }
+
+        search.Locations = SearchLocations.DescendantsAndSelf;
+        AddAlternatives(search, categoryName, propertyName, variants, rule);
+
+        // reportProgress must stay false: progress pumping can re-enter the host.
+        return NavisValues.ToItemList(search.FindAll(doc, false));
+    }
+
+    private static List<ModelItem> RunEqualitySearch(Document doc, ModelItemCollection? scope, string categoryName, string propertyName, object? value) =>
+        RunAlternativesSearch(doc, scope, categoryName, propertyName, BuildEqualityVariants(value), (condition, variant) => condition.EqualValue(variant));
+
+    /// <summary>
+    /// The found items at the requested selection level. A search result is already a fresh list without nulls, so with no resolution
+    /// (Self, the default) it is handed on as it is instead of being copied again.
+    /// </summary>
+    private static List<ModelItem> ResolveFound(List<ModelItem> found, SelectionLevel level) =>
+        level == SelectionLevel.Self ? found : SelectionLevels.Resolve(found, level);
 }

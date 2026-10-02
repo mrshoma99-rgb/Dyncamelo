@@ -23,6 +23,11 @@ public static class DataSearchFixtures
         [NodePropertyChoice("item", "tab")] string property) => tab + "/" + property;
 
     public static string Plain(string text) => text;
+
+    public static string Find(
+        [NodeTabChoice(NodeDataSource.Selection)] string tab,
+        [NodePropertyChoice(NodeDataSource.Selection, "tab")] string property,
+        object value) => tab + "/" + property + "/" + value;
 }
 
 /// <summary>The small search button next to a tab / property input: what it shows, what it reads, and that it stays out of the way.</summary>
@@ -140,6 +145,41 @@ public class DataSearchUiTests
                 tab.TextValue = "zzz";                               // matches nothing: everything is listed rather than nothing
                 tab.SearchDataCommand.Execute(null);
                 Assert.Equal(3, tab.DataItems.Count);
+            }
+            finally
+            {
+                ModelPropertyHost.Current = previousCatalog;
+            }
+        });
+    }
+
+    [Fact]
+    public void ASearchNodeOffersTheTabsOfTheSelectionAndSaysSo()
+    {
+        StaHost.Run(() =>
+        {
+            var previousCatalog = ModelPropertyHost.Current;
+            var catalog = new RecordingCatalog();
+            ModelPropertyHost.Current = catalog;
+            try
+            {
+                var (_, node) = Rig("Find");
+                var tab = Input(node, "tab");
+                var property = Input(node, "property");
+                Assert.True(tab.HasDataSearch);
+                Assert.True(property.HasDataSearch);
+                Assert.False(Input(node, "value").HasDataSearch);
+                Assert.Contains("selected in Navisworks", tab.DataSearchToolTip);
+                Assert.Contains("the model is not searched", tab.DataSearchToolTip);
+
+                tab.SearchDataCommand.Execute(null);
+
+                Assert.Same(ModelSelectionSource.Current, Assert.Single(catalog.Calls).Source);
+                Assert.Equal(new[] { "Element", "Item", "TimeLiner" }, tab.DataItems.ToArray());
+                tab.ChooseDataCommand.Execute("Element");
+                property.SearchDataCommand.Execute(null);
+                Assert.Equal("Element", catalog.Calls.Last().Tab);
+                Assert.Equal(new[] { "Layer", "Name", "Type" }, property.DataItems.ToArray());
             }
             finally
             {
