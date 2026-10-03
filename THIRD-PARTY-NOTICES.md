@@ -90,6 +90,7 @@ them, all MIT-licensed: the Material for MkDocs theme (styles, scripts, template
 GLightbox picture viewer that mkdocs-glightbox ships and the iframe-worker shim (`tools/wiki/overrides/assets/javascripts/`).
 The icons inside the pages are from Material Design Icons (Pictogrammers Free License) and Simple Icons (CC0 1.0).
 MkDocs itself (BSD 2-Clause, Copyright 2014-present Tom Christie) only runs the build and is not in the site.
+Pillow (the Python imaging library, MIT-CMU licence) is used by `tools/wiki_pictures.py` to save the wiki pictures as 256-colour PNGs; it is not in the site either.
 https://squidfunk.github.io/mkdocs-material/ · https://github.com/facelessuser/pymdown-extensions · https://github.com/blueswen/mkdocs-glightbox · https://github.com/mkdocs/mkdocs
 
 > MIT License

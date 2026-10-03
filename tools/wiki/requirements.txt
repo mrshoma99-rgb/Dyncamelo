@@ -8,6 +8,7 @@ mkdocs-material==9.7.7       # MIT. The theme (also brings pymdown-extensions, P
 pymdown-extensions==12.1     # MIT. Admonitions, tabs, key caps, emoji, code highlighting.
 mkdocs-glightbox==0.5.2      # MIT. Click a picture to see it large.
 PyYAML==6.0.3                # MIT. Reads docs/wiki-src/nav.yml and tools/wiki/site.yml.
+pillow==12.3.0               # MIT-CMU (HPND). Only tools/wiki_pictures.py uses it (saves the drawn pictures as 256-colour PNGs).
 #
 # What those need (pinned too, so the same input gives the same site)
 babel==2.18.0

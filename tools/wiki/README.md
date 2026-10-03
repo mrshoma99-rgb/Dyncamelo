@@ -23,7 +23,7 @@ The build is **strict**: any warning fails it. That includes a link to a page th
 |---|---|
 | `python tools/build_wiki.py` | Builds the site into `build/wiki-site`. |
 | `python tools/build_wiki.py --serve` | Builds, then serves the wiki on http://127.0.0.1:8000 and rebuilds when you save a page, a picture, a repository document or a setting. Press Ctrl+C to stop. `--dev-addr HOST:PORT` changes the address. |
-| `python tools/build_wiki.py --draft` | A picture or a graph file that is not in the repository yet is a warning, not an error. The page shows "picture to come" or "(file to come)" in its place. CI uses this until all pictures are committed. |
+| `python tools/build_wiki.py --draft` | A picture or a graph file that is not in the repository yet is a warning, not an error. The page shows "picture to come" or "(file to come)" in its place. CI builds without it, so a missing picture fails the job. |
 | `--allow-missing-images`, `--allow-missing-files` | The two halves of `--draft`. |
 | `python tools/build_wiki.py --stage-only` | Only writes the staging folder (`build/wiki-docs`) and the MkDocs file for it. |
 | `--out DIR`, `--stage DIR` | Choose the folders for the site and for the staging pages. The build refuses a folder that is not empty and does not look like an earlier build. |
@@ -72,6 +72,8 @@ order: 20                                 # optional; the menu is sorted by this
 ## Add a picture
 
 Pictures are made by the tests in `tests/Dyncamelo.UI.Tests/Wiki` (the agreed list is in `tools/wiki/image-manifest.md`) and committed to `docs/images/`.
+
+To refresh them all: push, let the Windows CI job finish, download its `editor-screenshots` artifact (it holds a `wiki` folder with every drawn picture and `_report.txt`, which names any scene that could not be drawn), read the pictures, then run `python tools/wiki_pictures.py path/to/wiki`. That copies the pictures the pages mention into `docs/images/` as 256-colour PNGs (about a third of the drawn size). Commit the result.
 
 * `docs/images/<id>.png` is the picture for the **dark** theme. `docs/images/<id>-light.png` is the same picture for the **light** theme. If only the first exists, it is shown in both themes.
 * In a page, write the picture **once**, with its caption as the text in the brackets: `![The editor after a run](../images/wiki-editor-overview.png)`. From a page in `docs/wiki-src/`, write `images/<id>.png`; from a how-to, `../images/<id>.png`. The build looks the file up by name in `docs/images/`, so the folder part does not matter.

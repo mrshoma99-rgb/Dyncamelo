@@ -95,12 +95,12 @@ jobs:
         run: python3 tools/generate_node_catalog.py --check
 
       # The wiki is built with MkDocs (Material theme) from docs/wiki-src, the repository documents and the node catalogue.
-      # Strict: a broken link, anchor or heading reference fails the job. --draft lets a picture or a graph file that is not
-      # committed yet be a warning; drop it once the pictures and graphs of the how-to pages are in the repository.
+      # Strict: a broken link, anchor or heading reference, or a picture or graph file that a page names and the repository
+      # does not have, fails the job. (--draft would make the last two a warning.)
       - name: Wiki builds (tools/build_wiki.py, MkDocs strict)
         run: |
           pip install -r tools/wiki/requirements.txt
-          python3 tools/build_wiki.py --draft
+          python3 tools/build_wiki.py
 
       - name: Keep the wiki site
         uses: actions/upload-artifact@v4
