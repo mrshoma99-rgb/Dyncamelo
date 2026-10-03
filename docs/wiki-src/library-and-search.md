@@ -1,6 +1,6 @@
 # Node library and search
 
-The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press `Space`, and the search that opens when you drop a wire on empty canvas.
+The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press ++space++, and the search that opens when you drop a wire on empty canvas.
 
 For the full list of nodes with their inputs and outputs, see the [node reference](nodes/index.md).
 
@@ -15,7 +15,7 @@ The panel sits on the left of the canvas. Drag the thin bar between the panel an
 | Up-arrow button | **Collapse all categories.** |
 | `‹` button at the left of the search row | **Hides the whole panel.** A small tab at the left edge of the canvas brings it back. |
 
-You can also hide or show the panel with `Ctrl+B` or **View ▸ Node Library Panel**, and **Settings ▸ Appearance ▸ Node library panel** controls whether it is shown. **Settings ▸ Appearance ▸ Descriptions in the library** adds or removes the grey description line under each node name (see [Settings](settings.md)).
+You can also hide or show the panel with ++ctrl+b++ or **View ▸ Node Library Panel**, and **Settings ▸ Appearance ▸ Node library panel** controls whether it is shown. **Settings ▸ Appearance ▸ Descriptions in the library** adds or removes the grey description line under each node name (see [Settings](settings.md)).
 
 ### Categories
 
@@ -48,19 +48,19 @@ Type in the search box and the folder tree is replaced by a flat list of matches
 * Every word you type has to appear somewhere in a node's **name, folder, search keywords or description**, in any order. Case does not matter.
 * Matches are ranked: names that start with your first word come first, then names that contain it, then folder or keyword matches, then description-only matches. Starred nodes come before others of equal rank, then recently added ones.
 * At most 200 results are shown. If there are more, a line at the bottom says so; type another word to narrow it down. If nothing matches, it says "No nodes match" followed by your text.
-* `Esc` in the panel clears the search. A second `Esc` clears the highlight.
+* ++esc++ in the panel clears the search. A second ++esc++ clears the highlight.
 
 ## Quick search with `Space`
 
-Press `Space` while the pointer is over the canvas and a small search box opens near the top of it. This is the fastest way to add a node.
+Press ++space++ while the pointer is over the canvas and a small search box opens near the top of it. This is the fastest way to add a node.
 
 1. Type a few letters of what you want. The list updates as you type (up to 50 matches).
 2. Move through the list with the up and down arrow keys, or click a result.
-3. Press `Enter` (or click) to insert the node **where your pointer was when you pressed `Space`**. `Esc`, or a click anywhere else, closes the box without adding anything.
+3. Press ++enter++ (or click) to insert the node **where your pointer was when you pressed ++space++**. ++esc++, or a click anywhere else, closes the box without adding anything.
 
 Hover a result for a tooltip with the node's description and its inputs and outputs.
 
-**Starred and recent nodes.** Before you type anything, the list shows your **starred nodes first, then the nodes you added most recently** (Dyncamelo remembers the last 12). While you type, starred and recent nodes come first among equally good matches. With no stars, pressing `Space` then `Enter` simply adds the node you added last.
+**Starred and recent nodes.** Before you type anything, the list shows your **starred nodes first, then the nodes you added most recently** (Dyncamelo remembers the last 12). While you type, starred and recent nodes come first among equally good matches. With no stars, pressing ++space++ then ++enter++ simply adds the node you added last.
 
 You can also open the quick search from the menu with **Graph ▸ Add Node…**, which inserts the node in the middle of the view.
 
@@ -70,7 +70,7 @@ If you drag a wire from a socket and let go on empty canvas, the same search box
 
 ## Finding a node that is already on the canvas
 
-The `@` search is for nodes you have already placed, not for the library. Press `Ctrl+F` (**Find Node on Canvas…**) or open the command palette (`Ctrl+Shift+P`) and start with `@`. Type part of a node's name or folder, move to a result and press `Enter`: the node is selected and brought into view. Without the `@`, the palette lists matching commands first, then a few canvas nodes, then matching settings. See [The editor: canvas and nodes](canvas-and-nodes.md).
+The `@` search is for nodes you have already placed, not for the library. Press ++ctrl+f++ (**Find Node on Canvas…**) or open the command palette (++ctrl+shift+p++) and start with `@`. Type part of a node's name or folder, move to a result and press ++enter++: the node is selected and brought into view. Without the `@`, the palette lists matching commands first, then a few canvas nodes, then matching settings. See [The editor: canvas and nodes](canvas-and-nodes.md).
 
 ## Tooltips and help
 
@@ -80,7 +80,7 @@ The `@` search is for nodes you have already placed, not for the library. Press 
 | A node's title on the canvas | What the node does. |
 | A socket | The socket's name and type, whether it is required or optional (and its default), what it does, and, after a run, the value it holds or the value arriving on its wire. |
 
-`F1` is **not** node help. It opens the sheet of keyboard shortcuts and mouse gestures. The full node documentation is in the [node reference](nodes/index.md).
+++f1++ is **not** node help. It opens the sheet of keyboard shortcuts and mouse gestures. The full node documentation is in the [node reference](nodes/index.md).
 
 ## How nodes are named and organised
 

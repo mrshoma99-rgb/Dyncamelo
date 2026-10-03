@@ -94,16 +94,19 @@ jobs:
       - name: Node catalogue is current (docs/dyncamelo-nodes.json and docs/NODE_CATALOG.md)
         run: python3 tools/generate_node_catalog.py --check
 
-      - name: Wiki is current (docs/wiki is what tools/build_wiki.py writes from docs/wiki-src, the repository documents and the node catalogue)
+      # The wiki is built with MkDocs (Material theme) from docs/wiki-src, the repository documents and the node catalogue.
+      # Strict: a broken link, anchor or heading reference fails the job. --draft lets a picture or a graph file that is not
+      # committed yet be a warning; drop it once the pictures and graphs of the how-to pages are in the repository.
+      - name: Wiki builds (tools/build_wiki.py, MkDocs strict)
         run: |
-          pip install markdown
-          python3 tools/build_wiki.py --check
+          pip install -r tools/wiki/requirements.txt
+          python3 tools/build_wiki.py --draft
 
       - name: Keep the wiki site
         uses: actions/upload-artifact@v4
         with:
           name: dyncamelo-wiki
-          path: docs/wiki
+          path: build/wiki-site
           if-no-files-found: error
           retention-days: 30
 

@@ -36,9 +36,9 @@ Dyncamelo is a **dataflow** engine. When you press **Run**:
 3. A node that changed (or whose input changed) runs, and stores its outputs.
 4. A node that fails shows its own error and gives empty outputs. The rest of the graph carries on and Navisworks is never stopped.
 
-Changing one value therefore runs that node and the nodes after it, nothing else. In **Manual** mode you press **Run** (`F5`); in **Auto** mode a run starts after every edit. Details, including how to stop a run, are in [Running a graph](running-graphs.md).
+Changing one value therefore runs that node and the nodes after it, nothing else. In **Manual** mode you press **Run** (++f5++); in **Auto** mode a run starts after every edit. Details, including how to stop a run, are in [Running a graph](running-graphs.md).
 
-Because runs happen on the Navisworks main thread, Navisworks is busy while a graph runs and the editor shows a progress overlay. `Esc` stops it between nodes.
+Because runs happen on the Navisworks main thread, Navisworks is busy while a graph runs and the editor shows a progress overlay. ++esc++ stops it between nodes.
 
 ## Lists, replication and lacing
 

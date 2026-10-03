@@ -10,7 +10,7 @@ Everything the submission form asks for, ready to paste. Limits come from Autode
 | Type | Desktop app, plug-in |
 | Programs | Navisworks Manage, Navisworks Simulate |
 | Operating system | Windows 64-bit |
-| Price | 100 EUR, for professional use. The free copy for personal use is on GitHub and bimcamel.com |
+| Price | **YOU**: not decided yet; set it in the listing form. The free copy for personal use is on GitHub and bimcamel.com |
 | Publisher name | **YOU**: the name on your Autodesk publisher profile (the package says "BIMCamel") |
 | Support email | **YOU**: an address you read; also goes into `appstore/publisher.json` |
 | Support / contact page | https://github.com/mrshoma99-rgb/Dyncamelo/issues |

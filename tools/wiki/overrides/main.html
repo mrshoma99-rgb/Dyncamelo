@@ -1,6 +1,7 @@
 {#-
   The page template of the Dyncamelo wiki: Material's own, plus the announcement bar.
-  The addresses come from tools/wiki/site.yml (config.extra.*).
+  The addresses come from tools/wiki/site.yml (config.extra.*). While `app_store_url` is empty the bar says the
+  Autodesk App Store copy is coming soon, without a link.
 -#}
 {% extends "base.html" %}
 
@@ -8,7 +9,11 @@
   Dyncamelo is free for personal use
   (<a href="{{ config.extra.github_url }}" target="_blank" rel="noopener">GitHub</a>
   or <a href="{{ config.extra.bimcamel_url }}" target="_blank" rel="noopener">bimcamel.com</a>).
-  For professional use, get it on the
-  <a href="{{ config.extra.app_store_url }}" target="_blank" rel="noopener">Autodesk App Store</a>.
+  {% if config.extra.app_store_url %}
+    For professional use, get it on the
+    <a href="{{ config.extra.app_store_url }}" target="_blank" rel="noopener">Autodesk App Store</a>.
+  {% else %}
+    The Autodesk App Store copy for professional use is coming soon.
+  {% endif %}
   See the <a href="{{ 'licence.html' | url }}">Licence</a>.
 {% endblock %}

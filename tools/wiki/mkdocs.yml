@@ -65,6 +65,12 @@ theme:
 extra_css:
   - assets/stylesheets/dyncamelo.css
 
+extra:
+  # Material's offline plugin would load this small script from unpkg.com; a local copy keeps the page from asking another
+  # server (it lets the search work from a folder, where browsers do not allow web workers). iframe-worker 1.0.4, MIT.
+  polyfills:
+    - assets/javascripts/iframe-worker-shim.js
+
 plugins:
   - search:
       lang: en

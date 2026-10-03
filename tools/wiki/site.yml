@@ -5,10 +5,11 @@
 # The "Get on GitHub" button and the GitHub links: the newest release.
 github_url: https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest
 
-# The "Get on Autodesk App Store" button.
-# PLACEHOLDER: the Autodesk App Store listing does not exist yet, so this is the store's home page.
-# The owner replaces it with the address of the real listing once it is published.
-app_store_url: https://apps.autodesk.com/
+# The "Get on Autodesk App Store" button and the sentence in the announcement bar.
+# EMPTY means "coming soon": the button is greyed out, says "Autodesk App Store - coming soon" and has no link, and the bar says
+# the Autodesk App Store copy for professional use is coming soon. The listing does not exist yet.
+# When it does, the owner puts the address of the real listing here between the quotes; the button and the bar then link to it.
+app_store_url: ""
 
 # The BIMCamel logo in the header and the "bimcamel.com" links.
 bimcamel_url: https://www.bimcamel.com/plugins/dyncamelo

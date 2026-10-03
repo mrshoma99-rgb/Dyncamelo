@@ -63,7 +63,7 @@ An input can get its value from four places. The first that applies wins:
 
 | Editor | For | Notes |
 |---|---|---|
-| Number field | Number, integer | Drag it, or click and type. A dot at its left edge shows it differs from the default; hover and press `Backspace` to restore the default. `Ctrl+C` and `Ctrl+V` while hovering copy and paste the value. |
+| Number field | Number, integer | Drag it, or click and type. A dot at its left edge shows it differs from the default; hover and press ++backspace++ to restore the default. ++ctrl+c++ and ++ctrl+v++ while hovering copy and paste the value. |
 | Check box | Boolean | |
 | Text box | Text | Grows with long or multi-line text. |
 | Drop-down or switch | Named choices | For example `mode` on `Search.ByProperty`. |
@@ -72,7 +72,7 @@ An input can get its value from four places. The first that applies wins:
 | Element picker | A Navisworks item or items | Press it to take the **current selection**. |
 | Vector fields | Points and vectors | Paste `1, 2, 3` (or cells from a spreadsheet) into the first field and the values spread over the next fields. |
 
-Optional inputs that are unconnected can be hidden: **Hide / Show Unused Sockets** (`Ctrl+H`). Rarely-used inputs of some nodes sit in an **Advanced** panel.
+Optional inputs that are unconnected can be hidden: **Hide / Show Unused Sockets** (++ctrl+h++). Rarely-used inputs of some nodes sit in an **Advanced** panel.
 
 ### Choosing a tab or a property name
 

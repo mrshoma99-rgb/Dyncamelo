@@ -25,6 +25,15 @@ public static class DistributionChannel
     /// </summary>
     public const string AppStorePage = "https://apps.autodesk.com/";
 
+    /// <summary>
+    /// False until the professional copy is in the Autodesk App Store. While it is false every store link in the app is greyed out and
+    /// reads "coming soon"; set it to true (and <see cref="AppStorePage"/> to the listing's address) when the listing is live.
+    /// </summary>
+    public const bool AppStoreListed = false;
+
+    /// <summary>The text of the store button on the start screen.</summary>
+    public static string StoreButtonText => AppStoreListed ? "Autodesk App Store ↗" : "Autodesk App Store: coming soon";
+
     /// <summary>The name of the edition of an install: "Personal use" (GitHub installer, zip, bimcamel.com, a build from source) or "Professional" (Autodesk App Store).</summary>
     /// <param name="channel">The channel, from <see cref="Detect"/>.</param>
     public static string EditionName(string channel) => channel == AppStore ? "Professional" : "Personal use";
@@ -33,7 +42,9 @@ public static class DistributionChannel
     /// <param name="channel">The channel, from <see cref="Detect"/>.</param>
     public static string EditionNote(string channel) => channel == AppStore
         ? "Licensed for professional use. Updates come from the Autodesk App Store."
-        : "Free for personal and other noncommercial use. For professional use (work at a company, a paid project) get Dyncamelo from the Autodesk App Store.";
+        : AppStoreListed
+            ? "Free for personal and other noncommercial use. For professional use (work at a company, a paid project) get Dyncamelo from the Autodesk App Store."
+            : "Free for personal and other noncommercial use. A copy for professional use (work at a company, a paid project) is coming soon to the Autodesk App Store.";
 
     /// <summary>The channel named by the first non-empty line of a marker file; anything unrecognised is <see cref="Direct"/>.</summary>
     /// <param name="markerText">The marker file's text, or null.</param>

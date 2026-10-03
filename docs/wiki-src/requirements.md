@@ -8,6 +8,7 @@
 | **Autodesk Navisworks** | **Manage** or **Simulate**, release **2024, 2025 or 2026**. The install package lists exactly these six products and no others. |
 | **Rights to install** | None beyond your own user account. The installer works per user. A copy for all users needs write access to `C:\ProgramData\Autodesk\ApplicationPlugins\`. |
 | **A model** | Dyncamelo works against the active Navisworks document. Open a model first (`.nwd`, `.nwf`, or an appended `.rvt`, `.ifc`, `.dwg`…). A few nodes, such as the maths and text nodes, run without one. |
+| **A licence that fits your use** | The copy from GitHub or bimcamel.com is free for personal use. For work at a company or in a paid project, the professional copy is coming soon to the Autodesk App Store ([Licence](licence.md#which-copy-do-i-need)). |
 | **Internet** | Not needed. The only network request Dyncamelo makes by itself is the once-a-day look for a newer version, and you can switch that off ([Privacy and safety](privacy-and-safety.md)). |
 
 Nodes that use **Clash Detective** need Navisworks **Manage**, because Simulate does not include Clash Detective.

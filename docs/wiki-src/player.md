@@ -7,7 +7,7 @@ It is made for the people who should use a tested script but should not have to 
 ## Opening the Player
 
 * Click the **Player** button on the **BIMCamel** ribbon tab (in the *Visual Programming* panel, beside the **Dyncamelo** and **About** buttons). The pane itself is titled **Script Player**.
-* From the editor, use **View ▸ Open Script Player**, or find it in the command palette (`Ctrl+Shift+P`).
+* From the editor, use **View ▸ Open Script Player**, or find it in the command palette (++ctrl+shift+p++).
 
 Open a model first. Scripts that read or change the model work on whichever Navisworks document is open.
 
@@ -18,7 +18,7 @@ The pane opens on a **script bar** that shows the name of the open script and th
 1. Click the bar (or its chevron) to unfold the **list of scripts**. Until you have chosen one, the list stays unfolded.
 2. Click a script. It is chosen and the list folds away.
 
-In the list you can **type to filter** by part of a script's name or its folder. Press `Down` to move from the search box into the list, `Enter` to choose the highlighted script, and `Esc` to fold the list. Choosing with `Enter` puts the focus on **Run**, so pressing `Enter` again runs the script. The **↻** button looks for scripts again after you add or change files.
+In the list you can **type to filter** by part of a script's name or its folder. Press ++down++ to move from the search box into the list, ++enter++ to choose the highlighted script, and ++esc++ to fold the list. Choosing with ++enter++ puts the focus on **Run**, so pressing ++enter++ again runs the script. The **↻** button looks for scripts again after you add or change files.
 
 Typing in the search box never closes the script you are working in and never loses the values you have filled in.
 
@@ -35,7 +35,7 @@ The Player builds the form from the script itself. It shows:
 * every **input node**: `Number`, `Integer`, `Number Slider`, `Integer Slider`, `Boolean`, `String`, `Date`, `Choice`, `File Path`, `Directory Path` and `Color Picker`;
 * any **unwired input of another node** that the script's author chose to offer (see below).
 
-Fields appear top to bottom in the order their nodes sit on the canvas, each labelled with the node's name. The fields are the same editors as on the canvas, only roomier: scrub a number, pick a colour, browse for a file. A text field wraps and grows with its text, so a long or multi-line value is never cut off. In a `String` input, `Enter` starts a new line. A small **dot** beside a label marks a field you have changed from the value saved in the script, and **↺** puts that field back. If a script asks for nothing, the form says "This script asks for nothing — it just runs."
+Fields appear top to bottom in the order their nodes sit on the canvas, each labelled with the node's name. The fields are the same editors as on the canvas, only roomier: scrub a number, pick a colour, browse for a file. A text field wraps and grows with its text, so a long or multi-line value is never cut off. In a `String` input, ++enter++ starts a new line. A small **dot** beside a label marks a field you have changed from the value saved in the script, and **↺** puts that field back. If a script asks for nothing, the form says "This script asks for nothing — it just runs."
 
 If the script has a **description**, it is shown above the form.
 
@@ -52,7 +52,7 @@ The bar at the bottom stays in view however long the form is.
 
 ## Running and stopping
 
-A Player run runs **every node of the script afresh**, because a script talks to a live model that may have changed since it last ran. The pane shows progress, such as "Running 12 / 40 — " followed by the name of the node at work. Press **`Esc`** to stop: the run halts before the next node, and anything the finished nodes already changed in Navisworks is kept. The result line says so ("Stopped after … of … nodes").
+A Player run runs **every node of the script afresh**, because a script talks to a live model that may have changed since it last ran. The pane shows progress, such as "Running 12 / 40 — " followed by the name of the node at work. Press **++esc++** to stop: the run halts before the next node, and anything the finished nodes already changed in Navisworks is kept. The result line says so ("Stopped after … of … nodes").
 
 ## Results
 
@@ -83,7 +83,7 @@ When you press **Run**, the Player remembers the values in the form **for that s
 All of these choices are made in the editor and saved in the `.dyc` file.
 
 * **Name your input nodes clearly.** Double-click a node's title to rename it; the name becomes the label of the field.
-* **Show or hide nodes** with `Ctrl+Alt+P` (**Node ▸ Show / Hide in Player**) on the selected nodes. Input nodes and Watch nodes are shown unless you hide them. Any other node is hidden unless you show it, and its result is then listed.
+* **Show or hide nodes** with ++ctrl+alt+p++ (**Node ▸ Show / Hide in Player**) on the selected nodes. Input nodes and Watch nodes are shown unless you hide them. Any other node is hidden unless you show it, and its result is then listed.
 * **Offer an input that is not an input node**: select the node and use **Node ▸ Show / Hide Unwired Inputs in Player**, or right-click one socket and choose **Show in Player**. Only inputs with no wire and with an editor can be offered; lists and objects cannot be typed in.
 * A small **▶** badge on a node's title bar marks a node, or a node with inputs, that the Player uses.
 * **Describe the script** with **Graph ▸ Script Description…**; the text appears above the form in the Player.

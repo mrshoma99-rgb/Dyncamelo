@@ -100,6 +100,14 @@ public partial class GraphEditorViewModel
     /// <summary>Opens the Autodesk App Store, where the professional copy is sold.</summary>
     public ICommand OpenStoreCommand { get; private set; } = null!;
 
+    /// <summary>The text of the store button: a link to the store once the listing is live, "coming soon" (greyed out) before.</summary>
+    public string StoreButtonText => DistributionChannel.StoreButtonText;
+
+    /// <summary>The tooltip of the store button.</summary>
+    public string StoreButtonToolTip => DistributionChannel.AppStoreListed
+        ? "Open the Autodesk App Store, where the professional copy is sold"
+        : "The copy for professional use is coming soon to the Autodesk App Store";
+
     /// <summary>"Personal use" or "Professional": which edition this install is (shown beside the version).</summary>
     public string EditionName { get; private set; } = DistributionChannel.EditionName(DistributionChannel.Direct);
 
@@ -171,7 +179,7 @@ public partial class GraphEditorViewModel
         StartNewScriptCommand = new RelayCommand(StartNewScript);
         OpenWebsiteCommand = new RelayCommand(() => OpenAddress(WebsiteUrl));
         OpenUpdateCommand = new RelayCommand(() => OpenAddress(_updateUrl), () => HasUpdate && _updateUrl.Length > 0);
-        OpenStoreCommand = new RelayCommand(() => OpenAddress(DistributionChannel.AppStorePage));
+        OpenStoreCommand = new RelayCommand(() => OpenAddress(DistributionChannel.AppStorePage), () => DistributionChannel.AppStoreListed);
         RecentFiles.CollectionChanged += (_, _) => RefreshStartCards();
         SampleGraphs.CollectionChanged += (_, _) => RefreshStartCards();
         RefreshSampleGraphs();

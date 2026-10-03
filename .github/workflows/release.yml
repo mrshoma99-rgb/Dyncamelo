@@ -300,7 +300,7 @@ jobs:
             $changes = ((Get-Content dist/RELEASE_NOTES.md -Raw) -replace '(?s)^# [^\r\n]*\r?\n', '').Trim()
           }
           $notes = @"
-          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks. **Personal-use edition**: free for personal and other noncommercial use; for professional use get Dyncamelo from the Autodesk App Store.
+          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks. **Personal-use edition**: free for personal and other noncommercial use; a copy for professional use is coming soon to the Autodesk App Store.
 
           $changes
 

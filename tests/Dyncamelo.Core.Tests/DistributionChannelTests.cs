@@ -30,6 +30,9 @@ public class DistributionChannelTests
         Assert.Contains("Autodesk App Store", DistributionChannel.EditionNote(DistributionChannel.Direct));
         Assert.DoesNotContain("Free for personal", DistributionChannel.EditionNote(DistributionChannel.AppStore));
         Assert.StartsWith("https://", DistributionChannel.AppStorePage);
+        Assert.False(DistributionChannel.AppStoreListed);        // until the listing exists every store link is greyed out
+        Assert.Contains("coming soon", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.Contains("coming soon", DistributionChannel.StoreButtonText);
     }
 
     [Fact]

@@ -69,13 +69,13 @@ Dyncamelo asks before it runs a graph that can do real harm:
 Advice:
 
 * Treat a `.dyc` file like a macro or a script. **Do not run graphs from e-mail attachments or unknown downloads** without reading them first.
-* Before you run a graph from someone else, look at it. Press **`Ctrl+F`** and search the canvas for `System`, `Web`, `File`, `Directory` and `Zip`, and check what the Navisworks nodes in it will change.
+* Before you run a graph from someone else, look at it. Press **++ctrl+f++** and search the canvas for `System`, `Web`, `File`, `Directory` and `Zip`, and check what the Navisworks nodes in it will change.
 * Try an unknown graph on a **copy** of the model, with a normal user account, not on a machine that holds anything you cannot afford to lose.
 * Say **no** to the question if you are not sure what the listed nodes will do.
 
 ## Downloads
 
-* Download Dyncamelo only from the [releases page](https://github.com/mrshoma99-rgb/dyncamelo/releases) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo).
+* Download Dyncamelo only from the [releases page](https://github.com/mrshoma99-rgb/dyncamelo/releases) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). The professional copy will come from the Autodesk App Store, which is coming soon.
 * The installer is **not code-signed** unless the publisher configured a certificate, so Windows SmartScreen may warn about it (**More info ▸ Run anyway**). Each release publishes a SHA-256 checksum next to every download; compare it with `Get-FileHash .\DyncameloSetup.exe -Algorithm SHA256`.
 * The installer works per user, in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle`, and needs no administrator rights.
 

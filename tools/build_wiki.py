@@ -1,82 +1,58 @@
 #!/usr/bin/env python3
-"""Builds the Dyncamelo wiki: a static, offline-capable site in docs/wiki/ for publishing on bimcamel.com.
+"""Builds the Dyncamelo wiki: a static site for bimcamel.com, made with MkDocs and the Material theme.
 
-Sources
-  docs/wiki-src/*.md           hand-written pages (one Markdown file per page; first line '# Title')
-  docs/dyncamelo-nodes.json    the node catalogue (written by tools/generate_node_catalog.py): one reference page per
-                               category with every node's description, inputs and outputs
-  CHANGELOG.md                 becomes the 'What's new' page
-  docs/images/*                pictures a page refers to are copied next to the site
+What it does
+  1. Puts all pages in a staging folder (default build/wiki-docs):
+       docs/wiki-src/*.md, howto/*.md   the pages written by hand (YAML front matter allowed: title, order, summary)
+       docs/wiki-src/graphs/*.dyc       graph files, offered for download
+       docs/TROUBLESHOOTING.md, docs/RECIPES.md, docs/EXTENDING.md
+                                        the repository's own documents, with their links turned into links of the site
+       CHANGELOG.md                     becomes the "What's new" page
+       docs/dyncamelo-nodes.json        becomes the node reference (nodes/*.md, one page per category group)
+       docs/images/<id>.png             the pictures the pages use; <id>-light.png is the light-theme version when it exists
+  2. Writes build/wiki-docs.mkdocs.yml (the navigation from docs/wiki-src/nav.yml, the addresses from tools/wiki/site.yml).
+  3. Runs `mkdocs build --strict` with tools/wiki/mkdocs.yml, into build/wiki-site.
 
 Usage
-  python tools/build_wiki.py            write docs/wiki
-  python tools/build_wiki.py --check    fail (exit 1) when docs/wiki is not what a build would write (used by CI)
-  python tools/build_wiki.py --out DIR  write somewhere else (for the CI artifact)
+  python tools/build_wiki.py                         build; any warning fails the build
+  python tools/build_wiki.py --serve                 build, then serve with live reload on http://127.0.0.1:8000
+  python tools/build_wiki.py --allow-missing-images  (drafts) a missing picture is a warning and shows a note in its place
+  python tools/build_wiki.py --allow-missing-files   (drafts) a link to a graph file that is not there yet is shown as text
+  python tools/build_wiki.py --draft                 both of the above
+  python tools/build_wiki.py --stage-only            only write the staging folder and the MkDocs file
+  python tools/build_wiki.py --out DIR               write the site to DIR instead of build/wiki-site
 
-Needs the 'markdown' package (pip install markdown). The output has no timestamps, so a build is repeatable.
+Needs the packages in tools/wiki/requirements.txt: pip install -r tools/wiki/requirements.txt
 """
 
 import argparse
 import html
 import json
 import os
+import posixpath
 import re
-import shutil
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
-    import markdown
+    import yaml
 except ImportError:  # pragma: no cover - the message is the point
-    sys.exit("build_wiki.py needs the 'markdown' package: pip install markdown")
+    sys.exit("build_wiki.py needs the packages in tools/wiki/requirements.txt: pip install -r tools/wiki/requirements.txt")
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "docs" / "wiki-src"
-OUT_DEFAULT = ROOT / "docs" / "wiki"
+NAV_FILE = SRC / "nav.yml"
 CATALOGUE = ROOT / "docs" / "dyncamelo-nodes.json"
 IMAGES = ROOT / "docs" / "images"
-SITE_URL = "https://www.bimcamel.com/plugins/dyncamelo"
-REPO_URL = "https://github.com/mrshoma99-rgb/dyncamelo"
-
-# The order and grouping of the sidebar. A page that is not listed here is a build error, and so is a listed page without a file.
-NAV = [
-    ("Start here", [
-        ("index", "Home"),
-        ("installation", "Installation"),
-        ("requirements", "Requirements"),
-        ("first-steps", "Your first script"),
-        ("updating", "Updating"),
-        ("uninstall", "Uninstalling"),
-    ]),
-    ("Using Dyncamelo", [
-        ("concepts", "Concepts"),
-        ("ports-and-kinds", "Inputs, outputs and kinds"),
-        ("canvas-and-nodes", "The editor"),
-        ("library-and-search", "Node library and search"),
-        ("running-graphs", "Running a graph"),
-        ("saving-opening", "Saving and opening"),
-        ("node-groups", "Node groups"),
-        ("player", "The Script Player"),
-        ("settings", "Settings"),
-        ("shortcuts", "Keyboard and mouse"),
-    ]),
-    ("Learn by example", [
-        ("samples", "Sample scripts"),
-        ("recipes", "Recipes"),
-        ("exchange-formats", "IFC, BCF, Excel and CSV"),
-    ]),
-    ("Help", [
-        ("troubleshooting", "Troubleshooting"),
-        ("faq", "FAQ"),
-        ("privacy-and-safety", "Privacy and safety"),
-        ("licence", "Licence"),
-        ("whats-new", "What's new"),
-    ]),
-    ("For developers", [
-        ("extending", "Writing your own nodes"),
-    ]),
-]
-OPTIONAL_PAGES = set()  # pages that may be missing without failing a non-strict build
+TOOLS = ROOT / "tools" / "wiki"
+MKDOCS_BASE = TOOLS / "mkdocs.yml"
+SITE_FILE = TOOLS / "site.yml"
+BUILD = ROOT / "build"
+STAGE_DEFAULT = BUILD / "wiki-docs"
+SITE_DEFAULT = BUILD / "wiki-site"
+STAGE_MARKER = ".wiki-stage"
 
 # Pages whose text lives in the repository's own documents, so there is one copy of it: the wiki page is that document with its
 # links turned into links of the site (or, for files the site does not have, into the file on GitHub).
@@ -86,7 +62,7 @@ REPO_PAGES = {
     "extending": "docs/EXTENDING.md",
 }
 
-# Where a link from a repository document goes on the site (the anchor is kept when the target page has it).
+# Where a link from a repository document goes on the site.
 LINK_MAP = {
     "GETTING_STARTED.md": "first-steps.md",
     "TROUBLESHOOTING.md": "troubleshooting.md",
@@ -100,7 +76,21 @@ LINK_MAP = {
     "samples/README.md": "samples.md",
 }
 
-NODE_SECTION_TITLE = "Node reference"
+CHANGELOG_KEY = "whats-new"
+NODES_INDEX_KEY = "nodes/index"
+SITE_KEYS = ("github_url", "app_store_url", "bimcamel_url", "repo_url")
+
+
+class BuildError(Exception):
+    pass
+
+
+# ------------------------------------------------------------------------------------------------------------------------
+# Small helpers
+# ------------------------------------------------------------------------------------------------------------------------
+
+def read_text(path):
+    return Path(path).read_text(encoding="utf-8").replace("\r\n", "\n")
 
 
 def read_version():
@@ -113,142 +103,366 @@ def slug(text):
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def esc(text):
-    return html.escape(str(text), quote=True)
+def md_text(text):
+    """Plain text made safe for Markdown: nothing in it is taken for formatting, a link, HTML or a table border."""
+    out = []
+    for ch in str(text):
+        if ch == "&":
+            out.append("&amp;")
+        elif ch == "<":
+            out.append("&lt;")
+        elif ch == ">":
+            out.append("&gt;")
+        elif ch == "|":
+            out.append("&#124;")
+        elif ch == ":":
+            out.append("&#58;")
+        elif ch in "\\`*_{}[]#+!":
+            out.append("\\" + ch)
+        else:
+            out.append(ch)
+    result = "".join(out)
+    result = re.sub(r"^(\d+)([.)])", r"\1\\\2", result)   # not a numbered list
+    result = re.sub(r"^-", r"\\-", result)                  # not a bullet
+    return result
+
+
+def code(text):
+    return "<code>%s</code>" % md_text(text)
+
+
+def chip(text, extra=""):
+    return '<span class="chip%s">%s</span>' % (extra, html.escape(text))
+
+
+def plain(text):
+    """A line of Markdown as plain text (for labels and descriptions)."""
+    text = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"[`*]", "", text)
+    text = re.sub(r"<[^>]+>", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def summary_of(body, limit=170):
+    """The first paragraph after the page title, as plain text (for the page description)."""
+    lines = body.split("\n")
+    i = 0
+    while i < len(lines) and not lines[i].startswith("# "):
+        i += 1
+    para = []
+    for line in lines[i + 1:]:
+        stripped = line.strip()
+        if not stripped:
+            if para:
+                break
+            continue
+        if not para and stripped.startswith(("#", "|", "```", "~~~", "-", "*", ">", "!", "<", "1.", "???", "===")):
+            continue
+        if para and stripped.startswith(("#", "|", "```", "~~~")):
+            break
+        para.append(stripped)
+    text = plain(" ".join(para))
+    if len(text) > limit:
+        text = text[:limit].rsplit(" ", 1)[0].rstrip(",;:") + "..."
+    return text
+
+
+def split_front_matter(text, where):
+    """(meta, body) of a page that may start with a YAML front matter block."""
+    match = re.match(r"\A---[ \t]*\n(.*?)\n---[ \t]*(?:\n|\Z)", text, re.S)
+    if not match:
+        return {}, text
+    try:
+        meta = yaml.safe_load(match.group(1)) or {}
+    except yaml.YAMLError as error:
+        raise BuildError("%s: the front matter is not valid YAML (%s)" % (where, str(error).splitlines()[0]))
+    if not isinstance(meta, dict):
+        raise BuildError("%s: the front matter must be a list of 'key: value' lines" % where)
+    return meta, text[match.end():].lstrip("\n")
+
+
+def title_of(body, where):
+    first = next((line for line in body.split("\n") if line.strip()), "")
+    if not first.startswith("# ") or not first[2:].strip():
+        raise BuildError("%s must start with a '# Title' line (after the front matter, if there is one)" % where)
+    return first[2:].strip()
+
+
+INLINE_CODE = re.compile(r"(?<!`)(`+)(?!`)(.+?)(?<!`)\1(?!`)")
+FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
+LINK_OR_PICTURE = re.compile(r'(!?)\[((?:[^\]\\]|\\.)*)\]\(\s*([^)\s]*)((?:\s+"[^"]*")?)\s*\)(\{[^}\n]*\})?')
+
+
+def closes_fence(match, fence, line):
+    return bool(match) and match.group(1)[0] == fence[0] and len(match.group(1)) >= len(fence) and line.strip() == match.group(1)
+
+
+def outside_code(line, function):
+    """Applies `function` to a line of a page with its `inline code` hidden, so a link or a picture is found even when its
+    text contains code."""
+    spans = []
+
+    def hide(found):
+        spans.append(found.group(0))
+        return "\x00%d\x00" % (len(spans) - 1)
+
+    result = function(INLINE_CODE.sub(hide, line))
+    return re.sub(r"\x00(\d+)\x00", lambda found: spans[int(found.group(1))], result)
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-# Pages
+# The staging folder
 # ------------------------------------------------------------------------------------------------------------------------
 
 class Page:
-    def __init__(self, key, title, body_html, toc, kind="page", summary=""):
-        self.key = key          # "installation" or "nodes/search"
+    def __init__(self, key, body, title, meta=None, edit_path=None, description=None):
+        self.key = key
+        self.body = body.rstrip("\n") + "\n"
         self.title = title
-        self.body = body_html
-        self.toc = toc          # [(level, id, text)]
-        self.kind = kind
-        self.summary = summary
+        self.meta = dict(meta or {})
+        self.edit_path = edit_path
+        self.description = description
 
     @property
-    def path(self):
-        return self.key + ".html"
+    def directory(self):
+        return posixpath.dirname(self.key)
 
-    @property
-    def depth(self):
-        return self.key.count("/")
-
-
-def github_slug(value, separator="-"):
-    """Heading ids the way GitHub makes them (punctuation dropped, each space a hyphen), so the links inside the repository's own
-    documents, which were written for GitHub, find their headings on the site too."""
-    value = re.sub(r"[^\w\- ]", "", value.strip().lower(), flags=re.UNICODE)
-    return value.replace(" ", separator)
-
-
-def markdown_to_html(text):
-    md = markdown.Markdown(extensions=["tables", "fenced_code", "toc", "sane_lists", "attr_list"],
-                           extension_configs={"toc": {"permalink": False, "slugify": github_slug}})
-    body = md.convert(text)
-    body = re.sub(r"^\s*<h1[^>]*>.*?</h1>\s*", "", body, count=1, flags=re.S)   # the page template draws the title itself
-    toc = []
-
-    def walk(tokens):
-        for token in tokens:
-            if token["level"] in (2, 3):
-                toc.append((token["level"], token["id"], token["name"]))
-            walk(token.get("children", []))
-
-    walk(md.toc_tokens)
-    return body, toc
+    def render(self):
+        meta = {"title": self.title}
+        extra = dict(self.meta)
+        description = extra.pop("description", None) or self.description
+        if description:
+            meta["description"] = description
+        if self.edit_path:
+            meta["edit_path"] = self.edit_path
+        meta.update(extra)
+        front = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, width=10000, default_flow_style=False)
+        return "---\n" + front + "---\n\n" + self.body
 
 
-def first_paragraph_text(markdown_text):
-    lines = markdown_text.splitlines()
-    seen_title = False
-    for line in lines:
-        stripped = line.strip()
-        if not seen_title:
-            if stripped.startswith("# "):
-                seen_title = True
+class Stage:
+    """Everything the build puts into the staging folder: pages, pictures, graph files."""
+
+    def __init__(self, allow_missing_images=False, allow_missing_files=False):
+        self.allow_missing_images = allow_missing_images
+        self.allow_missing_files = allow_missing_files
+        self.downloads = {path.relative_to(SRC).as_posix() for path in SRC.rglob("*")
+                          if path.is_file() and path.suffix.lower() != ".md" and path != NAV_FILE and path.name != "README"}
+        self.problems = []
+        self.warnings = []
+        self.pages = {}           # key -> Page
+        self.files = {}           # relative path -> bytes or Path
+        self.images_used = set()
+
+    def image_markup(self, alt, src, title, attrs, page, standalone):
+        """Markdown for one picture. A picture that has a light version is shown in its own theme."""
+        if re.match(r"^(https?:|data:|//)", src):
+            return None
+        name = posixpath.basename(src.split("#")[0])
+        if not (IMAGES / name).is_file():
+            message = "%s uses the picture '%s', which is not in docs/images" % (page.key, name)
+            if self.allow_missing_images:
+                message += " (a note is shown in its place)"
+                if message not in self.warnings:
+                    self.warnings.append(message)
+                note = "**[picture to come: %s]**" % name
+                return ("\n" + note + "\n") if standalone else note
+            if message not in self.problems:
+                self.problems.append(message)
+            return None
+        self.images_used.add(name)
+        stem, dot, suffix = name.rpartition(".")
+        light_name = "%s-light.%s" % (stem, suffix)
+        has_light = bool(dot) and not stem.endswith("-light") and (IMAGES / light_name).is_file()
+        if has_light:
+            self.images_used.add(light_name)
+
+        def rel(file_name):
+            return posixpath.relpath("images/" + file_name, page.directory or ".")
+
+        alt_plain = alt.replace("`", "").replace("*", "").replace("[", "").replace("]", "")
+        extra = (attrs or "").strip()
+        extra = extra[1:-1].strip() if extra.startswith("{") and extra.endswith("}") else ""
+        if "loading" not in extra:
+            extra = (extra + " loading=lazy").strip()
+        tail = "{ %s }" % extra
+        if has_light:
+            pictures = ["![%s](%s#only-dark)%s" % (alt_plain, rel(name), tail),
+                        "![%s](%s#only-light)%s" % (alt_plain, rel(light_name), tail)]
+        else:
+            pictures = ["![%s](%s)%s" % (alt_plain, rel(name), tail)]
+        caption = alt.strip() or (title or "").strip()
+        if standalone and caption:
+            return "\n".join(['<figure markdown="span">'] + ["  " + p for p in pictures]
+                             + ["  <figcaption>%s</figcaption>" % caption, "</figure>"])
+        return "".join(pictures)
+
+    def download_link(self, label, target, page, original):
+        """A link to a file that is not a page (a graph to download): it must exist. Returns the text to use, or None to keep it."""
+        if re.match(r"^(https?:|mailto:|#|/)", target):
+            return None
+        path = target.split("#")[0].split("?")[0]
+        suffix = posixpath.splitext(path)[1].lower()
+        if not suffix or suffix in (".md", ".html"):
+            return None
+        resolved = posixpath.normpath(posixpath.join(page.directory, path))
+        if resolved in self.downloads:
+            return None
+        if resolved.startswith("images/") and (IMAGES / posixpath.basename(resolved)).is_file():
+            self.images_used.add(posixpath.basename(resolved))
+            return None
+        message = "%s links to the file '%s', which is not in docs/wiki-src" % (page.key, resolved)
+        if self.allow_missing_files:
+            message += " (the link is shown as plain text)"
+            if message not in self.warnings:
+                self.warnings.append(message)
+            return "%s (file to come)" % label
+        if message not in self.problems:
+            self.problems.append(message)
+        return None
+
+    def process(self, text, page, link_function=None):
+        """Turns the pictures of a page into figures and, if asked, rewrites its links (not in code)."""
+
+        def one(match, standalone=False):
+            bang, label, target, title_part, attrs = match.groups()
+            if bang:
+                title = title_part.strip().strip('"') if title_part else ""
+                made = self.image_markup(label, target, title, attrs, page, standalone)
+                return made if made is not None else match.group(0)
+            if link_function:
+                new_target = link_function(target)
+                if new_target is not None and new_target != target:
+                    return "[%s](%s%s)%s" % (label, new_target, title_part, attrs or "")
+                return match.group(0)
+            replaced = self.download_link(label, target, page, match.group(0))
+            return replaced if replaced is not None else match.group(0)
+
+        out = []
+        fence = None
+        for line in text.split("\n"):
+            match = FENCE.match(line)
+            if fence:
+                out.append(line)
+                if closes_fence(match, fence, line):
+                    fence = None
+                continue
+            if match:
+                fence = match.group(1)
+                out.append(line)
+                continue
+            whole = LINK_OR_PICTURE.fullmatch(line.strip())
+            if whole and whole.group(1):
+                made = one(whole, standalone=True)
+                if "\n" in made:
+                    indent = re.match(r"\s*", line).group(0)
+                    out.append("")
+                    out.extend(indent + b for b in made.strip("\n").split("\n"))
+                    out.append("")
+                    continue
+            out.append(outside_code(line, lambda fragment: LINK_OR_PICTURE.sub(one, fragment)))
+        return "\n".join(out)
+
+
+def load_site(problems):
+    try:
+        site = yaml.safe_load(SITE_FILE.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as error:
+        problems.append("tools/wiki/site.yml cannot be read: %s" % error)
+        return {}
+    for key in SITE_KEYS:
+        value = site.get(key)
+        if key == "app_store_url" and (value is None or value == ""):
+            site[key] = ""      # empty: the Autodesk App Store copy is "coming soon", greyed out and without a link
             continue
-        if stripped and not stripped.startswith("#") and not stripped.startswith(("|", "```", "-", "*", ">")):
-            return re.sub(r"[`*_\[\]]", "", re.sub(r"\]\([^)]*\)", "", stripped))
-    return ""
+        if not isinstance(value, str) or not value.startswith("https://"):
+            problems.append("tools/wiki/site.yml needs '%s' with an https:// address%s"
+                            % (key, " (or an empty one for 'coming soon')" if key == "app_store_url" else ""))
+    return site
 
 
-def repo_document(key):
-    """The text of a page that is a repository document, with its links turned into links of the site."""
+def load_nav(problems):
+    try:
+        nav = yaml.safe_load(NAV_FILE.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as error:
+        problems.append("docs/wiki-src/nav.yml cannot be read: %s" % error)
+        return []
+    if not isinstance(nav, list) or not nav:
+        problems.append("docs/wiki-src/nav.yml must be a list of sections")
+        return []
+    sections = []
+    for entry in nav:
+        if not isinstance(entry, dict) or "section" not in entry or not (("pages" in entry) ^ ("glob" in entry)):
+            problems.append("docs/wiki-src/nav.yml: each entry needs 'section' and either 'pages' or 'glob': %r" % (entry,))
+            continue
+        bad = [p for p in entry.get("pages", []) if not isinstance(p, dict) or "key" not in p or "label" not in p]
+        if bad:
+            problems.append("docs/wiki-src/nav.yml: each page needs 'key' and 'label': %r" % (bad[0],))
+            continue
+        sections.append(entry)
+    return sections
+
+
+# ------------------------------------------------------------------------------------------------------------------------
+# Hand-written pages, repository documents, changelog
+# ------------------------------------------------------------------------------------------------------------------------
+
+def written_page(stage, key, path):
+    where = path.relative_to(ROOT).as_posix()
+    meta, body = split_front_matter(read_text(path), where)
+    heading = title_of(body, where)
+    title = plain(str(meta.pop("title", None) or heading))
+    summary = meta.pop("summary", None)
+    meta.pop("order", None)
+    if summary and "description" not in meta:
+        meta["description"] = str(summary).strip()
+    page = Page(key, body, title, meta, edit_path=where, description=summary_of(body))
+    page.body = stage.process(page.body, page)
+    return page
+
+
+def repo_link(target, key, site):
+    """Where a link in a repository document goes on the site."""
+    if re.match(r"^(https?:|mailto:|#)", target):
+        return None
+    path, _, anchor = target.partition("#")
+    resolved = posixpath.normpath(posixpath.join(posixpath.dirname(REPO_PAGES[key]), path))
+    for name, page in LINK_MAP.items():
+        if resolved in ("docs/" + name, name):
+            # the headings of the three documents get the same ids as on GitHub, so an anchor stays valid between them
+            keep = page == key + ".md" or page[:-3] in REPO_PAGES
+            return page + (("#" + anchor) if anchor and keep else "")
+    return "%s/blob/main/%s%s" % (site["repo_url"].rstrip("/"), resolved, ("#" + anchor) if anchor else "")
+
+
+def repo_page(stage, key, site):
     rel = REPO_PAGES[key]
-    text = (ROOT / rel).read_text(encoding="utf-8").replace("\r\n", "\n")
-    base = Path(rel).parent
-
-    def fix(match):
-        target = match.group(1)
-        if re.match(r"^(https?:|mailto:|#)", target):
-            return match.group(0)
-        path, _, anchor = target.partition("#")
-        resolved = os.path.normpath((base / path).as_posix()).replace("\\", "/")
-        for name, page in LINK_MAP.items():
-            if resolved in ("docs/" + name, name):
-                suffix = ("#" + anchor) if anchor and page == key + ".md" else ""
-                return "](%s%s)" % (page, suffix)
-        return "](%s/blob/main/%s%s)" % (REPO_URL, resolved, ("#" + anchor) if anchor else "")
-
-    return re.sub(r"\]\(([^)\s]+)\)", fix, text)
+    meta, body = split_front_matter(read_text(ROOT / rel), rel)
+    heading = title_of(body, rel)
+    page = Page(key, body, plain(heading), meta, edit_path=rel, description=summary_of(body))
+    page.body = stage.process(page.body, page, lambda target: repo_link(target, key, site))
+    return page
 
 
-def load_handwritten(strict, problems):
-    pages = {}
-    for _, items in NAV:
-        for key, label in items:
-            if key == "whats-new":
-                continue
-            if key in REPO_PAGES:
-                if (SRC / (key + ".md")).exists():
-                    problems.append("docs/wiki-src/%s.md must not exist: the page is built from %s" % (key, REPO_PAGES[key]))
-                    continue
-                text = repo_document(key)
-                if not text.lstrip().startswith("# "):
-                    problems.append("%s must start with '# Title'" % REPO_PAGES[key])
-                    continue
-                title = text.lstrip().split("\n", 1)[0][2:].strip()
-                body, toc = markdown_to_html(text)
-                pages[key] = Page(key, title, body, toc, summary=first_paragraph_text(text))
-                continue
-            path = SRC / (key + ".md")
-            if not path.exists():
-                if strict and key not in OPTIONAL_PAGES:
-                    problems.append("missing page: docs/wiki-src/%s.md (listed in NAV as '%s')" % (key, label))
-                continue
-            text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
-            if not text.lstrip().startswith("# "):
-                problems.append("docs/wiki-src/%s.md must start with '# Title'" % key)
-                continue
-            title = text.lstrip().split("\n", 1)[0][2:].strip()
-            body, toc = markdown_to_html(text)
-            pages[key] = Page(key, title, body, toc, summary=first_paragraph_text(text))
-    listed = {key for _, items in NAV for key, _ in items}
-    if SRC.exists():
-        for path in sorted(SRC.rglob("*.md")):
-            key = path.relative_to(SRC).with_suffix("").as_posix()
-            if key not in listed and key != "README" and not key.startswith(("howto/", "graphs/")) and key != "glossary":   # these are built by the MkDocs pipeline that replaces this script
-                problems.append("docs/wiki-src/%s.md is not listed in NAV (tools/build_wiki.py)" % key)
-    return pages
-
-
-def changelog_page():
-    text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8").replace("\r\n", "\n")
-    lines = text.split("\n")
-    # drop the file's own '# Changelog' line and its two intro paragraphs about how it was made; keep from the first '## ' on
+def changelog_page(stage, site):
+    lines = read_text(ROOT / "CHANGELOG.md").split("\n")
+    # drop the file's own '# Changelog' line and its intro paragraphs about how it was made; keep from the first '## ' on
     start = next((i for i, line in enumerate(lines) if line.startswith("## ")), 0)
     intro = ("# What's new\n\nEvery release of Dyncamelo and what changed in it, newest first. "
              "The newest section, *Unreleased*, lists what is already in the source and not yet in a numbered release.\n\n")
-    text = "\n".join(lines[start:])
-    # the changelog links to files of the repository; on the site those are the repository's pages
-    text = re.sub(r"\]\((?!https?:|#|mailto:)([^)\s]+)\)", lambda m: "](%s/blob/main/%s)" % (REPO_URL, m.group(1).lstrip("./")), text)
-    body, toc = markdown_to_html(intro + text)
-    return Page("whats-new", "What's new", body, toc, summary="Every release of Dyncamelo and what changed in it.")
+    page = Page(CHANGELOG_KEY, intro + "\n".join(lines[start:]), "What's new",
+                description="Every release of Dyncamelo and what changed in it.")
+    base = site["repo_url"].rstrip("/") + "/blob/main/"
+
+    def to_github(target):
+        # the changelog links to files of the repository; on the site those are the repository's pages
+        if re.match(r"^(https?:|mailto:|#)", target):
+            return None
+        return base + posixpath.normpath(target)
+
+    page.body = stage.process(page.body, page, to_github)
+    return page
 
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -270,420 +484,406 @@ def node_anchor(name):
     return "node-" + slug(name)
 
 
-def format_default(value):
-    if value is None:
-        return ""
-    return str(value)
+def plural(count, word):
+    return "%d %s%s" % (count, word, "" if count == 1 else "s")
 
 
 def render_node(node):
-    out = ['<section class="node" id="%s">' % node_anchor(node["name"])]
-    out.append('<h3><a class="node-name" href="#%s">%s</a></h3>' % (node_anchor(node["name"]), esc(node["name"])))
+    anchor = node_anchor(node["name"])
+    out = ["### %s { #%s .node }" % (md_text(node["name"]), anchor), "", md_text(node["description"]), ""]
     if node.get("interactive"):
-        out.append('<p class="node-flag">Interactive node: it has its own controls on the canvas.</p>')
-    out.append("<p>%s</p>" % esc(node["description"]))
+        out += ['!!! note "Interactive node"', "    It has its own controls on the canvas.", ""]
     if node.get("inputs"):
-        out.append('<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>')
+        out += ['<p class="node-sub">Inputs</p>', "",
+                "| Input | Type | Default | What it does |", "|---|---|---|---|"]
         for port in node["inputs"]:
-            flags = ' <span class="chip">any number of wires</span>' if port.get("multiInput") else ""
-            optional = "" if "default" in port else ' <span class="chip required">required</span>'
-            out.append("<tr><td><code>%s</code>%s%s</td><td><code>%s</code></td><td>%s</td><td>%s</td></tr>" % (
-                esc(port["name"]), flags, optional, esc(port["type"]),
-                ("<code>%s</code>" % esc(format_default(port["default"]))) if "default" in port else "&mdash;",
-                esc(port.get("description", ""))))
-        out.append("</tbody></table>")
+            flags = ""
+            if port.get("multiInput"):
+                flags += " " + chip("any number of wires")
+            if "default" not in port:
+                flags += " " + chip("required", " chip--required")
+                default = "&mdash;"
+            else:
+                default = code(port["default"]) if port["default"] != "" else "*empty*"
+            out.append("| %s%s | %s | %s | %s |" % (code(port["name"]), flags, code(port["type"]), default,
+                                                    md_text(port.get("description", ""))))
+        out.append("")
     else:
-        out.append('<p class="muted">No inputs.</p>')
+        out += ["*No inputs.*", ""]
     if node.get("outputs"):
         described = any(port.get("description") for port in node["outputs"])
-        out.append('<table class="ports"><thead><tr><th>Output</th><th>Type</th>%s</tr></thead><tbody>' % ("<th>What it gives</th>" if described else ""))
+        out += ['<p class="node-sub">Outputs</p>', ""]
+        out += ["| Output | Type | What it gives |", "|---|---|---|"] if described else ["| Output | Type |", "|---|---|"]
         for port in node["outputs"]:
-            out.append("<tr><td><code>%s</code></td><td><code>%s</code></td>%s</tr>" % (
-                esc(port["name"]), esc(port["type"]), ("<td>%s</td>" % esc(port.get("description", ""))) if described else ""))
-        out.append("</tbody></table>")
+            row = "| %s | %s |" % (code(port["name"]), code(port["type"]))
+            if described:
+                row += " %s |" % md_text(port.get("description", ""))
+            out.append(row)
+        out.append("")
     else:
-        out.append('<p class="muted">No outputs.</p>')
+        out += ["*No outputs.*", ""]
     if node.get("returns"):
-        out.append('<p class="muted">Returns: %s</p>' % esc(node["returns"]))
+        out += ["Returns: %s" % md_text(node["returns"]), ""]
     tags = node.get("tags") or []
     if tags:
-        out.append('<p class="tags">%s</p>' % " ".join('<span class="chip">%s</span>' % esc(tag) for tag in tags))
-    out.append("</section>")
+        out += ["Tags: " + " ".join(chip(tag) for tag in tags), ""]
     return "\n".join(out)
 
 
-def build_node_pages(catalogue):
+def node_pages(catalogue):
+    """The index page and the pages of the groups of the node reference: (index, [(group, page, count)])."""
     nodes = catalogue["nodes"]
     groups = {}
     for node in nodes:
         groups.setdefault(node_group(node["category"]), []).append(node)
+    order = sorted(groups, key=lambda g: (g.startswith("Navisworks"), g.lower()))
+
     pages = []
-    group_index = []
-    for group in sorted(groups, key=lambda g: (g.startswith("Navisworks"), g.lower())):
+    seen_anchors = {}
+    for group in order:
         items = sorted(groups[group], key=lambda n: (n["category"].lower(), n["name"].lower()))
-        key = "nodes/" + slug(group)
-        toc = []
-        body = ['<p class="lead">%d node%s. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>' % (
-            len(items), "" if len(items) == 1 else "s")]
+        body = ["# %s" % md_text(group_title(group)), "",
+                "%s. Types ending in <code>[]</code> are lists. An input with a default is optional."
+                % plural(len(items), "node").capitalize(), ""]
         current = None
         for node in items:
+            anchor = node_anchor(node["name"])
+            if anchor in seen_anchors:
+                raise BuildError("two nodes make the same anchor '%s': %s and %s" % (anchor, seen_anchors[anchor], node["name"]))
+            seen_anchors[anchor] = node["name"]
             if node["category"] != current:
                 current = node["category"]
-                if current != group:
+                if current == group:
+                    body += ["## Nodes { #%s-nodes }" % slug(group), ""]
+                else:
                     heading = current[len(group) + 1:] if current.startswith(group + ".") else current
-                    body.append('<h2 id="%s">%s</h2>' % (slug(current), esc(heading)))
-                    toc.append((2, slug(current), heading))
+                    body += ["## %s { #%s }" % (md_text(heading), slug(current)), ""]
             body.append(render_node(node))
-        page = Page(key, group_title(group), "\n".join(body), toc, kind="nodes", summary="%d nodes: inputs, outputs and what each does." % len(items))
-        pages.append(page)
-        group_index.append((group, key, len(items)))
-    return pages, group_index, groups
+        page = Page("nodes/" + slug(group), "\n".join(body), group_title(group),
+                    description="%s: inputs, outputs and what each does." % plural(len(items), "node").capitalize())
+        pages.append((group, page, len(items)))
+
+    # the index: category cards and a table of all nodes
+    body = ["# Node reference", "",
+            "Every node in the library, with its inputs and outputs: %s in %s. Pick a category below, or type a node's name in the search box at the top."
+            % (plural(len(nodes), "node"), plural(len(order), "category group")), "",
+            "## Categories", "", '<div class="grid cards" markdown>', ""]
+    for group, page, count in pages:
+        names = sorted((n["name"] for n in groups[group]), key=str.lower)[:3]
+        body += ["- **[%s](%s.md)**" % (md_text(group_title(group)), page.key.split("/", 1)[1]), "",
+                 "    %s" % plural(count, "node"), "",
+                 "    " + ", ".join(code(n) for n in names) + ", ...", ""]
+    body += ["</div>", "", "## All nodes { data-search-exclude }", "",
+             "| Node | Category | What it does |", "|---|---|---|"]
+    page_of = {group: page for group, page, _ in pages}
+    for node in sorted(nodes, key=lambda n: n["name"].lower()):
+        summary = node["description"]
+        cut = summary.find(". ")
+        short = summary if cut < 0 else summary[:cut + 1]
+        target = "%s.md#%s" % (page_of[node_group(node["category"])].key.split("/", 1)[1], node_anchor(node["name"]))
+        body.append("| [%s](%s) | %s | %s |" % (code(node["name"]), target, md_text(node["category"]), md_text(short)))
+    index = Page(NODES_INDEX_KEY, "\n".join(body), "Node reference",
+                 description="Every node with its inputs and outputs, by category.")
+    return index, pages
 
 
-def build_nodes_index(group_index, groups):
-    body = ['<p class="lead">Every node in the library, with its inputs and outputs. Pick a category, or type in the box to filter all %d nodes.</p>' % sum(c for _, _, c in group_index)]
-    body.append('<h2 id="categories">Categories</h2><div class="cards">')
-    for group, key, count in group_index:
-        names = groups[group]
-        sample = ", ".join(n["name"].split(".")[-1] for n in sorted(names, key=lambda n: n["name"].lower())[:4])
-        body.append('<a class="card" href="%s.html"><strong>%s</strong><span>%d node%s</span><em>%s&hellip;</em></a>' % (
-            key.split("/", 1)[1], esc(group_title(group)), count, "" if count == 1 else "s", esc(sample)))
-    body.append("</div>")
-    body.append('<h2 id="all-nodes">All nodes</h2>')
-    body.append('<input id="node-filter" class="node-filter" type="search" placeholder="Filter by name, category or word in the description" aria-label="Filter nodes">')
-    body.append('<table class="ports all-nodes"><thead><tr><th>Node</th><th>Category</th><th>What it does</th></tr></thead><tbody>')
-    rows = []
-    for group, key, _ in group_index:
-        for node in sorted(groups[group], key=lambda n: n["name"].lower()):
-            summary = node["description"]
-            cut = summary.find(". ")
-            short = summary if cut < 0 else summary[:cut + 1]
-            rows.append('<tr data-search="%s"><td><a href="%s.html#%s"><code>%s</code></a></td><td>%s</td><td>%s</td></tr>' % (
-                esc((node["name"] + " " + node["category"] + " " + node["description"] + " " + " ".join(node.get("tags") or [])).lower()),
-                key.split("/", 1)[1], node_anchor(node["name"]), esc(node["name"]), esc(node["category"]), esc(short)))
-    body.extend(rows)
-    body.append("</tbody></table>")
-    toc = [(2, "categories", "Categories"), (2, "all-nodes", "All nodes")]
-    return Page("nodes/index", "Node reference", "\n".join(body), toc, kind="nodes-index",
-                summary="Every node with its inputs and outputs, by category.")
-
-
-# ------------------------------------------------------------------------------------------------------------------------
-# Rendering
-# ------------------------------------------------------------------------------------------------------------------------
-
-CSS = """
-:root{--bg:#f7f8fa;--panel:#ffffff;--text:#1d2430;--muted:#5d6877;--line:#d9dee6;--accent:#0a74da;--accent-soft:#e3f0fc;--code:#eef1f5;--warn:#b86e00}
-:root[data-theme=dark]{--bg:#15171b;--panel:#1c1f24;--text:#e6e9ee;--muted:#9aa4b2;--line:#333941;--accent:#4aa8f5;--accent-soft:#1f2d3d;--code:#252a31;--warn:#f0c66a}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15171b;--panel:#1c1f24;--text:#e6e9ee;--muted:#9aa4b2;--line:#333941;--accent:#4aa8f5;--accent-soft:#1f2d3d;--code:#252a31;--warn:#f0c66a}}
-*{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
-header.top .brand{font-weight:700;font-size:18px;color:var(--text);white-space:nowrap}
-header.top .brand small{font-weight:400;color:var(--muted);margin-left:8px;font-size:13px}
-header.top .spacer{flex:1}
-#search{width:min(360px,40vw);padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:14px}
-#results{position:absolute;top:52px;right:130px;width:min(520px,90vw);max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.25);display:none}
-#results a{display:block;padding:8px 14px;color:var(--text);border-bottom:1px solid var(--line)}
-#results a:hover{background:var(--accent-soft);text-decoration:none}
-#results small{display:block;color:var(--muted)}
-button.theme{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:13px}
-.layout{display:grid;grid-template-columns:260px minmax(0,1fr) 220px;gap:28px;max-width:1500px;margin:0 auto;padding:0 20px}
-nav.side{position:sticky;top:60px;align-self:start;max-height:calc(100vh - 70px);overflow:auto;padding:18px 0;font-size:14.5px}
-nav.side h4{margin:16px 0 4px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-nav.side a{display:block;padding:4px 10px;border-radius:6px;color:var(--text)}
-nav.side a:hover{background:var(--accent-soft);text-decoration:none}
-nav.side a.current{background:var(--accent-soft);color:var(--accent);font-weight:600}
-nav.side details.nodes-nav{margin-top:16px}nav.side details summary{cursor:pointer;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:2px 0 4px}
-nav.side a.sub{padding-left:22px;font-size:13.5px;color:var(--muted)}
-nav.side a.sub.current{color:var(--accent)}
-main{padding:26px 0 60px;min-width:0}
-main h1{font-size:2rem;margin:.2em 0 .3em}
-main h2{margin-top:2em;padding-top:.4em;border-top:1px solid var(--line)}
-main h3{margin-top:1.6em}
-main img{max-width:100%;border:1px solid var(--line);border-radius:8px}
-main table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14.5px;display:block;overflow-x:auto}
-main th,main td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
-main th{background:var(--panel)}
-main code{background:var(--code);padding:1px 5px;border-radius:4px;font:13.5px/1.4 Consolas,"Cascadia Mono",monospace}
-main pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto}
-main pre code{background:none;padding:0}
-main blockquote{margin:1em 0;padding:.4em 1em;border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0}
-.lead{font-size:1.1rem;color:var(--muted)}.muted{color:var(--muted)}
-aside.toc{position:sticky;top:60px;align-self:start;max-height:calc(100vh - 70px);overflow:auto;padding:26px 0;font-size:13.5px}
-aside.toc h4{margin:0 0 6px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-aside.toc a{display:block;padding:2px 0;color:var(--muted)}aside.toc a.l3{padding-left:12px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:1em 0}
-.card{display:flex;flex-direction:column;gap:2px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--text)}
-.card:hover{border-color:var(--accent);text-decoration:none}.card span{color:var(--accent);font-size:13px}.card em{color:var(--muted);font-size:12.5px;font-style:normal}
-section.node{padding:6px 0 10px;border-top:1px solid var(--line)}
-section.node h3{margin:.8em 0 .2em}a.node-name{color:var(--text);font-family:Consolas,"Cascadia Mono",monospace;font-size:1.05rem}
-table.ports{font-size:14px}.chip{display:inline-block;padding:0 7px;border-radius:9px;background:var(--code);color:var(--muted);font-size:12px;margin:1px 2px}
-.chip.required{background:transparent;border:1px solid var(--line)}.tags{margin:.4em 0}.node-flag{color:var(--warn);font-size:13.5px}
-input.node-filter{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
-footer.foot{border-top:1px solid var(--line);padding:18px 20px;text-align:center;color:var(--muted);font-size:13.5px}
-@media (max-width:1100px){.layout{grid-template-columns:230px minmax(0,1fr)}aside.toc{display:none}}
-@media (max-width:760px){.layout{grid-template-columns:1fr}nav.side{position:static;max-height:none}#results{right:10px}}
-"""
-
-JS = """
-(function(){
-  var root=document.documentElement;
-  try{var saved=localStorage.getItem('dyc-theme');if(saved){root.setAttribute('data-theme',saved);}}catch(e){}
-  var toggle=document.getElementById('theme');
-  if(toggle){toggle.addEventListener('click',function(){
-    var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var next=dark?'light':'dark';root.setAttribute('data-theme',next);
-    try{localStorage.setItem('dyc-theme',next);}catch(e){}
-  });}
-  var box=document.getElementById('search'),out=document.getElementById('results'),base=document.body.getAttribute('data-base')||'';
-  if(box&&window.WIKI_INDEX){
-    box.addEventListener('input',function(){
-      var q=box.value.toLowerCase().split(/\\s+/).filter(Boolean);
-      if(!q.length){out.style.display='none';return;}
-      var hits=[];
-      window.WIKI_INDEX.forEach(function(e){
-        var hay=(e.t+' '+e.x).toLowerCase(),score=0;
-        for(var i=0;i<q.length;i++){if(hay.indexOf(q[i])<0){return;}score+=e.t.toLowerCase().indexOf(q[i])>=0?3:1;}
-        hits.push({e:e,s:score});
-      });
-      hits.sort(function(a,b){return b.s-a.s;});
-      out.innerHTML='';
-      hits.slice(0,25).forEach(function(h){
-        var a=document.createElement('a');a.href=base+h.e.u;
-        a.innerHTML='<strong></strong><small></small>';
-        a.firstChild.textContent=h.e.t;a.lastChild.textContent=h.e.k+(h.e.d?' - '+h.e.d:'');
-        out.appendChild(a);
-      });
-      if(!hits.length){out.innerHTML='<a href="#"><small>Nothing found.</small></a>';}
-      out.style.display='block';
-    });
-    document.addEventListener('click',function(ev){if(ev.target!==box&&!out.contains(ev.target)){out.style.display='none';}});
-  }
-  var filter=document.getElementById('node-filter');
-  if(filter){
-    var rows=document.querySelectorAll('table.all-nodes tbody tr');
-    filter.addEventListener('input',function(){
-      var q=filter.value.toLowerCase().split(/\\s+/).filter(Boolean);
-      rows.forEach(function(r){var h=r.getAttribute('data-search')||'';var show=q.every(function(w){return h.indexOf(w)>=0;});r.style.display=show?'':'none';});
-    });
-  }
-})();
-"""
-
-
-def nav_html(pages, node_groups_list, current_key, base):
-    parts = []
-    for section, items in NAV:
-        links = []
-        for key, label in items:
-            if key not in pages:
-                continue
-            cls = ' class="current"' if key == current_key else ""
-            links.append('<a%s href="%s%s.html">%s</a>' % (cls, base, key, esc(label)))
-        if links:
-            parts.append("<h4>%s</h4>" % esc(section))
-            parts.extend(links)
-        if section == "Learn by example":
-            opened = " open" if current_key.startswith("nodes/") else ""
-            parts.append('<details class="nodes-nav"%s><summary>%s</summary>' % (opened, NODE_SECTION_TITLE))
-            cls = ' class="current"' if current_key == "nodes/index" else ""
-            parts.append('<a%s href="%snodes/index.html">All nodes</a>' % (cls, base))
-            for group, key, count in node_groups_list:
-                cls = "sub current" if key == current_key else "sub"
-                parts.append('<a class="%s" href="%s%s.html">%s <span class="muted">(%d)</span></a>' % (cls, base, key, esc(group_title(group)), count))
-            parts.append("</details>")
-    return "\n".join(parts)
-
-
-def render_page(page, pages, node_groups_list, version, base):
-    toc_links = "".join('<a class="l%d" href="#%s">%s</a>' % (lvl, tid, esc(text)) for lvl, tid, text in page.toc)
-    toc_block = ('<aside class="toc"><h4>On this page</h4>%s</aside>' % toc_links) if toc_links else '<aside class="toc"></aside>'
-    description = esc(page.summary or "Dyncamelo documentation")
-    return """<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title} - Dyncamelo Wiki</title>
-<meta name="description" content="{description}">
-<link rel="stylesheet" href="{base}assets/wiki.css">
-</head>
-<body data-base="{base}">
-<header class="top">
-<a class="brand" href="{base}index.html">Dyncamelo<small>Wiki &middot; v{version}</small></a>
-<span class="spacer"></span>
-<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
-<div id="results"></div>
-<a href="{site}">bimcamel.com</a>
-<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
-</header>
-<div class="layout">
-<nav class="side">{nav}</nav>
-<main>
-<h1>{title}</h1>
-{body}
-</main>
-{toc}
-</div>
-<footer class="foot">Dyncamelo v{version} by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="{repo}/issues">Report a problem</a></footer>
-<script src="{base}assets/search-index.js"></script>
-<script src="{base}assets/wiki.js"></script>
-</body>
-</html>
-""".format(title=esc(page.title), description=description, base=base, version=version, site=SITE_URL, repo=REPO_URL,
-           nav=nav_html(pages, node_groups_list, page.key, base), body=page.body, toc=toc_block)
+def node_nav(pages):
+    """Navigation entries below 'All nodes': the general groups, then a 'Navisworks' section."""
+    entries = [{group_title(group): page.key + ".md"} for group, page, _ in pages if not group.startswith("Navisworks.")]
+    navisworks = [{group_title(group).replace("Navisworks: ", ""): page.key + ".md"}
+                  for group, page, _ in pages if group.startswith("Navisworks.")]
+    if navisworks:
+        entries.append({"Navisworks": navisworks})
+    return entries
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-# Links and images
+# Putting it together
 # ------------------------------------------------------------------------------------------------------------------------
 
-def rewrite_links(page, known_keys, problems, images_used):
-    base_dir = Path(page.key).parent
-
-    def fix_href(match):
-        href = match.group(1)
-        if re.match(r"^(https?:|mailto:|#|/)", href):
-            return match.group(0)
-        target, _, anchor = href.partition("#")
-        if target.endswith(".md"):
-            resolved = os.path.normpath((base_dir / target).as_posix()).replace("\\", "/")
-            key = resolved[:-3]
-            if key not in known_keys:
-                problems.append("%s links to '%s', which is not a wiki page" % (page.key, href))
-                return match.group(0)
-            relative = os.path.relpath(key + ".html", base_dir.as_posix() or ".").replace("\\", "/")
-            return 'href="%s%s"' % (relative, ("#" + anchor) if anchor else "")
-        if target.endswith(".html") or target == "":
-            return match.group(0)
-        problems.append("%s links to '%s' (use a wiki page .md link or an https address)" % (page.key, href))
-        return match.group(0)
-
-    def fix_src(match):
-        src = match.group(1)
-        if re.match(r"^(https?:|data:)", src):
-            return match.group(0)
-        name = Path(src).name
-        if not (IMAGES / name).exists():
-            problems.append("%s uses the image '%s', which is not in docs/images" % (page.key, src))
-            return match.group(0)
-        images_used.add(name)
-        prefix = "../" * page.depth
-        return 'src="%simages/%s"' % (prefix, name)
-
-    page.body = re.sub(r'href="([^"]+)"', fix_href, page.body)
-    page.body = re.sub(r'src="([^"]+)"', fix_src, page.body)
-
-
-# ------------------------------------------------------------------------------------------------------------------------
-# Build
-# ------------------------------------------------------------------------------------------------------------------------
-
-def build(out_dir, strict):
-    problems = []
-    version = read_version()
-    catalogue = json.loads(CATALOGUE.read_text(encoding="utf-8"))
-    pages = load_handwritten(strict, problems)
-    pages["whats-new"] = changelog_page()
-
-    node_pages, group_index, groups = build_node_pages(catalogue)
-    index_page = build_nodes_index(group_index, groups)
-    all_pages = dict(pages)
-    all_pages[index_page.key] = index_page
-    for page in node_pages:
-        all_pages[page.key] = page
-
-    known = set(all_pages)
-    images_used = set()
-    for page in all_pages.values():
-        rewrite_links(page, known, problems, images_used)
-
+def build_stage(allow_missing_images, allow_missing_files):
+    stage = Stage(allow_missing_images, allow_missing_files)
+    problems = stage.problems
+    site = load_site(problems)
+    sections = load_nav(problems)
     if problems:
-        for problem in problems:
-            print("wiki: " + problem, file=sys.stderr)
-        return None
+        return stage, site, []
 
-    files = {}
-    for page in all_pages.values():
-        files[page.path] = render_page(page, pages, group_index, version, "../" * page.depth)
-    files["assets/wiki.css"] = CSS.strip() + "\n"
-    files["assets/wiki.js"] = JS.strip() + "\n"
+    catalogue = json.loads(CATALOGUE.read_text(encoding="utf-8"))
+    sources = {}
+    for path in sorted(SRC.rglob("*.md")):
+        key = path.relative_to(SRC).with_suffix("").as_posix()
+        if key != "README":
+            sources[key] = path
 
-    index = []
-    for page in all_pages.values():
-        if page.kind == "nodes":
+    listed = set()
+    nav = []
+    seen_nodes = False
+
+    def add_page(key, label):
+        """Reads the page of a nav.yml key into the stage. Returns the Page, 'nodes' for the node reference, or None."""
+        if key in listed:
+            problems.append("docs/wiki-src/nav.yml lists '%s' twice" % key)
+            return None
+        listed.add(key)
+        try:
+            if key in REPO_PAGES:
+                if key in sources:
+                    problems.append("docs/wiki-src/%s.md must not exist: the page is built from %s" % (key, REPO_PAGES[key]))
+                    return None
+                page = repo_page(stage, key, site)
+            elif key == CHANGELOG_KEY:
+                page = changelog_page(stage, site)
+            elif key == NODES_INDEX_KEY:
+                return "nodes"
+            elif key.startswith("nodes/"):
+                problems.append("docs/wiki-src/nav.yml lists '%s': the build makes the node pages, list only nodes/index" % key)
+                return None
+            elif key in sources:
+                page = written_page(stage, key, sources[key])
+            else:
+                problems.append("missing page: docs/wiki-src/%s.md (listed in nav.yml as '%s')" % (key, label))
+                return None
+        except BuildError as error:
+            problems.append(str(error))
+            return None
+        stage.pages[key] = page
+        return page
+
+    for section in sections:
+        items = []
+        if "glob" in section:
+            found = []
+            for path in sorted(SRC.glob(section["glob"])):
+                key = path.relative_to(SRC).with_suffix("").as_posix()
+                if path.suffix != ".md" or key == "README":
+                    continue
+                where = path.relative_to(ROOT).as_posix()
+                try:
+                    meta, _ = split_front_matter(read_text(path), where)
+                except BuildError as error:
+                    problems.append(str(error))
+                    continue
+                order = meta.get("order", 1000)
+                if isinstance(order, bool) or not isinstance(order, (int, float)):
+                    problems.append("%s: 'order' must be a number" % where)
+                    continue
+                found.append((order, path.name, key))
+            for _, _, key in sorted(found):
+                page = add_page(key, key)
+                if isinstance(page, Page):
+                    items.append({page.title: key + ".md"})
+            if not found:
+                print("wiki: note: the section '%s' (glob %s) matches no file yet, so it is left out"
+                      % (section["section"], section["glob"]), file=sys.stderr)
+        else:
+            for entry in section["pages"]:
+                result = add_page(entry["key"], entry["label"])
+                if result == "nodes":
+                    seen_nodes = True
+                    index, group_pages = node_pages(catalogue)
+                    stage.pages[index.key] = index
+                    for _, page, _ in group_pages:
+                        stage.pages[page.key] = page
+                    items.append({entry["label"]: index.key + ".md"})
+                    items.extend(node_nav(group_pages))
+                elif result is not None:
+                    items.append({entry["label"]: entry["key"] + ".md"})
+        if items:
+            nav.append({section["section"]: items})
+
+    for key in sorted(set(sources) - listed):
+        problems.append("docs/wiki-src/%s.md is not listed in nav.yml (and no 'glob' section matches it)" % key)
+    if not seen_nodes:
+        problems.append("docs/wiki-src/nav.yml must list 'nodes/index' (the node reference)")
+
+    for key, page in stage.pages.items():
+        stage.files[key + ".md"] = page.render().encode("utf-8")
+    for name in sorted(stage.images_used):
+        stage.files["images/" + name] = IMAGES / name
+    # other files next to the pages (graphs to download, ...)
+    for path in sorted(SRC.rglob("*")):
+        if path.is_file() and path.suffix.lower() != ".md" and path != NAV_FILE and path.name != "README":
+            stage.files[path.relative_to(SRC).as_posix()] = path
+    return stage, site, nav
+
+
+def mkdocs_config(site, nav, stage_dir, site_dir):
+    """The small file that inherits tools/wiki/mkdocs.yml and adds what changes from build to build."""
+    def posix(path):
+        return Path(path).resolve().as_posix()
+
+    config = {
+        "INHERIT": posix(MKDOCS_BASE),
+        "docs_dir": posix(stage_dir),
+        "site_dir": posix(site_dir),
+        "hooks": [posix(TOOLS / "hooks.py")],
+        "theme": {"custom_dir": posix(TOOLS / "overrides")},
+        "copyright": "Dyncamelo v%s by BIMCamel. Licensed under the PolyForm Noncommercial License 1.0.0." % read_version(),
+        "extra": {key: site[key] for key in SITE_KEYS},
+        "nav": nav,
+    }
+    return ("# Written by tools/build_wiki.py. Do not edit: the next build replaces it.\n"
+            + yaml.safe_dump(config, allow_unicode=True, sort_keys=False, width=10000))
+
+
+# ------------------------------------------------------------------------------------------------------------------------
+# Writing files safely
+# ------------------------------------------------------------------------------------------------------------------------
+
+def ensure_not_dangerous(path, what):
+    path = path.resolve()
+    if path == ROOT or path in ROOT.parents or path == Path(path.anchor):
+        raise BuildError("refusing to use %s as the %s folder" % (path, what))
+
+
+def sync_tree(dest, files):
+    """Makes `dest` hold exactly `files` (relative path -> bytes or a source Path), touching only what changed."""
+    ensure_not_dangerous(dest, "staging")
+    if dest.exists() and any(dest.iterdir()) and not (dest / STAGE_MARKER).exists():
+        raise BuildError("%s is not empty and was not made by this build; choose another --stage folder" % dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / STAGE_MARKER).write_text("Written by tools/build_wiki.py. The next build replaces everything in this folder.\n", encoding="utf-8")
+    wanted = set(files) | {STAGE_MARKER}
+    for existing in sorted(dest.rglob("*"), reverse=True):
+        rel = existing.relative_to(dest).as_posix()
+        if existing.is_file() and rel not in wanted:
+            existing.unlink()
+        elif existing.is_dir() and not any(existing.iterdir()):
+            existing.rmdir()
+    for rel, source in files.items():
+        data = source.read_bytes() if isinstance(source, Path) else source
+        target = dest / rel
+        if target.is_file() and target.read_bytes() == data:
             continue
-        index.append({"t": page.title, "u": page.path, "k": "Page" if page.kind != "nodes-index" else "Nodes", "d": page.summary[:110],
-                      "x": " ".join(text for _, _, text in page.toc)})
-    for node in catalogue["nodes"]:
-        group = node_group(node["category"])
-        index.append({"t": node["name"], "u": "nodes/%s.html#%s" % (slug(group), node_anchor(node["name"])), "k": "Node",
-                      "d": node["description"][:110], "x": node["category"] + " " + " ".join(node.get("tags") or [])})
-    index.sort(key=lambda e: (e["k"] != "Page", e["t"].lower()))
-    files["assets/search-index.js"] = "window.WIKI_INDEX=" + json.dumps(index, ensure_ascii=False, separators=(",", ":")) + ";\n"
-    return files, images_used
-
-
-def write_tree(out_dir, files, images_used):
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    for rel, text in files.items():
-        target = out_dir / rel
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(text.encode("utf-8"))
-    if images_used:
-        (out_dir / "images").mkdir(parents=True, exist_ok=True)
-        for name in sorted(images_used):
-            shutil.copyfile(IMAGES / name, out_dir / "images" / name)
+        target.write_bytes(data)
 
 
-def tree_matches(out_dir, files, images_used):
-    expected = set(files) | {"images/" + n for n in images_used}
-    actual = set()
-    if out_dir.exists():
-        for path in out_dir.rglob("*"):
-            if path.is_file():
-                actual.add(path.relative_to(out_dir).as_posix())
-    problems = []
-    for rel in sorted(expected - actual):
-        problems.append("missing from docs/wiki: " + rel)
-    for rel in sorted(actual - expected):
-        problems.append("not produced by the build: " + rel)
-    for rel in sorted(expected & actual):
-        path = out_dir / rel
-        if rel in files:
-            if path.read_bytes() != files[rel].encode("utf-8"):
-                problems.append("out of date: " + rel)
-        elif path.read_bytes() != (IMAGES / rel.split("/", 1)[1]).read_bytes():
-            problems.append("out of date: " + rel)
-    return problems
+def write_if_changed(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = text.encode("utf-8")
+    if not (path.is_file() and path.read_bytes() == data):
+        path.write_bytes(data)
+
+
+def check_site_dir(site_dir):
+    ensure_not_dangerous(site_dir, "site")
+    if site_dir.exists() and any(site_dir.iterdir()):
+        looks_like_site = (site_dir / "index.html").is_file() and (site_dir / "assets").is_dir() and (site_dir / "search").is_dir()
+        if not looks_like_site:
+            raise BuildError("%s is not empty and does not look like an earlier build of the wiki; MkDocs would delete its "
+                             "contents. Choose an empty folder with --out." % site_dir)
+
+
+# ------------------------------------------------------------------------------------------------------------------------
+# Running
+# ------------------------------------------------------------------------------------------------------------------------
+
+def stage_everything(args, quiet=False):
+    stage, site, nav = build_stage(args.allow_missing_images, args.allow_missing_files)
+    for warning in stage.warnings:
+        print("wiki: warning: " + warning, file=sys.stderr)
+    if stage.problems:
+        for problem in stage.problems:
+            print("wiki: error: " + problem, file=sys.stderr)
+        raise BuildError("%d problem%s in the sources; nothing was built" % (len(stage.problems), "" if len(stage.problems) == 1 else "s"))
+    sync_tree(args.stage, stage.files)
+    config_path = args.stage.with_name(args.stage.name + ".mkdocs.yml")
+    write_if_changed(config_path, mkdocs_config(site, nav, args.stage, args.out))
+    if not quiet:
+        print("wiki: staged %d pages and %d other files in %s" % (len(stage.pages), len(stage.files) - len(stage.pages), args.stage))
+    return stage, config_path
+
+
+def mkdocs_command(*words):
+    return [sys.executable, "-m", "mkdocs"] + list(words)
+
+
+def mkdocs_env():
+    env = dict(os.environ)
+    env["NO_MKDOCS_2_WARNING"] = "1"      # Material's notice about MkDocs 2.0; the versions are pinned in requirements.txt
+    env["PYTHONUTF8"] = "1"
+    return env
+
+
+def require_mkdocs():
+    try:
+        import material  # noqa: F401
+        import mkdocs  # noqa: F401
+    except ImportError:
+        raise BuildError("MkDocs is not installed. Run: pip install -r tools/wiki/requirements.txt")
+
+
+def source_fingerprint():
+    """What --serve watches: the pages, pictures, repository documents, catalogue, settings and templates."""
+    files = [ROOT / rel for rel in REPO_PAGES.values()] + [ROOT / "CHANGELOG.md", CATALOGUE, ROOT / "Directory.Build.props"]
+    for base in (SRC, IMAGES, TOOLS):
+        files.extend(path for path in base.rglob("*") if path.is_file())
+    stamp = []
+    for path in files:
+        try:
+            info = path.stat()
+            stamp.append((str(path), info.st_mtime_ns, info.st_size))
+        except OSError:
+            pass
+    return sorted(stamp)
+
+
+def serve(args):
+    process = subprocess.Popen(mkdocs_command("serve", "-f", str(args.config), "--dev-addr", args.dev_addr, "--no-strict"),
+                               env=mkdocs_env())
+    last = source_fingerprint()
+    try:
+        while process.poll() is None:
+            time.sleep(1.0)
+            current = source_fingerprint()
+            if current != last:
+                last = current
+                try:
+                    stage_everything(args, quiet=True)
+                    print("wiki: sources changed, staged again")
+                except BuildError as error:
+                    print("wiki: error: %s (the page on screen is the last good one)" % error, file=sys.stderr)
+    except KeyboardInterrupt:
+        process.terminate()
+    return process.wait()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build the Dyncamelo wiki (docs/wiki).")
-    parser.add_argument("--check", action="store_true", help="fail when docs/wiki is not current")
-    parser.add_argument("--out", type=Path, default=OUT_DEFAULT, help="output directory (default docs/wiki)")
-    parser.add_argument("--lenient", action="store_true", help="do not fail on listed pages that have no source file yet")
+    parser = argparse.ArgumentParser(description="Build the Dyncamelo wiki with MkDocs (Material theme).")
+    parser.add_argument("--out", type=Path, default=SITE_DEFAULT, help="folder for the finished site (default build/wiki-site)")
+    parser.add_argument("--stage", type=Path, default=STAGE_DEFAULT, help="staging folder for the pages (default build/wiki-docs)")
+    parser.add_argument("--serve", action="store_true", help="serve the wiki with live reload instead of building the site")
+    parser.add_argument("--dev-addr", default="127.0.0.1:8000", help="address for --serve (default 127.0.0.1:8000)")
+    parser.add_argument("--allow-missing-images", action="store_true", help="a missing picture is a warning, not an error (for drafts)")
+    parser.add_argument("--allow-missing-files", action="store_true", help="a link to a file that is not there yet (a graph to download) is a warning, not an error")
+    parser.add_argument("--draft", action="store_true", help="both of the above")
+    parser.add_argument("--stage-only", action="store_true", help="only write the staging folder and the MkDocs file")
     args = parser.parse_args()
+    if args.draft:
+        args.allow_missing_images = args.allow_missing_files = True
+    args.out = args.out.resolve()
+    args.stage = args.stage.resolve()
 
-    built = build(args.out, strict=not args.lenient)
-    if built is None:
-        return 1
-    files, images_used = built
-    if args.check:
-        problems = tree_matches(args.out, files, images_used)
-        if problems:
-            for problem in problems[:40]:
-                print("wiki: " + problem, file=sys.stderr)
-            print("wiki: docs/wiki is not current - run: python tools/build_wiki.py", file=sys.stderr)
-            return 1
-        print("wiki is current - %d files" % (len(files) + len(images_used)))
+    try:
+        if not args.stage_only:
+            require_mkdocs()
+            check_site_dir(args.out)
+        stage, args.config = stage_everything(args)
+        if args.stage_only:
+            return 0
+        if args.serve:
+            return serve(args)
+        result = subprocess.run(mkdocs_command("build", "--strict", "-f", str(args.config)), env=mkdocs_env())
+        if result.returncode != 0:
+            print("wiki: the MkDocs build failed (a warning counts as a failure)", file=sys.stderr)
+            return result.returncode
+        print("wiki: built %d pages in %s" % (len(stage.pages), args.out))
         return 0
-    write_tree(args.out, files, images_used)
-    print("wrote %d files to %s" % (len(files) + len(images_used), args.out))
-    return 0
+    except BuildError as error:
+        print("wiki: error: %s" % error, file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

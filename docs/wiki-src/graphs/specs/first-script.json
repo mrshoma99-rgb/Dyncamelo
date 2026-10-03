@@ -1,0 +1,22 @@
+{
+  "name": "First script",
+  "description": "Finds every item whose Material contains Concrete, colours it red and saves the result as a selection set.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "text", "node": "String", "title": "Material text", "value": "Concrete"},
+    {"id": "search", "node": "Search.ByProperty",
+     "values": {"categoryName": "Element", "propertyName": "Material", "mode": "contains"}},
+    {"id": "found", "node": "Watch List", "title": "Matching items"},
+    {"id": "paint", "node": "Appearance.OverrideColor", "values": {"color": "#FF0000"}},
+    {"id": "save", "node": "SelectionSet.Create", "values": {"name": "Concrete elements"}}
+  ],
+  "wires": [
+    "text.value -> search.value",
+    "search.items -> found.list",
+    "search.items -> paint.items",
+    "paint.items -> save.items"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: finds the items whose Element > Material contains the text on the left, paints them red and saves them as the selection set \"Concrete elements\". TO CHANGE: edit the text, the property names or the colour, then press Run."}
+  ]
+}

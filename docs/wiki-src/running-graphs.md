@@ -6,7 +6,7 @@ The run bar at the bottom of the editor has the **Run** button, a **Manual / Aut
 
 | Mode | What happens |
 |---|---|
-| **Manual** | Edits only mark nodes as changed. Press **Run** (`F5`) when you are ready. Best on large models. |
+| **Manual** | Edits only mark nodes as changed. Press **Run** (++f5++) when you are ready. Best on large models. |
 | **Auto** | A run starts after every edit. A burst of edits, such as dragging a slider, gives one trailing run. The same switch is **Graph ▸ Auto-Run**. |
 
 **A run executes only what changed.** Dyncamelo marks the node you edited and everything after it as changed, and a run executes those nodes and serves the stored results of all the others. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". A change of the active document, or models added or removed, marks every node as changed.
@@ -24,7 +24,7 @@ While a graph runs, the window says which node is working (`12 / 40 - name`; ins
 
 ## Stopping a run
 
-Press **`Esc`** (switchable in **Settings ▸ Editing ▸ Esc cancels a running graph**). The run halts:
+Press **++esc++** (switchable in **Settings ▸ Editing ▸ Esc cancels a running graph**). The run halts:
 
 * before the next node;
 * between the items of a node that is working through a list;
@@ -34,10 +34,10 @@ A single Navisworks call already under way cannot be interrupted. What nodes alr
 
 ## Running part of a graph
 
-* **Run up to a node** (`Shift+F5`): runs only the selected nodes and what they depend on, then stops. Everything after them keeps its previous results and stays pending; the next ordinary **Run** finishes the job. Useful while you build a graph whose later steps are slow.
-* **Freeze** (`Shift+M`, badge *FROZEN*): a frozen node **and everything after it** is skipped by runs and keeps its results from the last run, shown ghosted. Use it to stop a slow branch from recomputing while you work elsewhere. `Shift+M` again unfreezes.
-* **Mute** (`M`, badge *MUTED*): the node is bypassed. Each output passes the first input of a matching kind straight through, the node counts as done, and everything after it **still runs** on the passed-through data. Use it to switch a step off inside a live chain, such as a filter or a recolour.
-* **Mute a wire** (hold `Ctrl` while cutting): only that connection is ignored and the input uses its own value instead. A quick way to switch a branch off without deleting it.
+* **Run up to a node** (++shift+f5++): runs only the selected nodes and what they depend on, then stops. Everything after them keeps its previous results and stays pending; the next ordinary **Run** finishes the job. Useful while you build a graph whose later steps are slow.
+* **Freeze** (++shift+m++, badge *FROZEN*): a frozen node **and everything after it** is skipped by runs and keeps its results from the last run, shown ghosted. Use it to stop a slow branch from recomputing while you work elsewhere. ++shift+m++ again unfreezes.
+* **Mute** (++m++, badge *MUTED*): the node is bypassed. Each output passes the first input of a matching kind straight through, the node counts as done, and everything after it **still runs** on the passed-through data. Use it to switch a step off inside a live chain, such as a filter or a recolour.
+* **Mute a wire** (hold ++ctrl++ while cutting): only that connection is ignored and the input uses its own value instead. A quick way to switch a branch off without deleting it.
 * **Flow.When**: nodes after a `Flow.When` whose condition is false are skipped and shown idle.
 
 Mute, freeze and muted wires are undoable and saved with the graph.
@@ -57,8 +57,8 @@ After a run, the border and badge of each node show its state. Hover the node, o
 
 ## Finding out why
 
-* The **Errors** and **Warnings** counts in the status bar are buttons (or press `Ctrl+Shift+E`). They list every node that failed or warned in the last run, errors first. Click a row to select the node and bring it into view. `F8` and `Shift+F8` step through them.
-* Select a node and press **`I`** (*Why Didn't This Run?*). The status bar explains in words whether the node is frozen, sits after a frozen node, is muted, failed (and with what), is waiting for an input, or is just waiting for the next Run, and names the node responsible when it is another one.
+* The **Errors** and **Warnings** counts in the status bar are buttons (or press ++ctrl+shift+e++). They list every node that failed or warned in the last run, errors first. Click a row to select the node and bring it into view. ++f8++ and ++shift+f8++ step through them.
+* Select a node and press ++i++ (*Why Didn't This Run?*). The status bar explains in words whether the node is frozen, sits after a frozen node, is muted, failed (and with what), is waiting for an input, or is just waiting for the next Run, and names the node responsible when it is another one.
 * Put **`Flow.Try`** after a node that may fail: it gives your fallback plus the error text, and nothing after it turns red.
 
 See also [Troubleshooting: Nothing happens when I press Run](troubleshooting.md#nothing-happens-when-i-press-run).
@@ -67,7 +67,7 @@ See also [Troubleshooting: Nothing happens when I press Run](troubleshooting.md#
 
 The status bar shows the time of each run and, when a run takes a second or more, the slowest node. To keep a run fast:
 
-* Switch **Auto** off on big models and run with `F5` when you are ready.
+* Switch **Auto** off on big models and run with ++f5++ when you are ready.
 * Freeze a slow branch, or run up to the node you are working on.
 * Pass nodes a smaller list of items where you can. Some nodes touch every item of the model and say so in their description, for example `Model.Statistics` and `Search.ByGuid` ("walks every item of the document once"), `Appearance.Focus`, and `Distance.BetweenItems` and `Proximity.NearestDistance` with `method` set to `mesh`. Prefer `bbox` where it is accurate enough.
 * A loop runs its body once per item, so a slow node inside it is slow once per item.
@@ -79,7 +79,7 @@ The status bar shows the time of each run and, when a run takes a second or more
 Nodes that change the model do so in the open Navisworks document. Many are real overrides (a colour, a hide, a transparency) saved with the file, and **Appearance.Reset** or **Appearance.ResetAll** undo them from a graph. Others are *temporary* overrides that live until you reset or close the view.
 
 * **Save the model before you try something new.** Whether a single Navisworks **Undo** reverses a whole run has not been checked.
-* The editor's own **Undo** (`Ctrl+Z` while the pane has the focus) changes the **graph** only, and says so.
+* The editor's own **Undo** (++ctrl+z++ while the pane has the focus) changes the **graph** only, and says so.
 * A run is not atomic. If it is cancelled or a node fails, nodes that already ran have already changed the model.
 
 ## Running without the editor

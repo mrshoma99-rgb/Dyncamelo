@@ -9,7 +9,7 @@
   --md-code-font-family: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, "DejaVu Sans Mono", monospace;
   --dyc-accent: #0a74da;
   --dyc-accent-strong: #0861b8;
-  --dyc-logo-h: 30px;
+  --dyc-logo-h: 36px;
 }
 
 /* A little wider than Material's default, so tables and the node reference have room. */
@@ -95,8 +95,8 @@
 /* The artwork is black on transparent; in the dark theme it is turned white. */
 [data-md-color-scheme="slate"] .dyc-logo__img { filter: invert(1); }
 .dyc-sitename {
-  margin-left: 0.5rem;
-  padding-left: 0.6rem;
+  margin-left: 0.8rem;
+  padding-left: 0.8rem;
   border-left: 1px solid var(--md-default-fg-color--lightest);
   color: var(--md-primary-bg-color);
   font-size: 0.8rem;
@@ -137,10 +137,19 @@
 .dyc-btn--secondary { color: var(--md-primary-bg-color); border-color: var(--md-default-fg-color--lighter); background: transparent; }
 .dyc-btn--secondary:hover, .dyc-btn--secondary:focus-visible { border-color: var(--md-accent-fg-color); color: var(--md-accent-fg-color); }
 
-/* Between a phone and a laptop only the icons show. */
+/* Not available yet (no address in tools/wiki/site.yml): greyed out, no link, no hover effect. */
+.dyc-btn--disabled, .dyc-btn--disabled:hover {
+  opacity: 0.5;
+  cursor: default;
+  color: var(--md-primary-bg-color);
+  border-color: var(--md-default-fg-color--lighter);
+  background: transparent;
+}
+
+/* Between a phone and a laptop only the icons show (the text stays for screen readers). */
 @media screen and (max-width: 69.984em) {
   .dyc-btn { width: 1.7rem; padding: 0; }
-  .dyc-btn__text { display: none; }
+  .dyc-btn__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .dyc-btn svg { width: 1rem; height: 1rem; }
 }
 
@@ -156,7 +165,7 @@
     border-top: 1px solid var(--md-default-fg-color--lightest);
   }
   .dyc-drawer-actions .dyc-btn { width: auto; height: 2rem; padding: 0 0.8rem; font-size: 0.7rem; justify-content: flex-start; }
-  .dyc-drawer-actions .dyc-btn__text { display: inline; }
+  .dyc-drawer-actions .dyc-btn__text { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
   .dyc-drawer-actions .dyc-btn svg { width: 0.95rem; height: 0.95rem; }
   .dyc-sitename { font-size: 0.7rem; margin-left: 0.4rem; padding-left: 0.4rem; }
 }
@@ -176,11 +185,14 @@
 .dyc-drawer-brand .dyc-logo__img { height: 28px; }
 [data-md-color-scheme="slate"] .dyc-drawer-brand .dyc-logo__img { filter: invert(1); }
 
-/* The search box and the toggle sit on the header colour. */
-[data-md-color-scheme="default"] .md-search__input { background-color: rgba(0, 0, 0, 0.06); }
-[data-md-color-scheme="default"] .md-search__input::placeholder,
-[data-md-color-scheme="default"] .md-search__input + .md-search__icon { color: var(--md-default-fg-color--light); }
-[data-md-color-scheme="slate"] .md-search__input { background-color: rgba(255, 255, 255, 0.08); }
+/* The search box sits on the header colour. */
+@media screen and (min-width: 60em) {
+  [data-md-color-scheme="default"] .md-search__form { background-color: rgba(0, 0, 0, 0.05); }
+  [data-md-color-scheme="default"] .md-search__form:hover { background-color: rgba(0, 0, 0, 0.09); }
+  [data-md-color-scheme="slate"] .md-search__form { background-color: rgba(255, 255, 255, 0.08); }
+  [data-md-color-scheme="slate"] .md-search__form:hover { background-color: rgba(255, 255, 255, 0.13); }
+}
+.md-search__input::placeholder { color: var(--md-default-fg-color--light); }
 .md-search__form { border-radius: 0.2rem; }
 
 /* ---------------------------------------------------------------------------------------------------------------------

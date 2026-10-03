@@ -49,7 +49,7 @@ Four small graphs in the repository's `samples` folder exercise the engine witho
 
 ## Use a sample as a starting point
 
-* Save it under a new name first (**File ▸ Save As…**, `Ctrl+Shift+S`) so the original stays as it was.
+* Save it under a new name first (**File ▸ Save As…**, ++ctrl+shift+s++) so the original stays as it was.
 * Change the typed inputs: the notes on the canvas say which ones are meant to be edited.
 * Replace a search or a property name with your own, and press **Run**.
 * Find where the sample's nodes live in the library: right-click a node and choose **Find in Library**.

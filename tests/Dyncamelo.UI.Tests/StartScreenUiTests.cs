@@ -229,8 +229,10 @@ public class StartScreenUiTests : IDisposable
             Assert.True(vm.IsPersonalEdition);                   // a copy nobody told otherwise is the free one
             Assert.Equal("Personal use", vm.EditionName);
             Assert.Contains("Autodesk App Store", vm.EditionNote);
-            vm.OpenStoreCommand.Execute(null);
-            Assert.Equal(new[] { Dyncamelo.Core.Editing.DistributionChannel.AppStorePage }, opened.ToArray());
+            Assert.False(vm.OpenStoreCommand.CanExecute(null));  // greyed out: the store copy is not there yet
+            Assert.Contains("coming soon", vm.StoreButtonText);
+            Assert.Contains("coming soon", vm.StoreButtonToolTip);
+            Assert.Empty(opened);
 
             vm.SetDistribution(Dyncamelo.Core.Editing.DistributionChannel.AppStore);
             Assert.False(vm.IsPersonalEdition);

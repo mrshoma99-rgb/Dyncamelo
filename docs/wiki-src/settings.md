@@ -8,9 +8,9 @@ Use any of these:
 
 * the **gear** button at the right of the menu bar;
 * **View ▸ Settings…**;
-* the command palette (`Ctrl+Shift+P`): type the name of a setting and choose it, and the page opens already filtered to that setting.
+* the command palette (++ctrl+shift+p++): type the name of a setting and choose it, and the page opens already filtered to that setting.
 
-The page covers the canvas. Close it with the **✕** at its top right or with `Esc`.
+The page covers the canvas. Close it with the **✕** at its top right or with ++esc++.
 
 On the left is the list of sections: **Appearance, Canvas, Editing, Shortcuts, Privacy, Diagnostics**. The **search box** at the top right finds a setting in any section by words from its name or description. A small **↺** button appears beside any setting you have changed; it puts that one back to its default.
 
@@ -24,7 +24,7 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 |---|---|---|---|
 | Node density | Compact / Normal / Comfortable | Normal | Row height of nodes. Compact fits more on screen; comfortable is easier to click. |
 | Type letters in sockets | On / Off | Off | Draws a short letter naming the data kind inside every socket, so kinds never depend on colour alone. Helpful for colour-blind users. The letters are listed in [Inputs, outputs and kinds](ports-and-kinds.md). |
-| Node library panel | On / Off | On | Shows the node library on the left of the canvas. It can also be hidden with the arrow in its header (or `Ctrl+B`) and brought back with the tab at the canvas edge. |
+| Node library panel | On / Off | On | Shows the node library on the left of the canvas. It can also be hidden with the arrow in its header (or ++ctrl+b++) and brought back with the tab at the canvas edge. |
 | Descriptions in the library | On / Off | On | Shows a description line under each node in the library panel. |
 | Value previews under nodes | On / Off | On | Shows a bubble with the result under each node after a run. |
 | Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Makes everything in the Dyncamelo window smaller or larger, for high-resolution screens or a small pane. |
@@ -52,7 +52,7 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 | Hide unused inputs by default | On / Off | Off | Nodes that have not been set either way hide their unconnected optional inputs. |
 | Make room when inserting on a wire | On / Off | On | Nodes after the insertion point move right when you drop a node onto a wire. |
 | Deleting a reroute keeps the wire | On / Off | On | Removing a reroute dot joins the wire back up instead of deleting it. |
-| Esc cancels a running graph | On / Off | On | Pressing `Esc` during a run stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
+| Esc cancels a running graph | On / Off | On | Pressing ++esc++ during a run stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
 | Autosave unsaved work | On / Off | On | Keeps a copy of a script with unsaved changes once a minute, and offers it back if Navisworks closed or crashed before you saved. The copy is deleted when you save. See [Saving and opening scripts](saving-opening.md). |
 | Highlight selected node in Navisworks | On / Off | Off | Selects the model items a node outputs in the Navisworks viewport when you click the node. This overwrites the live selection, so turn it off if you use `Selection.Current`. |
 | Ask before running graphs from files | On / Off | On | A script opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Scripts you create in the editor and the built-in samples never ask. |
@@ -71,17 +71,17 @@ This section is a table of **every command** with its shortcut, including comman
 To change a shortcut:
 
 1. Press **Change** on the command's row.
-2. Press the keys you want. `Esc` cancels, and `Backspace` removes the shortcut.
+2. Press the keys you want. ++esc++ cancels, and ++backspace++ removes the shortcut.
 3. If the keys are already used, the row tells you which command uses them and keeps listening, so nothing is taken away silently.
 
 Other buttons on each row: **✕** removes the shortcut, and **↺** (shown only when you have changed it) restores the default. **Reset all shortcuts** at the top restores every one.
 
 Two rules matter:
 
-* Commands that also work while you are typing in a text box (marked "Everywhere" in the [shortcut tables](shortcuts.md)) must use `Ctrl`, `Alt` or a function key. Plain letters, and keys such as `Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Ctrl+Z`, `Ctrl+Y`, `Ctrl+A`, `Delete`, `Space`, `Backspace`, `Enter`, `Esc` and `Tab`, are used for typing, so those commands cannot take them.
+* Commands that also work while you are typing in a text box (marked "Everywhere" in the [shortcut tables](shortcuts.md)) must use ++ctrl++, ++alt++ or a function key. Plain letters, and keys such as ++ctrl+c++, ++ctrl+v++, ++ctrl+x++, ++ctrl+z++, ++ctrl+y++, ++ctrl+a++, ++delete++, ++space++, ++backspace++, ++enter++, ++esc++ and ++tab++, are used for typing, so those commands cannot take them.
 * A command can be unbound. It then stays reachable from its menu and the command palette.
 
-The menus, the key handling, the `F1` help sheet and the palette all read the same keymap, so a change shows up everywhere at once and is remembered between sessions.
+The menus, the key handling, the ++f1++ help sheet and the palette all read the same keymap, so a change shows up everywhere at once and is remembered between sessions.
 
 ## Privacy
 
@@ -97,8 +97,8 @@ This section has buttons rather than switches. Each one is also available from a
 
 | Button | What it does |
 |---|---|
-| Performance HUD | Shows frame rate, node counts and input state on the canvas (`Ctrl+Shift+F12`). |
-| Keyboard and mouse help | Opens the `F1` sheet of shortcuts and gestures. |
+| Performance HUD | Shows frame rate, node counts and input state on the canvas (++ctrl+shift+f12++). |
+| Keyboard and mouse help | Opens the ++f1++ sheet of shortcuts and gestures. |
 | Open the user guide | Opens the online guide in your browser. |
 | Copy diagnostics | Copies the Dyncamelo and Navisworks versions, installed plug-ins and the end of the error log to the clipboard, with your user name, computer name and profile folder replaced, ready to paste into a bug report. |
 | Privacy policy | Shows what Dyncamelo stores on your computer and the one network request it can make. |

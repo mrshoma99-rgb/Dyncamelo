@@ -4,9 +4,12 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 
 > Search a federated model by property, colour-code it by system, create selection sets in bulk, take quantities out to Excel, triage clashes by rule and make a saved viewpoint for each issue, as graphs you can save, share and run again.
 
-![The Dyncamelo editor with a sample graph after a run](images/editor-screenshot.png)
+![The Dyncamelo editor with the library open and the Table Summary from Text sample after a run: nodes, wires, the values under each node and a Watch Table.](../images/wiki-editor-overview.png)
 
-*The editor with the "Table Summary from Text" sample after a run: nodes, wires, the values under each node and a Watch Table. It docks inside Navisworks as a pane, and has a light theme too.*
+*It docks inside Navisworks as a pane, and has a light theme too.*
+
+!!! note "Personal use or professional use?"
+    The copies from GitHub and bimcamel.com are **free for personal use**: learning, hobby projects, research, and charities, schools, universities, public research bodies and government institutions. For **work** at a company, a consultancy or a design office, or in a paid project or product, the professional copy is **coming soon** to the **Autodesk App Store**. Until it is there, get in touch through [bimcamel.com](https://www.bimcamel.com). It is the same program with the same features. See [Licence](licence.md#which-copy-do-i-need).
 
 ## Where to start
 
@@ -16,9 +19,11 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 | Build my first graph in ten minutes | [Your first script](first-steps.md) |
 | Understand how graphs work | [Concepts](concepts.md), then [Inputs, outputs and kinds](ports-and-kinds.md) |
 | Find a node and see its inputs and outputs | [Node reference](nodes/index.md), or search the whole site with the box at the top |
+| Follow a step-by-step guide for one job | [Colour elements by a property](howto/colour-elements-by-property.md), [Take quantities out to Excel](howto/quantity-takeoff-to-excel.md), [Make a clash report](howto/clash-report.md), and the other **How-to guides** in the menu |
 | Learn from a finished graph | [Sample scripts](samples.md) and [Recipes](recipes.md) |
 | Exchange data with IFC, BCF, Excel or CSV | [IFC, BCF, Excel and CSV](exchange-formats.md) |
 | Run a tested script without the node editor | [The Script Player](player.md) |
+| Look up a word | [Glossary](glossary.md) |
 | Fix a problem | [Troubleshooting](troubleshooting.md) and the [FAQ](faq.md) |
 | Update or remove Dyncamelo | [Updating](updating.md), [Uninstalling](uninstall.md) |
 | Write my own nodes in C# | [Writing your own nodes](extending.md) |
@@ -38,7 +43,7 @@ See [Concepts](concepts.md) for the vocabulary, and the [node reference](nodes/i
 
 ## Good to know before you start
 
-* Dyncamelo is **free for personal and other noncommercial use**. Using it for your job at a company, or in a paid project, needs a commercial licence from BIMCamel. See [Licence](licence.md).
+* **Personal use is free. A professional copy for the Autodesk App Store is coming soon.** Using Dyncamelo for your job at a company, or in a paid project, needs the professional copy, which will come with a commercial licence. Until it is there, get in touch through bimcamel.com. See [Licence](licence.md).
 * It **sends nothing about you or your models anywhere**. It makes one optional request a day to look for a newer version, which you can switch off. See [Privacy and safety](privacy-and-safety.md).
 * **A graph is a program.** Only run graphs you trust. Dyncamelo asks before it runs a graph from a file that can run programs, use the network or change files.
 * Only **Navisworks Manage 2024** has been seen running it in the field so far; 2025, 2026 and Simulate are built and installed the same way but not yet confirmed. The [requirements](requirements.md) page says exactly what is and is not verified.

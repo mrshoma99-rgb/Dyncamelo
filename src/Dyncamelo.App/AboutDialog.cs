@@ -114,7 +114,21 @@ internal static class AboutDialog
         });
         if (channel != DistributionChannel.AppStore)
         {
-            body.Children.Add(LinkBlock(DistributionChannel.AppStorePage, "Autodesk App Store: Dyncamelo for professional use", Paper, 12.5, FontWeights.SemiBold, topMargin: 6));
+            if (DistributionChannel.AppStoreListed)
+            {
+                body.Children.Add(LinkBlock(DistributionChannel.AppStorePage, "Autodesk App Store: Dyncamelo for professional use", Paper, 12.5, FontWeights.SemiBold, topMargin: 6));
+            }
+            else
+            {
+                // Not a link until the listing exists: greyed text.
+                body.Children.Add(new TextBlock
+                {
+                    Text = "Autodesk App Store: coming soon",
+                    Foreground = Paper45,
+                    FontSize = 12.5,
+                    Margin = new Thickness(0, 6, 0, 0),
+                });
+            }
         }
 
         body.Children.Add(new Border { BorderBrush = Hairline, BorderThickness = new Thickness(0, 1, 0, 0), Margin = new Thickness(0, 20, 0, 0) });

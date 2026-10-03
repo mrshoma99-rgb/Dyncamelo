@@ -14,18 +14,18 @@ It does **not** store results, and it does not contain your model. A script work
 
 | Command | Shortcut | What it does |
 |---|---|---|
-| **New** | `Ctrl+N` | Starts an empty script called "Untitled". |
-| **Open…** | `Ctrl+O` | Opens a `.dyc` file you choose. |
+| **New** | ++ctrl+n++ | Starts an empty script called "Untitled". |
+| **Open…** | ++ctrl+o++ | Opens a `.dyc` file you choose. |
 | **Recent Files** | | The ten files you opened or saved most recently, newest first. A file that no longer exists is removed from the list when you try it. |
 | **Sample Graphs** | | The example scripts that ship with Dyncamelo (see [Sample scripts](samples.md)). |
-| **Save** | `Ctrl+S` | Saves to the current file. A script that has never been saved asks for a name, like Save As. |
-| **Save As…** | `Ctrl+Shift+S` | Asks for a file name. The suggested name is the script's name. |
+| **Save** | ++ctrl+s++ | Saves to the current file. A script that has never been saved asks for a name, like Save As. |
+| **Save As…** | ++ctrl+shift+s++ | Asks for a file name. The suggested name is the script's name. |
 
 Other ways in and out:
 
 * **Drag a `.dyc` file from Windows Explorer onto the canvas** to open it. Only `.dyc` files are accepted; if you drop several files, the first `.dyc` is opened.
 * On the [start screen](canvas-and-nodes.md#the-start-screen), the cards for **recent scripts** and **examples** open them with one click.
-* **Rename Graph** (`F2`, Graph menu) renames the `.dyc` file on disk. For a script that has not been saved yet, it works like Save As.
+* **Rename Graph** (++f2++, Graph menu) renames the `.dyc` file on disk. For a script that has not been saved yet, it works like Save As.
 * The sample scripts open as read-only templates: **Save** asks you for a new name, so the shipped sample is never overwritten.
 
 After a successful open or save, the status bar confirms it. If a node has been changed since the script was saved so that some wires or typed-in values no longer fit, the status bar says how many connections or values could not be restored.

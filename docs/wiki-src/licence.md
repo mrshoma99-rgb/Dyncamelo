@@ -1,23 +1,47 @@
 # Licence
 
-Dyncamelo is **source-available** under the **[PolyForm Noncommercial License 1.0.0](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/LICENSE)**. The text of that licence is what counts; this page is a plain-words summary, not legal advice.
+Dyncamelo comes in two copies. Both are the same program with the same features. The difference is the licence and where you get it.
+
+* **Personal use: free.** Download the installer from the [GitHub releases page](https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest) or from the [Dyncamelo page on bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). It is **source-available** under the **[PolyForm Noncommercial License 1.0.0](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/LICENSE)**. The installer, the About window and the start screen of these copies are marked *Personal use*.
+* **Professional use: a copy for the Autodesk App Store is coming soon.** It is for work at a company, a consultancy or a design office, or in a paid project or product. The App Store copy will come with the commercial licence from BIMCamel and will be updated by the store. The store listing will show the price and terms. Until it is there, get in touch through [bimcamel.com](https://www.bimcamel.com).
+
+The text of the licence is what counts; this page is a plain-words summary, not legal advice.
+
+## Which copy do I need?
+
+| Are you using it for work or in a paid project or product? | Get |
+|---|---|
+| **Yes** | The professional copy for the **Autodesk App Store**. It is coming soon. Until it is there, get in touch through [bimcamel.com](https://www.bimcamel.com). |
+| **No** | The free copy from **GitHub releases** or **bimcamel.com**. |
+
+What "personal use" means in practice:
+
+| Personal use (free) | Professional use (Autodesk App Store) |
+|---|---|
+| A student learning Dyncamelo | A contractor's BIM coordinator running checks on a live project |
+| A hobbyist trying it on their own models | A consultancy producing deliverables for clients |
+| A university research group | An in-house team at a company |
+
+Charities, schools and universities, public research bodies and government institutions are covered by the free copy as well. If you are not sure whether your use is professional, assume it is.
 
 ## In plain words
 
 | If you use Dyncamelo… | Then |
 |---|---|
-| to learn, for a hobby project, for research or testing | **Free.** |
-| as a charity, a school or university, a public research body or a government institution | **Free.** |
-| for your job: at a contractor, consultancy, design office or any company | **Commercial use. You need a commercial licence from BIMCamel.** |
-| inside a paid project or a product | **Commercial use. You need a commercial licence from BIMCamel.** |
+| to learn, for a hobby project, for research or testing | **Free.** Use the copy from GitHub or bimcamel.com. |
+| as a charity, a school or university, a public research body or a government institution | **Free.** Use the copy from GitHub or bimcamel.com. |
+| for your job: at a contractor, consultancy, design office or any company | **Professional use.** The professional copy is coming soon to the Autodesk App Store. |
+| inside a paid project or a product | **Professional use.** The professional copy is coming soon to the Autodesk App Store. |
 
-You may read the source, change it and share it on those terms. Because of the commercial-use restriction, Dyncamelo is "source-available" rather than OSI-certified open source.
+You may read the source, change it and share it on the noncommercial terms. Because of the commercial-use restriction, the free copy is "source-available" rather than OSI-certified open source.
 
-If you are not sure whether your use is commercial, ask BIMCamel before you rely on it.
+## The professional copy
 
-## How to get a commercial licence
+The professional copy for the **Autodesk App Store** is coming soon. When it is there, the store listing will show the price and terms.
 
-[Open an issue titled "Commercial licence"](https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose) in the repository, or get in touch through [bimcamel.com](https://www.bimcamel.com).
+The App Store copy will not make the once-a-day update check, because the store delivers its updates ([Updating](updating.md)).
+
+Until it is there, and for other arrangements, for example for a company that needs a different agreement, get in touch through [bimcamel.com](https://www.bimcamel.com).
 
 ## Earlier versions
 

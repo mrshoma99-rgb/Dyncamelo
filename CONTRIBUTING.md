@@ -2,7 +2,7 @@
 
 Thanks for your interest in Dyncamelo! This document explains how to set up a development environment, the coding conventions the project enforces, and how to get a change merged.
 
-Dyncamelo is source-available under the PolyForm Noncommercial License 1.0.0 (see [LICENSE](LICENSE)) — free for personal and other noncommercial use; professional use is licensed through the copy sold in the Autodesk App Store. By submitting a contribution you assign to the project owner (BIMCamel) all rights in the contribution and you confirm you are entitled to do so — this is what lets BIMCamel keep the whole work under one license (including granting commercial licenses) without chasing per-file permissions later.
+Dyncamelo is source-available under the PolyForm Noncommercial License 1.0.0 (see [LICENSE](LICENSE)) — free for personal and other noncommercial use; professional use will be licensed through the copy for the Autodesk App Store (coming soon). By submitting a contribution you assign to the project owner (BIMCamel) all rights in the contribution and you confirm you are entitled to do so — this is what lets BIMCamel keep the whole work under one license (including granting commercial licenses) without chasing per-file permissions later.
 
 ## Ways to contribute
 

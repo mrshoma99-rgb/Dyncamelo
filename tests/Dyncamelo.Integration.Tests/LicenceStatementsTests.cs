@@ -77,14 +77,13 @@ public class LicenceStatementsTests
     [Fact]
     public void TheTwoEditionsAreSaidTheSameWayWhereTheyAreDescribed()
     {
-        // Free personal-use copies from GitHub and bimcamel.com; the professional copy is sold in the Autodesk App Store for 100 euros.
+        // Free personal-use copies from GitHub and bimcamel.com; the professional copy for the Autodesk App Store is coming soon. No price is stated anywhere.
         var readme = Read("README.md");
         Assert.Contains("Autodesk App Store", readme);
-        Assert.Contains("100 euros", readme);
+        Assert.Contains("coming soon", readme);
         Assert.Contains("Personal use", readme);
 
         var listing = Read("appstore", "listing.md");
-        Assert.Contains("100 EUR", listing);
         Assert.Contains("commercial licence from BIMCamel", listing);
 
         var notes = Read("dist", "RELEASE_NOTES.md");
@@ -93,6 +92,14 @@ public class LicenceStatementsTests
 
         var workflow = Read(".github", "workflows", "release.yml");
         Assert.Contains("personal use, Navisworks 2024-2026", workflow);
+
+        // The price is not stated yet, in any document of the repository that describes the editions.
+        foreach (var text in new[] { readme, listing, notes, workflow, Read("CHANGELOG.md"), Read("CONTRIBUTING.md") })
+        {
+            Assert.DoesNotContain("100 euro", text);
+            Assert.DoesNotContain("100 EUR", text);
+            Assert.DoesNotContain("€", text);
+        }
     }
 
     [Fact]

@@ -161,7 +161,7 @@ Pass-through
 :   Nodes that change the model give back the items they were given on an output with the same name, so you can chain them. See [Inputs, outputs and kinds](ports-and-kinds.md#outputs).
 
 Personal use and Professional copy
-:   The two ways to get Dyncamelo. The copy from GitHub or bimcamel.com is free for personal use. The professional copy, for work, comes from the Autodesk App Store. See [Licence](licence.md#which-copy-do-i-need).
+:   The two editions of Dyncamelo. The copy from GitHub or bimcamel.com is free for personal use. The professional copy, for work, is coming soon to the Autodesk App Store. See [Licence](licence.md#which-copy-do-i-need).
 
 Pill
 :   See [Multi-input](#l-to-m).

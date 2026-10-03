@@ -71,7 +71,7 @@ Five small nodes build the optional **option objects**. Wire each into the match
 | `Export.IfcSetClassMap` | `classMap` | An IFC class for every item of named selection or search sets (set name to class, with an optional predefined type). `Export.IfcClasses` lists the class names it accepts ("Wall", "Beam", "Door"…). |
 | `Export.IfcParameterRule` | `parameterRules` (collect several into a list) | Rename or relocate a source property into a target property set and name. |
 
-IFC export reads the geometry of every item and can take a while on a large model, so switch Auto off and run it with `F5`. To write several IFC files from one graph, use one `Export.ToIfc` per file, or put it inside a loop (`Loop.Item` to `Loop.Collect`).
+IFC export reads the geometry of every item and can take a while on a large model, so switch Auto off and run it with ++f5++. To write several IFC files from one graph, use one `Export.ToIfc` per file, or put it inside a loop (`Loop.Item` to `Loop.Collect`).
 
 ## BCF issues
 
@@ -101,7 +101,7 @@ Outputs: `filePath` and `topicCount`. Things to know:
 
 Reads a BCF 2.0 or 2.1 package. Outputs:
 
-* `topics`: a list of dictionaries, one per topic, with `guid`, `title`, `status`, `type`, `description`, `creationAuthor`, `creationDate`, `comments`, `commentAuthors`, `commentDates`, `componentGuids`, `camera` (with `isPerspective`, `position`, `direction`, `up`, `fieldOfView`, `viewToWorldScale`) and `hasSnapshot`;
+* `topics`: a list of dictionaries, one per topic, with `guid`, `title`, `status`, `type`, `description`, `creationAuthor`, `creationDate`, `comments`, `commentAuthors`, `commentDates`, `componentGuids`, `camera` (with `isPerspective`, `position`, `direction`, ++up++, `fieldOfView`, `viewToWorldScale`) and `hasSnapshot`;
 * `modelItems`: the model items the topics' components resolve to, matched by IFC GlobalId first, then InstanceGuid.
 
 `applyCameraTopicIndex` applies one topic's camera to the current view (the default, `-1`, leaves the view alone). To jump to issue 3, set it to `2`.

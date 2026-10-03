@@ -4,12 +4,12 @@
 
 When the editor opens, at most once a day, Dyncamelo asks GitHub for the number of the newest release. If it is newer than the one you have:
 
-* the **start screen** (the screen on an empty canvas) shows a notice with the new version and a **Get it** button;
+* the **start screen** (the screen on an empty canvas) shows a notice with the new version and a **Get it** button, which opens the GitHub page;
 * once per version, Dyncamelo also asks whether to open the download page.
 
 Nothing is downloaded or installed by itself. You can look for an update at any time with **Help ▸ Get the Newest Version…**, which opens the releases page in your browser.
 
-The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. To switch it off, open **Settings ▸ Privacy** and turn off **Check for a newer version once a day**. With the check off, Dyncamelo makes no network request of its own. A copy installed from the Autodesk App Store never makes this check, because the store delivers its updates.
+The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. To switch it off, open **Settings ▸ Privacy** and turn off **Check for a newer version once a day**. With the check off, Dyncamelo makes no network request of its own. A copy installed from the Autodesk App Store never makes this check, because the store delivers its updates. That professional copy is coming soon; the copies from GitHub and bimcamel.com are the personal-use ones ([Licence](licence.md#which-copy-do-i-need)).
 
 ## Which version do I have?
 

@@ -4,7 +4,7 @@ A node group packs a few nodes that do one job into a single reusable node with 
 
 Use a group to tidy up a big script, or to build a routine once (for example "find the elements on a level and colour them") and reuse it as often as you like. A group lives inside the `.dyc` file, so it travels with the script.
 
-Do not confuse node groups with **frames**. A frame (`Ctrl+G`, "Group Selection" in the Graph menu) is only a coloured rectangle drawn behind some nodes. See [The editor: canvas and nodes](canvas-and-nodes.md#notes-and-frames).
+Do not confuse node groups with **frames**. A frame (++ctrl+g++, "Group Selection" in the Graph menu) is only a coloured rectangle drawn behind some nodes. See [The editor: canvas and nodes](canvas-and-nodes.md#notes-and-frames).
 
 ## The pieces
 
@@ -19,7 +19,7 @@ All of the commands below are in the **Node Groups** menu, and several are also 
 ## Make a group
 
 1. Select the nodes that should become the group.
-2. Choose **Node Groups ▸ Make Node Group** (`Ctrl+Alt+G`).
+2. Choose **Node Groups ▸ Make Node Group** (++ctrl+alt+g++).
 
 The wires that crossed the edge of your selection become the group's sockets: one **input** for every outside source feeding the selection, and one **output** for every output socket that leaves it. An instance takes the place of your selection and is wired to the same neighbours, so the script computes exactly what it did before. The new group is called "Node Group" (with a number if that name is taken).
 
@@ -32,13 +32,13 @@ Dyncamelo will not make a group in a few cases, and the status bar says why:
 
 ## Open a group and get back out
 
-* Select an instance and press `Tab`, or click the small arrow in its title bar (or right-click ▸ **Open Node Group**). The canvas now shows the group's nodes between a **Group Input** and a **Group Output** node, fitted to the window.
-* A **breadcrumb bar** appears at the top left of the canvas, such as `My script ▸ Level colours`. Click any step to go back to that level, or click **Close group**. `Shift+Tab` also closes the group, and `Tab` closes it when no group is selected. When you leave, the view returns to where it was and the instance you opened is selected again.
+* Select an instance and press ++tab++, or click the small arrow in its title bar (or right-click ▸ **Open Node Group**). The canvas now shows the group's nodes between a **Group Input** and a **Group Output** node, fitted to the window.
+* A **breadcrumb bar** appears at the top left of the canvas, such as `My script ▸ Level colours`. Click any step to go back to that level, or click **Close group**. ++shift+tab++ also closes the group, and ++tab++ closes it when no group is selected. When you leave, the view returns to where it was and the instance you opened is selected again.
 * Groups can contain other groups, so you can go several levels deep; the breadcrumb shows the whole path.
 
-While a group is open you edit it like any other script. You can add nodes with `Space`, wire, move, mute, freeze and so on. Running (`F5`) still runs the **whole script**, so you see the effect of an edit at once. `Esc` stops a run from inside a group too, and the progress text names the path, for example `Outer ▸ Inner ▸ node`. You cannot open or close a group while a run is in progress.
+While a group is open you edit it like any other script. You can add nodes with ++space++, wire, move, mute, freeze and so on. Running (++f5++) still runs the **whole script**, so you see the effect of an edit at once. ++esc++ stops a run from inside a group too, and the progress text names the path, for example `Outer ▸ Inner ▸ node`. You cannot open or close a group while a run is in progress.
 
-Each level keeps its **own undo history**, so `Ctrl+Z` inside a group never reaches into the script outside it.
+Each level keeps its **own undo history**, so ++ctrl+z++ inside a group never reaches into the script outside it.
 
 ## Edit the interface
 
@@ -58,14 +58,14 @@ The Group Input and Group Output nodes cannot be deleted, copied or duplicated; 
 
 * **Rename Node Group…** renames the group. Instances that still carry the group's name follow the rename; an instance you named yourself keeps its name.
 * **Make Node Group Single User** gives one instance its own copy of the group (named "… copy") so editing it no longer changes the others. It only does something when the group is used more than once.
-* **Ungroup Node Group** (`Ctrl+Alt+U`) puts a copy of the group's nodes back in place of an instance, wired through the interface to whatever the instance was wired to. The group itself stays in the file for any other instances.
+* **Ungroup Node Group** (++ctrl+alt+u++) puts a copy of the group's nodes back in place of an instance, wired through the interface to whatever the instance was wired to. The group itself stays in the file for any other instances.
 * **Delete Unused Node Groups** removes the groups that no instance uses any more. Until you do this, a group stays in the file even after its last instance is gone.
 
 A group can hold other groups but never itself. If you try to place a group inside itself, Dyncamelo refuses and says so.
 
 ## Groups in the library
 
-The document's groups are listed in the node library under **Node Groups**, so adding another instance is as easy as adding any node (double-click, drag, or `Space` and type the group's name). The list follows the open script, so it changes when you open another file. See [Node library and search](library-and-search.md).
+The document's groups are listed in the node library under **Node Groups**, so adding another instance is as easy as adding any node (double-click, drag, or ++space++ and type the group's name). The list follows the open script, so it changes when you open another file. See [Node library and search](library-and-search.md).
 
 Copying an instance and pasting it into another script brings its group along.
 
@@ -81,10 +81,10 @@ Copying an instance and pasting it into another script brings its group along.
 
 | Command | Shortcut |
 |---|---|
-| Make Node Group | `Ctrl+Alt+G` |
-| Ungroup Node Group | `Ctrl+Alt+U` |
-| Open / Close Node Group | `Tab` |
-| Close Node Group | `Shift+Tab` |
+| Make Node Group | ++ctrl+alt+g++ |
+| Ungroup Node Group | ++ctrl+alt+u++ |
+| Open / Close Node Group | ++tab++ |
+| Close Node Group | ++shift+tab++ |
 | Rename Node Group… | none |
 | Make Node Group Single User | none |
 | Add Group Input Socket / Add Group Output Socket | none |
