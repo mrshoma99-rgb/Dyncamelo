@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Dyncamelo.Core.Editing;
 using Dyncamelo.Core.Loader;
@@ -38,8 +39,6 @@ internal static class WikiPaths
     /// <summary>The how-to graphs, <c>docs/wiki-src/graphs</c>.</summary>
     public static string GraphsDirectory() => Path.Combine(RepoRoot(), "docs", "wiki-src", "graphs");
 
-    /// <summary>The manifest of pictures, <c>tools/wiki/image-manifest.md</c>.</summary>
-    public static string ManifestPath() => Path.Combine(RepoRoot(), "tools", "wiki", "image-manifest.md");
 }
 
 /// <summary>What every scene draws with: the node registry (general nodes plus the Navisworks stand-ins) and the host stubs a Navisworks session would have.</summary>
@@ -116,25 +115,50 @@ internal sealed class WikiPicker : IModelPicker
     public bool Reveal(string? value) => false;
 }
 
-/// <summary>Everything one scene needs for one palette, and the windows it opened (closed when the scene ends).</summary>
+/// <summary>The two pictures of a scene: in the dark palette and in the light one.</summary>
+internal sealed class WikiPictures
+{
+    public WikiPictures(BitmapSource dark, BitmapSource light)
+    {
+        Dark = dark;
+        Light = light;
+    }
+
+    public BitmapSource Dark { get; }
+
+    public BitmapSource Light { get; }
+}
+
+/// <summary>
+/// Everything one scene needs, and the windows it opened (closed when the scene ends). A scene is built in the dark palette; the light
+/// picture is taken from the same window after the palette is switched, the way a user switches it in the settings (so the two
+/// pictures differ in colour only).
+/// </summary>
 internal sealed class WikiContext : IDisposable
 {
+    /// <summary>The palette ids, dark first.</summary>
+    public const string DarkPalette = "DyncameloDark";
+
+    public const string LightPalette = "Light";
+
     private readonly List<Window> _windows = new List<Window>();
+    private readonly List<Action> _cleanups = new List<Action>();
     private readonly string _temp;
 
-    public WikiContext(string palette)
+    public WikiContext(string palette = DarkPalette)
     {
         Palette = palette;
         _temp = Path.Combine(Path.GetTempPath(), "dyc-wiki-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_temp);
     }
 
-    /// <summary>The palette id: <c>DyncameloDark</c> or <c>Light</c>.</summary>
+    /// <summary>The palette the scene is built in: <c>DyncameloDark</c>.</summary>
     public string Palette { get; }
 
-    public bool IsLight => Palette == "Light";
-
     public NodeRegistry Registry => WikiWorld.Registry;
+
+    /// <summary>Things a scene found wrong with its sources (an unresolved node in a graph file); the picture is still drawn, the test then fails with the list.</summary>
+    public List<string> Problems { get; } = new List<string>();
 
     /// <summary>A folder of this scene's own, deleted with it.</summary>
     public string TempFolder => _temp;
@@ -145,11 +169,48 @@ internal sealed class WikiContext : IDisposable
     /// <summary>Remembers a window so it is closed when the scene ends.</summary>
     public void Track(Window window) => _windows.Add(window);
 
+    /// <summary>Remembers something to do when the scene ends (before its windows are closed).</summary>
+    public void OnDispose(Action cleanup) => _cleanups.Add(cleanup);
+
+    /// <summary>Takes the picture in the dark palette, switches the editor to the light one, takes it again and switches back.</summary>
+    public WikiPictures Both(EditorRig rig, Func<BitmapSource> take) => Both(id => rig.UsePalette(id), take);
+
+    /// <summary>The same for anything that can switch its palette: <paramref name="usePalette"/> is called with the palette id.</summary>
+    public WikiPictures Both(Action<string> usePalette, Func<BitmapSource> take)
+    {
+        var dark = take();
+        usePalette(LightPalette);
+        BitmapSource light;
+        try
+        {
+            light = take();
+        }
+        finally
+        {
+            usePalette(DarkPalette);
+        }
+
+        return new WikiPictures(dark, light);
+    }
+
     /// <summary>Gives up on the scene with a message (it is listed, but is not a failure).</summary>
     public void Skip(string message) => throw new WikiSkipException(message);
 
     public void Dispose()
     {
+        foreach (var cleanup in _cleanups)
+        {
+            try
+            {
+                cleanup();
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
+            {
+                // A scene is over; a failing clean-up must not hide the scene's own result.
+            }
+        }
+
+        _cleanups.Clear();
         foreach (var window in _windows)
         {
             try
@@ -223,5 +284,43 @@ internal static class WikiUi
             thread.CurrentCulture = culture;
             thread.CurrentUICulture = uiCulture;
         }
+    }
+
+    /// <summary>All visual descendants of a given type.</summary>
+    public static IEnumerable<T> Descendants<T>(DependencyObject root)
+        where T : DependencyObject
+    {
+        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            if (child is T match)
+            {
+                yield return match;
+            }
+
+            foreach (var inner in Descendants<T>(child))
+            {
+                yield return inner;
+            }
+        }
+    }
+
+    /// <summary>The nearest visual ancestor of a given type, or null.</summary>
+    public static T? AncestorOfType<T>(DependencyObject start)
+        where T : DependencyObject
+    {
+        var current = System.Windows.Media.VisualTreeHelper.GetParent(start);
+        while (current != null)
+        {
+            if (current is T match)
+            {
+                return match;
+            }
+
+            current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 }

@@ -265,6 +265,36 @@ public class NavisworksStandInTests
         Assert.Equal(((Newtonsoft.Json.Linq.JArray)json["Connectors"]!).Count, graph.Connections.Count);
     }
 
+    public static IEnumerable<object[]> HowToGraphFiles()
+    {
+        var folder = Path.Combine(Path.GetDirectoryName(SampleGraphFileTests.SamplesDirectory())!, "docs", "wiki-src", "graphs");
+        if (!Directory.Exists(folder))
+        {
+            return new List<object[]>();
+        }
+
+        return Directory.EnumerateFiles(folder, "*.dyc")
+            .OrderBy(p => p, StringComparer.Ordinal)
+            .Select(p => new object[] { Path.GetFileName(p) })
+            .ToList();
+    }
+
+    [Theory]
+    [MemberData(nameof(HowToGraphFiles))]
+    public void EveryHowToGraphResolvesEveryNodeWithTheStandIns(string fileName)
+    {
+        var path = Path.Combine(Path.GetDirectoryName(SampleGraphFileTests.SamplesDirectory())!, "docs", "wiki-src", "graphs", fileName);
+        var serializer = new GraphSerializer(Registry);
+        var graph = serializer.LoadFromFile(path);
+        var unresolved = graph.Nodes.OfType<MissingNodeModel>().Select(n => n.Name + ": " + n.Reason).ToList();
+        Assert.True(unresolved.Count == 0, fileName + " has unresolved nodes: " + string.Join("; ", unresolved));
+        Assert.True(serializer.LoadWarnings.Count == 0, fileName + ": " + string.Join("; ", serializer.LoadWarnings));
+        Assert.NotEmpty(graph.Nodes);
+
+        var json = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(path));
+        Assert.Equal(((Newtonsoft.Json.Linq.JArray)json["Connectors"]!).Count, graph.Connections.Count);
+    }
+
     [Fact]
     public void TheStandInsRoundTripThroughSaveAndLoad()
     {

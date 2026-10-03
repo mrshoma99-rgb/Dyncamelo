@@ -552,6 +552,11 @@ def parse_method(
     params_text = signature[open_idx + 1 : j]
     if "params " in params_text:  # loader rejects params-array methods
         return None
+    # ...and by-ref parameters and delegate-typed ones, which have no node ports.
+    for raw in split_top_level(params_text):
+        bare = re.sub(r"^(?:\[[^\]]*\]\s*)+", "", raw).split("=", 1)[0].strip()
+        if re.match(r"^(?:ref|out|in)\s", bare) or re.match(r"^(?:Func|Action|Predicate|Comparison|Converter)\b", bare):
+            return None
 
     docs = parse_xml_docs(doc_lines)
     inputs = []

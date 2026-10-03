@@ -27,11 +27,8 @@ internal sealed class EditorRig
     /// <summary>The run time shown for a run, so a picture never depends on how fast the machine was.</summary>
     private const double FixedRunMilliseconds = 12d;
 
-    private readonly WikiContext _context;
-
-    private EditorRig(WikiContext context, GraphEditorViewModel vm, DyncameloEditorControl control, Window window, double width, double height)
+    private EditorRig(GraphEditorViewModel vm, DyncameloEditorControl control, Window window, double width, double height)
     {
-        _context = context;
         Vm = vm;
         Control = control;
         Window = window;
@@ -56,9 +53,15 @@ internal sealed class EditorRig
     /// Opens an editor of this size. The graph, when given, is loaded as it opens: set to run by hand (so nothing runs by itself) and
     /// with no file behind it (so a run never asks whether to trust the file).
     /// </summary>
-    public static EditorRig Open(WikiContext context, double width, double height, GraphModel? graph = null, Action<GraphEditorViewModel>? prepare = null)
+    public static EditorRig Open(
+        WikiContext context,
+        double width,
+        double height,
+        GraphModel? graph = null,
+        Action<GraphEditorViewModel>? prepare = null,
+        UiSettingsService? settingsToUse = null)
     {
-        var settings = new UiSettingsService(context.TempPath("settings-" + Guid.NewGuid().ToString("N") + ".json"));
+        var settings = settingsToUse ?? new UiSettingsService(context.TempPath("settings-" + Guid.NewGuid().ToString("N") + ".json"));
         settings.SetPaletteId(context.Palette);
         var vm = new GraphEditorViewModel(context.Registry, new StubDialogs(), settings) { PaletteId = context.Palette };
         vm.CancelPoll = () => false;
@@ -83,10 +86,19 @@ internal sealed class EditorRig
             WindowStyle = WindowStyle.None,
         };
         context.Track(window);
+        context.OnDispose(() => vm.EndSession());       // stops the autosave timer of the editor
         window.Show();
-        var rig = new EditorRig(context, vm, control, window, width, height);
+        var rig = new EditorRig(vm, control, window, width, height);
         rig.Settle();
         return rig;
+    }
+
+    /// <summary>A small graph made on the spot from library nodes.</summary>
+    public static GraphModel GraphOf(WikiContext context, string name, Action<Dyncamelo.TestSupport.Wiki.Sketch> build)
+    {
+        var sketch = new Dyncamelo.TestSupport.Wiki.Sketch(context.Registry, name);
+        build(sketch);
+        return sketch.Graph;
     }
 
     /// <summary>Reads a graph file into a model, the way the editor does, without any node running.</summary>
@@ -96,6 +108,13 @@ internal sealed class EditorRig
         var graph = serializer.Deserialize(File.ReadAllText(path));
         warnings = serializer.LoadWarnings.ToList();
         return graph;
+    }
+
+    /// <summary>Switches the editor to another colour palette, as the settings page does.</summary>
+    public void UsePalette(string paletteId)
+    {
+        Vm.PaletteId = paletteId;
+        Settle();
     }
 
     /// <summary>Waits for layout, bindings and rendering.</summary>
@@ -217,8 +236,11 @@ internal sealed class EditorRig
 
     // ----- framing --------------------------------------------------------------------------------
 
-    /// <summary>Fits a rectangle of the graph into the canvas (never closer than <paramref name="maxZoom"/>), with some air around it.</summary>
-    public void Fit(Rect graphBounds, double padding = 30d, double maxZoom = 1.25d)
+    /// <summary>
+    /// Fits a rectangle of the graph into the canvas (never closer than <paramref name="maxZoom"/>). Nodify already leaves a margin around
+    /// the area; <paramref name="padding"/> adds to it.
+    /// </summary>
+    public void Fit(Rect graphBounds, double padding = 0d, double maxZoom = 1.25d)
     {
         if (graphBounds.IsEmpty)
         {
@@ -234,12 +256,27 @@ internal sealed class EditorRig
             editor.ViewportZoom = maxZoom;
         }
 
-        editor.BringIntoView(area);
+        // Centre without the animation, then give any animation that FitToScreen started time to end before the picture is taken.
+        editor.BringIntoView(new Point(area.X + area.Width / 2d, area.Y + area.Height / 2d), false);
+        WikiUi.Pump(300);
+        Settle();
+    }
+
+    /// <summary>
+    /// Shows the canvas at a given zoom with the top-left corner of a rectangle of the graph at a given distance from the top-left corner of the
+    /// canvas (room below for something that opens under a node).
+    /// </summary>
+    public void Place(Rect graphBounds, double zoom, Point screenOffset)
+    {
+        var editor = Editor;
+        editor.ViewportZoom = zoom;
+        editor.ViewportLocation = new Point(graphBounds.X - screenOffset.X / zoom, graphBounds.Y - screenOffset.Y / zoom);
+        WikiUi.Pump(100);
         Settle();
     }
 
     /// <summary>Fits everything on the canvas.</summary>
-    public void FitAll(double padding = 30d, double maxZoom = 1.25d) => Fit(GraphBounds(), padding, maxZoom);
+    public void FitAll(double padding = 0d, double maxZoom = 1.25d) => Fit(GraphBounds(), padding, maxZoom);
 
     /// <summary>Fits the nodes with these names.</summary>
     public void FitNodes(double padding, double maxZoom, params string[] names)
@@ -279,6 +316,11 @@ internal sealed class EditorRig
     /// <summary>A rectangle of the picture, grown by a margin and kept inside it.</summary>
     public static BitmapSource Crop(BitmapSource source, Rect area, double margin)
     {
+        if (area.IsEmpty)
+        {
+            throw new InvalidOperationException("There is nothing to keep of the picture: the part to crop to has not been laid out.");
+        }
+
         var grown = area;
         grown.Inflate(margin, margin);
         var x = Math.Max(0, (int)Math.Floor(grown.X));
