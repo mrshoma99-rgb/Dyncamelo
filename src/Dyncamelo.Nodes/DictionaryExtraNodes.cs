@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using Dyncamelo.Core.Loader;
@@ -226,8 +227,41 @@ public static class DictionaryExtraNodes
         }
     }
 
-    // Finds a key the way the other dictionary nodes name keys: a string key directly, any other key type by its
-    // invariant text.
+    // A dictionary type that can only hold string keys: it implements the generic dictionary interfaces and every one of them has string
+    // as its key type (Dictionary<string, T>, SortedDictionary<string, T>, ConcurrentDictionary<string, T>, ...). Worked out once per type.
+    private static readonly ConcurrentDictionary<Type, bool> StringKeyedTypes = new ConcurrentDictionary<Type, bool>();
+
+    private static bool HoldsOnlyStringKeys(Type type) => StringKeyedTypes.GetOrAdd(type, IsStringKeyed);
+
+    private static bool IsStringKeyed(Type type)
+    {
+        var generic = false;
+        foreach (var contract in type.GetInterfaces())
+        {
+            if (!contract.IsGenericType)
+            {
+                continue;
+            }
+
+            var definition = contract.GetGenericTypeDefinition();
+            if (definition == typeof(IDictionary<,>) || definition == typeof(IReadOnlyDictionary<,>))
+            {
+                if (contract.GetGenericArguments()[0] != typeof(string))
+                {
+                    return false;
+                }
+
+                generic = true;
+            }
+        }
+
+        return generic;
+    }
+
+    // Finds a key the way the other dictionary nodes name keys: a string key directly (by the dictionary's own rules for keys), any
+    // other key type by its invariant text. A miss is the normal answer of ContainsKey and ValueOrDefault, so it has to be cheap: the
+    // search for a key that is not a string looks at every entry, which is pointless (and was the whole cost of a miss) in a
+    // dictionary that cannot hold anything but string keys, so only a dictionary that can hold other keys is searched.
     private static bool TryGetValue(IDictionary dictionary, string key, out object? value)
     {
         if (dictionary.Contains(key))
@@ -236,12 +270,15 @@ public static class DictionaryExtraNodes
             return true;
         }
 
-        foreach (DictionaryEntry entry in dictionary)
+        if (!HoldsOnlyStringKeys(dictionary.GetType()))
         {
-            if (!(entry.Key is string) && string.Equals(TypeCoercion.FormatValue(entry.Key), key, StringComparison.Ordinal))
+            foreach (DictionaryEntry entry in dictionary)
             {
-                value = entry.Value;
-                return true;
+                if (!(entry.Key is string) && string.Equals(TypeCoercion.FormatValue(entry.Key), key, StringComparison.Ordinal))
+                {
+                    value = entry.Value;
+                    return true;
+                }
             }
         }
 
