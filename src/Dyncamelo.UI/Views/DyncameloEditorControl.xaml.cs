@@ -214,6 +214,8 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
                 }
             },
             vm.Keymap);
+
+        Dispatcher.BeginInvoke(new System.Action(UpdateHeaderLayout), System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     // The user rebound a shortcut (or reset them): the key router and the menus show the new chords.
@@ -594,6 +596,42 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
     }
 
     private void OnStatusBarSizeChanged(object sender, SizeChangedEventArgs e) => UpdateHintVisibility();
+
+    private void OnHeaderBarSizeChanged(object sender, SizeChangedEventArgs e) => UpdateHeaderLayout();
+
+    // The menus and the buttons always stay; the wordmark goes first when the pane is narrow, then the name of the script.
+    // The room is what the bar has left after the logo, the menu items (their own widths, not the width the menu is stretched to)
+    // and the buttons; nothing measured here depends on whether the wordmark or the title is showing, so it cannot flicker.
+    private const double WordmarkWidth = 96d;
+    private const double TitleMinimumWidth = 110d;
+    private const double TitleMaximumWidth = 320d;
+
+    private void UpdateHeaderLayout()
+    {
+        if (HeaderBar.ActualWidth <= 0d || HeaderControls.ActualWidth <= 0d)
+        {
+            return;
+        }
+
+        var menuWidth = 0d;
+        foreach (var item in HeaderMenu.Items)
+        {
+            if (item is MenuItem top)
+            {
+                menuWidth += top.ActualWidth + top.Margin.Left + top.Margin.Right;
+            }
+        }
+
+        var room = HeaderBar.ActualWidth - 12d - (HeaderLogo.ActualWidth + 8d) - menuWidth - HeaderControls.ActualWidth;
+        var wordmark = room >= WordmarkWidth + 8d;
+        HeaderWordmark.Visibility = wordmark ? Visibility.Visible : Visibility.Collapsed;
+
+        var titleRoom = room - (wordmark ? WordmarkWidth + 8d : 0d) - 18d;
+        var title = titleRoom >= TitleMinimumWidth;
+        HeaderTitle.Visibility = title ? Visibility.Visible : Visibility.Collapsed;
+        HeaderTitle.MaxWidth = title ? Math.Min(titleRoom, TitleMaximumWidth) : TitleMaximumWidth;
+    }
+
 
     // The hint goes first when the pane is narrow: the run figures and the status message matter more.
     private void UpdateHintVisibility()

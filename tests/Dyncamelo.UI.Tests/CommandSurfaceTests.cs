@@ -679,6 +679,51 @@ public class CommandSurfaceViewTests
     }
 
     [Fact]
+    public void TheLogoTheMenusAndTheButtonsShareOneHeaderRowAndTheWordmarkAndTheNameGiveWayWhenTheWindowIsNarrow()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            var bar = (System.Windows.Controls.Border)host.Control.FindName("HeaderBar");
+            var menu = (System.Windows.Controls.Menu)host.Control.FindName("HeaderMenu");
+            var run = (System.Windows.Controls.Button)host.Control.FindName("RunButton");
+            var logo = (System.Windows.FrameworkElement)host.Control.FindName("HeaderLogo");
+            var wordmark = (System.Windows.FrameworkElement)host.Control.FindName("HeaderWordmark");
+            var title = (System.Windows.Controls.TextBlock)host.Control.FindName("HeaderTitle");
+            var settings = (System.Windows.Controls.Primitives.ToggleButton)host.Control.FindName("SettingsButton");
+
+            // One bar: the identity, the menus and the buttons are inside it, it starts at the top of the pane, and it is one row high.
+            Assert.True(bar.IsAncestorOf(logo) && bar.IsAncestorOf(menu) && bar.IsAncestorOf(run) && bar.IsAncestorOf(settings));
+            Assert.Equal(0d, bar.TranslatePoint(new System.Windows.Point(0, 0), host.Control).Y);
+            Assert.True(bar.ActualHeight > 28 && bar.ActualHeight < 48, "the header is " + bar.ActualHeight + " high");
+            foreach (var part in new System.Windows.FrameworkElement[] { logo, menu, run, settings })
+            {
+                var centre = part.TranslatePoint(new System.Windows.Point(part.ActualWidth / 2, part.ActualHeight / 2), bar).Y;
+                Assert.True(centre > 0 && centre < bar.ActualHeight, part.GetType().Name + " is not on the header row");
+            }
+
+            // Wide: the wordmark and the script's name show, in this order from the left: logo, menus, name, buttons.
+            Assert.Equal(System.Windows.Visibility.Visible, wordmark.Visibility);
+            Assert.Equal(System.Windows.Visibility.Visible, title.Visibility);
+            Assert.Equal(host.Vm.Title, title.Text);
+            double Left(System.Windows.FrameworkElement e) => e.TranslatePoint(new System.Windows.Point(0, 0), bar).X;
+            Assert.True(Left(logo) < Left(menu) && Left(menu) + menu.ActualWidth <= Left(title) + 1d && Left(title) < Left(run));
+
+            // Narrow: the wordmark and the name are gone, the logo, the menus and the buttons stay.
+            host.Window.Width = 520;
+            host.Window.UpdateLayout();
+            Assert.Equal(System.Windows.Visibility.Collapsed, wordmark.Visibility);
+            Assert.Equal(System.Windows.Visibility.Collapsed, title.Visibility);
+            Assert.True(logo.IsVisible && menu.IsVisible && run.IsVisible && settings.IsVisible);
+
+            host.Window.Width = 1400;
+            host.Window.UpdateLayout();
+            Assert.Equal(System.Windows.Visibility.Visible, wordmark.Visibility);
+            Assert.Equal(System.Windows.Visibility.Visible, title.Visibility);
+        });
+    }
+
+    [Fact]
     public void CtrlMShowsAndHidesTheMinimapAndTheToolbarButtonFollows()
     {
         using var host = Build();

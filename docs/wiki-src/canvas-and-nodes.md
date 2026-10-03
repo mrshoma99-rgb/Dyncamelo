@@ -16,9 +16,8 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 
 | Area | What it holds |
 |---|---|
-| Header bar (blue in the default palette) | "Dyncamelo by BIMCamel" and, on the right, the name of the open script. A `*` after the name means there are unsaved changes; the file name follows once the script has been saved. |
-| Menu bar | **File, Edit, View, Graph, Node, Node Groups, Wires, Help.** Each menu shows the shortcut beside every command. File also holds **Recent Files** and **Sample Graphs**; Graph holds **Frame Colour**. |
-| Buttons on the right of the menu bar | Undo, Redo, **Run**, **Auto**, value previews on/off, minimap on/off, and the **Settings** gear. |
+| Header bar (one row, with a thin blue strip on top) | The BIMCamel logo and "Dyncamelo by BIMCamel" on the left, then the menus **File, Edit, View, Graph, Node, Node Groups, Wires, Help** (each shows the shortcut beside every command; File also holds **Recent Files** and **Sample Graphs**, Graph holds **Frame Colour**). On the right: the name of the open script (a `*` after it means there are unsaved changes; the file name follows once the script has been saved) and the buttons. In a narrow pane the "Dyncamelo by BIMCamel" text and then the script name make room for the menus and buttons; hover the logo for the version. |
+| Buttons on the right of the header | Undo, Redo, **Run** (the blue main button), **Auto / Manual** (a switch like the ones on Boolean nodes), value previews on/off, minimap on/off, and the **Settings** gear. |
 | Library panel (left) | The list of nodes. See [Node library and search](library-and-search.md). |
 | Canvas (middle) | Where nodes and wires live. |
 | Status bar (bottom) | A message on the left (what you just did, or what a run did), a hint line, and on the right the number of **Nodes**, the **Warnings** and **Errors** counts and the **Last run** time in milliseconds. |

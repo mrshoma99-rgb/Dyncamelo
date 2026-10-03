@@ -52,111 +52,127 @@
 
     <DockPanel x:Name="LayoutRoot" Background="{DynamicResource Dyc.PanelBrush}">
 
-        <!-- ===== Brand bar (BIMCamel identity) — the blue gradient header carries
-             the logo in a black chip so its baked-in black background reads as an
-             intentional rounded badge, matching the BIMCamel exporter's title bar. -->
-        <Border DockPanel.Dock="Top" Height="38" Background="{DynamicResource Dyc.BrandBrush}">
-            <Grid Margin="10,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0"
-                        Width="26" Height="26"
-                        CornerRadius="7"
-                        Background="{DynamicResource Dyc.LogoChipBrush}"
-                        VerticalAlignment="Center">
-                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
-                           Width="22" Height="22"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
-                </Border>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="9,0,0,0">
-                    <TextBlock Text="Dyncamelo"
-                               Foreground="{DynamicResource Dyc.OnBrandBrush}"
-                               FontWeight="SemiBold"
-                               FontSize="13.5" />
-                    <TextBlock Text="by BIMCamel"
-                               Foreground="{DynamicResource Dyc.OnBrandSubtleBrush}"
-                               FontSize="9.5"
-                               Margin="0,-1,0,0" />
-                </StackPanel>
-                <TextBlock Grid.Column="2"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource Dyc.OnBrandSubtleBrush}"
-                           FontSize="11"
-                           TextTrimming="CharacterEllipsis"
-                           MaxWidth="260"
-                           Text="{Binding Title}" />
-            </Grid>
-        </Border>
-
-        <!-- ===== Command bar: the menus (generated from CommandCatalog by EditorMenuBuilder)
-             on the left, the few actions worth a button on the right. Everything else lives in
-             the menus only, so nothing is offered twice. ===== -->
-        <Border DockPanel.Dock="Top"
+        <!-- ===== Header: one bar for the identity, the menus (generated from CommandCatalog by
+             EditorMenuBuilder) and the few actions worth a button, so it takes one row of the pane.
+             Left to right: the BIMCamel logo chip and wordmark, the menus, the name of the open script,
+             then the buttons. A thin strip of the brand gradient on top keeps the BIMCamel look. When the
+             pane is narrow the wordmark and then the script name give way (UpdateHeaderLayout); the menus
+             and the buttons never do. Everything else lives in the menus only, so nothing is offered twice. ===== -->
+        <Border x:Name="HeaderBar"
+                DockPanel.Dock="Top"
                 Background="{DynamicResource Dyc.PanelBrush}"
                 BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="4,2">
+                SizeChanged="OnHeaderBarSizeChanged">
             <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding UndoTooltip}" Command="{Binding UndoCommand}">
-                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Undo}" />
-                    </Button>
-                    <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding RedoTooltip}" Command="{Binding RedoCommand}">
-                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Redo}" />
-                    </Button>
-
-                    <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
-
-                    <Button x:Name="RunButton"
-                            Style="{StaticResource Dyc.PrimaryButton}"
-                            ToolTip="{Binding RunTooltip}"
-                            Command="{Binding RunCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Style="{StaticResource Dyc.ToolIcon}" Width="15" Height="15" Margin="0,0,6,0"
-                                  Data="{StaticResource Dyc.Icon.Run}"
-                                  Fill="{DynamicResource Dyc.OnPrimaryBrush}" />
-                            <TextBlock Text="Run" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Top" Height="3" Background="{DynamicResource Dyc.BrandBrush}" />
+                <DockPanel Margin="8,2,4,2">
+                    <StackPanel x:Name="HeaderBrand"
+                                DockPanel.Dock="Left"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0"
+                                Background="Transparent">
+                        <StackPanel.ToolTip>
+                            <TextBlock>
+                                <Run Text="Dyncamelo " /><Run Text="{Binding ProductVersionText, Mode=OneWay}" /><Run Text=" by BIMCamel" />
+                            </TextBlock>
+                        </StackPanel.ToolTip>
+                        <Border x:Name="HeaderLogo"
+                                Width="24" Height="24"
+                                CornerRadius="6"
+                                Background="{DynamicResource Dyc.LogoChipBrush}"
+                                VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
+                                   Width="20" Height="20"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                        <StackPanel x:Name="HeaderWordmark" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <TextBlock Text="Dyncamelo"
+                                       Foreground="{DynamicResource Dyc.TextBrush}"
+                                       FontWeight="SemiBold"
+                                       FontSize="12.5" />
+                            <TextBlock Text="by BIMCamel"
+                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                       FontSize="9.5"
+                                       Margin="0,-1,0,0" />
                         </StackPanel>
-                    </Button>
-                    <CheckBox x:Name="AutoRunSwitch"
-                              Style="{StaticResource Dyc.AutoRunSwitch}"
-                              ToolTip="On: run again automatically after every change. Off: manual, press Run."
-                              IsChecked="{Binding IsAutoRun}" />
-                    <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
-                                  ToolTip="Show a value preview bubble under each node after a run"
-                                  IsChecked="{Binding ShowNodePreviews}">
-                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Preview}" />
-                    </ToggleButton>
-                    <ToggleButton x:Name="MinimapButton"
-                                  Style="{StaticResource Dyc.ToolToggle}"
-                                  ToolTip="{Binding MinimapTooltip}"
-                                  Command="{Binding ToggleMinimapCommand}"
-                                  IsChecked="{Binding IsMinimapVisible, Mode=OneWay}">
-                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Map}" />
-                    </ToggleButton>
+                    </StackPanel>
 
-                    <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
+                    <StackPanel x:Name="HeaderControls"
+                                Orientation="Horizontal"
+                                DockPanel.Dock="Right"
+                                SizeChanged="OnHeaderBarSizeChanged">
+                        <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding UndoTooltip}" Command="{Binding UndoCommand}">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Undo}" />
+                        </Button>
+                        <Button Style="{StaticResource Dyc.ToolButton}" ToolTip="{Binding RedoTooltip}" Command="{Binding RedoCommand}">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Redo}" />
+                        </Button>
 
-                    <!-- ===== Settings page (sections, search, shortcut rebinding) ===== -->
-                    <ToggleButton x:Name="SettingsButton"
-                                  Style="{StaticResource Dyc.ToolToggle}"
-                                  ToolTip="Settings"
-                                  IsChecked="{Binding IsSettingsOpen, Mode=TwoWay}">
-                        <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Settings}" />
-                    </ToggleButton>
-                </StackPanel>
+                        <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
 
-                <!-- Not the window's main menu: Alt/F10 must stay with Navisworks (a WPF menu in menu mode
-                     grabs the keyboard and mouse of the whole host). -->
-                <Menu x:Name="HeaderMenu"
-                      IsMainMenu="False"
-                      Background="Transparent"
-                      Foreground="{DynamicResource Dyc.TextBrush}"
-                      VerticalAlignment="Center"
-                      Padding="0" />
+                        <Button x:Name="RunButton"
+                                Style="{StaticResource Dyc.PrimaryButton}"
+                                ToolTip="{Binding RunTooltip}"
+                                Command="{Binding RunCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource Dyc.ToolIcon}" Width="15" Height="15" Margin="0,0,6,0"
+                                      Data="{StaticResource Dyc.Icon.Run}"
+                                      Fill="{DynamicResource Dyc.OnPrimaryBrush}" />
+                                <TextBlock Text="Run" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <CheckBox x:Name="AutoRunSwitch"
+                                  Style="{StaticResource Dyc.AutoRunSwitch}"
+                                  ToolTip="On: run again automatically after every change. Off: manual, press Run."
+                                  IsChecked="{Binding IsAutoRun}" />
+                        <ToggleButton Style="{StaticResource Dyc.ToolToggle}"
+                                      ToolTip="Show a value preview bubble under each node after a run"
+                                      IsChecked="{Binding ShowNodePreviews}">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Preview}" />
+                        </ToggleButton>
+                        <ToggleButton x:Name="MinimapButton"
+                                      Style="{StaticResource Dyc.ToolToggle}"
+                                      ToolTip="{Binding MinimapTooltip}"
+                                      Command="{Binding ToggleMinimapCommand}"
+                                      IsChecked="{Binding IsMinimapVisible, Mode=OneWay}">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Map}" />
+                        </ToggleButton>
+
+                        <Border Width="1" Margin="6,2" Background="{DynamicResource Dyc.PanelBorderBrush}" />
+
+                        <!-- ===== Settings page (sections, search, shortcut rebinding) ===== -->
+                        <ToggleButton x:Name="SettingsButton"
+                                      Style="{StaticResource Dyc.ToolToggle}"
+                                      ToolTip="Settings"
+                                      IsChecked="{Binding IsSettingsOpen, Mode=TwoWay}">
+                            <Path Style="{StaticResource Dyc.ToolIcon}" Margin="0" Data="{StaticResource Dyc.Icon.Settings}" />
+                        </ToggleButton>
+                    </StackPanel>
+
+                    <!-- The open script (a * after the name: unsaved changes). Trimmed to the room left; gone when there is none. -->
+                    <TextBlock x:Name="HeaderTitle"
+                               DockPanel.Dock="Right"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Right"
+                               Margin="8,0,10,0"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                               FontSize="11"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="260"
+                               ToolTip="{Binding Title}"
+                               Text="{Binding Title}" />
+
+                    <!-- Not the window's main menu: Alt/F10 must stay with Navisworks (a WPF menu in menu mode
+                         grabs the keyboard and mouse of the whole host). -->
+                    <Menu x:Name="HeaderMenu"
+                          IsMainMenu="False"
+                          Background="Transparent"
+                          Foreground="{DynamicResource Dyc.TextBrush}"
+                          VerticalAlignment="Center"
+                          Padding="0" />
+                </DockPanel>
             </DockPanel>
         </Border>
 

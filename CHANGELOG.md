@@ -9,6 +9,7 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 ## Unreleased
 
 ### Changed
+* **One header row instead of two.** The blue brand bar and the menu bar are merged: the BIMCamel logo and "Dyncamelo by BIMCamel" sit at the left of the menus, the name of the open script and the buttons at the right, with a thin strip of the brand gradient on top. The pane gains a row for the canvas. In a narrow pane the "Dyncamelo by BIMCamel" text and then the script name give way to the menus and buttons; hover the logo for the version.
 * **Run is the main button of the toolbar.** It is filled with the palette's main-action colour, bold and larger, with the play symbol, where it was a quiet button like the others. Automatic / manual running is now the same on/off switch the Boolean nodes use, with the name of the mode beside it (*Auto* when on, *Manual* when off), instead of a toggle button. Every palette has two new colours for the main action (`Dyc.PrimaryBrush`, `Dyc.OnPrimaryBrush`), and a test keeps their contrast readable.
 
 ### Added

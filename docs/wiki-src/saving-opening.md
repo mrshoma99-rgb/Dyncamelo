@@ -34,7 +34,7 @@ After a successful open or save, the status bar confirms it. If a node has been 
 
 ## The modified marker and the save prompt
 
-A `*` after the script's name in the header bar means there are **unsaved changes**. Saving removes it. If you undo back to the state you saved, the `*` stays on purpose, to be on the safe side.
+A `*` after the script's name in the header (next to the buttons; the name is hidden when the pane is very narrow) means there are **unsaved changes**. Saving removes it. If you undo back to the state you saved, the `*` stays on purpose, to be on the safe side.
 
 **New**, **Open…**, opening a recent file, opening a sample, and dropping a `.dyc` file on the canvas all check first. When something is unsaved, Dyncamelo asks "Save changes to '…' before continuing?" with **Yes** (save first), **No** (go on without saving) and **Cancel**. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
 
