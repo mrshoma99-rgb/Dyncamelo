@@ -445,6 +445,26 @@
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Table}" />
                                         <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
                                     </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Data">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Data}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="IFC">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.IFC}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Report">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Report}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="System">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.System}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IconKey}" Value="Utility">
+                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Utility}" />
+                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
                                         <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
                                         <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
