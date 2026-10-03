@@ -47,20 +47,15 @@ public static class SelectionExtraNodes
         var list = NavisValues.NonNullItems(items);
         var doc = NavisworksContext.ResolveDocument(document);
 
-        // Work on a copy so the selection changes once (one change event), and only when something was removed.
-        var remaining = new ModelItemCollection(doc.CurrentSelection.SelectedItems);
-        var changed = false;
-        foreach (var item in list)
+        // Filter in plain .NET and set the selection once (one change event), and only when something was removed.
+        // ModelItemCollection.Remove searches the collection on every call, so taking 20 000 items out of a selection of 100 000
+        // was 20 000 searches; the requests are hashed by the same identity the collection uses for an item (ModelItemSet) and
+        // the selection is walked once. Each request still takes out the first matching entry, like Remove did.
+        var selected = NavisValues.ToItemList(doc.CurrentSelection.SelectedItems);
+        var remaining = ListRemoval.RemoveFirstOfEach(selected, list, ModelItemIdentityComparer.Instance, out var removed);
+        if (removed > 0)
         {
-            if (remaining.Remove(item))
-            {
-                changed = true;
-            }
-        }
-
-        if (changed)
-        {
-            doc.CurrentSelection.CopyFrom(remaining);
+            doc.CurrentSelection.CopyFrom(NavisValues.ToItemCollection(remaining));
         }
 
         // SelectedItems is a live view — snapshot it before handing it downstream.
