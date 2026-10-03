@@ -22,6 +22,8 @@ Goal: store search results in the Navisworks **Sets** window, either as one set 
 3. Type `Concrete elements` into its `name` input.
 4. Press ++f5++.
 
+The downloadable graph also paints the items red on the way, with `Appearance.OverrideColor` between the search and `SelectionSet.Create` ([Colour elements by a property](colour-elements-by-property.md)). It keeps the text `Concrete` in a `String` node wired to `value`; typing it into the box does the same.
+
 ![The first script: a search, a colour override and SelectionSet.Create named "Concrete elements".](../../images/wiki-first-script.png)
 
 The set appears in the Navisworks **Sets** window. `SelectionSet.Create` replaces a top-level set with the same name, so a second run updates the set instead of adding another. It stores the items that were found when you ran it.
@@ -32,17 +34,16 @@ The set appears in the Navisworks **Sets** window. `SelectionSet.Create` replace
 
 1. Add `SelectionSets.BulkByPropertyValues` (*Navisworks ▸ SelectionSets*).
 2. Type `Element` into `categoryName` and `Level` into `propertyName`.
-3. Type `By Level` into `folderName`. Leave it empty to put the sets at the top level.
+3. Type `Levels` into `folderName`. Leave it empty to put the sets at the top level.
 4. Add a `Watch List` (*Display*) and wire the `values` output into it. This shows the distinct values the node found.
-5. Add `List.Count` (*List*), wire `selectionSets` into its `list`, and wire its `count` into a `Watch`.
-6. Press ++f5++.
+5. Press ++f5++.
 
-![The bulk graph: SelectionSets.BulkByPropertyValues with a Watch List for the values and a count of the sets.](../../images/wiki-graph-bulk-selection-sets.png)
+![The bulk graph: SelectionSets.BulkByPropertyValues with a Watch List for the values.](../../images/wiki-graph-bulk-selection-sets.png)
 
 ## What you get
 
 * Part A: a saved selection set with the name you typed.
-* Part B: one **search set** for every distinct value, filed in the folder you named. A search set is live: it re-evaluates as the model changes. `selectionSets` and `values` are in the same order, so the first set belongs to the first value.
+* Part B: one **search set** for every distinct value, filed in the folder you named. A search set is live: it re-evaluates as the model changes. The `selectionSets` and `values` outputs are in the same order, so the first set belongs to the first value.
 * Running again replaces sets with the same name in that folder.
 
 !!! note "Selection set or search set?"
@@ -50,7 +51,7 @@ The set appears in the Navisworks **Sets** window. `SelectionSet.Create` replace
 
 ## If it does not work
 
-* The Watch List is empty or the count is 0: the names do not match what Navisworks shows. See [A search returns nothing](../troubleshooting.md#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names).
+* The Watch List is empty: the names do not match what Navisworks shows. See [A search returns nothing](../troubleshooting.md#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names).
 * A node is red: see [Read errors and warnings](read-errors-and-warnings.md).
 
 ## Next

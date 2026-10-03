@@ -1,0 +1,250 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "37d240cc03d68a43977a008646ff7c27",
+  "Name": "First script",
+  "Description": "Finds every item whose Material contains Concrete, colours it red and saves the result as a selection set.",
+  "Nodes": [
+    {
+      "Id": "2ccfdca62653aa34555cc3fe74bfb481",
+      "NodeType": "StringInput",
+      "Name": "Material text",
+      "X": 0.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Concrete"
+      }
+    },
+    {
+      "Id": "5be654ddda4e8bce09fa70adfc37cb88",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByProperty",
+      "X": 350.0,
+      "Y": 210.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Material"
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "mode",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "contains"
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "980428a56e8f8ac5e8ea7e4d5ef50833",
+      "NodeType": "WatchList",
+      "Name": "Matching items",
+      "X": 700.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "9f9dd1b4b8d09803590fbbd3c1e79e09",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.OverrideColor@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.OverrideColor",
+      "X": 700.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "color",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "#FFFF0000"
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "c670b08c23f745c3495a11d13520c2d7",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionSetNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "SelectionSet.Create",
+      "X": 1080.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "name",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Concrete elements"
+        },
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "selectionSet"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "d92d5686d7d9cf9d7cbef785cc924f08",
+      "FromNode": "2ccfdca62653aa34555cc3fe74bfb481",
+      "FromPort": "value",
+      "ToNode": "5be654ddda4e8bce09fa70adfc37cb88",
+      "ToPort": "value"
+    },
+    {
+      "Id": "a4152c771b9cd5e8e09b68449ad84534",
+      "FromNode": "5be654ddda4e8bce09fa70adfc37cb88",
+      "FromPort": "items",
+      "ToNode": "980428a56e8f8ac5e8ea7e4d5ef50833",
+      "ToPort": "list"
+    },
+    {
+      "Id": "0cff1c196ea84a1210b31c40f6caae98",
+      "FromNode": "5be654ddda4e8bce09fa70adfc37cb88",
+      "FromPort": "items",
+      "ToNode": "9f9dd1b4b8d09803590fbbd3c1e79e09",
+      "ToPort": "items"
+    },
+    {
+      "Id": "4e566d253c3a756c5b9123ef43a9cc0c",
+      "FromNode": "9f9dd1b4b8d09803590fbbd3c1e79e09",
+      "FromPort": "items",
+      "ToNode": "c670b08c23f745c3495a11d13520c2d7",
+      "ToPort": "items"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "c338e8bc7dee0e13bc7d248234ca3c5b",
+      "Text": "WHAT IT DOES: finds the items whose Element > Material contains the text on the left, paints them red and saves them as the selection set \"Concrete elements\". TO CHANGE: edit the text, the property names or the colour, then press Run.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Data completeness",
+  "description": "Finds the doors that lack a property and shows what percentage of all doors that is.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "category", "node": "String", "title": "Category to check", "value": "Doors"},
+    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Category"}},
+    {"id": "audit", "node": "Audit.MissingProperty", "values": {"categoryName": "Element", "propertyName": "Fire Rating"}},
+    {"id": "missing", "node": "List.Count", "title": "Missing"},
+    {"id": "total", "node": "List.Count", "title": "All"},
+    {"id": "percent", "node": "Math.Percent"},
+    {"id": "show", "node": "Watch", "title": "Percent missing"}
+  ],
+  "wires": [
+    "category.value -> search.value",
+    "search.items -> audit.items",
+    "audit.items -> missing.list",
+    "search.items -> total.list",
+    "missing.count -> percent.part",
+    "total.count -> percent.total",
+    "percent.percent -> show.value"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: finds the items of one category, picks out those without the required property and shows the share that is missing, so a model can be held to a data standard. TO CHANGE: the category text and the property name on Audit.MissingProperty."}
+  ]
+}

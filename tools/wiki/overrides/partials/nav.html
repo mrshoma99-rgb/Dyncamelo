@@ -1,6 +1,6 @@
 {#-
   The navigation (the drawer on a phone, the left sidebar on a wide screen). Material's own, with the BIMCamel wordmark in
-  the title and, on a phone only, the two buttons of the header below the list.
+  the title. (The two buttons for a phone are added in main.html.)
 -#}
 {% import "partials/nav-item.html" as item with context %}
 {% set class = "md-nav md-nav--primary" %}
@@ -23,7 +23,4 @@
       {{ item.render(nav_item, path, 1) }}
     {% endfor %}
   </ul>
-  <div class="dyc-drawer-actions">
-    {% include "partials/dyc-actions.html" %}
-  </div>
 </nav>

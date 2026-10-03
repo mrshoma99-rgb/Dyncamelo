@@ -14,10 +14,13 @@ Usage
     python3 tools/wiki_graph.py --check          fail when a committed .dyc is not what its spec builds
     python3 tools/wiki_graph.py --node Search.ByProperty
                                                  show a node: its id, ports, editors, defaults and choices
+    python3 tools/wiki_graph.py first-script --stdout
+                                                 print the built graph instead of writing it
 
 Specs live in `docs/wiki-src/graphs/specs/<name>.json`; the graph is written to
 `docs/wiki-src/graphs/<name>.dyc` (the wiki links it as `../graphs/<name>.dyc`).
-Rebuilding an unchanged spec gives a byte-identical file, so `--check` can run in CI.
+Rebuilding an unchanged spec gives a byte-identical file (ids come from the graph name and the spec ids; the
+`AppVersion` stamp is the version in `Directory.Build.props` and is ignored by `--check`), so `--check` can run in CI.
 
 A spec
 ------
@@ -50,9 +53,11 @@ A spec
   `Choice` (`options`: list of texts, `value`: one of them), `Date` (`value`: `2026-10-01`), `Number Slider` and
   `Integer Slider` (`value`, `min`, `max`, `step`), `File Path` and `Directory Path` (`value`), `Color Picker`
   (`value`: `#RRGGBB`), `Watch`, `Watch List`, `Watch Table`, `Watch Image`, `List.Create` (`count`), `Loop.Item`,
-  `Loop.Collect`, `Reroute` and `Note` (a sticky note: `text`).
+  `Loop.Collect` and `Note` (a sticky note: `text`, `at`).
 * Optional on any node: `lacing` (`Auto`, `Shortest`, `Longest` or `CrossProduct`), `player` (true shows a node in the
-  Script Player), `player_inputs` (names of unwired inputs the Player offers as fields).
+  Script Player), `player_inputs` (names of unwired inputs the Player offers as fields) and `levels`
+  (`{"values": 2}` sets List Levels `@L2` on a wired input; `{"values": {"level": 2, "keep": true}}` also keeps the list
+  structure).
 * `notes` are sticky notes; `at` is `"top"` (default), `"bottom"` or `[x, y]`. Use one per graph, sparingly.
 * `frames` draw a titled rectangle round the listed nodes; `colour` is Blue, Green, Amber, Red, Purple or Gray.
 
@@ -73,10 +78,13 @@ How node ids are found
 A zero-touch node is saved with a definition id such as
 `Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document`
 (declaring type, method, then the parameter types the loader writes). When a catalogue entry carries an `id` that
-value is used. Otherwise the id is derived here from the C# sources with the loader's own rules
+value is used. The id is also derived here from the C# sources with the loader's own rules
 (`AssemblyNodeLoader.GetFunctionSignature`): keyword types stay as written, every other type is written with its
-full name, generics without spaces, `Nullable<T>` as `T?`. Everything else a node needs (port names, defaults, choices,
-ranges, multi-input, kinds) is read from the same sources and cross-checked against `docs/dyncamelo-nodes.json`.
+full name, generics without spaces, `Nullable<T>` as `T?`; when both exist they must agree, and the derivation is the
+fallback for a catalogue without ids. Everything else a node needs (port names, defaults, choices, ranges,
+multi-input, kinds) is read from the same sources and cross-checked against `docs/dyncamelo-nodes.json`.
+A new C# parameter type from a library the tool does not know (for example a new Navisworks type) is added to
+`SourceIndex.EXTERNAL_TYPES`.
 """
 
 from __future__ import annotations
@@ -439,6 +447,7 @@ class SourceNode:
     hidden: bool = False
     converter: bool = False
     id: str = ""
+    id_error: str = ""         # why the id could not be derived (an unknown external type), when it could not
     source: str = ""           # file name, for messages
 
 
@@ -693,12 +702,15 @@ class SourceIndex:
             deprecated=deprecated, hidden=hidden, converter=converter, source=fi.path.name,
         )
         node.output_types = out_types  # type: ignore[attr-defined]
-        for p in params:
-            p.mangled = self.mangle(p.cs_type, fi)
-        node.id = (
-            (fi.namespace + "." if fi.namespace else "") + t.full_name + "." + method
-            + (("@" + ",".join(p.mangled for p in params)) if params else "")
-        )
+        try:
+            for p in params:
+                p.mangled = self.mangle(p.cs_type, fi)
+            node.id = (
+                (fi.namespace + "." if fi.namespace else "") + t.full_name + "." + method
+                + (("@" + ",".join(p.mangled for p in params)) if params else "")
+            )
+        except SpecError as exc:
+            node.id_error = str(exc)  # only matters if a spec uses this node and the catalogue has no id for it
         return node
 
     def _parse_param(self, masked: str, text: str, a: int, b: int) -> Optional[Param]:
@@ -1123,6 +1135,10 @@ def resolve_node(name: str) -> NodeDef:
     """The definition a spec's `node` names: a built-in kind or a catalogue node, checked against the sources."""
     if name in INTERACTIVE:
         spec = INTERACTIVE[name]
+        entry = catalogue().nodes.get(name)
+        if entry is not None and entry.get("id") and entry["id"] != spec["type"]:
+            raise SpecError(
+                "the catalogue says the node '" + name + "' is saved as '" + str(entry["id"]) + "' but this tool writes '" + spec["type"] + "'")
         return NodeDef(
             name=name, node_type=spec["type"], inputs=[PortInfo(**vars(p)) for p in spec.get("inputs", [])],
             outputs=[PortInfo(**vars(p)) for p in spec["outputs"]], interactive=True, kind=name, category=spec["category"],
@@ -1149,10 +1165,18 @@ def resolve_node(name: str) -> NodeDef:
             + ", sources " + str([p.name for p in definition.inputs]) + " -> " + str([p.name for p in definition.outputs])
             + "); regenerate the catalogue with tools/generate_node_catalog.py")
     cat_id = entry.get("id")
-    if cat_id and cat_id != definition.definition_id:
+    cat_id_usable = isinstance(cat_id, str) and cat_id.startswith("Dyncamelo.")
+    if src.id_error and not cat_id_usable:
+        raise SpecError("the node '" + name + "': " + src.id_error)
+    if cat_id_usable and not src.id_error and cat_id != definition.definition_id:
         raise SpecError(
-            "the catalogue id of '" + name + "' (" + cat_id + ") differs from the id derived from the sources ("
+            "the catalogue id of '" + name + "' (" + str(cat_id) + ") differs from the id derived from the sources ("
             + definition.definition_id + ")")
+    if cat_id_usable:
+        definition.definition_id = str(cat_id)
+    if entry.get("assembly") and entry["assembly"] != definition.assembly:
+        raise SpecError(
+            "the catalogue puts '" + name + "' in " + str(entry["assembly"]) + " but the sources have it in " + definition.assembly)
     definition.category = entry.get("category", "")
     return definition
 
@@ -1193,7 +1217,7 @@ LACING_MODES = ("Auto", "Shortest", "Longest", "CrossProduct")
 RUN_TYPES = ("Manual", "Automatic")
 NODE_KEYS = {
     "id", "node", "title", "values", "value", "options", "min", "max", "step", "count", "text", "lacing", "player",
-    "player_inputs",
+    "player_inputs", "levels",
 }
 TOP_KEYS = {"name", "description", "run", "nodes", "wires", "notes", "frames", "appVersion"}
 
@@ -1216,6 +1240,7 @@ class BNode:
     lacing: str = "Auto"
     player: Optional[bool] = None
     player_inputs: list[str] = field(default_factory=list)
+    levels: dict[str, tuple[int, bool]] = field(default_factory=dict)   # port -> (list level, keep list structure)
     wired_in: dict[str, list[tuple["BNode", str]]] = field(default_factory=dict)
     x: float = 0.0
     y: float = 0.0
@@ -1499,6 +1524,22 @@ def build_nodes_and_wires(spec: dict, stem: str) -> tuple[list[BNode], list[Wire
             if port.editor == "none":
                 raise SpecError("node '" + key + "': input '" + x + "' has no inline editor, so the Player cannot offer it")
         bn.player_inputs = list(pi)
+        levels = raw.get("levels", {})
+        if not isinstance(levels, dict):
+            raise SpecError("node '" + key + "': 'levels' is an object of input: level")
+        for port_name, spec_level in levels.items():
+            if bn.in_port(port_name) is None:
+                raise SpecError("node '" + key + "': 'levels' names '" + port_name + "', which is not an input")
+            keep = False
+            if isinstance(spec_level, dict):
+                _check_keys(spec_level, {"level", "keep"}, "node '" + key + "' levels." + port_name)
+                keep = spec_level.get("keep", False)
+                spec_level = spec_level.get("level")
+            if not isinstance(spec_level, int) or isinstance(spec_level, bool) or not 1 <= spec_level <= 9 or not isinstance(keep, bool):
+                raise SpecError(
+                    "node '" + key + "': 'levels' for '" + port_name
+                    + "' is a whole number from 1 (individual items, @L1) up, or {\"level\": n, \"keep\": true}")
+            bn.levels[port_name] = (spec_level, keep)
         nodes.append(bn)
         by_key[key] = bn
     spec["_notes_from_nodes"] = notes_from_nodes
@@ -1544,6 +1585,10 @@ def build_nodes_and_wires(spec: dict, stem: str) -> tuple[list[BNode], list[Wire
         if w:
             warnings.append(w)
         wires.append(Wire(src, sp, dst, dp))
+    for n in nodes:
+        for port_name in n.levels:
+            if port_name not in n.wired_in:
+                raise SpecError("node '" + n.key + "': 'levels' on '" + port_name + "', which has no wire; list levels apply to a wired list")
     # required inputs
     for n in nodes:
         for p in n.defn.inputs:
@@ -1752,12 +1797,13 @@ def app_version() -> str:
 
 def _port_json(n: BNode, p: PortInfo) -> dict:
     wired = p.name in n.wired_in
+    level, keep = n.levels.get(p.name, (-1, False))
     out: dict[str, Any] = {
         "Name": p.name,
         "UsingDefaultValue": bool(p.has_default and not wired),
-        "Level": -1,
-        "UseLevels": False,
-        "KeepListStructure": False,
+        "Level": level,
+        "UseLevels": p.name in n.levels,
+        "KeepListStructure": keep,
     }
     if p.name in n.player_inputs:
         out["Player"] = True

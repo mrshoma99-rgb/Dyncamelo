@@ -1,0 +1,21 @@
+{
+  "name": "Find by GUID",
+  "description": "Reads a column of GUIDs from a worksheet, selects the matching items and lists the GUIDs that matched nothing.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "sheet", "node": "Table.FromExcelFile", "values": {"path": "C:\\Data\\guids.xlsx"}},
+    {"id": "column", "node": "Table.Column", "values": {"column": "GUID"}},
+    {"id": "find", "node": "Search.ByGuid"},
+    {"id": "select", "node": "Selection.SetCurrent"},
+    {"id": "missing", "node": "Watch List", "title": "GUIDs not found"}
+  ],
+  "wires": [
+    "sheet.table -> column.table",
+    "column.values -> find.guids",
+    "find.items -> select.items",
+    "find.missing -> missing.list"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: reads the GUID column, finds every item with one of those GUIDs in a single pass, selects them in Navisworks and lists the GUIDs that matched no item. TO CHANGE: the file path and the column name."}
+  ]
+}

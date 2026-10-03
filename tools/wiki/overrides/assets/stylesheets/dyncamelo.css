@@ -153,21 +153,53 @@
   .dyc-btn svg { width: 1rem; height: 1rem; }
 }
 
-/* On a phone the buttons move into the drawer. */
+/* On a phone the buttons move into the drawer, at its foot (they stay in view at every level of the menu). */
 .dyc-drawer-actions { display: none; }
 @media screen and (max-width: 35.984em) {
   .dyc-actions { display: none; }
-  .md-nav--primary .dyc-drawer-actions {
+  .md-sidebar--primary .md-sidebar__scrollwrap { padding-bottom: 7.5rem; box-sizing: border-box; }
+  .md-sidebar--primary .dyc-drawer-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.8rem;
+    gap: 0.4rem;
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.6rem 0.8rem;
+    background: var(--md-default-bg-color);
     border-top: 1px solid var(--md-default-fg-color--lightest);
   }
-  .dyc-drawer-actions .dyc-btn { width: auto; height: 2rem; padding: 0 0.8rem; font-size: 0.7rem; justify-content: flex-start; }
-  .dyc-drawer-actions .dyc-btn__text { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .dyc-drawer-actions .dyc-btn {
+    width: auto;
+    height: auto;
+    min-height: 1.9rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.65rem;
+    justify-content: flex-start;
+    white-space: normal;
+    text-align: left;
+  }
+  .dyc-drawer-actions .dyc-btn__text { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
   .dyc-drawer-actions .dyc-btn svg { width: 0.95rem; height: 0.95rem; }
-  .dyc-sitename { font-size: 0.7rem; margin-left: 0.4rem; padding-left: 0.4rem; }
+}
+
+/* Narrow screens: the logo and the name shrink so the menu, the toggle and the search icon all fit (checked at 360 px). */
+@media screen and (max-width: 35.984em) {
+  :root { --dyc-logo-h: 26px; }
+  .dyc-sitename {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.62rem;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  .md-header__inner { padding: 0 0.1rem; }
+  .md-header__option { margin-left: 0; margin-right: 0; flex: none; }
+  .md-header__button { margin-left: 0.1rem; margin-right: 0.1rem; }
 }
 @media screen and (max-width: 29.984em) {
   .dyc-logo { margin-left: 0; }
@@ -227,6 +259,7 @@
   border: 1px solid var(--md-default-fg-color--lightest);
   border-radius: 0.3rem;
 }
+.md-typeset figure br { display: none; }
 .md-typeset figcaption { color: var(--md-default-fg-color--light); font-size: 0.7rem; margin-top: 0.5rem; }
 
 /* Tables: the header row is quiet, the rows are easy to follow. */
@@ -268,6 +301,8 @@
 .md-typeset .grid.cards > ul > li > p:first-child a, .md-typeset .grid.cards > ul > li > p:first-child strong { font-weight: 700; }
 .md-typeset .grid.cards > ul > li > p .twemoji, .md-typeset .grid.cards > ul > li > p .lg { color: var(--md-accent-fg-color); }
 .md-typeset .grid.cards > ul > li > hr { margin: 0.6em 0; }
+/* Three cards in a row where there is room (Material's default is two). */
+.md-typeset .grid.cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
 /* A quick-links strip: small cards in one row where there is room. */
 .md-typeset .grid.cards.quick-links { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.6rem; }
 .md-typeset .grid.cards.quick-links > ul > li { padding: 0.6rem 0.8rem; font-size: 0.7rem; }

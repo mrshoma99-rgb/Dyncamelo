@@ -75,6 +75,8 @@ Hover the node, or read the balloon above it. It holds the message.
 | **Amber** border | The node ran with a warning, or an input node upstream failed ("Upstream failure: one or more input nodes are in an error state."). | If it says upstream, find the first red node before it and fix that. |
 | **Idle**, no coloured border | The node did not run. "Input 'x' is not connected." means a required input has no wire and no value. "Skipped: an input comes from a branch that was switched off (Flow.When was false)." means a `Flow.When` upstream was false. | Connect the input, or change the condition. This is not an error. |
 
+![A red node with its message, an amber node and idle nodes behind a false Flow.When, with the counts in the status bar.](images/wiki-errors-and-warnings.png)
+
 Ways to find the cause faster:
 
 * The **Errors** and **Warnings** counts in the status bar are buttons (or press `Ctrl+Shift+E`). They list every problem node; `F8` and `Shift+F8` step through them.
@@ -128,6 +130,8 @@ Select the node and press `I` to see which of these applies.
 
 Typing the name by hand always works; the magnifier only helps you fill it in. It reads at most the first 100 elements of a longer list.
 
+![The magnifier popup on Properties.Value, listing tab names.](images/wiki-magnifier.png)
+
 ## The start screen is missing
 
 The start screen (cards for a new script, recent scripts and examples, the version and a link to bimcamel.com) shows only while the canvas is **empty**: it goes as soon as you add a node or open a script, and comes back when you delete every node or choose **File ▸ New**. If you never see it, check **Settings ▸ Appearance ▸ Start screen on an empty canvas**; with it off, an empty canvas stays empty. The **New script** card puts the cards away and leaves only a short hint line on the empty canvas.
@@ -135,6 +139,8 @@ The start screen (cards for a new script, recent scripts and examples, the versi
 ## A run is slow on a large model
 
 Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)").
+
+![The progress overlay during a run: the working node and the hint that Esc cancels.](images/wiki-run-progress.png)
 
 * **Stop a run with `Esc`.** It halts before the next node (or between items of a node working through a list). A single Navisworks call already under way cannot be interrupted. The next **Run** continues where it stopped; what finished nodes already changed in Navisworks is kept.
 * **Switch Auto-Run off** on big models, and run with `F5` when you are ready.

@@ -1,0 +1,580 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "347c28e10239eb9a8710241b6e6aca38",
+  "Name": "Properties from Excel",
+  "Description": "Joins a worksheet to model items by GUID and writes its Cost and Supplier columns onto each item as a property tab.",
+  "Nodes": [
+    {
+      "Id": "cb7b8d4971108f45fbd5740200ef464a",
+      "NodeType": "StringInput",
+      "Name": "Category to enrich",
+      "X": 0.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Walls"
+      }
+    },
+    {
+      "Id": "2aab39489c13b932bb6ca5332acc370e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByProperty",
+      "X": 350.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Category"
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "mode",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "fe5ce8ae683c08e0075c76093d679c1e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Split columns",
+      "X": 350.0,
+      "Y": 290.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "@Guid,@Name"
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": ","
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "7448f3a9ac6215691d10012a30a44daa",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Items as a table",
+      "X": 730.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "properties",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "be84a9143e50137b69c3fcb80a7732c4",
+      "NodeType": "FilePath",
+      "Name": "Workbook",
+      "X": 350.0,
+      "Y": 470.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "C:\\Data\\walls.xlsx"
+      }
+    },
+    {
+      "Id": "2c4c15e7a9b16265b41fb1720a06d5ff",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.FromExcelFile",
+      "X": 730.0,
+      "Y": 430.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "sheet",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "firstRowIsHeader",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b6ae3d28793f6ef1ef26da375505e80e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Join@Dyncamelo.Nodes.DyncameloTable,Dyncamelo.Nodes.DyncameloTable,string,string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.Join",
+      "X": 1080.0,
+      "Y": 210.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "left",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "right",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "leftKey",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "@Guid"
+        },
+        {
+          "Name": "rightKey",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "GUID"
+        },
+        {
+          "Name": "kind",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "left"
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b520439104a1dab64c6e32813aefa4be",
+      "NodeType": "WatchTable",
+      "Name": "Joined table",
+      "X": 1430.0,
+      "Y": 20.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "f18317212f72178ed1749b0424d5831a",
+      "NodeType": "StringInput",
+      "Name": "Columns to write",
+      "X": 1080.0,
+      "Y": 480.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Cost,Supplier"
+      }
+    },
+    {
+      "Id": "49930ea44a4e902feabb9eb376b1a027",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.SelectColumns@Dyncamelo.Nodes.DyncameloTable,System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.SelectColumns",
+      "X": 1430.0,
+      "Y": 320.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "columns",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "f7486933dcee7c2ea7e96194735c3efa",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Rows@Dyncamelo.Nodes.DyncameloTable",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.Rows",
+      "X": 1810.0,
+      "Y": 290.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "rows"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e3d19ff766987923a562af138e7b99c9",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Split names",
+      "X": 1810.0,
+      "Y": 100.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Cost,Supplier"
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": ","
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "bf5812dd2ae81c3bddbdb13c58d36225",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.CustomPropertyNodes.SetCustom@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<object>,string,bool",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Properties.SetCustom",
+      "X": 2160.0,
+      "Y": 70.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "modelItems",
+          "UsingDefaultValue": false,
+          "Level": 1,
+          "UseLevels": true,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "names",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "values",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": true,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "tabName",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Spreadsheet"
+        },
+        {
+          "Name": "merge",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "modelItems"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "c620081c99f83ef86d87811c8c555a6f",
+      "FromNode": "cb7b8d4971108f45fbd5740200ef464a",
+      "FromPort": "value",
+      "ToNode": "2aab39489c13b932bb6ca5332acc370e",
+      "ToPort": "value"
+    },
+    {
+      "Id": "7c2373e8a52eeb78efe8567efc4ba2e4",
+      "FromNode": "2aab39489c13b932bb6ca5332acc370e",
+      "FromPort": "items",
+      "ToNode": "7448f3a9ac6215691d10012a30a44daa",
+      "ToPort": "items"
+    },
+    {
+      "Id": "fce585080ba2e351dabe56b83c395674",
+      "FromNode": "fe5ce8ae683c08e0075c76093d679c1e",
+      "FromPort": "list",
+      "ToNode": "7448f3a9ac6215691d10012a30a44daa",
+      "ToPort": "properties"
+    },
+    {
+      "Id": "bc7e11bf1747a9addca80ed18a7ee70c",
+      "FromNode": "be84a9143e50137b69c3fcb80a7732c4",
+      "FromPort": "path",
+      "ToNode": "2c4c15e7a9b16265b41fb1720a06d5ff",
+      "ToPort": "path"
+    },
+    {
+      "Id": "fd6bac2b980db3510723c37fa39215bc",
+      "FromNode": "7448f3a9ac6215691d10012a30a44daa",
+      "FromPort": "table",
+      "ToNode": "b6ae3d28793f6ef1ef26da375505e80e",
+      "ToPort": "left"
+    },
+    {
+      "Id": "39c9924b020a19750ef9bab4782a7a5c",
+      "FromNode": "2c4c15e7a9b16265b41fb1720a06d5ff",
+      "FromPort": "table",
+      "ToNode": "b6ae3d28793f6ef1ef26da375505e80e",
+      "ToPort": "right"
+    },
+    {
+      "Id": "f292c2f8f5164828064658d0bd429409",
+      "FromNode": "b6ae3d28793f6ef1ef26da375505e80e",
+      "FromPort": "table",
+      "ToNode": "b520439104a1dab64c6e32813aefa4be",
+      "ToPort": "table"
+    },
+    {
+      "Id": "5b5e9973a421879efa16d347cba067fd",
+      "FromNode": "b6ae3d28793f6ef1ef26da375505e80e",
+      "FromPort": "table",
+      "ToNode": "49930ea44a4e902feabb9eb376b1a027",
+      "ToPort": "table"
+    },
+    {
+      "Id": "b99dcf00455464b98d0513fd17c1e6ab",
+      "FromNode": "f18317212f72178ed1749b0424d5831a",
+      "FromPort": "value",
+      "ToNode": "49930ea44a4e902feabb9eb376b1a027",
+      "ToPort": "columns"
+    },
+    {
+      "Id": "349c827a9cd707fd7f36a42449c715b5",
+      "FromNode": "49930ea44a4e902feabb9eb376b1a027",
+      "FromPort": "table",
+      "ToNode": "f7486933dcee7c2ea7e96194735c3efa",
+      "ToPort": "table"
+    },
+    {
+      "Id": "82e68c7bbc7e80d69569e633fe210813",
+      "FromNode": "2aab39489c13b932bb6ca5332acc370e",
+      "FromPort": "items",
+      "ToNode": "bf5812dd2ae81c3bddbdb13c58d36225",
+      "ToPort": "modelItems"
+    },
+    {
+      "Id": "e738f94e27d7a5b6d117d4dc0f498d0e",
+      "FromNode": "e3d19ff766987923a562af138e7b99c9",
+      "FromPort": "list",
+      "ToNode": "bf5812dd2ae81c3bddbdb13c58d36225",
+      "ToPort": "names"
+    },
+    {
+      "Id": "d671cc467af2cde36314778f9c33e8a4",
+      "FromNode": "f7486933dcee7c2ea7e96194735c3efa",
+      "FromPort": "rows",
+      "ToNode": "bf5812dd2ae81c3bddbdb13c58d36225",
+      "ToPort": "values"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "14844d613695eac83c6591baf8e1ca9d",
+      "Text": "WHAT IT DOES: joins the worksheet to the found items by GUID, then writes the Cost and Supplier columns onto each item as a property tab called Spreadsheet. The list levels on modelItems (@L1) and values (@L2) make Properties.SetCustom run once per item, with item 1 paired with row 1. TO CHANGE: the category, the workbook path, the column names and the tab name.",
+      "X": 0.0,
+      "Y": -210.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

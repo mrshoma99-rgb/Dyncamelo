@@ -21,8 +21,8 @@ Goal: hand clash results to a BCF tool such as BIMcollab, Konekt, Revizto or Aut
 1. Add `Clash.Tests` (*Navisworks ▸ Clash ▸ Tests*) for the list of tests.
 2. Add `List.GetItemAtIndex` (*List*). Wire `tests` into `list` and type `0` into `index` for the first test. A negative index counts from the end.
 3. Add `ClashTest.Results` (*Navisworks ▸ Clash ▸ Tests*). Wire `item` into its `test`.
-4. Add `BCF.ExportIssues` (*Navisworks ▸ Export*). Wire `results` into `results`. Type a **full path** into `filePath`, for example `C:\Temp\clashes.bcfzip`.
-5. Add a `Watch` (*Display*) on `topicCount` and press ++f5++.
+4. Add `BCF.ExportIssues` (*Navisworks ▸ Export*). Wire `results` into `results`. Type a **full path** into `filePath`, for example `C:\Reports\clash-issues.bcfzip`.
+5. Add a `Watch` (*Display*) on `topicCount`, rename it `Topics exported`, and press ++f5++.
 
 ![The BCF export graph: Clash.Tests, List.GetItemAtIndex, ClashTest.Results and BCF.ExportIssues.](../../images/wiki-graph-bcf-export.png)
 
@@ -32,16 +32,19 @@ Each result becomes a topic with a markup, a camera viewpoint, the GUIDs of its 
 
 [Download the graph](../graphs/bcf-import.dyc)
 
-1. Add `BCF.ImportIssues` (*Navisworks ▸ Export*). Type the full path of a `.bcfzip` (BCF 2.0 or 2.1) into `filePath`.
-2. Add `Selection.SetCurrent` (*Navisworks ▸ Selection*). Wire `modelItems` into `items`. The elements named in the topics are selected.
-3. For the titles, add `List.GetItemAtIndex`, wire `topics` into `list` and type `0` into `index`. Add `Dictionary.ValueOrDefault` (*Dictionary*), wire `item` into `dictionary` and type `title` into `key`. Wire `value` into a `Watch`.
-4. Press ++f5++.
+1. Add `BCF.ImportIssues` (*Navisworks ▸ Export*). Type the full path of a `.bcfzip` (BCF 2.0 or 2.1) into `filePath`, for example the file from Part A.
+2. Add an `Integer` node (*Input*), rename it `Topic number` and leave it at `0`.
+3. Add `List.GetItemAtIndex`. Wire `topics` into `list` and `Topic number` into `index`.
+4. Add `Dictionary.ValueOrDefault` (*Dictionary*). Wire `item` into `dictionary` and type `title` into `key`. Wire `value` into a `Watch` and rename it `Topic title`.
+5. Add a second `List.GetItemAtIndex`. Wire `modelItems` into `list` and `Topic number` into `index`. `modelItems` holds one list of items for each topic, in the same order as `topics`.
+6. Add `Selection.SetCurrent` (*Navisworks ▸ Selection*). Wire the `item` output of the second `List.GetItemAtIndex` into its `items`. The elements named in that topic are selected.
+7. Press ++f5++, then change `Topic number` to look at the next topic.
 
-![The BCF import graph: BCF.ImportIssues into Selection.SetCurrent, and the first topic's title in a Watch.](../../images/wiki-graph-bcf-import.png)
+![The BCF import graph: BCF.ImportIssues, two List.GetItemAtIndex nodes picking one topic, Dictionary.ValueOrDefault for its title and Selection.SetCurrent.](../../images/wiki-graph-bcf-import.png)
 
-To list **all** the titles, skip `List.GetItemAtIndex` and wire `topics` straight into `Dictionary.ValueOrDefault`. The wire turns dashed and you get one title for each topic. Each topic is a dictionary with the keys `guid`, `title`, `status`, `type`, `description`, `creationAuthor`, `creationDate`, `comments`, `commentAuthors`, `commentDates`, `componentGuids`, `camera` and `hasSnapshot`.
+To list **all** the titles, skip the first `List.GetItemAtIndex` and wire `topics` straight into `Dictionary.ValueOrDefault`. The wire turns dashed and you get one title for each topic. Each topic is a dictionary with the keys `guid`, `title`, `status`, `type`, `description`, `creationAuthor`, `creationDate`, `comments`, `commentAuthors`, `commentDates`, `componentGuids`, `camera` and `hasSnapshot`.
 
-To jump the view to one issue, set `applyCameraTopicIndex` to its position, counting from 0. The default, `-1`, leaves the view alone.
+To jump the view to one issue, set `applyCameraTopicIndex` to its position, counting from 0. The default, `-1`, leaves the view alone. A topic without a camera, or an index past the last topic, makes the node report an error.
 
 ## What you get
 

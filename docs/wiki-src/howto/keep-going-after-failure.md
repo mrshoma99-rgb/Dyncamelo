@@ -18,18 +18,18 @@ Goal: let a graph carry on when one step can fail, for example reading a file th
 
 ## Steps
 
-1. Add the node that may fail. In the example it is `Table.FromExcelFile` (*Table*) with `path` set to a file that may not exist, such as `C:\Temp\input.xlsx`.
+1. Add the node that may fail. In the example it is `Table.FromExcelFile` (*Table*) with `path` set to a file that may not exist, such as `C:\Data\maybe-missing.xlsx`.
 2. Add `Flow.Try` (*Workflow*). Wire the output of the risky node (`table`) into its `value`. Leave `fallback` empty, or wire in what the rest of the graph should use when the step fails.
 3. Add `Flow.When` (*Workflow*). Wire the `error` output of `Flow.Try` into its `value` and the `failed` output into its `condition`. When `failed` is true the error text passes on. When it is false the nodes after `Flow.When` are skipped and shown idle, not red.
-4. Add `Log.Write` (*File*). Wire the `value` output of `Flow.When` into its `message`. Type a full path such as `C:\Temp\dyncamelo.log` into `path` and `ERROR` into `level`. `level` can also be `INFO`, `WARN` or `DEBUG`.
-5. Wire the `result` output of `Flow.Try` to the rest of your graph, for example a `Watch Table` (*Display*).
+4. Add `Log.Write` (*File*). Wire the `value` output of `Flow.When` into its `message`. Type a full path such as `C:\Logs\dyncamelo.log` into `path` and `WARN` into `level`. `level` can also be `INFO`, `ERROR` or `DEBUG`.
+5. Wire the `result` output of `Flow.Try` to the rest of your graph, for example a `Watch` (*Display*) named `Result (or nothing)`.
 6. Press ++f5++.
 
 ![The graph: a risky node into Flow.Try, then Flow.When on the failed output and Log.Write.](../../images/wiki-graph-keep-going-after-failure.png)
 
 ## What you get
 
-* **File missing:** `Flow.Try` gives your fallback in `result`, `failed` is true and `error` holds the message. `Log.Write` appends one line such as `2026-10-01 10:20:35  ERROR  message` to the log file.
+* **File missing:** `Flow.Try` gives your fallback in `result`, `failed` is true and `error` holds the message. `Log.Write` appends one line such as `2026-10-01 10:20:35  WARN  message` to the log file.
 * **File found:** `result` is the table, `failed` is false, `error` is empty. `Flow.When` is false, so `Log.Write` is skipped and shown idle.
 
 !!! tip "Where else to use it"

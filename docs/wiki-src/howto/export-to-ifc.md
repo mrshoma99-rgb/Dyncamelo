@@ -12,17 +12,17 @@ Goal: write a chosen set of model items to an `.ifc` file, with names you set fo
 
 * Open a model in Navisworks and the Dyncamelo editor.
 * The IFC export engine ships inside Dyncamelo. You do not need another plug-in.
-* Decide where the file goes and use a **full path** that ends in `.ifc`, for example `C:\Exports\steel.ifc`. The folder is created if it is missing.
+* Decide where the file goes and use a **full path** that ends in `.ifc`, for example `C:\Exports\level-02.ifc`. The folder is created if it is missing.
 
 [Download the graph](../graphs/ifc-export.dyc)
 
 ## Steps
 
-1. Add `Search.ByProperty` (*Navisworks ▸ Search*) to choose what to export. For example `categoryName` = `Element`, `propertyName` = `Material`, `value` = `Steel`, `mode` = `contains`.
+1. Add a `String` node (*Input*), rename it `Level to export` and type `Level 02`. Add `Search.ByProperty` (*Navisworks ▸ Search*) to choose what to export: `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into `value`. Use a level name from your model.
 2. Add `Export.ToIfc` (*Navisworks ▸ Export*). Wire the search `items` into its `items`. Type the full path into `filePath`. Only `items` and `filePath` are required.
 3. Add `Export.IfcSpatialNames` (*Navisworks ▸ Export*). Type names into `project`, `site`, `building` and `storey`. Wire its `spatialNames` output into the `spatialNames` input of `Export.ToIfc`.
 4. Add `Export.IfcCoordinates` (*Navisworks ▸ Export*). Leave `basePoint` on `GeometryOrigin` for now. Wire its `coordinates` output into the `coordinates` input of `Export.ToIfc`.
-5. Add a `Watch` (*Display*) for each result you want to see: `elementCount`, `fileCount` and `fileSizeKb`.
+5. Add a `Watch` (*Display*), rename it `Elements exported` and wire `elementCount` into it. You can add more for `fileCount` and `fileSizeKb`.
 6. Switch **Auto** off in the run bar, then press ++f5++. The export reads the geometry of every item and can take a while on a large model.
 
 ![The IFC export graph: a search into Export.ToIfc, with Export.IfcSpatialNames and Export.IfcCoordinates wired into it.](../../images/wiki-graph-ifc-export.png)

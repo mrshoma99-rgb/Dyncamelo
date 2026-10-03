@@ -1,0 +1,332 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "6572127f5898a401bc70816d7ccb4ac6",
+  "Name": "Data completeness",
+  "Description": "Finds the doors that lack a property and shows what percentage of all doors that is.",
+  "Nodes": [
+    {
+      "Id": "d356837fd62a4d22a09a6b62857cb320",
+      "NodeType": "StringInput",
+      "Name": "Category to check",
+      "X": 0.0,
+      "Y": 330.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Doors"
+      }
+    },
+    {
+      "Id": "7dbcc5019a4a6a16450c6d5672f577f7",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByProperty",
+      "X": 350.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Category"
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "mode",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "d5c1e801a4010c3599051204bea2e75d",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AuditNodes.MissingProperty@string,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,bool,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Audit.MissingProperty",
+      "X": 700.0,
+      "Y": 130.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Fire Rating"
+        },
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "geometryOnly",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        },
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "e85178e676456f95b07907affb6791a8",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Missing",
+      "X": 1050.0,
+      "Y": 80.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "05120e74cb2fc506a53d167336d22f50",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "All",
+      "X": 1050.0,
+      "Y": 230.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "count"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "fa047aeaf6b89e9eb77874af7338d2a9",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.MathExtraNodes.Percent@double,double",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Math.Percent",
+      "X": 1400.0,
+      "Y": 110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "part",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "total",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "percent"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a7ed7c4d7eae7dffb0f304e4e85d76de",
+      "NodeType": "Watch",
+      "Name": "Percent missing",
+      "X": 1750.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "9cc7c07c2b0afe49b409dcf472ed1017",
+      "FromNode": "d356837fd62a4d22a09a6b62857cb320",
+      "FromPort": "value",
+      "ToNode": "7dbcc5019a4a6a16450c6d5672f577f7",
+      "ToPort": "value"
+    },
+    {
+      "Id": "5aa1375755cfa10dde3e2ad503a36f73",
+      "FromNode": "7dbcc5019a4a6a16450c6d5672f577f7",
+      "FromPort": "items",
+      "ToNode": "d5c1e801a4010c3599051204bea2e75d",
+      "ToPort": "items"
+    },
+    {
+      "Id": "7b705c3655cecf7f522b5f6445ec6f11",
+      "FromNode": "d5c1e801a4010c3599051204bea2e75d",
+      "FromPort": "items",
+      "ToNode": "e85178e676456f95b07907affb6791a8",
+      "ToPort": "list"
+    },
+    {
+      "Id": "3b2fc3733f78e3d9dca9c9aefa8fe5c5",
+      "FromNode": "7dbcc5019a4a6a16450c6d5672f577f7",
+      "FromPort": "items",
+      "ToNode": "05120e74cb2fc506a53d167336d22f50",
+      "ToPort": "list"
+    },
+    {
+      "Id": "94f6e924e07b7ee2a0f9a0b1050f67bb",
+      "FromNode": "e85178e676456f95b07907affb6791a8",
+      "FromPort": "count",
+      "ToNode": "fa047aeaf6b89e9eb77874af7338d2a9",
+      "ToPort": "part"
+    },
+    {
+      "Id": "aefac7ffd7b77625cbf81330de556b4e",
+      "FromNode": "05120e74cb2fc506a53d167336d22f50",
+      "FromPort": "count",
+      "ToNode": "fa047aeaf6b89e9eb77874af7338d2a9",
+      "ToPort": "total"
+    },
+    {
+      "Id": "c3886a35e0fc68f838fedd23e50a41f3",
+      "FromNode": "fa047aeaf6b89e9eb77874af7338d2a9",
+      "FromPort": "percent",
+      "ToNode": "a7ed7c4d7eae7dffb0f304e4e85d76de",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "094f8b2f8068a75a861aae3bbdb8c9b6",
+      "Text": "WHAT IT DOES: finds the items of one category, picks out those without the required property and shows the share that is missing, so a model can be held to a data standard. TO CHANGE: the category text and the property name on Audit.MissingProperty.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

@@ -11,7 +11,7 @@ Two ideas make most of these short:
 
 **Clash matrix from selection sets.** `SelectionSets.All` (twice, filtered by name with `List.FilterByValue`) → `ClashTest.Create` with *cross product* lacing: one test per pair of sets.
 
-**Triage and report.** `Clash.Tests` → `ClashTest.Results` → `Clash.FilterByStatus` → `Clash.GroupResultsByLevel` → `Clash.SummaryTable` → `Table.FromRows` → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the busiest level first.
+**Triage and report.** `Clash.Tests` → `Clash.SummaryTable` (clash counts per test and status, as `rows` and `headers`) → `Table.FromRows` → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the test with the most clashes first. For one test floor by floor, take it with `List.GetItemAtIndex` and use `Clash.GroupResultsByLevel` (it takes the test, your level names and their elevations); `ClashTest.Results` and `Clash.FilterByStatus` work on the results of a test.
 
 **Keep a history.** `DateTime.Now` → `DateTime.Format` for the file name; `Clash.SnapshotToFile` each week, `Clash.CompareSnapshots` against last week's file; `CSV.AppendToFile` adds one row of totals per run instead of overwriting.
 
@@ -22,6 +22,8 @@ Two ideas make most of these short:
 ## BIM manager
 
 **Data completeness KPI.** `Search.ByProperty` for the category → `Audit.MissingProperty` for the required property → `List.Count` (missing) and `List.Count` (all) → `Math.Percent` → `Watch`.
+
+![The data-completeness graph: a search, Audit.MissingProperty, two List.Count nodes, Math.Percent and a Watch.](images/wiki-graph-data-completeness.png)
 
 **What data does this model have?** `Selection.Current` (or a search) → `Properties.Discover` → `Watch Table`: every category and property with how many items carry it and sample values. Use it before writing any search, so names are not guessed.
 
@@ -60,6 +62,8 @@ Two ideas make most of these short:
 ## Model data and quantities
 
 **Quantity take-off.** `Search.ByProperty` → `Properties.ToTable` (`@Name`, `Item.Category`, `Length`, `Area`) → `Table.GroupBy` (by category; `count`, `sum:Length`, `sum:Area`) → `Table.Sort` → `Table.ToExcelFile`. `Table.AddFormulaColumn` adds a column such as `Length * Width / 1000000`.
+
+![The quantity take-off graph: Search.ByProperty, Properties.ToTable, Table.GroupBy, Table.Sort and Table.ToExcelFile.](images/wiki-graph-qto-to-excel.png)
 
 **Cross-tab.** `Table.Pivot` with rows = level, columns = status and *count*: clashes (or items) by level and status.
 

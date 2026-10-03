@@ -63,3 +63,9 @@ Dyncamelo uses libraries that keep their own permissive licences, such as Nodify
 ## Trademarks
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at run time the API is provided by your licensed Navisworks installation.
+
+## Next steps
+
+* [Installation](installation.md) lists where each copy comes from.
+* [Updating](updating.md) explains how each copy learns about a newer version.
+* [Privacy and safety](privacy-and-safety.md) and the [FAQ](faq.md).

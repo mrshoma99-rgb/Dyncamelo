@@ -11,7 +11,8 @@
 | **A licence that fits your use** | The copy from GitHub or bimcamel.com is free for personal use. For work at a company or in a paid project, the professional copy is coming soon to the Autodesk App Store ([Licence](licence.md#which-copy-do-i-need)). |
 | **Internet** | Not needed. The only network request Dyncamelo makes by itself is the once-a-day look for a newer version, and you can switch that off ([Privacy and safety](privacy-and-safety.md)). |
 
-Nodes that use **Clash Detective** need Navisworks **Manage**, because Simulate does not include Clash Detective.
+!!! warning "Clash nodes need Manage"
+    Nodes that use **Clash Detective** need Navisworks **Manage**, because Simulate does not include Clash Detective. The clash nodes report "Clash Detective is not available in this Navisworks edition." in Simulate.
 
 No other Autodesk product, runtime or licence is needed. The IFC export engine ships inside Dyncamelo, so the IFC nodes need no extra plug-in ([IFC, BCF, Excel and CSV](exchange-formats.md)).
 
@@ -35,3 +36,9 @@ Only needed if you build Dyncamelo from source ([Installation](installation.md#b
 * Windows 10 or 11 with **Visual Studio 2022** (the ".NET desktop development" workload) or the **.NET 8 SDK**.
 * A Navisworks installation is **not** needed to build. The Navisworks API is referenced at compile time through NuGet packages and is never redistributed with Dyncamelo; at run time your own Navisworks provides it.
 * On Linux or macOS the engine, the general node library, the Navisworks node library and the tests build and run; the WPF editor does not.
+
+## Next steps
+
+* [Installation](installation.md) once the requirements are met.
+* [Your first script](first-steps.md) after Dyncamelo is installed.
+* [Licence](licence.md#which-copy-do-i-need) if you are not sure which copy fits your use.

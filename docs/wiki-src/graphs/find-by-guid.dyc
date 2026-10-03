@@ -1,0 +1,230 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "d43cdc6cdbfeb1e85a09f0b50b26eee9",
+  "Name": "Find by GUID",
+  "Description": "Reads a column of GUIDs from a worksheet, selects the matching items and lists the GUIDs that matched nothing.",
+  "Nodes": [
+    {
+      "Id": "cea14b671ccad8da7bec57a57efe57e8",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.FromExcelFile",
+      "X": 0.0,
+      "Y": 280.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Data\\guids.xlsx"
+        },
+        {
+          "Name": "sheet",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "firstRowIsHeader",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "f362d735fbe3617f6c3a8d346037ffd1",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Column@Dyncamelo.Nodes.DyncameloTable,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.Column",
+      "X": 350.0,
+      "Y": 250.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "column",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "GUID"
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "values"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "beff3ec8aafdce99babf80dba8d05c3b",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionExtraNodes.ByGuid@System.Collections.Generic.IList<object>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByGuid",
+      "X": 700.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "guids",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        },
+        {
+          "Name": "missing"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "fe4cffbe1ff58fa2e37942da45619b04",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionNodes.SetCurrent@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Selection.SetCurrent",
+      "X": 1050.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b1f866bde16963f7c98af4237d04f270",
+      "NodeType": "WatchList",
+      "Name": "GUIDs not found",
+      "X": 1050.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "165df3b254fea17dd76f59fc4b078e5d",
+      "FromNode": "cea14b671ccad8da7bec57a57efe57e8",
+      "FromPort": "table",
+      "ToNode": "f362d735fbe3617f6c3a8d346037ffd1",
+      "ToPort": "table"
+    },
+    {
+      "Id": "41daf73b7d8902c23470a5fdc52ab1f7",
+      "FromNode": "f362d735fbe3617f6c3a8d346037ffd1",
+      "FromPort": "values",
+      "ToNode": "beff3ec8aafdce99babf80dba8d05c3b",
+      "ToPort": "guids"
+    },
+    {
+      "Id": "dd38984badb0ddfa5ec53f7cea1d9508",
+      "FromNode": "beff3ec8aafdce99babf80dba8d05c3b",
+      "FromPort": "items",
+      "ToNode": "fe4cffbe1ff58fa2e37942da45619b04",
+      "ToPort": "items"
+    },
+    {
+      "Id": "1ee7e4a208c8f7d3b498ecbe1b3d44b9",
+      "FromNode": "beff3ec8aafdce99babf80dba8d05c3b",
+      "FromPort": "missing",
+      "ToNode": "b1f866bde16963f7c98af4237d04f270",
+      "ToPort": "list"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "08243f14282f9a4bcc9cda36e07f309a",
+      "Text": "WHAT IT DOES: reads the GUID column, finds every item with one of those GUIDs in a single pass, selects them in Navisworks and lists the GUIDs that matched no item. TO CHANGE: the file path and the column name.",
+      "X": 0.0,
+      "Y": -140.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

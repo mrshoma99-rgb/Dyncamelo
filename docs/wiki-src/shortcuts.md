@@ -4,6 +4,11 @@ Every keyboard shortcut and mouse gesture of the Dyncamelo editor, grouped by ar
 
 The shortcuts shown here are the **defaults**. You can change any of them in **Settings ▸ Shortcuts** (see [Settings](settings.md#shortcuts)), and the in-app sheet that opens with ++f1++ always shows the keys currently in force. Every command can also be reached from a menu and from the command palette (++ctrl+shift+p++), so you never have to remember a key.
 
+![The F1 sheet of keyboard shortcuts and mouse gestures, showing the keys in force.](../images/wiki-shortcuts.png)
+
+!!! tip "Do not memorise this page"
+    Press ++f1++ in the editor for the same sheet with the keys currently in force, or press ++ctrl+shift+p++ and type a word of the command's name.
+
 ## How to read the tables
 
 * **Canvas** in the *Works* column means the shortcut acts only while the canvas has the keyboard, so typing in a text box never triggers it.
@@ -11,6 +16,9 @@ The shortcuts shown here are the **defaults**. You can change any of them in **S
 * *(toggle)* marks a command that switches something on and off.
 * A dash means the command has no shortcut by default. It is still in its menu and the palette, and you can give it one.
 * Keys work when the Dyncamelo pane has the keyboard focus (click the canvas first). While it does, Dyncamelo's keys take priority over Navisworks's own for the same keys.
+
+!!! note "Keys do nothing?"
+    Keys work when the Dyncamelo pane has the keyboard focus. Click the canvas first.
 
 ## File
 
@@ -142,6 +150,7 @@ See [Node groups](node-groups.md).
 | UI Guide (online) | — | Canvas |
 | BIMCamel Website | — | Canvas |
 | Get the Newest Version… | — | Canvas |
+| Autodesk App Store… | — | Canvas |
 | Keyboard & Mouse Shortcuts | ++f1++ | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |
@@ -217,4 +226,7 @@ These belong to a particular box or pane and are not in the command list.
 
 Open the command palette with ++ctrl+shift+p++, type a word of the command's name, and the palette lists the matching commands with their shortcuts at the right. To see everything at once, press ++f1++.
 
-Related: [The editor: canvas and nodes](canvas-and-nodes.md), [Node library and search](library-and-search.md), [Settings](settings.md).
+## Next steps
+
+* [The editor: canvas and nodes](canvas-and-nodes.md), [Node library and search](library-and-search.md) and [Settings](settings.md#shortcuts), where you change a key.
+* [Your first script](first-steps.md) uses the handful of keys you need on day one.

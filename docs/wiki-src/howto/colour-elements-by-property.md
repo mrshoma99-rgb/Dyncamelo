@@ -24,6 +24,8 @@ Goal: paint model items by what a property says, first with one colour for a mat
 4. Click the swatch on its `color` input and choose red. You can also wire a `String` node that holds `#FF0000`.
 5. Press ++f5++. Every matching item turns red in the Navisworks view.
 
+The downloadable graph keeps the text `Concrete` in a `String` node wired to `value`, and also saves the items as a selection set ([Save selection sets](save-selection-sets.md)). Typing the text into the box does the same.
+
 ![The finished graph: Search.ByProperty into Appearance.OverrideColor and SelectionSet.Create, with a Watch List on the search result.](../../images/wiki-first-script.png)
 
 To take the colour back, use `Appearance.Reset` on the same items, or `Appearance.ResetAll` for the whole model (both in *Navisworks ▸ Appearance*).

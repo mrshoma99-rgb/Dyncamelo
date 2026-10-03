@@ -1,0 +1,22 @@
+{
+  "name": "Keep going after a failure",
+  "description": "Reads a worksheet that may be missing and, if that fails, logs the reason instead of stopping the run.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "risky", "node": "Table.FromExcelFile", "title": "Risky step", "values": {"path": "C:\\Temp\\input.xlsx"}},
+    {"id": "try", "node": "Flow.Try"},
+    {"id": "result", "node": "Watch Table", "title": "Result (or nothing)"},
+    {"id": "gate", "node": "Flow.When", "title": "Only if it failed"},
+    {"id": "log", "node": "Log.Write", "values": {"path": "C:\\Temp\\dyncamelo.log", "level": "ERROR"}}
+  ],
+  "wires": [
+    "risky.table -> try.value",
+    "try.result -> result.table",
+    "try.error -> gate.value",
+    "try.failed -> gate.condition",
+    "gate.value -> log.message"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: Flow.Try catches a failure of the node before it, so nothing after it turns red; Flow.When lets the logging run only when it did fail, and Log.Write adds the error text to the log file. TO CHANGE: put any risky node where the worksheet reader is, and set the log path."}
+  ]
+}

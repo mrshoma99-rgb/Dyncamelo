@@ -19,6 +19,8 @@ All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\Ap
 
 **Help ▸ Copy Diagnostics** and **Help ▸ Run Self-Test** put a text report on the clipboard when you ask. Your user name, computer name and profile folder are replaced in it, and no model or graph names are included. Dyncamelo does not send the report anywhere; you decide whether to paste it into a bug report.
 
+![The Privacy page of Settings, with the once-a-day update check switched on.](../images/wiki-settings-privacy.png)
+
 ### What it sends over the network
 
 One thing, and you can switch it off.
@@ -38,7 +40,8 @@ Dyncamelo keeps nothing on any server. Close Navisworks and delete the folder `%
 
 ## What a graph can do
 
-**A graph is a program. Only run graphs you trust.**
+!!! danger "A graph is a program. Only run graphs you trust."
+    A `.dyc` file has no program code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. Read the table below before you run a graph from someone else.
 
 A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no program code of its own, and there is no node that runs Python or C# code you type in. (`Math.Formula` and `Table.AddFormulaColumn` use a small arithmetic parser.) But the **nodes** do real work when the graph runs, and a graph can use any of them:
 
@@ -84,3 +87,9 @@ Advice:
 Please report a vulnerability **privately**, with GitHub's private security advisories: open the repository's **Security** tab, then **Report a vulnerability** (direct link: <https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new>). Say which Dyncamelo version and Navisworks year it affects and how to reproduce it; a small `.dyc` file that shows the problem helps a lot. Please do not open a public issue or post details before it is fixed.
 
 What counts: a `.dyc` file that makes Dyncamelo do something harmful *without* any of the nodes in the table above, a way round the questions it asks, or the installer writing outside its own folder or running a file it should not. What does not count: a graph doing what its nodes say after you chose to run it. Only the latest release gets security fixes.
+
+## Next steps
+
+* [Settings](settings.md#privacy) shows where to switch off the update check.
+* [The Script Player](player.md#safety-scripts-that-change-things) shows the question for scripts that change things.
+* [Saving and opening scripts](saving-opening.md#sharing-a-script) covers sharing a script safely.

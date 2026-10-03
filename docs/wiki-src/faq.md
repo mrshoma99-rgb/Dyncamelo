@@ -119,7 +119,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. The number is in document units. The other modes are `equals`, `contains` and `wildcard` (`*` matches any text, `?` one character). See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Is the text search case sensitive?"
-    The documentation of the contains search says it is case sensitive, like Find Items, so type the capitals as Navisworks shows them. If a search finds less than you expect, wire the result into a `Watch List` and try `wildcard`.
+    The documentation of the contains search says it is case sensitive, like Find Items, so type the capitals as Navisworks shows them. If a search finds less than you expect, wire the result into a `Watch List` and try `wildcard`. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Can I search on two properties?"
     Yes. Chain searches: wire the `items` of a `Search.ByProperty` into a `Search.InItems`, which looks only inside the items it is given. See [Search nodes](nodes/navisworks-search.md#node-search-initems).
@@ -143,7 +143,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     ![The three lacing modes side by side, with their results.](../images/wiki-lacing-modes.png)
 
 ??? question "A list has empty items. How do I remove them?"
-    Put `List.Clean` after the node that made them. A node that gets an empty item inside a list returns an empty result for it, and shows one amber warning that counts them.
+    Put `List.Clean` after the node that made them. A node that gets an empty item inside a list returns an empty result for it, and shows one amber warning that counts them. See [Concepts](concepts.md#lists-replication-and-lacing).
 
 ??? question "Can I wire several searches into one input?"
     Yes, if the socket is a pill. A pill takes any number of wires and combines them into one list in the order the wires were made. See [Inputs, outputs and kinds](ports-and-kinds.md#shape-one-value-or-a-list).
@@ -204,7 +204,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     No. The export engine ships inside Dyncamelo. See [Export model items to IFC](howto/export-to-ifc.md).
 
 ??? question "Which IFC versions can it write?"
-    `IFC4` (the default) and `IFC2x3`, set with the `schema` input of `Export.ToIfc`.
+    `IFC4` (the default) and `IFC2x3`, set with the `schema` input of `Export.ToIfc`. See [Export model items to IFC](howto/export-to-ifc.md).
 
 ??? question "A file node fails with 'access denied'."
     Give a full path, for example `C:\Users\you\Documents\report.xlsx`. A relative path points into the Navisworks install folder, which ordinary users cannot write to. See [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
@@ -277,4 +277,4 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Yes, through the plug-in `Dyncamelo.Run.DYNC`: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and asks the same confirmation as the Player. See [The Script Player](player.md#running-a-script-from-other-tools).
 
 ??? question "Is Dyncamelo connected to Autodesk?"
-    No. It is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.
+    No. It is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. See [Licence](licence.md#trademarks).

@@ -6,7 +6,7 @@ summary: Count the items that lack a required property and show the share as a p
 
 # Check how complete your data is
 
-Goal: get a single number that says how many items in a group are missing a property they should have, for example how many walls have no Material.
+Goal: get a single number that says how many items in a group are missing a property they should have, for example how many doors have no Fire Rating.
 
 ## Before you start
 
@@ -17,13 +17,14 @@ Goal: get a single number that says how many items in a group are missing a prop
 
 ## Steps
 
-1. Add `Search.ByProperty` (*Navisworks ▸ Search*) to find the items to check. For example `categoryName` = `Element`, `propertyName` = `Category`, `value` = `Walls`, `mode` = `equals`.
-2. Add `Audit.MissingProperty` (*Navisworks ▸ Analysis*). Wire the search `items` into its `items`. Type `Element` into `categoryName` and `Material` into `propertyName`. It finds the items that do **not** carry the property.
-3. Add a `List.Count` (*List*). Wire the `items` output of `Audit.MissingProperty` into its `list`. This is the number missing.
-4. Add a second `List.Count`. Wire the search `items` into its `list`. This is the number checked.
-5. Add `Math.Percent` (*Math*). Wire the first count into `part` and the second into `total`.
-6. Add a `Watch` (*Display*) and wire `percent` into it.
-7. Press ++f5++.
+1. Add a `String` node (*Input*). Double-click its title and rename it `Category to check`. Type `Doors` as the text.
+2. Add `Search.ByProperty` (*Navisworks ▸ Search*) to find the items to check. Type `Element` into `categoryName`, `Category` into `propertyName`, and leave `mode` on `equals`. Wire the `String` into `value`.
+3. Add `Audit.MissingProperty` (*Navisworks ▸ Analysis*). Wire the search `items` into its `items`. Type `Element` into `categoryName` and the property each item must carry, here `Fire Rating`, into `propertyName`. It finds the items that do **not** carry the property.
+4. Add a `List.Count` (*List*), rename it `Missing`, and wire the `items` output of `Audit.MissingProperty` into its `list`. This is the number missing.
+5. Add a second `List.Count`, rename it `All`, and wire the search `items` into its `list`. This is the number checked.
+6. Add `Math.Percent` (*Math*). Wire `count` from `Missing` into `part` and `count` from `All` into `total`.
+7. Add a `Watch` (*Display*), rename it `Percent missing`, and wire `percent` into it.
+8. Press ++f5++.
 
 ![The data-completeness graph: a search, Audit.MissingProperty, two List.Count nodes, Math.Percent and a Watch.](../../images/wiki-graph-data-completeness.png)
 

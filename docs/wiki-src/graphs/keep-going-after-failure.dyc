@@ -1,0 +1,248 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "812be61e7e31cac24d8b1de8068a5da2",
+  "Name": "Keep going after a failure",
+  "Description": "Reads a worksheet that may be missing and, if that fails, logs the reason instead of stopping the run.",
+  "Nodes": [
+    {
+      "Id": "603dfcb1651b8b2abc685f3c818cd0a3",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Risky step",
+      "X": 0.0,
+      "Y": 320.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Temp\\input.xlsx"
+        },
+        {
+          "Name": "sheet",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "firstRowIsHeader",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "6bc3123197edb9307f1484acc68140b6",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Try@object,object",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Flow.Try",
+      "X": 350.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "fallback",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "result"
+        },
+        {
+          "Name": "failed"
+        },
+        {
+          "Name": "error"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "910e29e304cfa8dfec420d50054e6e1c",
+      "NodeType": "WatchTable",
+      "Name": "Result (or nothing)",
+      "X": 700.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "67f5f7a0272fe1d491848061f1625f26",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.When@object,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Only if it failed",
+      "X": 700.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "condition",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "37b8027b6843a8c65fd2bc38549a9f6e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FileExtraNodes.WriteLog@string,string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Log.Write",
+      "X": 1080.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Temp\\dyncamelo.log"
+        },
+        {
+          "Name": "message",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "level",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "ERROR"
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "line"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "cfe81327091d28123ebe4d8f0ab3ba1a",
+      "FromNode": "603dfcb1651b8b2abc685f3c818cd0a3",
+      "FromPort": "table",
+      "ToNode": "6bc3123197edb9307f1484acc68140b6",
+      "ToPort": "value"
+    },
+    {
+      "Id": "2d62555389e1aeacd4d33cacb3800da7",
+      "FromNode": "6bc3123197edb9307f1484acc68140b6",
+      "FromPort": "result",
+      "ToNode": "910e29e304cfa8dfec420d50054e6e1c",
+      "ToPort": "table"
+    },
+    {
+      "Id": "42851e7e129cdd9aedbd25f1b741501c",
+      "FromNode": "6bc3123197edb9307f1484acc68140b6",
+      "FromPort": "error",
+      "ToNode": "67f5f7a0272fe1d491848061f1625f26",
+      "ToPort": "value"
+    },
+    {
+      "Id": "1f4ae035656c728e7cb849ef62c1d65d",
+      "FromNode": "6bc3123197edb9307f1484acc68140b6",
+      "FromPort": "failed",
+      "ToNode": "67f5f7a0272fe1d491848061f1625f26",
+      "ToPort": "condition"
+    },
+    {
+      "Id": "682bb1746ea872d62029e67313576ed0",
+      "FromNode": "67f5f7a0272fe1d491848061f1625f26",
+      "FromPort": "value",
+      "ToNode": "37b8027b6843a8c65fd2bc38549a9f6e",
+      "ToPort": "message"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "fa62116a6c69b55ac98b409a06063230",
+      "Text": "WHAT IT DOES: Flow.Try catches a failure of the node before it, so nothing after it turns red; Flow.When lets the logging run only when it did fail, and Log.Write adds the error text to the log file. TO CHANGE: put any risky node where the worksheet reader is, and set the log path.",
+      "X": 0.0,
+      "Y": -180.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

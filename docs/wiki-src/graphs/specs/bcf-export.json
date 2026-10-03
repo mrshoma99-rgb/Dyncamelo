@@ -6,7 +6,7 @@
     {"id": "tests", "node": "Clash.Tests"},
     {"id": "first", "node": "List.GetItemAtIndex", "title": "Pick a test", "values": {"index": 0}},
     {"id": "results", "node": "ClashTest.Results"},
-    {"id": "export", "node": "BCF.ExportIssues", "values": {"filePath": "C:\\Reports\\clash-issues.bcfzip"}},
+    {"id": "export", "node": "BCF.ExportIssues", "values": {"filePath": "C:\\Temp\\clashes.bcfzip"}},
     {"id": "count", "node": "Watch", "title": "Topics exported"}
   ],
   "wires": [

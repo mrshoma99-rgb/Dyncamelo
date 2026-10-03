@@ -1,55 +1,57 @@
 ---
 title: Write spreadsheet data onto model items
 order: 80
-summary: Match the rows of an Excel sheet to model items by GUID and store the values in a property tab of your own.
+summary: Read an Excel sheet row by row, find the item for each GUID and store the value in a property tab of your own.
 ---
 
 # Write spreadsheet data onto model items
 
-Goal: take columns such as `Cost` and `Supplier` from an Excel sheet and store them as a searchable property tab on the matching items.
+Goal: take a value such as a classification from each row of an Excel sheet and store it as a searchable property on the item with the matching GUID.
 
 ## Before you start
 
 * Open a model in Navisworks and the Dyncamelo editor.
-* Have an `.xlsx` file with one row for each item. One column holds the item's instance GUID (here with the header `GUID`), and the other columns hold the data (here `Cost` and `Supplier`). The first row holds the headers.
-* Keys are compared as exact text. A GUID in capitals does not match one in lower case.
+* Have an `.xlsx` file with one row for each item. Column A holds the item's instance GUID as text, and column B holds the value, here a classification. The first row holds headers.
 * Save the model first. The values are written into the open document. The source files of the model are never changed.
 
 [Download the graph](../graphs/properties-from-excel.dyc)
 
 ## Steps
 
-1. Add `Search.ByProperty` (*Navisworks ▸ Search*) to find the items that should get the data, for example `Element` / `Category` / `Walls` / `equals`.
-2. Add `Properties.ToTable` (*Navisworks ▸ Properties*). Wire the search `items` into `items`. For `properties`, add a `String.Split` (*String*) with the text `@Guid,@Name` and the separator `,`, and wire its `list` in. `@Guid` is the item's instance GUID.
-3. Add a `File Path` (*Input*) with the full path of the workbook, and a `Table.FromExcelFile` (*Table*). Wire the path in.
-4. Add `Table.Join` (*Table*). Wire the `Properties.ToTable` table into `left` and the Excel table into `right`. Type `@Guid` into `leftKey`, `GUID` into `rightKey` and choose `left` in `kind`. A left join keeps every item, in the same order as the search.
-5. Add a `Watch Table` (*Display*) on the joined table and press ++f5++. Check that `Cost` and `Supplier` are filled. An empty cell means the sheet has no row for that item.
-6. Add `Table.SelectColumns` (*Table*) with `columns` = `Cost,Supplier`, then `Table.Rows` (*Table*). `rows` is a list with one list of cells for each item.
-7. Add `Properties.SetCustom` (*Navisworks ▸ Properties*). Wire the search `items` into `modelItems` and `rows` into `values`. For `names`, add another `String.Split` with the text `Cost,Supplier` and the separator `,`. Type `Spreadsheet` into `tabName`.
-8. Right-click the `modelItems` socket, choose **List Levels** and then `@L1 — items`. Right-click the `values` socket, choose **List Levels** and then `@L2 — lists of items`.
-9. Press ++f5++ again.
+1. Add `Table.FromExcelFile` (*Table*). Type the full path of the workbook into `path`, for example `C:\Data\classification.xlsx`. Leave `firstRowIsHeader` ticked, so the header row is not treated as data.
+2. Add `Table.Rows` (*Table*) and wire the `table` in. `rows` is a list with one list of cells for each row.
+3. Add `Loop.Item` (*Workflow*) and wire `rows` into its `items`. Everything you wire between `Loop.Item` and `Loop.Collect` runs once for each row, in order.
+4. Add two `List.GetItemAtIndex` nodes (*List*). Wire the `item` output of `Loop.Item` (the current row) into the `list` of both. Type `0` into `index` of the first and rename it `GUID of the row`. Type `1` into `index` of the second and rename it `Classification of the row`.
+5. Add `Search.ByGuid` (*Navisworks ▸ Search*). Wire the `item` output of `GUID of the row` into its `guids`. A single GUID is treated as a list of one.
+6. Add a `String` node (*Input*) with the text `Classification`, and rename it `Property name`.
+7. Add `Properties.SetCustom` (*Navisworks ▸ Properties*). Wire the `items` output of `Search.ByGuid` into `modelItems`, `Property name` into `names`, and the `item` output of `Classification of the row` into `values`. Leave `tabName` on `Dyncamelo Data`, or type your own tab name.
+8. Add `Loop.Collect` (*Workflow*). Wire `loop` from `Loop.Item` into its `loop` and the `modelItems` output of `Properties.SetCustom` into its `value`.
+9. Add `List.Count` (*List*) on `results`, then a `Watch` (*Display*) named `Rows written` on its `count`. Try it on a sheet of a few rows first, then press ++f5++.
 
-![The graph: items and an Excel table joined by GUID, then written with Properties.SetCustom.](../../images/wiki-graph-properties-from-excel.png)
+![The graph: Table.FromExcelFile and Table.Rows into a loop that finds each item by GUID and writes its classification with Properties.SetCustom.](../../images/wiki-graph-properties-from-excel.png)
 
 ## What you get
 
-Every matched item has a property tab called `Spreadsheet` with the properties `Cost` and `Supplier`. Open the Navisworks **Properties** window on an item to see it. The values are searchable, can be used in schedules, and travel with the NWF or NWD.
+Each matched item has a property tab called `Dyncamelo Data` (or the name you typed) with the property `Classification`. Open the Navisworks **Properties** window on an item to see it. The values are searchable, can be used in schedules, and travel with the NWF or NWD.
 
-Why step 8: `Properties.SetCustom` writes one list of names and values to **all** the items it is given. The levels make it run once for each item, with item 1 paired with row 1, item 2 with row 2, and so on. Both lists come from the same join, so they line up.
+Running again with `merge` on (the default) keeps other properties in the tab and lets the new values win. To remove the tab, run `Properties.RemoveCustomTab` with the same items and tab name.
 
-!!! warning "One row per GUID"
-    If the sheet holds the same GUID twice, the join adds a second row for that item and the lists no longer line up. Remove duplicates in the sheet first.
+To write more columns, give `names` a list and `values` a list of the same length. For example, a `String.Split` of `Classification,Supplier` for `names`, and a `List.Create` (*List*) of two more `List.GetItemAtIndex` nodes for `values`.
 
-To remove the tab again, run `Properties.RemoveCustomTab` with the same items and `tabName`. Running `Properties.SetCustom` again with `merge` on (the default) keeps other properties in the tab and lets the new values win.
+!!! warning "Slow on big sheets"
+    `Search.ByGuid` walks every item of the document once each time it runs, and the loop runs it once for each row. A long sheet on a large model takes a long time. Press ++esc++ to stop; the next **Run** carries on. See [Speed up a slow graph](speed-up-slow-graph.md).
+
+!!! note "Which GUID matches"
+    `Search.ByGuid` matches the item's **instance GUID** (a 22-character IFC GlobalId is accepted too). Its `missing` output lists the GUIDs that matched no item, so wire it into a `Watch List` while you test.
 
 ## If it does not work
 
-* Every cell from the sheet is empty: the keys do not match. Compare one `@Guid` with the sheet cell.
-* A socket shows no `@L1` badge: List Levels was not set. See [Concepts](../concepts.md#lists-replication-and-lacing).
+* Nothing is written and `missing` lists every GUID: the sheet holds a different kind of identity, or the cells are not plain text. Compare one cell with `ModelItem.InstanceGuid` of an item you picked in Navisworks.
 * A node is red: see [Read errors and warnings](read-errors-and-warnings.md).
+* `Properties.SetCustom` changes the document, so save before you try it on a real model.
 
 ## Next
 
-* [Find elements from a list of GUIDs](find-elements-from-guids.md).
-* [Table nodes](../nodes/table.md#node-table-join) for `Table.Join` and the rest of the table toolkit.
+* [Find elements from a list of GUIDs](find-elements-from-guids.md) uses the same sheet to select the items.
+* [Properties nodes](../nodes/navisworks-properties.md#node-properties-setcustom) lists `Properties.SetCustom` and its companions.
 * [IFC, BCF, Excel and CSV](../exchange-formats.md#excel).

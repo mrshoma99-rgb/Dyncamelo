@@ -74,6 +74,9 @@ extra:
 plugins:
   - search:
       lang: en
+      # Words end at a space, hyphen, dot (not in a number) and the usual punctuation, but not inside CamelCase: a node's name
+      # is one word after the dot, so "Appearance.OverrideColor" is found by "overridecolor", "override" and "appearance".
+      separator: '[\s\-,:!=\[\]()"/]+|\.(?!\d)|&[lg]t;'
   # Click a picture to see it large. Pictures that come in a dark and a light version open in their own theme.
   - glightbox:
       auto_themed: true

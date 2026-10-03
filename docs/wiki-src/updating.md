@@ -11,6 +11,11 @@ Nothing is downloaded or installed by itself. You can look for an update at any 
 
 The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. To switch it off, open **Settings ▸ Privacy** and turn off **Check for a newer version once a day**. With the check off, Dyncamelo makes no network request of its own. A copy installed from the Autodesk App Store never makes this check, because the store delivers its updates. That professional copy is coming soon; the copies from GitHub and bimcamel.com are the personal-use ones ([Licence](licence.md#which-copy-do-i-need)).
 
+![The start screen of an empty canvas, with the version next to the name and a notice about a newer version.](../images/wiki-start-screen.png)
+
+!!! note "Updating never happens by itself"
+    Nothing is downloaded or installed unless you ask. The notice only tells you that a newer version exists.
+
 ## Which version do I have?
 
 * On the **BIMCamel** ribbon tab, click **About**: the version is at the bottom of the window.
@@ -39,3 +44,9 @@ Every release is described on [What's new](whats-new.md). Two things are worth k
 ## Going back
 
 Install the older version over the new one in the same way. Graphs that use something only the newer version has will show placeholders until you update again.
+
+## Next steps
+
+* [Installation](installation.md) lists the ways to install.
+* [Settings](settings.md#privacy) switches the update check off.
+* [Troubleshooting](troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes) if an old graph opens with a warning.

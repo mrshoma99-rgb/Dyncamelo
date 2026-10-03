@@ -1,0 +1,38 @@
+{
+  "name": "Properties from Excel",
+  "description": "Joins a worksheet to model items by GUID and writes its Cost and Supplier columns onto each item as a property tab.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "category", "node": "String", "title": "Category to enrich", "value": "Walls"},
+    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Category"}},
+    {"id": "keys", "node": "String.Split", "title": "Split columns", "values": {"text": "@Guid,@Name", "separator": ","}},
+    {"id": "model", "node": "Properties.ToTable", "title": "Items as a table"},
+    {"id": "file", "node": "File Path", "title": "Workbook", "value": "C:\\Data\\walls.xlsx"},
+    {"id": "sheet", "node": "Table.FromExcelFile"},
+    {"id": "join", "node": "Table.Join", "values": {"leftKey": "@Guid", "rightKey": "GUID", "kind": "left"}},
+    {"id": "check", "node": "Watch Table", "title": "Joined table"},
+    {"id": "wanted", "node": "String", "title": "Columns to write", "value": "Cost,Supplier"},
+    {"id": "pick", "node": "Table.SelectColumns"},
+    {"id": "rows", "node": "Table.Rows"},
+    {"id": "names", "node": "String.Split", "title": "Split names", "values": {"text": "Cost,Supplier", "separator": ","}},
+    {"id": "write", "node": "Properties.SetCustom", "values": {"tabName": "Spreadsheet"}, "levels": {"modelItems": 1, "values": 2}}
+  ],
+  "wires": [
+    "category.value -> search.value",
+    "search.items -> model.items",
+    "keys.list -> model.properties",
+    "file.path -> sheet.path",
+    "model.table -> join.left",
+    "sheet.table -> join.right",
+    "join.table -> check.table",
+    "join.table -> pick.table",
+    "wanted.value -> pick.columns",
+    "pick.table -> rows.table",
+    "search.items -> write.modelItems",
+    "names.list -> write.names",
+    "rows.rows -> write.values"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: joins the worksheet to the found items by GUID, then writes the Cost and Supplier columns onto each item as a property tab called Spreadsheet. The list levels on modelItems (@L1) and values (@L2) make Properties.SetCustom run once per item, with item 1 paired with row 1. TO CHANGE: the category, the workbook path, the column names and the tab name."}
+  ]
+}

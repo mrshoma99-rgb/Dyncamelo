@@ -6,7 +6,7 @@
   },
   "Uuid": "deea7e6c2b8e344478e89bd9089b805a",
   "Name": "BCF import",
-  "Description": "Reads a BCF package, shows the title of one topic and selects the model items that topic refers to.",
+  "Description": "Reads a BCF package, selects the model items its topics refer to and shows the title of one topic.",
   "Nodes": [
     {
       "Id": "9d88a45c9d16246e3a7912d2b8969db0",
@@ -15,7 +15,7 @@
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "BCF.ImportIssues",
       "X": 0.0,
-      "Y": 170.0,
+      "Y": 260.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -25,7 +25,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "C:\\Reports\\clash-issues.bcfzip"
+          "UserValue": "C:\\Temp\\clashes.bcfzip"
         },
         {
           "Name": "applyCameraTopicIndex",
@@ -53,29 +53,77 @@
       "Data": {}
     },
     {
-      "Id": "5b4ad1ea2a16aff090047aadee70a2b5",
-      "NodeType": "IntegerInput",
-      "Name": "Topic number",
-      "X": 0.0,
-      "Y": 400.0,
+      "Id": "cac4e7a2e9b6902e45dd93fe72e75d31",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Flatten@System.Collections.Generic.IList<object>,int",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "All items of all topics",
+      "X": 350.0,
+      "Y": 340.0,
       "Lacing": "Auto",
       "IsFrozen": false,
-      "InputPorts": [],
-      "OutputPorts": [
+      "InputPorts": [
         {
-          "Name": "value"
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "amount",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
         }
       ],
-      "Data": {
-        "Value": 0
-      }
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
     },
     {
-      "Id": "99717ff716968d80ca3295efbc80bee5",
+      "Id": "e551f02f3e2b0b0cfe54a32d200db0ab",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionNodes.SetCurrent@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Selection.SetCurrent",
+      "X": 700.0,
+      "Y": 320.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "ec8450efb0dd0ddefe5a5837c20003a7",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
       "Assembly": "Dyncamelo.Nodes",
-      "Name": "Topic",
+      "Name": "Pick a topic",
       "X": 350.0,
       "Y": 160.0,
       "Lacing": "Auto",
@@ -93,40 +141,8 @@
           "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "item"
-        }
-      ],
-      "Data": {}
-    },
-    {
-      "Id": "fe82c0d131c4fa29ebab3b5cfd81b57d",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Items of the topic",
-      "X": 350.0,
-      "Y": 340.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "list",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "index",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
+          "KeepListStructure": false,
+          "UserValue": 0
         }
       ],
       "OutputPorts": [
@@ -203,73 +219,33 @@
         "ViewWidth": 0.0,
         "ViewHeight": 0.0
       }
-    },
-    {
-      "Id": "e551f02f3e2b0b0cfe54a32d200db0ab",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SelectionNodes.SetCurrent@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
-      "Name": "Selection.SetCurrent",
-      "X": 700.0,
-      "Y": 320.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "items",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "document",
-          "UsingDefaultValue": true,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "items"
-        }
-      ],
-      "Data": {}
     }
   ],
   "Connectors": [
     {
-      "Id": "25901ed4f514317006b08d6a6e6aeb6c",
-      "FromNode": "9d88a45c9d16246e3a7912d2b8969db0",
-      "FromPort": "topics",
-      "ToNode": "99717ff716968d80ca3295efbc80bee5",
-      "ToPort": "list"
-    },
-    {
-      "Id": "7109616e3c348f4cc64e303daca4f37c",
+      "Id": "321d020b5c314da8c8968afd812f279d",
       "FromNode": "9d88a45c9d16246e3a7912d2b8969db0",
       "FromPort": "modelItems",
-      "ToNode": "fe82c0d131c4fa29ebab3b5cfd81b57d",
+      "ToNode": "cac4e7a2e9b6902e45dd93fe72e75d31",
       "ToPort": "list"
     },
     {
-      "Id": "811734342b7ae22a916dac2a6f7eddf1",
-      "FromNode": "5b4ad1ea2a16aff090047aadee70a2b5",
-      "FromPort": "value",
-      "ToNode": "99717ff716968d80ca3295efbc80bee5",
-      "ToPort": "index"
+      "Id": "de2325a0d4ab2db4bcf5f1131e23a932",
+      "FromNode": "cac4e7a2e9b6902e45dd93fe72e75d31",
+      "FromPort": "list",
+      "ToNode": "e551f02f3e2b0b0cfe54a32d200db0ab",
+      "ToPort": "items"
     },
     {
-      "Id": "7c1d7454c5c0819f05a4772e3209d43d",
-      "FromNode": "5b4ad1ea2a16aff090047aadee70a2b5",
-      "FromPort": "value",
-      "ToNode": "fe82c0d131c4fa29ebab3b5cfd81b57d",
-      "ToPort": "index"
+      "Id": "cd9a2e4d890d565ee01d08b7c097158b",
+      "FromNode": "9d88a45c9d16246e3a7912d2b8969db0",
+      "FromPort": "topics",
+      "ToNode": "ec8450efb0dd0ddefe5a5837c20003a7",
+      "ToPort": "list"
     },
     {
-      "Id": "2a3688bce392fa074bbdd738c71c5729",
-      "FromNode": "99717ff716968d80ca3295efbc80bee5",
+      "Id": "9473600df918e59f53c3cecaede45b90",
+      "FromNode": "ec8450efb0dd0ddefe5a5837c20003a7",
       "FromPort": "item",
       "ToNode": "30468bb28e889b1bc7c2d5ea7642f950",
       "ToPort": "dictionary"
@@ -280,21 +256,14 @@
       "FromPort": "value",
       "ToNode": "53839ccece47348c9c5cf24326fbc1d1",
       "ToPort": "value"
-    },
-    {
-      "Id": "b154a7e36b22bea7e0c26f623e7d3966",
-      "FromNode": "fe82c0d131c4fa29ebab3b5cfd81b57d",
-      "FromPort": "item",
-      "ToNode": "e551f02f3e2b0b0cfe54a32d200db0ab",
-      "ToPort": "items"
     }
   ],
   "Notes": [
     {
       "Id": "f2ef138df05d29322b08e6020375abe7",
-      "Text": "WHAT IT DOES: reads every topic in the package, then picks one by its number (0 is the first), shows its title and selects the model items its components match. TO CHANGE: the file path and the topic number.",
+      "Text": "WHAT IT DOES: reads every topic of the package, selects the model items its components match (the list of lists is flattened first, so every topic's items are selected) and shows the title of one topic. TO CHANGE: the file path and the topic number (0 is the first).",
       "X": 0.0,
-      "Y": -140.0
+      "Y": -180.0
     }
   ],
   "Groups": [],

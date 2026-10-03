@@ -1,0 +1,513 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "d8a9b933766bee77a0dbcb72a7159880",
+  "Name": "IFC export",
+  "Description": "Exports the items whose material contains Steel to an IFC4 file with chosen project and building names.",
+  "Nodes": [
+    {
+      "Id": "3d1bbd624d01ebf4e97fb0fcbe5659f4",
+      "NodeType": "StringInput",
+      "Name": "Material text",
+      "X": 0.0,
+      "Y": 400.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Steel"
+      }
+    },
+    {
+      "Id": "a57e4e3073a05acd0a3756eb6f473504",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.ByProperty",
+      "X": 350.0,
+      "Y": 310.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Material"
+        },
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "mode",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "contains"
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "5c947f0edfee848d61cd18e03eccdb2c",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.IfcSpatialNames@string,string,string,string",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Export.IfcSpatialNames",
+      "X": 350.0,
+      "Y": 900.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "project",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Office Block"
+        },
+        {
+          "Name": "site",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Main Site"
+        },
+        {
+          "Name": "building",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Block A"
+        },
+        {
+          "Name": "storey",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Level 01"
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "spatialNames"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "3e33cca1f33b461ec27ffa81048a69db",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.IfcCoordinates@string,double,double,double,double,bool",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Export.IfcCoordinates",
+      "X": 350.0,
+      "Y": 600.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "basePoint",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "eastings",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "northings",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "elevation",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "rotationDegrees",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "writeGeoref",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "coordinates"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "3aa41b1d352ac865923cc034d9938e5e",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.ToIfc@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,bool,bool,bool,bool,string,string,BIMCamel.Ifc.CoordOptions,BIMCamel.Ifc.SpatialNames,BIMCamel.Data.PropertyRoles,System.Collections.Generic.IEnumerable<BIMCamel.Data.ParamMapRule>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.Dictionary<string,string>,double,bool,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Export.ToIfc",
+      "X": 700.0,
+      "Y": 280.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "filePath",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Exports\\steel.ifc"
+        },
+        {
+          "Name": "schema",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "instancing",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "properties",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "materials",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "quantities",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "units",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "quality",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "coordinates",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "spatialNames",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "roles",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "parameterRules",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "categoryFilter",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "classMap",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "splitMegabytes",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "validate",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "filePath"
+        },
+        {
+          "Name": "fileCount"
+        },
+        {
+          "Name": "elementCount"
+        },
+        {
+          "Name": "triangleCount"
+        },
+        {
+          "Name": "fileSizeKb"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "4775ed59ddb6e894566f020119f8934b",
+      "NodeType": "Watch",
+      "Name": "Elements exported",
+      "X": 1050.0,
+      "Y": 230.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "9038c1f788f45c2e66b0e35d9f6c7b1b",
+      "NodeType": "Watch",
+      "Name": "Files written",
+      "X": 1050.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "ad6aaa8854791966154b5a251f19a666",
+      "NodeType": "Watch",
+      "Name": "Size (KB)",
+      "X": 1050.0,
+      "Y": 460.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "f91a7207c84e65cfda4bb1cb89cc31f8",
+      "FromNode": "3d1bbd624d01ebf4e97fb0fcbe5659f4",
+      "FromPort": "value",
+      "ToNode": "a57e4e3073a05acd0a3756eb6f473504",
+      "ToPort": "value"
+    },
+    {
+      "Id": "5cecd3697fcefb83e751549a9e1dc611",
+      "FromNode": "a57e4e3073a05acd0a3756eb6f473504",
+      "FromPort": "items",
+      "ToNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "ToPort": "items"
+    },
+    {
+      "Id": "be9c8ee0aca4535f06a0ecfb04e73c52",
+      "FromNode": "5c947f0edfee848d61cd18e03eccdb2c",
+      "FromPort": "spatialNames",
+      "ToNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "ToPort": "spatialNames"
+    },
+    {
+      "Id": "ecba7a2a9ba0fbcf234072ef888af039",
+      "FromNode": "3e33cca1f33b461ec27ffa81048a69db",
+      "FromPort": "coordinates",
+      "ToNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "ToPort": "coordinates"
+    },
+    {
+      "Id": "6d1d333876f983f155ebb7428ff5b37d",
+      "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "FromPort": "elementCount",
+      "ToNode": "4775ed59ddb6e894566f020119f8934b",
+      "ToPort": "value"
+    },
+    {
+      "Id": "1f4709f1c36860b112ead5e51e3c9abc",
+      "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "FromPort": "fileCount",
+      "ToNode": "9038c1f788f45c2e66b0e35d9f6c7b1b",
+      "ToPort": "value"
+    },
+    {
+      "Id": "849fb7790290eb681dddeb1db7232a1b",
+      "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
+      "FromPort": "fileSizeKb",
+      "ToNode": "ad6aaa8854791966154b5a251f19a666",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "6c16092d5d85b981697e90b2850361fb",
+      "Text": "WHAT IT DOES: finds the items whose Element > Material contains the text and writes them to an IFC4 file. The spatial names and the base point are wired into Export.ToIfc; the three Watch nodes show what was written. TO CHANGE: the material text, the names and the file path.",
+      "X": 0.0,
+      "Y": -180.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

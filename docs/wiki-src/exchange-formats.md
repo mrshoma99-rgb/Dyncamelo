@@ -12,7 +12,8 @@ How data gets into and out of a Dyncamelo graph. Every node named here is in the
 | **Navisworks files and pictures** | `Document.Open`, `Document.AppendFiles` | `Export.NWD`, `Export.ViewpointImage` |
 | **JSON** | `JSON.ReadFromFile` | `JSON.WriteToFile` |
 
-> **Use a full path for every file a graph writes**, for example `C:\Users\you\Documents\report.xlsx`. The working folder of Navisworks is its install folder under `Program Files`, which ordinary users cannot write to, so a relative path fails with "access denied" ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Paste a path without the quotes that Explorer's *Copy as path* adds. Graphs that write files are marked, and the Script Player asks before it runs one.
+!!! warning "Use a full path for every file a graph writes"
+    Give a full path, for example `C:\Users\you\Documents\report.xlsx`. The working folder of Navisworks is its install folder under `Program Files`, which ordinary users cannot write to, so a relative path fails with "access denied" ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Paste a path without the quotes that Explorer's *Copy as path* adds. Graphs that write files are marked, and the Script Player asks before it runs one.
 
 ## IFC
 
@@ -40,6 +41,10 @@ The simplest graph:
 ```
 Search.ByProperty ──items──▶ Export.ToIfc (filePath: C:\Exports\steel.ifc)
 ```
+
+![The IFC export graph: a search into Export.ToIfc, with Export.IfcSpatialNames and Export.IfcCoordinates wired into it.](../images/wiki-graph-ifc-export.png)
+
+Step by step, with a graph to download: [Export model items to IFC](howto/export-to-ifc.md).
 
 Only `items` and `filePath` are required. The other inputs are optional:
 
@@ -83,6 +88,8 @@ BCF is the vendor-neutral format for issues: a `.bcfzip` of topics, each with a 
 Clash.Tests ─▶ List.GetItemAtIndex ─▶ ClashTest.Results ─▶ BCF.ExportIssues (results)
 ```
 
+![The BCF export graph: Clash.Tests, List.GetItemAtIndex, ClashTest.Results and BCF.ExportIssues.](../images/wiki-graph-bcf-export.png)
+
 | Input | Meaning |
 |---|---|
 | `filePath` (required) | Destination `.bcfzip` (or `.bcf`). The folder is created when missing. |
@@ -102,16 +109,21 @@ Outputs: `filePath` and `topicCount`. Things to know:
 Reads a BCF 2.0 or 2.1 package. Outputs:
 
 * `topics`: a list of dictionaries, one per topic, with `guid`, `title`, `status`, `type`, `description`, `creationAuthor`, `creationDate`, `comments`, `commentAuthors`, `commentDates`, `componentGuids`, `camera` (with `isPerspective`, `position`, `direction`, ++up++, `fieldOfView`, `viewToWorldScale`) and `hasSnapshot`;
-* `modelItems`: the model items the topics' components resolve to, matched by IFC GlobalId first, then InstanceGuid.
+* `modelItems`: a list with one list of model items for each topic, in the same order as `topics`: the items the topic's components resolve to, matched by IFC GlobalId first, then InstanceGuid.
 
 `applyCameraTopicIndex` applies one topic's camera to the current view (the default, `-1`, leaves the view alone). To jump to issue 3, set it to `2`.
 
-The return leg of an issue round trip is built from the outputs: wire `modelItems` into `Selection.SetCurrent` to select the elements, or use the topic statuses with `ClashResult.SetStatus` to update clash results.
+The return leg of an issue round trip is built from the outputs: pick one topic's list from `modelItems` with `List.GetItemAtIndex` and wire it into `Selection.SetCurrent` to select that topic's elements (a whole `modelItems` list would select topic after topic and leave only the last one selected), or use the topic statuses with `ClashResult.SetStatus` to update clash results.
 
 ```
-BCF.ImportIssues ─ modelItems ─▶ Selection.SetCurrent
-                 └ topics ─────▶ List.GetItemAtIndex ─▶ Dictionary.ValueOrDefault (title) ─▶ Watch
+BCF.ImportIssues ─ modelItems ─▶ List.GetItemAtIndex (topic number) ─▶ Selection.SetCurrent
+                 └ topics ─────▶ List.GetItemAtIndex (topic number) ─▶ Dictionary.ValueOrDefault (title) ─▶ Watch
 ```
+
+![The BCF import graph: BCF.ImportIssues into Selection.SetCurrent, and the first topic's title in a Watch.](../images/wiki-graph-bcf-import.png)
+
+!!! tip "Step by step"
+    [Send clashes to BCF and read an issue list back](howto/clash-issues-bcf.md) builds both graphs.
 
 ## Excel
 
@@ -134,7 +146,11 @@ Search.ByProperty ─▶ Properties.ToTable ─▶ Table.GroupBy ─▶ Table.So
                       Length, Area)            count, sum)       first)
 ```
 
-To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join`, and write each row onto the items with `Properties.SetCustom`. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified.
+![The quantity take-off graph: Search.ByProperty, Properties.ToTable, Table.GroupBy, Table.Sort and Table.ToExcelFile.](../images/wiki-graph-qto-to-excel.png)
+
+[Take quantities out to Excel](howto/quantity-takeoff-to-excel.md) builds this graph step by step.
+
+To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join`, and write each row onto the items with `Properties.SetCustom`. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified. [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md) shows the wiring.
 
 ## CSV
 
@@ -160,3 +176,9 @@ Two patterns that need no database:
 
 * **Clash deltas.** `Clash.SnapshotToFile` saves a snapshot of all clash results as JSON each week; `Clash.CompareSnapshots` takes two snapshot files and gives the clashes that are new, resolved and persisting. It works on files only, so it needs no open model.
 * **Model changes.** `Model.Snapshot` captures chosen properties of items as a dictionary keyed by GUID; save it with `JSON.WriteToFile`, and diff it against a later one with `Snapshot.Diff` (added, removed and changed keys).
+
+## Next steps
+
+* [Make a clash report](howto/clash-report.md) writes the summary of every clash test as HTML.
+* [Find elements from a list of GUIDs](howto/find-elements-from-guids.md) reads GUIDs from Excel.
+* [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do): nodes that write files are marked, and the Script Player asks before running one.

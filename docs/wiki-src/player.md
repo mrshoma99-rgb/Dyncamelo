@@ -72,15 +72,15 @@ After a run the Player shows a **results card**:
 
 ## Safety: scripts that change things
 
-!!! warning "Scripts can change things"
-    A script can change your model, write files, run programs or use the network. Read the note above the form before you press **Run** on a script you did not write.
-
 A script can change your model, write files, run programs or use the network. The Player tells you before it does:
 
 * A script that does any of this shows a note above the form: "Changes the model, writes files, runs programs or uses the network:" followed by the names of the nodes responsible.
 * **The first time you run such a script** in the Player, and again whenever the script file changes, a dialog lists those nodes and asks "Run it?". If you agree, the answer is remembered for that file exactly as it is now. Edit the script and the question comes back.
 * Scripts that only read are never asked about.
 * A script that uses nodes which are not installed shows a warning ("1 node is not installed, so this script cannot run") and will not run.
+
+!!! warning "Say no if you are not sure"
+    If the question lists nodes you do not understand, answer **No** and open the script in the editor with **Edit** to look at it first.
 
 The Settings option **Ask before running graphs from files** belongs to the editor. See [Privacy and safety](privacy-and-safety.md) for what scripts can do and how to treat scripts you did not write.
 

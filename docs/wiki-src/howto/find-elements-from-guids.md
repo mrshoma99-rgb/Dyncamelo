@@ -18,13 +18,12 @@ Goal: take a column of element GUIDs from an Excel sheet, select those elements 
 
 ## Steps
 
-1. Add a `File Path` node (*Input*). Type the full path of your workbook into its box, for example `C:\Temp\guids.xlsx`. The `…` button opens a dialog to pick an existing file.
-2. Add `Table.FromExcelFile` (*Table*). Wire the `path` output into its `path`. Leave `sheet` empty to read the first sheet and leave `firstRowIsHeader` ticked.
-3. Add `Table.Column` (*Table*). Wire the `table` in and type the header of your GUID column, such as `GUID`, into `column`. It gives the cells top to bottom.
-4. Add `Search.ByGuid` (*Navisworks ▸ Search*). Wire `values` into its `guids`.
-5. Add `Selection.SetCurrent` (*Navisworks ▸ Selection*). Wire the `items` output of `Search.ByGuid` into its `items`.
-6. Add a `Watch List` (*Display*) and wire the `missing` output of `Search.ByGuid` into it.
-7. Press ++f5++.
+1. Add `Table.FromExcelFile` (*Table*). Type the full path of your workbook into `path`, for example `C:\Data\guids.xlsx`. Leave `sheet` empty to read the first sheet and leave `firstRowIsHeader` ticked.
+2. Add `Table.Column` (*Table*). Wire the `table` in and type the header of your GUID column, such as `GUID`, into `column`. It gives the cells top to bottom.
+3. Add `Search.ByGuid` (*Navisworks ▸ Search*). Wire `values` into its `guids`.
+4. Add `Selection.SetCurrent` (*Navisworks ▸ Selection*). Wire the `items` output of `Search.ByGuid` into its `items`.
+5. Add a `Watch List` (*Display*) and wire the `missing` output of `Search.ByGuid` into it. Double-click its title to rename it `GUIDs not found`.
+6. Press ++f5++.
 
 ![The find-by-GUID graph: Table.FromExcelFile, Table.Column, Search.ByGuid, Selection.SetCurrent and a Watch List for the missing GUIDs.](../../images/wiki-graph-find-by-guid.png)
 

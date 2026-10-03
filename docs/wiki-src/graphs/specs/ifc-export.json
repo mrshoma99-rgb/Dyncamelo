@@ -1,0 +1,28 @@
+{
+  "name": "IFC export",
+  "description": "Exports the items whose material contains Steel to an IFC4 file with chosen project and building names.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "material", "node": "String", "title": "Material text", "value": "Steel"},
+    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Material", "mode": "contains"}},
+    {"id": "names", "node": "Export.IfcSpatialNames",
+     "values": {"project": "Office Block", "site": "Main Site", "building": "Block A", "storey": "Level 01"}},
+    {"id": "coords", "node": "Export.IfcCoordinates"},
+    {"id": "export", "node": "Export.ToIfc", "values": {"filePath": "C:\\Exports\\steel.ifc"}},
+    {"id": "elements", "node": "Watch", "title": "Elements exported"},
+    {"id": "files", "node": "Watch", "title": "Files written"},
+    {"id": "size", "node": "Watch", "title": "Size (KB)"}
+  ],
+  "wires": [
+    "material.value -> search.value",
+    "search.items -> export.items",
+    "names.spatialNames -> export.spatialNames",
+    "coords.coordinates -> export.coordinates",
+    "export.elementCount -> elements.value",
+    "export.fileCount -> files.value",
+    "export.fileSizeKb -> size.value"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: finds the items whose Element > Material contains the text and writes them to an IFC4 file. The spatial names and the base point are wired into Export.ToIfc; the three Watch nodes show what was written. TO CHANGE: the material text, the names and the file path."}
+  ]
+}

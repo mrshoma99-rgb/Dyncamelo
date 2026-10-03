@@ -121,8 +121,12 @@ You can also run graphs that use only the general nodes, with no Navisworks, fro
 4. Open the **Getting Started - Math and Watch** example from the start screen. It needs no model. Press **Run** (++f5++): the Watch nodes show **32** and **Area = 32**.
 5. For a deeper check with your model open, choose **Help ▸ Run Self-Test…**. It runs a set of read-only Navisworks nodes and shows pass or fail for each.
 
-Then continue with [Your first script](first-steps.md).
+![The start screen of an empty canvas: the version, a New script card, recent scripts and the examples.](../images/wiki-start-screen.png)
 
+!!! tip "No model at hand?"
+    The *Getting Started - Math and Watch* example needs no model, so it is a quick way to see that the editor works.
+
+Then continue with [Your first script](first-steps.md).
 ## If something goes wrong
 
 | Symptom | Where to look |

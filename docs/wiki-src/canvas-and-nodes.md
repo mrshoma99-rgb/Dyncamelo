@@ -23,7 +23,7 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 | Canvas (middle) | Where nodes and wires live. |
 | Status bar (bottom) | A message on the left (what you just did, or what a run did), a hint line, and on the right the number of **Nodes**, the **Warnings** and **Errors** counts and the **Last run** time in milliseconds. |
 
-A run blocks Navisworks while it works, so during a run a dark overlay shows which node is working (for example `12 / 40 — name`) and reminds you that **Esc** cancels it. See [Running scripts](running-graphs.md).
+A run blocks Navisworks while it works, so during a run a dark overlay shows which node is working (for example `12 / 40 — name`) and reminds you that ++esc++ cancels it. See [Running scripts](running-graphs.md).
 
 ![The progress overlay during a run: the working node and the Esc hint.](../images/wiki-run-progress.png)
 

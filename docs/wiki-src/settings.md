@@ -20,6 +20,8 @@ Settings are saved automatically, per Windows user, in `%APPDATA%\Dyncamelo\ui-s
 
 The **colour palette** of the whole editor is chosen at the top of this section: **Dyncamelo Dark** (the default), **Midnight**, **Slate** and **Light**. The Script Player follows the palette you choose.
 
+![The Appearance page of Settings: the colour palettes and the appearance options.](../images/wiki-settings-appearance.png)
+
 | Setting | Values | Default | What it does |
 |---|---|---|---|
 | Node density | Compact / Normal / Comfortable | Normal | Row height of nodes. Compact fits more on screen; comfortable is easier to click. |
@@ -33,6 +35,8 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 
 ## Canvas
 
+![The Canvas page of Settings: grid, snapping, straight wires, minimap and highlighting.](../images/wiki-settings-canvas.png)
+
 | Setting | Values | Default | What it does |
 |---|---|---|---|
 | Grid lines | On / Off | On | Draws the grid on the canvas background. |
@@ -43,6 +47,8 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 | Layered Arrange | On / Off | On | Arrange uses the layered layout that keeps wire crossings to a minimum. Off uses simple columns. |
 
 ## Editing
+
+![The Editing page of Settings: number dragging, autosave, the question before running graphs from files and the double-click action.](../images/wiki-settings-editing.png)
 
 | Setting | Values | Default | What it does |
 |---|---|---|---|
@@ -63,6 +69,9 @@ Notes on a few of these:
 * **Number drag speed.** Slow needs 16 pixels of mouse travel per step, Normal 8 and Fast 4.
 * **Run while dragging numbers.** Leave it off for scripts that change the model. A node that talks to Navisworks would otherwise run again and again while you drag.
 * **Ask before running graphs from files.** Turning it off removes a safety question. See [Privacy and safety](privacy-and-safety.md) before you do.
+
+!!! warning "Leave the safety question on"
+    **Ask before running graphs from files** is how Dyncamelo warns you before a graph from a file starts programs, uses the network, or deletes, moves or overwrites files. Leave it on.
 
 ## Shortcuts
 
@@ -85,6 +94,8 @@ The menus, the key handling, the ++f1++ help sheet and the palette all read the 
 
 ## Privacy
 
+![The Privacy page of Settings: the once-a-day update check.](../images/wiki-settings-privacy.png)
+
 | Setting | Values | Default | What it does |
 |---|---|---|---|
 | Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is a newer one. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, nothing about you or your models. Off means Dyncamelo makes no network request of its own. |
@@ -105,3 +116,9 @@ This section has buttons rather than switches. Each one is also available from a
 | Run self-test | Runs read-only Navisworks nodes on the open model and reports which work. It changes nothing. |
 
 **Reset all settings** puts every setting and shortcut back to its default. Your favourite nodes and recent files are kept, and so are your Script Player folders and remembered values. If something behaves strangely, resetting is a quick way to rule settings out. See [Troubleshooting](troubleshooting.md).
+
+## Next steps
+
+* [Keyboard and mouse reference](shortcuts.md) lists the shortcuts you can change.
+* [Privacy and safety](privacy-and-safety.md) explains the update check and the question before running graphs.
+* [Saving and opening scripts](saving-opening.md#autosave-and-recovery) covers autosave.

@@ -4,16 +4,16 @@
     "MinReaderVersion": 1,
     "AppVersion": "0.47.0"
   },
-  "Uuid": "c8d15d4dc2be0eba9775066b90abc244",
-  "Name": "Quantities to Excel",
-  "Description": "Totals the volume of every item by category and writes the result, largest first, to an Excel workbook.",
+  "Uuid": "221927cb57d677132ac7d50e584be361",
+  "Name": "Takeoff form",
+  "Description": "A script made for the Script Player: a number, a choice and a file path become the form, and the totals are written to Excel.",
   "Nodes": [
     {
-      "Id": "54bff0e2e39d80d9a511d9bb27bd0b82",
+      "Id": "7b4e0ebf2ce6735fcc4aa467a2216283",
       "NodeType": "NumberInput",
       "Name": "Minimum volume",
       "X": 0.0,
-      "Y": 170.0,
+      "Y": 90.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [],
@@ -23,17 +23,57 @@
         }
       ],
       "Data": {
-        "Value": 0.0
+        "Value": 1.0
       }
     },
     {
-      "Id": "c0b10be30f896caf9f58a3df13f56e0d",
+      "Id": "56a9dbc92387883c97756407e0181003",
+      "NodeType": "ChoiceInput",
+      "Name": "Group by",
+      "X": 700.0,
+      "Y": 280.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        },
+        {
+          "Name": "index"
+        }
+      ],
+      "Data": {
+        "Options": "Element.Category\nElement.Level",
+        "Value": "Element.Category"
+      }
+    },
+    {
+      "Id": "e6674be113dbc528424d27ae1fc5554a",
+      "NodeType": "FilePath",
+      "Name": "Excel file",
+      "X": 1080.0,
+      "Y": 450.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {
+        "Path": "C:\\Temp\\takeoff.xlsx"
+      }
+    },
+    {
+      "Id": "7be98d819931a2c0863435ac3b60ad38",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Search.ByProperty",
       "X": 350.0,
-      "Y": 80.0,
+      "Y": 0.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -91,31 +131,13 @@
       "Data": {}
     },
     {
-      "Id": "52c386388a49f95a31d5149a4261c509",
-      "NodeType": "StringInput",
-      "Name": "Columns to read",
-      "X": 0.0,
-      "Y": 400.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [],
-      "OutputPorts": [
-        {
-          "Name": "value"
-        }
-      ],
-      "Data": {
-        "Value": "@Name,Element.Category,Element.Volume"
-      }
-    },
-    {
-      "Id": "12c12a21b92cb66758e019b7f0ef3e90",
+      "Id": "34e683bfc8c95fe659e930d85d787553",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
       "Assembly": "Dyncamelo.Nodes",
       "Name": "Split columns",
       "X": 350.0,
-      "Y": 370.0,
+      "Y": 290.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -124,7 +146,8 @@
           "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false
+          "KeepListStructure": false,
+          "UserValue": "Element.Category,Element.Level,Element.Volume"
         },
         {
           "Name": "separator",
@@ -143,13 +166,13 @@
       "Data": {}
     },
     {
-      "Id": "e78e2dbef5c00b478c3de87b8153204d",
+      "Id": "b942ad30a78c6e2c49b7cbef36647652",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Properties.ToTable",
       "X": 700.0,
-      "Y": 180.0,
+      "Y": 100.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -176,11 +199,133 @@
       "Data": {}
     },
     {
-      "Id": "499e2ae1aef22bd564ef93902e26b011",
+      "Id": "87e1ebefdbe9b3681699457935de0440",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Split totals",
+      "X": 700.0,
+      "Y": 540.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "count,sum:Element.Volume"
+        },
+        {
+          "Name": "separator",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": ","
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "f2bdbccd3ba8a820cc93f5c3d405f51a",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.GroupBy@Dyncamelo.Nodes.DyncameloTable,string,System.Collections.Generic.IList<object>",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.GroupBy",
+      "X": 1080.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "by",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "aggregations",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "6b9a45ad6d180b2dfc6e27c96ae90050",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.ToExcelFile@Dyncamelo.Nodes.DyncameloTable,string,string,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.ToExcelFile",
+      "X": 1460.0,
+      "Y": 340.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "sheet",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "append",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "0c511ec21438f328b75dab05fbafa9fb",
       "NodeType": "WatchTable",
-      "Name": "Rows read",
-      "X": 1050.0,
-      "Y": 0.0,
+      "Name": "Totals",
+      "X": 1460.0,
+      "Y": 40.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -201,268 +346,77 @@
         "ViewWidth": 0.0,
         "ViewHeight": 0.0
       }
-    },
-    {
-      "Id": "01c6a59db9928db927a9afcfa4c01ccb",
-      "NodeType": "StringInput",
-      "Name": "Totals to work out",
-      "X": 350.0,
-      "Y": 550.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [],
-      "OutputPorts": [
-        {
-          "Name": "value"
-        }
-      ],
-      "Data": {
-        "Value": "count,sum:Element.Volume as Volume"
-      }
-    },
-    {
-      "Id": "f1ac0a7074bf674a2bd2961af9fc97cf",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Split totals",
-      "X": 700.0,
-      "Y": 510.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "text",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "separator",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": ","
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "list"
-        }
-      ],
-      "Data": {}
-    },
-    {
-      "Id": "4e93f22ec246e3488fa472c87b109ec0",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.GroupBy@Dyncamelo.Nodes.DyncameloTable,string,System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Table.GroupBy",
-      "X": 1050.0,
-      "Y": 300.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "table",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "by",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "Element.Category"
-        },
-        {
-          "Name": "aggregations",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "table"
-        }
-      ],
-      "Data": {}
-    },
-    {
-      "Id": "e9b57b91e50445c47765e1423b65e440",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Sort@Dyncamelo.Nodes.DyncameloTable,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Table.Sort",
-      "X": 1430.0,
-      "Y": 270.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "table",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "columns",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "Volume"
-        },
-        {
-          "Name": "descending",
-          "UsingDefaultValue": true,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": true
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "table"
-        }
-      ],
-      "Data": {}
-    },
-    {
-      "Id": "7ab717632733b1c5e030e9a0afd0ed74",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.ToExcelFile@Dyncamelo.Nodes.DyncameloTable,string,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Table.ToExcelFile",
-      "X": 1780.0,
-      "Y": 240.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "table",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "path",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "C:\\Reports\\qto.xlsx"
-        },
-        {
-          "Name": "sheet",
-          "UsingDefaultValue": true,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "Quantities"
-        },
-        {
-          "Name": "append",
-          "UsingDefaultValue": true,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "path"
-        }
-      ],
-      "Data": {}
     }
   ],
   "Connectors": [
     {
-      "Id": "10beb981963e12419702b38f5fe851ca",
-      "FromNode": "54bff0e2e39d80d9a511d9bb27bd0b82",
+      "Id": "93665bb0a44194a49168e1a9204a1bcd",
+      "FromNode": "7b4e0ebf2ce6735fcc4aa467a2216283",
       "FromPort": "value",
-      "ToNode": "c0b10be30f896caf9f58a3df13f56e0d",
+      "ToNode": "7be98d819931a2c0863435ac3b60ad38",
       "ToPort": "value"
     },
     {
-      "Id": "9237e6273635e6de48f941b8b99f6034",
-      "FromNode": "52c386388a49f95a31d5149a4261c509",
-      "FromPort": "value",
-      "ToNode": "12c12a21b92cb66758e019b7f0ef3e90",
-      "ToPort": "text"
-    },
-    {
-      "Id": "d87220e6c47c28d755c7a886cbf9d9bc",
-      "FromNode": "c0b10be30f896caf9f58a3df13f56e0d",
+      "Id": "0dbcdeedd68702dd3f875607c81f311a",
+      "FromNode": "7be98d819931a2c0863435ac3b60ad38",
       "FromPort": "items",
-      "ToNode": "e78e2dbef5c00b478c3de87b8153204d",
+      "ToNode": "b942ad30a78c6e2c49b7cbef36647652",
       "ToPort": "items"
     },
     {
-      "Id": "ec578484599602e4007a2ed6e9cb1e0c",
-      "FromNode": "12c12a21b92cb66758e019b7f0ef3e90",
+      "Id": "bcdf3012c478e41979f2592a3d43576a",
+      "FromNode": "34e683bfc8c95fe659e930d85d787553",
       "FromPort": "list",
-      "ToNode": "e78e2dbef5c00b478c3de87b8153204d",
+      "ToNode": "b942ad30a78c6e2c49b7cbef36647652",
       "ToPort": "properties"
     },
     {
-      "Id": "c72c101dbb17ade98c87515d18186504",
-      "FromNode": "01c6a59db9928db927a9afcfa4c01ccb",
-      "FromPort": "value",
-      "ToNode": "f1ac0a7074bf674a2bd2961af9fc97cf",
-      "ToPort": "text"
-    },
-    {
-      "Id": "3443517a160ba4f18a6d4d9b773a86fa",
-      "FromNode": "e78e2dbef5c00b478c3de87b8153204d",
+      "Id": "dcd74c44c6109d86f6c04a38fdfdf04e",
+      "FromNode": "b942ad30a78c6e2c49b7cbef36647652",
       "FromPort": "table",
-      "ToNode": "4e93f22ec246e3488fa472c87b109ec0",
+      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
       "ToPort": "table"
     },
     {
-      "Id": "b2e8537fabc8ea9ab5295391f897fff6",
-      "FromNode": "f1ac0a7074bf674a2bd2961af9fc97cf",
+      "Id": "59c0f168f7ded80543af965300f718c1",
+      "FromNode": "56a9dbc92387883c97756407e0181003",
+      "FromPort": "value",
+      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
+      "ToPort": "by"
+    },
+    {
+      "Id": "88dd8c9c8af944c1d6711a0ecc7865b7",
+      "FromNode": "87e1ebefdbe9b3681699457935de0440",
       "FromPort": "list",
-      "ToNode": "4e93f22ec246e3488fa472c87b109ec0",
+      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
       "ToPort": "aggregations"
     },
     {
-      "Id": "5f9695ea691bf36e39afb81357720a2f",
-      "FromNode": "4e93f22ec246e3488fa472c87b109ec0",
+      "Id": "f40030e6f38e5882ad82023f1e0be3dd",
+      "FromNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
       "FromPort": "table",
-      "ToNode": "e9b57b91e50445c47765e1423b65e440",
+      "ToNode": "6b9a45ad6d180b2dfc6e27c96ae90050",
       "ToPort": "table"
     },
     {
-      "Id": "1d2fae660859417a0ba95a4c209a25e5",
-      "FromNode": "e9b57b91e50445c47765e1423b65e440",
-      "FromPort": "table",
-      "ToNode": "7ab717632733b1c5e030e9a0afd0ed74",
-      "ToPort": "table"
+      "Id": "2e7fc6641e940f3bdee90806a9a5d547",
+      "FromNode": "e6674be113dbc528424d27ae1fc5554a",
+      "FromPort": "path",
+      "ToNode": "6b9a45ad6d180b2dfc6e27c96ae90050",
+      "ToPort": "path"
     },
     {
-      "Id": "08767c16338684806ff9e2673f7975d3",
-      "FromNode": "e78e2dbef5c00b478c3de87b8153204d",
+      "Id": "744b8058abd734f9d4aeee1f626d90dd",
+      "FromNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
       "FromPort": "table",
-      "ToNode": "499e2ae1aef22bd564ef93902e26b011",
+      "ToNode": "0c511ec21438f328b75dab05fbafa9fb",
       "ToPort": "table"
     }
   ],
   "Notes": [
     {
-      "Id": "cb38052441832a711d37d4cba250f301",
-      "Text": "WHAT IT DOES: takes every item with a volume above the minimum, reads the columns you list, adds up count and volume per category, sorts the biggest first and writes the sheet. The Watch Table shows the rows read before they are totalled. TO CHANGE: the columns, the totals (for example sum:Element.Area as Area) and the file path on Table.ToExcelFile.",
+      "Id": "f3ce9c76fa0fd5e4e2d9a14856af2e9e",
+      "Text": "WHAT IT DOES: finds the items whose Element > Volume is above the minimum, totals them by the property you choose and writes the totals to Excel. In the Script Player the Number, Choice and File Path nodes become the form and the Watch Table is the result. TO CHANGE: the property searched on Search.ByProperty and the columns to read.",
       "X": 0.0,
       "Y": -190.0
     }

@@ -22,8 +22,8 @@ Goal: write an HTML page that shows, for each clash test, how many results are N
 2. Add `Clash.SummaryTable` (*Navisworks ▸ Clash ▸ Report*). Wire `tests` from `Clash.Tests` into its `tests`. It makes one row for each test with the columns Test, Total and one for each status (New, Active, Reviewed, Approved, Resolved). Leave `tests` unwired to cover every test without `Clash.Tests`.
 3. Add `Table.FromRows` (*Table*). Wire `rows` into `rows` and `headers` into `headers`. The summary node gives rows and headers separately, and this node joins them into one table.
 4. Add `Report.Html` (*Report*). Wire the table into `sections`. Type a title, such as `Clash summary`, into `title`, and a line such as the model name and date into `subtitle`.
-5. Add `Text.WriteToFile` (*File*). Wire `html` into `text`. Type a **full path** into `path`, for example `C:\Temp\clash-summary.html`.
-6. Add a `Watch Table` (*Display*) on the table to see the numbers on the canvas.
+5. Add `Text.WriteToFile` (*File*). Wire `html` into `text`. Type a **full path** into `path`, for example `C:\Reports\clash-summary.html`.
+6. Add a `Watch Table` (*Display*) on the `table` output of `Table.FromRows` to see the numbers on the canvas.
 7. Press ++f5++, then open the file in a browser.
 
 ![The clash report graph: Clash.Tests, Clash.SummaryTable, Table.FromRows, Report.Html and Text.WriteToFile.](../../images/wiki-graph-clash-report.png)

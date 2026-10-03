@@ -233,7 +233,8 @@ class Page:
         extra = dict(self.meta)
         description = extra.pop("description", None) or self.description
         if description:
-            meta["description"] = description
+            # the theme writes it into <meta name="description" content="...">, so quotes and & must be escaped
+            meta["description"] = html.escape(str(description), quote=True)
         if self.edit_path:
             meta["edit_path"] = self.edit_path
         meta.update(extra)
@@ -292,7 +293,7 @@ class Stage:
                         "![%s](%s#only-light)%s" % (alt_plain, rel(light_name), tail)]
         else:
             pictures = ["![%s](%s)%s" % (alt_plain, rel(name), tail)]
-        caption = alt.strip() or (title or "").strip()
+        caption = re.sub(r"[`*]", "", alt.strip() or (title or "").strip())
         if standalone and caption:
             return "\n".join(['<figure markdown="span">'] + ["  " + p for p in pictures]
                              + ["  <figcaption>%s</figcaption>" % caption, "</figure>"])
@@ -353,10 +354,11 @@ class Stage:
                 out.append(line)
                 continue
             whole = LINK_OR_PICTURE.fullmatch(line.strip())
-            if whole and whole.group(1):
+            indent = re.match(r"\s*", line).group(0)
+            # a picture alone on its line becomes a figure (not when it is a loose continuation of a list item)
+            if whole and whole.group(1) and (indent == "" or len(indent.expandtabs(4)) >= 4):
                 made = one(whole, standalone=True)
                 if "\n" in made:
-                    indent = re.match(r"\s*", line).group(0)
                     out.append("")
                     out.extend(indent + b for b in made.strip("\n").split("\n"))
                     out.append("")
@@ -663,10 +665,12 @@ def build_stage(allow_missing_images, allow_missing_files):
                     meta, _ = split_front_matter(read_text(path), where)
                 except BuildError as error:
                     problems.append(str(error))
+                    listed.add(key)
                     continue
                 order = meta.get("order", 1000)
                 if isinstance(order, bool) or not isinstance(order, (int, float)):
                     problems.append("%s: 'order' must be a number" % where)
+                    listed.add(key)
                     continue
                 found.append((order, path.name, key))
             for _, _, key in sorted(found):

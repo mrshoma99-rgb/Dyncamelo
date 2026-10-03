@@ -19,7 +19,8 @@ namespace Dyncamelo.Integration.Tests;
 /// Dyncamelo.Navisworks C# source — that every serialized port matches the
 /// definition's ports, and that every connector references ports that exist.
 /// A renamed node, method, parameter or output in either library breaks the
-/// corresponding sample here before a user ever opens it.
+/// corresponding sample here before a user ever opens it. The same checks run on
+/// the how-to graphs the wiki offers for download (docs/wiki-src/graphs).
 /// </summary>
 public class SampleGraphStaticValidationTests
 {
@@ -36,8 +37,16 @@ public class SampleGraphStaticValidationTests
     [MemberData(nameof(SampleFiles))]
     public void SampleGraph_StaticStructureIsValid(string fileName)
     {
-        var json = JObject.Parse(File.ReadAllText(
-            Path.Combine(SampleGraphFileTests.SamplesDirectory(), fileName)));
+        ValidateGraphFile(Path.Combine(SampleGraphFileTests.SamplesDirectory(), fileName), fileName);
+    }
+
+    /// <summary>
+    /// The static checks shared by the shipped samples and the wiki graphs: every node resolves, every serialized port
+    /// matches its definition and every connector references real ports.
+    /// </summary>
+    private static void ValidateGraphFile(string path, string fileName)
+    {
+        var json = JObject.Parse(File.ReadAllText(path));
         Assert.NotNull(json["Dyncamelo"]);
 
         var registry = NodeRegistry.CreateDefault();
@@ -89,6 +98,145 @@ public class SampleGraphStaticValidationTests
                 label + ": input port '" + toPort + "' does not exist on node '" +
                 toNode!.Value<string>("Name") + "'.");
         }
+    }
+
+    // ------------------------------------------------------------------
+    // The how-to graphs the wiki offers for download (docs/wiki-src/graphs).
+    // They are built by tools/wiki_graph.py from the specs next to them, so
+    // the checks below also hold the two together.
+    // ------------------------------------------------------------------
+
+    private static string WikiGraphsDirectory()
+    {
+        var directory = Path.Combine(
+            Path.GetDirectoryName(SampleGraphFileTests.SamplesDirectory())!, "docs", "wiki-src", "graphs");
+        Assert.True(Directory.Exists(directory), "Wiki graphs directory not found: " + directory);
+        return directory;
+    }
+
+    public static IEnumerable<object[]> WikiGraphFiles()
+    {
+        return Directory.EnumerateFiles(WikiGraphsDirectory(), "*.dyc")
+            .OrderBy(p => p, StringComparer.Ordinal)
+            .Select(p => new object[] { Path.GetFileName(p) });
+    }
+
+    [Fact]
+    public void WikiGraphs_ExistAndEachOneHasItsSpec()
+    {
+        var directory = WikiGraphsDirectory();
+        var graphs = Directory.EnumerateFiles(directory, "*.dyc")
+            .Select(Path.GetFileNameWithoutExtension).OrderBy(n => n, StringComparer.Ordinal).ToList();
+        var specs = Directory.EnumerateFiles(Path.Combine(directory, "specs"), "*.json")
+            .Select(Path.GetFileNameWithoutExtension).OrderBy(n => n, StringComparer.Ordinal).ToList();
+
+        Assert.NotEmpty(graphs);
+        Assert.Equal(specs, graphs);
+    }
+
+    [Theory]
+    [MemberData(nameof(WikiGraphFiles))]
+    public void WikiGraph_StaticStructureIsValid(string fileName)
+    {
+        ValidateGraphFile(Path.Combine(WikiGraphsDirectory(), fileName), fileName);
+    }
+
+    /// <summary>
+    /// What a graph offered for download must also be: named and described, set to run manually, every input of every
+    /// node either wired or given a value (a default counts), no value typed into a wired input, ids that are
+    /// unique 32-digit hex numbers, and no two nodes drawn on top of each other.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(WikiGraphFiles))]
+    public void WikiGraph_IsCompleteAndTidy(string fileName)
+    {
+        var json = JObject.Parse(File.ReadAllText(Path.Combine(WikiGraphsDirectory(), fileName)));
+        var registry = NodeRegistry.CreateDefault();
+        NodeLibrary.RegisterAll(registry);
+        var navisworksMethods = HarvestedNavisworksMethods.Value;
+
+        Assert.False(string.IsNullOrWhiteSpace(json.Value<string>("Name")), fileName + ": the graph has no Name.");
+        var description = (json.Value<string>("Description") ?? string.Empty).Trim();
+        Assert.True(description.Length > 0 && description.EndsWith(".", StringComparison.Ordinal),
+            fileName + ": the Description is one sentence ending with a full stop.");
+        Assert.False(Regex.IsMatch(description.Substring(0, description.Length - 1), @"[.!?]\s+[A-Z]"),
+            fileName + ": the Description runs to more than one sentence.");
+        Assert.Equal("Manual", json["View"]?["RunType"]?.Value<string>());
+        Assert.True(Regex.IsMatch(json.Value<string>("Uuid") ?? string.Empty, "^[0-9a-f]{32}$"), fileName + ": Uuid is not 32 hex digits.");
+
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        var wiredPorts = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var connector in ((JArray)json["Connectors"]!).OfType<JObject>())
+        {
+            Assert.True(ids.Add(connector.Value<string>("Id")!), fileName + ": duplicate id " + connector.Value<string>("Id"));
+            wiredPorts.Add(connector.Value<string>("ToNode") + "/" + connector.Value<string>("ToPort"));
+        }
+
+        var positions = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var node in ((JArray)json["Nodes"]!).OfType<JObject>())
+        {
+            var id = node.Value<string>("Id")!;
+            var label = fileName + " node '" + node.Value<string>("Name") + "'";
+            Assert.True(Regex.IsMatch(id, "^[0-9a-f]{32}$"), label + ": id is not 32 hex digits.");
+            Assert.True(ids.Add(id), label + ": duplicate id.");
+            Assert.True(positions.Add(node.Value<double>("X") + "," + node.Value<double>("Y")), label + ": drawn exactly on top of another node.");
+
+            var optional = InputsAreOptional(node, registry, navisworksMethods);
+            var ports = ((JArray)node["InputPorts"]!).OfType<JObject>().ToList();
+            Assert.Equal(optional.Count, ports.Count);
+            for (int i = 0; i < ports.Count; i++)
+            {
+                var name = ports[i].Value<string>("Name");
+                var wired = wiredPorts.Contains(id + "/" + name);
+                var typed = ports[i]["UserValue"] != null;
+                Assert.True(wired || typed || optional[i],
+                    label + ": required input '" + name + "' is neither wired nor given a value.");
+                Assert.False(wired && typed, label + ": input '" + name + "' has a value typed into it and a wire.");
+                if (wired)
+                {
+                    Assert.False(ports[i].Value<bool>("UsingDefaultValue"),
+                        label + ": wired input '" + name + "' still says it uses its default.");
+                }
+            }
+        }
+
+        foreach (var note in ((JArray)json["Notes"]!).OfType<JObject>())
+        {
+            Assert.True(ids.Add(note.Value<string>("Id")!), fileName + ": duplicate note id.");
+            Assert.False(string.IsNullOrWhiteSpace(note.Value<string>("Text")), fileName + ": a note is empty.");
+        }
+    }
+
+    /// <summary>For each serialized input of a node, whether the node's definition gives it a default.</summary>
+    private static List<bool> InputsAreOptional(
+        JObject node,
+        NodeRegistry registry,
+        IReadOnlyList<SourceMethod> navisworksMethods)
+    {
+        var nodeType = node.Value<string>("NodeType");
+        if (nodeType != "ZeroTouch")
+        {
+            var instance = registry.CreateNode(nodeType ?? string.Empty);
+            Assert.NotNull(instance);
+            if (node["Data"] is JObject data)
+            {
+                instance!.DeserializeData(data); // rebuilds the ports of nodes such as List.Create
+            }
+
+            return instance!.InPorts.Select(p => p.HasDefault).ToList();
+        }
+
+        var definitionId = node.Value<string>("DefinitionId") ?? string.Empty;
+        if (node.Value<string>("Assembly") == NavisworksAssemblyName)
+        {
+            var inputNames = ((JArray)node["InputPorts"]!).OfType<JObject>().Select(p => p.Value<string>("Name")).ToList();
+            var method = navisworksMethods.First(m =>
+                m.MatchesDefinitionId(definitionId) && m.ParameterNames.SequenceEqual(inputNames));
+            return method.ParameterIsOptional.ToList();
+        }
+
+        Assert.True(registry.TryGetDefinition(definitionId, out var definition), "definition '" + definitionId + "' is not registered.");
+        return definition!.Inputs.Select(i => i.HasDefault).ToList();
     }
 
     private static void ValidateZeroTouchNode(

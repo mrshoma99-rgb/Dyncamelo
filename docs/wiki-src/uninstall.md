@@ -2,6 +2,9 @@
 
 Close Navisworks first. The setup window warns you if it is still running.
 
+!!! tip "Your work is safe"
+    Uninstalling removes the program and the Apps entry. Your `.dyc` graphs, your scripts folder and your settings stay where they are, so you can reinstall later and carry on. The table [below](#what-stays-behind-and-how-to-remove-it) lists them.
+
 ## If you installed with the installer
 
 Any one of these:
@@ -9,6 +12,10 @@ Any one of these:
 * **Windows Settings ▸ Apps ▸ Installed apps ▸ Dyncamelo for Navisworks ▸ Uninstall**.
 * Run `DyncameloSetup.exe` and choose **Remove existing install**.
 * Silently, from a command prompt: `DyncameloSetup.exe /uninstall /silent`.
+
+## If you got the professional copy from the Autodesk App Store
+
+That copy is coming soon. Remove it the way the store describes. What stays behind is the same as in the table [below](#what-stays-behind-and-how-to-remove-it).
 
 ## If you installed with `install-dyncamelo.bat`
 
@@ -46,3 +53,8 @@ For a completely clean start, delete the `%APPDATA%\Dyncamelo` folder yourself (
 Start Navisworks. The **BIMCamel** tab should no longer have Dyncamelo, Player and About buttons from this install. If another BIMCamel tool is installed, its own buttons stay.
 
 If the tab or buttons are still there, look for a second copy: in the other `ApplicationPlugins` folder (user and all-users), or in a `Plugins\Dyncamelo.App` folder of Navisworks.
+
+## Next steps
+
+* [Installation](installation.md) to put it back, and [Updating](updating.md) if you only want a newer version.
+* [Privacy and safety](privacy-and-safety.md#removing-what-it-stored) for what is stored on your computer.
