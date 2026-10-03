@@ -130,6 +130,11 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             }
         }
 
+        if (HeaderMenuOverflow.IsSubmenuOpen)
+        {
+            return;
+        }
+
         if (Mouse.Captured is Visual captured && IsAncestorOf(captured))
         {
             Mouse.Capture(null);
@@ -187,6 +192,12 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
         _hudCommand ??= new RelayCommand(() => _perfHud?.Toggle());
         _addNoteCommand ??= new RelayCommand(() => ViewModel?.AddNote(ViewportCenter));
         _addNodeCommand ??= new RelayCommand(OpenQuickSearchFromMenu);
+
+        // A new menu starts as a bar; the next layout pass decides again whether the pane has room for it.
+        HeaderMenuOverflow.Items.Clear();
+        _menuCompact = false;
+        HeaderMenu.Visibility = Visibility.Visible;
+        HeaderMenuCompact.Visibility = Visibility.Collapsed;
 
         EditorMenuBuilder.Build(
             HeaderMenu,
@@ -599,12 +610,16 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
 
     private void OnHeaderBarSizeChanged(object sender, SizeChangedEventArgs e) => UpdateHeaderLayout();
 
-    // The menus and the buttons always stay; the wordmark goes first when the pane is narrow, then the name of the script.
-    // The room is what the bar has left after the logo, the menu items (their own widths, not the width the menu is stretched to)
-    // and the buttons; nothing measured here depends on whether the wordmark or the title is showing, so it cannot flicker.
+    // What the header gives up first when the pane is narrow: the script's name, then the "Dyncamelo by BIMCamel" text, then the
+    // menu bar itself, which becomes one button holding the same menus. The buttons and the logo never go. Everything is
+    // decided from widths that do not depend on what is showing (the logo, the buttons, the menu bar's width measured while it
+    // was a bar), so the layout cannot flicker between two states.
     private const double WordmarkWidth = 96d;
     private const double TitleMinimumWidth = 110d;
     private const double TitleMaximumWidth = 320d;
+    private const double CompactMenuWidth = 36d;
+    private bool _menuCompact;
+    private double _menuBarWidth;
 
     private void UpdateHeaderLayout()
     {
@@ -613,16 +628,28 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             return;
         }
 
-        var menuWidth = 0d;
-        foreach (var item in HeaderMenu.Items)
+        if (!_menuCompact)
         {
-            if (item is MenuItem top)
+            var measured = 0d;
+            foreach (var item in HeaderMenu.Items)
             {
-                menuWidth += top.ActualWidth + top.Margin.Left + top.Margin.Right;
+                if (item is MenuItem top)
+                {
+                    measured += top.ActualWidth + top.Margin.Left + top.Margin.Right;
+                }
+            }
+
+            if (measured > 0d)
+            {
+                _menuBarWidth = measured;
             }
         }
 
-        var room = HeaderBar.ActualWidth - 12d - (HeaderLogo.ActualWidth + 8d) - menuWidth - HeaderControls.ActualWidth;
+        var available = HeaderBar.ActualWidth - 12d - (HeaderLogo.ActualWidth + 8d) - HeaderControls.ActualWidth;
+        var compact = _menuBarWidth > 0d && available < _menuBarWidth;
+        SetMenuCompact(compact);
+
+        var room = available - (compact ? CompactMenuWidth : _menuBarWidth);
         var wordmark = room >= WordmarkWidth + 8d;
         HeaderWordmark.Visibility = wordmark ? Visibility.Visible : Visibility.Collapsed;
 
@@ -630,6 +657,33 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
         var title = titleRoom >= TitleMinimumWidth;
         HeaderTitle.Visibility = title ? Visibility.Visible : Visibility.Collapsed;
         HeaderTitle.MaxWidth = title ? Math.Min(titleRoom, TitleMaximumWidth) : TitleMaximumWidth;
+    }
+
+    // The menu bar's items move into the one button (as submenus, which open to the right) and back (as menu bar items).
+    private void SetMenuCompact(bool compact)
+    {
+        if (compact == _menuCompact)
+        {
+            return;
+        }
+
+        _menuCompact = compact;
+        ItemsControl from = compact ? HeaderMenu : HeaderMenuOverflow;
+        ItemsControl to = compact ? HeaderMenuOverflow : HeaderMenu;
+        var style = TryFindResource(compact ? "Dyc.MenuItem" : "Dyc.TopMenuItem") as Style;
+        foreach (var item in from.Items.Cast<object>().ToList())
+        {
+            from.Items.Remove(item);
+            if (item is MenuItem menuItem && style != null)
+            {
+                menuItem.Style = style;
+            }
+
+            to.Items.Add(item);
+        }
+
+        HeaderMenu.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        HeaderMenuCompact.Visibility = compact ? Visibility.Visible : Visibility.Collapsed;
     }
 
 

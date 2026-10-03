@@ -679,47 +679,81 @@ public class CommandSurfaceViewTests
     }
 
     [Fact]
-    public void TheLogoTheMenusAndTheButtonsShareOneHeaderRowAndTheWordmarkAndTheNameGiveWayWhenTheWindowIsNarrow()
+    public void TheLogoTheMenusAndTheButtonsShareOneHeaderRowAndTheNarrowerThePaneTheLessTheHeaderShows()
     {
         using var host = Build();
         StaHost.Run(() =>
         {
             var bar = (System.Windows.Controls.Border)host.Control.FindName("HeaderBar");
             var menu = (System.Windows.Controls.Menu)host.Control.FindName("HeaderMenu");
+            var compact = (System.Windows.Controls.Menu)host.Control.FindName("HeaderMenuCompact");
+            var overflow = (System.Windows.Controls.MenuItem)host.Control.FindName("HeaderMenuOverflow");
             var run = (System.Windows.Controls.Button)host.Control.FindName("RunButton");
             var logo = (System.Windows.FrameworkElement)host.Control.FindName("HeaderLogo");
             var wordmark = (System.Windows.FrameworkElement)host.Control.FindName("HeaderWordmark");
             var title = (System.Windows.Controls.TextBlock)host.Control.FindName("HeaderTitle");
             var settings = (System.Windows.Controls.Primitives.ToggleButton)host.Control.FindName("SettingsButton");
+            var topMenus = menu.Items.OfType<System.Windows.Controls.MenuItem>().Count();
+            Assert.True(topMenus >= 6, "the menu bar has " + topMenus + " menus");
 
-            // One bar: the identity, the menus and the buttons are inside it, it starts at the top of the pane, and it is one row high.
-            Assert.True(bar.IsAncestorOf(logo) && bar.IsAncestorOf(menu) && bar.IsAncestorOf(run) && bar.IsAncestorOf(settings));
-            Assert.Equal(0d, bar.TranslatePoint(new System.Windows.Point(0, 0), host.Control).Y);
-            Assert.True(bar.ActualHeight > 28 && bar.ActualHeight < 48, "the header is " + bar.ActualHeight + " high");
-            foreach (var part in new System.Windows.FrameworkElement[] { logo, menu, run, settings })
+            void Resize(double width)
             {
-                var centre = part.TranslatePoint(new System.Windows.Point(part.ActualWidth / 2, part.ActualHeight / 2), bar).Y;
-                Assert.True(centre > 0 && centre < bar.ActualHeight, part.GetType().Name + " is not on the header row");
+                host.Control.Width = width;
+                host.Control.UpdateLayout();
+                host.Window.UpdateLayout();
             }
 
-            // Wide: the wordmark and the script's name show, in this order from the left: logo, menus, name, buttons.
-            Assert.Equal(System.Windows.Visibility.Visible, wordmark.Visibility);
-            Assert.Equal(System.Windows.Visibility.Visible, title.Visibility);
+            void AssertOneRow(string when)
+            {
+                Assert.True(bar.ActualHeight > 28 && bar.ActualHeight < 48, when + ": the header is " + bar.ActualHeight + " high");
+                var menus = menu.IsVisible ? (System.Windows.FrameworkElement)menu : compact;
+                foreach (var part in new[] { logo, menus, run, settings })
+                {
+                    var centre = part.TranslatePoint(new System.Windows.Point(part.ActualWidth / 2, part.ActualHeight / 2), bar).Y;
+                    Assert.True(part.IsVisible && centre > 0 && centre < bar.ActualHeight, when + ": " + part.GetType().Name + " is not on the header row");
+                }
+
+                Assert.True(run.TranslatePoint(new System.Windows.Point(run.ActualWidth, 0), bar).X <= bar.ActualWidth + 1d, when + ": the Run button is cut off");
+            }
+
+            // One bar: the identity, the menus and the buttons are inside it, and it starts at the top of the pane.
+            Assert.True(bar.IsAncestorOf(logo) && bar.IsAncestorOf(menu) && bar.IsAncestorOf(run) && bar.IsAncestorOf(settings));
+            Assert.Equal(0d, bar.TranslatePoint(new System.Windows.Point(0, 0), host.Control).Y);
+
+            // Wide: the whole menu bar, the wordmark and the script's name, left to right: logo, menus, name, buttons.
+            Resize(1400);
+            Assert.True(menu.IsVisible && !compact.IsVisible, "wide: the menu bar should be a bar");
+            Assert.True(wordmark.IsVisible, "wide: the wordmark is hidden");
+            Assert.True(title.IsVisible, "wide: the script's name is hidden");
             Assert.Equal(host.Vm.Title, title.Text);
+            AssertOneRow("wide");
             double Left(System.Windows.FrameworkElement e) => e.TranslatePoint(new System.Windows.Point(0, 0), bar).X;
-            Assert.True(Left(logo) < Left(menu) && Left(menu) + menu.ActualWidth <= Left(title) + 1d && Left(title) < Left(run));
+            Assert.True(Left(logo) < Left(menu) && Left(menu) + menu.ActualWidth <= Left(title) + 1d && Left(title) < Left(run), "wide: the parts are not in order");
 
-            // Narrow: the wordmark and the name are gone, the logo, the menus and the buttons stay.
-            host.Window.Width = 520;
-            host.Window.UpdateLayout();
-            Assert.Equal(System.Windows.Visibility.Collapsed, wordmark.Visibility);
-            Assert.Equal(System.Windows.Visibility.Collapsed, title.Visibility);
-            Assert.True(logo.IsVisible && menu.IsVisible && run.IsVisible && settings.IsVisible);
+            // Medium: the menu bar still fits, the script's name has gone.
+            Resize(980);
+            Assert.True(menu.IsVisible && !compact.IsVisible, "medium: the menu bar should be a bar");
+            Assert.True(wordmark.IsVisible, "medium: the wordmark is hidden");
+            Assert.False(title.IsVisible, "medium: the script's name should have given way");
+            AssertOneRow("medium");
 
-            host.Window.Width = 1400;
-            host.Window.UpdateLayout();
-            Assert.Equal(System.Windows.Visibility.Visible, wordmark.Visibility);
-            Assert.Equal(System.Windows.Visibility.Visible, title.Visibility);
+            // Narrow: the menus are one button holding all of them, nothing wraps, the buttons are all there.
+            Resize(520);
+            Assert.False(menu.IsVisible, "narrow: the menu bar should be folded away");
+            Assert.True(compact.IsVisible, "narrow: the menu button is missing");
+            Assert.Equal(topMenus, overflow.Items.OfType<System.Windows.Controls.MenuItem>().Count());
+            Assert.Empty(menu.Items);
+            Assert.False(title.IsVisible, "narrow: the script's name should have given way");
+            AssertOneRow("narrow");
+
+            // Wide again: the menus come back to the bar, with their own style.
+            Resize(1400);
+            Assert.True(menu.IsVisible && !compact.IsVisible, "wide again: the menu bar should be a bar");
+            Assert.Equal(topMenus, menu.Items.OfType<System.Windows.Controls.MenuItem>().Count());
+            Assert.Empty(overflow.Items);
+            Assert.True(wordmark.IsVisible && title.IsVisible, "wide again: the wordmark and the name should be back");
+            Assert.Same(host.Control.FindResource("Dyc.TopMenuItem"), menu.Items.OfType<System.Windows.Controls.MenuItem>().First().Style);
+            AssertOneRow("wide again");
         });
     }
 

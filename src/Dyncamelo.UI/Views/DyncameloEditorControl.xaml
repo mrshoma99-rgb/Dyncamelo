@@ -99,6 +99,22 @@
                         </StackPanel>
                     </StackPanel>
 
+                    <!-- The menus of a narrow pane: one button that holds the same menus (UpdateHeaderLayout moves them in and out). -->
+                    <Menu x:Name="HeaderMenuCompact"
+                          DockPanel.Dock="Left"
+                          IsMainMenu="False"
+                          Background="Transparent"
+                          Foreground="{DynamicResource Dyc.TextBrush}"
+                          VerticalAlignment="Center"
+                          Padding="0"
+                          Visibility="Collapsed">
+                        <MenuItem x:Name="HeaderMenuOverflow"
+                                  Style="{StaticResource Dyc.TopMenuItem}"
+                                  ToolTip="Menus"
+                                  FontSize="15"
+                                  Header="&#x2630;" />
+                    </Menu>
+
                     <StackPanel x:Name="HeaderControls"
                                 Orientation="Horizontal"
                                 DockPanel.Dock="Right"
