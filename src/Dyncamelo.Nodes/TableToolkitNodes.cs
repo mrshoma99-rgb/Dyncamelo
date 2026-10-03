@@ -444,17 +444,33 @@ public static class TableToolkitNodes
             throw new ArgumentException("Table.Sort needs at least one column to sort by.", nameof(columns));
         }
 
-        IOrderedEnumerable<object?[]>? ordered = null;
+        // Every cell of a sort column is read once into a sort key (empty, number, text or other, with its number and text worked out
+        // only when a comparison needs them), so a comparison of two cells is plain code: no parsing per pair and, for a column that
+        // mixes numbers and text, none of the two exceptions per pair the old comparer threw and caught. OrderBy/ThenBy still do the
+        // sorting (stable, same sequence of comparisons), so the order is exactly what it was.
+        var rows = table.Rows;
+        var keysOfColumn = new Dictionary<int, CellSortKey[]>();
+        IOrderedEnumerable<int>? ordered = null;
         foreach (var key in keys)
         {
-            var comparer = new CellComparer(key.Descending);
-            var index = key.Index;
+            if (!keysOfColumn.TryGetValue(key.Index, out var cells))
+            {
+                cells = new CellSortKey[rows.Count];
+                for (var i = 0; i < cells.Length; i++)
+                {
+                    cells[i] = CellSortKey.Of(rows[i][key.Index]);
+                }
+
+                keysOfColumn[key.Index] = cells;
+            }
+
+            var comparer = CellSortKey.Comparer(key.Descending);
             ordered = ordered == null
-                ? table.Rows.OrderBy(r => r[index], comparer)
-                : ordered.ThenBy(r => r[index], comparer);
+                ? Enumerable.Range(0, cells.Length).OrderBy(i => cells[i], comparer)
+                : ordered.ThenBy(i => cells[i], comparer);
         }
 
-        return new DyncameloTable(table.Headers, ordered!.Select(r => (IReadOnlyList<object?>)r).ToList());
+        return new DyncameloTable(table.Headers, ordered!.Select(i => (IReadOnlyList<object?>)rows[i]).ToList());
     }
 
     /// <summary>Removes duplicate rows.</summary>
@@ -1204,38 +1220,5 @@ public static class TableToolkitNodes
         }
 
         throw new InvalidOperationException(nodeName + ": unhandled aggregation " + spec.Function + ".");
-    }
-
-    // Orders cells: empty last (in either direction), numbers numerically (numeric text too), otherwise by value, otherwise by text.
-    private sealed class CellComparer : IComparer<object?>
-    {
-        private readonly bool _descending;
-
-        public CellComparer(bool descending)
-        {
-            _descending = descending;
-        }
-
-        public int Compare(object? x, object? y)
-        {
-            var xEmpty = x == null || (x is string sx && sx.Length == 0);
-            var yEmpty = y == null || (y is string sy && sy.Length == 0);
-            if (xEmpty || yEmpty)
-            {
-                return xEmpty == yEmpty ? 0 : xEmpty ? 1 : -1;
-            }
-
-            int order;
-            try
-            {
-                order = ValueTests.Order(x, y, "Table.Sort");
-            }
-            catch (InvalidOperationException)
-            {
-                order = string.Compare(TypeCoercion.FormatValue(x), TypeCoercion.FormatValue(y), StringComparison.OrdinalIgnoreCase);
-            }
-
-            return _descending ? -order : order;
-        }
     }
 }
