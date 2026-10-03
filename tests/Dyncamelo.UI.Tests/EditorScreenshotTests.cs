@@ -148,6 +148,76 @@ public class EditorScreenshotTests
         }
     }
 
+    [Theory]
+    [InlineData("DyncameloDark", "editor-start.png")]
+    [InlineData("Light", "editor-start-light.png")]
+    public void RenderTheStartScreenOfAnEmptyEditor(string palette, string fileName)
+    {
+        var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");
+        if (string.IsNullOrWhiteSpace(folder))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(folder);
+        var root = Path.Combine(Path.GetTempPath(), "dyc-shot-start-" + Guid.NewGuid().ToString("N"));
+        var scripts = Path.Combine(root, "Clash Coordination");
+        Directory.CreateDirectory(scripts);
+        var settings = new UiSettingsService(Path.Combine(root, "settings.json"));
+        foreach (var name in new[] { "csv-roundtrip", "Table Summary from Text", "string-report" })
+        {
+            var path = Path.Combine(scripts, name + ".dyc");
+            File.Copy(Path.Combine(RepoRoot(), "samples", name + ".dyc"), path);
+            settings.AddRecentFile(path);
+        }
+
+        settings.SetPaletteId(palette);
+        Window? window = null;
+        DyncameloEditorControl? control = null;
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var registry = NodeRegistry.CreateDefault();
+                NodeLibrary.RegisterAll(registry);
+                var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings) { PaletteId = palette };
+                vm.SetAvailableUpdate("0.47.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
+                control = new DyncameloEditorControl { ViewModel = vm, Width = 1100d, Height = 760d };
+                var canvas = new Canvas();
+                canvas.Children.Add(control);
+                window = new Window
+                {
+                    Width = 1100d,
+                    Height = 760d,
+                    Content = canvas,
+                    ShowInTaskbar = false,
+                    ShowActivated = false,
+                    WindowStyle = WindowStyle.None,
+                };
+                window.Show();
+            });
+            StaHost.Flush();
+            StaHost.Flush();
+
+            Save(control!, folder, fileName, 1100, 760);
+        }
+        finally
+        {
+            if (window != null)
+            {
+                StaHost.Run(() => window.Close());
+            }
+
+            try
+            {
+                Directory.Delete(root, true);
+            }
+            catch (IOException)
+            {
+            }
+        }
+    }
+
     private static void RenderEditor(string palette, string fileName, Action<GraphEditorViewModel>? state)
     {
         var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");

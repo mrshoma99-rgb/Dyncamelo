@@ -91,9 +91,11 @@ public class DyncameloDockPanePlugin : DockPanePlugin
 
         // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists. A copy installed from the
         // Autodesk App Store is updated by the store, so it never offers the GitHub download.
+        // The start screen of the empty editor shows the newer version too, so the prompt is not the only place it is mentioned.
         UpdateCheck.Run(
             action => editor.Dispatcher.BeginInvoke(action),
-            () => !DistributionChannel.IsAppStore(InstallFolder) && (_viewModel?.CheckForUpdates ?? true));
+            () => !DistributionChannel.IsAppStore(InstallFolder) && (_viewModel?.CheckForUpdates ?? true),
+            (version, url) => _viewModel?.SetAvailableUpdate(version.ToString(3), url));
 
         return host;
     }

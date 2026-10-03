@@ -211,6 +211,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
         _savedChangeCount = _changeCount;
         _autosavedChangeCount = _changeCount;
         Views.ScrubNumberBox.WrapPointerAtScreenEdge = ScrubWrapsPointer;
+        InitStartScreen();
         RefreshHint();
     }
 
@@ -329,6 +330,12 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
             {
                 OnPropertyChanged(nameof(IsMinimapVisible));
                 OnPropertyChanged(nameof(MinimapTooltip));
+                if (value > 0)
+                {
+                    // Something is on the canvas: the start screen comes back the next time it is empty.
+                    _startScreenDismissed = false;
+                }
+
                 RefreshHint();
             }
         }
@@ -1982,15 +1989,19 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 
     // ----- files -------------------------------------------------------------
 
-    private void NewGraph()
+    private void NewGraph() => TryNewGraph();
+
+    // False when the user backed out of the question about unsaved work.
+    private bool TryNewGraph()
     {
         if (!ConfirmCloseDocument("New Graph"))
         {
-            return;
+            return false;
         }
 
         LoadGraph(new GraphModel { Name = "Untitled" });
         StatusMessage = "New graph.";
+        return true;
     }
 
     private void OpenGraph()

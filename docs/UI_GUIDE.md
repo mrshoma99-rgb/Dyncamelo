@@ -101,7 +101,8 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * **Colour eyedropper.** The dropper button in a colour popup turns the next click anywhere on the screen — the Navisworks viewport included — into the colour under the pointer. `Esc` or a right click cancels.
 * **Dragging numbers further.** With *Wrap the pointer while dragging numbers* on (Settings ▸ Editing), dragging a number to the edge of the screen brings the pointer back on the other side and the value carries on.
 * **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.
-* **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas lists the ways to add the first node. Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
+* **The start screen.** While the canvas is empty — when Dyncamelo opens, or after you delete every node — it shows the installed **version**, a link to **bimcamel.com** (guides, the node library and updates), a notice with a **Get it** button when a newer version has been found (the once-a-day update check, Settings ▸ Privacy), and cards: **New script** (starts an empty script and puts the cards away), your four newest **recent scripts**, and the **examples**. Click a card to open it. The cards go as soon as you open a script or add a node. *Help ▸ BIMCamel Website* and *Help ▸ Get the Newest Version…* do the same as the two links; **Settings ▸ Appearance ▸ Start screen on an empty canvas** switches the screen off.
+* **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas shows the start screen (below). Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
 
 ## The Script Player
 
@@ -239,6 +240,8 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 |---|---|---|
 | Command Palette… | `Ctrl+Shift+P` | Everywhere |
 | UI Guide (online) | — | Canvas |
+| BIMCamel Website | — | Canvas |
+| Get the Newest Version… | — | Canvas |
 | Keyboard & Mouse Shortcuts | `F1` | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |
@@ -292,7 +295,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Value previews under nodes | On / Off | On | Show a preview bubble with the result under each node after a run. |
 | Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Make everything in the Dyncamelo window smaller or larger, for high-resolution screens or a small pane. |
 | Hints in the status bar | On / Off | On | Show a line of suggestions at the bottom that follows what you are doing: the keys for the selected nodes, what a dragged wire will do. |
-| Hints on an empty canvas | On / Off | On | Show the ways to add a first node while the canvas is empty. |
+| Start screen on an empty canvas | On / Off | On | While the canvas is empty, show the start screen: a New script card, your recent scripts, the examples, the installed version and a link to bimcamel.com. It goes away as soon as you open a script or add a node. |
 
 ### Canvas
 

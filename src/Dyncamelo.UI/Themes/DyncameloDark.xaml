@@ -640,6 +640,45 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
     </Style>
 
+    <!-- A card on the start screen: a rounded tile that lights up under the pointer. -->
+    <Style x:Key="Dyc.StartCard" TargetType="{x:Type Button}">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="Width" Value="196" />
+        <Setter Property="MinHeight" Value="64" />
+        <Setter Property="Margin" Value="0,0,10,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Chrome"
+                            Background="{DynamicResource Dyc.NodeBodyBrush}"
+                            BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="12,10">
+                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Dyc.SmallToggle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource Dyc.ToolToggle}">
         <Setter Property="Padding" Value="6,1" />
         <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />

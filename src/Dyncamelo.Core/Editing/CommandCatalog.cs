@@ -156,6 +156,8 @@ public static class CommandCatalog
         new CommandInfo("wire.disconnect", "Disconnect Selected Wires", "Wires", null, keywords: "cut remove unlink"),
         new CommandInfo("help.palette", "Command Palette…", "Help", "Ctrl+Shift+P", CommandScope.Global, keywords: "search run any command"),
         new CommandInfo("help.guide", "UI Guide (online)", "Help", null, keywords: "documentation manual"),
+        new CommandInfo("help.website", "BIMCamel Website", "Help", null, keywords: "bimcamel.com wiki nodes library guides online"),
+        new CommandInfo("help.update", "Get the Newest Version…", "Help", null, keywords: "update upgrade download release new version"),
         new CommandInfo("help.keys", "Keyboard & Mouse Shortcuts", "Help", "F1", CommandScope.Global, keywords: "help keys shortcuts gestures cheat sheet"),
         new CommandInfo("help.diagnostics", "Copy Diagnostics", "Help", null, keywords: "report problem bug issue support version log errors paste"),
         new CommandInfo("help.selftest", "Run Self-Test…", "Help", null, keywords: "check test verify nodes work navisworks health"),

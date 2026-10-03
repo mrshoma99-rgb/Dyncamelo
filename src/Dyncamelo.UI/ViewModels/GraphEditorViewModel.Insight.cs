@@ -591,7 +591,7 @@ public partial class GraphEditorViewModel
     public bool ShowEmptyCanvasHints
     {
         get => _settings.GetBool(SettingKeys.EmptyHints, true);
-        set => SetPreference(SettingKeys.EmptyHints, value, true, nameof(ShowEmptyCanvasHints), nameof(IsEmptyCanvasHintVisible));
+        set => SetPreference(SettingKeys.EmptyHints, value, true, nameof(ShowEmptyCanvasHints), nameof(IsEmptyCanvasHintVisible), nameof(IsStartScreenVisible), nameof(IsEmptyHintOnlyVisible));
     }
 
     /// <summary>True while the getting-started hints are on screen: an empty canvas, hints switched on.</summary>
@@ -630,5 +630,6 @@ public partial class GraphEditorViewModel
             _keymap);
         OnPropertyChanged(nameof(IsEmptyCanvasHintVisible));
         OnPropertyChanged(nameof(EmptyCanvasHintLines));
+        NotifyStartScreen();
     }
 }

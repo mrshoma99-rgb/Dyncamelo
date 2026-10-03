@@ -21,24 +21,38 @@ internal static class UpdateCheck
     private const string Owner = "mrshoma99-rgb";
     private const string Repo = "dyncamelo";
     private const string ProductName = "Dyncamelo";
-    private const string DownloadPage = "https://github.com/" + Owner + "/" + Repo + "/releases/latest";
+    internal const string DownloadPage = "https://github.com/" + Owner + "/" + Repo + "/releases/latest";
 
-    // %APPDATA%\Dyncamelo\update-check.txt: "<last check yyyy-MM-dd>|<last version offered>"
+    // %APPDATA%\Dyncamelo\update-check.txt: "<last check yyyy-MM-dd>|<last version offered>|<newest version seen>"
     private static readonly string StatePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Dyncamelo", "update-check.txt");
 
     private static bool _ranThisSession;
+    private static Version? _knownLatest;
 
     /// <summary>
     /// Kicks off the background check. <paramref name="onUiThread"/> marshals the prompt back
-    /// to the UI thread (the caller passes its Dispatcher's Invoke).
+    /// to the UI thread (the caller passes its Dispatcher's Invoke). <paramref name="onUpdateKnown"/> is told, on the UI thread, about
+    /// a newer release whenever one is known — also on the days the check does not ask GitHub again, and for a pane opened again in
+    /// the same session — so the start screen can show it without a prompt.
     /// </summary>
-    public static void Run(Action<Action> onUiThread, Func<bool>? enabled = null)
+    public static void Run(Action<Action> onUiThread, Func<bool>? enabled = null, Action<Version, string>? onUpdateKnown = null)
     {
         // Switched off in Settings > Privacy: no request at all (and the session's one chance is kept for when it is switched on).
-        if (_ranThisSession || (enabled != null && !enabled()))
+        if (enabled != null && !enabled())
         {
+            return;
+        }
+
+        if (_ranThisSession)
+        {
+            var known = _knownLatest;
+            if (known != null && onUpdateKnown != null)
+            {
+                onUiThread(() => onUpdateKnown(known, DownloadPage));
+            }
+
             return;
         }
 
@@ -54,32 +68,40 @@ internal static class UpdateCheck
                     return; // dev build
                 }
 
-                var (lastCheck, lastOffered) = ReadState();
-                if (lastCheck == DateTime.UtcNow.Date)
-                {
-                    return; // at most one request per day
-                }
-
-                var latest = FetchLatestVersion();
-                WriteState(DateTime.UtcNow.Date, lastOffered);
-                if (latest == null)
-                {
-                    return;
-                }
-
                 var currentThree = new Version(current.Major, current.Minor, Math.Max(current.Build, 0));
-                if (latest <= currentThree)
+                var (lastCheck, lastOffered, lastLatest) = ReadState();
+                var checkedToday = lastCheck == DateTime.UtcNow.Date;
+                Version? latest;
+                if (checkedToday)
+                {
+                    latest = lastLatest; // at most one request per day: today's answer was kept
+                }
+                else
+                {
+                    latest = FetchLatestVersion();
+                    WriteState(DateTime.UtcNow.Date, lastOffered, latest ?? lastLatest);
+                    latest = latest ?? lastLatest;
+                }
+
+                if (latest == null || latest <= currentThree)
                 {
                     return;
                 }
 
-                if (lastOffered != null && latest <= lastOffered)
+                var newer = latest;
+                _knownLatest = newer;
+                if (onUpdateKnown != null)
                 {
-                    return; // already declined this one
+                    onUiThread(() => onUpdateKnown(newer, DownloadPage));
                 }
 
-                WriteState(DateTime.UtcNow.Date, latest);
-                onUiThread(() => Prompt(currentThree, latest));
+                if (checkedToday || (lastOffered != null && newer <= lastOffered))
+                {
+                    return; // asked about it already (or declined it): the start screen shows it, no second prompt
+                }
+
+                WriteState(DateTime.UtcNow.Date, newer, newer);
+                onUiThread(() => Prompt(currentThree, newer));
             }
             catch
             {
@@ -137,34 +159,35 @@ internal static class UpdateCheck
 
     // ------------------------------------------------------------- state
 
-    private static (DateTime? lastCheck, Version? lastOffered) ReadState()
+    private static (DateTime? lastCheck, Version? lastOffered, Version? lastLatest) ReadState()
     {
         try
         {
             if (!File.Exists(StatePath))
             {
-                return (null, null);
+                return (null, null, null);
             }
 
             var parts = File.ReadAllText(StatePath).Split('|');
             DateTime? day = DateTime.TryParseExact(parts[0].Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var d) ? d.Date : (DateTime?)null;
             Version? offered = parts.Length > 1 && Version.TryParse(parts[1].Trim(), out var v) ? v : null;
-            return (day, offered);
+            Version? latest = parts.Length > 2 && Version.TryParse(parts[2].Trim(), out var l) ? l : null;
+            return (day, offered, latest);
         }
         catch
         {
-            return (null, null);
+            return (null, null, null);
         }
     }
 
-    private static void WriteState(DateTime day, Version? offered)
+    private static void WriteState(DateTime day, Version? offered, Version? latest)
     {
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(StatePath)!);
             File.WriteAllText(StatePath,
-                day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "|" + (offered?.ToString() ?? ""));
+                day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "|" + (offered?.ToString() ?? "") + "|" + (latest?.ToString() ?? ""));
         }
         catch
         {

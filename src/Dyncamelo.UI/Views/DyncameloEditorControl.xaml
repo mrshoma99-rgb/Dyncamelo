@@ -11,6 +11,42 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Dyncamelo.UI;component/Themes/DyncameloDark.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- The cards of the start screen (New, a recent script, an example). -->
+            <ItemsPanelTemplate x:Key="Start.CardsPanel">
+                <WrapPanel />
+            </ItemsPanelTemplate>
+            <DataTemplate x:Key="Start.CardTemplate">
+                <Button Style="{StaticResource Dyc.StartCard}"
+                        Command="{Binding Command}"
+                        CommandParameter="{Binding Parameter}"
+                        ToolTip="{Binding ToolTip}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="34" Height="34" CornerRadius="9" Background="{DynamicResource Dyc.HoverBrush}" VerticalAlignment="Center">
+                            <Path x:Name="Glyph" Width="15" Height="15" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Fill="{DynamicResource Dyc.AccentBrush}"
+                                  Data="{StaticResource Dyc.Icon.Cat.File}" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Dyc.TextBrush}" />
+                            <TextBlock Text="{Binding Subtitle}" Margin="0,1,0,0" FontSize="10.5" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Kind}" Value="New">
+                        <Setter TargetName="Glyph" Property="Data" Value="{StaticResource Dyc.Icon.New}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Kind}" Value="Example">
+                        <Setter TargetName="Glyph" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Workflow}" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -1395,12 +1431,102 @@
                 </DockPanel>
             </Border>
 
-            <!-- Getting started: shown in the middle of an empty canvas, never in the way of clicks. -->
+            <!-- Start screen: shown in the middle of an empty canvas — a New card, the recent scripts, the examples, the installed
+                 version, an update notice and the link to bimcamel.com. It is gone as soon as a node is on the canvas. The scroll
+                 viewer has no background, so the empty canvas around the cards still takes clicks and drops. -->
+            <ScrollViewer Grid.Column="2"
+                          Margin="20"
+                          Focusable="False"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Visibility="{Binding IsStartScreenVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
+                <StackPanel MaxWidth="640" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="46" Height="46" CornerRadius="12" Background="{DynamicResource Dyc.LogoChipBrush}" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
+                                   Width="36" Height="36"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Dyncamelo" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.TextBrush}" />
+                                <Border Margin="10,0,0,0" Padding="8,1" CornerRadius="9" VerticalAlignment="Center"
+                                        Background="{DynamicResource Dyc.HoverBrush}" ToolTip="The installed version">
+                                    <TextBlock Text="{Binding ProductVersionText}" FontSize="11" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Visual programming for Navisworks" FontSize="12" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                        </StackPanel>
+                        <Button Grid.Column="2"
+                                Style="{StaticResource Dyc.SmallButton}"
+                                VerticalAlignment="Center"
+                                Padding="10,4"
+                                Content="bimcamel.com ↗"
+                                ToolTip="Open bimcamel.com: guides, the node library and updates"
+                                Command="{Binding OpenWebsiteCommand}" />
+                    </Grid>
+
+                    <Border Margin="0,0,0,16" Padding="12,8" CornerRadius="4"
+                            Background="{DynamicResource Dyc.HoverBrush}"
+                            BorderBrush="{DynamicResource Dyc.WarningBrush}"
+                            BorderThickness="3,0,0,0"
+                            Visibility="{Binding HasUpdate, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right"
+                                    Style="{StaticResource Dyc.SmallButton}"
+                                    Margin="12,0,0,0"
+                                    Padding="10,3"
+                                    Content="Get it"
+                                    ToolTip="Open the download page of the newer version"
+                                    Command="{Binding OpenUpdateCommand}" />
+                            <TextBlock Text="{Binding UpdateText}" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource Dyc.TextBrush}" />
+                        </DockPanel>
+                    </Border>
+
+                    <TextBlock Text="Start" Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                    <ItemsControl ItemsSource="{Binding StartCards}"
+                                  ItemsPanel="{StaticResource Start.CardsPanel}"
+                                  ItemTemplate="{StaticResource Start.CardTemplate}"
+                                  IsTabStop="False" />
+                    <TextBlock Margin="2,0,0,0" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                               Text="The scripts you open or save appear here, so you can come back to them in one click.">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasRecentCards}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <StackPanel Margin="0,10,0,0" Visibility="{Binding HasExampleCards, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        <TextBlock Text="Examples" Margin="0,0,0,8" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                        <ItemsControl ItemsSource="{Binding ExampleCards}"
+                                      ItemsPanel="{StaticResource Start.CardsPanel}"
+                                      ItemTemplate="{StaticResource Start.CardTemplate}"
+                                      IsTabStop="False" />
+                    </StackPanel>
+
+                    <TextBlock Margin="0,18,0,0" FontSize="11.5" TextWrapping="Wrap" Opacity="0.65"
+                               Text="{Binding EmptyCanvasHintText}"
+                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- The short getting-started hint: what is left of the start screen once its New card was pressed. Never in the way of clicks. -->
             <StackPanel Grid.Column="2"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         IsHitTestVisible="False"
-                        Visibility="{Binding IsEmptyCanvasHintVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
+                        Visibility="{Binding IsEmptyHintOnlyVisible, Converter={StaticResource Dyc.BoolToVisibility}}">
                 <TextBlock Text="An empty canvas"
                            HorizontalAlignment="Center"
                            FontSize="18"
