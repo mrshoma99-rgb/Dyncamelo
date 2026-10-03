@@ -145,7 +145,7 @@ public partial class GraphEditorViewModel
     /// <summary>True when the host found a newer release.</summary>
     public bool HasUpdate => _updateVersion.Length > 0;
 
-    /// <summary>The newer version's number ("0.47.0"), or empty.</summary>
+    /// <summary>The newer version's number ("0.99.0"), or empty.</summary>
     public string UpdateVersion => _updateVersion;
 
     /// <summary>The line announcing the newer version.</summary>
@@ -153,7 +153,7 @@ public partial class GraphEditorViewModel
         HasUpdate ? "Version " + _updateVersion + " is available (you have " + ProductVersionText.TrimStart('v') + ")." : string.Empty;
 
     /// <summary>Tells the start screen (and Help &gt; Get the Newest Version) that a newer release exists.</summary>
-    /// <param name="version">The newer version's number, e.g. "0.47.0".</param>
+    /// <param name="version">The newer version's number, e.g. "0.99.0".</param>
     /// <param name="downloadUrl">Where to get it.</param>
     public void SetAvailableUpdate(string version, string downloadUrl)
     {

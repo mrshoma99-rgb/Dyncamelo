@@ -2,7 +2,7 @@
 
 Find the symptom, read the cause, try the fix. If nothing here helps, [collect diagnostics](#how-to-collect-diagnostics) and open an issue with the bug report form.
 
-`DyncameloSetup.exe` is the installer attached to a release that carries one (v0.47.0 does; some releases carry the source code only). A Debug build of the solution also puts the bundle in the right folder for you.
+`DyncameloSetup.exe` is the installer attached to a release that carries one (v0.47.0 and newer do; some earlier releases carry the source code only). A Debug build of the solution also puts the bundle in the right folder for you.
 
 Everything below comes from the Dyncamelo source and docs. Where a behaviour has **not** been seen inside a real Navisworks yet, the text says so. See [Known issues](#known-issues).
 

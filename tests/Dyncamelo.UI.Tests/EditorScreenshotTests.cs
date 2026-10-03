@@ -188,7 +188,7 @@ public class EditorScreenshotTests
                 if (withUpdate)
                 {
                     // Not a real release: the picture shows what the notice looks like.
-                    vm.SetAvailableUpdate("0.47.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
+                    vm.SetAvailableUpdate("0.99.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
                 }
 
                 control = new DyncameloEditorControl { ViewModel = vm, Width = width, Height = height };

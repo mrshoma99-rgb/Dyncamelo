@@ -6,7 +6,9 @@ Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyn
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
 
-## Unreleased
+## 0.48.0 - 2026-10-03
+
+The editor header is one row, the Run button is a wide solid key, several nodes are much faster on big models and tables, and three clash grouping nodes that silently did nothing now work. These downloads (GitHub, bimcamel.com) are the **personal-use edition**; professional use is the copy for the Autodesk App Store, coming soon.
 
 ### Changed
 * **Faster on big models and big tables.** None of this was timed in Navisworks; the logic was tested on its own against the old code (same results, much fewer steps).
