@@ -92,6 +92,10 @@
 <h1>What&#x27;s new</h1>
 <p>Every release of Dyncamelo and what changed in it, newest first. The newest section, <em>Unreleased</em>, lists what is already in the source and not yet in a numbered release.</p>
 <h2 id="unreleased">Unreleased</h2>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><strong>Run is the main button of the toolbar.</strong> It is filled with the palette's main-action colour, bold and larger, with the play symbol, where it was a quiet button like the others. Automatic / manual running is now the same on/off switch the Boolean nodes use, with the name of the mode beside it (<em>Auto</em> when on, <em>Manual</em> when off), instead of a toggle button. Every palette has two new colours for the main action (<code>Dyc.PrimaryBrush</code>, <code>Dyc.OnPrimaryBrush</code>), and a test keeps their contrast readable.</li>
+</ul>
 <h3 id="added">Added</h3>
 <ul>
 <li><strong>A wiki for bimcamel.com</strong>, built from the repository by <code>python tools/build_wiki.py</code> into <code>docs/wiki</code>: installation, requirements, updating, uninstalling, a first script, concepts, inputs and outputs, the editor, the Script Player, settings, shortcuts, samples, recipes, IFC, BCF, Excel and CSV, troubleshooting, an FAQ, privacy and the licence, and a reference page for every one of the library's nodes with its inputs and outputs. It is plain static HTML with a built-in search, light and dark. Troubleshooting, recipes and the guide to writing nodes are the repository's own documents, so there is one copy of each. CI checks that <code>docs/wiki</code> is what the build writes and keeps it as the <code>dyncamelo-wiki</code> artifact.</li>
@@ -114,7 +118,7 @@
 <ul>
 <li><strong>The search nodes walk the model once instead of once per data type.</strong> Navisworks matches a value only when its data type equals the stored one, so Search.ByProperty (equals and the number comparisons), Search.ByPropertyValue, Search.ByPropertyCompare and Search.InItems tried a text as 2 types and a number as 5 or 6, each in a search of its own over the whole model. They now run one search with the types as alternatives (the way live search sets already did), and a search result is no longer copied a second time when no selection resolution is asked for. Same items as before, in model order. This is untested against a real Navisworks model on the build machines; the new self-test check and your own run will show it.</li>
 </ul>
-<h3 id="changed">Changed</h3>
+<h3 id="changed_1">Changed</h3>
 <ul>
 <li><strong>The Script Player has a new layout.</strong> A script bar names the open script and unfolds the list (search, ↻), the form is a card of labelled fields with an on/off switch beside its label, the results sit in a card of their own, and <strong>Run</strong>, <strong>Reset</strong>, <em>Edit</em> and <em>File</em> stay at the bottom in view however long the form is. The list folds away once a script is chosen, <code>Enter</code> in it chooses and puts the focus on Run, and typing in the search box no longer closes the open script or loses its values.</li>
 </ul>
@@ -137,7 +141,7 @@
 <ul>
 <li>The node library no longer lists a stray "WatchTableNode" category (a helper method of the Watch Table node was offered as a node).</li>
 </ul>
-<h3 id="changed_1">Changed</h3>
+<h3 id="changed_2">Changed</h3>
 <ul>
 <li><strong>New licence: the PolyForm Noncommercial License 1.0.0.</strong> Dyncamelo is free for personal and other noncommercial use (hobby, learning, research, charities, schools, public bodies); using it for work at a company or in a paid project needs a commercial licence from BIMCamel. Releases up to 0.45.1 were published under Apache 2.0 with the Commons Clause and copies you already have stay under that licence; its text is kept in <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/licenses/README.md">docs/licenses</a>.</li>
 <li>Dyncamelo no longer merges its ribbon tab with the one of other BIMCamel tools. The merge used code that reached into Autodesk's ribbon assembly, which is not a public API. With the IFC exporter installed as well, Navisworks may now show two BIMCamel tabs.</li>
@@ -162,7 +166,7 @@
 <li>Navisworks nodes, not yet tried in Navisworks (see "For the Navisworks side" in the notes): the IFC GlobalId bridge, <code>Model.Snapshot</code>, <code>Model.Statistics</code>, <code>Search.ByGuid</code>, <code>Selection.Invert</code> and <code>Selection.Remove</code>, clash test edit, delete, duplicate and clear, <code>SavedViewpoint.Info</code> and <code>Update</code>, <code>Camera.SetStandardView</code>, <code>Appearance.Focus</code>, TimeLiner progress, <code>ModelItem.Scale</code> and <code>MoveTo</code>.</li>
 <li>A sample graph, <em>Table Summary from Text</em>, and <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/RECIPES.md">recipes by role</a>.</li>
 </ul>
-<h3 id="changed_2">Changed</h3>
+<h3 id="changed_3">Changed</h3>
 <ul>
 <li><code>Navisworks.Clash</code> is split into Tests, Results, Filter, Group and Report; Viewpoints into Folders and Files; list statistics sit under <code>List.Statistics</code>. Saved graphs are not affected.</li>
 <li>The Number, Number Slider and Integer Slider nodes use the same scrub field as every other number.</li>
@@ -180,7 +184,7 @@
 <li>Collapsed nodes are a capsule in their category colour with inputs on the left and outputs on the right.</li>
 <li>A failure of ours that would have closed Navisworks is logged to <code>%APPDATA%\Dyncamelo\errors.log</code> with its inner exceptions, and a XAML template that fails to load is reported in the status bar.</li>
 </ul>
-<h3 id="changed_3">Changed</h3>
+<h3 id="changed_4">Changed</h3>
 <ul>
 <li>Node library clean-up. Retired nodes keep loading and running in saved graphs but are no longer offered; renamed ports keep their wires; every multi-output node declares the kind of its outputs.</li>
 <li>Opening a file says when wires or typed-in values could not be restored.</li>
@@ -204,7 +208,7 @@
 <li>Scrub fields and editors for colours, <strong>Freeze</strong> (<code>Shift+M</code>), a minimap button, a node library panel that can be hidden (<code>Ctrl+B</code>).</li>
 <li><strong>Esc cancels a running graph</strong>; the run resumes from where it stopped next time.</li>
 </ul>
-<h3 id="changed_4">Changed</h3>
+<h3 id="changed_5">Changed</h3>
 <ul>
 <li>Collapsed nodes keep their sockets. The light theme and menus were fixed.</li>
 </ul>
@@ -229,7 +233,7 @@
 <li>The <strong>crash guard</strong>: a failing command or handler is written to <code>%APPDATA%\Dyncamelo\errors.log</code> and shown in the status bar instead of ending Navisworks.</li>
 </ul>
 <h2 id="0370---2026-09-30">0.37.0 - 2026-09-30</h2>
-<h3 id="changed_5">Changed</h3>
+<h3 id="changed_6">Changed</h3>
 <ul>
 <li>Blender-style row layout: each input is a row with its socket and an inline editor (scrub number field, toggle, choice, text, colour, path). Sockets and wires are coloured by data type.</li>
 </ul>
@@ -289,7 +293,7 @@
 <li><code>ModelItem.AncestorNameMatches</code>: tests the names of an item's ancestors.</li>
 </ul>
 <h2 id="0280---2026-08-21">0.28.0 - 2026-08-21</h2>
-<h3 id="changed_6">Changed</h3>
+<h3 id="changed_7">Changed</h3>
 <ul>
 <li>Lacing tolerates nulls: a null element gives a null result at its place instead of failing the whole node.</li>
 </ul>
@@ -308,7 +312,7 @@
 <ul>
 <li><code>Viewpoints.ExportFile</code> and <code>Viewpoints.ImportFile</code> copy saved viewpoints between models.</li>
 </ul>
-<h3 id="changed_7">Changed</h3>
+<h3 id="changed_8">Changed</h3>
 <ul>
 <li><strong>Licence</strong>: Dyncamelo is now source-available under Apache 2.0 with the Commons Clause (0.26.2). Free to use, including at work; selling it is not allowed. See <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/LICENSE">LICENSE</a>.</li>
 </ul>
@@ -354,7 +358,7 @@
 <li>A single <strong>BIMCamel</strong> ribbon tab shared with the IFC exporter, a shared About window, and an update check when the editor opens.</li>
 <li><code>Flow.Then</code> pins the order of side-effect nodes as a data dependency.</li>
 </ul>
-<h3 id="changed_8">Changed</h3>
+<h3 id="changed_9">Changed</h3>
 <ul>
 <li>The order of nodes that have no wire between them is no longer taken from their position on the canvas (0.19.3).</li>
 </ul>
@@ -434,7 +438,7 @@
 <li><strong>0.2</strong>: 103 new nodes, copy and paste, node frames, value previews, library favourites. Notes: <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/WHATS_NEW_0.2.md">docs/WHATS_NEW_0.2.md</a>.</li>
 </ul>
 </main>
-<aside class="toc"><h4>On this page</h4><a class="l2" href="#unreleased">Unreleased</a><a class="l3" href="#added">Added</a><a class="l2" href="#0470---2026-10-03">0.47.0 - 2026-10-03</a><a class="l3" href="#added_1">Added</a><a class="l3" href="#fixed">Fixed</a><a class="l3" href="#faster">Faster</a><a class="l3" href="#changed">Changed</a><a class="l3" href="#fixed_1">Fixed</a><a class="l2" href="#0460---2026-10-02">0.46.0 - 2026-10-02</a><a class="l3" href="#added_2">Added</a><a class="l3" href="#fixed_2">Fixed</a><a class="l3" href="#changed_1">Changed</a><a class="l2" href="#0451---2026-10-01">0.45.1 - 2026-10-01</a><a class="l3" href="#fixed_3">Fixed</a><a class="l2" href="#0450---2026-10-01">0.45.0 - 2026-10-01</a><a class="l3" href="#added_3">Added</a><a class="l3" href="#changed_2">Changed</a><a class="l3" href="#removed">Removed</a><a class="l2" href="#0440---2026-10-01">0.44.0 - 2026-10-01</a><a class="l3" href="#fixed_4">Fixed</a><a class="l3" href="#changed_3">Changed</a><a class="l2" href="#0430---2026-09-30">0.43.0 - 2026-09-30</a><a class="l3" href="#added_4">Added</a><a class="l2" href="#0420---2026-09-30">0.42.0 - 2026-09-30</a><a class="l3" href="#added_5">Added</a><a class="l2" href="#0410---2026-09-30">0.41.0 - 2026-09-30</a><a class="l3" href="#added_6">Added</a><a class="l3" href="#changed_4">Changed</a><a class="l2" href="#0400---2026-09-30">0.40.0 - 2026-09-30</a><a class="l3" href="#added_7">Added</a><a class="l2" href="#0390---2026-09-30">0.39.0 - 2026-09-30</a><a class="l3" href="#added_8">Added</a><a class="l3" href="#fixed_5">Fixed</a><a class="l2" href="#0380---2026-09-30">0.38.0 - 2026-09-30</a><a class="l3" href="#added_9">Added</a><a class="l2" href="#0370---2026-09-30">0.37.0 - 2026-09-30</a><a class="l3" href="#changed_5">Changed</a><a class="l2" href="#0360---2026-09-30">0.36.0 - 2026-09-30</a><a class="l3" href="#added_10">Added</a><a class="l2" href="#0350---2026-09-30">0.35.0 - 2026-09-30</a><a class="l3" href="#added_11">Added</a><a class="l2" href="#0340---2026-09-30">0.34.0 - 2026-09-30</a><a class="l3" href="#added_12">Added</a><a class="l3" href="#fixed_6">Fixed</a><a class="l2" href="#033x---2026-08-31">0.33.x - 2026-08-31</a><a class="l3" href="#added_13">Added</a><a class="l3" href="#fixed_7">Fixed</a><a class="l2" href="#0320---2026-08-31">0.32.0 - 2026-08-31</a><a class="l3" href="#added_14">Added</a><a class="l2" href="#031x---2026-08-21">0.31.x - 2026-08-21</a><a class="l3" href="#added_15">Added</a><a class="l3" href="#fixed_8">Fixed</a><a class="l2" href="#0300---2026-08-21">0.30.0 - 2026-08-21</a><a class="l3" href="#added_16">Added</a><a class="l2" href="#0290---2026-08-21">0.29.0 - 2026-08-21</a><a class="l3" href="#added_17">Added</a><a class="l2" href="#0280---2026-08-21">0.28.0 - 2026-08-21</a><a class="l3" href="#changed_6">Changed</a><a class="l3" href="#added_18">Added</a><a class="l2" href="#0270---2026-08-17">0.27.0 - 2026-08-17</a><a class="l3" href="#added_19">Added</a><a class="l2" href="#026x---2026-07-29">0.26.x - 2026-07-29</a><a class="l3" href="#added_20">Added</a><a class="l3" href="#changed_7">Changed</a><a class="l3" href="#fixed_9">Fixed</a><a class="l2" href="#025x---2026-07-27">0.25.x - 2026-07-27</a><a class="l3" href="#added_21">Added</a><a class="l2" href="#0240---2026-07-27">0.24.0 - 2026-07-27</a><a class="l3" href="#added_22">Added</a><a class="l2" href="#023x---2026-07-27">0.23.x - 2026-07-27</a><a class="l3" href="#added_23">Added</a><a class="l2" href="#022x---2026-07-27">0.22.x - 2026-07-27</a><a class="l3" href="#added_24">Added</a><a class="l2" href="#0210---2026-07-23">0.21.0 - 2026-07-23</a><a class="l3" href="#added_25">Added</a><a class="l2" href="#0200---2026-07-23">0.20.0 - 2026-07-23</a><a class="l3" href="#added_26">Added</a><a class="l2" href="#019x---2026-07-19">0.19.x - 2026-07-19</a><a class="l3" href="#added_27">Added</a><a class="l3" href="#changed_8">Changed</a><a class="l2" href="#0180---2026-07-17">0.18.0 - 2026-07-17</a><a class="l3" href="#added_28">Added</a><a class="l2" href="#017x---2026-07-15">0.17.x - 2026-07-15</a><a class="l3" href="#added_29">Added</a><a class="l2" href="#0160---2026-07-15">0.16.0 - 2026-07-15</a><a class="l3" href="#added_30">Added</a><a class="l2" href="#0150---2026-07-15">0.15.0 - 2026-07-15</a><a class="l3" href="#added_31">Added</a><a class="l3" href="#fixed_10">Fixed</a><a class="l2" href="#0140---2026-07-15">0.14.0 - 2026-07-15</a><a class="l3" href="#added_32">Added</a><a class="l2" href="#013x---2026-07-15">0.13.x - 2026-07-15</a><a class="l3" href="#added_33">Added</a><a class="l3" href="#fixed_11">Fixed</a><a class="l2" href="#012x---2026-07-15">0.12.x - 2026-07-15</a><a class="l3" href="#added_34">Added</a><a class="l2" href="#010x---2026-07-13">0.10.x - 2026-07-13</a><a class="l3" href="#added_35">Added</a><a class="l2" href="#09x---2026-07-13">0.9.x - 2026-07-13</a><a class="l3" href="#added_36">Added</a><a class="l3" href="#fixed_12">Fixed</a><a class="l2" href="#02-to-04-no-dates-recorded-in-this-repository">0.2 to 0.4 (no dates recorded in this repository)</a></aside>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#unreleased">Unreleased</a><a class="l3" href="#changed">Changed</a><a class="l3" href="#added">Added</a><a class="l2" href="#0470---2026-10-03">0.47.0 - 2026-10-03</a><a class="l3" href="#added_1">Added</a><a class="l3" href="#fixed">Fixed</a><a class="l3" href="#faster">Faster</a><a class="l3" href="#changed_1">Changed</a><a class="l3" href="#fixed_1">Fixed</a><a class="l2" href="#0460---2026-10-02">0.46.0 - 2026-10-02</a><a class="l3" href="#added_2">Added</a><a class="l3" href="#fixed_2">Fixed</a><a class="l3" href="#changed_2">Changed</a><a class="l2" href="#0451---2026-10-01">0.45.1 - 2026-10-01</a><a class="l3" href="#fixed_3">Fixed</a><a class="l2" href="#0450---2026-10-01">0.45.0 - 2026-10-01</a><a class="l3" href="#added_3">Added</a><a class="l3" href="#changed_3">Changed</a><a class="l3" href="#removed">Removed</a><a class="l2" href="#0440---2026-10-01">0.44.0 - 2026-10-01</a><a class="l3" href="#fixed_4">Fixed</a><a class="l3" href="#changed_4">Changed</a><a class="l2" href="#0430---2026-09-30">0.43.0 - 2026-09-30</a><a class="l3" href="#added_4">Added</a><a class="l2" href="#0420---2026-09-30">0.42.0 - 2026-09-30</a><a class="l3" href="#added_5">Added</a><a class="l2" href="#0410---2026-09-30">0.41.0 - 2026-09-30</a><a class="l3" href="#added_6">Added</a><a class="l3" href="#changed_5">Changed</a><a class="l2" href="#0400---2026-09-30">0.40.0 - 2026-09-30</a><a class="l3" href="#added_7">Added</a><a class="l2" href="#0390---2026-09-30">0.39.0 - 2026-09-30</a><a class="l3" href="#added_8">Added</a><a class="l3" href="#fixed_5">Fixed</a><a class="l2" href="#0380---2026-09-30">0.38.0 - 2026-09-30</a><a class="l3" href="#added_9">Added</a><a class="l2" href="#0370---2026-09-30">0.37.0 - 2026-09-30</a><a class="l3" href="#changed_6">Changed</a><a class="l2" href="#0360---2026-09-30">0.36.0 - 2026-09-30</a><a class="l3" href="#added_10">Added</a><a class="l2" href="#0350---2026-09-30">0.35.0 - 2026-09-30</a><a class="l3" href="#added_11">Added</a><a class="l2" href="#0340---2026-09-30">0.34.0 - 2026-09-30</a><a class="l3" href="#added_12">Added</a><a class="l3" href="#fixed_6">Fixed</a><a class="l2" href="#033x---2026-08-31">0.33.x - 2026-08-31</a><a class="l3" href="#added_13">Added</a><a class="l3" href="#fixed_7">Fixed</a><a class="l2" href="#0320---2026-08-31">0.32.0 - 2026-08-31</a><a class="l3" href="#added_14">Added</a><a class="l2" href="#031x---2026-08-21">0.31.x - 2026-08-21</a><a class="l3" href="#added_15">Added</a><a class="l3" href="#fixed_8">Fixed</a><a class="l2" href="#0300---2026-08-21">0.30.0 - 2026-08-21</a><a class="l3" href="#added_16">Added</a><a class="l2" href="#0290---2026-08-21">0.29.0 - 2026-08-21</a><a class="l3" href="#added_17">Added</a><a class="l2" href="#0280---2026-08-21">0.28.0 - 2026-08-21</a><a class="l3" href="#changed_7">Changed</a><a class="l3" href="#added_18">Added</a><a class="l2" href="#0270---2026-08-17">0.27.0 - 2026-08-17</a><a class="l3" href="#added_19">Added</a><a class="l2" href="#026x---2026-07-29">0.26.x - 2026-07-29</a><a class="l3" href="#added_20">Added</a><a class="l3" href="#changed_8">Changed</a><a class="l3" href="#fixed_9">Fixed</a><a class="l2" href="#025x---2026-07-27">0.25.x - 2026-07-27</a><a class="l3" href="#added_21">Added</a><a class="l2" href="#0240---2026-07-27">0.24.0 - 2026-07-27</a><a class="l3" href="#added_22">Added</a><a class="l2" href="#023x---2026-07-27">0.23.x - 2026-07-27</a><a class="l3" href="#added_23">Added</a><a class="l2" href="#022x---2026-07-27">0.22.x - 2026-07-27</a><a class="l3" href="#added_24">Added</a><a class="l2" href="#0210---2026-07-23">0.21.0 - 2026-07-23</a><a class="l3" href="#added_25">Added</a><a class="l2" href="#0200---2026-07-23">0.20.0 - 2026-07-23</a><a class="l3" href="#added_26">Added</a><a class="l2" href="#019x---2026-07-19">0.19.x - 2026-07-19</a><a class="l3" href="#added_27">Added</a><a class="l3" href="#changed_9">Changed</a><a class="l2" href="#0180---2026-07-17">0.18.0 - 2026-07-17</a><a class="l3" href="#added_28">Added</a><a class="l2" href="#017x---2026-07-15">0.17.x - 2026-07-15</a><a class="l3" href="#added_29">Added</a><a class="l2" href="#0160---2026-07-15">0.16.0 - 2026-07-15</a><a class="l3" href="#added_30">Added</a><a class="l2" href="#0150---2026-07-15">0.15.0 - 2026-07-15</a><a class="l3" href="#added_31">Added</a><a class="l3" href="#fixed_10">Fixed</a><a class="l2" href="#0140---2026-07-15">0.14.0 - 2026-07-15</a><a class="l3" href="#added_32">Added</a><a class="l2" href="#013x---2026-07-15">0.13.x - 2026-07-15</a><a class="l3" href="#added_33">Added</a><a class="l3" href="#fixed_11">Fixed</a><a class="l2" href="#012x---2026-07-15">0.12.x - 2026-07-15</a><a class="l3" href="#added_34">Added</a><a class="l2" href="#010x---2026-07-13">0.10.x - 2026-07-13</a><a class="l3" href="#added_35">Added</a><a class="l2" href="#09x---2026-07-13">0.9.x - 2026-07-13</a><a class="l3" href="#added_36">Added</a><a class="l3" href="#fixed_12">Fixed</a><a class="l2" href="#02-to-04-no-dates-recorded-in-this-repository">0.2 to 0.4 (no dates recorded in this repository)</a></aside>
 </div>
 <footer class="foot">Dyncamelo v0.47.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
 <script src="assets/search-index.js"></script>

@@ -76,6 +76,8 @@ public static class PaletteCatalog
         "Dyc.BrandButtonBrush", "Dyc.BrandButtonHoverBrush",
         // Create / Modify / Info tints in the library
         "Dyc.FnCreateBrush", "Dyc.FnModifyBrush", "Dyc.FnInfoBrush",
+        // the main action (the Run button): its fill and the text on it
+        "Dyc.PrimaryBrush", "Dyc.OnPrimaryBrush",
     };
 
     /// <summary>The brush keys (kept for callers that predate colour keys).</summary>
@@ -97,6 +99,7 @@ public static class PaletteCatalog
             ["Dyc.BrandStartColor"] = "#FF0070C0", ["Dyc.BrandEndColor"] = "#FF0D83DA", ["Dyc.OnBrandBrush"] = "#FFFFFFFF",
             ["Dyc.OnBrandSubtleBrush"] = "#DDFFFFFF", ["Dyc.BrandButtonBrush"] = "#29FFFFFF", ["Dyc.BrandButtonHoverBrush"] = "#47FFFFFF",
             ["Dyc.FnCreateBrush"] = "#FF66BB6A", ["Dyc.FnModifyBrush"] = "#FFF0C66A", ["Dyc.FnInfoBrush"] = "#FF3AA0F0",
+            ["Dyc.PrimaryBrush"] = "#FF1A73C5", ["Dyc.OnPrimaryBrush"] = "#FFFFFFFF",
         }),
 
         // Deep blue.
@@ -113,6 +116,7 @@ public static class PaletteCatalog
             ["Dyc.BrandStartColor"] = "#FF0070C0", ["Dyc.BrandEndColor"] = "#FF0D83DA", ["Dyc.OnBrandBrush"] = "#FFFFFFFF",
             ["Dyc.OnBrandSubtleBrush"] = "#DDFFFFFF", ["Dyc.BrandButtonBrush"] = "#29FFFFFF", ["Dyc.BrandButtonHoverBrush"] = "#47FFFFFF",
             ["Dyc.FnCreateBrush"] = "#FF66BB6A", ["Dyc.FnModifyBrush"] = "#FFF5A623", ["Dyc.FnInfoBrush"] = "#FF5B8DEF",
+            ["Dyc.PrimaryBrush"] = "#FF3D6FD6", ["Dyc.OnPrimaryBrush"] = "#FFFFFFFF",
         }),
 
         // Warm neutral grey with a teal accent.
@@ -129,6 +133,7 @@ public static class PaletteCatalog
             ["Dyc.BrandStartColor"] = "#FF0070C0", ["Dyc.BrandEndColor"] = "#FF0D83DA", ["Dyc.OnBrandBrush"] = "#FFFFFFFF",
             ["Dyc.OnBrandSubtleBrush"] = "#DDFFFFFF", ["Dyc.BrandButtonBrush"] = "#29FFFFFF", ["Dyc.BrandButtonHoverBrush"] = "#47FFFFFF",
             ["Dyc.FnCreateBrush"] = "#FF66BB6A", ["Dyc.FnModifyBrush"] = "#FFE0A02A", ["Dyc.FnInfoBrush"] = "#FF4CC2A8",
+            ["Dyc.PrimaryBrush"] = "#FF4CC2A8", ["Dyc.OnPrimaryBrush"] = "#FF0B1F1A",
         }),
 
         // Light theme — BIMCamel light tokens (Bg #EEF1F5, Pane #F7F8FA, Card #FFF, Text #1F2329, Accent #0070C0).
@@ -147,6 +152,7 @@ public static class PaletteCatalog
             ["Dyc.BrandStartColor"] = "#FFFFFFFF", ["Dyc.BrandEndColor"] = "#FFEDF1F6", ["Dyc.OnBrandBrush"] = "#FF1F2329",
             ["Dyc.OnBrandSubtleBrush"] = "#FF5F6874", ["Dyc.BrandButtonBrush"] = "#12000000", ["Dyc.BrandButtonHoverBrush"] = "#24000000",
             ["Dyc.FnCreateBrush"] = "#FF2E7D32", ["Dyc.FnModifyBrush"] = "#FFB26B00", ["Dyc.FnInfoBrush"] = "#FF0070C0",
+            ["Dyc.PrimaryBrush"] = "#FF0070C0", ["Dyc.OnPrimaryBrush"] = "#FFFFFFFF",
         }),
     };
 

@@ -104,6 +104,8 @@ public class PaletteDataTests
             AtLeast("OnBrandSubtleBrush", "BrandStartColor", 3.0);
             AtLeast("OnBrandSubtleBrush", "BrandEndColor", 3.0);
             AtLeast("WireBrush", "CanvasBrush", 2.5);
+            AtLeast("OnPrimaryBrush", "PrimaryBrush", 4.5);
+            AtLeast("PrimaryBrush", "PanelBrush", 3.0);   // the Run button must stand out from the toolbar it sits on
         }
     }
 

@@ -74,7 +74,7 @@ public static class UiGuide
         sb.Append("* The progress text names the group path (`Outer ▸ Inner ▸ node`), and `Esc` cancels from inside a group too.\n\n");
 
         sb.Append("## Running and stopping\n\n");
-        sb.Append("* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.\n");
+        sb.Append("* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; the **Auto** switch beside **Run** (it reads *Auto* when on, *Manual* when off) makes it run again after every edit.\n");
         sb.Append("* While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.\n");
         sb.Append("* The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.\n\n");
 

@@ -75,7 +75,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 
 ## Running and stopping
 
-* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; **Auto** runs again after every edit.
+* **Run** (`F5`) executes the nodes that changed since the last run and reuses the rest; the **Auto** switch beside **Run** (it reads *Auto* when on, *Manual* when off) makes it run again after every edit.
 * While a graph runs, the window says which node is working (`12 / 40 — name`, with the group path inside a node group). **Press `Esc` to stop it** — switchable in Settings ▸ Editing ▸ *Esc cancels a running graph*.
 * The run halts **before the next node**, or between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted, and what finished nodes already changed in Navisworks is kept. A node or loop that was cut short keeps its previous results and waits, together with everything after it, so the next **Run** carries on where this one stopped.
 

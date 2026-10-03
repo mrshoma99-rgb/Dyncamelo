@@ -643,6 +643,42 @@ public class CommandSurfaceViewTests
     }
 
     [Fact]
+    public void RunIsTheOneFilledButtonOfTheToolbarAndAutomaticRunningIsASwitch()
+    {
+        using var host = Build();
+        StaHost.Run(() =>
+        {
+            var run = (System.Windows.Controls.Button)host.Control.FindName("RunButton");
+            Assert.Same(host.Vm.RunCommand, run.Command);
+            Assert.Contains("Run the graph", (string)run.ToolTip);
+            Assert.Equal(System.Windows.FontWeights.SemiBold, run.FontWeight);
+
+            // The fill is the palette's main-action colour, and nothing else on the toolbar is filled.
+            var chrome = (System.Windows.Controls.Border)run.Template.FindName("Chrome", run);
+            var primary = (System.Windows.Media.SolidColorBrush)host.Control.FindResource("Dyc.PrimaryBrush");
+            Assert.Equal(primary.Color, ((System.Windows.Media.SolidColorBrush)chrome.Background).Color);
+            Assert.True(run.ActualWidth > 60 && run.ActualHeight > 24, "the Run button has no size");
+
+            // Automatic / manual is the on/off switch of the Boolean nodes, with the name of the mode beside it.
+            var auto = (System.Windows.Controls.CheckBox)host.Control.FindName("AutoRunSwitch");
+            var state = (System.Windows.Controls.TextBlock)auto.Template.FindName("State", auto);
+            var knob = (System.Windows.Shapes.Ellipse)auto.Template.FindName("Knob", auto);
+            host.Vm.IsAutoRun = false;
+            host.Window.UpdateLayout();
+            Assert.False(auto.IsChecked);
+            Assert.Equal("Manual", state.Text);
+            Assert.Equal(System.Windows.HorizontalAlignment.Left, knob.HorizontalAlignment);
+
+            auto.IsChecked = true;
+            host.Window.UpdateLayout();
+            Assert.True(host.Vm.IsAutoRun);
+            Assert.Equal("Auto", state.Text);
+            Assert.Equal(System.Windows.HorizontalAlignment.Right, knob.HorizontalAlignment);
+            Assert.False(auto.Focusable);                       // it must not take the keyboard from the canvas
+        });
+    }
+
+    [Fact]
     public void CtrlMShowsAndHidesTheMinimapAndTheToolbarButtonFollows()
     {
         using var host = Build();

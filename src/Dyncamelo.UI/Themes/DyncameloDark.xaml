@@ -42,6 +42,9 @@
     <SolidColorBrush x:Key="Dyc.MinimapBrush" Color="#D9151719" />
     <SolidColorBrush x:Key="Dyc.MinimapItemBrush" Color="#FF7F8FA3" />
     <SolidColorBrush x:Key="Dyc.ViewportFillBrush" Color="#223AA0F0" />
+    <!-- The main action (the Run button): a solid fill that stands out from the quiet toolbar, and the text on it. -->
+    <SolidColorBrush x:Key="Dyc.PrimaryBrush" Color="#FF1A73C5" />
+    <SolidColorBrush x:Key="Dyc.OnPrimaryBrush" Color="#FFFFFFFF" />
 
     <!-- ===== BIMCamel brand chrome. The dark palettes keep the BIMCamel blue gradient; the Light palette
          turns the header light (dark text on white-to-grey). The logo always rides in a black chip so
@@ -628,6 +631,94 @@
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The one main action of the toolbar (Run): filled, bold, and a little larger than the quiet tool buttons beside it. A white sheen
+         on hover and a dark one when pressed work on any palette's fill. -->
+    <Style x:Key="Dyc.PrimaryButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.OnPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="14,5" />
+        <Setter Property="Margin" Value="6,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border x:Name="Chrome"
+                                Background="{DynamicResource Dyc.PrimaryBrush}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Sheen" CornerRadius="7" Background="White" Opacity="0" IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.16" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Sheen" Property="Background" Value="Black" />
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.18" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Automatic / manual running as the on/off switch the Boolean nodes use: a track whose knob slides right and fills with the accent
+         colour when on, with the name of the mode beside it. It never takes the keyboard focus, so the canvas keeps its shortcuts. -->
+    <Style x:Key="Dyc.AutoRunSwitch" TargetType="{x:Type CheckBox}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="8,0,6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Track"
+                                Width="30" Height="16"
+                                CornerRadius="8"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource Dyc.InputBackgroundBrush}"
+                                BorderBrush="{DynamicResource Dyc.InputBorderBrush}"
+                                BorderThickness="1">
+                            <Ellipse x:Name="Knob"
+                                     Width="10" Height="10"
+                                     HorizontalAlignment="Left"
+                                     Margin="3,0,0,0"
+                                     Fill="{DynamicResource Dyc.SubtleTextBrush}" />
+                        </Border>
+                        <TextBlock x:Name="State"
+                                   Text="Manual"
+                                   Margin="7,0,0,0"
+                                   MinWidth="44"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+                            <Setter TargetName="Knob" Property="Fill" Value="White" />
+                            <Setter TargetName="State" Property="Text" Value="Auto" />
+                            <Setter TargetName="State" Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
