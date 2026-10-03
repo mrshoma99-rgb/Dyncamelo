@@ -4,6 +4,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using Dyncamelo.Nodes.Spatial;
 
 namespace Dyncamelo.Navisworks;
 
@@ -608,7 +609,7 @@ public static class ClashNodes
         bool useItem1 = true,
         Document? document = null)
     {
-        return CommitRegroup(test, document, results => PartitionBySameItem(results, useItem1));
+        return ClashRegroup.Commit(test, document, results => PartitionBySameItem(results, useItem1));
     }
 
     /// <summary>Groups a test's results into clusters of nearby clash points.</summary>
@@ -632,7 +633,7 @@ public static class ClashNodes
             throw new ArgumentOutOfRangeException(nameof(radius), "The cluster radius must be positive (in document units).");
         }
 
-        return CommitRegroup(test, document, results => PartitionByProximity(results, radius));
+        return ClashRegroup.Commit(test, document, results => PartitionByProximity(results, radius));
     }
 
     /// <summary>Groups a test's results by building level.</summary>
@@ -683,7 +684,7 @@ public static class ClashNodes
         var sortedNames = order.ConvertAll(i => names[i]);
         var sortedElevations = order.ConvertAll(i => elevations[i]);
 
-        return CommitRegroup(test, document, results => PartitionByLevel(results, sortedNames, sortedElevations));
+        return ClashRegroup.Commit(test, document, results => PartitionByLevel(results, sortedNames, sortedElevations));
     }
 
     private static System.Drawing.Imaging.ImageFormat ImageFormatForExtension(string filePath)
@@ -699,76 +700,6 @@ public static class ClashNodes
                 throw new ArgumentException(
                     "'" + filePath + "' must end in .png, .jpg or .bmp.", nameof(filePath));
         }
-    }
-
-    /// <summary>
-    /// Rebuilds a stored test's result tree from a partition: flattens the current
-    /// results, buckets them, wraps buckets of two or more into named
-    /// ClashResultGroups (singletons stay ungrouped) and commits the new tree in
-    /// one TestsEditTestFromCopy edit.
-    /// </summary>
-    private static Dictionary<string, object?> CommitRegroup(
-        ClashTest test,
-        Document? document,
-        Func<List<ClashResult>, List<KeyValuePair<string, List<ClashResult>>>> partition)
-    {
-        var stored = ClashHelpers.RequireStoredTest(test);
-        var doc = NavisworksContext.ResolveDocument(document);
-        var clash = ClashHelpers.RequireClash(doc);
-
-        var copy = (ClashTest)stored.CreateCopy();
-        var flattened = ClashHelpers.FlattenResults(copy);
-
-        // Detach every result from the copy's tree before rebuilding it — Clear()
-        // below destroys the originals.
-        var detached = new List<ClashResult>(flattened.Count);
-        foreach (var result in flattened)
-        {
-            detached.Add((ClashResult)result.CreateCopy());
-        }
-
-        var clusters = partition(detached);
-
-        copy.Children.Clear();
-        var groupCount = 0;
-        var usedNames = new HashSet<string>(StringComparer.Ordinal);
-        var singles = new List<ClashResult>();
-        foreach (var cluster in clusters)
-        {
-            if (cluster.Value.Count < 2)
-            {
-                singles.AddRange(cluster.Value);
-                continue;
-            }
-
-            var name = cluster.Key;
-            var suffix = 2;
-            while (!usedNames.Add(name))
-            {
-                name = cluster.Key + " (" + suffix++ + ")";
-            }
-
-            var group = new ClashResultGroup { DisplayName = name };
-            foreach (var result in cluster.Value)
-            {
-                group.Children.Add(result);
-            }
-
-            copy.Children.Add(group);
-            groupCount++;
-        }
-
-        foreach (var result in singles)
-        {
-            copy.Children.Add(result);
-        }
-
-        clash.TestsData.TestsEditTestFromCopy(stored, copy);
-        return new Dictionary<string, object?>
-        {
-            ["test"] = stored,
-            ["groupCount"] = groupCount,
-        };
     }
 
     private static List<KeyValuePair<string, List<ClashResult>>> PartitionBySameItem(
@@ -842,29 +773,33 @@ public static class ClashNodes
         List<ClashResult> results,
         double radius)
     {
-        var seeds = new List<Point3D>();
-        var clusters = new List<List<ClashResult>>();
-        foreach (var result in results)
+        // Each result joins the first cluster whose seed (its first result) is within the radius; the grid in
+        // ProximityClusterer only spares the comparison with seeds that are far away.
+        var centers = new Point3D[results.Count];
+        var xs = new double[results.Count];
+        var ys = new double[results.Count];
+        var zs = new double[results.Count];
+        for (int i = 0; i < results.Count; i++)
         {
-            var center = result.Center;
-            var clusterIndex = -1;
-            for (int i = 0; i < seeds.Count; i++)
-            {
-                if (seeds[i].DistanceTo(center) <= radius)
-                {
-                    clusterIndex = i;
-                    break;
-                }
-            }
+            var center = results[i].Center;
+            centers[i] = center;
+            xs[i] = center.X;
+            ys[i] = center.Y;
+            zs[i] = center.Z;
+        }
 
-            if (clusterIndex < 0)
+        var clusterOf = ProximityClusterer.Assign(
+            xs, ys, zs, radius, (seed, point) => centers[seed].DistanceTo(centers[point]) <= radius);
+
+        var clusters = new List<List<ClashResult>>();
+        for (int i = 0; i < results.Count; i++)
+        {
+            if (clusterOf[i] == clusters.Count)
             {
-                clusterIndex = seeds.Count;
-                seeds.Add(center);
                 clusters.Add(new List<ClashResult>());
             }
 
-            clusters[clusterIndex].Add(result);
+            clusters[clusterOf[i]].Add(results[i]);
         }
 
         var buckets = new List<KeyValuePair<string, List<ClashResult>>>(clusters.Count);

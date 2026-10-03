@@ -156,7 +156,7 @@ public static class ClashEditNodes
     [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByStatus(ClashTest test, Document? document = null)
     {
-        return RegroupAndCommit(test, document, results =>
+        return ClashRegroup.Commit(test, document, results =>
             Partition(results, r => r.Status.ToString()));
     }
 
@@ -180,7 +180,7 @@ public static class ClashEditNodes
                 "The document has no active grid system. Grids come from source models " +
                 "(e.g. Revit or IFC files with grids and levels) — for hand-typed levels use Clash.GroupResultsByLevel.");
 
-        return RegroupAndCommit(test, document, results =>
+        return ClashRegroup.Commit(test, document, results =>
             Partition(results, r =>
             {
                 var center = r.Center;
@@ -300,86 +300,5 @@ public static class ClashEditNodes
         }
 
         return buckets;
-    }
-
-    /// <summary>
-    /// Rebuilds a stored test's result tree from a partition and commits it in
-    /// one <c>TestsEditTestFromCopy</c> edit (same commit path as the v0.2
-    /// grouping nodes): buckets of two or more become named
-    /// <see cref="ClashResultGroup"/>s, singletons stay ungrouped.
-    /// </summary>
-    private static Dictionary<string, object?> RegroupAndCommit(
-        ClashTest test,
-        Document? document,
-        Func<List<ClashResult>, List<KeyValuePair<string, List<ClashResult>>>> partition)
-    {
-        ClashTest stored;
-        try
-        {
-            stored = ClashHelpers.RequireStoredTest(test);
-        }
-        catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
-        {
-            throw ClashHelpers.StaleInputError("clash test", ex);
-        }
-
-        var doc = NavisworksContext.ResolveDocument(document);
-        var clash = ClashHelpers.RequireClash(doc);
-
-        var copy = (ClashTest)stored.CreateCopy();
-        var flattened = ClashHelpers.FlattenResults(copy);
-
-        // Detach every result from the copy's tree before rebuilding it —
-        // Children.Clear() below destroys the originals.
-        var detached = new List<ClashResult>(flattened.Count);
-        foreach (var result in flattened)
-        {
-            detached.Add((ClashResult)result.CreateCopy());
-        }
-
-        var clusters = partition(detached);
-
-        copy.Children.Clear();
-        var groupCount = 0;
-        var usedNames = new HashSet<string>(StringComparer.Ordinal);
-        var singles = new List<ClashResult>();
-        foreach (var cluster in clusters)
-        {
-            if (cluster.Value.Count < 2)
-            {
-                singles.AddRange(cluster.Value);
-                continue;
-            }
-
-            var name = cluster.Key;
-            var suffix = 2;
-            while (!usedNames.Add(name))
-            {
-                name = cluster.Key + " (" + suffix++ + ")";
-            }
-
-            var group = new ClashResultGroup { DisplayName = name };
-            foreach (var result in cluster.Value)
-            {
-                group.Children.Add(result);
-            }
-
-            copy.Children.Add(group);
-            groupCount++;
-        }
-
-        foreach (var result in singles)
-        {
-            copy.Children.Add(result);
-        }
-
-        // TestsEditTestFromCopy ignores the children tree — the tree must be
-        // committed with TestsReplaceWithCopy (see ClashHelpers.CommitTestTree).
-        var refreshed = ClashHelpers.CommitTestTree(doc, clash, stored, copy, "Group clash results");
-        return new Dictionary<string, object?>
-        {
-            ["test"] = refreshed,
-            ["groupCount"] = groupCount,
-        };
     }
 }
