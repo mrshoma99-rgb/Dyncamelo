@@ -94,6 +94,19 @@ jobs:
       - name: Node catalogue is current (docs/dyncamelo-nodes.json and docs/NODE_CATALOG.md)
         run: python3 tools/generate_node_catalog.py --check
 
+      - name: Wiki is current (docs/wiki is what tools/build_wiki.py writes from docs/wiki-src, the repository documents and the node catalogue)
+        run: |
+          pip install markdown
+          python3 tools/build_wiki.py --check
+
+      - name: Keep the wiki site
+        uses: actions/upload-artifact@v4
+        with:
+          name: dyncamelo-wiki
+          path: docs/wiki
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Autodesk App Store package builder works (tools/build_store_package.py)
         run: python3 tools/build_store_package.py --self-test
 

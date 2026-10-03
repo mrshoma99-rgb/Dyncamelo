@@ -181,6 +181,8 @@ public class EditorScreenshotTests
                 var registry = NodeRegistry.CreateDefault();
                 NodeLibrary.RegisterAll(registry);
                 var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings) { PaletteId = palette };
+                vm.SamplesDirectoryOverride = Path.Combine(RepoRoot(), "samples");
+                vm.RefreshSampleGraphs();
                 vm.SetAvailableUpdate("0.47.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
                 control = new DyncameloEditorControl { ViewModel = vm, Width = 1100d, Height = 760d };
                 var canvas = new Canvas();

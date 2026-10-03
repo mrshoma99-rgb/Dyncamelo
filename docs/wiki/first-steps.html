@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first script - Dyncamelo Wiki</title>
+<meta name="description" content="In about ten minutes you will build a real graph: find every item whose Material contains &quot;Concrete&quot;, colour it red, and save it as a selection set. About six nodes, no code.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a class="current" href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Your first script</h1>
+<p>In about ten minutes you will build a real graph: <strong>find every item whose Material contains "Concrete", colour it red, and save it as a selection set</strong>. About six nodes, no code.</p>
+<p>You need Dyncamelo <a href="installation.html">installed</a> and a model open in Navisworks (a Revit, IFC or DWG model appended to a new <code>.nwd</code> is fine).</p>
+<h2 id="1-open-the-editor-and-meet-the-screen">1. Open the editor and meet the screen</h2>
+<p>On the <strong>BIMCamel</strong> ribbon tab, click <strong>Dyncamelo</strong>. The editor opens as a pane. Its parts:</p>
+<ul>
+<li><strong>Library</strong> (left): every node, in a category tree, with a search box. Double-click a node, or drag it onto the canvas.</li>
+<li><strong>Canvas</strong> (middle): your graph. Pan by dragging with the right or middle mouse button, zoom with the wheel, box-select with the left button.</li>
+<li><strong>Run bar</strong> (bottom): the <strong>Run</strong> button, the <strong>Manual / Auto</strong> switch and the status line.</li>
+</ul>
+<p>While the canvas is empty the <strong>start screen</strong> shows cards: <strong>New script</strong>, your recent scripts and the examples. It disappears when you add a node or open a script.</p>
+<p>Every node shows its <strong>inputs on the left</strong> and its <strong>outputs on the right</strong>. Drag from an output socket to an input socket to make a <strong>wire</strong>. The wire is the data flow.</p>
+<p>Three habits that save time from day one:</p>
+<ul>
+<li>Press <strong>Space</strong> over the canvas to search for a node right where the cursor is. Type part of the name, <code>↑</code>/<code>↓</code> to choose, <code>Enter</code> to insert, <code>Esc</code> to close.</li>
+<li><strong>Hover a socket</strong> to see what it expects: its name, its <a href="ports-and-kinds.html">kind</a>, whether it is required, its default and a description.</li>
+<li>Press <strong><code>Ctrl+Shift+P</code></strong> for the command palette: type a word of any command or setting.</li>
+</ul>
+<h2 id="2-find-the-names-in-navisworks">2. Find the names in Navisworks</h2>
+<p>Click a concrete element in Navisworks and look at the <strong>Properties</strong> window. Find the tab (also called <em>category</em>) and the row (the <em>property</em>) that holds the material text. In Revit-sourced models this is usually category <strong>Element</strong>, property <strong>Material</strong>; other formats often use <strong>Item</strong> and <strong>Material</strong>. Dyncamelo searches by exactly the names you see, including their language.</p>
+<h2 id="3-the-search">3. The search</h2>
+<ol>
+<li>Press <code>Space</code>, type <code>Search.ByProperty</code>, and insert <strong>Search.ByProperty</strong> (category <em>Navisworks ▸ Search</em>).</li>
+<li>Type into its inputs:<ul>
+<li><code>categoryName</code>: <code>Element</code> (or what you found),</li>
+<li><code>propertyName</code>: <code>Material</code>,</li>
+<li><code>value</code>: <code>Concrete</code>,</li>
+<li><code>mode</code>: choose <code>contains</code> from the drop-down. The other modes are <code>equals</code>, <code>wildcard</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> and <code>&lt;=</code>.</li>
+</ul>
+</li>
+<li>Leave <code>document</code> alone. A <strong>Document</strong> input uses the active document when nothing is wired to it.</li>
+<li>Add a <strong>Watch List</strong> node (category <em>Display</em>) and wire <code>items</code> from the search into its <code>list</code>.</li>
+<li>Press <strong>Run</strong> (<code>F5</code>).</li>
+</ol>
+<p>The Watch List fills with every matching item. If it is empty, the names do not match what Navisworks shows. The <code>categoryName</code> and <code>propertyName</code> boxes have a small <strong>magnifier</strong> button: select an element in Navisworks, press the magnifier, and pick the tab and then the property from a list that shows only what that element has. Nothing is read until you press it.</p>
+<h2 id="4-colour-the-result">4. Colour the result</h2>
+<ol>
+<li>Add <strong>Appearance.OverrideColor</strong> (<em>Navisworks ▸ Appearance</em>).</li>
+<li>Wire <code>items</code> from the search into its <code>items</code> input.</li>
+<li>Click the colour swatch on its <code>color</code> input and choose red.</li>
+<li>Press <strong>Run</strong>. Every concrete item in the viewport turns red.</li>
+</ol>
+<p>This is a real Navisworks colour override, as if you had used <em>Item Tools ▸ Override Color</em>. To take it back from a graph, use <strong>Appearance.Reset</strong> (or <strong>Appearance.ResetAll</strong> for a clean slate before you colour again).</p>
+<blockquote>
+<p><strong>Save the model before you experiment.</strong> Whether one Navisworks <strong>Undo</strong> reverses a whole run has not been confirmed. The editor's own undo (<code>Ctrl+Z</code> while the pane has the focus) changes the graph only.</p>
+</blockquote>
+<h2 id="5-save-it-as-a-selection-set">5. Save it as a selection set</h2>
+<ol>
+<li>Add <strong>SelectionSet.Create</strong> (<em>Navisworks ▸ SelectionSets</em>).</li>
+<li>Wire the <code>items</code> output of <strong>Appearance.OverrideColor</strong> into its <code>items</code> input. Nodes that change the model pass their items through for exactly this reason, so you can chain them.</li>
+<li>Type <code>Concrete elements</code> into its <code>name</code> input.</li>
+<li>Press <strong>Run</strong>. The set appears in the Navisworks <strong>Sets</strong> window. <code>SelectionSet.Create</code> replaces a top-level set with the same name, so running again updates it instead of duplicating it.</li>
+</ol>
+<p>The finished graph:</p>
+<pre><code>Search.ByProperty ──items──▶ Appearance.OverrideColor ──items──▶ SelectionSet.Create
+(Element / Material /                (colour: red)                (name: Concrete elements)
+ Concrete / contains)
+        └──items──▶ Watch List
+</code></pre>
+<h2 id="6-make-it-live">6. Make it live</h2>
+<p>Switch the run bar from <strong>Manual</strong> to <strong>Auto</strong>. Change <code>Concrete</code> to <code>Steel</code>: the graph runs again by itself and recolours the model. Only the nodes <strong>after</strong> your edit run again; the rest serve their stored results, which is what keeps large graphs fast.</p>
+<h2 id="7-save-the-graph">7. Save the graph</h2>
+<p>Press <code>Ctrl+S</code> and save a <code>.dyc</code> file. It stores the nodes, wires and the values you typed, not the results, so a graph you open later computes afresh on its first run. It is plain text, so it can be emailed or kept in version control. Save it in <code>Documents\Dyncamelo\Scripts</code> and the <a href="player.html">Script Player</a> lists it.</p>
+<h2 id="8-one-search-for-many-values">8. One search for many values</h2>
+<p>Lists are where Dyncamelo pays off. Add a <strong>String.Split</strong> node with the text <code>Concrete,Steel,Masonry</code> and the separator <code>,</code>, and wire its result into the <code>value</code> input of the search. The search now receives a <strong>list</strong> of three values on an input that wants <strong>one</strong>, so the node runs three times and gives three lists of items. The wire is drawn dashed to show this. Wire the same three texts into the <code>name</code> input of <strong>SelectionSet.Create</strong>, and one run makes three sets.</p>
+<p>This is <em>replication</em>, and how several lists pair up is <em>lacing</em>. Both are explained in <a href="concepts.html#lists-replication-and-lacing">Concepts</a>.</p>
+<h2 id="when-something-is-red">When something is red</h2>
+<p>A node that fails shows a red border and a message; hover it, or open the <strong>Errors</strong> count in the status bar. Press <code>I</code> with a node selected to hear in words why it did or did not run. The full list of what red, amber and idle mean is in <a href="running-graphs.html#node-states">Running a graph</a> and <a href="troubleshooting.html#a-node-is-red-or-amber">Troubleshooting</a>.</p>
+<h2 id="where-next">Where next</h2>
+<ul>
+<li><a href="concepts.html">Concepts</a> and <a href="ports-and-kinds.html">Inputs, outputs and kinds</a> explain how graphs behave.</li>
+<li><a href="samples.html">Sample scripts</a> are finished graphs to open, run and take apart.</li>
+<li><a href="recipes.html">Recipes</a> list node chains for the jobs of a BIM coordinator, a manager and a model maintainer.</li>
+<li>The <a href="nodes/index.html">node reference</a> lists every node with its inputs and outputs.</li>
+</ul>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#1-open-the-editor-and-meet-the-screen">1. Open the editor and meet the screen</a><a class="l2" href="#2-find-the-names-in-navisworks">2. Find the names in Navisworks</a><a class="l2" href="#3-the-search">3. The search</a><a class="l2" href="#4-colour-the-result">4. Colour the result</a><a class="l2" href="#5-save-it-as-a-selection-set">5. Save it as a selection set</a><a class="l2" href="#6-make-it-live">6. Make it live</a><a class="l2" href="#7-save-the-graph">7. Save the graph</a><a class="l2" href="#8-one-search-for-many-values">8. One search for many values</a><a class="l2" href="#when-something-is-red">When something is red</a><a class="l2" href="#where-next">Where next</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

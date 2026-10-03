@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table - Dyncamelo Wiki</title>
+<meta name="description" content="28 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub current" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Table</h1>
+<p class="lead">28 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-table-addcolumn">
+<h3><a class="node-name" href="#node-table-addcolumn">Table.AddColumn</a></h3>
+<p>Adds a column at the end: a list with one value per row, or a single value repeated on every row.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>name</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The new column&#x27;s name.</td></tr>
+<tr><td><code>values</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>A list with one value per row, or a single value repeated on every row.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table with the column added at the end.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">add</span> <span class="chip">column</span> <span class="chip">append</span> <span class="chip">new field</span> <span class="chip">constant</span></p>
+</section>
+<section class="node" id="node-table-addformulacolumn">
+<h3><a class="node-name" href="#node-table-addformulacolumn">Table.AddFormulaColumn</a></h3>
+<p>Adds a column calculated per row from the others, e.g. &quot;Width * Height * Length / 1000000000&quot; (same formula language as Math.Formula; [Names with spaces] in brackets).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>name</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The new column&#x27;s name.</td></tr>
+<tr><td><code>formula</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>A formula over the column names, e.g. Width * Height or [Fire Rating] / 60 (names with spaces in square brackets).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table with the calculated column added at the end.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">formula</span> <span class="chip">calculated</span> <span class="chip">computed</span> <span class="chip">column</span> <span class="chip">expression</span> <span class="chip">volume</span> <span class="chip">area</span></p>
+</section>
+<section class="node" id="node-table-column">
+<h3><a class="node-name" href="#node-table-column">Table.Column</a></h3>
+<p>The cells of one column, top to bottom — wire it into List.Sum, List.CountBy, Search or a property writer.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>column</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The column name.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>values</code></td><td><code>any[]</code></td><td>The cells of that column, top to bottom.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">column</span> <span class="chip">field</span> <span class="chip">values</span> <span class="chip">extract</span> <span class="chip">pick</span></p>
+</section>
+<section class="node" id="node-table-concat">
+<h3><a class="node-name" href="#node-table-concat">Table.Concat</a></h3>
+<p>Stacks tables one below the other, matching columns by name; a column one table lacks is left empty — weekly snapshots, one table per model.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>tables</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The tables, top first (wire several into the one socket).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>One table with every column of every table (matched by name; missing cells are empty).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">append</span> <span class="chip">union</span> <span class="chip">stack</span> <span class="chip">merge</span> <span class="chip">combine</span> <span class="chip">rbind</span></p>
+</section>
+<section class="node" id="node-table-distinct">
+<h3><a class="node-name" href="#node-table-distinct">Table.Distinct</a></h3>
+<p>Keeps only the first row for each distinct value (of the given columns, or of the whole row).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>columns</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Columns that must differ (separated by commas); leave empty to compare whole rows.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table with only the first row of each kind.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">unique</span> <span class="chip">duplicates</span> <span class="chip">dedupe</span> <span class="chip">remove duplicates</span> <span class="chip">distinct</span></p>
+</section>
+<section class="node" id="node-table-filter">
+<h3><a class="node-name" href="#node-table-filter">Table.Filter</a></h3>
+<p>Splits a table by a test on one column — Level == &quot;L02&quot;, Length &gt; 3000, Name matches &quot;W-*&quot; — into the rows that pass and the rows that do not.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>column</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The column to test.</td></tr>
+<tr><td><code>test</code></td><td><code>string</code></td><td><code>&quot;==&quot;</code></td><td>The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</td></tr>
+<tr><td><code>value</code></td><td><code>any</code></td><td><code>null</code></td><td>What to test against (unused by the null / empty tests).</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) ignores upper/lower case in text tests.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>matched</code></td><td><code>dict</code></td></tr>
+<tr><td><code>rejected</code></td><td><code>dict</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The rows that passed and the rows that did not, both as tables.</p>
+<p class="tags"><span class="chip">filter</span> <span class="chip">where</span> <span class="chip">query</span> <span class="chip">select rows</span> <span class="chip">search</span> <span class="chip">keep</span></p>
+</section>
+<section class="node" id="node-table-fromcolumns">
+<h3><a class="node-name" href="#node-table-fromcolumns">Table.FromColumns</a></h3>
+<p>Makes a table from columns: a list of lists, one per column, with optional names — for results that come as parallel lists.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>columns</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>One list per column (they may differ in length; short ones are padded with nulls).</td></tr>
+<tr><td><code>headers</code></td><td><code>any[]</code></td><td><code>null</code></td><td>The column names (leave unwired for Column 1, Column 2 …).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">columns</span> <span class="chip">parallel lists</span> <span class="chip">zip</span> <span class="chip">table</span> <span class="chip">transpose</span></p>
+</section>
+<section class="node" id="node-table-fromcsvfile">
+<h3><a class="node-name" href="#node-table-fromcsvfile">Table.FromCsvFile</a></h3>
+<p>Reads a CSV file straight into a table (numbers become numbers, everything else stays text).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>path</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The CSV file.</td></tr>
+<tr><td><code>delimiter</code></td><td><code>string</code></td><td><code>&quot;,&quot;</code></td><td>The cell separator (default a comma).</td></tr>
+<tr><td><code>firstRowIsHeader</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) takes the first row as the column names.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">csv</span> <span class="chip">read</span> <span class="chip">import</span> <span class="chip">load</span> <span class="chip">file</span></p>
+</section>
+<section class="node" id="node-table-fromdictionaries">
+<h3><a class="node-name" href="#node-table-fromdictionaries">Table.FromDictionaries</a></h3>
+<p>Makes a table from a list of dictionaries (one row each); the columns are all their keys — property bags become rows.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dictionaries</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Dictionaries such as the ones Properties.AsDictionary returns; the columns are all their keys, in order of first appearance.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">properties</span> <span class="chip">records</span> <span class="chip">json</span> <span class="chip">dictionary</span> <span class="chip">table</span> <span class="chip">dataframe</span></p>
+</section>
+<section class="node" id="node-table-fromexcelfile">
+<h3><a class="node-name" href="#node-table-fromexcelfile">Table.FromExcelFile</a></h3>
+<p>Reads an Excel worksheet straight into a table.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>path</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .xlsx file.</td></tr>
+<tr><td><code>sheet</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>The worksheet name (empty takes the first sheet).</td></tr>
+<tr><td><code>firstRowIsHeader</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) takes the first row as the column names.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">excel</span> <span class="chip">xlsx</span> <span class="chip">read</span> <span class="chip">import</span> <span class="chip">load</span> <span class="chip">spreadsheet</span></p>
+</section>
+<section class="node" id="node-table-fromrows">
+<h3><a class="node-name" href="#node-table-fromrows">Table.FromRows</a></h3>
+<p>Makes a table from rows of cells and column names (or from the first row) — the doorway from Excel, CSV and list data.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>rows</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The rows; each row a list of cells (as read by Excel.ReadFromFile or CSV.ReadFromFile).</td></tr>
+<tr><td><code>headers</code></td><td><code>any[]</code></td><td><code>null</code></td><td>The column names. Leave unwired to name the columns Column 1, Column 2 …, or tick firstRowIsHeader.</td></tr>
+<tr><td><code>firstRowIsHeader</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True takes the first row as the column names (when no headers are wired).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">create</span> <span class="chip">table</span> <span class="chip">dataframe</span> <span class="chip">rows</span> <span class="chip">headers</span> <span class="chip">sheet</span> <span class="chip">grid</span></p>
+</section>
+<section class="node" id="node-table-groupby">
+<h3><a class="node-name" href="#node-table-groupby">Table.GroupBy</a></h3>
+<p>Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group — &quot;sum:Volume&quot;, &quot;count&quot; — the pivot-table core for quantities.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>by</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The column(s) to group by, separated by commas; leave empty for one total row.</td></tr>
+<tr><td><code>aggregations</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>What to work out per group, one text each: count, sum:Volume, average:Length as AvgLength. Functions: count, sum, average, min, max, median, first, last, list, distinct.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>One row per group: the grouping columns followed by one column per aggregation.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">group</span> <span class="chip">aggregate</span> <span class="chip">summary</span> <span class="chip">rollup</span> <span class="chip">total</span> <span class="chip">sum</span> <span class="chip">count</span> <span class="chip">pivot</span> <span class="chip">takeoff</span> <span class="chip">qto</span></p>
+</section>
+<section class="node" id="node-table-headers">
+<h3><a class="node-name" href="#node-table-headers">Table.Headers</a></h3>
+<p>The column names of a table, in order.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>headers</code></td><td><code>string[]</code></td><td>The names, in column order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">columns</span> <span class="chip">names</span> <span class="chip">header</span> <span class="chip">fields</span></p>
+</section>
+<section class="node" id="node-table-info">
+<h3><a class="node-name" href="#node-table-info">Table.Info</a></h3>
+<p>How many rows and columns a table has, and its column names.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>rowCount</code></td><td><code>integer</code></td></tr>
+<tr><td><code>columnCount</code></td><td><code>integer</code></td></tr>
+<tr><td><code>headers</code></td><td><code>string[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: rowCount, columnCount and headers.</p>
+<p class="tags"><span class="chip">size</span> <span class="chip">count</span> <span class="chip">shape</span> <span class="chip">dimensions</span> <span class="chip">length</span></p>
+</section>
+<section class="node" id="node-table-join">
+<h3><a class="node-name" href="#node-table-join">Table.Join</a></h3>
+<p>Joins two tables on a key column (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and &quot;42&quot; are the same.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>left</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The main table.</td></tr>
+<tr><td><code>right</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table to add columns from.</td></tr>
+<tr><td><code>leftKey</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The key column of the left table.</td></tr>
+<tr><td><code>rightKey</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>The key column of the right table (leave empty to use the same name as leftKey).</td></tr>
+<tr><td><code>kind</code></td><td><code>string</code></td><td><code>&quot;inner&quot;</code></td><td>inner keeps rows with a match on both sides; left keeps every left row; outer keeps every row of both.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The joined table: the left columns, then the right columns (a repeated name gets &quot; (right)&quot;).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">join</span> <span class="chip">merge</span> <span class="chip">lookup</span> <span class="chip">vlookup</span> <span class="chip">combine</span> <span class="chip">match</span> <span class="chip">relate</span></p>
+</section>
+<section class="node" id="node-table-joinbykey">
+<h3><a class="node-name" href="#node-table-joinbykey">Table.JoinByKey</a></h3>
+<p>Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>rows</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Table rows; each row a list of cells (e.g. from Excel.ReadFromFile).</td></tr>
+<tr><td><code>headers</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Column headers, one per cell column.</td></tr>
+<tr><td><code>keys</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Keys to look up, e.g. element GUIDs or mark values.</td></tr>
+<tr><td><code>keyColumn</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Name of the header column holding the keys.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>matchedRows</code></td><td><code>any</code></td></tr>
+<tr><td><code>unmatchedKeys</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;matchedRows&quot; (parallel to keys; null when unmatched) and &quot;unmatchedKeys&quot;.</p>
+<p class="tags"><span class="chip">join</span> <span class="chip">lookup</span> <span class="chip">vlookup</span> <span class="chip">merge</span> <span class="chip">link</span> <span class="chip">table</span> <span class="chip">excel</span> <span class="chip">csv</span></p>
+</section>
+<section class="node" id="node-table-pivot">
+<h3><a class="node-name" href="#node-table-pivot">Table.Pivot</a></h3>
+<p>Cross-tabulates: rows from one column, columns from another, each cell the sum (or count, average …) of a third — clashes by level and status.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>rowColumn</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The column whose values become the rows.</td></tr>
+<tr><td><code>columnColumn</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The column whose values become the new columns.</td></tr>
+<tr><td><code>valueColumn</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>The column to total in each cell (not needed for count).</td></tr>
+<tr><td><code>aggregation</code></td><td><code>string</code></td><td><code>&quot;sum&quot;</code></td><td>How to combine: sum (default), count, average, min, max, first, last.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>One row per row value, one column per column value.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">pivot</span> <span class="chip">cross-tab</span> <span class="chip">matrix</span> <span class="chip">crosstab</span> <span class="chip">summary</span> <span class="chip">levels by status</span></p>
+</section>
+<section class="node" id="node-table-removecolumns">
+<h3><a class="node-name" href="#node-table-removecolumns">Table.RemoveColumns</a></h3>
+<p>Drops the listed columns and keeps the rest.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>columns</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The names to remove (a list, or one text with names separated by commas).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table without them.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">drop</span> <span class="chip">delete</span> <span class="chip">columns</span> <span class="chip">remove</span> <span class="chip">hide</span></p>
+</section>
+<section class="node" id="node-table-renamecolumn">
+<h3><a class="node-name" href="#node-table-renamecolumn">Table.RenameColumn</a></h3>
+<p>Renames one column.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>column</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The current name.</td></tr>
+<tr><td><code>newName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The new name.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The table with the column renamed.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">rename</span> <span class="chip">header</span> <span class="chip">column name</span></p>
+</section>
+<section class="node" id="node-table-row">
+<h3><a class="node-name" href="#node-table-row">Table.Row</a></h3>
+<p>One row of a table as a dictionary from column name to cell (0 is the first row; -1 the last).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>The row number, counting from 0 (negative counts from the end).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>row</code></td><td><code>dict</code></td><td>The row as a dictionary from column name to cell.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">row</span> <span class="chip">record</span> <span class="chip">line</span> <span class="chip">get</span></p>
+</section>
+<section class="node" id="node-table-rows">
+<h3><a class="node-name" href="#node-table-rows">Table.Rows</a></h3>
+<p>The rows of a table as a list of lists of cells (for Excel.WriteToFile, CSV.WriteToFile and the List nodes).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>rows</code></td><td><code>any[]</code></td><td>A list of rows, each a list of cells in column order (feeds Excel.WriteToFile and CSV.WriteToFile).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">rows</span> <span class="chip">cells</span> <span class="chip">list</span> <span class="chip">export</span> <span class="chip">values</span></p>
+</section>
+<section class="node" id="node-table-selectcolumns">
+<h3><a class="node-name" href="#node-table-selectcolumns">Table.SelectColumns</a></h3>
+<p>Keeps only the listed columns, in that order (names as a list or one comma-separated text).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>columns</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The names to keep (a list, or one text with names separated by commas).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The narrower table.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">keep</span> <span class="chip">columns</span> <span class="chip">pick</span> <span class="chip">reorder</span> <span class="chip">project</span> <span class="chip">narrow</span></p>
+</section>
+<section class="node" id="node-table-slice">
+<h3><a class="node-name" href="#node-table-slice">Table.Slice</a></h3>
+<p>Takes count rows from a starting row (count -1 takes all the rest) — the first 10 rows: start 0, count 10.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>start</code></td><td><code>integer</code></td><td><code>0</code></td><td>The first row to take, counting from 0.</td></tr>
+<tr><td><code>count</code></td><td><code>integer</code></td><td><code>-1</code></td><td>How many rows (-1 takes all the rest).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The rows from start on, at most count of them.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">take</span> <span class="chip">skip</span> <span class="chip">head</span> <span class="chip">top</span> <span class="chip">limit</span> <span class="chip">page</span> <span class="chip">subset</span></p>
+</section>
+<section class="node" id="node-table-sort">
+<h3><a class="node-name" href="#node-table-sort">Table.Sort</a></h3>
+<p>Sorts the rows by one or more columns (&quot;Level, -Length&quot; sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>columns</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Columns to sort by, separated by commas; add &quot; desc&quot; or a leading &quot;-&quot; for largest first: Level, -Length.</td></tr>
+<tr><td><code>descending</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True sorts every column largest first (a column can still opt out with &quot; asc&quot;).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>The sorted table; empty cells go last and equal rows keep their order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">sort</span> <span class="chip">order</span> <span class="chip">rank</span> <span class="chip">arrange</span> <span class="chip">ascending</span> <span class="chip">descending</span></p>
+</section>
+<section class="node" id="node-table-tocsvfile">
+<h3><a class="node-name" href="#node-table-tocsvfile">Table.ToCsvFile</a></h3>
+<p>Writes a table, with its column names, to a CSV file.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>path</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The file to write (overwritten; folders are created).</td></tr>
+<tr><td><code>delimiter</code></td><td><code>string</code></td><td><code>&quot;,&quot;</code></td><td>The cell separator (default a comma).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>path</code></td><td><code>string</code></td><td>The path that was written.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">csv</span> <span class="chip">write</span> <span class="chip">export</span> <span class="chip">save</span> <span class="chip">file</span></p>
+</section>
+<section class="node" id="node-table-todictionaries">
+<h3><a class="node-name" href="#node-table-todictionaries">Table.ToDictionaries</a></h3>
+<p>The rows of a table as dictionaries (column name to cell) — for JSON.WriteToFile or per-row lookups.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dictionaries</code></td><td><code>any[]</code></td><td>One dictionary per row, from column name to cell.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">records</span> <span class="chip">json</span> <span class="chip">dictionary</span> <span class="chip">objects</span></p>
+</section>
+<section class="node" id="node-table-toexcelfile">
+<h3><a class="node-name" href="#node-table-toexcelfile">Table.ToExcelFile</a></h3>
+<p>Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>path</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .xlsx file to write.</td></tr>
+<tr><td><code>sheet</code></td><td><code>string</code></td><td><code>&quot;Sheet1&quot;</code></td><td>The worksheet name.</td></tr>
+<tr><td><code>append</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True adds the sheet to an existing workbook instead of replacing the file.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>path</code></td><td><code>string</code></td><td>The path that was written.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">excel</span> <span class="chip">xlsx</span> <span class="chip">write</span> <span class="chip">export</span> <span class="chip">save</span> <span class="chip">spreadsheet</span> <span class="chip">sheet</span></p>
+</section>
+<section class="node" id="node-table-totext">
+<h3><a class="node-name" href="#node-table-totext">Table.ToText</a></h3>
+<p>Renders a table as Markdown, CSV, tab-separated or an HTML table — for a report, an e-mail or a log.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>table</code> <span class="chip required">required</span></td><td><code>DyncameloTable</code></td><td>&mdash;</td><td>The table.</td></tr>
+<tr><td><code>format</code></td><td><code>string</code></td><td><code>&quot;markdown&quot;</code></td><td>markdown (default), csv, tsv, or html.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The table rendered in that format, ready for Text.WriteToFile, an e-mail or Log.Write.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markdown</span> <span class="chip">csv</span> <span class="chip">html</span> <span class="chip">render</span> <span class="chip">print</span> <span class="chip">string</span> <span class="chip">report</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

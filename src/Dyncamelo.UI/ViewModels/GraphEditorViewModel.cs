@@ -238,6 +238,9 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
     /// </summary>
     public ObservableCollection<SampleGraphViewModel> SampleGraphs { get; }
 
+    /// <summary>A folder to list the example graphs from instead of the one found next to the plugin (for a host that keeps them elsewhere, and for tests).</summary>
+    public string? SamplesDirectoryOverride { get; set; }
+
     /// <summary>Canvas items (nodes and notes); bound to the editor's ItemsSource.</summary>
     public ObservableCollection<CanvasItemViewModel> Items { get; }
 
@@ -2119,7 +2122,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
     public void RefreshSampleGraphs()
     {
         SampleGraphs.Clear();
-        string? directory = ResolveSamplesDirectory();
+        string? directory = SamplesDirectoryOverride ?? ResolveSamplesDirectory();
         if (directory == null)
         {
             return;
@@ -2155,30 +2158,16 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
     /// </summary>
     private static string? ResolveSamplesDirectory()
     {
+        // The directory the assembly was loaded from — and, when a test host or a shadow copy moved it to a temporary
+        // folder, the directory it was built in (its code base) — so a development layout still finds the repository's folder.
+        var starts = new List<string>();
         try
         {
-            var assemblyDirectory = System.IO.Path.GetDirectoryName(typeof(GraphEditorViewModel).Assembly.Location);
-            if (string.IsNullOrEmpty(assemblyDirectory))
+            var assembly = typeof(GraphEditorViewModel).Assembly;
+            AddDirectory(starts, assembly.Location);
+            if (!string.IsNullOrEmpty(assembly.CodeBase) && Uri.TryCreate(assembly.CodeBase, UriKind.Absolute, out var codeBase) && codeBase.IsFile)
             {
-                return null;
-            }
-
-            var deployed = System.IO.Path.Combine(assemblyDirectory, "Samples");
-            if (System.IO.Directory.Exists(deployed))
-            {
-                return deployed;
-            }
-
-            // Dev fallback: walk up from bin\<Configuration>\net48 to the repo
-            // root and use its samples folder.
-            var current = new System.IO.DirectoryInfo(assemblyDirectory);
-            for (int depth = 0; depth < 6 && current != null; depth++, current = current.Parent)
-            {
-                var dev = System.IO.Path.Combine(current.FullName, "samples");
-                if (System.IO.Directory.Exists(dev))
-                {
-                    return dev;
-                }
+                AddDirectory(starts, codeBase.LocalPath);
             }
         }
         catch (Exception)
@@ -2186,7 +2175,56 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
             // A broken probing path must never break the toolbar.
         }
 
+        foreach (var start in starts)
+        {
+            try
+            {
+                var deployed = System.IO.Path.Combine(start, "Samples");
+                if (System.IO.Directory.Exists(deployed))
+                {
+                    return deployed;
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        foreach (var start in starts)
+        {
+            try
+            {
+                // Dev fallback: walk up from bin\<Configuration>\net48 to the repo root and use its samples folder.
+                var current = new System.IO.DirectoryInfo(start);
+                for (int depth = 0; depth < 6 && current != null; depth++, current = current.Parent)
+                {
+                    var dev = System.IO.Path.Combine(current.FullName, "samples");
+                    if (System.IO.Directory.Exists(dev))
+                    {
+                        return dev;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         return null;
+    }
+
+    private static void AddDirectory(List<string> directories, string? file)
+    {
+        if (string.IsNullOrEmpty(file))
+        {
+            return;
+        }
+
+        var directory = System.IO.Path.GetDirectoryName(file);
+        if (!string.IsNullOrEmpty(directory) && !directories.Contains(directory!, StringComparer.OrdinalIgnoreCase))
+        {
+            directories.Add(directory!);
+        }
     }
 
     private void OpenSample(SampleGraphViewModel? sample)

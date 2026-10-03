@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Troubleshooting - Dyncamelo Wiki</title>
+<meta name="description" content="Find the symptom, read the cause, try the fix. If nothing here helps, collect diagnostics and open an issue with the bug report form.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a class="current" href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Troubleshooting</h1>
+<p>Find the symptom, read the cause, try the fix. If nothing here helps, <a href="#how-to-collect-diagnostics">collect diagnostics</a> and open an issue with the bug report form.</p>
+<p>GitHub releases carry the source code only at the moment, so where this page mentions <code>DyncameloSetup.exe</code> it means an installer you built yourself or got elsewhere; a Debug build of the solution puts the bundle in the right folder for you.</p>
+<p>Everything below comes from the Dyncamelo source and docs. Where a behaviour has <strong>not</strong> been seen inside a real Navisworks yet, the text says so. See <a href="#known-issues">Known issues</a>.</p>
+<h2 id="symptoms">Symptoms</h2>
+<ul>
+<li><a href="#navisworks-reports-plugin_load_02-or-0x80131515-at-start">Navisworks reports <code>PLUGIN_LOAD_02</code> or <code>0x80131515</code> at start</a></li>
+<li><a href="#the-bimcamel-ribbon-tab-or-the-dyncamelo-button-is-missing">The BIMCamel ribbon tab or the Dyncamelo button is missing</a></li>
+<li><a href="#the-editor-says-something-went-wrong">The editor says "Something went wrong"</a></li>
+<li><a href="#a-node-is-red-or-amber">A node is red or amber</a></li>
+<li><a href="#a-graph-opens-with-a-warning-or-with-missing-nodes">A graph opens with a warning, or with missing nodes</a></li>
+<li><a href="#nothing-happens-when-i-press-run">Nothing happens when I press Run</a></li>
+<li><a href="#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names">A search returns nothing, or the magnifier next to a tab or property shows no names</a></li>
+<li><a href="#the-start-screen-is-missing">The start screen is missing</a></li>
+<li><a href="#a-run-is-slow-on-a-large-model">A run is slow on a large model</a></li>
+<li><a href="#the-script-player-asks-me-to-confirm-a-script">The Script Player asks me to confirm a script</a></li>
+<li><a href="#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place">A file node fails with "access denied" or writes to the wrong place</a></li>
+<li><a href="#navisworks-closed-while-i-was-working">Navisworks closed while I was working</a></li>
+<li><a href="#running-next-to-other-add-ins">Running next to other add-ins</a></li>
+</ul>
+<p>Then: <a href="#how-to-collect-diagnostics">how to collect diagnostics</a>, <a href="#which-version-is-installed">which version is installed</a>, <a href="#how-to-uninstall">how to uninstall</a> and <a href="#known-issues">known issues</a>.</p>
+<hr />
+<h2 id="navisworks-reports-plugin_load_02-or-0x80131515-at-start">Navisworks reports <code>PLUGIN_LOAD_02</code> or <code>0x80131515</code> at start</h2>
+<p><strong>Cause.</strong> Windows kept the browser's "downloaded file" mark (Zone.Identifier) on the Dyncamelo DLLs. .NET Framework refuses to load assemblies with that mark. <code>DyncameloSetup.exe</code> and <code>install-dyncamelo.bat</code> remove the mark. A manual copy of the bundle from the zip does not.</p>
+<p><strong>Fix.</strong> In PowerShell:</p>
+<pre><code class="language-powershell">Get-ChildItem &quot;$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle&quot; -Recurse -File | Unblock-File
+</code></pre>
+<p>Then restart Navisworks. You can also unblock the downloaded zip before you extract it (right-click, <strong>Properties</strong>, <strong>Unblock</strong>), or simply run <code>DyncameloSetup.exe</code>.</p>
+<h2 id="the-bimcamel-ribbon-tab-or-the-dyncamelo-button-is-missing">The BIMCamel ribbon tab or the Dyncamelo button is missing</h2>
+<p>Check these in order.</p>
+<ol>
+<li><strong>Is the bundle in the right folder?</strong> The installer puts it in <code>%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle</code>. That folder must hold <code>PackageContents.xml</code> and one folder per Navisworks year: <code>2024</code>, <code>2025</code> and <code>2026</code>. Each year folder holds <code>Dyncamelo.App.dll</code> and the other DLLs. (For all users the bundle can go in <code>C:\ProgramData\Autodesk\ApplicationPlugins\</code> instead.) If a folder is missing, run <code>DyncameloSetup.exe</code> again.</li>
+<li><strong>Did you restart Navisworks?</strong> Navisworks reads the bundle at start. Close it fully and start it again.</li>
+<li><strong>Is your Navisworks supported?</strong> <code>PackageContents.xml</code> lists Navisworks <strong>Manage and Simulate, 2024, 2025 and 2026</strong>, 64-bit Windows (2024 is series Nw21, 2025 is Nw22, 2026 is Nw23). Other products and years are not listed. The installer's start screen says which supported years it found.</li>
+<li><strong>Are the files blocked?</strong> See <code>PLUGIN_LOAD_02</code> above.</li>
+<li><strong>Wrong-year DLL.</strong> A DLL built for one Navisworks year still loads its ribbon button in another, but its dock pane cannot register. The button then shows "The Dyncamelo editor panel is not registered with Navisworks". Reinstall with the installer from the same release, which carries a build for each year.</li>
+<li><strong>Classic Plugins-folder install.</strong> If you copied the files to <code>...\Navisworks Manage 2024\Plugins\Dyncamelo.App\</code> instead, there is no ribbon tab. The button is under <strong>Tool add-ins</strong> (<a href="first-steps.html">Getting Started</a>).</li>
+</ol>
+<p>The tab is named <strong>BIMCamel</strong> and the panel <strong>Visual Programming</strong>. It holds three buttons: <strong>Dyncamelo</strong>, <strong>Player</strong> and <strong>About</strong>. If you also installed another BIMCamel tool, Dyncamelo merges the duplicate "BIMCamel" tabs into one. If you still see two, please report it.</p>
+<h2 id="the-editor-says-something-went-wrong">The editor says "Something went wrong"</h2>
+<p>The full text is "Something went wrong (<em>ExceptionType</em>: <em>message</em>). Details: %APPDATA%\Dyncamelo\errors.log".</p>
+<p><strong>Cause.</strong> Dyncamelo's <em>crash guard</em> caught a failure in its own code, for example in a command, or WPF failing to build a visual soon after you clicked. Without the guard, an error like this would close Navisworks. The editor keeps running and the failure is written to the log.</p>
+<p><strong>Fix.</strong></p>
+<ol>
+<li>Save your graph if you have changes. (Autosave is on by default; see <strong>Settings &gt; Editing &gt; Autosave unsaved work</strong>.)</li>
+<li>Open <code>%APPDATA%\Dyncamelo\errors.log</code> (paste that into the Windows Explorer address bar). Each entry starts with the date and time and where it happened (<code>a command</code>, <code>the editor</code> or <code>a failure that ended the host</code>), followed by the full exception and, for XAML problems, the file and line.</li>
+<li>Send the last entry, together with what you clicked just before. Use the bug report form and <a href="#how-to-collect-diagnostics">the diagnostics</a>.</li>
+</ol>
+<p>If the message also says "The node that could not be drawn was taken off the canvas", the node you just added could not be shown. Leave it out and report which node it was.</p>
+<h2 id="a-node-is-red-or-amber">A node is red or amber</h2>
+<p>Hover the node, or read the balloon above it. It holds the message.</p>
+<table>
+<thead>
+<tr>
+<th>Look</th>
+<th>Meaning</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Red</strong> border</td>
+<td>The node failed: it raised an error, or it cannot be found. Its outputs are empty.</td>
+<td>Read the message. It is the node's own error text.</td>
+</tr>
+<tr>
+<td><strong>Amber</strong> border</td>
+<td>The node ran with a warning, or an input node upstream failed ("Upstream failure: one or more input nodes are in an error state.").</td>
+<td>If it says upstream, find the first red node before it and fix that.</td>
+</tr>
+<tr>
+<td><strong>Idle</strong>, no coloured border</td>
+<td>The node did not run. "Input 'x' is not connected." means a required input has no wire and no value. "Skipped: an input comes from a branch that was switched off (Flow.When was false)." means a <code>Flow.When</code> upstream was false.</td>
+<td>Connect the input, or change the condition. This is not an error.</td>
+</tr>
+</tbody>
+</table>
+<p>Ways to find the cause faster:</p>
+<ul>
+<li>The <strong>Errors</strong> and <strong>Warnings</strong> counts in the status bar are buttons (or press <code>Ctrl+Shift+E</code>). They list every problem node; <code>F8</code> and <code>Shift+F8</code> step through them.</li>
+<li>Select a node and press <code>I</code> (<strong>Why Didn't This Run?</strong>). The status bar explains in words.</li>
+<li>To let a graph carry on after a failure, put <code>Flow.Try</code> after the node that may fail. It returns your fallback and the error text, and nothing after it turns red.</li>
+<li>A list wired into a single-value input is drawn with a dashed wire, and the node runs once per item. When some items fail, those items give an empty result, the rest still compute, and the node shows one amber warning that counts the failed calls. See <a href="canvas-and-nodes.html">the editor guide</a>.</li>
+</ul>
+<p>More in the <a href="canvas-and-nodes.html">editor guide</a>.</p>
+<h2 id="a-graph-opens-with-a-warning-or-with-missing-nodes">A graph opens with a warning, or with missing nodes</h2>
+<p><strong>"Opened <em>file</em>.dyc. 3 connections or values could not be restored — ..."</strong> appears in the status bar.</p>
+<p><strong>Cause.</strong> The file was saved with an older version, and a node has changed since: it no longer has an input or output with that name. Dyncamelo drops the wire, or the value typed into that input, and says which one first (<code>A connection into 'X' was dropped: it no longer has an input 'y'.</code>, or <code>'X' no longer has an input 'y'; the value typed into it was dropped.</code>). Everything else is restored.</p>
+<p><strong>Fix.</strong> Find the node named in the message, look at its current inputs (hover a socket), reconnect the wire or type the value again, and save. Renamed inputs normally keep their wires on their own, and retired nodes keep working in old graphs, so this message appears only when a socket is really gone.</p>
+<p><strong>A node is red with "Unresolved zero-touch definition ..." or "Unknown node type ...".</strong> The node is not in your install: the graph needs a node pack you have not installed, or it was made with a newer Dyncamelo. Install the pack or update Dyncamelo. The placeholder keeps the node's original data, so saving the file does not lose it. The Script Player will not run a script that has missing nodes.</p>
+<p><strong>The file will not open at all.</strong></p>
+<ul>
+<li>"The file requires .dyc reader version N but this application supports version M": update Dyncamelo. (A file that contains node groups is refused by older versions rather than opened without them.)</li>
+<li>"The file is not valid JSON" or "not a Dyncamelo .dyc document": the file is damaged or is not a graph.</li>
+</ul>
+<h2 id="nothing-happens-when-i-press-run">Nothing happens when I press Run</h2>
+<p>Work down this list.</p>
+<ol>
+<li><strong>Run only runs what changed.</strong> <code>F5</code> executes the nodes that changed since the last run and reuses the rest. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". This includes nodes that read Navisworks: nothing in the source marks <code>Selection.Current</code> as changed when you change the selection in Navisworks, so a plain Run does not read it again (not yet confirmed in Navisworks). Change one of the node's inputs (or its value) to make it run again. A change of the active document, or models added or removed, marks every node as changed.</li>
+<li><strong>A frozen node holds back everything after it.</strong> Frozen nodes (<code>Shift+M</code>, badge <em>FROZEN</em>) and everything downstream are skipped and keep their old results. Unfreeze with <code>Shift+M</code>.</li>
+<li><strong>A muted node passes data through</strong> instead of running (<code>M</code>, badge <em>MUTED</em>). Downstream nodes still run, on the passed-through data.</li>
+<li><strong>A <code>Flow.When</code> is false.</strong> The nodes after it are skipped and shown idle, not red, with the message "Skipped: ... (Flow.When was false)".</li>
+<li><strong>A required input is empty.</strong> The node is idle with "Input 'x' is not connected."</li>
+<li><strong>You ran up to a node</strong> (<code>Shift+F5</code>) or <strong>stopped with Esc</strong>. Everything after the stop point waits for the next ordinary <strong>Run</strong>, which carries on from there.</li>
+<li><strong>Auto-Run is off.</strong> With <strong>Graph &gt; Auto-Run</strong> off, edits only mark nodes as changed; press <strong>Run</strong> (<code>F5</code>). With it on, a run starts after every edit.</li>
+<li><strong>A muted wire</strong> (<code>Ctrl</code> while cutting) is ignored by the run. The input uses its own value instead.</li>
+</ol>
+<p>Select the node and press <code>I</code> to see which of these applies.</p>
+<h2 id="a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names">A search returns nothing, or the magnifier next to a tab or property shows no names</h2>
+<p><strong>A search returns nothing.</strong> The tab (category) and property names must be the ones Navisworks <strong>displays</strong>, in the language it displays them in: internal names do not match. Click an element in Navisworks, read the Properties window, and copy the two names. Try <code>mode</code> set to <code>contains</code> on <code>Search.ByProperty</code> before <code>equals</code>, and wire the result into a <strong>Watch List</strong> to see what came back.</p>
+<p><strong>The magnifier shows no names.</strong> The magnifier next to a tab or property input lists names of <strong>one element only</strong>, and says why when it has nothing to show:</p>
+<ul>
+<li>"Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (<code>Search.ByProperty</code>, <code>Search.HasProperty</code>, <code>Search.HasCategory</code>, <code>SelectionSet.CreateFromSearch</code>, <code>SelectionSets.BulkByPropertyValues</code>) list the names of the elements <strong>selected in Navisworks right now</strong>.</li>
+<li>"Pick an element on 'x' (or wire one in), then search its tabs." Nodes such as <code>Properties.Value</code> read the element on their own element input. Pick an element on that input, or wire one in.</li>
+<li>"The element wired to 'x' has not been computed yet. Run the graph (or pick the element on the node itself), then search." The wire needs a value first: press <strong>Run</strong>.</li>
+<li>"Choose the tab first (the 'x' input), then search its properties." Fill the tab input, then use the magnifier on the property input.</li>
+<li>"Element data can be searched in Navisworks only." The magnifier needs a running Navisworks.</li>
+</ul>
+<p>Typing the name by hand always works; the magnifier only helps you fill it in. It reads at most the first 100 elements of a longer list.</p>
+<h2 id="the-start-screen-is-missing">The start screen is missing</h2>
+<p>The start screen (cards for a new script, recent scripts and examples, the version and a link to bimcamel.com) shows only while the canvas is <strong>empty</strong>: it goes as soon as you add a node or open a script, and comes back when you delete every node or choose <strong>File ▸ New</strong>. If you never see it, check <strong>Settings ▸ Appearance ▸ Start screen on an empty canvas</strong>; with it off, an empty canvas stays empty. The <strong>New script</strong> card puts the cards away and leaves only a short hint line on the empty canvas.</p>
+<h2 id="a-run-is-slow-on-a-large-model">A run is slow on a large model</h2>
+<p>Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)").</p>
+<ul>
+<li><strong>Stop a run with <code>Esc</code>.</strong> It halts before the next node (or between items of a node working through a list). A single Navisworks call already under way cannot be interrupted. The next <strong>Run</strong> continues where it stopped; what finished nodes already changed in Navisworks is kept.</li>
+<li><strong>Switch Auto-Run off</strong> on big models, and run with <code>F5</code> when you are ready.</li>
+<li><strong>Freeze a slow branch</strong> (<code>Shift+M</code>) while you work elsewhere. <strong>Run up to a node</strong> (<code>Shift+F5</code>) runs only what that node needs.</li>
+<li><strong>Know the nodes that touch every item.</strong> Some node descriptions say so, for example <code>Model.Statistics</code> and <code>Search.ByGuid</code> ("walks every item of the document once (O(items))"), <code>Appearance.Focus</code> ("allow a moment on large models"), and <code>Distance.BetweenItems</code> and <code>Proximity.NearestDistance</code> with <code>method</code> set to <code>mesh</code>. Pass them a smaller list of items where you can, and prefer <code>bbox</code> where it is accurate enough.</li>
+<li><strong>A loop re-runs its body once per item</strong>, so a slow node inside <code>Loop.Item</code> ... <code>Loop.Collect</code> is slow once per item.</li>
+<li><strong>Very large graphs</strong> (many nodes, not many model items): turn on <strong>Settings &gt; Canvas &gt; Straight wires</strong>, which the settings page describes as faster on very large graphs.</li>
+<li>The <strong>Performance HUD</strong> (<code>Ctrl+Shift+F12</code>, or <strong>View &gt; Performance HUD</strong>) measures the canvas, not the model: frames per second, frame time, visuals and node counts, with a <strong>Copy report</strong> button. It is not yet verified in Navisworks.</li>
+</ul>
+<p>If you measure a slow case, please add the model size, the node and the time to an issue.</p>
+<h2 id="the-script-player-asks-me-to-confirm-a-script">The Script Player asks me to confirm a script</h2>
+<p><strong>Cause.</strong> The script contains nodes that change things: the model, a file on disk, a program, or data sent to the web. The Player lists them by name above the form ("Changes the model, writes files, runs programs or uses the network: ...") and asks the first time you run the script. This is a safety question, not an error. See <a href="privacy-and-safety.html">SECURITY.md</a>.</p>
+<ul>
+<li>The answer is remembered <strong>for that file as it is now</strong>. If the script file changes, the question comes back.</li>
+<li>Scripts that only read are never asked about.</li>
+<li>Muted and frozen nodes do not count.</li>
+<li>A script run by path through <code>Dyncamelo.Run.DYNC</code> (the Automation API, the Batch Utility) asks the same question. In an unattended run nobody can answer, so run the script once by hand in the Player first (not tested in an unattended run).</li>
+</ul>
+<h2 id="a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place">A file node fails with "access denied" or writes to the wrong place</h2>
+<p><strong>Cause.</strong> The source (in the viewpoint package code, written after a field report) notes that the working folder of the Navisworks process is the Navisworks install folder under <code>Program Files</code>, which ordinary users cannot write to. A <strong>relative path</strong> in a file node therefore points somewhere you cannot write. Windows also reports a folder given in place of a file as "access denied", and <strong>Controlled folder access</strong> can block writes to Documents or Desktop.</p>
+<p><strong>Fix.</strong> Give a <strong>full path</strong> for every file a graph writes, for example <code>C:\Users\you\Documents\report.xlsx</code>. Paste it without the quotes that Explorer's "Copy as path" adds; only the viewpoint package nodes are known to remove them for you. If Controlled folder access is on, allow Navisworks or write to another folder. The <em>csv-roundtrip</em> developer sample writes a relative path and is not shipped in the installer for that reason.</p>
+<h2 id="navisworks-closed-while-i-was-working">Navisworks closed while I was working</h2>
+<ol>
+<li>Start Navisworks and open the editor. If you had unsaved changes and <strong>Autosave</strong> was on, Dyncamelo offers the autosaved copy when the editor opens on an empty canvas. Saving, or answering <em>No</em>, deletes the copy. The copies are in <code>%APPDATA%\Dyncamelo\recovery</code>.</li>
+<li>Open <code>%APPDATA%\Dyncamelo\errors.log</code>. If there is an entry marked <code>a failure that ended the host</code> from the time of the crash, it holds the full exception. Send it.</li>
+<li>Tell us what you clicked last. A crash of Navisworks is the most serious kind of bug for this project.</li>
+</ol>
+<h2 id="running-next-to-other-add-ins">Running next to other add-ins</h2>
+<p>Dyncamelo ships its own copies of <code>Nodify.dll</code>, <code>Newtonsoft.Json.dll</code> and <code>AutomaticGraphLayout.dll</code> in the folder of <code>Dyncamelo.App.dll</code>, and Dyncamelo's own DLLs there too. Navisworks loads all add-ins into <strong>one process</strong>, so if two add-ins use the same library in different versions, the .NET Framework rules decide which copy a request gets.</p>
+<p>What the code does about it (<code>src/Dyncamelo.App/DyncameloHost.cs</code>):</p>
+<ul>
+<li>It redirects the one strong-named Navisworks reference that does not match across years, <code>Autodesk.Navisworks.Timeliner</code>, to the copy the running Navisworks has already loaded. Without it the TimeLiner nodes would silently vanish from the library.</li>
+<li>For any other assembly that the normal lookup cannot find, it loads <code>&lt;name&gt;.dll</code> from the add-in folder as a last resort. This is how WPF finds the theme's <code>Nodify</code> resources.</li>
+<li>That is all. Dyncamelo does <strong>not</strong> isolate its copies from other add-ins, and it does not force its own version to win. The fallback only runs when the normal lookup has already failed.</li>
+</ul>
+<p>Whether any real combination of add-ins conflicts with Dyncamelo has not been tested. If you suspect one, <code>errors.log</code> or a Navisworks message will name the assembly (look for <code>FileLoadException</code>, <code>MissingMethodException</code> or a version number). To test, move the other add-in's bundle out of <code>ApplicationPlugins</code> temporarily and restart Navisworks. Then send the log and the name and version of the other add-in. Dyncamelo and the BIMCamel IFC exporter are built to share the <strong>BIMCamel</strong> tab (see the <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/README.md">README</a>).</p>
+<hr />
+<h2 id="how-to-collect-diagnostics">How to collect diagnostics</h2>
+<p>When you report a problem, include:</p>
+<ol>
+<li><strong>Dyncamelo version.</strong> On the <strong>BIMCamel</strong> ribbon tab, click <strong>About</strong>. The version is at the bottom of the window.</li>
+<li><strong>Navisworks product and year</strong> (Manage or Simulate, 2024, 2025 or 2026) and your Windows version.</li>
+<li><strong>Help &gt; Copy Diagnostics</strong> in the editor. It copies the Dyncamelo and Navisworks versions, the installed Navisworks plug-ins and the end of <code>errors.log</code>. Paste it into the issue.</li>
+<li><strong>The end of <code>%APPDATA%\Dyncamelo\errors.log</code></strong>, if the problem produced an error.</li>
+<li><strong>Help &gt; Run Self-Test</strong> with a model open, if a Navisworks node behaves oddly. It runs a set of read-only Navisworks nodes and shows pass or fail for each. The report can be copied.</li>
+<li><strong>The graph</strong> (<code>.dyc</code>), if you can share it. Open it in a text editor first: it can hold file paths, names and values.</li>
+<li><strong>Does it happen with a sample graph?</strong> Samples are under <strong>File &gt; Sample Graphs</strong>. If one shows the problem, say which.</li>
+</ol>
+<h2 id="which-version-is-installed">Which version is installed</h2>
+<ul>
+<li><strong>BIMCamel</strong> ribbon tab, <strong>About</strong>: "Version x.y.z".</li>
+<li><strong>Windows Settings &gt; Apps &gt; Installed apps</strong>: "Dyncamelo for Navisworks" shows the version.</li>
+<li>The <code>Version</code> attribute in <code>%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\PackageContents.xml</code> (it reads like <code>0.45.1.0</code>).</li>
+<li><code>DyncameloSetup.exe</code> shows "Update install (v... found)" when a version is already installed.</li>
+</ul>
+<h2 id="how-to-uninstall">How to uninstall</h2>
+<ul>
+<li><strong>Windows Settings &gt; Apps &gt; Installed apps &gt; Dyncamelo for Navisworks &gt; Uninstall</strong>, or run <code>DyncameloSetup.exe</code> and choose <strong>Remove existing install</strong>.</li>
+<li>Silent: <code>DyncameloSetup.exe /uninstall /silent</code>.</li>
+<li>Scripted: <code>install-dyncamelo.bat uninstall</code> (from the zip).</li>
+<li>Close Navisworks first (the setup window warns when Navisworks is running).</li>
+</ul>
+<p>Uninstalling removes the bundle folder and the Apps entry. It <strong>leaves</strong> your <code>.dyc</code> graphs, your scripts folder (<code>Documents\Dyncamelo\Scripts</code>) and <code>%APPDATA%\Dyncamelo</code> (settings, <code>errors.log</code>, autosaved copies, <code>update-check.txt</code>). Delete <code>%APPDATA%\Dyncamelo</code> yourself for a completely clean start.</p>
+<h2 id="known-issues">Known issues</h2>
+<p>These are open at the time of writing. Items marked <em>not yet verified</em> have not been seen inside a real Navisworks.</p>
+<ul>
+<li><strong>Color Picker.</strong> A report of Navisworks closing while using the Color Picker node has <strong>not been confirmed fixed in v0.45.1 or v0.46.0</strong> (that release fixed a different crash, in the node library). If it happens to you, please send <code>errors.log</code>. A workaround that avoids the node: wire a <strong>String</strong> node holding a hex colour such as <code>#FF0000</code> into the colour input, as the sample <em>Clash Group Viewpoints per Test</em> does.</li>
+<li><strong>Performance report shortcut.</strong> <code>Ctrl+Shift+F12</code> (the Performance HUD and its <strong>Copy report</strong> button) is not yet verified in Navisworks. If nothing happens, use <strong>View &gt; Performance HUD</strong> or the command palette (<code>Ctrl+Shift+P</code>).</li>
+<li><strong>Navisworks nodes have never been run automatically.</strong> Nothing can run the Navisworks API outside Navisworks, so these nodes are compiled and their logic is unit-tested, but their behaviour in Navisworks is checked only by hand. The nodes added in 0.45 are the least tried; the list to try first is under "For the Navisworks side" in <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/WHATS_NEW_0.45.md#for-the-navisworks-side">WHATS_NEW_0.45.md</a>.</li>
+<li><strong>Only Navisworks Manage 2024 has been observed in the field.</strong> The 2025 and 2026 builds, and Simulate, are built and installed the same way but have not been seen running.</li>
+<li><strong>Undo in Navisworks.</strong> The editor's own Undo (<code>Ctrl+Z</code> while the pane has focus) changes the graph only, and says so. Whether one Navisworks <strong>Undo</strong> reverses a whole run is <strong>unknown</strong>: node descriptions call permanent overrides undoable, but the source has no code that groups a run into one undo step. Do not rely on it; save the model first.</li>
+<li><strong>Automatic run on open.</strong> A graph saved with run mode Automatic is <strong>not</strong> run when you open it from a file: the status bar says so, and nothing runs until you press Run. Before Run, a graph from a file that contains nodes that run programs, use the network, or delete or move files lists them and asks once (<a href="privacy-and-safety.html">SECURITY.md</a>).</li>
+<li><strong>Unsigned installer.</strong> An installer built from this source is not code-signed unless you configure a certificate (see the release workflow). Windows SmartScreen shows a warning for it; choose <strong>More info</strong>, then <strong>Run anyway</strong>.</li>
+</ul>
+<h2 id="still-stuck">Still stuck?</h2>
+<p>Open an issue with the <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues/new/choose">bug report form</a> and include the items above. For a security problem, use the private route in <a href="privacy-and-safety.html">SECURITY.md</a>.</p>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#symptoms">Symptoms</a><a class="l2" href="#navisworks-reports-plugin_load_02-or-0x80131515-at-start">Navisworks reports PLUGIN_LOAD_02 or 0x80131515 at start</a><a class="l2" href="#the-bimcamel-ribbon-tab-or-the-dyncamelo-button-is-missing">The BIMCamel ribbon tab or the Dyncamelo button is missing</a><a class="l2" href="#the-editor-says-something-went-wrong">The editor says &quot;Something went wrong&quot;</a><a class="l2" href="#a-node-is-red-or-amber">A node is red or amber</a><a class="l2" href="#a-graph-opens-with-a-warning-or-with-missing-nodes">A graph opens with a warning, or with missing nodes</a><a class="l2" href="#nothing-happens-when-i-press-run">Nothing happens when I press Run</a><a class="l2" href="#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names">A search returns nothing, or the magnifier next to a tab or property shows no names</a><a class="l2" href="#the-start-screen-is-missing">The start screen is missing</a><a class="l2" href="#a-run-is-slow-on-a-large-model">A run is slow on a large model</a><a class="l2" href="#the-script-player-asks-me-to-confirm-a-script">The Script Player asks me to confirm a script</a><a class="l2" href="#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place">A file node fails with &quot;access denied&quot; or writes to the wrong place</a><a class="l2" href="#navisworks-closed-while-i-was-working">Navisworks closed while I was working</a><a class="l2" href="#running-next-to-other-add-ins">Running next to other add-ins</a><a class="l2" href="#how-to-collect-diagnostics">How to collect diagnostics</a><a class="l2" href="#which-version-is-installed">Which version is installed</a><a class="l2" href="#how-to-uninstall">How to uninstall</a><a class="l2" href="#known-issues">Known issues</a><a class="l2" href="#still-stuck">Still stuck?</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

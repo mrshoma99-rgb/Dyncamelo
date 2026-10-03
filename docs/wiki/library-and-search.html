@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Node library and search - Dyncamelo Wiki</title>
+<meta name="description" content="The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press Space, and the search that opens when you drop a wire on empty canvas.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a class="current" href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Node library and search</h1>
+<p>The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press <code>Space</code>, and the search that opens when you drop a wire on empty canvas.</p>
+<p>For the full list of nodes with their inputs and outputs, see the <a href="nodes/index.html">node reference</a>.</p>
+<h2 id="the-library-panel">The library panel</h2>
+<p>The panel sits on the left of the canvas. Drag the thin bar between the panel and the canvas to change its width.</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search box</td>
+<td>Type to search all nodes (see below). The ✕ at the right of the box clears it.</td>
+</tr>
+<tr>
+<td>Down-arrow button</td>
+<td><strong>Expand all categories.</strong></td>
+</tr>
+<tr>
+<td>Up-arrow button</td>
+<td><strong>Collapse all categories.</strong></td>
+</tr>
+<tr>
+<td><code>‹</code> button at the left of the search row</td>
+<td><strong>Hides the whole panel.</strong> A small tab at the left edge of the canvas brings it back.</td>
+</tr>
+</tbody>
+</table>
+<p>You can also hide or show the panel with <code>Ctrl+B</code> or <strong>View ▸ Node Library Panel</strong>, and <strong>Settings ▸ Appearance ▸ Node library panel</strong> controls whether it is shown. <strong>Settings ▸ Appearance ▸ Descriptions in the library</strong> adds or removes the grey description line under each node name (see <a href="settings.html">Settings</a>).</p>
+<h3 id="categories">Categories</h3>
+<p>Nodes are grouped in a folder tree. The top-level folders are the families of nodes, such as Input, Math, Logic, String, List, Table, Color, File, Geometry, Workflow and <strong>Navisworks</strong>. Most top-level folders have a small icon beside the name. Folders can hold sub-folders: the Navisworks folder, for example, contains Appearance, Clash, Properties, Search, Selection, SelectionSets, Viewpoints and more.</p>
+<p>Inside the lowest folders the nodes are sorted under three small headings that tell you at a glance what a node does:</p>
+<ul>
+<li><strong>Create</strong> produces something new: a model element, a saved view, set or folder, an exported file, or a new data value.</li>
+<li><strong>Modify</strong> acts on or changes existing things or the scene: overrides, transforms, isolate, move, rename, delete.</li>
+<li><strong>Info</strong> reads and returns data without changing anything: property reads, searches, counts, names, measures.</li>
+</ul>
+<p>The same dot appears on a node's title bar on the canvas; hover it to see which of the three it is.</p>
+<p>If your script contains <a href="node-groups.html">node groups</a>, the library also lists them in a <strong>Node Groups</strong> folder, so you add an instance the same way as any node. Nodes that have been retired are not listed, although old scripts that use them still open and run.</p>
+<h3 id="favourites">Favourites</h3>
+<p>Hover a node in the list and a <strong>star</strong> appears at its right. Click it to add the node to <strong>Favourites</strong> (click again to remove it). Starred nodes are collected in a <strong>★ Favourites</strong> folder pinned at the top of the tree. Your stars are kept between sessions and are not lost by <strong>Reset all settings</strong> (see <a href="settings.html">Settings</a>).</p>
+<h3 id="adding-a-node-from-the-panel">Adding a node from the panel</h3>
+<ul>
+<li><strong>Double-click</strong> a node to put it in the middle of what you see on the canvas.</li>
+<li><strong>Drag</strong> it onto the canvas where you want it. If you drop it on a wire it fits, the node is spliced into the wire.</li>
+<li>To go the other way, right-click a node on the canvas and choose <strong>Find in Library</strong>: the panel opens the right folders and highlights the entry.</li>
+</ul>
+<h3 id="searching-the-panel">Searching the panel</h3>
+<p>Type in the search box and the folder tree is replaced by a flat list of matches. Clear the box and the tree comes back exactly as you left it.</p>
+<ul>
+<li>Every word you type has to appear somewhere in a node's <strong>name, folder, search keywords or description</strong>, in any order. Case does not matter.</li>
+<li>Matches are ranked: names that start with your first word come first, then names that contain it, then folder or keyword matches, then description-only matches. Starred nodes come before others of equal rank, then recently added ones.</li>
+<li>At most 200 results are shown. If there are more, a line at the bottom says so; type another word to narrow it down. If nothing matches, it says "No nodes match" followed by your text.</li>
+<li><code>Esc</code> in the panel clears the search. A second <code>Esc</code> clears the highlight.</li>
+</ul>
+<h2 id="quick-search-with-space">Quick search with <code>Space</code></h2>
+<p>Press <code>Space</code> while the pointer is over the canvas and a small search box opens near the top of it. This is the fastest way to add a node.</p>
+<ol>
+<li>Type a few letters of what you want. The list updates as you type (up to 50 matches).</li>
+<li>Move through the list with the up and down arrow keys, or click a result.</li>
+<li>Press <code>Enter</code> (or click) to insert the node <strong>where your pointer was when you pressed <code>Space</code></strong>. <code>Esc</code>, or a click anywhere else, closes the box without adding anything.</li>
+</ol>
+<p>Hover a result for a tooltip with the node's description and its inputs and outputs.</p>
+<p><strong>Starred and recent nodes.</strong> Before you type anything, the list shows your <strong>starred nodes first, then the nodes you added most recently</strong> (Dyncamelo remembers the last 12). While you type, starred and recent nodes come first among equally good matches. With no stars, pressing <code>Space</code> then <code>Enter</code> simply adds the node you added last.</p>
+<p>You can also open the quick search from the menu with <strong>Graph ▸ Add Node…</strong>, which inserts the node in the middle of the view.</p>
+<h2 id="search-when-you-drop-a-wire">Search when you drop a wire</h2>
+<p>If you drag a wire from a socket and let go on empty canvas, the same search box opens, with a line under it such as "Nodes that accept a Number from …" or "Nodes that produce … for …". It shows only nodes that can connect to that wire, with exact and convertible fits first and looser fits after them. Pick one and Dyncamelo adds it and connects its best matching socket in a single step (one undo). If you type nothing, you see starred and recent nodes first.</p>
+<h2 id="finding-a-node-that-is-already-on-the-canvas">Finding a node that is already on the canvas</h2>
+<p>The <code>@</code> search is for nodes you have already placed, not for the library. Press <code>Ctrl+F</code> (<strong>Find Node on Canvas…</strong>) or open the command palette (<code>Ctrl+Shift+P</code>) and start with <code>@</code>. Type part of a node's name or folder, move to a result and press <code>Enter</code>: the node is selected and brought into view. Without the <code>@</code>, the palette lists matching commands first, then a few canvas nodes, then matching settings. See <a href="canvas-and-nodes.html">The editor: canvas and nodes</a>.</p>
+<h2 id="tooltips-and-help">Tooltips and help</h2>
+<table>
+<thead>
+<tr>
+<th>Hover over…</th>
+<th>You see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A node in the library, or a quick-search result</td>
+<td>The node's name, its folder, a description, and a signature line listing its inputs and outputs with their types.</td>
+</tr>
+<tr>
+<td>A node's title on the canvas</td>
+<td>What the node does.</td>
+</tr>
+<tr>
+<td>A socket</td>
+<td>The socket's name and type, whether it is required or optional (and its default), what it does, and, after a run, the value it holds or the value arriving on its wire.</td>
+</tr>
+</tbody>
+</table>
+<p><code>F1</code> is <strong>not</strong> node help. It opens the sheet of keyboard shortcuts and mouse gestures. The full node documentation is in the <a href="nodes/index.html">node reference</a>.</p>
+<h2 id="how-nodes-are-named-and-organised">How nodes are named and organised</h2>
+<ul>
+<li>Node names follow a <code>Category.Verb</code> or <code>Category.Noun</code> pattern, for example <code>Search.ByProperty</code>, <code>Appearance.OverrideColor</code> or <code>List.GetItemAtIndex</code>. The part before the dot tells you the family, which makes names easy to search and easy to read on a node.</li>
+<li>The name and the library folder are related but not identical. The node <code>Appearance.OverrideColor</code>, for example, lives in the library folder Navisworks ▸ Appearance. You can search by either.</li>
+<li>The interactive input and display nodes have plain names instead: <code>Number</code>, <code>Number Slider</code>, <code>Boolean</code>, <code>String</code>, <code>Choice</code>, <code>Watch</code>, <code>Watch List</code>, <code>Color Picker</code> and so on.</li>
+<li>Nodes you add yourself (see <a href="extending.html">Writing your own nodes</a>) are placed in whichever folder their author chose.</li>
+</ul>
+<p>Next: <a href="canvas-and-nodes.html">The editor: canvas and nodes</a>, <a href="concepts.html">Concepts</a> and the <a href="shortcuts.html">keyboard and mouse reference</a>.</p>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#the-library-panel">The library panel</a><a class="l3" href="#categories">Categories</a><a class="l3" href="#favourites">Favourites</a><a class="l3" href="#adding-a-node-from-the-panel">Adding a node from the panel</a><a class="l3" href="#searching-the-panel">Searching the panel</a><a class="l2" href="#quick-search-with-space">Quick search with Space</a><a class="l2" href="#search-when-you-drop-a-wire">Search when you drop a wire</a><a class="l2" href="#finding-a-node-that-is-already-on-the-canvas">Finding a node that is already on the canvas</a><a class="l2" href="#tooltips-and-help">Tooltips and help</a><a class="l2" href="#how-nodes-are-named-and-organised">How nodes are named and organised</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

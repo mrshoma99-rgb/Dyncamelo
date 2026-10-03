@@ -82,7 +82,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 ## Keeping your work safe
 
 * A `*` after the graph name in the header means there are **unsaved changes**. Saving removes it; undoing back to the saved state keeps it, to be on the safe side.
-* **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask *Save / Don't Save / Cancel* when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
+* **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask whether to save first (*Yes* saves, *No* discards, *Cancel* stops) when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
 * **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\Dyncamelo\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, Dyncamelo offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
 * Drag a `.dyc` file from Explorer onto the canvas to open it.
 
@@ -106,7 +106,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 
 ## The Script Player
 
-The **Player** runs a saved graph without opening the node editor: pick a script, fill in the values it asks for, press **Run**, read the results. It is a pane of its own (ribbon ▸ BIMCamel ▸ **Dyncamelo Player**, or *Open Script Player* in the View menu and the palette) and does not load the editor, so it opens fast and stays small.
+The **Player** runs a saved graph without opening the node editor: pick a script, fill in the values it asks for, press **Run**, read the results. It is a pane of its own (ribbon ▸ BIMCamel ▸ **Player**, or *Open Script Player* in the View menu and the palette) and does not load the editor, so it opens fast and stays small.
 
 * **The script bar.** The pane opens on a bar that names the open script and the folder it is in; click it (or press its chevron) to unfold the list of scripts, click a script to choose it and the list folds away. Until a script is chosen the list stays unfolded. In the list, typing filters by name or folder, `Down` moves into it, `Enter` chooses (and puts the focus on **Run**, so `Enter` again runs the script), `Esc` folds it, and ↻ looks for scripts again. Typing in the search box never closes the script you are working in or loses the values you filled in.
 * **Where scripts live.** Every `.dyc` file under `Documents\Dyncamelo\Scripts` (subfolders included, up to four levels) is listed. **Script folders ▸ Add a folder…** at the bottom of the pane adds more — a shared network folder, say; ✕ takes a folder off the list without touching the files.

@@ -157,6 +157,7 @@ Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon
 | [Architecture](docs/ARCHITECTURE.md) | Projects, engine pipeline, zero-touch loading, `.dyc` format, threading |
 | [Extending Dyncamelo](docs/EXTENDING.md) | Write your own node pack; custom NodeModel nodes with custom UI |
 | [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Vision, milestones M0-M5, engineering decisions, testing strategy, risks |
+| [Wiki](docs/wiki-src/index.md) | The user guide for bimcamel.com as a static site: installation, a first script, the editor, the Script Player, samples, IFC / BCF / Excel exchange, troubleshooting and a page per node category with inputs and outputs. Built with `python tools/build_wiki.py` into `docs/wiki` |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Symptom, cause and fix: missing ribbon tab, `PLUGIN_LOAD_02`, red nodes, slow runs, diagnostics, uninstalling, known issues |
 | [Changelog](CHANGELOG.md) | What changed in each release, newest first |
 | [Contributing](CONTRIBUTING.md) | Dev setup, code style, PR workflow |

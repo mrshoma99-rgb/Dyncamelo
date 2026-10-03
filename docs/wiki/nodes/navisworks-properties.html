@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navisworks: Properties - Dyncamelo Wiki</title>
+<meta name="description" content="13 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub current" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Navisworks: Properties</h1>
+<p class="lead">13 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-properties-asdictionary">
+<h3><a class="node-name" href="#node-properties-asdictionary">Properties.AsDictionary</a></h3>
+<p>Every property of an item flattened to a &quot;Category.Property&quot; → value dictionary (full data dump).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>properties</code></td><td><code>dict</code></td><td>A &quot;Category.Property&quot; → value dictionary (full data dump / JSON export).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">dictionary</span> <span class="chip">all</span> <span class="chip">dump</span> <span class="chip">json</span> <span class="chip">export</span></p>
+</section>
+<section class="node" id="node-properties-categories">
+<h3><a class="node-name" href="#node-properties-categories">Properties.Categories</a></h3>
+<p>The property category names available on a model item.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>categories</code></td><td><code>string[]</code></td><td>The category display names.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">categories</span> <span class="chip">tabs</span> <span class="chip">groups</span></p>
+</section>
+<section class="node" id="node-properties-customtabs">
+<h3><a class="node-name" href="#node-properties-customtabs">Properties.CustomTabs</a></h3>
+<p>The user-defined property tabs on an item (discovery/QA before SetCustom or RemoveCustomTab). Built-in source-file categories are not listed — use Properties.Categories for those.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>modelItem</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item to inspect.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>tabNames</code></td><td><code>string[]</code></td><td>The user-defined tab display names, in tab order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">custom</span> <span class="chip">tabs</span> <span class="chip">list</span> <span class="chip">user</span> <span class="chip">discover</span></p>
+</section>
+<section class="node" id="node-properties-discover">
+<h3><a class="node-name" href="#node-properties-discover">Properties.Discover</a></h3>
+<p>Lists every property the given items carry, one row per category and property with how many items have it (Items), how many different values it holds (Distinct, counted up to 10000) and the first few values (Samples) — the answer to &quot;what data does this model actually have?&quot;. Reads every property of every item once, so cost grows with items times properties.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to look at (their own properties only, not their children&#x27;s).</td></tr>
+<tr><td><code>maxSamples</code></td><td><code>integer</code></td><td><code>3</code></td><td>How many distinct sample values to show per property (0 to 50).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>A table with the columns Category, Property, Items, Distinct and Samples.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">properties</span> <span class="chip">discover</span> <span class="chip">explore</span> <span class="chip">schema</span> <span class="chip">catalog</span> <span class="chip">what data</span> <span class="chip">categories</span> <span class="chip">values</span> <span class="chip">profile</span> <span class="chip">audit</span> <span class="chip">inventory</span></p>
+</section>
+<section class="node" id="node-properties-hasproperty">
+<h3><a class="node-name" href="#node-properties-hasproperty">Properties.HasProperty</a></h3>
+<p>True when the item carries the property — drives model-QA missing-data masks.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+<tr><td><code>categoryName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Category display name; internal names also match.</td></tr>
+<tr><td><code>propertyName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Property display name; internal names also match.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>hasProperty</code></td><td><code>boolean</code></td><td>True when the property exists on the item — drives model-QA &quot;missing data&quot; masks.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">has</span> <span class="chip">exists</span> <span class="chip">qa</span> <span class="chip">missing</span></p>
+</section>
+<section class="node" id="node-properties-incategory">
+<h3><a class="node-name" href="#node-properties-incategory">Properties.InCategory</a></h3>
+<p>All property names and values inside one category of an item. Returns empty lists when the item lacks the category.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+<tr><td><code>categoryName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Category display name (e.g. &quot;Element&quot;); internal names also match.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>names</code></td><td><code>string[]</code></td></tr>
+<tr><td><code>values</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Index-aligned property names and plain values (empty lists when the category is absent).</p>
+<p class="tags"><span class="chip">property</span> <span class="chip">category</span> <span class="chip">all</span> <span class="chip">names</span> <span class="chip">values</span> <span class="chip">tab</span></p>
+</section>
+<section class="node" id="node-properties-removecustomtab">
+<h3><a class="node-name" href="#node-properties-removecustomtab">Properties.RemoveCustomTab</a></h3>
+<p>Removes a user-defined property tab from items. Items without the tab are skipped (see removedCount) — safe for clean re-runs of SetCustom graphs.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>modelItems</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to clean.</td></tr>
+<tr><td><code>tabName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The tab&#x27;s user-visible name.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>modelItems</code></td><td><code>ModelItem[]</code></td></tr>
+<tr><td><code>removedCount</code></td><td><code>integer</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The items (pass-through) and how many items actually had the tab.</p>
+<p class="tags"><span class="chip">property</span> <span class="chip">custom</span> <span class="chip">remove</span> <span class="chip">delete</span> <span class="chip">tab</span> <span class="chip">clean</span> <span class="chip">user</span></p>
+</section>
+<section class="node" id="node-properties-renamecustomtab">
+<h3><a class="node-name" href="#node-properties-renamecustomtab">Properties.RenameCustomTab</a></h3>
+<p>Renames a user-defined property tab in place (same properties, same internal name — search sets targeting the tab stay valid). Items without the tab are skipped.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>modelItems</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items whose tab to rename.</td></tr>
+<tr><td><code>tabName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The tab&#x27;s current user-visible name.</td></tr>
+<tr><td><code>newTabName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The new user-visible name.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>modelItems</code></td><td><code>ModelItem[]</code></td><td>The items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">custom</span> <span class="chip">rename</span> <span class="chip">tab</span> <span class="chip">user</span></p>
+</section>
+<section class="node" id="node-properties-setcustom">
+<h3><a class="node-name" href="#node-properties-setcustom">Properties.SetCustom</a></h3>
+<p>Writes a user-defined property tab onto items — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Merge keeps existing same-tab properties; new values win on name collisions.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>modelItems</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to stamp.</td></tr>
+<tr><td><code>names</code> <span class="chip required">required</span></td><td><code>string[]</code></td><td>&mdash;</td><td>Property display names (index-aligned with values).</td></tr>
+<tr><td><code>values</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Property values (string, number, boolean or date; index-aligned with names).</td></tr>
+<tr><td><code>tabName</code></td><td><code>string</code></td><td><code>&quot;Dyncamelo Data&quot;</code></td><td>User-visible tab name; a stable internal name is derived from it so search sets can target the tab.</td></tr>
+<tr><td><code>merge</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True keeps existing properties of a same-named tab (new values win on name collisions); false replaces the tab&#x27;s content entirely.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>modelItems</code></td><td><code>ModelItem[]</code></td><td>The items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">custom</span> <span class="chip">set</span> <span class="chip">write</span> <span class="chip">user</span> <span class="chip">tab</span> <span class="chip">parameter</span> <span class="chip">smartproperties</span> <span class="chip">stamp</span></p>
+</section>
+<section class="node" id="node-properties-totable">
+<h3><a class="node-name" href="#node-properties-totable">Properties.ToTable</a></h3>
+<p>Reads the named properties of every item into a table with one row per item and one column per name (&quot;Element.Category&quot;, &quot;Item|Layer&quot;, a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items, one table row each.</td></tr>
+<tr><td><code>properties</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The columns: &quot;Category.Property&quot; or &quot;Category|Property&quot; (split at the first &quot;|&quot; if there is one, otherwise at the first &quot;.&quot;), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>table</code></td><td><code>DyncameloTable</code></td><td>A table with one column per entry of properties, headed with the text as written.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">properties</span> <span class="chip">table</span> <span class="chip">export</span> <span class="chip">rows</span> <span class="chip">columns</span> <span class="chip">excel</span> <span class="chip">csv</span> <span class="chip">dataframe</span> <span class="chip">report</span> <span class="chip">schedule</span> <span class="chip">quantities</span></p>
+</section>
+<section class="node" id="node-properties-value">
+<h3><a class="node-name" href="#node-properties-value">Properties.Value</a></h3>
+<p>Reads a property value from a model item, converted to a plain value. Returns null when the property is absent.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+<tr><td><code>categoryName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Category display name (e.g. &quot;Element&quot;, &quot;Item&quot;); internal names also match.</td></tr>
+<tr><td><code>propertyName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Property display name (e.g. &quot;Category&quot;, &quot;Name&quot;); internal names also match.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The property value as a plain .NET value, or null when the item lacks the property.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">value</span> <span class="chip">parameter</span> <span class="chip">attribute</span> <span class="chip">data</span></p>
+</section>
+<section class="node" id="node-properties-valueasstring">
+<h3><a class="node-name" href="#node-properties-valueasstring">Properties.ValueAsString</a></h3>
+<p>Reads a property value as text. Returns &quot;&quot; when the property is absent.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+<tr><td><code>categoryName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Category display name; internal names also match.</td></tr>
+<tr><td><code>propertyName</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Property display name; internal names also match.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The value as text (&quot;&quot; when the property is absent).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">property</span> <span class="chip">value</span> <span class="chip">string</span> <span class="chip">text</span> <span class="chip">display</span></p>
+</section>
+<section class="node" id="node-property-info">
+<h3><a class="node-name" href="#node-property-info">Property.Info</a></h3>
+<p>The internal name, display name and plain value of a raw data property.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>property</code> <span class="chip required">required</span></td><td><code>DataProperty</code></td><td>&mdash;</td><td>The data property (e.g. from Properties.InCategory workflows).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td><code>string</code></td></tr>
+<tr><td><code>displayName</code></td><td><code>string</code></td></tr>
+<tr><td><code>value</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Internal name, display name, and the plain value.</p>
+<p class="tags"><span class="chip">property</span> <span class="chip">info</span> <span class="chip">name</span> <span class="chip">displayname</span> <span class="chip">raw</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

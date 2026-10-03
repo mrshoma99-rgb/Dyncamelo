@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>String - Dyncamelo Wiki</title>
+<meta name="description" content="36 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub current" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>String</h1>
+<p class="lead">36 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-number-format">
+<h3><a class="node-name" href="#node-number-format">Number.Format</a></h3>
+<p>Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>number</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>The number to format.</td></tr>
+<tr><td><code>decimals</code></td><td><code>integer</code></td><td><code>2</code></td><td>Digits after the decimal point, 0 to 15 (the number is rounded).</td></tr>
+<tr><td><code>thousandsSeparator</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to group the digits in thousands with &quot;,&quot;.</td></tr>
+<tr><td><code>prefix</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Text placed before the number (and its sign), e.g. &quot;EUR &quot;.</td></tr>
+<tr><td><code>suffix</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Text placed after the number, e.g. &quot; m2&quot;.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The formatted text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">round</span> <span class="chip">decimals</span> <span class="chip">currency</span> <span class="chip">unit</span> <span class="chip">thousands</span> <span class="chip">tostring</span> <span class="chip">display</span> <span class="chip">format</span></p>
+</section>
+<section class="node" id="node-string-concat">
+<h3><a class="node-name" href="#node-string-concat">String.Concat</a></h3>
+<p>Joins two strings into one.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>First string.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Second string.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The two strings joined together.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">concatenate</span> <span class="chip">join</span> <span class="chip">append</span> <span class="chip">+</span></p>
+</section>
+<section class="node" id="node-string-contains">
+<h3><a class="node-name" href="#node-string-contains">String.Contains</a></h3>
+<p>Tests whether a string contains the given substring. Case-sensitive unless ignoreCase is on.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to search in.</td></tr>
+<tr><td><code>searchFor</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The substring to look for.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to compare case-insensitively.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the substring occurs in the string.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">substring</span> <span class="chip">search</span> <span class="chip">find</span></p>
+</section>
+<section class="node" id="node-string-endswith">
+<h3><a class="node-name" href="#node-string-endswith">String.EndsWith</a></h3>
+<p>Tests whether a string ends with the given suffix. Ignores case unless ignoreCase is switched off.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to test.</td></tr>
+<tr><td><code>searchFor</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The suffix to look for.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) to compare case-insensitively.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the string ends with the suffix.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">suffix</span> <span class="chip">trailing</span> <span class="chip">extension</span></p>
+</section>
+<section class="node" id="node-string-format">
+<h3><a class="node-name" href="#node-string-format">String.Format</a></h3>
+<p>Fills a .NET composite format such as &quot;{0} is {1:0.00} m&quot; with the wired values (invariant culture, &quot;{{&quot; and &quot;}}&quot; are literal braces).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>format</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The composite format text, e.g. &quot;Wall {0} is {1:0.00} m high&quot;.</td></tr>
+<tr><td><code>values</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values for {0}, {1}, ... in the order they are wired.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The formatted text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">sprintf</span> <span class="chip">interpolate</span> <span class="chip">placeholder</span> <span class="chip">compose</span> <span class="chip">message</span> <span class="chip">text</span></p>
+</section>
+<section class="node" id="node-string-fromobject">
+<h3><a class="node-name" href="#node-string-fromobject">String.FromObject</a></h3>
+<p>Converts any value (including whole lists) to its display string.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>obj</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to format.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The formatted text (&quot;null&quot; for null).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">tostring</span> <span class="chip">format</span> <span class="chip">text</span></p>
+</section>
+<section class="node" id="node-string-indexof">
+<h3><a class="node-name" href="#node-string-indexof">String.IndexOf</a></h3>
+<p>Returns the zero-based index of the first occurrence of a text (-1 when absent).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to search in.</td></tr>
+<tr><td><code>search</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to look for.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+<tr><td><code>startIndex</code></td><td><code>integer</code></td><td><code>0</code></td><td>Zero-based index to start searching at (0 to the text&#x27;s length).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>index</code></td><td><code>integer</code></td><td>The zero-based index of the first occurrence, or -1 when it is absent.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">find</span> <span class="chip">position</span> <span class="chip">locate</span> <span class="chip">search</span> <span class="chip">first</span></p>
+</section>
+<section class="node" id="node-string-isblank">
+<h3><a class="node-name" href="#node-string-isblank">String.IsBlank</a></h3>
+<p>Tests whether a text is null, empty or only whitespace.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to test.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>isBlank</code></td><td><code>boolean</code></td><td>True when the text is null, empty or only whitespace.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">empty</span> <span class="chip">null</span> <span class="chip">whitespace</span> <span class="chip">missing</span> <span class="chip">has value</span> <span class="chip">validate</span></p>
+</section>
+<section class="node" id="node-string-join">
+<h3><a class="node-name" href="#node-string-join">String.Join</a></h3>
+<p>Joins the elements of a list into a single string with a separator.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>separator</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Text placed between elements.</td></tr>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values to join; non-strings are formatted invariantly.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The joined string.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">concatenate</span> <span class="chip">combine</span> <span class="chip">delimiter</span></p>
+</section>
+<section class="node" id="node-string-lastindexof">
+<h3><a class="node-name" href="#node-string-lastindexof">String.LastIndexOf</a></h3>
+<p>Returns the zero-based index of the last occurrence of a text (-1 when absent).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to search in.</td></tr>
+<tr><td><code>search</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to look for.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>index</code></td><td><code>integer</code></td><td>The zero-based index of the last occurrence, or -1 when it is absent.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">find</span> <span class="chip">position</span> <span class="chip">locate</span> <span class="chip">search</span> <span class="chip">last</span> <span class="chip">extension</span></p>
+</section>
+<section class="node" id="node-string-left">
+<h3><a class="node-name" href="#node-string-left">String.Left</a></h3>
+<p>Returns the first characters of a text (the whole text when the count is larger).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to take from.</td></tr>
+<tr><td><code>count</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many characters to take (0 or more).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The first count characters.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">first</span> <span class="chip">start</span> <span class="chip">prefix</span> <span class="chip">head</span> <span class="chip">take</span> <span class="chip">substring</span></p>
+</section>
+<section class="node" id="node-string-length">
+<h3><a class="node-name" href="#node-string-length">String.Length</a></h3>
+<p>Returns the number of characters in a string.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to measure.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>integer</code></td><td>The number of characters.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">count</span> <span class="chip">size</span></p>
+</section>
+<section class="node" id="node-string-lines">
+<h3><a class="node-name" href="#node-string-lines">String.Lines</a></h3>
+<p>Splits a text into a list of lines (handles \r\n, \n and \r), optionally dropping the empty ones.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to split.</td></tr>
+<tr><td><code>removeEmpty</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to drop lines that are empty (lines holding only spaces are kept).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>lines</code></td><td><code>string[]</code></td><td>The lines, without their line breaks.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">split</span> <span class="chip">newline</span> <span class="chip">linebreak</span> <span class="chip">rows</span> <span class="chip">paragraph</span> <span class="chip">multiline</span></p>
+</section>
+<section class="node" id="node-string-padleft">
+<h3><a class="node-name" href="#node-string-padleft">String.PadLeft</a></h3>
+<p>Pads a text on the left with a character up to a total width (&quot;7&quot; becomes &quot;007&quot; with width 3 and padChar 0).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to pad.</td></tr>
+<tr><td><code>width</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>The wanted total length; a longer text is returned unchanged.</td></tr>
+<tr><td><code>padChar</code></td><td><code>string</code></td><td><code>&quot; &quot;</code></td><td>The padding character: exactly one character (default a space).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The padded text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">pad</span> <span class="chip">zero</span> <span class="chip">leading</span> <span class="chip">align</span> <span class="chip">fill</span> <span class="chip">right-align</span></p>
+</section>
+<section class="node" id="node-string-padright">
+<h3><a class="node-name" href="#node-string-padright">String.PadRight</a></h3>
+<p>Pads a text on the right with a character up to a total width.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to pad.</td></tr>
+<tr><td><code>width</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>The wanted total length; a longer text is returned unchanged.</td></tr>
+<tr><td><code>padChar</code></td><td><code>string</code></td><td><code>&quot; &quot;</code></td><td>The padding character: exactly one character (default a space).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The padded text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">pad</span> <span class="chip">trailing</span> <span class="chip">align</span> <span class="chip">fill</span> <span class="chip">left-align</span> <span class="chip">column</span></p>
+</section>
+<section class="node" id="node-string-regexismatch">
+<h3><a class="node-name" href="#node-string-regexismatch">String.RegexIsMatch</a></h3>
+<p>Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to test.</td></tr>
+<tr><td><code>pattern</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .NET regular expression, e.g. &quot;^[A-Z]{2}-\d+$&quot;.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>isMatch</code></td><td><code>boolean</code></td><td>True when the pattern matches somewhere in the text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">regex</span> <span class="chip">regexp</span> <span class="chip">pattern</span> <span class="chip">match</span> <span class="chip">test</span> <span class="chip">validate</span> <span class="chip">wildcard</span></p>
+</section>
+<section class="node" id="node-string-regexmatch">
+<h3><a class="node-name" href="#node-string-regexmatch">String.RegexMatch</a></h3>
+<p>Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to search.</td></tr>
+<tr><td><code>pattern</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .NET regular expression, e.g. &quot;(\d+)-(\w+)&quot;.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>found</code></td><td><code>boolean</code></td></tr>
+<tr><td><code>match</code></td><td><code>string</code></td></tr>
+<tr><td><code>groups</code></td><td><code>string[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;found&quot;, &quot;match&quot; and &quot;groups&quot;.</p>
+<p class="tags"><span class="chip">regex</span> <span class="chip">regexp</span> <span class="chip">pattern</span> <span class="chip">capture</span> <span class="chip">group</span> <span class="chip">extract</span> <span class="chip">parse</span> <span class="chip">find</span></p>
+</section>
+<section class="node" id="node-string-regexmatches">
+<h3><a class="node-name" href="#node-string-regexmatches">String.RegexMatches</a></h3>
+<p>Returns the text of every match of a regular expression as a list (empty when nothing matches).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to search.</td></tr>
+<tr><td><code>pattern</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .NET regular expression, e.g. &quot;\d+&quot;.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>matches</code></td><td><code>string[]</code></td><td>The text of every match, in order (empty when nothing matches).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">regex</span> <span class="chip">regexp</span> <span class="chip">pattern</span> <span class="chip">findall</span> <span class="chip">extract</span> <span class="chip">all</span> <span class="chip">numbers</span></p>
+</section>
+<section class="node" id="node-string-regexreplace">
+<h3><a class="node-name" href="#node-string-regexreplace">String.RegexReplace</a></h3>
+<p>Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to change.</td></tr>
+<tr><td><code>pattern</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .NET regular expression to replace.</td></tr>
+<tr><td><code>replacement</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The replacement text; $1, $2, ... insert capture groups.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to ignore upper/lower case.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The text with every match replaced.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">regex</span> <span class="chip">regexp</span> <span class="chip">pattern</span> <span class="chip">substitute</span> <span class="chip">rename</span> <span class="chip">clean</span> <span class="chip">sub</span></p>
+</section>
+<section class="node" id="node-string-regexsplit">
+<h3><a class="node-name" href="#node-string-regexsplit">String.RegexSplit</a></h3>
+<p>Splits a text into a list of parts wherever a regular expression matches.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to split.</td></tr>
+<tr><td><code>pattern</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The .NET regular expression that separates the parts, e.g. &quot;[,;]\s*&quot;.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>string[]</code></td><td>The parts between the matches.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">regex</span> <span class="chip">regexp</span> <span class="chip">pattern</span> <span class="chip">tokenize</span> <span class="chip">divide</span> <span class="chip">delimiter</span> <span class="chip">separator</span></p>
+</section>
+<section class="node" id="node-string-removediacritics">
+<h3><a class="node-name" href="#node-string-removediacritics">String.RemoveDiacritics</a></h3>
+<p>Removes accents from letters (&quot;é&quot; becomes &quot;e&quot;) so names compare and sort without them.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to clean.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The text without diacritics.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">accents</span> <span class="chip">umlaut</span> <span class="chip">ascii</span> <span class="chip">normalize</span> <span class="chip">normalise</span> <span class="chip">latin</span> <span class="chip">strip</span></p>
+</section>
+<section class="node" id="node-string-repeat">
+<h3><a class="node-name" href="#node-string-repeat">String.Repeat</a></h3>
+<p>Repeats a text a number of times (0 to 10000), optionally with a separator between the copies.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to repeat.</td></tr>
+<tr><td><code>count</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many copies, 0 to 10000 (0 gives an empty text).</td></tr>
+<tr><td><code>separator</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Text placed between two copies.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The repeated text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">duplicate</span> <span class="chip">multiply</span> <span class="chip">fill</span> <span class="chip">line</span> <span class="chip">dashes</span> <span class="chip">times</span></p>
+</section>
+<section class="node" id="node-string-replace">
+<h3><a class="node-name" href="#node-string-replace">String.Replace</a></h3>
+<p>Replaces all occurrences of a substring with another string.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to modify.</td></tr>
+<tr><td><code>searchFor</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Substring to replace (must not be empty).</td></tr>
+<tr><td><code>replaceWith</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Replacement text.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The string with all occurrences replaced.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">substitute</span> <span class="chip">swap</span></p>
+</section>
+<section class="node" id="node-string-reverse">
+<h3><a class="node-name" href="#node-string-reverse">String.Reverse</a></h3>
+<p>Reverses the characters of a text.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to reverse.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The reversed text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">backwards</span> <span class="chip">mirror</span> <span class="chip">flip</span> <span class="chip">invert</span></p>
+</section>
+<section class="node" id="node-string-right">
+<h3><a class="node-name" href="#node-string-right">String.Right</a></h3>
+<p>Returns the last characters of a text (the whole text when the count is larger).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to take from.</td></tr>
+<tr><td><code>count</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many characters to take (0 or more).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The last count characters.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">last</span> <span class="chip">end</span> <span class="chip">suffix</span> <span class="chip">tail</span> <span class="chip">take</span> <span class="chip">substring</span></p>
+</section>
+<section class="node" id="node-string-split">
+<h3><a class="node-name" href="#node-string-split">String.Split</a></h3>
+<p>Splits a string into a list of substrings around a separator.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to split.</td></tr>
+<tr><td><code>separator</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>Separator text.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>string[]</code></td><td>The list of segments.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">tokenize</span> <span class="chip">divide</span> <span class="chip">delimiter</span></p>
+</section>
+<section class="node" id="node-string-startswith">
+<h3><a class="node-name" href="#node-string-startswith">String.StartsWith</a></h3>
+<p>Tests whether a string starts with the given prefix. Ignores case unless ignoreCase is switched off.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to test.</td></tr>
+<tr><td><code>searchFor</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The prefix to look for.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) to compare case-insensitively.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the string starts with the prefix.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">prefix</span> <span class="chip">begins</span> <span class="chip">leading</span></p>
+</section>
+<section class="node" id="node-string-substring">
+<h3><a class="node-name" href="#node-string-substring">String.Substring</a></h3>
+<p>Extracts part of a string from a start index (-1 length = to the end).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to slice.</td></tr>
+<tr><td><code>startIndex</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Zero-based index of the first character to take.</td></tr>
+<tr><td><code>length</code></td><td><code>integer</code></td><td><code>-1</code></td><td>Number of characters to take; -1 = to the end.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The extracted substring.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">slice</span> <span class="chip">extract</span> <span class="chip">mid</span> <span class="chip">part</span></p>
+</section>
+<section class="node" id="node-string-template">
+<h3><a class="node-name" href="#node-string-template">String.Template</a></h3>
+<p>Replaces {name} placeholders in a text with the values of a dictionary (&quot;{{&quot; and &quot;}}&quot; are literal braces).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>template</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text with {name} placeholders, e.g. &quot;Level {level}: {count} clashes&quot;.</td></tr>
+<tr><td><code>dictionary</code> <span class="chip required">required</span></td><td><code>IDictionary</code></td><td>&mdash;</td><td>The values by name.</td></tr>
+<tr><td><code>onMissing</code></td><td><code>string</code></td><td><code>&quot;keep&quot;</code></td><td>&quot;keep&quot; leaves the placeholder as written, &quot;empty&quot; replaces it with nothing, &quot;error&quot; fails.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The text with the placeholders replaced.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">placeholder</span> <span class="chip">mustache</span> <span class="chip">merge</span> <span class="chip">interpolate</span> <span class="chip">fill</span> <span class="chip">replace</span> <span class="chip">report</span> <span class="chip">message</span></p>
+</section>
+<section class="node" id="node-string-tolower">
+<h3><a class="node-name" href="#node-string-tolower">String.ToLower</a></h3>
+<p>Converts a string to lowercase.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to convert.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The lowercase string.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">lowercase</span> <span class="chip">case</span></p>
+</section>
+<section class="node" id="node-string-tonumber">
+<h3><a class="node-name" href="#node-string-tonumber">String.ToNumber</a></h3>
+<p>Converts a numeric string (invariant culture, e.g. &quot;3.14&quot;) to a number.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to parse, e.g. &quot;3.14&quot;.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>number</code></td><td>The parsed number.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">parse</span> <span class="chip">convert</span> <span class="chip">double</span></p>
+</section>
+<section class="node" id="node-string-totitlecase">
+<h3><a class="node-name" href="#node-string-totitlecase">String.ToTitleCase</a></h3>
+<p>Capitalises the first letter of every word and lowercases the rest (&quot;bim COORDINATION&quot; becomes &quot;Bim Coordination&quot;).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to convert.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The text in title case.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">capitalize</span> <span class="chip">capitalise</span> <span class="chip">proper</span> <span class="chip">case</span> <span class="chip">words</span> <span class="chip">heading</span></p>
+</section>
+<section class="node" id="node-string-toupper">
+<h3><a class="node-name" href="#node-string-toupper">String.ToUpper</a></h3>
+<p>Converts a string to uppercase.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to convert.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The uppercase string.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">uppercase</span> <span class="chip">capital</span> <span class="chip">case</span></p>
+</section>
+<section class="node" id="node-string-trim">
+<h3><a class="node-name" href="#node-string-trim">String.Trim</a></h3>
+<p>Removes leading and trailing whitespace from a string.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The string to trim.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>string</code></td><td>The trimmed string.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">whitespace</span> <span class="chip">strip</span> <span class="chip">clean</span></p>
+</section>
+<section class="node" id="node-string-trimend">
+<h3><a class="node-name" href="#node-string-trimend">String.TrimEnd</a></h3>
+<p>Removes whitespace (or the given characters) from the end of a text.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to trim.</td></tr>
+<tr><td><code>chars</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>The characters to remove (each character of this text counts); empty means whitespace.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The trimmed text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">trim</span> <span class="chip">strip</span> <span class="chip">trailing</span> <span class="chip">right</span> <span class="chip">clean</span> <span class="chip">whitespace</span></p>
+</section>
+<section class="node" id="node-string-trimstart">
+<h3><a class="node-name" href="#node-string-trimstart">String.TrimStart</a></h3>
+<p>Removes whitespace (or the given characters) from the start of a text.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to trim.</td></tr>
+<tr><td><code>chars</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>The characters to remove (each character of this text counts); empty means whitespace.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The trimmed text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">trim</span> <span class="chip">strip</span> <span class="chip">leading</span> <span class="chip">left</span> <span class="chip">clean</span> <span class="chip">whitespace</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

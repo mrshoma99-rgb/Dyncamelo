@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy and safety - Dyncamelo Wiki</title>
+<meta name="description" content="Two questions come up before a tool like this goes onto a work computer: what does it do with my data? and what can a graph do to my computer? This page answers both. The full texts are the privacy policy (also inside the app: Help ▸ Privacy Policy) and the security policy.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a class="current" href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Privacy and safety</h1>
+<p>Two questions come up before a tool like this goes onto a work computer: <em>what does it do with my data?</em> and <em>what can a graph do to my computer?</em> This page answers both. The full texts are the <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/PRIVACY.md">privacy policy</a> (also inside the app: <strong>Help ▸ Privacy Policy</strong>) and the <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/SECURITY.md">security policy</a>.</p>
+<h2 id="privacy-in-short">Privacy in short</h2>
+<p>Dyncamelo does not collect your data. It has <strong>no account, no sign-in, no licence server, no analytics and no crash reporting</strong> that leaves your computer. Your models and graphs stay on your computer unless a graph you run sends them somewhere (<a href="#what-a-graph-can-do">see below</a>).</p>
+<h3 id="what-it-keeps-on-your-computer">What it keeps on your computer</h3>
+<p>All of it is in <code>%APPDATA%\Dyncamelo</code> (on a standard install, <code>C:\Users\&lt;you&gt;\AppData\Roaming\Dyncamelo</code>). None of it is sent anywhere by Dyncamelo.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What is in it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ui-settings.json</code></td>
+<td>Your preferences: theme, shortcuts, recent files, favourite nodes, Script Player folders, the last values you typed into scripts, and which graph files you agreed to run.</td>
+</tr>
+<tr>
+<td><code>errors.log</code></td>
+<td>The technical details of a failure Dyncamelo caught: the error, the place in the code, the XAML file involved. An error message can name a node or a file. Model contents are not written to it.</td>
+</tr>
+<tr>
+<td><code>update-check.txt</code></td>
+<td>The date of the last update check and the last version offered.</td>
+</tr>
+<tr>
+<td><code>recovery\</code></td>
+<td>Copies of graphs with unsaved changes, so they can be offered back after a crash. Deleted when you save.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Help ▸ Copy Diagnostics</strong> and <strong>Help ▸ Run Self-Test</strong> put a text report on the clipboard when you ask. Your user name, computer name and profile folder are replaced in it, and no model or graph names are included. Dyncamelo does not send the report anywhere; you decide whether to paste it into a bug report.</p>
+<h3 id="what-it-sends-over-the-network">What it sends over the network</h3>
+<p>One thing, and you can switch it off.</p>
+<ul>
+<li><strong>The update check.</strong> When the editor opens, at most once a day, Dyncamelo asks GitHub (<code>api.github.com</code>) for the number of the newest release. The request carries your IP address and the name <code>Dyncamelo-UpdateCheck</code>, as any web request does, and nothing about you or your models. If a newer version exists, the start screen says so and Dyncamelo asks before it opens the download page.</li>
+<li><strong>Switch it off:</strong> <strong>Settings ▸ Privacy ▸ Check for a newer version once a day</strong>. With it off, Dyncamelo makes no network request of its own. A copy installed from the Autodesk App Store never makes the check, because the store delivers its updates.</li>
+</ul>
+<p>Opening the website, the user guide or a download page from a menu or a link opens your browser at your request; that is then between you and that website.</p>
+<h3 id="third-parties">Third parties</h3>
+<p>No advertising, analytics or tracking libraries, and nothing shared with anyone. Its libraries (Nodify, Newtonsoft.Json, AutomaticGraphLayout and others, listed in <code>THIRD-PARTY-NOTICES.md</code>) run inside Navisworks and contain no code that contacts the network.</p>
+<h3 id="removing-what-it-stored">Removing what it stored</h3>
+<p>Dyncamelo keeps nothing on any server. Close Navisworks and delete the folder <code>%APPDATA%\Dyncamelo</code>. The uninstaller removes the program but leaves that folder and your <code>.dyc</code> graphs alone (<a href="uninstall.html">Uninstalling</a>).</p>
+<h2 id="what-a-graph-can-do">What a graph can do</h2>
+<p><strong>A graph is a program. Only run graphs you trust.</strong></p>
+<p>A <code>.dyc</code> file is plain JSON: nodes, wires and typed values. It contains no program code of its own, and there is no node that runs Python or C# code you type in. (<code>Math.Formula</code> and <code>Table.AddFormulaColumn</code> use a small arithmetic parser.) But the <strong>nodes</strong> do real work when the graph runs, and a graph can use any of them:</p>
+<table>
+<thead>
+<tr>
+<th>A graph can…</th>
+<th>Through these nodes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Run programs</strong></td>
+<td><code>System.Run</code> starts any program with any arguments and returns what it prints. <code>System.OpenPath</code> opens a file or folder with its default application, which can start a program.</td>
+</tr>
+<tr>
+<td><strong>Call web addresses</strong></td>
+<td><code>Web.Get</code> downloads from an http or https address. <code>Web.Post</code> sends data to one, for example a web hook.</td>
+</tr>
+<tr>
+<td><strong>Delete, move and overwrite files</strong></td>
+<td><code>File.Delete</code>, <code>File.Move</code>, <code>File.Copy</code>, <code>Directory.Delete</code>, <code>Directory.Create</code>, <code>Zip.Extract</code>, <code>Zip.Create</code></td>
+</tr>
+<tr>
+<td><strong>Write files</strong></td>
+<td><code>Text.WriteToFile</code>, <code>Text.AppendToFile</code>, <code>CSV.WriteToFile</code>, <code>CSV.AppendToFile</code>, <code>JSON.WriteToFile</code>, <code>Excel.WriteToFile</code>, <code>Table.ToCsvFile</code>, <code>Table.ToExcelFile</code>, <code>Log.Write</code></td>
+</tr>
+<tr>
+<td><strong>Read files and facts about your computer</strong></td>
+<td><code>Text.ReadFromFile</code>, <code>CSV.ReadFromFile</code>, <code>Excel.ReadFromFile</code>, <code>JSON.ReadFromFile</code>, <code>Directory.FindFiles</code>, <code>System.Environment</code> (user name, computer name, well-known folders). A graph can read a file and send it away with <code>Web.Post</code>.</td>
+</tr>
+<tr>
+<td><strong>Change the open model, or the files Navisworks writes</strong></td>
+<td>The Navisworks nodes that change the document, for example <code>Appearance.OverrideColor</code>, <code>Appearance.Hide</code>, <code>SelectionSet.Create</code>, <code>Properties.SetCustom</code>, <code>ModelItem.Translate</code>, <code>Document.Open</code>, <code>Document.Save</code>, <code>Model.Remove</code>, <code>Export.NWD</code>, <code>Export.ToIfc</code>, <code>BCF.ExportIssues</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>Zip.Extract</code> refuses archive entries that would land outside the target folder.</p>
+<p>Also know that:</p>
+<ul>
+<li><strong>Node packs are code.</strong> Dyncamelo loads every <code>.dll</code> it finds in a <code>Packages</code> folder next to <code>Dyncamelo.App.dll</code> when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.</li>
+<li><strong>The command-line tool does not ask.</strong> <code>Dyncamelo.Cli</code> (built from source, not part of the installer) runs a graph without any question. It cannot use the Navisworks nodes.</li>
+</ul>
+<h2 id="running-graphs-from-other-people">Running graphs from other people</h2>
+<p>Dyncamelo asks before it runs a graph that can do real harm:</p>
+<ul>
+<li><strong>Editor.</strong> When you run a graph that was <strong>opened from a file</strong> and contains nodes that run programs, use the network, or delete, move or overwrite files, the editor lists those nodes and asks first. You are asked once per file, and again only if the file changes. A graph saved with run mode <em>Auto</em> is <strong>not</strong> run when you open it: the status bar says so, and you press <strong>Run</strong> to review it first. Graphs you make in the editor and the built-in samples never ask. Switch this off with <strong>Settings ▸ Editing ▸ Ask before running graphs from files</strong>.</li>
+<li><strong>Script Player.</strong> A script that contains nodes that change things or reach outside the model is listed by name above its form, and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. <code>Dyncamelo.Run.DYNC</code> (the Automation API and the Batch Utility) asks the same question.</li>
+<li>Muted and frozen nodes do not count.</li>
+</ul>
+<p>Advice:</p>
+<ul>
+<li>Treat a <code>.dyc</code> file like a macro or a script. <strong>Do not run graphs from e-mail attachments or unknown downloads</strong> without reading them first.</li>
+<li>Before you run a graph from someone else, look at it. Press <strong><code>Ctrl+F</code></strong> and search the canvas for <code>System</code>, <code>Web</code>, <code>File</code>, <code>Directory</code> and <code>Zip</code>, and check what the Navisworks nodes in it will change.</li>
+<li>Try an unknown graph on a <strong>copy</strong> of the model, with a normal user account, not on a machine that holds anything you cannot afford to lose.</li>
+<li>Say <strong>no</strong> to the question if you are not sure what the listed nodes will do.</li>
+</ul>
+<h2 id="downloads">Downloads</h2>
+<ul>
+<li>Download Dyncamelo only from the <a href="https://github.com/mrshoma99-rgb/dyncamelo/releases">releases page</a> or from <a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>.</li>
+<li>The installer is <strong>not code-signed</strong> unless the publisher configured a certificate, so Windows SmartScreen may warn about it (<strong>More info ▸ Run anyway</strong>). Each release publishes a SHA-256 checksum next to every download; compare it with <code>Get-FileHash .\DyncameloSetup.exe -Algorithm SHA256</code>.</li>
+<li>The installer works per user, in <code>%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle</code>, and needs no administrator rights.</li>
+</ul>
+<h2 id="reporting-a-security-problem">Reporting a security problem</h2>
+<p>Please report a vulnerability <strong>privately</strong>, with GitHub's private security advisories: open the repository's <strong>Security</strong> tab, then <strong>Report a vulnerability</strong> (direct link: <a href="https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new">https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new</a>). Say which Dyncamelo version and Navisworks year it affects and how to reproduce it; a small <code>.dyc</code> file that shows the problem helps a lot. Please do not open a public issue or post details before it is fixed.</p>
+<p>What counts: a <code>.dyc</code> file that makes Dyncamelo do something harmful <em>without</em> any of the nodes in the table above, a way round the questions it asks, or the installer writing outside its own folder or running a file it should not. What does not count: a graph doing what its nodes say after you chose to run it. Only the latest release gets security fixes.</p>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#privacy-in-short">Privacy in short</a><a class="l3" href="#what-it-keeps-on-your-computer">What it keeps on your computer</a><a class="l3" href="#what-it-sends-over-the-network">What it sends over the network</a><a class="l3" href="#third-parties">Third parties</a><a class="l3" href="#removing-what-it-stored">Removing what it stored</a><a class="l2" href="#what-a-graph-can-do">What a graph can do</a><a class="l2" href="#running-graphs-from-other-people">Running graphs from other people</a><a class="l2" href="#downloads">Downloads</a><a class="l2" href="#reporting-a-security-problem">Reporting a security problem</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

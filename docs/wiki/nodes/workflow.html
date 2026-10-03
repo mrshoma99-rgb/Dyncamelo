@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workflow - Dyncamelo Wiki</title>
+<meta name="description" content="16 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub current" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Workflow</h1>
+<p class="lead">16 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-flow-then">
+<h3><a class="node-name" href="#node-flow-then">Flow.Then</a></h3>
+<p>Passes a value through unchanged AFTER the wired &#x27;after&#x27; nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to pass through unchanged.</td></tr>
+<tr><td><code>after</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Wire any output of the node that must run first (its value is ignored).</td></tr>
+<tr><td><code>after2</code></td><td><code>any</code></td><td><code>null</code></td><td>Optional second node that must run first.</td></tr>
+<tr><td><code>after3</code></td><td><code>any</code></td><td><code>null</code></td><td>Optional third node that must run first.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The value input, unchanged.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">sequence</span> <span class="chip">order</span> <span class="chip">passthrough</span> <span class="chip">wait</span> <span class="chip">after</span> <span class="chip">chain</span> <span class="chip">depend</span></p>
+</section>
+<section class="node" id="node-flow-try">
+<h3><a class="node-name" href="#node-flow-try">Flow.Try</a></h3>
+<p>Carries on after a failure: gives the node&#x27;s result, or your fallback plus the error text when that node failed — nothing after it turns red.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The node output to try. Wire the node that might fail.</td></tr>
+<tr><td><code>fallback</code></td><td><code>any</code></td><td><code>null</code></td><td>What to output when it failed (nothing by default).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>any</code></td></tr>
+<tr><td><code>failed</code></td><td><code>boolean</code></td></tr>
+<tr><td><code>error</code></td><td><code>string</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The &quot;result&quot; (the value, or the fallback after a failure), whether it &quot;failed&quot;, and the &quot;error&quot; text.</p>
+<p class="tags"><span class="chip">try</span> <span class="chip">catch</span> <span class="chip">error</span> <span class="chip">recover</span> <span class="chip">fallback</span> <span class="chip">optional</span> <span class="chip">safe</span> <span class="chip">exception</span> <span class="chip">on error</span></p>
+</section>
+<section class="node" id="node-flow-wait">
+<h3><a class="node-name" href="#node-flow-wait">Flow.Wait</a></h3>
+<p>Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to pass through after the pause (it is also what makes the pause happen in the right place).</td></tr>
+<tr><td><code>seconds</code></td><td><code>number</code></td><td><code>1</code></td><td>How long to wait, 0 to 3600 seconds (fractions allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The value input, unchanged.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">wait</span> <span class="chip">sleep</span> <span class="chip">pause</span> <span class="chip">delay</span> <span class="chip">timer</span> <span class="chip">throttle</span> <span class="chip">seconds</span></p>
+</section>
+<section class="node" id="node-flow-when">
+<h3><a class="node-name" href="#node-flow-when">Flow.When</a></h3>
+<p>Runs the nodes wired after it only when the condition is true; when false they are skipped (idle, not an error) — e.g. export only if there are clashes.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to pass on when the condition is true. Wire the output of the node that must have run.</td></tr>
+<tr><td><code>condition</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>True lets the branch run; false skips everything wired after this node.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The value input, or nothing when the condition is false.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">if</span> <span class="chip">only</span> <span class="chip">skip</span> <span class="chip">branch</span> <span class="chip">gate</span> <span class="chip">conditional</span> <span class="chip">run if</span> <span class="chip">guard</span></p>
+</section>
+<section class="node" id="node-loop-collect">
+<h3><a class="node-name" href="#node-loop-collect">Loop.Collect</a></h3>
+<p class="node-flag">Interactive node: it has its own controls on the canvas.</p>
+<p>Closes a loop and collects one value per iteration. Wire Loop.Item&#x27;s &#x27;loop&#x27; output into &#x27;loop&#x27; and the per-item value into &#x27;value&#x27;; &#x27;results&#x27; is the list of collected values, available after the loop. Downstream of &#x27;results&#x27; runs once.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>loop</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Loop handle from Loop.Item.</td></tr>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to collect this iteration.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td><code>any[]</code></td><td>One collected value per item.</td></tr>
+</tbody></table>
+</section>
+<section class="node" id="node-loop-item">
+<h3><a class="node-name" href="#node-loop-item">Loop.Item</a></h3>
+<p class="node-flag">Interactive node: it has its own controls on the canvas.</p>
+<p>Yields the current item of a loop. Wire a list into &#x27;items&#x27;, wire &#x27;item&#x27; into the nodes that should run per item, and wire &#x27;loop&#x27; into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to iterate.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The current item (per iteration).</td></tr>
+<tr><td><code>index</code></td><td><code>integer</code></td><td>The current 0-based index.</td></tr>
+<tr><td><code>count</code></td><td><code>integer</code></td><td>The total number of items.</td></tr>
+<tr><td><code>loop</code></td><td><code>any</code></td><td>Loop handle — wire into Loop.Collect to close the loop.</td></tr>
+</tbody></table>
+</section>
+<section class="node" id="node-workflow-foreach">
+<h3><a class="node-name" href="#node-workflow-foreach">Workflow.ForEach</a></h3>
+<p>Runs a sequence of actions on each item, one item fully before the next — the per-item ordered loop (zoom → isolate → save viewpoint → next) that wiring and lacing cannot express. Wire items and a List.Create of Action.* nodes.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The items to iterate. Each element becomes the current item for one pass; an element may itself be a group (a sub-list).</td></tr>
+<tr><td><code>actions</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The actions to run per item, in order — build this with List.Create from Action.* builder nodes.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>results</code></td><td><code>any[]</code></td><td>One entry per item: the value that item&#x27;s actions collected (unwrapped when a single value, a list when several, the item itself when none). For a per-item Save Viewpoint workflow this is the list of created viewpoints.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">for each</span> <span class="chip">loop</span> <span class="chip">iterate</span> <span class="chip">sequence</span> <span class="chip">per item</span> <span class="chip">batch</span> <span class="chip">each</span></p>
+</section>
+<h2 id="workflow-actions">Actions</h2>
+<section class="node" id="node-action-ghost">
+<h3><a class="node-name" href="#node-action-ghost">Action.Ghost</a></h3>
+<p>Per item: applies a TEMPORARY transparency to the given items (wire the whole found set) so the highlighted item reads against a faded context. Captured per viewpoint. Put before Action.Highlight; reset each item with Action.ResetTemporaryAppearance.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The items to fade each iteration (usually the whole found set — the current item is made solid again by Action.Highlight).</td></tr>
+<tr><td><code>transparency</code></td><td><code>number</code></td><td><code>0.85</code></td><td>0 = opaque, 1 = invisible (0.85 fades to a faint context).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A ghost action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">ghost</span> <span class="chip">fade</span> <span class="chip">transparency</span> <span class="chip">temporary</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">context</span></p>
+</section>
+<section class="node" id="node-action-highlight">
+<h3><a class="node-name" href="#node-action-highlight">Action.Highlight</a></h3>
+<p>Per item: applies a TEMPORARY color to the current item so it stands out — captured per viewpoint by Action.SaveViewpoint, so each view keeps its own highlight. Pair with Action.Ghost to fade the rest.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>color</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>A Color, a &quot;#RRGGBB&quot; string, or a list of three numbers.</td></tr>
+<tr><td><code>transparency</code></td><td><code>number</code></td><td><code>0.0</code></td><td>Transparency for the highlighted item (0 = solid, so it stands out of the ghosted rest).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A highlight action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">highlight</span> <span class="chip">color</span> <span class="chip">temporary</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">spotlight</span></p>
+</section>
+<section class="node" id="node-action-isolate">
+<h3><a class="node-name" href="#node-action-isolate">Action.Isolate</a></h3>
+<p>Per item: shows the current item and hides everything else (Appearance.Isolate). Place before Save Viewpoint to bake the isolation into each view.</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>An isolate action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">isolate</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">only</span> <span class="chip">focus</span></p>
+</section>
+<section class="node" id="node-action-overridecolor">
+<h3><a class="node-name" href="#node-action-overridecolor">Action.OverrideColor</a></h3>
+<p>Per item: overrides the current item&#x27;s color (Appearance.OverrideColor).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>color</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>A Color, a &quot;#RRGGBB&quot; string, or a list of three numbers.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A recolor action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">color</span> <span class="chip">override</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">paint</span> <span class="chip">tint</span></p>
+</section>
+<section class="node" id="node-action-resetappearance">
+<h3><a class="node-name" href="#node-action-resetappearance">Action.ResetAppearance</a></h3>
+<p>Per item: removes color and transparency overrides from the current item (Appearance.Reset).</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A reset-appearance action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">reset</span> <span class="chip">appearance</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">restore</span> <span class="chip">original</span></p>
+</section>
+<section class="node" id="node-action-resettemporaryappearance">
+<h3><a class="node-name" href="#node-action-resettemporaryappearance">Action.ResetTemporaryAppearance</a></h3>
+<p>Per item: clears all TEMPORARY color/transparency overrides (Appearance.ResetTemporary) — put first in the sequence so the previous item&#x27;s highlight/ghost doesn&#x27;t linger into this view.</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A reset-temporary-appearance action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">reset</span> <span class="chip">temporary</span> <span class="chip">appearance</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">clear</span> <span class="chip">clean</span></p>
+</section>
+<section class="node" id="node-action-saveviewpoint">
+<h3><a class="node-name" href="#node-action-saveviewpoint">Action.SaveViewpoint</a></h3>
+<p>Per item: saves the current view as a saved viewpoint named from the item. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop&#x27;s per-item result.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td><code>string</code></td><td><code>&quot;{name}&quot;</code></td><td>Viewpoint name; supports {name}, {index1}, {count} templating (default {name} = the item&#x27;s name).</td></tr>
+<tr><td><code>folder</code></td><td><code>string</code></td><td><code>&quot;Dyncamelo Views&quot;</code></td><td>Viewpoint folder to file them under (null/empty stores at the top level).</td></tr>
+<tr><td><code>bakeOverrides</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True to capture the current hidden AND temporary color/transparency overrides into the viewpoint, so recalling it restores that exact isolation and highlighting.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A save-viewpoint action that collects the created viewpoint.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">viewpoint</span> <span class="chip">view</span> <span class="chip">save</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">capture</span> <span class="chip">snapshot</span></p>
+</section>
+<section class="node" id="node-action-showall">
+<h3><a class="node-name" href="#node-action-showall">Action.ShowAll</a></h3>
+<p>Per item: un-hides every item in the model (Appearance.ShowAll) — a reset step, e.g. before re-isolating.</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A show-all action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">showall</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">reveal</span> <span class="chip">reset</span> <span class="chip">unhide</span></p>
+</section>
+<section class="node" id="node-action-zoomto">
+<h3><a class="node-name" href="#node-action-zoomto">Action.ZoomTo</a></h3>
+<p>Per item: frames the current item in the view (Camera.ZoomToItems). Place before Save Viewpoint so each view is centred on its item.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>paddingFactor</code></td><td><code>number</code></td><td><code>1.5</code></td><td>Space to leave around the item (1 = tight fit).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>action</code></td><td><code>IWorkflowAction</code></td><td>A zoom action for Workflow.ForEach.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">action</span> <span class="chip">zoom</span> <span class="chip">workflow</span> <span class="chip">foreach</span> <span class="chip">frame</span> <span class="chip">fit</span> <span class="chip">focus</span></p>
+</section>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#workflow-actions">Actions</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

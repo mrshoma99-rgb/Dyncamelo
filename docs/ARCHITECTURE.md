@@ -150,7 +150,7 @@ Loader rules:
 - **Multi-output**: a method returning `Dictionary<string, object>` and tagged `[MultiReturn("a", "b")]` gets one output port per named key.
 - **Document defaulting**: in `Dyncamelo.Navisworks`, `Document` parameters resolve to the active document when unconnected, so most graphs never wire `Document.Current` explicitly.
 - **Isolation**: a library that fails to load (bad image, missing dependency, duplicate node names) is reported and skipped — it never takes down the editor. Duplicate `[NodeName]`s within one load are rejected with a clear message.
-- **Sources**: built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded by `Dyncamelo.App` at startup; from M3, `%APPDATA%\Dyncamelo\Packages\<PackName>\` folders are scanned the same way (see [EXTENDING.md](EXTENDING.md)).
+- **Sources**: built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded by `Dyncamelo.App` at startup; a `Packages` folder next to `Dyncamelo.App.dll` (`…\Dyncamelo.bundle\<year>\Packages\`) is scanned the same way (see [EXTENDING.md](EXTENDING.md)).
 
 Interactive nodes (sliders, Watch, Note, `List.Create`'s growable ports, Color Picker, File Path) can't be expressed as a static function; they subclass `NodeModel` in Core/Nodes and get a WPF view in `Dyncamelo.UI` via `DataTemplate` (§8, extension point 4).
 

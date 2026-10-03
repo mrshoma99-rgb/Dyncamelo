@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IFC, BCF, Excel and CSV - Dyncamelo Wiki</title>
+<meta name="description" content="How data gets into and out of a Dyncamelo graph. Every node named here is in the node reference with its inputs and outputs.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a class="current" href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>IFC, BCF, Excel and CSV</h1>
+<p>How data gets into and out of a Dyncamelo graph. Every node named here is in the <a href="nodes/index.html">node reference</a> with its inputs and outputs.</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Read</th>
+<th>Write</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IFC</strong></td>
+<td>Navisworks reads IFC itself; <code>Document.AppendFiles</code> adds files to the model. IFC identity (GlobalIds) is handled by <code>ModelItem.IfcGuid</code>, <code>IFC.GuidDecode</code>, <code>IFC.GuidEncode</code> and <code>Search.ByGuid</code>.</td>
+<td><code>Export.ToIfc</code> and its option nodes</td>
+</tr>
+<tr>
+<td><strong>BCF</strong> (issues)</td>
+<td><code>BCF.ImportIssues</code> (BCF 2.0 and 2.1)</td>
+<td><code>BCF.ExportIssues</code> (BCF 2.1)</td>
+</tr>
+<tr>
+<td><strong>Excel</strong> (<code>.xlsx</code>)</td>
+<td><code>Table.FromExcelFile</code>, <code>Excel.ReadFromFile</code></td>
+<td><code>Table.ToExcelFile</code>, <code>Excel.WriteToFile</code></td>
+</tr>
+<tr>
+<td><strong>CSV</strong></td>
+<td><code>Table.FromCsvFile</code>, <code>CSV.ReadFromFile</code></td>
+<td><code>Table.ToCsvFile</code>, <code>CSV.WriteToFile</code>, <code>CSV.AppendToFile</code>, <code>Export.ToCsv</code></td>
+</tr>
+<tr>
+<td><strong>Reports</strong></td>
+<td></td>
+<td><code>Report.Html</code>, <code>Report.Markdown</code>, <code>Table.ToText</code>, <code>Export.ClashReportCsv</code>, <code>Export.ClashReportHtml</code></td>
+</tr>
+<tr>
+<td><strong>Navisworks files and pictures</strong></td>
+<td><code>Document.Open</code>, <code>Document.AppendFiles</code></td>
+<td><code>Export.NWD</code>, <code>Export.ViewpointImage</code></td>
+</tr>
+<tr>
+<td><strong>JSON</strong></td>
+<td><code>JSON.ReadFromFile</code></td>
+<td><code>JSON.WriteToFile</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Use a full path for every file a graph writes</strong>, for example <code>C:\Users\you\Documents\report.xlsx</code>. The working folder of Navisworks is its install folder under <code>Program Files</code>, which ordinary users cannot write to, so a relative path fails with "access denied" (<a href="troubleshooting.html#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place">Troubleshooting</a>). Paste a path without the quotes that Explorer's <em>Copy as path</em> adds. Graphs that write files are marked, and the Script Player asks before it runs one.</p>
+</blockquote>
+<h2 id="ifc">IFC</h2>
+<h3 id="bringing-ifc-in">Bringing IFC in</h3>
+<p>Navisworks opens and appends IFC files by itself. To add several files in a graph, use <code>Directory.FindFiles</code> (a pattern such as <code>*.ifc;*.nwc</code>, sorted by date) into <code>Document.AppendFiles</code>, then <code>Document.Save</code> or <code>Export.NWD</code>. <code>Document.Open</code> replaces the current contents of the document instead of appending.</p>
+<h3 id="ifc-identity-globalids">IFC identity: GlobalIds</h3>
+<p>IFC elements are identified by a 22-character <strong>GlobalId</strong> (<code>0$WU4A9R19$vKWO$AdOnKA</code>) that other tools show as a standard GUID (<code>3f81e10a-25b0-49ff-9520-63f2a763150a</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ModelItem.IfcGuid</code></td>
+<td>The 22-character GlobalId of an item (from its GlobalId / IfcGUID / IFC GUID / Guid property, otherwise its InstanceGuid encoded the same way); <code>null</code> when it has neither. A list of items gives a list of ids.</td>
+</tr>
+<tr>
+<td><code>IFC.GuidDecode</code></td>
+<td>22-character GlobalId to a lower-case hyphenated GUID.</td>
+</tr>
+<tr>
+<td><code>IFC.GuidEncode</code></td>
+<td>Standard GUID to the 22-character GlobalId.</td>
+</tr>
+<tr>
+<td><code>Search.ByGuid</code></td>
+<td>Finds the items for a list of GUIDs (text, 22-character GlobalIds or GUID values) in <strong>one pass</strong> over the model, and gives the ids it could not find on a second output, <code>missing</code>. It walks every item once, so give it the whole list at once, not one id at a time.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="writing-ifc-exporttoifc">Writing IFC: <code>Export.ToIfc</code></h3>
+<p><code>Export.ToIfc</code> writes model items to an IFC file with the BIMCamel IFC exporter engine, which ships inside Dyncamelo (nothing else to install). It writes a spatial tree, geometry instancing, property sets, materials, base quantities and georeferencing.</p>
+<p>The simplest graph:</p>
+<pre><code>Search.ByProperty ──items──▶ Export.ToIfc (filePath: C:\Exports\steel.ifc)
+</code></pre>
+<p>Only <code>items</code> and <code>filePath</code> are required. The other inputs are optional:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>items</code></td>
+<td>required</td>
+<td>The model items to export (resolved to leaf geometry).</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td>required</td>
+<td>Destination <code>.ifc</code> path. The folder is created when missing.</td>
+</tr>
+<tr>
+<td><code>schema</code></td>
+<td><code>IFC4</code></td>
+<td><code>IFC4</code> or <code>IFC2x3</code>.</td>
+</tr>
+<tr>
+<td><code>instancing</code></td>
+<td>on</td>
+<td>Reuse repeated geometry as mapped items (smaller files).</td>
+</tr>
+<tr>
+<td><code>properties</code></td>
+<td>on</td>
+<td>Write Navisworks properties as IFC property sets.</td>
+</tr>
+<tr>
+<td><code>materials</code></td>
+<td>on</td>
+<td>Write element colours as surface styles and materials.</td>
+</tr>
+<tr>
+<td><code>quantities</code></td>
+<td>on</td>
+<td>Compute base quantities (volume, area, length) from the mesh.</td>
+</tr>
+<tr>
+<td><code>units</code></td>
+<td><code>Auto</code></td>
+<td>Source units: <code>Auto</code> (from the model), or Millimeters, Centimeters, Meters, Feet, Inches.</td>
+</tr>
+<tr>
+<td><code>quality</code></td>
+<td><code>Balanced</code></td>
+<td><code>Balanced</code>, <code>Small file</code> or <code>High detail</code>: sets the weld tolerance and coordinate precision.</td>
+</tr>
+<tr>
+<td><code>splitMegabytes</code></td>
+<td>0</td>
+<td>Split the output into parts near this size (0 is a single file).</td>
+</tr>
+<tr>
+<td><code>validate</code></td>
+<td>off</td>
+<td>Run the built-in structural validator on each written file.</td>
+</tr>
+<tr>
+<td><code>categoryFilter</code></td>
+<td>all</td>
+<td>Export only these property categories.</td>
+</tr>
+<tr>
+<td><code>document</code></td>
+<td>active</td>
+<td>The document.</td>
+</tr>
+</tbody>
+</table>
+<p>Outputs: <code>filePath</code>, <code>fileCount</code>, <code>elementCount</code>, <code>triangleCount</code> and <code>fileSizeKb</code>, so you can show or log what was written.</p>
+<p>Five small nodes build the optional <strong>option objects</strong>. Wire each into the matching input of <code>Export.ToIfc</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Option node</th>
+<th>Wire into</th>
+<th>What it sets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Export.IfcSpatialNames</code></td>
+<td><code>spatialNames</code></td>
+<td>Names of the project, site, building and the default storey.</td>
+</tr>
+<tr>
+<td><code>Export.IfcCoordinates</code></td>
+<td><code>coordinates</code></td>
+<td>Base point (<code>GeometryOrigin</code>, <code>ModelOrigin</code> or <code>Custom</code> with eastings, northings and elevation in metres), rotation, and whether to write IFC4 georeferencing.</td>
+</tr>
+<tr>
+<td><code>Export.IfcRoles</code></td>
+<td><code>roles</code></td>
+<td>Which source properties become the IFC type, building storey, material and classification reference.</td>
+</tr>
+<tr>
+<td><code>Export.IfcSetClassMap</code></td>
+<td><code>classMap</code></td>
+<td>An IFC class for every item of named selection or search sets (set name to class, with an optional predefined type). <code>Export.IfcClasses</code> lists the class names it accepts ("Wall", "Beam", "Door"…).</td>
+</tr>
+<tr>
+<td><code>Export.IfcParameterRule</code></td>
+<td><code>parameterRules</code> (collect several into a list)</td>
+<td>Rename or relocate a source property into a target property set and name.</td>
+</tr>
+</tbody>
+</table>
+<p>IFC export reads the geometry of every item and can take a while on a large model, so switch Auto off and run it with <code>F5</code>. To write several IFC files from one graph, use one <code>Export.ToIfc</code> per file, or put it inside a loop (<code>Loop.Item</code> to <code>Loop.Collect</code>).</p>
+<h2 id="bcf-issues">BCF issues</h2>
+<p>BCF is the vendor-neutral format for issues: a <code>.bcfzip</code> of topics, each with a title, status, comments, a camera and the elements involved. It is the bridge to BIMcollab, Konekt, Revizto and Autodesk Construction Cloud.</p>
+<h3 id="export-bcfexportissues">Export: <code>BCF.ExportIssues</code></h3>
+<pre><code>Clash.Tests ─▶ List.GetItemAtIndex ─▶ ClashTest.Results ─▶ BCF.ExportIssues (results)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filePath</code> (required)</td>
+<td>Destination <code>.bcfzip</code> (or <code>.bcf</code>). The folder is created when missing.</td>
+</tr>
+<tr>
+<td><code>results</code></td>
+<td>Clash results, or result groups, to export as topics (from <code>ClashTest.Results</code>).</td>
+</tr>
+<tr>
+<td><code>viewpoints</code></td>
+<td>Saved viewpoints to export as topics, instead of or besides results.</td>
+</tr>
+<tr>
+<td><code>includeSnapshots</code></td>
+<td>Render a <code>snapshot.png</code> per topic (on by default; slower on long result lists).</td>
+</tr>
+<tr>
+<td><code>statusMap</code></td>
+<td>A dictionary from Navisworks status to BCF status, for example <code>{"New": "Open", "Approved": "Closed"}</code>. Unmapped statuses use the default: New and Active become Open, Reviewed becomes In Progress, Approved and Resolved become Closed.</td>
+</tr>
+</tbody>
+</table>
+<p>Outputs: <code>filePath</code> and <code>topicCount</code>. Things to know:</p>
+<ul>
+<li>Each topic carries a markup, a camera viewpoint, the GUIDs of the elements, and the snapshot.</li>
+<li><strong>Elements are identified by their IFC GlobalId when the item has one, and by its InstanceGuid otherwise.</strong> For models that did not come from IFC this is lossy: another tool may not find the same element. Add IFC GlobalIds to the source model when the receiver must match elements.</li>
+<li><strong>Cameras are written in metres</strong>, as the BCF convention says, whatever units the model uses.</li>
+</ul>
+<h3 id="import-bcfimportissues">Import: <code>BCF.ImportIssues</code></h3>
+<p>Reads a BCF 2.0 or 2.1 package. Outputs:</p>
+<ul>
+<li><code>topics</code>: a list of dictionaries, one per topic, with <code>guid</code>, <code>title</code>, <code>status</code>, <code>type</code>, <code>description</code>, <code>creationAuthor</code>, <code>creationDate</code>, <code>comments</code>, <code>commentAuthors</code>, <code>commentDates</code>, <code>componentGuids</code>, <code>camera</code> (with <code>isPerspective</code>, <code>position</code>, <code>direction</code>, <code>up</code>, <code>fieldOfView</code>, <code>viewToWorldScale</code>) and <code>hasSnapshot</code>;</li>
+<li><code>modelItems</code>: the model items the topics' components resolve to, matched by IFC GlobalId first, then InstanceGuid.</li>
+</ul>
+<p><code>applyCameraTopicIndex</code> applies one topic's camera to the current view (the default, <code>-1</code>, leaves the view alone). To jump to issue 3, set it to <code>2</code>.</p>
+<p>The return leg of an issue round trip is built from the outputs: wire <code>modelItems</code> into <code>Selection.SetCurrent</code> to select the elements, or use the topic statuses with <code>ClashResult.SetStatus</code> to update clash results.</p>
+<pre><code>BCF.ImportIssues ─ modelItems ─▶ Selection.SetCurrent
+                 └ topics ─────▶ List.GetItemAtIndex ─▶ Dictionary.ValueOrDefault (title) ─▶ Watch
+</code></pre>
+<h2 id="excel">Excel</h2>
+<p>Dyncamelo reads and writes <code>.xlsx</code> files itself, so <strong>Excel does not have to be installed</strong>. <code>.xls</code> (the old format) is not supported.</p>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Table.ToExcelFile</code></td>
+<td>Writes a table with its column names. <code>sheet</code> names the worksheet; <code>append</code> adds a sheet to an existing workbook.</td>
+</tr>
+<tr>
+<td><code>Table.FromExcelFile</code></td>
+<td>Reads a worksheet into a table. <code>firstRowIsHeader</code> controls the column names.</td>
+</tr>
+<tr>
+<td><code>Excel.WriteToFile</code></td>
+<td>Writes rows (and optional headers). <code>append</code> adds a sheet to an existing workbook; <strong>styles and formulas that were not written by Dyncamelo are not preserved</strong>.</td>
+</tr>
+<tr>
+<td><code>Excel.ReadFromFile</code></td>
+<td>Gives <code>rows</code>, <code>headers</code> and <code>sheetNames</code>. <strong>Dates arrive as Excel serial numbers.</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Tables are the easiest way in: <code>Properties.ToTable</code> reads the named properties of items into a table (use <code>Category.Property</code> names such as <code>Element.Category</code>, or <code>@Name</code>, <code>@Path</code>, <code>@Guid</code>), and the <code>Table.*</code> nodes then filter, sort, group, join, pivot and format it before <code>Table.ToExcelFile</code> writes it.</p>
+<p>A <strong>quantity take-off</strong> in five nodes:</p>
+<pre><code>Search.ByProperty ─▶ Properties.ToTable ─▶ Table.GroupBy ─▶ Table.Sort ─▶ Table.ToExcelFile
+                     (@Name, Item.Category,   (by category;     (largest      (C:\...\qto.xlsx)
+                      Length, Area)            count, sum)       first)
+</code></pre>
+<p>To <strong>bring a spreadsheet into the model</strong>, read it with <code>Table.FromExcelFile</code>, join it to <code>Properties.ToTable</code> on a GUID or mark column with <code>Table.Join</code>, and write each row onto the items with <code>Properties.SetCustom</code>. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified.</p>
+<h2 id="csv">CSV</h2>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Table.ToCsvFile</code>, <code>Table.FromCsvFile</code></td>
+<td>Tables in and out. Numbers become numbers; everything else stays text. <code>delimiter</code> is a comma unless you change it.</td>
+</tr>
+<tr>
+<td><code>CSV.WriteToFile</code></td>
+<td>Writes a list of rows. Overwrites; creates missing folders.</td>
+</tr>
+<tr>
+<td><code>CSV.AppendToFile</code></td>
+<td>Adds rows to a file, writing the optional headers only when the file is new or empty: one row of totals per run.</td>
+</tr>
+<tr>
+<td><code>CSV.ReadFromFile</code></td>
+<td>Reads rows (numeric cells become numbers).</td>
+</tr>
+<tr>
+<td><code>Export.ToCsv</code></td>
+<td>One row per model item: a name column plus the property columns you list. Useful for quantity take-offs.</td>
+</tr>
+<tr>
+<td><code>Export.ClashReportCsv</code></td>
+<td>One-node clash report: test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point. Excel-ready.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reports">Reports</h2>
+<ul>
+<li><strong><code>Report.Html</code></strong> builds a self-contained, printable HTML report (light and dark) from tables and text; a line starting with <code>#</code> becomes a heading. Write it with <code>Text.WriteToFile</code>, or paste it into an e-mail. <strong><code>Report.Markdown</code></strong> does the same in Markdown for Teams, trackers and wikis.</li>
+<li><strong><code>Table.ToText</code></strong> renders a table as Markdown, CSV, tab-separated text or an HTML table.</li>
+<li><strong><code>Export.ClashReportHtml</code></strong> is a single-file HTML clash report, one section per test and one row per result, optionally with embedded snapshots (<code>includeImages</code>, <code>imageWidth</code>, <code>imageHeight</code>).</li>
+<li><strong><code>Export.ViewpointImage</code></strong> renders the current view to a <code>.png</code>, <code>.jpg</code> or <code>.bmp</code>. <strong><code>Export.NWD</code></strong> saves the document as a published <code>.nwd</code> with appearance overrides baked in.</li>
+</ul>
+<h2 id="keeping-a-history">Keeping a history</h2>
+<p>Two patterns that need no database:</p>
+<ul>
+<li><strong>Clash deltas.</strong> <code>Clash.SnapshotToFile</code> saves a snapshot of all clash results as JSON each week; <code>Clash.CompareSnapshots</code> takes two snapshot files and gives the clashes that are new, resolved and persisting. It works on files only, so it needs no open model.</li>
+<li><strong>Model changes.</strong> <code>Model.Snapshot</code> captures chosen properties of items as a dictionary keyed by GUID; save it with <code>JSON.WriteToFile</code>, and diff it against a later one with <code>Snapshot.Diff</code> (added, removed and changed keys).</li>
+</ul>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#ifc">IFC</a><a class="l3" href="#bringing-ifc-in">Bringing IFC in</a><a class="l3" href="#ifc-identity-globalids">IFC identity: GlobalIds</a><a class="l3" href="#writing-ifc-exporttoifc">Writing IFC: Export.ToIfc</a><a class="l2" href="#bcf-issues">BCF issues</a><a class="l3" href="#export-bcfexportissues">Export: BCF.ExportIssues</a><a class="l3" href="#import-bcfimportissues">Import: BCF.ImportIssues</a><a class="l2" href="#excel">Excel</a><a class="l2" href="#csv">CSV</a><a class="l2" href="#reports">Reports</a><a class="l2" href="#keeping-a-history">Keeping a history</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

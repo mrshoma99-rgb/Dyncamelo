@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navisworks: Camera - Dyncamelo Wiki</title>
+<meta name="description" content="7 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub current" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Navisworks: Camera</h1>
+<p class="lead">7 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-camera-current">
+<h3><a class="node-name" href="#node-camera-current">Camera.Current</a></h3>
+<p>The current camera position, focal distance and vertical field height.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>position</code></td><td><code>Point</code></td></tr>
+<tr><td><code>focalDistance</code></td><td><code>number</code></td></tr>
+<tr><td><code>heightField</code></td><td><code>number</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Camera position, focal distance (null when unset) and vertical field height.</p>
+<p class="tags"><span class="chip">camera</span> <span class="chip">current</span> <span class="chip">position</span> <span class="chip">view</span> <span class="chip">eye</span></p>
+</section>
+<section class="node" id="node-camera-lookat">
+<h3><a class="node-name" href="#node-camera-lookat">Camera.LookAt</a></h3>
+<p>Moves the camera to &#x27;eye&#x27; looking at &#x27;target&#x27; (up stays +Z).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>eye</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Camera position: a Point, or a list of three numbers.</td></tr>
+<tr><td><code>target</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Point to look at: a Point, or a list of three numbers.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>done</code></td><td><code>boolean</code></td><td>True when the camera was moved.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">camera</span> <span class="chip">lookat</span> <span class="chip">aim</span> <span class="chip">point</span> <span class="chip">view</span></p>
+</section>
+<section class="node" id="node-camera-setfieldofview">
+<h3><a class="node-name" href="#node-camera-setfieldofview">Camera.SetFieldOfView</a></h3>
+<p>Sets the camera&#x27;s vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>degrees</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Vertical field of view in degrees (typical 20–90). Applies to the perspective camera.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>done</code></td><td><code>boolean</code></td><td>True when the field of view was set.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">camera</span> <span class="chip">fov</span> <span class="chip">field of view</span> <span class="chip">lens</span> <span class="chip">zoom</span> <span class="chip">angle</span> <span class="chip">wide</span></p>
+</section>
+<section class="node" id="node-camera-setprojection">
+<h3><a class="node-name" href="#node-camera-setprojection">Camera.SetProjection</a></h3>
+<p>Switches the camera between perspective (true) and orthographic (false) projection.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>perspective</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>True for perspective, false for orthographic.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>done</code></td><td><code>boolean</code></td><td>True when the projection was set.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">camera</span> <span class="chip">projection</span> <span class="chip">perspective</span> <span class="chip">orthographic</span> <span class="chip">ortho</span> <span class="chip">parallel</span></p>
+</section>
+<section class="node" id="node-camera-setstandardview">
+<h3><a class="node-name" href="#node-camera-setstandardview">Camera.SetStandardView</a></h3>
+<p>Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items — or the whole model when none are wired. Convention: Z is up and +Y is north, so top is a plan with north at the top of the screen, front looks north from the south side, left looks east from the west side, and iso looks from the south-east above. Assumes a Z-up model; for others use Camera.LookAt.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>view</code></td><td><code>string</code></td><td><code>&quot;iso&quot;</code></td><td>One of top, bottom, front, back, left, right, iso.</td></tr>
+<tr><td><code>items</code> <span class="chip">any number of wires</span></td><td><code>ModelItem[]</code></td><td><code>null</code></td><td>The items to frame (leave unwired to frame the whole model).</td></tr>
+<tr><td><code>paddingFactor</code></td><td><code>number</code></td><td><code>1.2</code></td><td>Space to leave around the framed box (1 = tight fit).</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>Viewpoint</code></td><td>A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.SaveCurrent).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">camera</span> <span class="chip">standard</span> <span class="chip">view</span> <span class="chip">top</span> <span class="chip">plan</span> <span class="chip">front</span> <span class="chip">back</span> <span class="chip">left</span> <span class="chip">right</span> <span class="chip">iso</span> <span class="chip">isometric</span> <span class="chip">elevation</span></p>
+</section>
+<section class="node" id="node-camera-zoomtoitems">
+<h3><a class="node-name" href="#node-camera-zoomtoitems">Camera.ZoomToItems</a></h3>
+<p>Frames the given items in the current view (per-item close-ups, screenshot staging).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to frame.</td></tr>
+<tr><td><code>paddingFactor</code></td><td><code>number</code></td><td><code>1.5</code></td><td>How much space to leave around the items (1 = tight fit).</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>done</code></td><td><code>boolean</code></td><td>True when the camera was moved.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">camera</span> <span class="chip">zoom</span> <span class="chip">frame</span> <span class="chip">fit</span> <span class="chip">items</span> <span class="chip">focus</span></p>
+</section>
+<section class="node" id="node-viewpoint-setsectionbox">
+<h3><a class="node-name" href="#node-viewpoint-setsectionbox">Viewpoint.SetSectionBox</a></h3>
+<p>Applies a section box around a region on the current view (Sectioning &gt; Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>boundingBox</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The box region, in document units (e.g. from ModelItem.BoundingBox or BoundingBox.ByCorners). Ignored when enabled is false.</td></tr>
+<tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True to section to the box, false to disable sectioning.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>done</code></td><td><code>boolean</code></td><td>True when the clip planes were applied to the current view.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">section</span> <span class="chip">box</span> <span class="chip">clip</span> <span class="chip">sectioning</span> <span class="chip">viewpoint</span> <span class="chip">crop</span> <span class="chip">isolate</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

@@ -14,6 +14,8 @@ Everything below comes from the Dyncamelo source and docs. Where a behaviour has
 * [A node is red or amber](#a-node-is-red-or-amber)
 * [A graph opens with a warning, or with missing nodes](#a-graph-opens-with-a-warning-or-with-missing-nodes)
 * [Nothing happens when I press Run](#nothing-happens-when-i-press-run)
+* [A search returns nothing, or the magnifier next to a tab or property shows no names](#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names)
+* [The start screen is missing](#the-start-screen-is-missing)
 * [A run is slow on a large model](#a-run-is-slow-on-a-large-model)
 * [The Script Player asks me to confirm a script](#the-script-player-asks-me-to-confirm-a-script)
 * [A file node fails with "access denied" or writes to the wrong place](#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)
@@ -111,6 +113,24 @@ Work down this list.
 8. **A muted wire** (`Ctrl` while cutting) is ignored by the run. The input uses its own value instead.
 
 Select the node and press `I` to see which of these applies.
+
+## A search returns nothing, or the magnifier next to a tab or property shows no names
+
+**A search returns nothing.** The tab (category) and property names must be the ones Navisworks **displays**, in the language it displays them in: internal names do not match. Click an element in Navisworks, read the Properties window, and copy the two names. Try `mode` set to `contains` on `Search.ByProperty` before `equals`, and wire the result into a **Watch List** to see what came back.
+
+**The magnifier shows no names.** The magnifier next to a tab or property input lists names of **one element only**, and says why when it has nothing to show:
+
+* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
+* "Pick an element on 'x' (or wire one in), then search its tabs." Nodes such as `Properties.Value` read the element on their own element input. Pick an element on that input, or wire one in.
+* "The element wired to 'x' has not been computed yet. Run the graph (or pick the element on the node itself), then search." The wire needs a value first: press **Run**.
+* "Choose the tab first (the 'x' input), then search its properties." Fill the tab input, then use the magnifier on the property input.
+* "Element data can be searched in Navisworks only." The magnifier needs a running Navisworks.
+
+Typing the name by hand always works; the magnifier only helps you fill it in. It reads at most the first 100 elements of a longer list.
+
+## The start screen is missing
+
+The start screen (cards for a new script, recent scripts and examples, the version and a link to bimcamel.com) shows only while the canvas is **empty**: it goes as soon as you add a node or open a script, and comes back when you delete every node or choose **File ▸ New**. If you never see it, check **Settings ▸ Appearance ▸ Start screen on an empty canvas**; with it off, an empty canvas stays empty. The **New script** card puts the cards away and leaves only a short hint line on the empty canvas.
 
 ## A run is slow on a large model
 

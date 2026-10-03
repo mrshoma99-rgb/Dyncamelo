@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List - Dyncamelo Wiki</title>
+<meta name="description" content="63 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub current" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>List</h1>
+<p class="lead">63 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-list-additemtoend">
+<h3><a class="node-name" href="#node-list-additemtoend">List.AddItemToEnd</a></h3>
+<p>Appends a value to the end of a list (returns a new list).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to append to.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to append.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with the value appended.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">append</span> <span class="chip">push</span> <span class="chip">add</span></p>
+</section>
+<section class="node" id="node-list-additemtofront">
+<h3><a class="node-name" href="#node-list-additemtofront">List.AddItemToFront</a></h3>
+<p>Returns a new list with the value prepended — the front-side twin of List.AddItemToEnd.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to extend.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to prepend.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with the element first.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">add</span> <span class="chip">prepend</span> <span class="chip">front</span> <span class="chip">first</span> <span class="chip">push</span></p>
+</section>
+<section class="node" id="node-list-allindicesof">
+<h3><a class="node-name" href="#node-list-allindicesof">List.AllIndicesOf</a></h3>
+<p>Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to search.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to look for (value equality, like List.IndexOf).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>indices</code></td><td><code>integer[]</code></td><td>The zero-based indices of every occurrence (empty when absent).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">indices</span> <span class="chip">index</span> <span class="chip">all</span> <span class="chip">occurrences</span> <span class="chip">find</span> <span class="chip">positions</span> <span class="chip">where</span></p>
+</section>
+<section class="node" id="node-list-alltrue">
+<h3><a class="node-name" href="#node-list-alltrue">List.AllTrue</a></h3>
+<p>True when EVERY element of the list is true — collapse a mask into one verdict (an empty list gives false; nulls count as not-true).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The booleans to test (nulls and non-booleans count as not-true).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>allTrue</code></td><td><code>boolean</code></td><td>True when every element is true (and the list is not empty).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">all</span> <span class="chip">true</span> <span class="chip">every</span> <span class="chip">and</span> <span class="chip">mask</span> <span class="chip">verdict</span></p>
+</section>
+<section class="node" id="node-list-anytrue">
+<h3><a class="node-name" href="#node-list-anytrue">List.AnyTrue</a></h3>
+<p>True when AT LEAST ONE element of the list is true — &quot;did anything match?&quot; in one node (nulls count as not-true).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The booleans to test (nulls and non-booleans count as not-true).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>anyTrue</code></td><td><code>boolean</code></td><td>True when at least one element is true.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">any</span> <span class="chip">true</span> <span class="chip">some</span> <span class="chip">or</span> <span class="chip">mask</span> <span class="chip">exists</span></p>
+</section>
+<section class="node" id="node-list-chop">
+<h3><a class="node-name" href="#node-list-chop">List.Chop</a></h3>
+<p>Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to chop.</td></tr>
+<tr><td><code>lengths</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Sublist length(s): one number chops evenly; a list of numbers is applied in sequence and repeats until the list is used up.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>lists</code></td><td><code>any[]</code></td><td>The sublists (the last one may be shorter).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">chop</span> <span class="chip">split</span> <span class="chip">partition</span> <span class="chip">chunk</span> <span class="chip">sublists</span> <span class="chip">group</span></p>
+</section>
+<section class="node" id="node-list-clean">
+<h3><a class="node-name" href="#node-list-clean">List.Clean</a></h3>
+<p>Removes null elements from a list, at every nesting level — the mop-up after laced calls that emitted nulls for missing elements (a yellow node badge points here). removeEmptyLists also drops sublists left empty. Dynamo users: same idea as List.Clean.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to clean (nested lists are cleaned recursively).</td></tr>
+<tr><td><code>removeEmptyLists</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True also drops sublists that are (or become) empty; false keeps them as empty lists.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The cleaned list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">clean</span> <span class="chip">null</span> <span class="chip">remove</span> <span class="chip">nulls</span> <span class="chip">compact</span> <span class="chip">purge</span> <span class="chip">empty</span> <span class="chip">filter</span></p>
+</section>
+<section class="node" id="node-list-contains">
+<h3><a class="node-name" href="#node-list-contains">List.Contains</a></h3>
+<p>Tests whether a list contains a value (numbers compare by value regardless of numeric type).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to search.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to look for.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>contains</code></td><td><code>boolean</code></td><td>True when the value occurs in the list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">membership</span> <span class="chip">includes</span> <span class="chip">has</span> <span class="chip">any</span></p>
+</section>
+<section class="node" id="node-list-count">
+<h3><a class="node-name" href="#node-list-count">List.Count</a></h3>
+<p>Returns the number of elements in a list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to count.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>count</code></td><td><code>integer</code></td><td>The element count.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">length</span> <span class="chip">size</span></p>
+</section>
+<section class="node" id="node-list-counttrue">
+<h3><a class="node-name" href="#node-list-counttrue">List.CountTrue</a></h3>
+<p>Counts the true and not-true elements of a mask — &quot;37 of 340 matched&quot; for reports without filtering first (nulls count as not-true).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The booleans to count (nulls and non-booleans count as not-true).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>trueCount</code></td><td><code>integer</code></td></tr>
+<tr><td><code>falseCount</code></td><td><code>integer</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The true and not-true counts.</p>
+<p class="tags"><span class="chip">count</span> <span class="chip">true</span> <span class="chip">false</span> <span class="chip">mask</span> <span class="chip">tally</span> <span class="chip">how many</span></p>
+</section>
+<section class="node" id="node-list-create">
+<h3><a class="node-name" href="#node-list-create">List.Create</a></h3>
+<p class="node-flag">Interactive node: it has its own controls on the canvas.</p>
+<p>Builds a list from the wired item inputs.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item0 … itemN</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Wire any number of items — a fresh empty input appears as you connect.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The created list.</td></tr>
+</tbody></table>
+</section>
+<section class="node" id="node-list-cycle">
+<h3><a class="node-name" href="#node-list-cycle">List.Cycle</a></h3>
+<p>Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to repeat.</td></tr>
+<tr><td><code>amount</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many copies to chain (≥ 0).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The list repeated end-to-end.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">cycle</span> <span class="chip">repeat</span> <span class="chip">tile</span> <span class="chip">loop</span> <span class="chip">duplicate</span></p>
+</section>
+<section class="node" id="node-list-dropitems">
+<h3><a class="node-name" href="#node-list-dropitems">List.DropItems</a></h3>
+<p>Drops elements from the start of the list — or from the END with a negative amount (Dynamo behavior). Dropping more than the length gives an empty list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to shorten.</td></tr>
+<tr><td><code>amount</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many elements to drop: positive from the start, negative from the end.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The shortened list (empty when the amount exceeds the length).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">drop</span> <span class="chip">skip</span> <span class="chip">remove</span> <span class="chip">trim</span> <span class="chip">start</span> <span class="chip">end</span></p>
+</section>
+<section class="node" id="node-list-dropwhile">
+<h3><a class="node-name" href="#node-list-dropwhile">List.DropWhile</a></h3>
+<p>Drops items from the start of the list for as long as the mask is true; keeps everything from the first false.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The items.</td></tr>
+<tr><td><code>mask</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>One true/false per item (same length).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The items from the first false on.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">skip</span> <span class="chip">leading</span> <span class="chip">tail</span> <span class="chip">prefix</span></p>
+</section>
+<section class="node" id="node-list-filterbyboolmask">
+<h3><a class="node-name" href="#node-list-filterbyboolmask">List.FilterByBoolMask</a></h3>
+<p>Splits a list into elements whose mask entry is true (&quot;in&quot;) and the rest (&quot;out&quot;).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to filter.</td></tr>
+<tr><td><code>mask</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Booleans (or values coercible to booleans), one per element.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>in</code></td><td><code>any</code></td></tr>
+<tr><td><code>out</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;in&quot; and &quot;out&quot; lists.</p>
+<p class="tags"><span class="chip">filter</span> <span class="chip">mask</span> <span class="chip">partition</span> <span class="chip">sieve</span></p>
+</section>
+<section class="node" id="node-list-filterbyvalue">
+<h3><a class="node-name" href="#node-list-filterbyvalue">List.FilterByValue</a></h3>
+<p>Keeps the items that pass a test such as &gt; 100, contains &quot;wall&quot; or matches &quot;A-*&quot; — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The items to filter.</td></tr>
+<tr><td><code>test</code></td><td><code>string</code></td><td><code>&quot;==&quot;</code></td><td>The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</td></tr>
+<tr><td><code>value</code></td><td><code>any</code></td><td><code>null</code></td><td>What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests).</td></tr>
+<tr><td><code>keys</code></td><td><code>any[]</code></td><td><code>null</code></td><td>Optional: a list of the same length whose values are tested instead of the items themselves (filter model items by a property value).</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) ignores upper/lower case in text tests.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>matched</code></td><td><code>any</code></td></tr>
+<tr><td><code>rejected</code></td><td><code>any</code></td></tr>
+<tr><td><code>mask</code></td><td><code>boolean[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The items that passed, the items that did not, and the true/false mask.</p>
+<p class="tags"><span class="chip">filter</span> <span class="chip">where</span> <span class="chip">select</span> <span class="chip">keep</span> <span class="chip">compare</span> <span class="chip">mask</span> <span class="chip">search</span> <span class="chip">query</span></p>
+</section>
+<section class="node" id="node-list-firstitem">
+<h3><a class="node-name" href="#node-list-firstitem">List.FirstItem</a></h3>
+<p>Returns the first element of a list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from (must not be empty).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The first element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">head</span> <span class="chip">front</span></p>
+</section>
+<section class="node" id="node-list-flatten">
+<h3><a class="node-name" href="#node-list-flatten">List.Flatten</a></h3>
+<p>Flattens a nested list by a given number of levels (-1 = completely).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The (possibly nested) list to flatten.</td></tr>
+<tr><td><code>amount</code></td><td><code>integer</code></td><td><code>-1</code></td><td>Levels of nesting to remove; -1 flattens completely.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The flattened list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">nested</span> <span class="chip">unwrap</span></p>
+</section>
+<section class="node" id="node-list-getitematindex">
+<h3><a class="node-name" href="#node-list-getitematindex">List.GetItemAtIndex</a></h3>
+<p>Returns the element at the given index (negative indexes count from the end).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from.</td></tr>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Zero-based index; negative values count from the end.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The element at the index.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">element</span> <span class="chip">at</span> <span class="chip">index</span> <span class="chip">pick</span></p>
+</section>
+<section class="node" id="node-list-groupbykey">
+<h3><a class="node-name" href="#node-list-groupbykey">List.GroupByKey</a></h3>
+<p>Groups list elements by a parallel key list; returns the groups and their unique keys.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The elements to group.</td></tr>
+<tr><td><code>keys</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>One key per element.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>groups</code></td><td><code>any</code></td></tr>
+<tr><td><code>uniqueKeys</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;groups&quot; (list of lists) and &quot;uniqueKeys&quot;.</p>
+<p class="tags"><span class="chip">group</span> <span class="chip">bucket</span> <span class="chip">categorize</span> <span class="chip">partition</span></p>
+</section>
+<section class="node" id="node-list-indexof">
+<h3><a class="node-name" href="#node-list-indexof">List.IndexOf</a></h3>
+<p>Returns the index of the first occurrence of a value in a list (-1 when absent).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to search.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to look for.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>index</code></td><td><code>integer</code></td><td>The zero-based index, or -1 when not found.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">find</span> <span class="chip">position</span> <span class="chip">locate</span> <span class="chip">search</span></p>
+</section>
+<section class="node" id="node-list-insert">
+<h3><a class="node-name" href="#node-list-insert">List.Insert</a></h3>
+<p>Returns a new list with the value inserted at the index (0 = front; the list&#x27;s length = append; negative counts from the end).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to edit.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to insert.</td></tr>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Zero-based position for the new element (0 = front, Count = end; negative counts from the end).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with the element inserted.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">insert</span> <span class="chip">add</span> <span class="chip">index</span> <span class="chip">position</span></p>
+</section>
+<section class="node" id="node-list-lastindexof">
+<h3><a class="node-name" href="#node-list-lastindexof">List.LastIndexOf</a></h3>
+<p>The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to search.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to look for (value equality).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>index</code></td><td><code>integer</code></td><td>The zero-based index of the last occurrence, or -1 when absent.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">index</span> <span class="chip">last</span> <span class="chip">find</span> <span class="chip">position</span> <span class="chip">reverse</span></p>
+</section>
+<section class="node" id="node-list-lastitem">
+<h3><a class="node-name" href="#node-list-lastitem">List.LastItem</a></h3>
+<p>Returns the last element of a list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from (must not be empty).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The last element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">tail</span> <span class="chip">end</span> <span class="chip">final</span></p>
+</section>
+<section class="node" id="node-list-maximumitem">
+<h3><a class="node-name" href="#node-list-maximumitem">List.MaximumItem</a></h3>
+<p>The largest element of a list (numbers, texts or dates; nulls are ignored).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to scan (must not be empty; nulls are ignored).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The maximum element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">maximum</span> <span class="chip">max</span> <span class="chip">largest</span> <span class="chip">biggest</span> <span class="chip">highest</span></p>
+</section>
+<section class="node" id="node-list-merge">
+<h3><a class="node-name" href="#node-list-merge">List.Merge</a></h3>
+<p>Concatenates any number of lists into one — a multi-input socket: connect as many wires as you like, in the order you want them.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>lists</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Every list wired to the socket; list-valued wires contribute their elements, other values themselves.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with the elements of all the wires, in wire order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">concat</span> <span class="chip">combine</span> <span class="chip">join</span> <span class="chip">append</span> <span class="chip">many</span> <span class="chip">multi</span></p>
+</section>
+<section class="node" id="node-list-minimumitem">
+<h3><a class="node-name" href="#node-list-minimumitem">List.MinimumItem</a></h3>
+<p>The smallest element of a list (numbers, texts or dates; nulls are ignored).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to scan (must not be empty; nulls are ignored).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td><td>The minimum element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">minimum</span> <span class="chip">min</span> <span class="chip">smallest</span> <span class="chip">lowest</span></p>
+</section>
+<section class="node" id="node-list-ofrepeateditem">
+<h3><a class="node-name" href="#node-list-ofrepeateditem">List.OfRepeatedItem</a></h3>
+<p>A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to repeat.</td></tr>
+<tr><td><code>amount</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many copies (≥ 0).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The repeated-value list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">repeat</span> <span class="chip">repeated</span> <span class="chip">fill</span> <span class="chip">constant</span> <span class="chip">duplicate</span></p>
+</section>
+<section class="node" id="node-list-pairs">
+<h3><a class="node-name" href="#node-list-pairs">List.Pairs</a></h3>
+<p>Pairs each item with the next one: [[a, b], [b, c], …] — consecutive points, segments, steps.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list.</td></tr>
+<tr><td><code>cyclic</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True also pairs the last item with the first.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>pairs</code></td><td><code>any[]</code></td><td>[item0, item1], [item1, item2], … (one pair fewer than items, or as many with &#x27;cyclic&#x27;).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">neighbours</span> <span class="chip">consecutive</span> <span class="chip">segments</span> <span class="chip">window</span> <span class="chip">adjacent</span></p>
+</section>
+<section class="node" id="node-list-range">
+<h3><a class="node-name" href="#node-list-range">List.Range</a></h3>
+<p>Creates a sequence of numbers from start to end using the given step.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>start</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>First value of the sequence.</td></tr>
+<tr><td><code>end</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Inclusive upper (or lower, for negative steps) bound.</td></tr>
+<tr><td><code>step</code></td><td><code>number</code></td><td><code>1</code></td><td>Increment between values; may be negative.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>number[]</code></td><td>The sequence as a list of numbers.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">sequence</span> <span class="chip">series</span> <span class="chip">numbers</span></p>
+</section>
+<section class="node" id="node-list-removeitematindex">
+<h3><a class="node-name" href="#node-list-removeitematindex">List.RemoveItemAtIndex</a></h3>
+<p>Removes the element at the given index (negative indexes count from the end).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to remove from.</td></tr>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Zero-based index; negative values count from the end.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list without the element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">delete</span> <span class="chip">drop</span> <span class="chip">without</span></p>
+</section>
+<section class="node" id="node-list-replaceitematindex">
+<h3><a class="node-name" href="#node-list-replaceitematindex">List.ReplaceItemAtIndex</a></h3>
+<p>Returns a new list with the element at the index replaced (negative indexes count from the end).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to edit.</td></tr>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Zero-based index; negative values count from the end.</td></tr>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The replacement value.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with the element replaced.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">replace</span> <span class="chip">item</span> <span class="chip">index</span> <span class="chip">set</span> <span class="chip">edit</span></p>
+</section>
+<section class="node" id="node-list-replacenulls">
+<h3><a class="node-name" href="#node-list-replacenulls">List.ReplaceNulls</a></h3>
+<p>Replaces every null element with a substitute value, at every nesting level — keeps list lengths and alignment intact where List.Clean would shift them. The gap-filler for laced calls that emitted nulls (0 for math, &quot;n/a&quot; for reports).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to patch (nested lists are patched recursively).</td></tr>
+<tr><td><code>substitute</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to put where a null sits (e.g. 0, &quot;&quot; or &quot;n/a&quot;).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The patched list, same shape as the input.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">replace</span> <span class="chip">null</span> <span class="chip">nulls</span> <span class="chip">substitute</span> <span class="chip">default</span> <span class="chip">fill</span> <span class="chip">patch</span></p>
+</section>
+<section class="node" id="node-list-restofitems">
+<h3><a class="node-name" href="#node-list-restofitems">List.RestOfItems</a></h3>
+<p>Everything but the first element — pairs with List.FirstItem for head/tail processing.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from (must not be empty).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The list without its first element.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">rest</span> <span class="chip">tail</span> <span class="chip">skip</span> <span class="chip">first</span></p>
+</section>
+<section class="node" id="node-list-reverse">
+<h3><a class="node-name" href="#node-list-reverse">List.Reverse</a></h3>
+<p>Returns the list in reverse order.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to reverse.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>reversed</code></td><td><code>any[]</code></td><td>A new list in reverse order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">flip</span> <span class="chip">invert</span> <span class="chip">backwards</span></p>
+</section>
+<section class="node" id="node-list-setdifference">
+<h3><a class="node-name" href="#node-list-setdifference">List.SetDifference</a></h3>
+<p>The distinct elements of the FIRST list that are NOT in the second (value equality) — subtract an ignore-list from a result set.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list1</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to start from.</td></tr>
+<tr><td><code>list2</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The elements to remove.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The difference, ordered as in the first list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">difference</span> <span class="chip">set</span> <span class="chip">subtract</span> <span class="chip">except</span> <span class="chip">remove</span> <span class="chip">without</span></p>
+</section>
+<section class="node" id="node-list-setintersection">
+<h3><a class="node-name" href="#node-list-setintersection">List.SetIntersection</a></h3>
+<p>The distinct elements present in BOTH lists (value equality, ordered as in the first) — what two searches/sets have in common.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list1</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The first list.</td></tr>
+<tr><td><code>list2</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The second list.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The intersection, ordered as in the first list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">intersection</span> <span class="chip">set</span> <span class="chip">common</span> <span class="chip">both</span> <span class="chip">and</span> <span class="chip">overlap</span></p>
+</section>
+<section class="node" id="node-list-setunion">
+<h3><a class="node-name" href="#node-list-setunion">List.SetUnion</a></h3>
+<p>The distinct elements present in EITHER list (value equality, first-seen order) — combine two item sets without duplicates.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list1</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The first list.</td></tr>
+<tr><td><code>list2</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The second list.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The union, first-seen order, duplicates removed.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">union</span> <span class="chip">set</span> <span class="chip">combine</span> <span class="chip">merge</span> <span class="chip">distinct</span> <span class="chip">or</span></p>
+</section>
+<section class="node" id="node-list-shiftindices">
+<h3><a class="node-name" href="#node-list-shiftindices">List.ShiftIndices</a></h3>
+<p>Rotates the list: +1 moves every element one place towards the end and wraps the last to the front ([a,b,c] → [c,a,b]); negative rotates the other way.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to rotate.</td></tr>
+<tr><td><code>amount</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Positive moves elements towards the end (the last wraps to the front); negative the other way.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The rotated list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">shift</span> <span class="chip">rotate</span> <span class="chip">wrap</span> <span class="chip">offset</span> <span class="chip">roll</span></p>
+</section>
+<section class="node" id="node-list-shuffle">
+<h3><a class="node-name" href="#node-list-shuffle">List.Shuffle</a></h3>
+<p>Shuffles a list; the same seed always gives the same order, so a run can be repeated.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list.</td></tr>
+<tr><td><code>seed</code></td><td><code>integer</code></td><td><code>0</code></td><td>Same seed, same order; change it for a different order.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A shuffled copy.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">random</span> <span class="chip">mix</span> <span class="chip">sample</span> <span class="chip">permute</span></p>
+</section>
+<section class="node" id="node-list-slice">
+<h3><a class="node-name" href="#node-list-slice">List.Slice</a></h3>
+<p>A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element. Negative start/end count from the end, Python-style.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from.</td></tr>
+<tr><td><code>start</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>First index of the range (inclusive; negative counts from the end).</td></tr>
+<tr><td><code>end</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>End of the range (exclusive; negative counts from the end).</td></tr>
+<tr><td><code>step</code></td><td><code>integer</code></td><td><code>1</code></td><td>Take every step-th element of the range (≥ 1).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The sub-list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">slice</span> <span class="chip">range</span> <span class="chip">sub</span> <span class="chip">subset</span> <span class="chip">portion</span> <span class="chip">between</span></p>
+</section>
+<section class="node" id="node-list-sort">
+<h3><a class="node-name" href="#node-list-sort">List.Sort</a></h3>
+<p>Returns the list sorted ascending (numbers numerically, strings alphabetically).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to sort.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new sorted list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">order</span> <span class="chip">ascending</span> <span class="chip">arrange</span></p>
+</section>
+<section class="node" id="node-list-sortbykey">
+<h3><a class="node-name" href="#node-list-sortbykey">List.SortByKey</a></h3>
+<p>Sorts list elements by a parallel key list; returns the sorted elements and keys.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The elements to sort.</td></tr>
+<tr><td><code>keys</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>One sort key per element.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>sorted</code></td><td><code>any</code></td></tr>
+<tr><td><code>sortedKeys</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;sorted&quot; elements and the &quot;sortedKeys&quot;.</p>
+<p class="tags"><span class="chip">order</span> <span class="chip">arrange</span> <span class="chip">rank</span> <span class="chip">key</span></p>
+</section>
+<section class="node" id="node-list-sortdescending">
+<h3><a class="node-name" href="#node-list-sortdescending">List.SortDescending</a></h3>
+<p>Returns the list sorted descending (largest first; text alphabetically from Z).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to sort.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list, descending (numbers numerically, text alphabetically).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">order</span> <span class="chip">descending</span> <span class="chip">reverse</span> <span class="chip">biggest first</span> <span class="chip">top</span></p>
+</section>
+<section class="node" id="node-list-takeeverynthitem">
+<h3><a class="node-name" href="#node-list-takeeverynthitem">List.TakeEveryNthItem</a></h3>
+<p>Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to sample.</td></tr>
+<tr><td><code>n</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Take every n-th element (≥ 1).</td></tr>
+<tr><td><code>offset</code></td><td><code>integer</code></td><td><code>0</code></td><td>Elements to skip before the first take.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The sampled elements.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">every</span> <span class="chip">nth</span> <span class="chip">sample</span> <span class="chip">skip</span> <span class="chip">thin</span> <span class="chip">step</span></p>
+</section>
+<section class="node" id="node-list-takeitems">
+<h3><a class="node-name" href="#node-list-takeitems">List.TakeItems</a></h3>
+<p>Takes elements from the start of the list — or from the END with a negative amount (Dynamo behavior). Taking more than the length gives the whole list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to read from.</td></tr>
+<tr><td><code>amount</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>How many elements to keep: positive from the start, negative from the end.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The taken elements (the whole list when the amount exceeds the length).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">take</span> <span class="chip">first</span> <span class="chip">head</span> <span class="chip">keep</span> <span class="chip">start</span> <span class="chip">end</span></p>
+</section>
+<section class="node" id="node-list-takewhile">
+<h3><a class="node-name" href="#node-list-takewhile">List.TakeWhile</a></h3>
+<p>Takes items from the start of the list for as long as the mask is true (stops at the first false).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The items.</td></tr>
+<tr><td><code>mask</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>One true/false per item (same length).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>The items before the first false.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">head</span> <span class="chip">until</span> <span class="chip">leading</span> <span class="chip">prefix</span></p>
+</section>
+<section class="node" id="node-list-transpose">
+<h3><a class="node-name" href="#node-list-transpose">List.Transpose</a></h3>
+<p>Swaps rows and columns of a list of lists — the table pivot for Excel/CSV data and property grids. Shorter rows pad with nulls so the result stays rectangular (Dynamo behavior); List.Clean or List.ReplaceNulls deal with the padding.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list of rows.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>lists</code></td><td><code>any[]</code></td><td>The transposed list; shorter rows are padded with nulls so the result is rectangular (Dynamo behavior).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">transpose</span> <span class="chip">rows</span> <span class="chip">columns</span> <span class="chip">pivot</span> <span class="chip">swap</span> <span class="chip">table</span> <span class="chip">matrix</span></p>
+</section>
+<section class="node" id="node-list-uniqueitems">
+<h3><a class="node-name" href="#node-list-uniqueitems">List.UniqueItems</a></h3>
+<p>Removes duplicate elements from a list, preserving the original order.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list to deduplicate.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td><code>any[]</code></td><td>A new list with duplicates removed, in original order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">distinct</span> <span class="chip">deduplicate</span> <span class="chip">unique</span></p>
+</section>
+<section class="node" id="node-list-withindex">
+<h3><a class="node-name" href="#node-list-withindex">List.WithIndex</a></h3>
+<p>Pairs each item with its position: [[0, item0], [1, item1], …].</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The list.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>pairs</code></td><td><code>any[]</code></td><td>A list of [index, item] pairs, indexes starting at 0.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">enumerate</span> <span class="chip">index</span> <span class="chip">number</span> <span class="chip">position</span> <span class="chip">row number</span></p>
+</section>
+<section class="node" id="node-list-zip">
+<h3><a class="node-name" href="#node-list-zip">List.Zip</a></h3>
+<p>Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>first</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The first list.</td></tr>
+<tr><td><code>second</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The second list.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>pairs</code></td><td><code>any[]</code></td><td>[first0, second0], [first1, second1], … as long as the shorter list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">pair</span> <span class="chip">combine</span> <span class="chip">merge</span> <span class="chip">interleave</span> <span class="chip">together</span></p>
+</section>
+<h2 id="list-statistics">Statistics</h2>
+<section class="node" id="node-list-average">
+<h3><a class="node-name" href="#node-list-average">List.Average</a></h3>
+<p>The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped); at least one is required.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>average</code></td><td><code>number</code></td><td>The arithmetic mean.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">mean</span> <span class="chip">aggregate</span> <span class="chip">avg</span> <span class="chip">kpi</span></p>
+</section>
+<section class="node" id="node-list-countby">
+<h3><a class="node-name" href="#node-list-countby">List.CountBy</a></h3>
+<p>Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values to tally (nulls are counted as one value, shown empty).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>values</code></td><td><code>any</code></td></tr>
+<tr><td><code>counts</code></td><td><code>integer[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The distinct values in order of first appearance and how many times each occurs.</p>
+<p class="tags"><span class="chip">tally</span> <span class="chip">frequency</span> <span class="chip">distribution</span> <span class="chip">group</span> <span class="chip">count</span> <span class="chip">how many of each</span></p>
+</section>
+<section class="node" id="node-list-cumulativesum">
+<h3><a class="node-name" href="#node-list-cumulativesum">List.CumulativeSum</a></h3>
+<p>A running total: each item is the sum of the list up to and including that position.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are an error here, so positions stay aligned).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>totals</code></td><td><code>number[]</code></td><td>A list as long as the input: each item is the sum of everything up to and including it.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">running</span> <span class="chip">accumulate</span> <span class="chip">progress</span> <span class="chip">s-curve</span></p>
+</section>
+<section class="node" id="node-list-duplicates">
+<h3><a class="node-name" href="#node-list-duplicates">List.Duplicates</a></h3>
+<p>The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values to check.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>duplicates</code></td><td><code>any</code></td></tr>
+<tr><td><code>counts</code></td><td><code>integer[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The repeated values (first appearance order) and how many times each occurs.</p>
+<p class="tags"><span class="chip">duplicate</span> <span class="chip">repeated</span> <span class="chip">twice</span> <span class="chip">unique</span> <span class="chip">check</span> <span class="chip">audit</span></p>
+</section>
+<section class="node" id="node-list-histogram">
+<h3><a class="node-name" href="#node-list-histogram">List.Histogram</a></h3>
+<p>Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped); at least one is required.</td></tr>
+<tr><td><code>bins</code></td><td><code>integer</code></td><td><code>10</code></td><td>How many bins, from the smallest to the largest value.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>lower</code></td><td><code>number[]</code></td></tr>
+<tr><td><code>upper</code></td><td><code>number[]</code></td></tr>
+<tr><td><code>counts</code></td><td><code>integer[]</code></td></tr>
+<tr><td><code>labels</code></td><td><code>string[]</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: For each bin: its lower edge, upper edge, count and a text label.</p>
+<p class="tags"><span class="chip">distribution</span> <span class="chip">bins</span> <span class="chip">buckets</span> <span class="chip">chart</span> <span class="chip">frequency</span> <span class="chip">range</span></p>
+</section>
+<section class="node" id="node-list-median">
+<h3><a class="node-name" href="#node-list-median">List.Median</a></h3>
+<p>The middle value of the numbers of a list (the mean of the two middle ones when the count is even).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped); at least one is required.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>median</code></td><td><code>number</code></td><td>The median; the mean of the two middle values when the count is even.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">middle</span> <span class="chip">aggregate</span> <span class="chip">typical</span></p>
+</section>
+<section class="node" id="node-list-mostcommon">
+<h3><a class="node-name" href="#node-list-mostcommon">List.MostCommon</a></h3>
+<p>The value that occurs most often in a list (the earliest wins a tie) and how many times.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values to check (at least one non-null).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>item</code></td><td><code>any</code></td></tr>
+<tr><td><code>count</code></td><td><code>integer</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The most common value (the first to appear wins a tie) and how many times it occurs.</p>
+<p class="tags"><span class="chip">mode</span> <span class="chip">frequent</span> <span class="chip">popular</span> <span class="chip">typical</span></p>
+</section>
+<section class="node" id="node-list-percentile">
+<h3><a class="node-name" href="#node-list-percentile">List.Percentile</a></h3>
+<p>The value below which a given percentage of the numbers lie (linear interpolation, like Excel&#x27;s PERCENTILE.INC).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped); at least one is required.</td></tr>
+<tr><td><code>percent</code></td><td><code>number</code></td><td><code>90</code></td><td>Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>number</code></td><td>The value at that percentile, interpolated linearly (like Excel&#x27;s PERCENTILE.INC).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">quantile</span> <span class="chip">quartile</span> <span class="chip">aggregate</span> <span class="chip">percent</span></p>
+</section>
+<section class="node" id="node-list-product">
+<h3><a class="node-name" href="#node-list-product">List.Product</a></h3>
+<p>Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>product</code></td><td><code>number</code></td><td>The product; 1 for an empty list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">multiply</span> <span class="chip">aggregate</span> <span class="chip">times</span></p>
+</section>
+<section class="node" id="node-list-standarddeviation">
+<h3><a class="node-name" href="#node-list-standarddeviation">List.StandardDeviation</a></h3>
+<p>The standard deviation of the numbers of a list (population by default; tick &#x27;sample&#x27; to divide by n-1).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped); at least one (two for a sample) is required.</td></tr>
+<tr><td><code>sample</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True divides by n-1 (a sample of a larger population); false (default) divides by n.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>standardDeviation</code></td><td><code>number</code></td><td>The standard deviation.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">spread</span> <span class="chip">variance</span> <span class="chip">deviation</span> <span class="chip">stdev</span> <span class="chip">statistics</span></p>
+</section>
+<section class="node" id="node-list-statistics">
+<h3><a class="node-name" href="#node-list-statistics">List.Statistics</a></h3>
+<p>Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>count</code></td><td><code>integer</code></td></tr>
+<tr><td><code>sum</code></td><td><code>number</code></td></tr>
+<tr><td><code>min</code></td><td><code>number</code></td></tr>
+<tr><td><code>max</code></td><td><code>number</code></td></tr>
+<tr><td><code>average</code></td><td><code>number</code></td></tr>
+<tr><td><code>median</code></td><td><code>number</code></td></tr>
+<tr><td><code>standardDeviation</code></td><td><code>number</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers.</p>
+<p class="tags"><span class="chip">summary</span> <span class="chip">describe</span> <span class="chip">aggregate</span> <span class="chip">kpi</span> <span class="chip">qto</span> <span class="chip">min</span> <span class="chip">max</span> <span class="chip">statistics</span></p>
+</section>
+<section class="node" id="node-list-sum">
+<h3><a class="node-name" href="#node-list-sum">List.Sum</a></h3>
+<p>Adds up the numbers of a list (nulls are skipped, an empty list gives 0).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>list</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The numbers (nulls are skipped; text such as &quot;12.5&quot; is read as a number).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>sum</code></td><td><code>number</code></td><td>The total; 0 for an empty list.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">total</span> <span class="chip">add</span> <span class="chip">aggregate</span> <span class="chip">quantity</span> <span class="chip">qto</span> <span class="chip">sum</span></p>
+</section>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#list-statistics">Statistics</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

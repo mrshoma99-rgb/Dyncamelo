@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navisworks: Transform - Dyncamelo Wiki</title>
+<meta name="description" content="7 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub current" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Navisworks: Transform</h1>
+<p class="lead">7 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-modelitem-gettransform">
+<h3><a class="node-name" href="#node-modelitem-gettransform">ModelItem.GetTransform</a></h3>
+<p>Reads an item&#x27;s current (active) transform: origin = its translation (a practical base point), matrix = 16 numbers row-major (feed ModelItem.SetTransform to round-trip), hasOverride = whether a permanent transform override is applied.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>item</code> <span class="chip required">required</span></td><td><code>ModelItem</code></td><td>&mdash;</td><td>The model item.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>origin</code></td><td><code>Point</code></td></tr>
+<tr><td><code>matrix</code></td><td><code>number[]</code></td></tr>
+<tr><td><code>hasOverride</code></td><td><code>boolean</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: The transform origin (translation — a practical base point), the 16-number row-major matrix, and whether a permanent override is active.</p>
+<p class="tags"><span class="chip">item</span> <span class="chip">transform</span> <span class="chip">get</span> <span class="chip">read</span> <span class="chip">matrix</span> <span class="chip">origin</span> <span class="chip">override</span> <span class="chip">position</span></p>
+</section>
+<section class="node" id="node-modelitem-moveto">
+<h3><a class="node-name" href="#node-modelitem-moveto">ModelItem.MoveTo</a></h3>
+<p>Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to move (they keep their layout relative to each other).</td></tr>
+<tr><td><code>target</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Where the centre of the items&#x27; combined bounding box should end up (a Point or a list of three numbers), in document units.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The moved items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">move</span> <span class="chip">moveto</span> <span class="chip">place</span> <span class="chip">position</span> <span class="chip">target</span> <span class="chip">centre</span> <span class="chip">center</span> <span class="chip">transform</span></p>
+</section>
+<section class="node" id="node-modelitem-resettransform">
+<h3><a class="node-name" href="#node-modelitem-resettransform">ModelItem.ResetTransform</a></h3>
+<p>Removes permanent transform overrides, restoring items to their original position. To reset every override in the whole document, set resetAll to true — an unwired or empty items input alone does nothing (and errors) so an empty upstream filter can never wipe all placement work.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td><code>null</code></td><td>The model items to reset.</td></tr>
+<tr><td><code>resetAll</code></td><td><code>boolean</code></td><td><code>false</code></td><td>True to reset EVERY transform override in the document (items may then be left unwired). Explicit opt-in — an unwired or empty items list alone never wipes the whole document.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The reset items (empty when every override was reset via resetAll).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">transform</span> <span class="chip">reset</span> <span class="chip">restore</span> <span class="chip">original</span> <span class="chip">undo</span> <span class="chip">position</span></p>
+</section>
+<section class="node" id="node-modelitem-rotateaboutaxis">
+<h3><a class="node-name" href="#node-modelitem-rotateaboutaxis">ModelItem.RotateAboutAxis</a></h3>
+<p>Rotates model items by an angle (degrees) about an axis through a point. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to rotate.</td></tr>
+<tr><td><code>origin</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>A point on the rotation axis (document units): a Point or a list of three numbers.</td></tr>
+<tr><td><code>axis</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The axis direction (need not be unit length): a Vector or a list of three numbers.</td></tr>
+<tr><td><code>degrees</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>The rotation angle in degrees (right-hand rule around the axis).</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The rotated items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">rotate</span> <span class="chip">rotation</span> <span class="chip">axis</span> <span class="chip">angle</span> <span class="chip">degrees</span> <span class="chip">transform</span></p>
+</section>
+<section class="node" id="node-modelitem-scale">
+<h3><a class="node-name" href="#node-modelitem-scale">ModelItem.Scale</a></h3>
+<p>Scales model items uniformly about a point — default: the centre of the items&#x27; combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again). One override per item, so allow a moment on large selections.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to scale. Wire the items themselves, not a container AND its children.</td></tr>
+<tr><td><code>factor</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive.</td></tr>
+<tr><td><code>about</code></td><td><code>any</code></td><td><code>null</code></td><td>The fixed point of the scaling (a Point or a list of three numbers); leave unwired to scale about the centre of the items&#x27; combined bounding box.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The scaled items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">scale</span> <span class="chip">resize</span> <span class="chip">size</span> <span class="chip">grow</span> <span class="chip">shrink</span> <span class="chip">factor</span> <span class="chip">transform</span> <span class="chip">units</span></p>
+</section>
+<section class="node" id="node-modelitem-settransform">
+<h3><a class="node-name" href="#node-modelitem-settransform">ModelItem.SetTransform</a></h3>
+<p>Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to transform.</td></tr>
+<tr><td><code>matrix</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>16 numbers, row-major (translation at indices 3, 7, 11; bottom row 0 0 0 1), or four rows of four numbers, or a matrix from ModelItem.GetTransform.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The transformed items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">transform</span> <span class="chip">matrix</span> <span class="chip">set</span> <span class="chip">override</span> <span class="chip">scale</span> <span class="chip">mirror</span></p>
+</section>
+<section class="node" id="node-modelitem-translate">
+<h3><a class="node-name" href="#node-modelitem-translate">ModelItem.Translate</a></h3>
+<p>Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>items</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>ModelItem[]</code></td><td>&mdash;</td><td>The model items to move.</td></tr>
+<tr><td><code>vector</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The offset, in document units: a Vector (Vector.ByCoordinates) or a list of three numbers.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>items</code></td><td><code>ModelItem[]</code></td><td>The moved items (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">item</span> <span class="chip">translate</span> <span class="chip">move</span> <span class="chip">offset</span> <span class="chip">transform</span> <span class="chip">shift</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navisworks: Markup - Dyncamelo Wiki</title>
+<meta name="description" content="6 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub current" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Navisworks: Markup</h1>
+<p class="lead">6 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-markup-addcloud">
+<h3><a class="node-name" href="#node-markup-addcloud">Markup.AddCloud</a></h3>
+<p>EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>points</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>Cloud outline: a list of [x, y] pairs, or a flat list x1, y1, x2, y2, … (3+ points).</td></tr>
+<tr><td><code>color</code></td><td><code>any</code></td><td><code>null</code></td><td>Line colour: a Color, hex &quot;#RRGGBB&quot; or [r,g,b] (empty keeps the Navisworks default).</td></tr>
+<tr><td><code>thickness</code></td><td><code>integer</code></td><td><code>2</code></td><td>Line thickness in pixels.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>SavedViewpoint</code></td><td>The stored viewpoint (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">cloud</span> <span class="chip">revision</span> <span class="chip">revcloud</span> <span class="chip">viewpoint</span></p>
+</section>
+<section class="node" id="node-markup-addnumbertag">
+<h3><a class="node-name" href="#node-markup-addnumbertag">Markup.AddNumberTag</a></h3>
+<p>EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>number</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>The tag number to draw.</td></tr>
+<tr><td><code>x</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space X of the tag centre.</td></tr>
+<tr><td><code>y</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space Y of the tag centre.</td></tr>
+<tr><td><code>radius</code></td><td><code>number</code></td><td><code>0.08</code></td><td>Circle radius in markup-space units.</td></tr>
+<tr><td><code>comment</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Optional comment attached to the viewpoint (shows in the Comments panel).</td></tr>
+<tr><td><code>color</code></td><td><code>any</code></td><td><code>null</code></td><td>Line colour: a Color, hex &quot;#RRGGBB&quot; or [r,g,b] (empty keeps the Navisworks default).</td></tr>
+<tr><td><code>thickness</code></td><td><code>integer</code></td><td><code>2</code></td><td>Line thickness in pixels.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>SavedViewpoint</code></td><td>The stored viewpoint (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">tag</span> <span class="chip">number</span> <span class="chip">bubble</span> <span class="chip">comment</span> <span class="chip">viewpoint</span></p>
+</section>
+<section class="node" id="node-markup-addshape">
+<h3><a class="node-name" href="#node-markup-addshape">Markup.AddShape</a></h3>
+<p>EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>shape</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>line, arrow (points from start to end) or ellipse (fitted to the corner-to-corner box).</td></tr>
+<tr><td><code>x1</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space X of the start point (tail, or first box corner).</td></tr>
+<tr><td><code>y1</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space Y of the start point.</td></tr>
+<tr><td><code>x2</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space X of the end point (head, or opposite box corner).</td></tr>
+<tr><td><code>y2</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space Y of the end point.</td></tr>
+<tr><td><code>color</code></td><td><code>any</code></td><td><code>null</code></td><td>Line colour: a Color, hex &quot;#RRGGBB&quot; or [r,g,b] (empty keeps the Navisworks default).</td></tr>
+<tr><td><code>thickness</code></td><td><code>integer</code></td><td><code>2</code></td><td>Line thickness in pixels.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>SavedViewpoint</code></td><td>The stored viewpoint (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">line</span> <span class="chip">arrow</span> <span class="chip">ellipse</span> <span class="chip">circle</span> <span class="chip">shape</span> <span class="chip">draw</span> <span class="chip">viewpoint</span></p>
+</section>
+<section class="node" id="node-markup-addtext">
+<h3><a class="node-name" href="#node-markup-addtext">Markup.AddText</a></h3>
+<p>EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to draw.</td></tr>
+<tr><td><code>x</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space X of the text anchor (0 = view centre).</td></tr>
+<tr><td><code>y</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Markup-space Y of the text anchor (0 = view centre).</td></tr>
+<tr><td><code>color</code></td><td><code>any</code></td><td><code>null</code></td><td>Line colour: a Color, hex &quot;#RRGGBB&quot; or [r,g,b] (empty keeps the Navisworks default).</td></tr>
+<tr><td><code>thickness</code></td><td><code>integer</code></td><td><code>2</code></td><td>Line thickness in pixels.</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>SavedViewpoint</code></td><td>The stored viewpoint (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">text</span> <span class="chip">annotate</span> <span class="chip">label</span> <span class="chip">viewpoint</span> <span class="chip">tag</span></p>
+</section>
+<section class="node" id="node-markup-clear">
+<h3><a class="node-name" href="#node-markup-clear">Markup.Clear</a></h3>
+<p>EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code></td><td><code>SavedViewpoint</code></td><td>The stored viewpoint (pass-through for chaining).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">clear</span> <span class="chip">delete</span> <span class="chip">remove</span> <span class="chip">viewpoint</span></p>
+</section>
+<section class="node" id="node-markup-list">
+<h3><a class="node-name" href="#node-markup-list">Markup.List</a></h3>
+<p>EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>viewpoint</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The saved viewpoint (or its name).</td></tr>
+<tr><td><code>document</code></td><td><code>Document</code></td><td><code>null</code></td><td>The document (defaults to the active document).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>count</code></td><td><code>integer</code></td></tr>
+<tr><td><code>types</code></td><td><code>string[]</code></td></tr>
+<tr><td><code>texts</code></td><td><code>string[]</code></td></tr>
+<tr><td><code>positions</code></td><td><code>any</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Markup count, per-markup type names, texts (empty for shapes) and anchor positions as [x, y] — the calibration reference for the Add nodes.</p>
+<p class="tags"><span class="chip">markup</span> <span class="chip">redline</span> <span class="chip">list</span> <span class="chip">read</span> <span class="chip">count</span> <span class="chip">calibrate</span> <span class="chip">viewpoint</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

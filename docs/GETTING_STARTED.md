@@ -85,7 +85,7 @@ A few editor shortcuts worth knowing from day one:
 We will build this chain:
 
 ```
-String ("Concrete") ──▶ Search.ByPropertyContains ──▶ Appearance.OverrideColor ──▶ SelectionSet.Create
+String ("Concrete") ──▶ Search.ByProperty (contains) ──▶ Appearance.OverrideColor ──▶ SelectionSet.Create
                                                         ▲
                                      Color Picker (red) ┘
 ```
@@ -100,10 +100,10 @@ In Navisworks, click a concrete element and look at the **Properties** window. F
    - first: `Element` (or whatever category you found),
    - second: `Material`,
    - third: `Concrete`.
-2. Add **Search.ByPropertyContains** (under *Navisworks → Search*).
-3. Wire the three strings to its `category`, `property`, and `value` inputs.
+2. Add **Search.ByProperty** (under *Navisworks → Search*) and set its `mode` to `contains`.
+3. Wire the three strings to its `categoryName`, `propertyName`, and `value` inputs. (Or type the names straight into the node's own boxes; the small magnifier next to the two name boxes lists the tabs and properties of the element you have selected in Navisworks.)
 4. Leave the `document` input unconnected — Document ports default to the active document automatically.
-5. Add a **Watch List** node (under *Output*), wire `modelItems` into it, and press **Run**.
+5. Add a **Watch List** node (under *Display*), wire `items` into it, and press **Run**.
 
 The Watch List fills with every matching item. If it is empty, re-check the category/property names against the Properties window (they must match what Navisworks displays, including language).
 
@@ -111,7 +111,7 @@ The Watch List fills with every matching item. If it is empty, re-check the cate
 
 1. Add **Color Picker** (under *Color*) and pick red.
 2. Add **Appearance.OverrideColor** (under *Navisworks → Appearance*).
-3. Wire `Search.ByPropertyContains → modelItems` into `modelItems`, and the Color Picker into `color`.
+3. Wire `Search.ByProperty → items` into `items`, and the Color Picker into `color` (or just click the colour swatch on the node's own `color` input).
 4. Press **Run** — every concrete item in the viewport turns red.
 
 This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (whether a single Undo reverts a whole run has not been checked yet; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
@@ -119,7 +119,7 @@ This is a real Navisworks color override, exactly like *Item Tools → Override 
 ### Step 4 — save the selection set
 
 1. Add a **String** node with the text `Concrete elements`, and **SelectionSet.Create** (under *Navisworks → SelectionSets*).
-2. Wire `Appearance.OverrideColor → modelItems` (write nodes pass their items through precisely so you can chain like this) into `modelItems`, and the name string into `name`.
+2. Wire `Appearance.OverrideColor → items` (write nodes pass their items through precisely so you can chain like this) into `items`, and the name string into `name`.
 3. Run. Check Navisworks' **Sets** window — your set is there, ready for use in clash tests, TimeLiner, or manual work. `overwrite` defaults to true, so re-running updates the same set instead of duplicating it.
 
 ### Step 5 — make it live
@@ -132,8 +132,8 @@ Most Dyncamelo power comes from feeding **lists** into inputs that expect a **si
 
 Example — turn the single-set graph above into a set-per-system factory:
 
-1. Replace the value String with **String.Split** fed by a String containing `Concrete,Steel,Masonry` (separator `,`), so `Search.ByPropertyContains` receives a **list** of three values → it runs three times → outputs a list of three item-lists.
-2. Feed `SelectionSet.Create` the same three texts as `name` and the search output as `modelItems` → three selection sets are created in one run.
+1. Replace the value String with **String.Split** fed by a String containing `Concrete,Steel,Masonry` (separator `,`), so `Search.ByProperty` receives a **list** of three values → it runs three times → outputs a list of three item-lists.
+2. Feed `SelectionSet.Create` the same three texts as `name` and the search output as `items` → three selection sets are created in one run.
 
 When a node receives lists on more than one input, its **lacing** setting (right-click the node) pairs them:
 
@@ -159,7 +159,7 @@ Inputs that already *expect* a list (like `CSV.WriteToFile → rows`) absorb the
 ## 6. Saving and loading graphs
 
 - **Save** (toolbar or Ctrl+S) writes a `.dyc` file — a small, versioned JSON document. It stores nodes, wires, your input values, notes, and lacing settings; it does **not** store results, so a loaded graph recomputes fresh on its first run.
-- **Open** loads any `.dyc`; the graph reconnects to whatever document is currently active, so one graph serves every project. File paths picked with *File Path* nodes are stored relative to the graph when possible, which keeps graphs portable across machines.
+- **Open** loads any `.dyc`; the graph reconnects to whatever document is currently active, so one graph serves every project. File paths picked with *File Path* nodes are stored exactly as you chose them, so a graph that moves to another machine needs its paths checked.
 - `.dyc` files are plain text: they diff cleanly, belong in source control, and attach nicely to issues. If you open a graph using nodes you do not have (from a newer version or a node pack), those nodes appear as placeholders and are preserved on save — nothing is lost.
 
 ## 7. When something goes wrong
@@ -175,7 +175,7 @@ Nodes never crash a run — they report on themselves, per node:
 
 Quick fixes for common cases:
 
-- **Search returns nothing** — category/property names must match the Properties window exactly (localized names included). Try `Search.ByPropertyContains` before `Search.ByPropertyValue`, and verify with a Watch List.
+- **Search returns nothing** — category/property names must match the Properties window exactly (localized names included). Try `mode` set to `contains` on `Search.ByProperty` before `equals`, and verify with a Watch List.
 - **`Properties.Value` warns "property not found"** — not all items carry all properties; filter first (e.g. `ModelItem.HasGeometry → List.FilterByBoolMask`) or accept the nulls.
 - **Everything is Idle after loading** — that is normal; press Run once.
 - **A run takes long** — press the cancel button in the run bar; already-computed nodes keep their results and the next run resumes where it stopped. Right-click any node and **Freeze** it to exclude an expensive branch (it and its downstream ghost out) while you work on the rest.

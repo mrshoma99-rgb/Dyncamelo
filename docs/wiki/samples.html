@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample scripts - Dyncamelo Wiki</title>
+<meta name="description" content="Dyncamelo ships with example graphs. Open them from the start screen (the cards on an empty canvas), from File ▸ Sample Graphs, or from the Samples folder inside each year folder of the installed bundle. Each one explains its editable inputs in notes on the canvas. Press Run to see what it does; read the nodes to learn how.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a class="current" href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Sample scripts</h1>
+<p>Dyncamelo ships with example graphs. Open them from the <strong>start screen</strong> (the cards on an empty canvas), from <strong>File ▸ Sample Graphs</strong>, or from the <code>Samples</code> folder inside each year folder of the installed bundle. Each one explains its editable inputs in notes on the canvas. Press <strong>Run</strong> to see what it does; read the nodes to learn how.</p>
+<p>Except for the first two, the samples need Navisworks with a <strong>model open</strong>. They are saved so that you decide when they run: a graph opened from a file is not run until you press Run.</p>
+<h2 id="without-a-model">Without a model</h2>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Getting Started - Math and Watch</strong></td>
+<td>Two sliders multiplied into an area, shown in a Watch node and formatted into a text report with <code>String.FromObject</code> and <code>String.Concat</code>. Expected results: <strong>32</strong> and <strong><code>Area = 32</code></strong>.</td>
+</tr>
+<tr>
+<td><strong>Table Summary from Text</strong></td>
+<td>Pasted CSV text becomes a table (<code>String.Lines</code>, <code>String.Split</code>, <code>Table.FromRows</code>), grouped by category with a count, total and maximum (<code>Table.GroupBy</code>), sorted largest first (<code>Table.Sort</code>) and shown in a <strong>Watch Table</strong> and as Markdown (<code>Table.ToText</code>). Expected first row: <strong>Wall, 3, 10000, 4500</strong>. With model data the first three nodes are replaced by <code>Properties.ToTable</code>, and <code>Table.ToExcelFile</code> or <code>Report.Html</code> publishes the result.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="searching-colouring-and-exporting">Searching, colouring and exporting</h2>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Color Elements by Property</strong></td>
+<td><code>Search.ByProperty</code> finds every item whose property contains a text (default: Item ▸ Name contains "Wall") and <code>Appearance.OverrideColor</code> paints it; <code>List.Count</code> reports how many.</td>
+</tr>
+<tr>
+<td><strong>Export Properties to Excel</strong></td>
+<td>Finds items, reads three properties of each with <code>Properties.ValueAsString</code> and writes a worksheet with <code>Excel.WriteToFile</code>. Item names become the header row; replication turns the single-item property node into a per-item list.</td>
+</tr>
+<tr>
+<td><strong>Bulk Selection Sets from Values</strong></td>
+<td><code>SelectionSets.BulkByPropertyValues</code> makes one live search set per distinct value of a property (default: Element ▸ Level), filed under a folder in the Sets window.</td>
+</tr>
+<tr>
+<td><strong>QTO Rollup by Category</strong></td>
+<td><code>Search.HasProperty</code> finds items, <code>Takeoff.SumPropertyByGroup</code> sums a numeric property (default: Element ▸ Volume) grouped by another (default: Element ▸ Category) and <code>Excel.WriteToFile</code> writes the rollup.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="clash">Clash</h2>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Clash Triage and BCF Export</strong></td>
+<td><code>Clash.Tests</code>, <code>List.GetItemAtIndex</code>, <code>Clash.GroupResultsByStatus</code>, <code>ClashTest.Results</code> and <code>BCF.ExportIssues</code>, plus <code>Export.ClashReportCsv</code> for a CSV summary of every test. Needs Navisworks Manage.</td>
+</tr>
+<tr>
+<td><strong>Clash Group Viewpoints per Test</strong></td>
+<td>For every result group of every clash test: isolates the group's clashing elements, colours each clash's first element red and its second green (temporary overrides) and saves a viewpoint named after the group, in a folder named after its test. Needs an open model with clash tests that have run and have groups. <code>Flow.Then</code> pins the order isolate, zoom, red, green, save inside each pass of the loop.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="viewpoints-and-loops">Viewpoints and loops</h2>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Isolated Viewpoints per Item</strong></td>
+<td>The per-item loop built from <strong>reified actions</strong>: a search finds items, and a recipe (<code>Action.Isolate</code>, <code>Action.ZoomTo</code>, <code>Action.SaveViewpoint</code>) gathered with <code>List.Create</code> is replayed by <code>Workflow.ForEach</code> for every item. One saved viewpoint per element, framed on its own item and named from the item with the <code>{name}</code> template.</td>
+</tr>
+<tr>
+<td><strong>Spotlight Viewpoints per Item</strong></td>
+<td>The same loop for presentation: for each item the recipe ghosts the whole model, highlights the current item in a chosen colour, zooms to it and saves a viewpoint. The temporary overrides are captured into each viewpoint, so every view keeps its own look.</td>
+</tr>
+<tr>
+<td><strong>Isolated Viewpoints (Loop)</strong></td>
+<td>The same result built from ordinary nodes: <code>Loop.Item</code> and <code>Loop.Collect</code> bracket a body (<code>Appearance.Isolate</code>, <code>Camera.ZoomToItems</code>, <code>Viewpoint.SaveWithOverrides</code>) that the engine re-runs once per item. Any subgraph between the two boundaries becomes a loop.</td>
+</tr>
+<tr>
+<td><strong>Section Box Viewpoints per Group</strong></td>
+<td>Clusters the current selection into touching groups with <code>Proximity.Cluster</code>, then for each group applies a section box from its combined bounding box (padded), zooms to the group and saves a viewpoint named "Group &lt;n&gt;" in the "Group Views" folder. The cluster tolerance is in metres and must be smaller than the space between separate groups. Needs a live Navisworks session.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="safety-analysis">Safety analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Floor Opening Fall-Hazard Map</strong></td>
+<td><code>FallHazard.FloorOpeningMap</code> slices the model at a level, reads the real floor and equipment mesh, finds the openings fully enclosed by floor and grades each by how far its centre is from the nearest edge. It writes a top-down heat-map PNG and saves one viewpoint per opening whose widest gap is at least your threshold. Needs a live Navisworks session; <code>Cell size</code> trades accuracy for speed.</td>
+</tr>
+<tr>
+<td><strong>Floor Openings Needing Handrails</strong></td>
+<td>Part 1 measures each item of the selection to its nearest handrail with <code>Proximity.NearestDistance</code> and flags the ones with none close by. Part 2 uses <code>BoundingBox.PlanGap</code> to find the widest gap between an opening and the equipment through it. Part 2 is self-contained and reports <code>0.8</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="for-developers-not-installed">For developers (not installed)</h2>
+<p>Four small graphs in the repository's <code>samples</code> folder exercise the engine without Navisworks and run on the command line: <code>hello-math</code> (result <strong>85</strong>), <code>list-lacing</code> (the three lacing modes side by side), <code>string-report</code> (<strong><code>Word count: 4</code></strong>) and <code>csv-roundtrip</code> (writes and reads a CSV file). The last one writes a relative path, which is why it is not shipped: see <a href="troubleshooting.html#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place">Troubleshooting</a>.</p>
+<h2 id="use-a-sample-as-a-starting-point">Use a sample as a starting point</h2>
+<ul>
+<li>Save it under a new name first (<strong>File ▸ Save As…</strong>, <code>Ctrl+Shift+S</code>) so the original stays as it was.</li>
+<li>Change the typed inputs: the notes on the canvas say which ones are meant to be edited.</li>
+<li>Replace a search or a property name with your own, and press <strong>Run</strong>.</li>
+<li>Find where the sample's nodes live in the library: right-click a node and choose <strong>Find in Library</strong>.</li>
+</ul>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#without-a-model">Without a model</a><a class="l2" href="#searching-colouring-and-exporting">Searching, colouring and exporting</a><a class="l2" href="#clash">Clash</a><a class="l2" href="#viewpoints-and-loops">Viewpoints and loops</a><a class="l2" href="#safety-analysis">Safety analysis</a><a class="l2" href="#for-developers-not-installed">For developers (not installed)</a><a class="l2" href="#use-a-sample-as-a-starting-point">Use a sample as a starting point</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

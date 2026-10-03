@@ -2,7 +2,7 @@
 
 Dyncamelo is designed so that adding a node is a five-minute job: **a public static C# method with a couple of attributes is a node.** This guide walks through building a complete node pack, from an empty project to nodes showing up in the editor, and then covers the advanced path — interactive `NodeModel` nodes with custom WPF UI.
 
-> Availability note: zero-touch authoring works from v0.1 for libraries compiled into Dyncamelo. **Loading third-party packs from the Packages folder ships in v0.2 (milestone M3)** — see the [roadmap](IMPLEMENTATION_PLAN.md#3-milestone-roadmap). The authoring model described here is identical in both cases, so packs written today drop in unchanged.
+> Packs are loaded from a `Packages` folder next to `Dyncamelo.App.dll`, the first time the editor or the Script Player opens in a session. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
 
 ## Contents
 
@@ -21,9 +21,9 @@ Dyncamelo is designed so that adding a node is a five-minute job: **a public sta
 
 ## 1. How node loading works
 
-At startup, Dyncamelo's zero-touch loader (in `Dyncamelo.Core`) reflects over node assemblies and registers every `public static` method that carries a `[NodeName]` attribute. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
+At startup, Dyncamelo's zero-touch loader (in `Dyncamelo.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
 
-From v0.2, the loader also scans:
+The loader also scans the `Packages` folder next to `Dyncamelo.App.dll` (subfolders included):
 
 ```
 %APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\<year>\Packages\<YourPackName>\
@@ -63,7 +63,7 @@ A general-purpose pack (no Navisworks API) targets `netstandard2.0` and referenc
 ### Step 2 — write a node
 
 ```csharp
-using Dyncamelo.Core.Nodes; // attribute namespace — see Dyncamelo.Core XML docs
+using Dyncamelo.Core.Loader; // the attributes: [NodeName], [NodeCategory], [NodeDescription], [MultiReturn]…
 
 namespace RebarToolkit;
 

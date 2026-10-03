@@ -71,7 +71,7 @@ Three more things to know:
 
 ## What Dyncamelo sends over the network
 
-Searched in the source: besides the `Web.Get` and `Web.Post` nodes, the only network call is the **update check**. Once a day, when the editor pane opens, Dyncamelo asks `https://api.github.com/repos/mrshoma99-rgb/dyncamelo/releases/latest` for the newest release number. It sends no information about you or your models beyond what any web request carries (the request has the user agent `Dyncamelo-UpdateCheck`). If a newer version exists, it asks you before it opens the download page. The date of the last check is kept in `%APPDATA%\Dyncamelo\update-check.txt`. There is no setting to switch the check off.
+Searched in the source: besides the `Web.Get` and `Web.Post` nodes, the only network call is the **update check**. Once a day, when the editor pane opens, Dyncamelo asks `https://api.github.com/repos/mrshoma99-rgb/dyncamelo/releases/latest` for the newest release number. It sends no information about you or your models beyond what any web request carries (the request has the user agent `Dyncamelo-UpdateCheck`). If a newer version exists, it asks you before it opens the download page. The date of the last check is kept in `%APPDATA%\Dyncamelo\update-check.txt`. Switch the check off in **Settings > Privacy > Check for a newer version once a day**; with it off, Dyncamelo makes no network request of its own.
 
 ## Downloads
 

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dyncamelo for Navisworks - Dyncamelo Wiki</title>
+<meta name="description" content="Dyncamelo brings Dynamo-style visual programming to Autodesk Navisworks 2024, 2025 and 2026. You drag nodes onto a canvas, wire the output of one into the input of the next and press Run. The graph reads and changes the model you have open: no code, no macros, no SDK boilerplate.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a class="current" href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Dyncamelo for Navisworks</h1>
+<p>Dyncamelo brings <strong>Dynamo-style visual programming</strong> to Autodesk Navisworks 2024, 2025 and 2026. You drag <strong>nodes</strong> onto a canvas, wire the output of one into the input of the next and press <strong>Run</strong>. The graph reads and changes the model you have open: no code, no macros, no SDK boilerplate.</p>
+<blockquote>
+<p>Search a federated model by property, colour-code it by system, create selection sets in bulk, take quantities out to Excel, triage clashes by rule and make a saved viewpoint for each issue, as graphs you can save, share and run again.</p>
+</blockquote>
+<p><img alt="The Dyncamelo editor with a sample graph after a run" src="images/editor-screenshot.png" /></p>
+<p><em>The editor with the "Table Summary from Text" sample after a run: nodes, wires, the values under each node and a Watch Table. It docks inside Navisworks as a pane, and has a light theme too.</em></p>
+<h2 id="where-to-start">Where to start</h2>
+<table>
+<thead>
+<tr>
+<th>I want to…</th>
+<th>Read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Install it</td>
+<td><a href="installation.html">Installation</a>, after a look at the <a href="requirements.html">requirements</a></td>
+</tr>
+<tr>
+<td>Build my first graph in ten minutes</td>
+<td><a href="first-steps.html">Your first script</a></td>
+</tr>
+<tr>
+<td>Understand how graphs work</td>
+<td><a href="concepts.html">Concepts</a>, then <a href="ports-and-kinds.html">Inputs, outputs and kinds</a></td>
+</tr>
+<tr>
+<td>Find a node and see its inputs and outputs</td>
+<td><a href="nodes/index.html">Node reference</a>, or search the whole site with the box at the top</td>
+</tr>
+<tr>
+<td>Learn from a finished graph</td>
+<td><a href="samples.html">Sample scripts</a> and <a href="recipes.html">Recipes</a></td>
+</tr>
+<tr>
+<td>Exchange data with IFC, BCF, Excel or CSV</td>
+<td><a href="exchange-formats.html">IFC, BCF, Excel and CSV</a></td>
+</tr>
+<tr>
+<td>Run a tested script without the node editor</td>
+<td><a href="player.html">The Script Player</a></td>
+</tr>
+<tr>
+<td>Fix a problem</td>
+<td><a href="troubleshooting.html">Troubleshooting</a> and the <a href="faq.html">FAQ</a></td>
+</tr>
+<tr>
+<td>Update or remove Dyncamelo</td>
+<td><a href="updating.html">Updating</a>, <a href="uninstall.html">Uninstalling</a></td>
+</tr>
+<tr>
+<td>Write my own nodes in C#</td>
+<td><a href="extending.html">Writing your own nodes</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-it-can-do">What it can do</h2>
+<ul>
+<li><strong>A real dataflow engine.</strong> Nodes run in dependency order, results are cached, and when you change one input only the nodes after it run again. Run by hand, or let it re-run after every edit.</li>
+<li><strong>Lists work the way Dynamo users expect.</strong> Feed a list into an input that wants one value and the node runs once per item; <em>lacing</em> (shortest, longest, cross product) and <em>list levels</em> (<code>@L</code>) choose how lists pair up.</li>
+<li><strong>Loops over items.</strong> Put any nodes between <code>Loop.Item</code> and <code>Loop.Collect</code> and they run once per item, in order, so jobs like "isolate, zoom, save a viewpoint, next" use the real nodes.</li>
+<li><strong>A deep Navisworks library.</strong> Properties and quantities, Find-Items-grade search, selection sets, colour, transparency and hide overrides, transforms, saved viewpoints, clash tests and results, BCF exchange, IFC export, grids, TimeLiner, and CSV, Excel and HTML reports. The general library adds maths, logic, text, dates, lists, dictionaries, tables and files.</li>
+<li><strong>Robust by design.</strong> A node that fails shows its own error and never stops the graph run or Navisworks.</li>
+<li><strong>Portable graphs.</strong> A graph is a small, versioned, plain-text <code>.dyc</code> file that you can email, review and keep in version control.</li>
+<li><strong>The Script Player.</strong> Run a saved graph from a simple form, for colleagues who should not have to open the editor.</li>
+<li><strong>Extensible.</strong> A public static C# method with a couple of attributes is a node.</li>
+</ul>
+<p>See <a href="concepts.html">Concepts</a> for the vocabulary, and the <a href="nodes/index.html">node reference</a> for every node.</p>
+<h2 id="good-to-know-before-you-start">Good to know before you start</h2>
+<ul>
+<li>Dyncamelo is <strong>free for personal and other noncommercial use</strong>. Using it for your job at a company, or in a paid project, needs a commercial licence from BIMCamel. See <a href="licence.html">Licence</a>.</li>
+<li>It <strong>sends nothing about you or your models anywhere</strong>. It makes one optional request a day to look for a newer version, which you can switch off. See <a href="privacy-and-safety.html">Privacy and safety</a>.</li>
+<li><strong>A graph is a program.</strong> Only run graphs you trust. Dyncamelo asks before it runs a graph from a file that can run programs, use the network or change files.</li>
+<li>Only <strong>Navisworks Manage 2024</strong> has been seen running it in the field so far; 2025, 2026 and Simulate are built and installed the same way but not yet confirmed. The <a href="requirements.html">requirements</a> page says exactly what is and is not verified.</li>
+<li>Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.</li>
+</ul>
+<p>This site belongs to the version it was built from (shown at the top of every page). The source code, issues and release notes are on <a href="https://github.com/mrshoma99-rgb/dyncamelo">GitHub</a>.</p>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#where-to-start">Where to start</a><a class="l2" href="#what-it-can-do">What it can do</a><a class="l2" href="#good-to-know-before-you-start">Good to know before you start</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

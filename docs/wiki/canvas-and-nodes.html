@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The editor: canvas and nodes - Dyncamelo Wiki</title>
+<meta name="description" content="The Dyncamelo editor is a pane inside Navisworks where you build a script by placing nodes on a canvas and joining them with wires.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a class="current" href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>The editor: canvas and nodes</h1>
+<p>The Dyncamelo editor is a pane inside Navisworks where you build a script by placing nodes on a canvas and joining them with wires.</p>
+<p>This page tours the editor window and everything you do on the canvas. The node library has its own page (<a href="library-and-search.html">Node library and search</a>), and every key is listed in the <a href="shortcuts.html">keyboard and mouse reference</a>.</p>
+<h2 id="opening-the-editor">Opening the editor</h2>
+<p>Open a model in Navisworks, then click <strong>Dyncamelo</strong> on the <strong>BIMCamel</strong> ribbon tab. The button shows or hides the editor pane. It is a normal Navisworks dock pane, so you can dock it, float it or put it on a second monitor.</p>
+<p>Every function of the editor can be reached four ways: a <strong>menu</strong>, a <strong>shortcut</strong>, the <strong>command palette</strong> (<code>Ctrl+Shift+P</code>) and the <strong>Settings</strong> page. If you cannot remember where something is, open the palette and type a word of its name.</p>
+<h2 id="the-window-at-a-glance">The window at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Header bar (blue in the default palette)</td>
+<td>"Dyncamelo by BIMCamel" and, on the right, the name of the open script. A <code>*</code> after the name means there are unsaved changes; the file name follows once the script has been saved.</td>
+</tr>
+<tr>
+<td>Menu bar</td>
+<td><strong>File, Edit, View, Graph, Node, Node Groups, Wires, Help.</strong> Each menu shows the shortcut beside every command. File also holds <strong>Recent Files</strong> and <strong>Sample Graphs</strong>; Graph holds <strong>Frame Colour</strong>.</td>
+</tr>
+<tr>
+<td>Buttons on the right of the menu bar</td>
+<td>Undo, Redo, <strong>Run</strong>, <strong>Auto</strong>, value previews on/off, minimap on/off, and the <strong>Settings</strong> gear.</td>
+</tr>
+<tr>
+<td>Library panel (left)</td>
+<td>The list of nodes. See <a href="library-and-search.html">Node library and search</a>.</td>
+</tr>
+<tr>
+<td>Canvas (middle)</td>
+<td>Where nodes and wires live.</td>
+</tr>
+<tr>
+<td>Status bar (bottom)</td>
+<td>A message on the left (what you just did, or what a run did), a hint line, and on the right the number of <strong>Nodes</strong>, the <strong>Warnings</strong> and <strong>Errors</strong> counts and the <strong>Last run</strong> time in milliseconds.</td>
+</tr>
+</tbody>
+</table>
+<p>A run blocks Navisworks while it works, so during a run a dark overlay shows which node is working (for example <code>12 / 40 — name</code>) and reminds you that <strong>Esc</strong> cancels it. See <a href="running-graphs.html">Running scripts</a>.</p>
+<h2 id="the-canvas">The canvas</h2>
+<p><strong>Moving around</strong></p>
+<ul>
+<li><strong>Pan</strong> by dragging with the right or the middle mouse button.</li>
+<li><strong>Zoom</strong> with the mouse wheel. <strong>View ▸ Zoom In</strong> and <strong>Zoom Out</strong> do the same from the menu.</li>
+<li><strong>Fit to Screen</strong> brings the whole script into view. It is in the View menu and the canvas right-click menu, and <code>Home</code> does it from the keyboard.</li>
+<li><code>Shift+F</code> (<strong>Frame Selected</strong>) zooms to what you have selected.</li>
+<li>The <strong>minimap</strong> is a small overview in the bottom-right corner. Drag its frame to pan and use the wheel to zoom. It appears by itself once a script has 40 or more nodes; <code>Ctrl+M</code> or the map button in the menu bar switches it on and off, and <strong>Settings ▸ Canvas ▸ Minimap</strong> chooses Automatic, Always or Never.</li>
+<li><strong>Bookmarks</strong> save a view so you can come back to it (see below).</li>
+</ul>
+<p><strong>Grid.</strong> The canvas draws grid lines, and nodes snap to the grid when you drag them. Both can be switched off in <a href="settings.html">Settings</a> under Canvas.</p>
+<p><strong>Zoomed far out.</strong> When you zoom out a long way, nodes shrink to just their title bars and wires become straight lines, so very large scripts stay responsive. Zoom back in and everything returns.</p>
+<p><strong>Right-click on empty canvas</strong> offers Add Note Here, Copy, Paste, Duplicate, Group Selection (a frame, see below), Arrange Selection, Run and Fit to Screen.</p>
+<h2 id="the-start-screen">The start screen</h2>
+<p>While the canvas is empty (when the editor opens, or after you delete every node) the middle of the canvas shows a start screen:</p>
+<ul>
+<li>the Dyncamelo name and the <strong>installed version</strong> (the letter <code>v</code> followed by the version number);</li>
+<li>a <strong>bimcamel.com</strong> button that opens the Dyncamelo page on the BIMCamel website, https://www.bimcamel.com/plugins/dyncamelo;</li>
+<li>when the once-a-day update check has found a newer release, a notice saying which version is available and which one you have, with a <strong>Get it</strong> button that opens the download page;</li>
+<li><strong>cards</strong>. <strong>New script</strong> starts an empty script. Under it come your four newest <strong>recent scripts</strong> (the card shows the file name and its folder). If you have none yet, a line says the scripts you open or save will appear there. Below that, an <strong>Examples</strong> row offers up to six of the sample scripts that ship with Dyncamelo, "Getting Started" first.</li>
+</ul>
+<p>Click a card to open it. The cards disappear as soon as you add a node or open a script. After you press <strong>New script</strong> only a short hint remains ("an empty canvas" and the ways to add a first node). The same two links also live in the Help menu (<strong>BIMCamel Website</strong> and <strong>Get the Newest Version…</strong>).</p>
+<p>You can switch the start screen off with <strong>Settings ▸ Appearance ▸ Start screen on an empty canvas</strong>.</p>
+<h2 id="nodes">Nodes</h2>
+<p>A node is one step of the script. It has a title bar, <strong>inputs</strong> on the left and <strong>outputs</strong> on the right. Add nodes from the library (<code>Space</code> over the canvas is the fastest way), then fill in or wire their inputs. How sockets are coloured and shaped is explained in <a href="ports-and-kinds.html">Inputs, outputs and kinds</a>.</p>
+<table>
+<thead>
+<tr>
+<th>To…</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Move a node</td>
+<td>Drag it. Drag a selection to move several together.</td>
+</tr>
+<tr>
+<td>Rename a node</td>
+<td>Double-click its title.</td>
+</tr>
+<tr>
+<td>Read what a node does</td>
+<td>Hover its title for the description. The small dot beside the title tells whether the node creates, modifies or only reads (Create, Modify, Info).</td>
+</tr>
+<tr>
+<td>Change the width</td>
+<td>Drag the node's right edge; double-click the edge for automatic width. <strong>View ▸ Reset Node Width</strong> does the same for the selected nodes.</td>
+</tr>
+<tr>
+<td>Collapse or expand</td>
+<td><code>H</code>, the arrow in the title bar, or the node's right-click menu. A collapsed node becomes a capsule that still has its sockets, so it can still be wired. <strong>View ▸ Collapse All Nodes</strong> and <strong>Expand All Nodes</strong> act on everything.</td>
+</tr>
+<tr>
+<td>Hide the inputs you are not using</td>
+<td><code>Ctrl+H</code> hides optional inputs that have no wire; click the row that stands in for them to show them again. <strong>Settings ▸ Editing ▸ Hide unused inputs by default</strong> makes it the rule.</td>
+</tr>
+<tr>
+<td>Put typed-in values back to defaults</td>
+<td><strong>Node ▸ Reset Inputs to Default</strong>, or hover a single number field and press <code>Backspace</code>.</td>
+</tr>
+<tr>
+<td>See the value a node produced</td>
+<td>After a run, a small bubble under each node previews the result; click it to expand. Hover a socket to see its type and the value it holds. The preview button in the menu bar (or Settings ▸ Appearance) switches the bubbles off.</td>
+</tr>
+<tr>
+<td>Ask "why didn't this run?"</td>
+<td>Select the node and press <code>I</code>. The status bar explains in words whether it is frozen, muted, failed, waiting for an input or just waiting for the next Run, and names the node responsible when it is another one.</td>
+</tr>
+<tr>
+<td>Find the node in the library</td>
+<td>Right-click it and choose <strong>Find in Library</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Node states.</strong> A node that failed shows an error and a node that ran with a recoverable problem shows a warning. The <strong>Warnings</strong> and <strong>Errors</strong> counts in the status bar are buttons: click them (or press <code>Ctrl+Shift+E</code>) to list every node that failed or warned in the last run, errors first. Click a row to jump to that node; <code>F8</code> and <code>Shift+F8</code> step through the problems.</p>
+<p><strong>Mute and freeze.</strong> Both stop a node from running, but they behave differently around it.</p>
+<ul>
+<li>A <strong>muted</strong> node (<code>M</code>, badge MUTED) is bypassed. Each of its outputs passes along the first input of a matching kind, and everything after it still runs. Use it to switch a step off inside a live chain, such as a filter or a recolour.</li>
+<li>A <strong>frozen</strong> node (<code>Shift+M</code>, badge FROZEN) is held. It and everything after it are skipped by runs and keep the results of their last run. Use it to stop a slow branch from being recalculated while you work elsewhere.</li>
+</ul>
+<p>Both are undoable and saved with the script. The node's right-click menu also offers <strong>Lacing</strong> (Auto, Shortest, Longest, Cross Product), which decides how lists pair up (see <a href="concepts.html">Concepts</a>).</p>
+<p><strong>Selecting.</strong> Click a node, or drag a selection rectangle across empty canvas. <code>Ctrl+A</code> selects everything. These help in a busy script:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Selects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>L</code></td>
+<td>everything downstream of the selection</td>
+</tr>
+<tr>
+<td><code>Shift+L</code></td>
+<td>everything upstream of the selection</td>
+</tr>
+<tr>
+<td><code>Shift+G</code></td>
+<td>every node of the same kind as the selection</td>
+</tr>
+<tr>
+<td>Arrow keys</td>
+<td>the nearest node in that direction, so you can tour a script without the mouse</td>
+</tr>
+</tbody>
+</table>
+<p>With a node selected, its wires are drawn heavier and all others fainter, so you can follow a connection through a crowded script (<strong>Settings ▸ Canvas ▸ Highlight the wires of the selected node</strong>).</p>
+<p><strong>Arrange.</strong> <code>Ctrl+L</code> tidies the selected nodes into columns that follow the direction of the data; <code>Ctrl+Shift+L</code> does the whole script. The block stays roughly where it was.</p>
+<h2 id="wires">Wires</h2>
+<ul>
+<li><strong>Connect</strong> by dragging from an output socket to an input socket. While you drag, sockets that cannot take the wire fade out. An input takes one wire, except the long pill-shaped <strong>multi-input</strong> sockets, which take as many as you like and combine them into one list. Drag from a pill to take off the wire under the pointer; use <strong>Wires ▸ Move Wire Earlier / Later</strong> to reorder them.</li>
+<li><strong>Dashed wire.</strong> A dashed wire feeds a list into an input that wants a single value, so the node runs once per item.</li>
+<li><strong>Drop a wire on empty canvas</strong> and the node search opens, showing only nodes that can accept it. Picking one adds it and connects it in one step.</li>
+<li><strong>Move a connection.</strong> Drag from an input that already has a wire to pick the wire up. Drop it on another input to move it, hold <code>Shift</code> while dropping on an occupied input to swap the two, or drop it on empty canvas to remove it. <strong>Wires ▸ Swap Links</strong> swaps two selected wires.</li>
+<li><strong>Insert a node into a wire.</strong> Drag a node that has no wires of its own over a wire; the wire lights up. Drop it and the data now passes through the node, and the nodes after it shift right to make room (<strong>Settings ▸ Editing ▸ Make room when inserting on a wire</strong>). You can also drag a node straight from the library onto a wire, or select one node and one wire and use <strong>Node ▸ Insert Into Selected Wire</strong>. It is one undo step.</li>
+<li><strong>Cut wires.</strong> Hold <code>Alt+Shift</code> and drag across them. Hold <code>Ctrl</code> as you release to mute the cut wires instead of removing them.</li>
+<li><strong>Mute a wire.</strong> Select it and use <strong>Wires ▸ Mute / Unmute Selected Wires</strong>. A muted wire is ignored by the run and the input falls back to its own value, a quick way to switch a branch off without deleting it.</li>
+<li><strong>Connect Selected Nodes</strong> (<code>F</code>) joins two or more selected nodes from left to right, best matching sockets first.</li>
+<li><strong>Delete and Reconnect</strong> (<code>Ctrl+Delete</code>) removes a node but joins its inputs to its outputs, keeping the chain intact.</li>
+<li><strong>Reroutes.</strong> Double-click a wire to add a small waypoint that bends it, or use <strong>Wires ▸ Add Reroute to Selected Wires</strong>. Deleting a reroute keeps the wire (<strong>Settings ▸ Editing ▸ Deleting a reroute keeps the wire</strong>).</li>
+<li>Right-click a wire and choose <strong>Disconnect</strong> to remove it.</li>
+</ul>
+<h2 id="notes-and-frames">Notes and frames</h2>
+<ul>
+<li>A <strong>note</strong> is a yellow sticky note for explaining a script to the next person. Use <strong>Graph ▸ Add Note</strong>, right-click empty canvas and choose <strong>Add Note Here</strong>, or double-click the canvas if you set that in Settings. Type straight into it.</li>
+<li>A <strong>frame</strong> is a coloured rectangle with a title that sits behind a few nodes. Select the nodes and press <code>Ctrl+G</code> (the menu calls this <strong>Group Selection</strong>). Click the title to rename it, drag the coloured bar to move the frame together with its nodes, and drag its resize handle to change its size. <code>Ctrl+Shift+G</code> (<strong>Fit Frame to Contents</strong>) shrinks or grows it to wrap its nodes, <code>Ctrl+Shift+U</code> (<strong>Ungroup</strong>) removes the frame and leaves the nodes, and <strong>Graph ▸ Frame Colour</strong> (or the frame's right-click menu) offers Blue, Green, Amber, Red, Purple and Gray.</li>
+</ul>
+<p>Frames are only for tidiness. For a reusable piece of script with its own inputs and outputs, see <a href="node-groups.html">Node groups</a>.</p>
+<h2 id="copy-paste-duplicate-and-delete">Copy, paste, duplicate and delete</h2>
+<ul>
+<li><code>Ctrl+C</code>, <code>Ctrl+X</code> and <code>Ctrl+V</code> copy, cut and paste the selected nodes together with the wires between them. Dyncamelo keeps its own clipboard inside the editor, so pasting does not use the Windows clipboard. Repeated pastes are offset a little each time.</li>
+<li><code>Ctrl+D</code> <strong>duplicates</strong> the selection (with the wires between the copied nodes), placing the copy slightly offset from the original.</li>
+<li><code>Delete</code> removes the selection.</li>
+</ul>
+<h2 id="undo-redo-and-history">Undo, redo and history</h2>
+<p><code>Ctrl+Z</code> undoes and <code>Ctrl+Y</code> (or <code>Ctrl+Shift+Z</code>) redoes; the menu-bar buttons do the same and their tooltips name the edit. Undo covers edits to the script only. It does <strong>not</strong> reverse changes a run has already made in Navisworks, and the status bar says so.</p>
+<p><code>Ctrl+Shift+H</code> (<strong>Undo History…</strong>) lists every step. Click a step to jump back or forward to exactly that point; steps you undid appear dimmed until you make a new edit. Inside a <a href="node-groups.html">node group</a>, each level keeps its own history.</p>
+<h2 id="bookmarks">Bookmarks</h2>
+<p><code>Ctrl+K</code> (<strong>Bookmark This View…</strong>) names the current position and zoom and saves it <strong>in the script file</strong>. <code>Ctrl+Shift+K</code> (<strong>Canvas Bookmarks…</strong>) lists them: click one to go there, click the ✕ to remove it. They are handy for touring a big script, for example "inputs", "filters", "export".</p>
+<h2 id="finding-a-node-on-the-canvas">Finding a node on the canvas</h2>
+<p><code>Ctrl+F</code> (<strong>Find Node on Canvas…</strong>) opens the command palette already set to search the nodes in your script. Type part of a name and press <code>Enter</code>: the node is selected and scrolled into view. (This is different from <code>Space</code>, which adds a new node from the library.)</p>
+<h2 id="the-command-palette">The command palette</h2>
+<p><code>Ctrl+Shift+P</code> opens the command palette. Type a word and the list shows matching <strong>commands</strong>, matching <strong>settings</strong> (choosing one opens the Settings page on it) and matching <strong>nodes on your canvas</strong>. Use the up and down arrows, press <code>Enter</code> to run the highlighted entry and <code>Esc</code> to close. Start the text with <code>@</code> to list only canvas nodes. The palette only lists commands that can run right now.</p>
+<h2 id="hints-and-the-status-bar">Hints and the status bar</h2>
+<p>The status bar's hint line follows what you are doing: the keys for the selected nodes, what releasing a dragged wire will do, how to leave a node group. It hides itself first when the pane is narrow. <code>F1</code> opens a sheet of every keyboard shortcut and mouse gesture, showing the keys currently in force, including any you have changed. <strong>Settings ▸ Appearance</strong> switches the hints off and sets the <strong>Window scale</strong> (90 to 150 per cent) for high-resolution screens or a small pane.</p>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><a href="library-and-search.html">Node library and search</a>: find and add nodes.</li>
+<li><a href="saving-opening.html">Saving and opening scripts</a>: <code>.dyc</code> files, autosave and recovery.</li>
+<li><a href="settings.html">Settings</a> and the <a href="shortcuts.html">keyboard and mouse reference</a>.</li>
+<li><a href="node-groups.html">Node groups</a>: reusable pieces of script.</li>
+</ul>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#opening-the-editor">Opening the editor</a><a class="l2" href="#the-window-at-a-glance">The window at a glance</a><a class="l2" href="#the-canvas">The canvas</a><a class="l2" href="#the-start-screen">The start screen</a><a class="l2" href="#nodes">Nodes</a><a class="l2" href="#wires">Wires</a><a class="l2" href="#notes-and-frames">Notes and frames</a><a class="l2" href="#copy-paste-duplicate-and-delete">Copy, paste, duplicate and delete</a><a class="l2" href="#undo-redo-and-history">Undo, redo and history</a><a class="l2" href="#bookmarks">Bookmarks</a><a class="l2" href="#finding-a-node-on-the-canvas">Finding a node on the canvas</a><a class="l2" href="#the-command-palette">The command palette</a><a class="l2" href="#hints-and-the-status-bar">Hints and the status bar</a><a class="l2" href="#where-to-go-next">Where to go next</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>

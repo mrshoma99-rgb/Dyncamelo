@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DateTime - Dyncamelo Wiki</title>
+<meta name="description" content="19 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub current" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>DateTime</h1>
+<p class="lead">19 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-datetime-adddays">
+<h3><a class="node-name" href="#node-datetime-adddays">DateTime.AddDays</a></h3>
+<p>Offsets a date/time by a number of days (fractional and negative values allowed).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to offset.</td></tr>
+<tr><td><code>days</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Days to add (fractional and negative values allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The offset date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">offset</span> <span class="chip">shift</span> <span class="chip">schedule</span> <span class="chip">date</span></p>
+</section>
+<section class="node" id="node-datetime-addhours">
+<h3><a class="node-name" href="#node-datetime-addhours">DateTime.AddHours</a></h3>
+<p>Adds hours to a date/time (fractional and negative values allowed).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to offset.</td></tr>
+<tr><td><code>hours</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Hours to add (fractional and negative values allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The offset date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">offset</span> <span class="chip">shift</span> <span class="chip">schedule</span> <span class="chip">hour</span> <span class="chip">later</span> <span class="chip">earlier</span> <span class="chip">time</span></p>
+</section>
+<section class="node" id="node-datetime-addminutes">
+<h3><a class="node-name" href="#node-datetime-addminutes">DateTime.AddMinutes</a></h3>
+<p>Adds minutes to a date/time (fractional and negative values allowed).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to offset.</td></tr>
+<tr><td><code>minutes</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Minutes to add (fractional and negative values allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The offset date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">offset</span> <span class="chip">shift</span> <span class="chip">schedule</span> <span class="chip">minute</span> <span class="chip">later</span> <span class="chip">earlier</span> <span class="chip">time</span></p>
+</section>
+<section class="node" id="node-datetime-addmonths">
+<h3><a class="node-name" href="#node-datetime-addmonths">DateTime.AddMonths</a></h3>
+<p>Adds calendar months to a date/time (the day clamps to the end of a shorter month).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to offset.</td></tr>
+<tr><td><code>months</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Months to add (negative values allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The offset date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">offset</span> <span class="chip">shift</span> <span class="chip">schedule</span> <span class="chip">month</span> <span class="chip">later</span> <span class="chip">earlier</span></p>
+</section>
+<section class="node" id="node-datetime-addyears">
+<h3><a class="node-name" href="#node-datetime-addyears">DateTime.AddYears</a></h3>
+<p>Adds calendar years to a date/time (29 February clamps to 28 February in a common year).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to offset.</td></tr>
+<tr><td><code>years</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Years to add (negative values allowed).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The offset date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">offset</span> <span class="chip">shift</span> <span class="chip">schedule</span> <span class="chip">year</span> <span class="chip">later</span> <span class="chip">earlier</span></p>
+</section>
+<section class="node" id="node-datetime-ageindays">
+<h3><a class="node-name" href="#node-datetime-ageindays">DateTime.AgeInDays</a></h3>
+<p>Returns how many days old a date/time is at a reference date/time (reference minus date; fractional days included).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to measure the age of, e.g. when a clash was created.</td></tr>
+<tr><td><code>reference</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to measure up to, e.g. DateTime.Now.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>days</code></td><td><code>number</code></td><td>The age in days (reference minus dateTime).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">age</span> <span class="chip">old</span> <span class="chip">elapsed</span> <span class="chip">since</span> <span class="chip">overdue</span> <span class="chip">duration</span> <span class="chip">days</span></p>
+</section>
+<section class="node" id="node-datetime-bydate">
+<h3><a class="node-name" href="#node-datetime-bydate">DateTime.ByDate</a></h3>
+<p>Creates a date from year, month and day numbers.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>year</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Year, e.g. 2026.</td></tr>
+<tr><td><code>month</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Month, 1-12.</td></tr>
+<tr><td><code>day</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Day of month, 1-31.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The date at midnight.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">construct</span> <span class="chip">ymd</span> <span class="chip">calendar</span> <span class="chip">date</span></p>
+</section>
+<section class="node" id="node-datetime-compare">
+<h3><a class="node-name" href="#node-datetime-compare">DateTime.Compare</a></h3>
+<p>Compares two date/times: -1 when the first is earlier, 0 when equal, 1 when it is later.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The first date/time.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The second date/time.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>integer</code></td><td>-1 when a is earlier than b, 0 when they are equal, 1 when a is later than b.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">earlier</span> <span class="chip">later</span> <span class="chip">before</span> <span class="chip">after</span> <span class="chip">equal</span> <span class="chip">order</span> <span class="chip">sort</span></p>
+</section>
+<section class="node" id="node-datetime-components">
+<h3><a class="node-name" href="#node-datetime-components">DateTime.Components</a></h3>
+<p>Splits a date/time into year, month, day, hour, minute, second, English weekday name, day of year, ISO week, ISO year and quarter.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to split.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th></tr></thead><tbody>
+<tr><td><code>year</code></td><td><code>integer</code></td></tr>
+<tr><td><code>month</code></td><td><code>integer</code></td></tr>
+<tr><td><code>day</code></td><td><code>integer</code></td></tr>
+<tr><td><code>hour</code></td><td><code>integer</code></td></tr>
+<tr><td><code>minute</code></td><td><code>integer</code></td></tr>
+<tr><td><code>second</code></td><td><code>integer</code></td></tr>
+<tr><td><code>weekday</code></td><td><code>string</code></td></tr>
+<tr><td><code>dayOfYear</code></td><td><code>integer</code></td></tr>
+<tr><td><code>isoWeek</code></td><td><code>integer</code></td></tr>
+<tr><td><code>isoYear</code></td><td><code>integer</code></td></tr>
+<tr><td><code>quarter</code></td><td><code>integer</code></td></tr>
+</tbody></table>
+<p class="muted">Returns: Dictionary with &quot;year&quot;, &quot;month&quot;, &quot;day&quot;, &quot;hour&quot;, &quot;minute&quot;, &quot;second&quot;, &quot;weekday&quot;, &quot;dayOfYear&quot;, &quot;isoWeek&quot;, &quot;isoYear&quot; and &quot;quarter&quot;.</p>
+<p class="tags"><span class="chip">deconstruct</span> <span class="chip">parts</span> <span class="chip">year</span> <span class="chip">month</span> <span class="chip">weekday</span> <span class="chip">week number</span> <span class="chip">iso week</span> <span class="chip">quarter</span></p>
+</section>
+<section class="node" id="node-datetime-daysbetween">
+<h3><a class="node-name" href="#node-datetime-daysbetween">DateTime.DaysBetween</a></h3>
+<p>Returns the signed number of days between two date/times (end minus start).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>start</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The starting date/time.</td></tr>
+<tr><td><code>end</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The ending date/time.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>days</code></td><td><code>number</code></td><td>The signed day difference.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">difference</span> <span class="chip">duration</span> <span class="chip">span</span> <span class="chip">elapsed</span></p>
+</section>
+<section class="node" id="node-datetime-endof">
+<h3><a class="node-name" href="#node-datetime-endof">DateTime.EndOf</a></h3>
+<p>Returns the last millisecond of the day, week, month, quarter or year containing a date/time (start of the next period minus 1 ms).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time inside the period.</td></tr>
+<tr><td><code>unit</code></td><td><code>string</code></td><td><code>&quot;week&quot;</code></td><td>&quot;day&quot;, &quot;week&quot;, &quot;month&quot;, &quot;quarter&quot; or &quot;year&quot; (any case).</td></tr>
+<tr><td><code>firstDayOfWeek</code></td><td><code>string</code></td><td><code>&quot;Monday&quot;</code></td><td>&quot;Monday&quot; or &quot;Sunday&quot; (any case); only used for &quot;week&quot;.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The start of the next period minus one millisecond.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">ceiling</span> <span class="chip">period</span> <span class="chip">last day</span> <span class="chip">finish</span> <span class="chip">deadline</span> <span class="chip">week</span> <span class="chip">month</span> <span class="chip">quarter</span> <span class="chip">year</span></p>
+</section>
+<section class="node" id="node-datetime-format">
+<h3><a class="node-name" href="#node-datetime-format">DateTime.Format</a></h3>
+<p>Formats a date/time as text using a .NET format string (invariant culture).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to format.</td></tr>
+<tr><td><code>format</code></td><td><code>string</code></td><td><code>&quot;yyyy-MM-dd HH:mm:ss&quot;</code></td><td>.NET date format string.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td><code>string</code></td><td>The formatted text.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">tostring</span> <span class="chip">date</span> <span class="chip">time</span> <span class="chip">pattern</span></p>
+</section>
+<section class="node" id="node-datetime-fromunixseconds">
+<h3><a class="node-name" href="#node-datetime-fromunixseconds">DateTime.FromUnixSeconds</a></h3>
+<p>Converts Unix seconds since 1970-01-01 UTC to a (UTC) date/time.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>seconds</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Seconds since the Unix epoch (negative before 1970).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The date/time, with kind UTC.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">epoch</span> <span class="chip">timestamp</span> <span class="chip">posix</span> <span class="chip">unix</span> <span class="chip">seconds</span> <span class="chip">convert</span></p>
+</section>
+<section class="node" id="node-datetime-now">
+<h3><a class="node-name" href="#node-datetime-now">DateTime.Now</a></h3>
+<p>Returns the current local date and time (captured at execution).</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The current local date and time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">today</span> <span class="chip">current</span> <span class="chip">clock</span> <span class="chip">time</span></p>
+</section>
+<section class="node" id="node-datetime-parse">
+<h3><a class="node-name" href="#node-datetime-parse">DateTime.Parse</a></h3>
+<p>Parses text as a date/time, optionally with an exact .NET format string.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>text</code> <span class="chip required">required</span></td><td><code>string</code></td><td>&mdash;</td><td>The text to parse.</td></tr>
+<tr><td><code>format</code></td><td><code>string</code></td><td><code>&quot;&quot;</code></td><td>Optional exact .NET date format string.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The parsed date/time.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">fromstring</span> <span class="chip">convert</span> <span class="chip">date</span> <span class="chip">time</span></p>
+</section>
+<section class="node" id="node-datetime-range">
+<h3><a class="node-name" href="#node-datetime-range">DateTime.Range</a></h3>
+<p>Creates a list of dates from a start to an end (both included) with a step in days; at most 100000 items.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>start</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The first date.</td></tr>
+<tr><td><code>end</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The last date (included when the step lands on it).</td></tr>
+<tr><td><code>stepDays</code></td><td><code>number</code></td><td><code>1</code></td><td>Days between two items; must be greater than 0.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dates</code></td><td><code>datetime[]</code></td><td>The dates, in order.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">sequence</span> <span class="chip">series</span> <span class="chip">calendar</span> <span class="chip">schedule</span> <span class="chip">every</span> <span class="chip">days</span> <span class="chip">timeline</span></p>
+</section>
+<section class="node" id="node-datetime-startof">
+<h3><a class="node-name" href="#node-datetime-startof">DateTime.StartOf</a></h3>
+<p>Returns midnight at the start of the day, week, month, quarter or year containing a date/time.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time inside the period.</td></tr>
+<tr><td><code>unit</code></td><td><code>string</code></td><td><code>&quot;week&quot;</code></td><td>&quot;day&quot;, &quot;week&quot;, &quot;month&quot;, &quot;quarter&quot; or &quot;year&quot; (any case).</td></tr>
+<tr><td><code>firstDayOfWeek</code></td><td><code>string</code></td><td><code>&quot;Monday&quot;</code></td><td>&quot;Monday&quot; or &quot;Sunday&quot; (any case); only used for &quot;week&quot;.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The first instant (00:00:00) of the period.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">floor</span> <span class="chip">truncate</span> <span class="chip">period</span> <span class="chip">first day</span> <span class="chip">beginning</span> <span class="chip">week</span> <span class="chip">month</span> <span class="chip">quarter</span> <span class="chip">year</span></p>
+</section>
+<section class="node" id="node-datetime-today">
+<h3><a class="node-name" href="#node-datetime-today">DateTime.Today</a></h3>
+<p>Returns today&#x27;s local date at midnight (captured at execution).</p>
+<p class="muted">No inputs.</p>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>dateTime</code></td><td><code>datetime</code></td><td>The local date at 00:00:00.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">current</span> <span class="chip">date</span> <span class="chip">now</span> <span class="chip">midnight</span> <span class="chip">day</span></p>
+</section>
+<section class="node" id="node-datetime-tounixseconds">
+<h3><a class="node-name" href="#node-datetime-tounixseconds">DateTime.ToUnixSeconds</a></h3>
+<p>Converts a date/time to Unix seconds since 1970-01-01 UTC (a value without a time zone is taken as UTC).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dateTime</code> <span class="chip required">required</span></td><td><code>datetime</code></td><td>&mdash;</td><td>The date/time to convert.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>seconds</code></td><td><code>number</code></td><td>Seconds since the Unix epoch (negative before 1970).</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">epoch</span> <span class="chip">timestamp</span> <span class="chip">posix</span> <span class="chip">unix</span> <span class="chip">seconds</span> <span class="chip">convert</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

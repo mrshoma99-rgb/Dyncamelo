@@ -42,6 +42,18 @@ public class StartScreenUiTests : IDisposable
         return path;
     }
 
+    private static string SamplesFolder()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null && !File.Exists(Path.Combine(dir.FullName, "Dyncamelo.sln")))
+        {
+            dir = dir.Parent;
+        }
+
+        Assert.NotNull(dir);
+        return Path.Combine(dir!.FullName, "samples");
+    }
+
     private GraphEditorViewModel NewEditor(int recent = 0)
     {
         var settings = new UiSettingsService(Path.Combine(_root, "settings-" + Guid.NewGuid().ToString("N") + ".json"));
@@ -52,6 +64,8 @@ public class StartScreenUiTests : IDisposable
 
         var vm = new GraphEditorViewModel(NodeRegistry.CreateDefault(), new ScriptedDialogs(), settings);
         vm.UrlOpener = _ => true;
+        vm.SamplesDirectoryOverride = SamplesFolder();   // the examples of the repository, whatever folder the test host runs from
+        vm.RefreshSampleGraphs();
         return vm;
     }
 

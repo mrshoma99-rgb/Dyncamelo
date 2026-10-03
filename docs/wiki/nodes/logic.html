@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logic - Dyncamelo Wiki</title>
+<meta name="description" content="18 nodes: inputs, outputs and what each does.">
+<link rel="stylesheet" href="../assets/wiki.css">
+</head>
+<body data-base="../">
+<header class="top">
+<a class="brand" href="../index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="../index.html">Home</a>
+<a href="../installation.html">Installation</a>
+<a href="../requirements.html">Requirements</a>
+<a href="../first-steps.html">Your first script</a>
+<a href="../updating.html">Updating</a>
+<a href="../uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="../concepts.html">Concepts</a>
+<a href="../ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="../canvas-and-nodes.html">The editor</a>
+<a href="../library-and-search.html">Node library and search</a>
+<a href="../running-graphs.html">Running a graph</a>
+<a href="../saving-opening.html">Saving and opening</a>
+<a href="../node-groups.html">Node groups</a>
+<a href="../player.html">The Script Player</a>
+<a href="../settings.html">Settings</a>
+<a href="../shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="../samples.html">Sample scripts</a>
+<a href="../recipes.html">Recipes</a>
+<a href="../exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav" open><summary>Node reference</summary>
+<a href="../nodes/index.html">All nodes</a>
+<a class="sub" href="../nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="../nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="../nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub current" href="../nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="../nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="../nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="../nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="../nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="../nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="../nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="../nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="../nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="../nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="../nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="../nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="../nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="../nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="../nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="../nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="../nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="../nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="../nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="../troubleshooting.html">Troubleshooting</a>
+<a href="../faq.html">FAQ</a>
+<a href="../privacy-and-safety.html">Privacy and safety</a>
+<a href="../licence.html">Licence</a>
+<a href="../whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="../extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Logic</h1>
+<p class="lead">18 nodes. Every node has its own link: click its name. Types ending in <code>[]</code> are lists; an input with a default is optional.</p>
+<section class="node" id="node-and">
+<h3><a class="node-name" href="#node-and">And</a></h3>
+<p>Returns true only when both inputs are true.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when both operands are true.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">&amp;&amp;</span> <span class="chip">conjunction</span> <span class="chip">boolean</span></p>
+</section>
+<section class="node" id="node-equals">
+<h3><a class="node-name" href="#node-equals">Equals</a></h3>
+<p>Tests whether two values are equal (numbers compare by value regardless of numeric type).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>First value.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Second value.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the values are considered equal.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">==</span> <span class="chip">equal</span> <span class="chip">same</span> <span class="chip">compare</span></p>
+</section>
+<section class="node" id="node-greaterthan">
+<h3><a class="node-name" href="#node-greaterthan">GreaterThan</a></h3>
+<p>Returns true when the first number is greater than the second.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when a &gt; b.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">&gt;</span> <span class="chip">compare</span> <span class="chip">larger</span></p>
+</section>
+<section class="node" id="node-greaterthanorequal">
+<h3><a class="node-name" href="#node-greaterthanorequal">GreaterThanOrEqual</a></h3>
+<p>Returns true when the first number is greater than or equal to the second.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when a &gt;= b.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">&gt;=</span> <span class="chip">compare</span> <span class="chip">atleast</span></p>
+</section>
+<section class="node" id="node-if">
+<h3><a class="node-name" href="#node-if">If</a></h3>
+<p>Returns one of two values depending on a boolean condition.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>test</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>The condition to evaluate.</td></tr>
+<tr><td><code>trueValue</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Value returned when the condition is true.</td></tr>
+<tr><td><code>falseValue</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Value returned when the condition is false.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>any</code></td><td>Either trueValue or falseValue.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">condition</span> <span class="chip">branch</span> <span class="chip">ternary</span> <span class="chip">switch</span></p>
+</section>
+<section class="node" id="node-isnull">
+<h3><a class="node-name" href="#node-isnull">IsNull</a></h3>
+<p>True when the value is null — with @L1 on the input it tests a whole list element-wise, giving the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). The input port is untyped, so a list arrives whole unless levels are set.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to test. To test each element of a list, set this input&#x27;s List Levels to @L1.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>isNull</code></td><td><code>boolean</code></td><td>True when the value is null.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">null</span> <span class="chip">is</span> <span class="chip">check</span> <span class="chip">missing</span> <span class="chip">empty</span> <span class="chip">mask</span> <span class="chip">test</span></p>
+</section>
+<section class="node" id="node-isnullorempty">
+<h3><a class="node-name" href="#node-isnullorempty">IsNullOrEmpty</a></h3>
+<p>True when the value is null, an empty string, an empty list or an empty dictionary — the guard for &quot;did anything come out?&quot; checks before If branches. NOTE: wired to a list directly it tests the LIST (empty or not); set the input&#x27;s List Levels to @L1 to test each element instead.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input&#x27;s List Levels to @L1.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>isEmpty</code></td><td><code>boolean</code></td><td>True when the value is null or empty.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">null</span> <span class="chip">empty</span> <span class="chip">is</span> <span class="chip">check</span> <span class="chip">blank</span> <span class="chip">missing</span> <span class="chip">guard</span> <span class="chip">test</span></p>
+</section>
+<section class="node" id="node-lessthan">
+<h3><a class="node-name" href="#node-lessthan">LessThan</a></h3>
+<p>Returns true when the first number is less than the second.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when a &lt; b.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">&lt;</span> <span class="chip">compare</span> <span class="chip">smaller</span></p>
+</section>
+<section class="node" id="node-lessthanorequal">
+<h3><a class="node-name" href="#node-lessthanorequal">LessThanOrEqual</a></h3>
+<p>Returns true when the first number is less than or equal to the second.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>number</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when a &lt;= b.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">&lt;=</span> <span class="chip">compare</span> <span class="chip">atmost</span></p>
+</section>
+<section class="node" id="node-logic-choose">
+<h3><a class="node-name" href="#node-logic-choose">Logic.Choose</a></h3>
+<p>Picks one of several options by position (0 = first) — a multi-way If.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>index</code> <span class="chip required">required</span></td><td><code>integer</code></td><td>&mdash;</td><td>Which option, counting from 0.</td></tr>
+<tr><td><code>options</code> <span class="chip">any number of wires</span> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The options (wire several nodes into the one socket, or a list).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The option at that index.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">select</span> <span class="chip">pick</span> <span class="chip">switch</span> <span class="chip">index</span> <span class="chip">option</span> <span class="chip">multiplexer</span></p>
+</section>
+<section class="node" id="node-logic-compare">
+<h3><a class="node-name" href="#node-logic-compare">Logic.Compare</a></h3>
+<p>Compares two values — numbers, text or dates — with a test chosen from a list (==, &gt;, contains, matches, regex …). Text that reads as a number is compared as a number.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to test.</td></tr>
+<tr><td><code>b</code></td><td><code>any</code></td><td><code>null</code></td><td>What to test it against (unused by the isNull / notNull / isEmpty / notEmpty tests).</td></tr>
+<tr><td><code>test</code></td><td><code>string</code></td><td><code>&quot;==&quot;</code></td><td>The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</td></tr>
+<tr><td><code>ignoreCase</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) ignores upper/lower case when comparing text.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the test passes.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">compare</span> <span class="chip">greater</span> <span class="chip">less</span> <span class="chip">equal</span> <span class="chip">date</span> <span class="chip">text</span> <span class="chip">contains</span> <span class="chip">wildcard</span> <span class="chip">regex</span> <span class="chip">test</span></p>
+</section>
+<section class="node" id="node-logic-isbetween">
+<h3><a class="node-name" href="#node-logic-isbetween">Logic.IsBetween</a></h3>
+<p>True when a number, text or date lies between a lower and an upper bound (bounds included by default).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to test (number, text or date).</td></tr>
+<tr><td><code>min</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The lower bound.</td></tr>
+<tr><td><code>max</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The upper bound.</td></tr>
+<tr><td><code>inclusive</code></td><td><code>boolean</code></td><td><code>true</code></td><td>True (default) counts the bounds themselves as inside.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the value is within the range.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">range</span> <span class="chip">within</span> <span class="chip">between</span> <span class="chip">inside</span> <span class="chip">interval</span> <span class="chip">tolerance</span></p>
+</section>
+<section class="node" id="node-logic-notequals">
+<h3><a class="node-name" href="#node-logic-notequals">Logic.NotEquals</a></h3>
+<p>True when two values are different (numbers compare by value regardless of numeric type).</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>First value.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Second value.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the values are not equal.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">!=</span> <span class="chip">different</span> <span class="chip">not equal</span> <span class="chip">unequal</span></p>
+</section>
+<section class="node" id="node-logic-switch">
+<h3><a class="node-name" href="#node-logic-switch">Logic.Switch</a></h3>
+<p>Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or code-to-name mapping.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>The value to look for.</td></tr>
+<tr><td><code>cases</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>The values it can be.</td></tr>
+<tr><td><code>results</code> <span class="chip required">required</span></td><td><code>any[]</code></td><td>&mdash;</td><td>What to give for each case (same length as the cases).</td></tr>
+<tr><td><code>fallback</code></td><td><code>any</code></td><td><code>null</code></td><td>What to give when no case matches (nothing by default).</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>value</code></td><td><code>any</code></td><td>The result for the first matching case, or the fallback.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">case</span> <span class="chip">match</span> <span class="chip">map</span> <span class="chip">lookup</span> <span class="chip">translate</span> <span class="chip">switch</span> <span class="chip">select</span></p>
+</section>
+<section class="node" id="node-logic-typeof">
+<h3><a class="node-name" href="#node-logic-typeof">Logic.TypeOf</a></h3>
+<p>Names the kind of a value — number, text, boolean, datetime, list, dictionary, null or the object&#x27;s type — for debugging what a node really returns.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>any</code></td><td>&mdash;</td><td>Any value.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td><code>string</code></td><td>One of: null, number, text, boolean, datetime, list, dictionary, or the type&#x27;s name.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">type</span> <span class="chip">kind</span> <span class="chip">debug</span> <span class="chip">inspect</span> <span class="chip">what is this</span> <span class="chip">class</span></p>
+</section>
+<section class="node" id="node-logic-xor">
+<h3><a class="node-name" href="#node-logic-xor">Logic.Xor</a></h3>
+<p>True when exactly one of the two inputs is true.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the two inputs differ.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">exclusive or</span> <span class="chip">either</span> <span class="chip">one of</span></p>
+</section>
+<section class="node" id="node-not">
+<h3><a class="node-name" href="#node-not">Not</a></h3>
+<p>Inverts a boolean value.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>value</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>The value to negate.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when the input is false.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">!</span> <span class="chip">negate</span> <span class="chip">invert</span> <span class="chip">boolean</span></p>
+</section>
+<section class="node" id="node-or">
+<h3><a class="node-name" href="#node-or">Or</a></h3>
+<p>Returns true when at least one input is true.</p>
+<table class="ports"><thead><tr><th>Input</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>a</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>First operand.</td></tr>
+<tr><td><code>b</code> <span class="chip required">required</span></td><td><code>boolean</code></td><td>&mdash;</td><td>Second operand.</td></tr>
+</tbody></table>
+<table class="ports"><thead><tr><th>Output</th><th>Type</th><th>What it gives</th></tr></thead><tbody>
+<tr><td><code>result</code></td><td><code>boolean</code></td><td>True when at least one operand is true.</td></tr>
+</tbody></table>
+<p class="tags"><span class="chip">||</span> <span class="chip">disjunction</span> <span class="chip">boolean</span></p>
+</section>
+</main>
+<aside class="toc"></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/wiki.js"></script>
+</body>
+</html>

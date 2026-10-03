@@ -98,8 +98,9 @@ DYNCAMELO_REGEN_DOCS=1 dotnet test tests/Dyncamelo.Core.Tests --filter UiGuideTe
 5. General-purpose node (`Dyncamelo.Nodes`)? Add xunit tests in `tests/Dyncamelo.Nodes.Tests` — they must pass on Linux.
 6. Navisworks node? Unit-test any pure logic you can extract; cover the rest via the [QA checklist](docs/QA_CHECKLIST.md) (add a row for it) and say in the PR whether you tried it in Navisworks.
 7. **Regenerate the node catalogue** and commit the result: `python3 tools/generate_node_catalog.py` (it rewrites `docs/NODE_CATALOG.md` and `docs/dyncamelo-nodes.json`; CI runs it with `--check` and fails when they are out of date). Do this whenever you add, rename or retire a node.
-8. Changing a node that has already shipped? Saved graphs must keep loading: keep an old definition id with `[NodeAliases]`, a renamed port with `[PortAlias]`, and retire a node with `[NodeDeprecated]` instead of deleting it. See [docs/EXTENDING.md](docs/EXTENDING.md#10-changing-a-node-that-is-already-shipped).
-9. Update `docs/NODE_LIBRARY.md` if ports/behavior deviate from the design catalog (with reviewer agreement), and add a line to [CHANGELOG.md](CHANGELOG.md) for a user-visible change.
+8. **Regenerate the wiki** and commit the result: `pip install markdown` once, then `python3 tools/build_wiki.py` (it rewrites `docs/wiki` from `docs/wiki-src`, `docs/TROUBLESHOOTING.md`, `docs/RECIPES.md`, `docs/EXTENDING.md`, `CHANGELOG.md` and the node catalogue; CI runs it with `--check`). Do this whenever one of those changes or the version is bumped.
+9. Changing a node that has already shipped? Saved graphs must keep loading: keep an old definition id with `[NodeAliases]`, a renamed port with `[PortAlias]`, and retire a node with `[NodeDeprecated]` instead of deleting it. See [docs/EXTENDING.md](docs/EXTENDING.md#10-changing-a-node-that-is-already-shipped).
+10. Update `docs/NODE_LIBRARY.md` if ports/behavior deviate from the design catalog (with reviewer agreement), and add a line to [CHANGELOG.md](CHANGELOG.md) for a user-visible change.
 
 ## Git workflow
 

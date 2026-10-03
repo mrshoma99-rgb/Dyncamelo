@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes by role - Dyncamelo Wiki</title>
+<meta name="description" content="Short node chains for the jobs people use Dyncamelo for. Each recipe names the nodes (find them with the library search or Ctrl+Shift+P) and says what to wire; the sample graphs in samples/ show some of them built. Every node named here is in the node catalogue; a name that is not there fails the check described at the end of this page.">
+<link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body data-base="">
+<header class="top">
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<span class="spacer"></span>
+<input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
+<div id="results"></div>
+<a href="https://www.bimcamel.com/plugins/dyncamelo">bimcamel.com</a>
+<button class="theme" id="theme" title="Switch between light and dark">Light / dark</button>
+</header>
+<div class="layout">
+<nav class="side"><h4>Start here</h4>
+<a href="index.html">Home</a>
+<a href="installation.html">Installation</a>
+<a href="requirements.html">Requirements</a>
+<a href="first-steps.html">Your first script</a>
+<a href="updating.html">Updating</a>
+<a href="uninstall.html">Uninstalling</a>
+<h4>Using Dyncamelo</h4>
+<a href="concepts.html">Concepts</a>
+<a href="ports-and-kinds.html">Inputs, outputs and kinds</a>
+<a href="canvas-and-nodes.html">The editor</a>
+<a href="library-and-search.html">Node library and search</a>
+<a href="running-graphs.html">Running a graph</a>
+<a href="saving-opening.html">Saving and opening</a>
+<a href="node-groups.html">Node groups</a>
+<a href="player.html">The Script Player</a>
+<a href="settings.html">Settings</a>
+<a href="shortcuts.html">Keyboard and mouse</a>
+<h4>Learn by example</h4>
+<a href="samples.html">Sample scripts</a>
+<a class="current" href="recipes.html">Recipes</a>
+<a href="exchange-formats.html">IFC, BCF, Excel and CSV</a>
+<details class="nodes-nav"><summary>Node reference</summary>
+<a href="nodes/index.html">All nodes</a>
+<a class="sub" href="nodes/annotation.html">Annotation <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/color.html">Color <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/data.html">Data <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/datetime.html">DateTime <span class="muted">(19)</span></a>
+<a class="sub" href="nodes/dictionary.html">Dictionary <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/display.html">Display <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/file.html">File <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/geometry.html">Geometry <span class="muted">(43)</span></a>
+<a class="sub" href="nodes/ifc.html">IFC <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/input.html">Input <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/list.html">List <span class="muted">(63)</span></a>
+<a class="sub" href="nodes/logic.html">Logic <span class="muted">(18)</span></a>
+<a class="sub" href="nodes/math.html">Math <span class="muted">(37)</span></a>
+<a class="sub" href="nodes/report.html">Report <span class="muted">(2)</span></a>
+<a class="sub" href="nodes/string.html">String <span class="muted">(36)</span></a>
+<a class="sub" href="nodes/system.html">System <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/table.html">Table <span class="muted">(28)</span></a>
+<a class="sub" href="nodes/utility.html">Utility <span class="muted">(1)</span></a>
+<a class="sub" href="nodes/workflow.html">Workflow <span class="muted">(16)</span></a>
+<a class="sub" href="nodes/navisworks-analysis.html">Navisworks: Analysis <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-appearance.html">Navisworks: Appearance <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-camera.html">Navisworks: Camera <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-clash.html">Navisworks: Clash <span class="muted">(49)</span></a>
+<a class="sub" href="nodes/navisworks-comments.html">Navisworks: Comments <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-document.html">Navisworks: Document <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-export.html">Navisworks: Export <span class="muted">(14)</span></a>
+<a class="sub" href="nodes/navisworks-grids.html">Navisworks: Grids <span class="muted">(3)</span></a>
+<a class="sub" href="nodes/navisworks-markup.html">Navisworks: Markup <span class="muted">(6)</span></a>
+<a class="sub" href="nodes/navisworks-model.html">Navisworks: Model <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-modelitem.html">Navisworks: ModelItem <span class="muted">(20)</span></a>
+<a class="sub" href="nodes/navisworks-properties.html">Navisworks: Properties <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-search.html">Navisworks: Search <span class="muted">(5)</span></a>
+<a class="sub" href="nodes/navisworks-selection.html">Navisworks: Selection <span class="muted">(9)</span></a>
+<a class="sub" href="nodes/navisworks-selectionsets.html">Navisworks: SelectionSets <span class="muted">(13)</span></a>
+<a class="sub" href="nodes/navisworks-timeliner.html">Navisworks: TimeLiner <span class="muted">(10)</span></a>
+<a class="sub" href="nodes/navisworks-transform.html">Navisworks: Transform <span class="muted">(7)</span></a>
+<a class="sub" href="nodes/navisworks-units.html">Navisworks: Units <span class="muted">(4)</span></a>
+<a class="sub" href="nodes/navisworks-viewpoints.html">Navisworks: Viewpoints <span class="muted">(24)</span></a>
+</details>
+<h4>Help</h4>
+<a href="troubleshooting.html">Troubleshooting</a>
+<a href="faq.html">FAQ</a>
+<a href="privacy-and-safety.html">Privacy and safety</a>
+<a href="licence.html">Licence</a>
+<a href="whats-new.html">What&#x27;s new</a>
+<h4>For developers</h4>
+<a href="extending.html">Writing your own nodes</a></nav>
+<main>
+<h1>Recipes by role</h1>
+<p>Short node chains for the jobs people use Dyncamelo for. Each recipe names the nodes (find them with the library search or <code>Ctrl+Shift+P</code>) and says what to wire; the sample graphs in <a href="samples.html"><code>samples/</code></a> show some of them built. Every node named here is in the <a href="nodes/index.html">node catalogue</a>; a name that is not there fails the check described at the end of this page.</p>
+<p>Two ideas make most of these short:</p>
+<ul>
+<li><strong>A list on a single-value input runs the node once per item</strong> (lacing), so <code>Properties.Value</code> wired to a list of items gives a list of values, and <code>Math.Formula</code> over a list of numbers gives a list of results.</li>
+<li><strong>A table is one wire.</strong> <code>Table.FromRows</code>, <code>Table.FromDictionaries</code>, <code>Properties.ToTable</code> and <code>Table.FromExcelFile</code> make one; <code>Table.Filter</code>, <code>Table.Sort</code>, <code>Table.GroupBy</code>, <code>Table.Join</code> and friends change it; <code>Watch Table</code>, <code>Table.ToExcelFile</code>, <code>Table.ToCsvFile</code>, <code>Report.Html</code> and <code>Table.ToText</code> show or publish it.</li>
+</ul>
+<h2 id="bim-coordinator">BIM coordinator</h2>
+<p><strong>Clash matrix from selection sets.</strong> <code>SelectionSets.All</code> (twice, filtered by name with <code>List.FilterByValue</code>) → <code>ClashTest.Create</code> with <em>cross product</em> lacing: one test per pair of sets.</p>
+<p><strong>Triage and report.</strong> <code>Clash.Tests</code> → <code>ClashTest.Results</code> → <code>Clash.FilterByStatus</code> → <code>Clash.GroupResultsByLevel</code> → <code>Clash.SummaryTable</code> → <code>Table.FromRows</code> → <code>Report.Html</code> → <code>Text.WriteToFile</code>. Add <code>Table.Sort</code> before the report to put the busiest level first.</p>
+<p><strong>Keep a history.</strong> <code>DateTime.Now</code> → <code>DateTime.Format</code> for the file name; <code>Clash.SnapshotToFile</code> each week, <code>Clash.CompareSnapshots</code> against last week's file; <code>CSV.AppendToFile</code> adds one row of totals per run instead of overwriting.</p>
+<p><strong>Only act when something is there.</strong> <code>List.Count</code> of the new results → <code>Logic.Compare</code> (<code>&gt;</code> 0) → <code>Flow.When</code> → the export or the e-mail step. When the condition is false everything after <code>Flow.When</code> is skipped and shown idle, not red.</p>
+<p><strong>Edit a test without re-creating it.</strong> <code>ClashTest.ByName</code> → <code>ClashTest.Duplicate</code> → <code>ClashTest.Edit</code> (tolerance), then <code>ClashTest.Run</code>.</p>
+<h2 id="bim-manager">BIM manager</h2>
+<p><strong>Data completeness KPI.</strong> <code>Search.ByProperty</code> for the category → <code>Audit.MissingProperty</code> for the required property → <code>List.Count</code> (missing) and <code>List.Count</code> (all) → <code>Math.Percent</code> → <code>Watch</code>.</p>
+<p><strong>What data does this model have?</strong> <code>Selection.Current</code> (or a search) → <code>Properties.Discover</code> → <code>Watch Table</code>: every category and property with how many items carry it and sample values. Use it before writing any search, so names are not guessed.</p>
+<p><strong>Naming rule.</strong> <code>Properties.ToTable</code> with the Name and category columns → <code>Table.Filter</code> (<code>regex</code>, <code>!matches</code> or <code>isEmpty</code>) → <code>Watch Table</code> for the offenders, <code>Table.ToExcelFile</code> for the list to send.</p>
+<p><strong>Status colours.</strong> <code>Logic.Switch</code> maps a status text to a colour name; or <code>Color.Palette</code> (colour-blind safe) with <code>Appearance.ColorByValues</code>.</p>
+<p><strong>Track change between two states.</strong> <code>Model.Snapshot</code> on the item set (a GUID → property values map) saved with <code>JSON.WriteToFile</code>; later <code>JSON.ReadFromFile</code> and <code>Snapshot.Diff</code> against a fresh snapshot.</p>
+<h2 id="model-maintainer--compiler">Model maintainer / compiler</h2>
+<p><strong>Compile the newest files.</strong> <code>Directory.FindFiles</code> (pattern <code>*.nwc;*.nwd</code>, sort <em>modified</em>, descending) → <code>Document.AppendFiles</code> → <code>Document.Save</code>. Put <code>Flow.Try</code> after a risky step so one bad file is logged with <code>Log.Write</code> instead of stopping the run.</p>
+<p><strong>Keep a log.</strong> <code>Log.Write</code> appends a time-stamped line (<code>INFO</code>, <code>WARN</code>, <code>ERROR</code>); feed it the message from <code>String.Format</code> (<code>{0} files appended in {1} s</code>).</p>
+<p><strong>Housekeeping on disk.</strong> <code>File.Info</code> (size, modified) for a report, <code>File.Copy</code> / <code>File.Move</code> for archiving, <code>Zip.Create</code> for the deliverable. These change files, so the Script Player asks before running a script that holds them.</p>
+<p><strong>Sets and views.</strong> <code>SelectionSet.Info</code> (kind, item count) over <code>SelectionSets.All</code> finds empty or stale sets; <code>SelectionSet.Duplicate</code> and <code>SavedViewpoint.Update</code> re-use what exists.</p>
+<h2 id="automation-and-bulk-actions">Automation and bulk actions</h2>
+<p><strong>One script, many inputs.</strong> Give the script <em>input nodes</em> (<code>Number</code>, <code>Integer</code>, <code>Date</code>, <code>Choice</code>, <code>File Path</code>, <code>Directory Path</code>) and open it in the <strong>Script Player</strong>: the form is built from them, the values are remembered, and the same script runs from the ribbon, the Player or <code>Dyncamelo.Run.DYNC</code> (Automation API / Batch Utility).</p>
+<p><strong>Run another program, call a service.</strong> <code>System.Run</code> (exit code, output, error) and <code>Web.Get</code> / <code>Web.Post</code> (status, body); both need <code>Flow.Try</code> around them if a failure should not stop the graph. <code>Flow.Wait</code> gives an external tool time to finish writing.</p>
+<p><strong>Pick the branch.</strong> <code>Logic.Choose</code> (by position) or <code>Logic.Switch</code> (by matching value) for more than two ways; <code>If</code> for two.</p>
+<h2 id="open-bim-integration">Open BIM integration</h2>
+<p><strong>IFC GlobalId bridge.</strong> <code>ModelItem.IfcGuid</code> gives an item's 22-character IFC GlobalId; <code>IFC.GuidDecode</code> / <code>IFC.GuidEncode</code> convert to and from the standard GUID other tools use; <code>Search.ByGuid</code> finds the items for a list of either form (the ones it could not find come out of a second socket).</p>
+<p><strong>COBie / classification sheets.</strong> <code>Table.FromExcelFile</code> → <code>Table.Join</code> against <code>Properties.ToTable</code> on the GUID column → <code>Properties.SetCustom</code> per row writes the classification onto the items.</p>
+<p><strong>IDS-style requirement check.</strong> A requirements sheet (category, property, expected pattern) read with <code>Table.FromExcelFile</code>; for each row <code>Search.ByProperty</code> + <code>List.FilterByValue</code> (<code>regex</code>) → failing items to <code>Table.ToExcelFile</code> with the reason.</p>
+<h2 id="model-data-and-quantities">Model data and quantities</h2>
+<p><strong>Quantity take-off.</strong> <code>Search.ByProperty</code> → <code>Properties.ToTable</code> (<code>@Name</code>, <code>Item.Category</code>, <code>Length</code>, <code>Area</code>) → <code>Table.GroupBy</code> (by category; <code>count</code>, <code>sum:Length</code>, <code>sum:Area</code>) → <code>Table.Sort</code> → <code>Table.ToExcelFile</code>. <code>Table.AddFormulaColumn</code> adds a column such as <code>Length * Width / 1000000</code>.</p>
+<p><strong>Cross-tab.</strong> <code>Table.Pivot</code> with rows = level, columns = status and <em>count</em>: clashes (or items) by level and status.</p>
+<p><strong>Distribution.</strong> <code>List.Histogram</code> for the bins, <code>List.Statistics</code> for count / min / max / average / median in one node, <code>List.CountBy</code> for "how many of each".</p>
+<p><strong>Duplicates.</strong> <code>List.Duplicates</code> over the GUID or mark list; <code>Table.Distinct</code> on a table.</p>
+<h2 id="model-manipulation">Model manipulation</h2>
+<p><strong>Focus on a set.</strong> <code>Appearance.Focus</code> leaves the chosen items as they are and ghosts the rest; <code>Appearance.Reset</code> or <code>Appearance.ResetAll</code> undoes it.</p>
+<p><strong>Everything but the selection.</strong> <code>Selection.Invert</code> → <code>Appearance.Hide</code>; <code>Selection.Remove</code> takes items out of the current selection.</p>
+<p><strong>Standard views.</strong> <code>Camera.SetStandardView</code> (top, front, iso …) zoomed to a set, then <code>Viewpoint.SaveCurrent</code> per level.</p>
+<p><strong>Move and scale.</strong> <code>ModelItem.MoveTo</code> puts an assembly's centre on a point; <code>ModelItem.Scale</code> scales about a point (a transform override, not a change to the model file).</p>
+<hr />
+<p><em>Checked by a script:</em> every node name above exists in <code>docs/dyncamelo-nodes.json</code> (or is an input node / plugin id). The same is done for <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/plans/node-library-gaps.md"><code>plans/node-library-gaps.md</code></a>.</p>
+</main>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#bim-coordinator">BIM coordinator</a><a class="l2" href="#bim-manager">BIM manager</a><a class="l2" href="#model-maintainer--compiler">Model maintainer / compiler</a><a class="l2" href="#automation-and-bulk-actions">Automation and bulk actions</a><a class="l2" href="#open-bim-integration">Open BIM integration</a><a class="l2" href="#model-data-and-quantities">Model data and quantities</a><a class="l2" href="#model-manipulation">Model manipulation</a></aside>
+</div>
+<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/wiki.js"></script>
+</body>
+</html>
