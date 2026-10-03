@@ -10,7 +10,6 @@
 * **A new Script Player layout**, and text boxes that no longer cut their text off.
 * **Icons for every node library category** (Data, IFC, Report, System, Utility had none).
 * **Two editions, marked as such.** The installer, the About window and the start screen say *Personal use*; **Help > Autodesk App Store…** opens the store.
-* **A wiki** with a page for every node and its inputs and outputs, how-to guides, troubleshooting and an FAQ.
 
 The full list is in `CHANGELOG.md`.
 
