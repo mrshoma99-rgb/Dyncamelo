@@ -5,6 +5,7 @@ using System.Globalization;
 using Autodesk.Navisworks.Api;
 using Dyncamelo.Core.Types;
 using Dyncamelo.Nodes;
+using Dyncamelo.Nodes.Portable;
 using NwColor = Autodesk.Navisworks.Api.Color;
 
 namespace Dyncamelo.Navisworks.Internal;
@@ -226,6 +227,57 @@ internal static class NavisValues
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Indexes the names of the <typeparamref name="T"/> items of a saved-item collection (no descent), so a node that
+    /// makes many items in one folder can ask "is there one with this name, and where" with a dictionary lookup instead of
+    /// <see cref="FindTopLevelIndex{T}"/> over the growing folder for every item. Items of other kinds (folders,
+    /// animations) take their position but are never found by name, exactly as in <see cref="FindTopLevelIndex{T}"/>.
+    /// </summary>
+    internal static TopLevelNameIndex BuildNameIndex<T>(IEnumerable<SavedItem> items) where T : SavedItem
+    {
+        return new TopLevelNameIndex(NamesOf<T>(items));
+    }
+
+    private static IEnumerable<string?> NamesOf<T>(IEnumerable<SavedItem> items) where T : SavedItem
+    {
+        foreach (var item in items)
+        {
+            yield return item is T ? item.DisplayName : null;
+        }
+    }
+
+    /// <summary>
+    /// After an item was added to, or replaced in, a collection that <paramref name="names"/> indexes: the STORED instance.
+    /// The index says where it should be, and one look at that position confirms it. When the collection is not what the
+    /// index thought (Navisworks put the item elsewhere, or under another name) the collection is read again, indexed
+    /// again, and searched the way <see cref="FindTopLevelIndex{T}"/> would.
+    /// </summary>
+    /// <param name="children">The collection as it is after the edit.</param>
+    /// <param name="read">Reads the collection again, for the case that the position did not hold the item.</param>
+    /// <param name="names">The index of the collection.</param>
+    /// <param name="name">The item's name.</param>
+    /// <param name="expectedIndex">Where the item should be.</param>
+    /// <returns>The stored item, or null when the collection holds no <typeparamref name="T"/> with that name.</returns>
+    internal static T? ConfirmStored<T>(
+        SavedItemCollection children,
+        Func<SavedItemCollection> read,
+        TopLevelNameIndex names,
+        string name,
+        int expectedIndex) where T : SavedItem
+    {
+        if (expectedIndex >= 0 &&
+            expectedIndex < children.Count &&
+            children[expectedIndex] is T item &&
+            string.Equals(item.DisplayName, name, StringComparison.Ordinal))
+        {
+            return item;
+        }
+
+        var fresh = read();
+        names.Reset(NamesOf<T>(fresh));
+        return names.TryGetIndex(name, out var index) ? fresh[index] as T : null;
     }
 
     /// <summary>

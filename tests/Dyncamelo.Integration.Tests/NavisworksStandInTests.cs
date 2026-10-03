@@ -205,6 +205,24 @@ public class NavisworksStandInTests
         Assert.All(definition.Outputs, o => Assert.Equal(typeof(object), o.Type));
     }
 
+    [Theory]
+    [InlineData("Clash.GroupResults", "results,groupName,moveExisting,document", "test,group,added,moved,skipped")]
+    [InlineData("Clash.GroupResultsByStatus", "test,document", "test,groupCount")]
+    [InlineData("Clash.GroupResultsByGridIntersection", "test,document", "test,groupCount")]
+    [InlineData("Clash.GroupResultsBySameItem", "test,useItem1,document", "test,groupCount")]
+    [InlineData("Clash.GroupResultsByProximity", "test,radius,document", "test,groupCount")]
+    [InlineData("Clash.GroupResultsByLevel", "test,levelNames,levelElevations,document", "test,groupCount")]
+    [InlineData("Viewpoints.FromClashResults", "results,folderName,document", "viewpoints")]
+    [InlineData("SelectionSets.BulkByPropertyValues", "categoryName,propertyName,folderName,document", "selectionSets,values")]
+    public void TheClashGroupingAndFolderFillingNodesKeepTheirSockets(string name, string inputs, string outputs)
+    {
+        // These nodes were rewritten to stop searching a whole tree or folder per item; a wired graph must not notice.
+        var definition = Registry.Definitions.Single(d => d.Name == name);
+
+        Assert.Equal(inputs.Split(','), definition.Inputs.Select(i => i.Name));
+        Assert.Equal(outputs.Split(','), definition.Outputs.Select(o => o.Name));
+    }
+
     [Fact]
     public void TheUnitsNodesGetTheirDropDown()
     {

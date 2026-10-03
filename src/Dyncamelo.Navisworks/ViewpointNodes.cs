@@ -320,6 +320,10 @@ public static class ViewpointNodes
             folder = folderIndex >= 0 ? (FolderItem)viewpoints.Value[folderIndex] : null;
         }
 
+        // Where each viewpoint of the target folder is, by name, read once and kept up to date as viewpoints are
+        // added: searching the growing folder twice per result made the run slower with every viewpoint it made.
+        var names = NavisValues.BuildNameIndex<SavedViewpoint>(folder != null ? folder.Children : viewpoints.Value);
+
         var stored = new List<SavedViewpoint>();
         foreach (var result in results)
         {
@@ -333,8 +337,8 @@ public static class ViewpointNodes
             var saved = new SavedViewpoint(camera) { DisplayName = name };
 
             var children = folder != null ? folder.Children : viewpoints.Value;
-            var existingIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
-            if (existingIndex >= 0)
+            int expectedIndex;
+            if (names.TryGetIndex(name, out var existingIndex))
             {
                 if (folder != null)
                 {
@@ -344,19 +348,30 @@ public static class ViewpointNodes
                 {
                     viewpoints.ReplaceWithCopy(existingIndex, saved);
                 }
-            }
-            else if (folder != null)
-            {
-                viewpoints.AddCopy(folder, saved);
+
+                expectedIndex = existingIndex;
             }
             else
             {
-                viewpoints.AddCopy(saved);
+                if (folder != null)
+                {
+                    viewpoints.AddCopy(folder, saved);
+                }
+                else
+                {
+                    viewpoints.AddCopy(saved);
+                }
+
+                expectedIndex = names.Append(name);
             }
 
             // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
-            var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
-            stored.Add(storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : saved);
+            stored.Add(NavisValues.ConfirmStored<SavedViewpoint>(
+                children,
+                () => folder != null ? folder.Children : viewpoints.Value,
+                names,
+                name,
+                expectedIndex) ?? saved);
         }
 
         return stored;

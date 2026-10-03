@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using Dyncamelo.Nodes.Portable;
 
 namespace Dyncamelo.Navisworks;
 
@@ -231,14 +232,19 @@ public static class SelectionSetNodes
             ? null
             : FindOrCreateTopLevelFolder(doc, folderName!);
 
+        // The names already in the target location, read once and kept up to date as sets are added: searching the
+        // growing location twice per value made the run slower with every set it made.
+        var names = NavisValues.BuildNameIndex<SelectionSet>(
+            parentFolder == null ? doc.SelectionSets.Value : parentFolder.Children);
+
         var storedSets = new List<SelectionSet>();
         foreach (var value in values)
         {
             var search = SearchNodes.CreateVariantEqualitySearch(categoryName, propertyName, variantByValue[value]);
             var set = new SelectionSet(search) { DisplayName = value };
             storedSets.Add(parentFolder == null
-                ? StoreTopLevel(doc, set, value)
-                : StoreInFolder(doc, parentFolder, set, value));
+                ? StoreTopLevel(doc, set, value, names)
+                : StoreInFolder(doc, parentFolder, set, value, names));
         }
 
         return new Dictionary<string, object?>
@@ -248,40 +254,48 @@ public static class SelectionSetNodes
         };
     }
 
-    /// <summary>Adds or replaces a top-level set and returns the STORED instance.</summary>
-    private static SelectionSet StoreTopLevel(Document doc, SelectionSet set, string name)
+    /// <summary>
+    /// Adds or replaces a top-level set and returns the STORED instance. <paramref name="names"/> is the index of the
+    /// top-level sets, kept up to date by the call; a caller that stores many sets passes the same one every time (null
+    /// builds one for this call alone).
+    /// </summary>
+    private static SelectionSet StoreTopLevel(Document doc, SelectionSet set, string name, TopLevelNameIndex? names = null)
     {
         var sets = doc.SelectionSets;
-        var existingIndex = NavisValues.FindTopLevelIndex<SelectionSet>(sets.Value, name);
-        if (existingIndex >= 0)
+        names ??= NavisValues.BuildNameIndex<SelectionSet>(sets.Value);
+        int expectedIndex;
+        if (names.TryGetIndex(name, out var existingIndex))
         {
             sets.ReplaceWithCopy(existingIndex, set);
+            expectedIndex = existingIndex;
         }
         else
         {
             sets.AddCopy(set);
+            expectedIndex = names.Append(name);
         }
 
-        var storedIndex = NavisValues.FindTopLevelIndex<SelectionSet>(sets.Value, name);
-        return storedIndex >= 0 ? (SelectionSet)sets.Value[storedIndex] : set;
+        return NavisValues.ConfirmStored<SelectionSet>(sets.Value, () => sets.Value, names, name, expectedIndex) ?? set;
     }
 
-    /// <summary>Adds or replaces a set inside a stored folder and returns the STORED instance.</summary>
-    private static SelectionSet StoreInFolder(Document doc, FolderItem folder, SelectionSet set, string name)
+    /// <summary>Adds or replaces a set inside a stored folder and returns the STORED instance (<paramref name="names"/> as for <see cref="StoreTopLevel"/>, for that folder).</summary>
+    private static SelectionSet StoreInFolder(
+        Document doc, FolderItem folder, SelectionSet set, string name, TopLevelNameIndex names)
     {
         var sets = doc.SelectionSets;
-        var existingIndex = NavisValues.FindTopLevelIndex<SelectionSet>(folder.Children, name);
-        if (existingIndex >= 0)
+        int expectedIndex;
+        if (names.TryGetIndex(name, out var existingIndex))
         {
             sets.ReplaceWithCopy(folder, existingIndex, set);
+            expectedIndex = existingIndex;
         }
         else
         {
             sets.AddCopy(folder, set);
+            expectedIndex = names.Append(name);
         }
 
-        var storedIndex = NavisValues.FindTopLevelIndex<SelectionSet>(folder.Children, name);
-        return storedIndex >= 0 ? (SelectionSet)folder.Children[storedIndex] : set;
+        return NavisValues.ConfirmStored<SelectionSet>(folder.Children, () => folder.Children, names, name, expectedIndex) ?? set;
     }
 
     private static FolderItem FindOrCreateTopLevelFolder(Document doc, string name)
