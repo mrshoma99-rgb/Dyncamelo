@@ -494,7 +494,7 @@ def render_node(node):
     anchor = node_anchor(node["name"])
     out = ["### %s { #%s .node }" % (md_text(node["name"]), anchor), "", md_text(node["description"]), ""]
     if node.get("interactive"):
-        out += ['!!! note "Interactive node"', "    It has its own controls on the canvas.", ""]
+        out += ['!!! note "Interactive node: it has its own controls on the canvas."', ""]
     if node.get("inputs"):
         out += ['<p class="node-sub">Inputs</p>', "",
                 "| Input | Type | Default | What it does |", "|---|---|---|---|"]
@@ -583,7 +583,7 @@ def node_pages(catalogue):
         cut = summary.find(". ")
         short = summary if cut < 0 else summary[:cut + 1]
         target = "%s.md#%s" % (page_of[node_group(node["category"])].key.split("/", 1)[1], node_anchor(node["name"]))
-        body.append("| [%s](%s) | %s | %s |" % (code(node["name"]), target, md_text(node["category"]), md_text(short)))
+        body.append("| [%s](%s) | %s | %s |" % (code(node["name"], True), target, md_text(node["category"]), md_text(short)))
     index = Page(NODES_INDEX_KEY, "\n".join(body), "Node reference",
                  description="Every node with its inputs and outputs, by category.")
     return index, pages

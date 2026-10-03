@@ -332,6 +332,7 @@
   white-space: nowrap;
 }
 .md-typeset .chip.chip--required { color: var(--md-accent-fg-color); border-color: var(--md-accent-fg-color); background: transparent; }
+.md-typeset .admonition.note:not(:has(p)) { margin: 0.8em 0; }
 .md-typeset code.nowrap { white-space: nowrap; word-break: normal; }
 .md-typeset .node-sub { margin: 1em 0 0.2em; font-weight: 700; color: var(--md-default-fg-color); }
 .md-typeset table.node-ports td:first-child { white-space: nowrap; }
