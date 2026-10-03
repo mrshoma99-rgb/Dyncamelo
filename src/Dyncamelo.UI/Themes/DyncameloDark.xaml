@@ -638,15 +638,15 @@
         </Setter>
     </Style>
 
-    <!-- The one main action of the toolbar (Run): filled and bold, but a raised key and not a lit-up toggle: a light top edge, a soft gloss
-         from the top, a thin shadow underneath. Hover adds a white sheen; pressed drops the gloss and the shadow, darkens it and sits
-         one pixel lower, so "pressed" looks like nothing it looks like at rest. It is 24 px high (the quiet tool buttons beside it are
-         about 28 with their padding), and the fill and the gloss work on any palette's main-action colour. -->
+    <!-- The one main action of the toolbar (Run): a solid fill in the palette's main-action colour (no gradient), bold, wide, 24 px high.
+         It stays a raised key and not a lit-up toggle through a light edge and a thin shadow underneath. Hover adds a white sheen;
+         pressed drops the shadow, darkens it and sits one pixel lower, so "pressed" looks like nothing it looks like at rest. -->
     <Style x:Key="Dyc.PrimaryButton" TargetType="{x:Type Button}">
         <Setter Property="Foreground" Value="{DynamicResource Dyc.OnPrimaryBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="Padding" Value="22,0" />
+        <Setter Property="MinWidth" Value="92" />
         <Setter Property="Height" Value="24" />
         <Setter Property="Margin" Value="6,0" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -666,15 +666,6 @@
                             </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
-                        <Border x:Name="Gloss" CornerRadius="6" Margin="1" IsHitTestVisible="False">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#40FFFFFF" Offset="0" />
-                                    <GradientStop Color="#08FFFFFF" Offset="0.5" />
-                                    <GradientStop Color="#22000000" Offset="1" />
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
                         <Border x:Name="Sheen" CornerRadius="6" Background="White" Opacity="0" IsHitTestVisible="False" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -683,7 +674,6 @@
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Margin" Value="0,1,0,0" />
-                            <Setter TargetName="Gloss" Property="Opacity" Value="0" />
                             <Setter TargetName="Chrome" Property="Effect" Value="{x:Null}" />
                             <Setter TargetName="Chrome" Property="BorderBrush" Value="#33000000" />
                             <Setter TargetName="Sheen" Property="Background" Value="Black" />

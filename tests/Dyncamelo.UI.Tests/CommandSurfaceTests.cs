@@ -657,13 +657,13 @@ public class CommandSurfaceViewTests
             var chrome = (System.Windows.Controls.Border)run.Template.FindName("Chrome", run);
             var primary = (System.Windows.Media.SolidColorBrush)host.Control.FindResource("Dyc.PrimaryBrush");
             Assert.Equal(primary.Color, ((System.Windows.Media.SolidColorBrush)chrome.Background).Color);
-            Assert.True(run.ActualWidth > 60, "the Run button has no width");
+            Assert.True(run.ActualWidth >= 88, "the Run button is " + run.ActualWidth + " wide, not a wide key");
             Assert.True(run.ActualHeight >= 22 && run.ActualHeight <= 26, "the Run button is " + run.ActualHeight + " high, not about 24");
 
-            // A raised key, not a lit-up toggle: a gloss over the fill and a shadow under it; pressed has neither.
-            var gloss = (System.Windows.Controls.Border)run.Template.FindName("Gloss", run);
+            // A solid fill (no gradient), raised by a shadow under it and a light edge; pressed has no shadow.
+            Assert.IsType<System.Windows.Media.SolidColorBrush>(chrome.Background);
+            Assert.Null(run.Template.FindName("Gloss", run));
             Assert.NotNull(chrome.Effect);
-            Assert.True(gloss.Opacity > 0.99, "the Run button should be raised at rest");
 
             // Automatic / manual is the on/off switch of the Boolean nodes, with the name of the mode beside it.
             var auto = (System.Windows.Controls.CheckBox)host.Control.FindName("AutoRunSwitch");
