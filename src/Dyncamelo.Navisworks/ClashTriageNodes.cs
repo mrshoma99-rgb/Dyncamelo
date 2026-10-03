@@ -4,6 +4,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using Dyncamelo.Nodes.Coordination;
 using Dyncamelo.Nodes.Spatial;
 
 namespace Dyncamelo.Navisworks;
@@ -54,7 +55,7 @@ public static class ClashTriageNodes
         // Read every identity up front, while the wired wrappers are certainly
         // alive: the edits below can revalidate result wrappers, and wrappers
         // cached from an earlier run may already be dead handles.
-        var wanted = new List<ResultRef>(resultList.Count);
+        var wanted = new List<ClashResultKey>(resultList.Count);
         ClashTest? owner = null;
         try
         {
@@ -70,7 +71,7 @@ public static class ClashTriageNodes
                         "') — group one test's results at a time.", nameof(results));
                 }
 
-                wanted.Add(new ResultRef(result.Guid, result.DisplayName ?? string.Empty));
+                wanted.Add(new ClashResultKey(result.Guid, result.DisplayName));
             }
         }
         catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
@@ -86,7 +87,13 @@ public static class ClashTriageNodes
         // wholesale would commit correctly but dispose every ClashResult under
         // it — including the ones wired into this graph, which then fail on the
         // next run with "Object has been Disposed (NativeHandle)".
-        int added = 0, moved = 0, skipped = 0, missing = 0;
+        //
+        // The tree is read once and every wanted result is found through
+        // dictionaries (ClashGroupPlanner); the moves then renumber the tree in
+        // a way the runner keeps track of, so no result is searched for again.
+        // Looking each one up by scanning the tree took minutes on a test with
+        // thousands of results.
+        ClashGroupOutcome outcome;
         using (var transaction = doc.BeginTransaction("Group clash results"))
         {
             if (FindGroup(stored, groupName) == null)
@@ -97,47 +104,17 @@ public static class ClashTriageNodes
                         "The clash test '" + testName + "' disappeared while the group was being created.");
             }
 
-            foreach (var reference in wanted)
-            {
-                // Re-locate on every pass: each move renumbers the tree.
-                stored = ClashHelpers.FindStoredTest(clash, testGuid, testName)
-                    ?? throw new InvalidOperationException(
-                        "The clash test '" + testName + "' disappeared while its results were being grouped.");
-                var group = FindGroup(stored, groupName)
-                    ?? throw new InvalidOperationException(
-                        "The group '" + groupName + "' disappeared while results were being moved into it.");
-
-                if (!TryLocate(stored, reference, out var parent, out var index, out var inTargetGroup, groupName))
-                {
-                    missing++;
-                    continue;
-                }
-
-                if (inTargetGroup)
-                {
-                    continue; // already where it belongs — re-runs stay clean
-                }
-
-                bool fromAnotherGroup = !(parent is ClashTest);
-                if (fromAnotherGroup && !moveExisting)
-                {
-                    skipped++;
-                    continue;
-                }
-
-                clash.TestsData.TestsMove(parent!, index, group, group.Children.Count);
-                if (fromAnotherGroup)
-                {
-                    moved++;
-                }
-                else
-                {
-                    added++;
-                }
-            }
+            outcome = ClashGroupRunner.Run(
+                new StoredClashTreeEditor(clash, testGuid, testName, groupName),
+                testName,
+                groupName,
+                moveExisting,
+                wanted);
 
             transaction.Commit();
         }
+
+        int added = outcome.Added, moved = outcome.Moved, skipped = outcome.Skipped, missing = outcome.Missing;
 
         var refreshed = ClashHelpers.FindStoredTest(clash, testGuid, testName)
             ?? throw new InvalidOperationException(
@@ -167,76 +144,6 @@ public static class ClashTriageNodes
             ["skipped"] = skipped,
         };
     }
-
-    /// <summary>Identity of one wanted result, read before any edit invalidates its wrapper.</summary>
-    private readonly struct ResultRef
-    {
-        internal ResultRef(Guid guid, string name)
-        {
-            Guid = guid;
-            Name = name;
-        }
-
-        internal Guid Guid { get; }
-
-        internal string Name { get; }
-
-        internal bool Matches(ClashResult candidate)
-        {
-            if (Guid != Guid.Empty && candidate.Guid != Guid.Empty)
-            {
-                return candidate.Guid == Guid;
-            }
-
-            return Name.Length > 0 && string.Equals(candidate.DisplayName, Name, StringComparison.Ordinal);
-        }
-    }
-
-    /// <summary>
-    /// Finds a result in the live tree: its parent (the test itself for loose
-    /// results, otherwise its group) and index. <paramref name="inTargetGroup"/>
-    /// reports that it already sits in the group being built.
-    /// </summary>
-    private static bool TryLocate(
-        ClashTest test, ResultRef reference, out GroupItem? parent, out int index, out bool inTargetGroup, string groupName)
-    {
-        parent = null;
-        index = -1;
-        inTargetGroup = false;
-
-        for (int i = 0; i < test.Children.Count; i++)
-        {
-            var child = test.Children[i];
-            if (child is ClashResult loose && reference.Matches(loose))
-            {
-                parent = test;
-                index = i;
-                return true;
-            }
-
-            if (child is ClashResultGroup group)
-            {
-                for (int j = 0; j < group.Children.Count; j++)
-                {
-                    if (group.Children[j] is ClashResult member && reference.Matches(member))
-                    {
-                        if (string.Equals(group.DisplayName, groupName, StringComparison.Ordinal))
-                        {
-                            inTargetGroup = true;
-                            return true;
-                        }
-
-                        parent = group;
-                        index = j;
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
 
     /// <summary>Finds a clash result group by test and group name.</summary>
     /// <param name="test">The clash test, or its display name.</param>
