@@ -8,7 +8,7 @@
     {"id": "table", "node": "Table.FromRows"},
     {"id": "show", "node": "Watch Table", "title": "Summary"},
     {"id": "report", "node": "Report.Html", "values": {"title": "Clash summary", "subtitle": "Weekly coordination meeting"}},
-    {"id": "write", "node": "Text.WriteToFile", "values": {"path": "C:\\Temp\\clash-summary.html"}}
+    {"id": "write", "node": "Text.WriteToFile", "values": {"path": "C:\\Reports\\clash-summary.html"}}
   ],
   "wires": [
     "tests.tests -> summary.tests",

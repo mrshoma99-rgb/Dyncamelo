@@ -1,32 +1,29 @@
 {
-  "name": "Takeoff form",
-  "description": "A script made for the Script Player: a number, a choice and a file path become the form, and the totals are written to Excel.",
+  "name": "Large items to Excel",
+  "description": "A script made for the Script Player: its Number, Choice and File Path nodes become the form and the table it writes is shown as the result.",
   "run": "Manual",
   "nodes": [
-    {"id": "limit", "node": "Number", "title": "Minimum volume", "value": 1},
-    {"id": "group", "node": "Choice", "title": "Group by", "options": ["Element.Category", "Element.Level"], "value": "Element.Category"},
-    {"id": "file", "node": "File Path", "title": "Excel file", "value": "C:\\Temp\\takeoff.xlsx"},
-    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Volume", "mode": ">"}},
-    {"id": "columns", "node": "String.Split", "title": "Split columns",
-     "values": {"text": "Element.Category,Element.Level,Element.Volume", "separator": ","}},
+    {"id": "limit", "node": "Number", "title": "Volume limit", "value": 2},
+    {"id": "test", "node": "Choice", "title": "Volume is", "options": [">", ">=", "<", "<="], "value": ">"},
+    {"id": "file", "node": "File Path", "title": "Save the list as", "value": "C:\\Reports\\large-items.xlsx"},
+    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Volume"}},
+    {"id": "columns", "node": "String", "title": "Columns to read", "value": "@Name,Element.Category,Element.Volume"},
+    {"id": "split", "node": "String.Split", "title": "Split columns", "values": {"separator": ","}},
     {"id": "table", "node": "Properties.ToTable"},
-    {"id": "totals", "node": "String.Split", "title": "Split totals", "values": {"text": "count,sum:Element.Volume", "separator": ","}},
-    {"id": "grouped", "node": "Table.GroupBy"},
-    {"id": "excel", "node": "Table.ToExcelFile"},
-    {"id": "show", "node": "Watch Table", "title": "Totals"}
+    {"id": "excel", "node": "Table.ToExcelFile", "values": {"sheet": "Large items"}},
+    {"id": "show", "node": "Watch Table", "title": "Items found"}
   ],
   "wires": [
+    "test.value -> search.mode",
     "limit.value -> search.value",
+    "columns.value -> split.text",
     "search.items -> table.items",
-    "columns.list -> table.properties",
-    "table.table -> grouped.table",
-    "group.value -> grouped.by",
-    "totals.list -> grouped.aggregations",
-    "grouped.table -> excel.table",
+    "split.list -> table.properties",
+    "table.table -> excel.table",
     "file.path -> excel.path",
-    "grouped.table -> show.table"
+    "table.table -> show.table"
   ],
   "notes": [
-    {"text": "WHAT IT DOES: finds the items whose Element > Volume is above the minimum, totals them by the property you choose and writes the totals to Excel. In the Script Player the Number, Choice and File Path nodes become the form and the Watch Table is the result. TO CHANGE: the property searched on Search.ByProperty and the columns to read."}
+    {"text": "WHAT IT DOES: lists the items whose Element > Volume passes the test you pick and saves the list to Excel. In the Script Player the Number, Choice and File Path nodes are the form and the Watch Table is the result. TO CHANGE: the property searched on Search.ByProperty and the columns to read."}
   ]
 }

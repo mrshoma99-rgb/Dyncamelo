@@ -1,23 +1,26 @@
 {
   "name": "BCF import",
-  "description": "Reads a BCF package, selects the model items its topics refer to and shows the title of one topic.",
+  "description": "Reads a BCF package, shows the title of one topic and selects the model items that topic refers to.",
   "run": "Manual",
   "nodes": [
-    {"id": "import", "node": "BCF.ImportIssues", "values": {"filePath": "C:\\Temp\\clashes.bcfzip"}},
-    {"id": "flatten", "node": "List.Flatten", "title": "All items of all topics"},
-    {"id": "select", "node": "Selection.SetCurrent"},
-    {"id": "first", "node": "List.GetItemAtIndex", "title": "Pick a topic", "values": {"index": 0}},
+    {"id": "import", "node": "BCF.ImportIssues", "values": {"filePath": "C:\\Reports\\clash-issues.bcfzip"}},
+    {"id": "number", "node": "Integer", "title": "Topic number", "value": 0},
+    {"id": "topic", "node": "List.GetItemAtIndex", "title": "Topic"},
+    {"id": "its-items", "node": "List.GetItemAtIndex", "title": "Items of the topic"},
     {"id": "title", "node": "Dictionary.ValueOrDefault", "values": {"key": "title"}},
-    {"id": "show", "node": "Watch", "title": "Topic title"}
+    {"id": "show", "node": "Watch", "title": "Topic title"},
+    {"id": "select", "node": "Selection.SetCurrent"}
   ],
   "wires": [
-    "import.modelItems -> flatten.list",
-    "flatten.list -> select.items",
-    "import.topics -> first.list",
-    "first.item -> title.dictionary",
-    "title.value -> show.value"
+    "import.topics -> topic.list",
+    "import.modelItems -> its-items.list",
+    "number.value -> topic.index",
+    "number.value -> its-items.index",
+    "topic.item -> title.dictionary",
+    "title.value -> show.value",
+    "its-items.item -> select.items"
   ],
   "notes": [
-    {"text": "WHAT IT DOES: reads every topic of the package, selects the model items its components match (the list of lists is flattened first, so every topic's items are selected) and shows the title of one topic. TO CHANGE: the file path and the topic number (0 is the first)."}
+    {"text": "WHAT IT DOES: reads every topic in the package, then picks one by its number (0 is the first), shows its title and selects the model items its components match. TO CHANGE: the file path and the topic number."}
   ]
 }

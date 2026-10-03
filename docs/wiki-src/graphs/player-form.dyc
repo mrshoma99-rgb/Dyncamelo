@@ -5,13 +5,13 @@
     "AppVersion": "0.47.0"
   },
   "Uuid": "221927cb57d677132ac7d50e584be361",
-  "Name": "Takeoff form",
-  "Description": "A script made for the Script Player: a number, a choice and a file path become the form, and the totals are written to Excel.",
+  "Name": "Large items to Excel",
+  "Description": "A script made for the Script Player: its Number, Choice and File Path nodes become the form and the table it writes is shown as the result.",
   "Nodes": [
     {
       "Id": "7b4e0ebf2ce6735fcc4aa467a2216283",
       "NodeType": "NumberInput",
-      "Name": "Minimum volume",
+      "Name": "Volume limit",
       "X": 0.0,
       "Y": 90.0,
       "Lacing": "Auto",
@@ -23,15 +23,15 @@
         }
       ],
       "Data": {
-        "Value": 1.0
+        "Value": 2.0
       }
     },
     {
-      "Id": "56a9dbc92387883c97756407e0181003",
+      "Id": "26e5dd4123965dfe2fff1b780270c9bb",
       "NodeType": "ChoiceInput",
-      "Name": "Group by",
-      "X": 700.0,
-      "Y": 280.0,
+      "Name": "Volume is",
+      "X": 0.0,
+      "Y": 250.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [],
@@ -44,16 +44,16 @@
         }
       ],
       "Data": {
-        "Options": "Element.Category\nElement.Level",
-        "Value": "Element.Category"
+        "Options": ">\n>=\n<\n<=",
+        "Value": ">"
       }
     },
     {
       "Id": "e6674be113dbc528424d27ae1fc5554a",
       "NodeType": "FilePath",
-      "Name": "Excel file",
-      "X": 1080.0,
-      "Y": 450.0,
+      "Name": "Save the list as",
+      "X": 730.0,
+      "Y": 390.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [],
@@ -63,7 +63,7 @@
         }
       ],
       "Data": {
-        "Path": "C:\\Temp\\takeoff.xlsx"
+        "Path": "C:\\Reports\\large-items.xlsx"
       }
     },
     {
@@ -72,8 +72,8 @@
       "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Search.ByProperty",
-      "X": 350.0,
-      "Y": 0.0,
+      "X": 380.0,
+      "Y": 60.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -102,11 +102,10 @@
         },
         {
           "Name": "mode",
-          "UsingDefaultValue": true,
+          "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": ">"
+          "KeepListStructure": false
         },
         {
           "Name": "resolveTo",
@@ -132,12 +131,30 @@
     },
     {
       "Id": "34e683bfc8c95fe659e930d85d787553",
+      "NodeType": "StringInput",
+      "Name": "Columns to read",
+      "X": 0.0,
+      "Y": 510.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "@Name,Element.Category,Element.Volume"
+      }
+    },
+    {
+      "Id": "7e047a24bc78f1dcc2adf9056d99c16c",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
       "Assembly": "Dyncamelo.Nodes",
       "Name": "Split columns",
-      "X": 350.0,
-      "Y": 290.0,
+      "X": 380.0,
+      "Y": 470.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -146,8 +163,7 @@
           "UsingDefaultValue": false,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "Element.Category,Element.Level,Element.Volume"
+          "KeepListStructure": false
         },
         {
           "Name": "separator",
@@ -171,8 +187,8 @@
       "DefinitionId": "Dyncamelo.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Properties.ToTable",
-      "X": 700.0,
-      "Y": 100.0,
+      "X": 730.0,
+      "Y": 210.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -199,88 +215,13 @@
       "Data": {}
     },
     {
-      "Id": "87e1ebefdbe9b3681699457935de0440",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Split totals",
-      "X": 700.0,
-      "Y": 540.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "text",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "count,sum:Element.Volume"
-        },
-        {
-          "Name": "separator",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": ","
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "list"
-        }
-      ],
-      "Data": {}
-    },
-    {
-      "Id": "f2bdbccd3ba8a820cc93f5c3d405f51a",
-      "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.GroupBy@Dyncamelo.Nodes.DyncameloTable,string,System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
-      "Name": "Table.GroupBy",
-      "X": 1080.0,
-      "Y": 240.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "table",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "by",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Name": "aggregations",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "table"
-        }
-      ],
-      "Data": {}
-    },
-    {
       "Id": "6b9a45ad6d180b2dfc6e27c96ae90050",
       "NodeType": "ZeroTouch",
       "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.ToExcelFile@Dyncamelo.Nodes.DyncameloTable,string,string,bool",
       "Assembly": "Dyncamelo.Nodes",
       "Name": "Table.ToExcelFile",
-      "X": 1460.0,
-      "Y": 340.0,
+      "X": 1110.0,
+      "Y": 300.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -303,7 +244,8 @@
           "UsingDefaultValue": true,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false
+          "KeepListStructure": false,
+          "UserValue": "Large items"
         },
         {
           "Name": "append",
@@ -323,9 +265,9 @@
     {
       "Id": "0c511ec21438f328b75dab05fbafa9fb",
       "NodeType": "WatchTable",
-      "Name": "Totals",
-      "X": 1460.0,
-      "Y": 40.0,
+      "Name": "Items found",
+      "X": 1110.0,
+      "Y": 0.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -350,11 +292,25 @@
   ],
   "Connectors": [
     {
+      "Id": "175d1ad93210b57a919aaf4d8476b61d",
+      "FromNode": "26e5dd4123965dfe2fff1b780270c9bb",
+      "FromPort": "value",
+      "ToNode": "7be98d819931a2c0863435ac3b60ad38",
+      "ToPort": "mode"
+    },
+    {
       "Id": "93665bb0a44194a49168e1a9204a1bcd",
       "FromNode": "7b4e0ebf2ce6735fcc4aa467a2216283",
       "FromPort": "value",
       "ToNode": "7be98d819931a2c0863435ac3b60ad38",
       "ToPort": "value"
+    },
+    {
+      "Id": "e4f40e924ab1a4c0322a05f09fc9d545",
+      "FromNode": "34e683bfc8c95fe659e930d85d787553",
+      "FromPort": "value",
+      "ToNode": "7e047a24bc78f1dcc2adf9056d99c16c",
+      "ToPort": "text"
     },
     {
       "Id": "0dbcdeedd68702dd3f875607c81f311a",
@@ -364,36 +320,15 @@
       "ToPort": "items"
     },
     {
-      "Id": "bcdf3012c478e41979f2592a3d43576a",
-      "FromNode": "34e683bfc8c95fe659e930d85d787553",
+      "Id": "f582f2c5f46581ec7e3051cee64aafda",
+      "FromNode": "7e047a24bc78f1dcc2adf9056d99c16c",
       "FromPort": "list",
       "ToNode": "b942ad30a78c6e2c49b7cbef36647652",
       "ToPort": "properties"
     },
     {
-      "Id": "dcd74c44c6109d86f6c04a38fdfdf04e",
+      "Id": "40d1c5cca8ec9642457830887efac3d5",
       "FromNode": "b942ad30a78c6e2c49b7cbef36647652",
-      "FromPort": "table",
-      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
-      "ToPort": "table"
-    },
-    {
-      "Id": "59c0f168f7ded80543af965300f718c1",
-      "FromNode": "56a9dbc92387883c97756407e0181003",
-      "FromPort": "value",
-      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
-      "ToPort": "by"
-    },
-    {
-      "Id": "88dd8c9c8af944c1d6711a0ecc7865b7",
-      "FromNode": "87e1ebefdbe9b3681699457935de0440",
-      "FromPort": "list",
-      "ToNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
-      "ToPort": "aggregations"
-    },
-    {
-      "Id": "f40030e6f38e5882ad82023f1e0be3dd",
-      "FromNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
       "FromPort": "table",
       "ToNode": "6b9a45ad6d180b2dfc6e27c96ae90050",
       "ToPort": "table"
@@ -406,8 +341,8 @@
       "ToPort": "path"
     },
     {
-      "Id": "744b8058abd734f9d4aeee1f626d90dd",
-      "FromNode": "f2bdbccd3ba8a820cc93f5c3d405f51a",
+      "Id": "702094dfbf97bae7450526bbad6e09d9",
+      "FromNode": "b942ad30a78c6e2c49b7cbef36647652",
       "FromPort": "table",
       "ToNode": "0c511ec21438f328b75dab05fbafa9fb",
       "ToPort": "table"
@@ -416,9 +351,9 @@
   "Notes": [
     {
       "Id": "f3ce9c76fa0fd5e4e2d9a14856af2e9e",
-      "Text": "WHAT IT DOES: finds the items whose Element > Volume is above the minimum, totals them by the property you choose and writes the totals to Excel. In the Script Player the Number, Choice and File Path nodes become the form and the Watch Table is the result. TO CHANGE: the property searched on Search.ByProperty and the columns to read.",
+      "Text": "WHAT IT DOES: lists the items whose Element > Volume passes the test you pick and saves the list to Excel. In the Script Player the Number, Choice and File Path nodes are the form and the Watch Table is the result. TO CHANGE: the property searched on Search.ByProperty and the columns to read.",
       "X": 0.0,
-      "Y": -190.0
+      "Y": -180.0
     }
   ],
   "Groups": [],

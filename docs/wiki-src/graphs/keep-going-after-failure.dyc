@@ -25,7 +25,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "C:\\Temp\\input.xlsx"
+          "UserValue": "C:\\Data\\maybe-missing.xlsx"
         },
         {
           "Name": "sheet",
@@ -165,7 +165,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "C:\\Temp\\dyncamelo.log"
+          "UserValue": "C:\\Logs\\dyncamelo.log"
         },
         {
           "Name": "message",
@@ -180,7 +180,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "ERROR"
+          "UserValue": "WARN"
         }
       ],
       "OutputPorts": [

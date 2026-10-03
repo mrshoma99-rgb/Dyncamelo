@@ -3,11 +3,11 @@
   "description": "Reads a worksheet that may be missing and, if that fails, logs the reason instead of stopping the run.",
   "run": "Manual",
   "nodes": [
-    {"id": "risky", "node": "Table.FromExcelFile", "title": "Risky step", "values": {"path": "C:\\Temp\\input.xlsx"}},
+    {"id": "risky", "node": "Table.FromExcelFile", "title": "Risky step", "values": {"path": "C:\\Data\\maybe-missing.xlsx"}},
     {"id": "try", "node": "Flow.Try"},
     {"id": "result", "node": "Watch Table", "title": "Result (or nothing)"},
     {"id": "gate", "node": "Flow.When", "title": "Only if it failed"},
-    {"id": "log", "node": "Log.Write", "values": {"path": "C:\\Temp\\dyncamelo.log", "level": "ERROR"}}
+    {"id": "log", "node": "Log.Write", "values": {"path": "C:\\Logs\\dyncamelo.log", "level": "WARN"}}
   ],
   "wires": [
     "risky.table -> try.value",

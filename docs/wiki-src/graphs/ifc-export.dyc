@@ -6,14 +6,14 @@
   },
   "Uuid": "d8a9b933766bee77a0dbcb72a7159880",
   "Name": "IFC export",
-  "Description": "Exports the items whose material contains Steel to an IFC4 file with chosen project and building names.",
+  "Description": "Exports the items on one level to an IFC4 file with chosen project, site, building and storey names.",
   "Nodes": [
     {
-      "Id": "3d1bbd624d01ebf4e97fb0fcbe5659f4",
+      "Id": "70d7559cd37a1a390f8beba4b3b89f0e",
       "NodeType": "StringInput",
-      "Name": "Material text",
+      "Name": "Level to export",
       "X": 0.0,
-      "Y": 400.0,
+      "Y": 180.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [],
@@ -23,7 +23,7 @@
         }
       ],
       "Data": {
-        "Value": "Steel"
+        "Value": "Level 02"
       }
     },
     {
@@ -33,7 +33,7 @@
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Search.ByProperty",
       "X": 350.0,
-      "Y": 310.0,
+      "Y": 90.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -51,7 +51,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "Material"
+          "UserValue": "Level"
         },
         {
           "Name": "value",
@@ -65,8 +65,7 @@
           "UsingDefaultValue": true,
           "Level": -1,
           "UseLevels": false,
-          "KeepListStructure": false,
-          "UserValue": "contains"
+          "KeepListStructure": false
         },
         {
           "Name": "resolveTo",
@@ -97,7 +96,7 @@
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Export.IfcSpatialNames",
       "X": 350.0,
-      "Y": 900.0,
+      "Y": 680.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -131,7 +130,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "Level 01"
+          "UserValue": "Level 02"
         }
       ],
       "OutputPorts": [
@@ -148,7 +147,7 @@
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Export.IfcCoordinates",
       "X": 350.0,
-      "Y": 600.0,
+      "Y": 380.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -209,7 +208,7 @@
       "Assembly": "Dyncamelo.Navisworks",
       "Name": "Export.ToIfc",
       "X": 700.0,
-      "Y": 280.0,
+      "Y": 60.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -226,7 +225,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "C:\\Exports\\steel.ifc"
+          "UserValue": "C:\\Exports\\level-02.ifc"
         },
         {
           "Name": "schema",
@@ -361,65 +360,11 @@
       "Data": {}
     },
     {
-      "Id": "4775ed59ddb6e894566f020119f8934b",
+      "Id": "400fb0a805978f28ed322f65de7fa154",
       "NodeType": "Watch",
       "Name": "Elements exported",
       "X": 1050.0,
-      "Y": 230.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "value",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "value"
-        }
-      ],
-      "Data": {
-        "ViewWidth": 0.0,
-        "ViewHeight": 0.0
-      }
-    },
-    {
-      "Id": "9038c1f788f45c2e66b0e35d9f6c7b1b",
-      "NodeType": "Watch",
-      "Name": "Files written",
-      "X": 1050.0,
       "Y": 0.0,
-      "Lacing": "Auto",
-      "IsFrozen": false,
-      "InputPorts": [
-        {
-          "Name": "value",
-          "UsingDefaultValue": false,
-          "Level": -1,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "OutputPorts": [
-        {
-          "Name": "value"
-        }
-      ],
-      "Data": {
-        "ViewWidth": 0.0,
-        "ViewHeight": 0.0
-      }
-    },
-    {
-      "Id": "ad6aaa8854791966154b5a251f19a666",
-      "NodeType": "Watch",
-      "Name": "Size (KB)",
-      "X": 1050.0,
-      "Y": 460.0,
       "Lacing": "Auto",
       "IsFrozen": false,
       "InputPorts": [
@@ -444,8 +389,8 @@
   ],
   "Connectors": [
     {
-      "Id": "f91a7207c84e65cfda4bb1cb89cc31f8",
-      "FromNode": "3d1bbd624d01ebf4e97fb0fcbe5659f4",
+      "Id": "0330a5ac75a67b8cc2e0f0c3cde3f1a6",
+      "FromNode": "70d7559cd37a1a390f8beba4b3b89f0e",
       "FromPort": "value",
       "ToNode": "a57e4e3073a05acd0a3756eb6f473504",
       "ToPort": "value"
@@ -472,31 +417,17 @@
       "ToPort": "coordinates"
     },
     {
-      "Id": "6d1d333876f983f155ebb7428ff5b37d",
+      "Id": "61efb3c00127941a030c63d432b6b061",
       "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
       "FromPort": "elementCount",
-      "ToNode": "4775ed59ddb6e894566f020119f8934b",
-      "ToPort": "value"
-    },
-    {
-      "Id": "1f4709f1c36860b112ead5e51e3c9abc",
-      "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
-      "FromPort": "fileCount",
-      "ToNode": "9038c1f788f45c2e66b0e35d9f6c7b1b",
-      "ToPort": "value"
-    },
-    {
-      "Id": "849fb7790290eb681dddeb1db7232a1b",
-      "FromNode": "3aa41b1d352ac865923cc034d9938e5e",
-      "FromPort": "fileSizeKb",
-      "ToNode": "ad6aaa8854791966154b5a251f19a666",
+      "ToNode": "400fb0a805978f28ed322f65de7fa154",
       "ToPort": "value"
     }
   ],
   "Notes": [
     {
       "Id": "6c16092d5d85b981697e90b2850361fb",
-      "Text": "WHAT IT DOES: finds the items whose Element > Material contains the text and writes them to an IFC4 file. The spatial names and the base point are wired into Export.ToIfc; the three Watch nodes show what was written. TO CHANGE: the material text, the names and the file path.",
+      "Text": "WHAT IT DOES: finds the items whose Element > Level equals the text, then writes them to an IFC4 file with the project, site, building and storey names and the base point wired into Export.ToIfc. TO CHANGE: the level text, the names, the base point (Export.IfcCoordinates) and the file path.",
       "X": 0.0,
       "Y": -180.0
     }
