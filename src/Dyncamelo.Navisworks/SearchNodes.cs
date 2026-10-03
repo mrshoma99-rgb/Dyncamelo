@@ -439,7 +439,7 @@ public static class SearchNodes
     /// Adds the property rule once per alternative to the search: the first as it is, every other one opening a new OR-group (conditions
     /// are ANDed inside a group, the groups are ORed). An item that matches any alternative is found, once.
     /// </summary>
-    private static void AddAlternatives(
+    internal static void AddAlternatives(
         Search search,
         string categoryName,
         string propertyName,

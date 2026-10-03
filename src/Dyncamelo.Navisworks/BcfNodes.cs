@@ -6,6 +6,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using Dyncamelo.Nodes.Portable;
 using IfcGuidCodec = Dyncamelo.Nodes.IfcGuidCodec;
 
 namespace Dyncamelo.Navisworks;
@@ -440,9 +441,9 @@ public static class BcfNodes
 
     /// <summary>
     /// Resolves every component GUID in the package to model items: one pass
-    /// over the scene matches InstanceGuids, then IFC GlobalId searches cover
-    /// the rest (IFC-authored GUIDs usually decode to the same instance GUID,
-    /// so the search fallback rarely runs).
+    /// over the scene matches InstanceGuids, then one IFC GlobalId search (per
+    /// batch of GUIDs) covers the rest (IFC-authored GUIDs usually decode to the
+    /// same instance GUID, so the search fallback rarely runs).
     /// </summary>
     private static Dictionary<string, List<ModelItem>> ResolveComponents(
         Document doc,
@@ -510,29 +511,69 @@ public static class BcfNodes
             }
         }
 
-        // Pass 2: IFC GlobalId property search for anything still unmatched.
+        // Pass 2: IFC GlobalId property search for anything still unmatched. One search walks the whole model, so the unmatched GUIDs
+        // are looked up together (an OR group per GUID, the way the Search nodes try a value as several data types) and the found
+        // items are given back to the GUID whose GlobalId they carry; a search per GUID walked the model once per GUID.
+        var unmatched = new List<string>();
         foreach (var pair in wanted)
         {
-            if (found.ContainsKey(pair.Key))
+            if (!found.ContainsKey(pair.Key))
             {
+                unmatched.Add(pair.Key);
+            }
+        }
+
+        foreach (var batch in GlobalIdMatching.Batch(unmatched))
+        {
+            var matches = SearchGlobalIds(doc, batch);
+            if (GlobalIdMatching.TryMapToGuids(matches, GlobalIdText, batch, out var byGuid))
+            {
+                foreach (var pair in byGuid)
+                {
+                    found[pair.Key] = pair.Value;
+                }
+
                 continue;
             }
 
-            var search = new Search();
-            search.Selection.SelectAll();
-            search.Locations = SearchLocations.DescendantsAndSelf;
-            search.SearchConditions.Add(
-                SearchCondition.HasPropertyByDisplayName("IFC", "GlobalId")
-                    .EqualValue(VariantData.FromDisplayString(pair.Key)));
-
-            var matches = NavisValues.ToItemList(search.FindAll(doc, false));
-            if (matches.Count > 0)
+            // An item the search found does not read as one of the GUIDs (so the search matched by a rule the mapping does not
+            // know): look this batch up one GUID at a time, as before.
+            foreach (var guid in batch)
             {
-                found[pair.Key] = matches;
+                var single = SearchGlobalIds(doc, new[] { guid });
+                if (single.Count > 0)
+                {
+                    found[guid] = single;
+                }
             }
         }
 
         return found;
+    }
+
+    /// <summary>ONE whole-model search for the items whose IFC GlobalId equals any of the GUIDs (an OR group per GUID).</summary>
+    private static List<ModelItem> SearchGlobalIds(Document doc, IReadOnlyList<string> guids)
+    {
+        var variants = new List<VariantData>(guids.Count);
+        foreach (var guid in guids)
+        {
+            variants.Add(VariantData.FromDisplayString(guid));
+        }
+
+        var search = new Search();
+        search.Selection.SelectAll();
+        search.Locations = SearchLocations.DescendantsAndSelf;
+        SearchNodes.AddAlternatives(search, "IFC", "GlobalId", variants, (condition, variant) => condition.EqualValue(variant));
+
+        // reportProgress must stay false: progress pumping can re-enter the host.
+        return NavisValues.ToItemList(search.FindAll(doc, false));
+    }
+
+    /// <summary>The IFC GlobalId text an item carries (the property the GlobalId search compares), or null when it has none.</summary>
+    private static string? GlobalIdText(ModelItem item)
+    {
+        var property = item.PropertyCategories.FindPropertyByDisplayName("IFC", "GlobalId");
+        return property == null ? null : NavisValues.ToClrObject(property.Value) as string;
     }
 
     private static Dictionary<string, object?> TopicToDictionary(BcfTopic topic, double fromMeters)

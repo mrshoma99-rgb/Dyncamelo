@@ -54,6 +54,34 @@ public class NavisworksPerformanceSourceTests
     }
 
     [Fact]
+    public void BcfImportLooksUpTheUnmatchedGuidsWithOneSearchPerBatchNotOnePerGuid()
+    {
+        var source = Source("BcfNodes.cs");
+        var resolve = WithoutComments(Body(source, "ResolveComponents"));
+
+        // The fallback batches the unmatched GUIDs and asks for each batch once ...
+        Assert.Contains("GlobalIdMatching.Batch(unmatched)", resolve);
+        Assert.Contains("GlobalIdMatching.TryMapToGuids(", resolve);
+        // ... through the helper that makes one search with an OR group per GUID ...
+        Assert.DoesNotContain("new Search()", resolve);
+        var search = WithoutComments(Body(source, "SearchGlobalIds"));
+        Assert.Equal(1, Regex.Matches(search, @"new Search\(\)").Count);
+        Assert.Contains("SearchNodes.AddAlternatives(search, \"IFC\", \"GlobalId\", variants", search);
+        Assert.Equal(1, Regex.Matches(search, @"FindAll\(").Count);
+        Assert.DoesNotMatch(@"for(each)?\s*\(.*FindAll", search);
+        // ... and the per-GUID lookup is only the fallback for a batch whose items cannot be given back to their GUIDs.
+        Assert.Matches(@"TryMapToGuids\(.*?\{.*?\bcontinue;.*?\}.*?foreach \(var guid in batch\)", resolve.Replace("\n", " "));
+    }
+
+    [Fact]
+    public void TheSearchNodesShareTheirOrGroupHelperWithTheBcfImport()
+    {
+        // BCF.ImportIssues builds its OR groups with the helper the Search nodes use (one shared definition of "alternatives").
+        Assert.Matches(@"internal static void AddAlternatives\(", Source("SearchNodes.cs"));
+        Assert.Contains("condition.StartGroup()", Source("SearchNodes.cs"));
+    }
+
+    [Fact]
     public void TheItemIdentityComparerUsesTheSameRuleAsTheModelItemSet()
     {
         var comparer = Source("Internal/ModelItemIdentityComparer.cs");
