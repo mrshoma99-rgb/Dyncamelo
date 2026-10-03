@@ -18,7 +18,7 @@ Goal: for every item a search finds, isolate it, frame it in the view and save a
 
 ## Steps: build the loop
 
-1. Add `Search.ByProperty` (*Navisworks ▸ Search*) to find the items, for example `Item` / `Name` / `Room` / `contains`.
+1. Add a `String` node (*Input*) with the text `Room`. Add `Search.ByProperty` (*Navisworks ▸ Search*) to find the items: type `Item` into `categoryName` and `Name` into `propertyName`, choose `contains` in `mode`, and wire the `String` into `value`. That input accepts any kind of value, so it has no box of its own.
 2. Add `Loop.Item` (*Workflow*). Wire the search `items` into its `items`. Everything you wire between `Loop.Item` and `Loop.Collect` runs once for each item, in order.
 3. Add `Appearance.Isolate` (*Navisworks ▸ Appearance*). Wire the `item` output of `Loop.Item` into its `items`.
 4. Add `Camera.ZoomToItems` (*Navisworks ▸ Camera*). Wire the `items` output of `Appearance.Isolate` into its `items`. Passing the items on makes the zoom wait for the isolate.

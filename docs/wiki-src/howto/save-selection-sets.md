@@ -17,12 +17,13 @@ Goal: store search results in the Navisworks **Sets** window, either as one set 
 
 [Download the graph](../graphs/first-script.dyc)
 
-1. Add `Search.ByProperty` (*Navisworks ▸ Search*). Type `Element` into `categoryName`, `Material` into `propertyName` and `Concrete` into `value`, and choose `contains` for `mode`.
-2. Add `SelectionSet.Create` (*Navisworks ▸ SelectionSets*). Wire `items` from the search into its `items`.
-3. Type `Concrete elements` into its `name` input.
-4. Press ++f5++.
+1. Add a `String` node (*Input*), rename it `Material text` and type `Concrete` into it.
+2. Add `Search.ByProperty` (*Navisworks ▸ Search*). Type `Element` into `categoryName` and `Material` into `propertyName`, and choose `contains` for `mode`. Wire the `String` into `value`. That input accepts any kind of value, so it has no box of its own.
+3. Add `SelectionSet.Create` (*Navisworks ▸ SelectionSets*). Wire `items` from the search into its `items`.
+4. Type `Concrete elements` into its `name` input.
+5. Press ++f5++.
 
-The downloadable graph also paints the items red on the way, with `Appearance.OverrideColor` between the search and `SelectionSet.Create` ([Colour elements by a property](colour-elements-by-property.md)). It keeps the text `Concrete` in a `String` node wired to `value`; typing it into the box does the same.
+The downloadable graph also paints the items red on the way, with `Appearance.OverrideColor` between the search and `SelectionSet.Create` ([Colour elements by a property](colour-elements-by-property.md)), and shows the search result in a `Watch List`.
 
 ![The first script: a search, a colour override and SelectionSet.Create named "Concrete elements".](../../images/wiki-first-script.png)
 

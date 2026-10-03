@@ -116,7 +116,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Use the magnifier, or send a few selected items through `Properties.Discover` into a `Watch Table` to list everything they carry. See [Find the name of a tab or property](howto/find-property-names.md).
 
 ??? question "How do I search for numbers, such as pipes with a diameter over 100?"
-    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. The number is in document units. The other modes are `equals`, `contains` and `wildcard` (`*` matches any text, `?` one character). See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
+    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. Wire a `Number` node into the `value` input; the number is in document units. The other modes are `equals`, `contains` and `wildcard` (`*` matches any text, `?` one character). See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Is the text search case sensitive?"
     The documentation of the contains search says it is case sensitive, like Find Items, so type the capitals as Navisworks shows them. If a search finds less than you expect, wire the result into a `Watch List` and try `wildcard`. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
@@ -135,7 +135,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     ![A list wired into a one-value input: a dashed wire and a list of results.](../images/wiki-replication.png)
 
 ??? question "My list of search values did not run the search once per value."
-    Inputs of kind *Any*, such as the `value` of `Search.ByProperty`, take a whole list as one value. Only inputs that want a single text, number or item run once per item by themselves. Right-click the socket, choose **List Levels** and then `@L1 — items`. See [Your first script](first-steps.md#8-one-search-for-many-values).
+    Inputs of kind *Any*, such as the `value` of `Search.ByProperty`, take a whole list as one value. They also have no box of their own: you wire a `String` or `Number` node into them. Only inputs that want a single text, number or item run once per item by themselves. Right-click the socket, choose **List Levels** and then `@L1 — items`. See [Your first script](first-steps.md#8-one-search-for-many-values).
 
 ??? question "What is lacing?"
     The rule for pairing two lists that both go into one-value inputs: **Shortest** (the default), **Longest** or **Cross-Product**. Right-click the node to change it.

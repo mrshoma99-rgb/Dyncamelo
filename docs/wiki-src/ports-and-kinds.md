@@ -64,7 +64,7 @@ A **dashed wire** means a list is going into a one-value input, so the node will
 An input can get its value from four places. The first that applies wins:
 
 1. **A wire.** Connecting a wire always overrides the rest. A *muted* wire is ignored and the next place is used.
-2. **The editor on the node.** An unwired input shows an inline editor you can type into.
+2. **The editor on the node.** An unwired input shows an inline editor you can type into. Inputs of kind *Any* (a diamond, such as the `value` of `Search.ByProperty`) and inputs that take a list or a table (such as `properties` of `Properties.ToTable` or `aggregations` of `Table.GroupBy`) have **no editor**. Wire a `String`, `Number` or `String.Split` node into them.
 3. **The default.** Optional inputs have one. It is shown in the tooltip and on the node's reference entry.
 4. **Nothing.** A **required** input with no wire and no value stops that node: it stays idle and says "Input 'x' is not connected."
 

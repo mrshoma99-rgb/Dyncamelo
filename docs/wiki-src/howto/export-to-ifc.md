@@ -20,7 +20,7 @@ Goal: write a chosen set of model items to an `.ifc` file, with names you set fo
 
 1. Add a `String` node (*Input*), rename it `Level to export` and type `Level 02`. Add `Search.ByProperty` (*Navisworks ▸ Search*) to choose what to export: `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into `value`. Use a level name from your model.
 2. Add `Export.ToIfc` (*Navisworks ▸ Export*). Wire the search `items` into its `items`. Type the full path into `filePath`. Only `items` and `filePath` are required.
-3. Add `Export.IfcSpatialNames` (*Navisworks ▸ Export*). Type names into `project`, `site`, `building` and `storey`. Wire its `spatialNames` output into the `spatialNames` input of `Export.ToIfc`.
+3. Add `Export.IfcSpatialNames` (*Navisworks ▸ Export*). Type names into `project`, `site`, `building` and `storey`, for example `Office Block`, `Main Site`, `Block A` and `Level 02`. Wire its `spatialNames` output into the `spatialNames` input of `Export.ToIfc`.
 4. Add `Export.IfcCoordinates` (*Navisworks ▸ Export*). Leave `basePoint` on `GeometryOrigin` for now. Wire its `coordinates` output into the `coordinates` input of `Export.ToIfc`.
 5. Add a `Watch` (*Display*), rename it `Elements exported` and wire `elementCount` into it. You can add more for `fileCount` and `fileSizeKb`.
 6. Switch **Auto** off in the run bar, then press ++f5++. The export reads the geometry of every item and can take a while on a large model.

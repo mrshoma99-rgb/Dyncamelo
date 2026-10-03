@@ -30,15 +30,16 @@ Click a concrete element in Navisworks and look at the **Properties** window. Fi
 
 ## 3. The search
 
-1. Press ++space++, type `Search.ByProperty`, and insert **Search.ByProperty** (category *Navisworks ▸ Search*).
-2. Type into its inputs:
+1. Add a **String** node (category *Input*): press ++space++, type `String` and insert it. Double-click its title, rename it `Material text` and type `Concrete` into it.
+2. Press ++space++, type `Search.ByProperty`, and insert **Search.ByProperty** (category *Navisworks ▸ Search*).
+3. Type into its inputs:
     * `categoryName`: `Element` (or what you found),
     * `propertyName`: `Material`,
-    * `value`: `Concrete`,
     * `mode`: choose `contains` from the drop-down. The other modes are `equals`, `wildcard`, `>`, `>=`, `<` and `<=`.
-3. Leave `document` alone. A **Document** input uses the active document when nothing is wired to it.
-4. Add a **Watch List** node (category *Display*) and wire `items` from the search into its `list`.
-5. Press **Run** (++f5++).
+4. Wire the `value` output of the **String** node into the `value` input of the search. The `value` input accepts any kind of value (a text, a number, a date), so it has no box of its own: you wire a **String** or **Number** node into it.
+5. Leave `document` alone. A **Document** input uses the active document when nothing is wired to it.
+6. Add a **Watch List** node (category *Display*) and wire `items` from the search into its `list`.
+7. Press **Run** (++f5++).
 
 ![The search node with its inputs filled in: Element, Material, Concrete and the contains mode.](../images/wiki-first-script-search.png)
 
@@ -71,10 +72,10 @@ This is a real Navisworks colour override, as if you had used *Item Tools ▸ Ov
 The finished graph:
 
 ```
-Search.ByProperty ──items──▶ Appearance.OverrideColor ──items──▶ SelectionSet.Create
-(Element / Material /                (colour: red)                (name: Concrete elements)
- Concrete / contains)
-        └──items──▶ Watch List
+String ──value──▶ Search.ByProperty ──items──▶ Appearance.OverrideColor ──items──▶ SelectionSet.Create
+(Concrete)        (Element / Material /           (colour: red)                (name: Concrete elements)
+                   contains)
+                          └──items──▶ Watch List
 ```
 
 ![The finished first script: Search.ByProperty into Appearance.OverrideColor and SelectionSet.Create, with a Watch List on the search result.](../images/wiki-first-script.png)
@@ -83,7 +84,7 @@ The same steps with a download, and a version that gives every value its own col
 
 ## 6. Make it live
 
-Switch the run bar from **Manual** to **Auto**. Change `Concrete` to `Steel`: the graph runs again by itself and recolours the model. Only the nodes **after** your edit run again; the rest serve their stored results, which is what keeps large graphs fast.
+Switch the run bar from **Manual** to **Auto**. Change the text of the **String** node from `Concrete` to `Steel`: the graph runs again by itself and recolours the model. Only the nodes **after** your edit run again; the rest serve their stored results, which is what keeps large graphs fast.
 
 ## 7. Save the graph
 
@@ -94,7 +95,7 @@ Press ++ctrl+s++ and save a `.dyc` file. It stores the nodes, wires and the valu
 Lists are where Dyncamelo pays off. Add a **String.Split** node (category *String*) with the text `Concrete,Steel,Masonry` and the separator `,`. Its result is a list of three texts.
 
 1. Wire the result into the `name` input of **SelectionSet.Create**. `name` wants **one** text, so the node runs three times, once for each text. The wire is drawn dashed to show this.
-2. Wire the same result into the `value` input of the search. This input accepts any kind of value, so it takes a list as one single value unless you ask for more. Right-click the `value` socket, choose **List Levels** and then `@L1 — items`. A small `@L1` badge appears, and the search now runs three times and gives three lists of items.
+2. Wire the same result into the `value` input of the search, instead of the single **String** node. This input accepts any kind of value, so it takes a list as one single value unless you ask for more. Right-click the `value` socket, choose **List Levels** and then `@L1 — items`. A small `@L1` badge appears, and the search now runs three times and gives three lists of items.
 3. Press **Run**. The three lists pair up with the three names, and one run makes three sets.
 
 This is *replication*, and how several lists pair up is *lacing*. Both are explained in [Concepts](concepts.md#lists-replication-and-lacing).

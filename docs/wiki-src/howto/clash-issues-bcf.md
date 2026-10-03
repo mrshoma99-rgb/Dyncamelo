@@ -34,9 +34,9 @@ Each result becomes a topic with a markup, a camera viewpoint, the GUIDs of its 
 
 1. Add `BCF.ImportIssues` (*Navisworks ▸ Export*). Type the full path of a `.bcfzip` (BCF 2.0 or 2.1) into `filePath`, for example the file from Part A.
 2. Add an `Integer` node (*Input*), rename it `Topic number` and leave it at `0`.
-3. Add `List.GetItemAtIndex`. Wire `topics` into `list` and `Topic number` into `index`.
+3. Add `List.GetItemAtIndex` and rename it `Topic`. Wire `topics` into `list` and `Topic number` into `index`.
 4. Add `Dictionary.ValueOrDefault` (*Dictionary*). Wire `item` into `dictionary` and type `title` into `key`. Wire `value` into a `Watch` and rename it `Topic title`.
-5. Add a second `List.GetItemAtIndex`. Wire `modelItems` into `list` and `Topic number` into `index`. `modelItems` holds one list of items for each topic, in the same order as `topics`.
+5. Add a second `List.GetItemAtIndex` and rename it `Items of the topic`. Wire `modelItems` into `list` and `Topic number` into `index`. `modelItems` holds one list of items for each topic, in the same order as `topics`.
 6. Add `Selection.SetCurrent` (*Navisworks ▸ Selection*). Wire the `item` output of the second `List.GetItemAtIndex` into its `items`. The elements named in that topic are selected.
 7. Press ++f5++, then change `Topic number` to look at the next topic.
 

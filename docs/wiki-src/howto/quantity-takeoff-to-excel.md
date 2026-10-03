@@ -21,10 +21,10 @@ Goal: count items and total a quantity for each category, and save the result as
 1. Add a `Number` node (*Input*). Double-click its title and rename it `Minimum volume`. Leave the value at `0`.
 2. Add `Search.ByProperty` (*Navisworks ▸ Search*). Type `Element` into `categoryName`, `Volume` into `propertyName` and choose `>` in the `mode` drop-down. Wire the `Number` into `value`. It finds every item whose volume is above the minimum.
 3. Add `Properties.ToTable` (*Navisworks ▸ Properties*). Wire `items` from the search into its `items`.
-4. Its `properties` input is a list of column names. Add a `String` node (*Input*) with the text `@Name,Element.Category,Element.Volume`, a `String.Split` (*String*) with the separator `,`, and wire the `String` into its `text` and its `list` into `properties`. `@Name` is the item name; the others are `Category.Property`.
-5. Add a `Watch Table` (*Display*) on the `table` output. Press ++f5++ and check the rows. An empty cell means the item does not carry that property.
+4. Its `properties` input is a list of column names and has no box. Add a `String` node (*Input*), rename it `Columns to read` and type `@Name,Element.Category,Element.Volume`. Add a `String.Split` (*String*) with the separator `,`, wire the `String` into its `text` and its `list` into `properties`. `@Name` is the item name; the others are `Category.Property`.
+5. Add a `Watch Table` (*Display*), rename it `Rows read`, and wire the `table` output into it. Press ++f5++ and check the rows. An empty cell means the item does not carry that property.
 6. Add `Table.GroupBy` (*Table*). Wire the table into `table` and type `Element.Category` into `by`.
-7. Add a second `String` with the text `count,sum:Element.Volume as Volume` and a second `String.Split` with the separator `,`. Wire its `list` into `aggregations`. The result has one row for each category with the columns `Element.Category`, `count` and `Volume`.
+7. The `aggregations` input has no box either. Add a second `String`, rename it `Totals to work out` and type `count,sum:Element.Volume as Volume`. Add a second `String.Split` with the separator `,` and wire its `list` into `aggregations`. The result has one row for each category with the columns `Element.Category`, `count` and `Volume`.
 8. Add `Table.Sort` (*Table*). Wire the table in, type `Volume` into `columns` and tick `descending`. The largest total comes first.
 9. Add `Table.ToExcelFile` (*Table*). Wire the sorted table in. Type a **full path** into `path`, for example `C:\Reports\qto.xlsx`, and `Quantities` into `sheet`.
 10. Press ++f5++.

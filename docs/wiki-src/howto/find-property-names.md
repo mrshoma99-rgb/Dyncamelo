@@ -21,7 +21,7 @@ Goal: get the exact tab (category) and property names for a search, without gues
 2. In Dyncamelo, add `Search.ByProperty` (*Navisworks ▸ Search*).
 3. Press the small **magnifier** next to `categoryName`. Dyncamelo lists the tabs of the elements selected in Navisworks right now. Type a few letters to narrow the list, then click a tab. The box fills in.
 4. Press the magnifier next to `propertyName`. It lists the properties of the tab you chose. Click one.
-5. Type the value you want in `value`.
+5. Wire a `String` (or `Number`) node holding the value you want into `value`. That input accepts any kind of value, so it has no box of its own.
 
 ![The magnifier popup on Properties.Value, listing the tabs of the picked element.](../../images/wiki-magnifier.png)
 

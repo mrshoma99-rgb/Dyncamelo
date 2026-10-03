@@ -132,7 +132,7 @@ Most Dyncamelo power comes from feeding **lists** into inputs that expect a **si
 
 Example — turn the single-set graph above into a set-per-system factory:
 
-1. Replace the value String with **String.Split** fed by a String containing `Concrete,Steel,Masonry` (separator `,`), so `Search.ByProperty` receives a **list** of three values → it runs three times → outputs a list of three item-lists.
+1. Replace the value String with **String.Split** fed by a String containing `Concrete,Steel,Masonry` (separator `,`), and wire its result into `value`. `value` accepts any kind of value, so it takes the list as one single value unless you ask for more: right-click the `value` socket, choose **List Levels** and then `@L1`. Now `Search.ByProperty` runs three times and outputs a list of three item-lists.
 2. Feed `SelectionSet.Create` the same three texts as `name` and the search output as `items` → three selection sets are created in one run.
 
 When a node receives lists on more than one input, its **lacing** setting (right-click the node) pairs them:

@@ -18,14 +18,13 @@ Goal: paint model items by what a property says, first with one colour for a mat
 
 [Download the graph](../graphs/first-script.dyc)
 
-1. Press ++space++ over the canvas, type `Search.ByProperty` and press ++enter++. The node is in *Navisworks ▸ Search*.
-2. Fill its inputs: `categoryName` = `Element`, `propertyName` = `Material`, `value` = `Concrete`, and choose `contains` in the `mode` drop-down. Use the names your model shows.
+1. Add a `String` node (*Input*). Double-click its title and rename it `Material text`. Type `Concrete` into it.
+2. Press ++space++ over the canvas, type `Search.ByProperty` and press ++enter++. The node is in *Navisworks ▸ Search*. Type `Element` into `categoryName` and `Material` into `propertyName`, and choose `contains` in the `mode` drop-down. Use the names your model shows. Wire the `value` output of the `String` into the `value` input. That input accepts any kind of value, so it has no box of its own: you wire a `String` (or `Number`) node into it.
 3. Add `Appearance.OverrideColor` (*Navisworks ▸ Appearance*). Wire `items` from the search into its `items`.
-4. Click the swatch on its `color` input and choose red. You can also wire a `String` node that holds `#FF0000`.
+4. Click the swatch on its `color` input and choose red. `color` also accepts a `#RRGGBB` text such as `#FF0000` wired in from a `String` node.
 5. Press ++f5++. Every matching item turns red in the Navisworks view.
 
-The downloadable graph keeps the text `Concrete` in a `String` node wired to `value`, and also saves the items as a selection set ([Save selection sets](save-selection-sets.md)). Typing the text into the box does the same.
-
+The downloadable graph also puts a `Watch List` on the search result and saves the items as a selection set ([Save selection sets](save-selection-sets.md)).
 ![The finished graph: Search.ByProperty into Appearance.OverrideColor and SelectionSet.Create, with a Watch List on the search result.](../../images/wiki-first-script.png)
 
 To take the colour back, use `Appearance.Reset` on the same items, or `Appearance.ResetAll` for the whole model (both in *Navisworks ▸ Appearance*).
@@ -36,11 +35,12 @@ To take the colour back, use `Appearance.Reset` on the same items, or `Appearanc
 
 This colours, for example, every item by its level.
 
-1. Add `Search.HasProperty` (*Navisworks ▸ Search*) with `categoryName` = `Element` and `propertyName` = `Level`. It finds every item that carries the property.
-2. Add `Properties.Value` (*Navisworks ▸ Properties*). Wire the search `items` into its `item` input and type `Element` and `Level` into the two name inputs. The wire is dashed: the node runs once per item and gives one value per item.
-3. Add `Appearance.ColorByValues`. Wire the search `items` into its `items` and the `value` output of `Properties.Value` into its `values`.
-4. Add a `Watch` node (*Display*) and wire the `legend` output into it.
-5. Press ++f5++.
+1. Add two `String` nodes (*Input*). Rename them `Property tab` and `Property`, and type `Element` and `Level` into them. Both searches below use the same two texts, so you change them in one place.
+2. Add `Search.HasProperty` (*Navisworks ▸ Search*). Wire `Property tab` into its `categoryName` and `Property` into its `propertyName`. It finds every item that carries the property.
+3. Add `Properties.Value` (*Navisworks ▸ Properties*). Wire the search `items` into its `item` input, and wire `Property tab` and `Property` into its two name inputs too. The wire into `item` is dashed: the node runs once per item and gives one value per item.
+4. Add `Appearance.ColorByValues` (*Navisworks ▸ Appearance*). Wire the search `items` into its `items` and the `value` output of `Properties.Value` into its `values`.
+5. Add a `Watch` node (*Display*), rename it `Legend`, and wire the `legend` output into it.
+6. Press ++f5++.
 
 ![The colour-by-value graph: a search, Properties.Value, Appearance.ColorByValues and a Watch node for the legend.](../../images/wiki-graph-colour-by-value.png)
 
