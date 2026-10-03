@@ -82,6 +82,53 @@ public class NavisworksPerformanceSourceTests
     }
 
     [Fact]
+    public void NearestDistanceReadsEachBoxOnceAndLetsTheIndexFindTheNearest()
+    {
+        var source = Source("DistanceNodes.cs");
+
+        var node = WithoutComments(Body(source, "NearestDistance"));
+        Assert.Contains("NearestByMesh(itemList, targetList, document)", node);
+        Assert.Contains("NearestByBox(itemList, targetList)", node);
+
+        // The bbox tier: the numbers of a box are read once (in TryReadBox), the nearest target comes from the index, and nothing
+        // in the method walks pairs or touches a Navisworks box.
+        var byBox = WithoutComments(Body(source, "NearestByBox"));
+        Assert.Contains("new NearestBoxIndex(targetBoxes)", byBox);
+        Assert.Contains("index.TryFindNearest(", byBox);
+        Assert.DoesNotContain("BoundingBox", byBox);
+        Assert.DoesNotMatch(@"\.(Min|Max)\.[XYZ]", byBox);
+        Assert.DoesNotContain("BoxDistanceBetween", source);
+        Assert.Equal(1, Regex.Matches(byBox, @"DistanceTo\(").Count);
+
+        var read = WithoutComments(Body(source, "TryReadBox"));
+        Assert.Equal(1, Regex.Matches(read, @"\.BoundingBox\(\)").Count);
+        Assert.Equal(1, Regex.Matches(read, @"\.Min;").Count);
+        Assert.Equal(1, Regex.Matches(read, @"\.Max;").Count);
+    }
+
+    [Fact]
+    public void NearestDistanceInMeshModePreparesTheEngineAndTheTargetsOnce()
+    {
+        var byMesh = WithoutComments(Body(Source("DistanceNodes.cs"), "NearestByMesh"));
+
+        var loop = byMesh.LastIndexOf("foreach (var item in itemList)", StringComparison.Ordinal);
+        Assert.True(loop > 0);
+        Assert.Equal(1, Regex.Matches(byMesh, @"RequireMeshEngine\(document\)").Count);
+        Assert.Equal(1, Regex.Matches(byMesh, @"ToItemCollection\(targetList\)").Count);
+        Assert.True(byMesh.IndexOf("RequireMeshEngine(document)", StringComparison.Ordinal) < loop, "the engine is prepared before the loop");
+        Assert.True(byMesh.IndexOf("ToItemCollection(targetList)", StringComparison.Ordinal) < loop, "the targets are copied before the loop");
+        Assert.DoesNotContain("GetClash", byMesh);
+        Assert.DoesNotContain("MeshDistance(new List", byMesh);
+    }
+
+    [Fact]
+    public void TheDistanceBetweenItemsUsesTheSameBoxRuleAsTheNearestDistance()
+    {
+        var between = WithoutComments(Body(Source("DistanceNodes.cs"), "BoxDistance"));
+        Assert.Equal(3, Regex.Matches(between, @"BoxGeometry\.ClosestCoordinates\(").Count);
+    }
+
+    [Fact]
     public void TheItemIdentityComparerUsesTheSameRuleAsTheModelItemSet()
     {
         var comparer = Source("Internal/ModelItemIdentityComparer.cs");

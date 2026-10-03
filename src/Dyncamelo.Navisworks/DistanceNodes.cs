@@ -4,6 +4,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Dyncamelo.Core.Loader;
 using Dyncamelo.Navisworks.Internal;
+using Dyncamelo.Nodes.Spatial;
 
 namespace Dyncamelo.Navisworks;
 
@@ -84,59 +85,104 @@ public static class DistanceNodes
                 "Unknown method '" + method + "'. Use \"bbox\" (fast) or \"mesh\" (exact surfaces).", nameof(method));
         }
 
-        // Pre-box the targets once (bbox mode measures to each target individually,
-        // NOT to their combined box, so a spread-out target set stays correct).
-        var targetBoxes = new List<BoundingBox3D>(targetList.Count);
-        if (mode == "bbox")
+        if (mode == "mesh")
         {
-            foreach (var target in targetList)
+            return NearestByMesh(itemList, targetList, document);
+        }
+
+        return NearestByBox(itemList, targetList);
+    }
+
+    /// <summary>
+    /// The bbox tier: every box is read from Navisworks once, as six plain numbers (the old code read a dozen numbers through the
+    /// API for every PAIR of boxes), and the nearest target of each item is found with <see cref="NearestBoxIndex"/>, which skips
+    /// the targets that cannot be the nearest. It measures to each target individually, NOT to their combined box, so a
+    /// spread-out target set stays correct, and gives the nearest target and distance that measuring against every target would.
+    /// </summary>
+    private static List<double> NearestByBox(List<ModelItem> itemList, List<ModelItem> targetList)
+    {
+        var results = new List<double>(itemList.Count);
+        if (targetList.Count == 0)
+        {
+            foreach (var item in itemList)
             {
-                var box = target.BoundingBox();
-                if (box != null && !box.IsEmpty)
-                {
-                    targetBoxes.Add(box);
-                }
+                results.Add(double.PositiveInfinity);
+            }
+
+            return results;
+        }
+
+        var targetBoxes = new List<AxisBox>(targetList.Count);
+        foreach (var target in targetList)
+        {
+            if (TryReadBox(target, out var box))
+            {
+                targetBoxes.Add(box);
             }
         }
 
-        var results = new List<double>(itemList.Count);
+        var index = new NearestBoxIndex(targetBoxes);
         foreach (var item in itemList)
         {
-            if (targetList.Count == 0)
+            if (targetBoxes.Count == 0 || !TryReadBox(item, out var itemBox) || !index.TryFindNearest(itemBox, out var nearest, out _))
             {
                 results.Add(double.PositiveInfinity);
                 continue;
             }
 
-            if (mode == "mesh")
-            {
-                // The clash minimum-clearance already returns the nearest across the set.
-                var clearance = MeshDistance(new List<ModelItem> { item }, targetList, document);
-                results.Add(clearance["distance"] is double d ? d : double.PositiveInfinity);
-                continue;
-            }
-
-            var itemBox = item.BoundingBox();
-            if (itemBox == null || itemBox.IsEmpty)
-            {
-                results.Add(double.PositiveInfinity);
-                continue;
-            }
-
-            var nearest = double.PositiveInfinity;
-            foreach (var targetBox in targetBoxes)
-            {
-                var distance = BoxDistanceBetween(itemBox, targetBox);
-                if (distance < nearest)
-                {
-                    nearest = distance;
-                }
-            }
-
-            results.Add(nearest);
+            // The nearest pair is known; its distance is asked of Navisworks as before (Point3D.DistanceTo of the two closest
+            // points), so the number is the one this node has always reported.
+            BoxGeometry.ClosestPoints(itemBox, targetBoxes[nearest], out var ax, out var ay, out var az, out var bx, out var by, out var bz);
+            results.Add(new Point3D(ax, ay, az).DistanceTo(new Point3D(bx, by, bz)));
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// The mesh tier: the clash engine's minimum clearance already returns the nearest across the whole target set, so it is asked
+    /// once per item. The engine and the Navisworks collection of the targets are prepared once, not once per item.
+    /// </summary>
+    private static List<double> NearestByMesh(List<ModelItem> itemList, List<ModelItem> targetList, Document? document)
+    {
+        var results = new List<double>(itemList.Count);
+        if (targetList.Count == 0)
+        {
+            foreach (var item in itemList)
+            {
+                results.Add(double.PositiveInfinity);
+            }
+
+            return results;
+        }
+
+        var clash = RequireMeshEngine(document);
+        var targets = NavisValues.ToItemCollection(targetList);
+        foreach (var item in itemList)
+        {
+            var single = new ModelItemCollection();
+            single.Add(item);
+            var clearance = MeshDistance(clash, single, targets);
+            results.Add(clearance["distance"] is double d ? d : double.PositiveInfinity);
+        }
+
+        return results;
+    }
+
+    /// <summary>A box as plain numbers; false when the item has no geometry (no box, or an empty one).</summary>
+    private static bool TryReadBox(ModelItem item, out AxisBox box)
+    {
+        var navisBox = item.BoundingBox();
+        if (navisBox == null || navisBox.IsEmpty)
+        {
+            box = default;
+            return false;
+        }
+
+        var min = navisBox.Min;
+        var max = navisBox.Max;
+        box = new AxisBox(min.X, min.Y, min.Z, max.X, max.Y, max.Z);
+        return true;
     }
 
     // ---------------------------------------------------------- Mesh tier
@@ -144,14 +190,21 @@ public static class DistanceNodes
     private static Dictionary<string, object?> MeshDistance(
         List<ModelItem> listA, List<ModelItem> listB, Document? document)
     {
+        var clash = RequireMeshEngine(document);
+        return MeshDistance(clash, NavisValues.ToItemCollection(listA), NavisValues.ToItemCollection(listB));
+    }
+
+    private static DocumentClash RequireMeshEngine(Document? document)
+    {
         var doc = NavisworksContext.ResolveDocument(document);
-        var clash = doc.GetClash()
+        return doc.GetClash()
             ?? throw new InvalidOperationException(
                 "The Clash engine is not available in this Navisworks edition — use method = \"bbox\" instead.");
+    }
 
-        var collectionA = NavisValues.ToItemCollection(listA);
-        var collectionB = NavisValues.ToItemCollection(listB);
-
+    private static Dictionary<string, object?> MeshDistance(
+        DocumentClash clash, ModelItemCollection collectionA, ModelItemCollection collectionB)
+    {
         MinimumClearanceResult clearance;
         var succeeded = clash.TryCalculateMinimumClearance(collectionA, collectionB, false, out clearance);
         if (!succeeded || clearance == null)
@@ -184,9 +237,9 @@ public static class DistanceNodes
         var boxA = CombinedBox(listA, "itemsA");
         var boxB = CombinedBox(listB, "itemsB");
 
-        ClosestCoordinates(boxA.Min.X, boxA.Max.X, boxB.Min.X, boxB.Max.X, out var ax, out var bx);
-        ClosestCoordinates(boxA.Min.Y, boxA.Max.Y, boxB.Min.Y, boxB.Max.Y, out var ay, out var by);
-        ClosestCoordinates(boxA.Min.Z, boxA.Max.Z, boxB.Min.Z, boxB.Max.Z, out var az, out var bz);
+        BoxGeometry.ClosestCoordinates(boxA.Min.X, boxA.Max.X, boxB.Min.X, boxB.Max.X, out var ax, out var bx);
+        BoxGeometry.ClosestCoordinates(boxA.Min.Y, boxA.Max.Y, boxB.Min.Y, boxB.Max.Y, out var ay, out var by);
+        BoxGeometry.ClosestCoordinates(boxA.Min.Z, boxA.Max.Z, boxB.Min.Z, boxB.Max.Z, out var az, out var bz);
 
         var pointA = new Point3D(ax, ay, az);
         var pointB = new Point3D(bx, by, bz);
@@ -197,15 +250,6 @@ public static class DistanceNodes
             ["pointA"] = pointA,
             ["pointB"] = pointB,
         };
-    }
-
-    /// <summary>Shortest distance between two axis-aligned boxes (0 when they touch/overlap).</summary>
-    private static double BoxDistanceBetween(BoundingBox3D boxA, BoundingBox3D boxB)
-    {
-        ClosestCoordinates(boxA.Min.X, boxA.Max.X, boxB.Min.X, boxB.Max.X, out var ax, out var bx);
-        ClosestCoordinates(boxA.Min.Y, boxA.Max.Y, boxB.Min.Y, boxB.Max.Y, out var ay, out var by);
-        ClosestCoordinates(boxA.Min.Z, boxA.Max.Z, boxB.Min.Z, boxB.Max.Z, out var az, out var bz);
-        return new Point3D(ax, ay, az).DistanceTo(new Point3D(bx, by, bz));
     }
 
     /// <summary>The union bounding box of all items' boxes (throws when none has one).</summary>
@@ -225,32 +269,5 @@ public static class DistanceNodes
 
         return combined ?? throw new ArgumentException(
             "None of the '" + parameterName + "' items has a bounding box — they carry no geometry.", parameterName);
-    }
-
-    /// <summary>
-    /// Per-axis closest coordinates of two intervals: when the intervals are
-    /// disjoint the nearest faces, when they overlap the midpoint of the
-    /// overlap (so touching/intersecting boxes report distance 0 with a
-    /// shared witness point).
-    /// </summary>
-    private static void ClosestCoordinates(
-        double minA, double maxA, double minB, double maxB, out double a, out double b)
-    {
-        if (minB > maxA)
-        {
-            a = maxA;
-            b = minB;
-        }
-        else if (maxB < minA)
-        {
-            a = minA;
-            b = maxB;
-        }
-        else
-        {
-            var mid = (Math.Max(minA, minB) + Math.Min(maxA, maxB)) / 2.0;
-            a = mid;
-            b = mid;
-        }
     }
 }
