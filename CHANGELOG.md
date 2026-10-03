@@ -9,12 +9,23 @@ How this file was made: from those notes, from the git tags (they stop at v0.34.
 ## Unreleased
 
 ### Changed
+* **Faster on big models and big tables.** None of this was timed in Navisworks; the logic was tested on its own against the old code (same results, much fewer steps).
+  * `Clash.GroupResults` reads the clash tree once instead of searching it for every result it moves; `Clash.GroupResultsByProximity` finds the nearby group through a grid instead of comparing with every group.
+  * `Viewpoints.FromClashResults` and `SelectionSets.BulkByPropertyValues` keep the names already in the folder in a dictionary instead of scanning the folder twice per item.
+  * `Selection.Remove` filters the selection in one pass and sets it once; it used to search the selection for every item it removed.
+  * `BCF.ImportIssues` looks up the component GUIDs that were not matched with one search per batch of 500 instead of one whole-model search per GUID.
+  * `Proximity.NearestDistance` reads each bounding box once and skips targets that cannot be nearer (same nearest item and distance as before); in mesh mode the clash engine is set up once, not per item.
+  * `Table.Sort` reads each cell once; sorting a column that mixes numbers and text no longer throws two exceptions per comparison. The order is unchanged.
+  * `Dictionary.ContainsKey` and `Dictionary.ValueOrDefault` no longer walk a dictionary that can only hold text keys when a key is not there.
 * **One header row instead of two.** The blue brand bar and the menu bar are merged: the BIMCamel logo and "Dyncamelo by BIMCamel" sit at the left of the menus, the name of the open script and the buttons at the right, with a thin strip of the brand gradient on top. The pane gains a row for the canvas. In a narrow pane the script name goes first, then the "Dyncamelo by BIMCamel" text, and in a very narrow one the menus fold into one ☰ button (it holds the same menus) instead of wrapping onto several rows; the buttons always stay. Hover the logo for the version.
 * **Run is the main button of the toolbar.** It is filled with the palette's main-action colour, bold and larger, with the play symbol, where it was a quiet button like the others. Automatic / manual running is now the same on/off switch the Boolean nodes use, with the name of the mode beside it (*Auto* when on, *Manual* when off), instead of a toggle button. Every palette has two new colours for the main action (`Dyc.PrimaryBrush`, `Dyc.OnPrimaryBrush`), and a test keeps their contrast readable.
 
 ### Added
 * **A wiki for bimcamel.com**, built with MkDocs and the Material theme from the repository by `python tools/build_wiki.py` (nothing generated is committed; the site goes to `build/wiki-site`): installation, requirements, updating, uninstalling, a first script, concepts, inputs and outputs, the editor, the Script Player, settings, shortcuts, samples, recipes, how-to guides, IFC, BCF, Excel and CSV, troubleshooting, an FAQ, a glossary, privacy and the licence, and a reference page for every one of the library's nodes with its inputs and outputs. It is plain static HTML with a built-in search, a light and a dark theme, and it also works from an unzipped folder. Troubleshooting, recipes and the guide to writing nodes are the repository's own documents, so there is one copy of each. CI builds it in strict mode (a broken link fails the build) and keeps the site as the `dyncamelo-wiki` artifact.
 * **More troubleshooting entries**: a search that returns nothing or a magnifier with no names, and a missing start screen.
+
+### Fixed
+* **`Clash.GroupResultsBySameItem`, `Clash.GroupResultsByProximity` and `Clash.GroupResultsByLevel` now change the clash tree.** They saved their result with a call that ignores the results tree, so they reported success while Clash Detective stayed as it was; they now save the way `Clash.GroupResults` and `Clash.GroupResultsByStatus` do. The test they return is the re-fetched one, so a graph that reuses `ClashTest.Results` after one of them must take the results again (the message says so).
 
 ## 0.47.0 - 2026-10-03
 
