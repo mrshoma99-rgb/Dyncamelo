@@ -9,7 +9,7 @@
 </head>
 <body data-base="">
 <header class="top">
-<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.46.0</small></a>
+<a class="brand" href="index.html">Dyncamelo<small>Wiki &middot; v0.47.0</small></a>
 <span class="spacer"></span>
 <input id="search" type="search" placeholder="Search the wiki and the nodes" aria-label="Search">
 <div id="results"></div>
@@ -94,11 +94,17 @@
 <h2 id="unreleased">Unreleased</h2>
 <h3 id="added">Added</h3>
 <ul>
+<li><strong>A wiki for bimcamel.com</strong>, built from the repository by <code>python tools/build_wiki.py</code> into <code>docs/wiki</code>: installation, requirements, updating, uninstalling, a first script, concepts, inputs and outputs, the editor, the Script Player, settings, shortcuts, samples, recipes, IFC, BCF, Excel and CSV, troubleshooting, an FAQ, privacy and the licence, and a reference page for every one of the library's nodes with its inputs and outputs. It is plain static HTML with a built-in search, light and dark. Troubleshooting, recipes and the guide to writing nodes are the repository's own documents, so there is one copy of each. CI checks that <code>docs/wiki</code> is what the build writes and keeps it as the <code>dyncamelo-wiki</code> artifact.</li>
+<li><strong>More troubleshooting entries</strong>: a search that returns nothing or a magnifier with no names, and a missing start screen.</li>
+</ul>
+<h2 id="0470---2026-10-03">0.47.0 - 2026-10-03</h2>
+<p>The first release since 0.45.1 with an installer and the bundle zip. These downloads (GitHub, bimcamel.com) are the <strong>personal-use edition</strong>; professional use is the copy sold in the Autodesk App Store.</p>
+<h3 id="added_1">Added</h3>
+<ul>
+<li><strong>Two editions, marked as such.</strong> A copy from GitHub or bimcamel.com is the free <em>Personal use</em> edition (PolyForm Noncommercial 1.0.0): the installer, the About window and the start screen say so and point to the Autodesk App Store for professional use (work at a company, a paid project or product), where the professional copy costs 100 euros and comes with a commercial licence from BIMCamel. A copy installed from the store (it carries the <code>distribution.txt</code> marker) says <em>Professional</em> and does not check GitHub for updates. New command <strong>Help &gt; Autodesk App Store…</strong>. The README, the store listing and the help page say the same.</li>
 <li><strong>A small search button next to tab and property names.</strong> On the nodes that read a property of an element (Properties.Value, ValueAsString, HasProperty and InCategory, ModelItem.AncestorPropertyMatches, Audit.MissingProperty, Takeoff.SumPropertyByGroup) the category and property inputs stay plain text boxes you can type in; a magnifier beside each lists the tabs, or the properties of the chosen tab, <strong>of that node's own element</strong> — the one picked on it or wired in — and a click fills the box. Nothing is read until the button is pressed, only that one element is read (the first 100 of a longer list), and what you typed narrows the list. The nodes that search the whole model (Search.ByProperty, HasProperty, HasCategory, SelectionSet.CreateFromSearch, SelectionSets.BulkByPropertyValues) have no element input, so their magnifier lists the tabs and properties of <strong>the elements selected in Navisworks right now</strong> (the first 100) and never searches the model to fill the list; Search.InItems offers those of its own items. Node authors get <code>[NodeTabChoice]</code> and <code>[NodePropertyChoice]</code> for it (see docs/EXTENDING.md).</li>
 <li><strong>Help &gt; Run Self-Test</strong> has one more check: a search for the name of the first model's root item must find it.</li>
 <li><strong>A start screen on an empty canvas.</strong> Opening Dyncamelo (or deleting every node) now shows the installed version, a link to bimcamel.com, a "newer version available" notice with a <strong>Get it</strong> button when the daily update check found one, and cards: <strong>New script</strong>, your four newest recent scripts and the examples. The cards go away as soon as you open a script or add a node. <em>Help &gt; BIMCamel Website</em> and <em>Help &gt; Get the Newest Version…</em> are new commands too; the old plain hint is what remains after you press <strong>New script</strong>. Settings &gt; Appearance &gt; <em>Start screen on an empty canvas</em> switches it off.</li>
-<li><strong>A wiki for bimcamel.com</strong>, built from the repository by <code>python tools/build_wiki.py</code> into <code>docs/wiki</code>: installation, requirements, updating, uninstalling, a first script, concepts, inputs and outputs, the editor, the Script Player, settings, shortcuts, samples, recipes, IFC, BCF, Excel and CSV, troubleshooting, an FAQ, privacy and the licence, and a reference page for every one of the library's nodes with its inputs and outputs. It is plain static HTML with a built-in search, light and dark. Troubleshooting, recipes and the guide to writing nodes are the repository's own documents, so there is one copy of each. CI checks that <code>docs/wiki</code> is what the build writes and keeps it as the <code>dyncamelo-wiki</code> artifact.</li>
-<li><strong>More troubleshooting entries</strong>: a search that returns nothing or a magnifier with no names, and a missing start screen.</li>
 </ul>
 <h3 id="fixed">Fixed</h3>
 <ul>
@@ -118,7 +124,7 @@
 </ul>
 <h2 id="0460---2026-10-02">0.46.0 - 2026-10-02</h2>
 <p>A source-code release: GitHub carries no installer or bundle for this version.</p>
-<h3 id="added_1">Added</h3>
+<h3 id="added_2">Added</h3>
 <ul>
 <li><strong>Help &gt; Run Self-Test</strong> runs 29 read-only checks on the Navisworks nodes against the open model (application and document, saved items, the model, model items, properties) and shows pass, fail or skip for each, with the node's own error. The report goes to the clipboard. It cannot change anything: it only uses nodes on a reviewed read-only list.</li>
 <li><strong>Help &gt; Copy Diagnostics</strong> copies the Dyncamelo and Navisworks versions, the installed Autodesk plug-in bundles, which copies of Nodify and Newtonsoft.Json are loaded and from where, and the end of <code>errors.log</code>. The user name, computer name and profile folder are replaced, so it is safe to post in an issue.</li>
@@ -148,7 +154,7 @@
 </ul>
 <p>Notes: <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/WHATS_NEW_0.45.1.md">docs/WHATS_NEW_0.45.1.md</a>.</p>
 <h2 id="0450---2026-10-01">0.45.0 - 2026-10-01</h2>
-<h3 id="added_2">Added</h3>
+<h3 id="added_3">Added</h3>
 <ul>
 <li>About 220 new nodes. <strong>Tables</strong> (<code>Table.*</code>, <strong>Watch Table</strong>, <code>Report.Html</code>, <code>Report.Markdown</code>, <code>Properties.ToTable</code>, <code>Properties.Discover</code>), <strong>conditional flow</strong> (<code>Flow.When</code>, <code>Flow.Try</code>, <code>Flow.Wait</code>, <code>Logic.Choose</code>, <code>Logic.Switch</code>), <code>Math.Formula</code>, list statistics, strings with regular expressions, dates, dictionaries, colour, vector and bounding-box maths.</li>
 <li>Path, file, zip, system and web nodes (<code>File.*</code>, <code>Directory.*</code>, <code>Zip.*</code>, <code>System.Run</code>, <code>System.OpenPath</code>, <code>Web.Get</code>, <code>Web.Post</code>). Everything that writes, launches or posts is marked as changing things, so the Script Player asks before running it.</li>
@@ -181,19 +187,19 @@
 <li><code>docs/NODE_CATALOG.md</code> is generated from the source and kept current by CI.</li>
 </ul>
 <h2 id="0430---2026-09-30">0.43.0 - 2026-09-30</h2>
-<h3 id="added_3">Added</h3>
+<h3 id="added_4">Added</h3>
 <ul>
 <li><strong>Script Player</strong>: a separate pane that runs saved graphs without opening the node editor. It lists the scripts under <code>Documents\Dyncamelo\Scripts</code> and any folders you add, builds a form from the script's input nodes, and lists the results of its Watch nodes. Esc stops a run. A script that changes the model asks once per file version.</li>
 <li>The <code>Dyncamelo.Run.DYNC</code> plug-in runs a script by path, for other add-ins, the Automation API and the Batch Utility.</li>
 </ul>
 <h2 id="0420---2026-09-30">0.42.0 - 2026-09-30</h2>
-<h3 id="added_4">Added</h3>
+<h3 id="added_5">Added</h3>
 <ul>
 <li><strong>Node groups</strong>: reusable pieces of graph with their own inputs and outputs (<code>.dyc</code> format 2, written only when a graph has groups).</li>
 <li>Unsaved-work safety (autosave and recovery, save prompts), a clickable Problems list, undo history, run up to a selected node (<code>Shift+F5</code>), canvas bookmarks, keyboard navigation, hints and a colour eyedropper.</li>
 </ul>
 <h2 id="0410---2026-09-30">0.41.0 - 2026-09-30</h2>
-<h3 id="added_5">Added</h3>
+<h3 id="added_6">Added</h3>
 <ul>
 <li>Scrub fields and editors for colours, <strong>Freeze</strong> (<code>Shift+M</code>), a minimap button, a node library panel that can be hidden (<code>Ctrl+B</code>).</li>
 <li><strong>Esc cancels a running graph</strong>; the run resumes from where it stopped next time.</li>
@@ -203,12 +209,12 @@
 <li>Collapsed nodes keep their sockets. The light theme and menus were fixed.</li>
 </ul>
 <h2 id="0400---2026-09-30">0.40.0 - 2026-09-30</h2>
-<h3 id="added_6">Added</h3>
+<h3 id="added_7">Added</h3>
 <ul>
 <li><strong>Multi-input sockets</strong>: a list input can take any number of wires.</li>
 </ul>
 <h2 id="0390---2026-09-30">0.39.0 - 2026-09-30</h2>
-<h3 id="added_7">Added</h3>
+<h3 id="added_8">Added</h3>
 <ul>
 <li>Layered <strong>Arrange</strong> (<code>Ctrl+Shift+L</code>), which ships <code>AutomaticGraphLayout.dll</code>; minimap (<code>Ctrl+M</code>); <strong>command palette</strong> (<code>Ctrl+Shift+P</code>); a sectioned Settings page with shortcut rebinding; the generated <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/UI_GUIDE.md">editor guide</a>.</li>
 </ul>
@@ -217,7 +223,7 @@
 <li><code>Ctrl+Z</code>, <code>Ctrl+Y</code> and the other shortcuts Navisworks binds now reach the editor while its pane has focus.</li>
 </ul>
 <h2 id="0380---2026-09-30">0.38.0 - 2026-09-30</h2>
-<h3 id="added_8">Added</h3>
+<h3 id="added_9">Added</h3>
 <ul>
 <li>Rope-style wire gestures (drop a node on a wire, release a wire on empty canvas to search for a node that fits, cut wires), a colour popup inside the node, model-element picker inputs, one command bar.</li>
 <li>The <strong>crash guard</strong>: a failing command or handler is written to <code>%APPDATA%\Dyncamelo\errors.log</code> and shown in the status bar instead of ending Navisworks.</li>
@@ -228,17 +234,17 @@
 <li>Blender-style row layout: each input is a row with its socket and an inline editor (scrub number field, toggle, choice, text, colour, path). Sockets and wires are coloured by data type.</li>
 </ul>
 <h2 id="0360---2026-09-30">0.36.0 - 2026-09-30</h2>
-<h3 id="added_9">Added</h3>
+<h3 id="added_10">Added</h3>
 <ul>
 <li>Undo and redo for the whole editor, and the header menu bar.</li>
 </ul>
 <h2 id="0350---2026-09-30">0.35.0 - 2026-09-30</h2>
-<h3 id="added_10">Added</h3>
+<h3 id="added_11">Added</h3>
 <ul>
 <li>Foundations for the new node UI: port kinds, colour palettes, mute, editor metadata saved in the graph, and the performance HUD (<code>Ctrl+Shift+F12</code>).</li>
 </ul>
 <h2 id="0340---2026-09-30">0.34.0 - 2026-09-30</h2>
-<h3 id="added_11">Added</h3>
+<h3 id="added_12">Added</h3>
 <ul>
 <li><code>Viewpoints.InFolder</code>: every saved viewpoint in a folder, in window order.</li>
 </ul>
@@ -248,7 +254,7 @@
 </ul>
 <h2 id="033x---2026-08-31">0.33.x - 2026-08-31</h2>
 <p>0.33.0 to 0.33.3.</p>
-<h3 id="added_12">Added</h3>
+<h3 id="added_13">Added</h3>
 <ul>
 <li><strong>Arrange Selection</strong> (<code>Ctrl+L</code>).</li>
 </ul>
@@ -257,13 +263,13 @@
 <li>Canvas drift on delete (finished in 0.34.0), <code>ClashResult.Focus</code> on clash items that are containers, empty viewpoints after the first in a loop, a <code>Ctrl+L</code> crash, and the clash-viewpoint loop slowing down into a freeze.</li>
 </ul>
 <h2 id="0320---2026-08-31">0.32.0 - 2026-08-31</h2>
-<h3 id="added_13">Added</h3>
+<h3 id="added_14">Added</h3>
 <ul>
 <li><code>Clash.AllGroups</code> and <code>ClashGroup.Info</code>, and the sample <em>Clash Group Viewpoints per Test</em>.</li>
 </ul>
 <h2 id="031x---2026-08-21">0.31.x - 2026-08-21</h2>
 <p>0.31.0 to 0.31.3 (until 2026-08-24).</p>
-<h3 id="added_14">Added</h3>
+<h3 id="added_15">Added</h3>
 <ul>
 <li>A Dynamo-parity wave of 24 new <code>List</code> nodes (slicing, sets, transposing, true/false tests and more).</li>
 <li><code>ModelItem.AncestorPropertyMatches</code>, and comma-separated statuses ("New,Active") in the clash status filters, with a <code>Clash.Statuses</code> node to build them.</li>
@@ -273,12 +279,12 @@
 <li><code>Clash.GroupResults</code> falsely reported results from more than one test, and its grouping never reached the document. It now edits the tree in place.</li>
 </ul>
 <h2 id="0300---2026-08-21">0.30.0 - 2026-08-21</h2>
-<h3 id="added_15">Added</h3>
+<h3 id="added_16">Added</h3>
 <ul>
 <li>Clash noise-reduction filters: property pair, set, depth and de-duplication.</li>
 </ul>
 <h2 id="0290---2026-08-21">0.29.0 - 2026-08-21</h2>
-<h3 id="added_16">Added</h3>
+<h3 id="added_17">Added</h3>
 <ul>
 <li><code>ModelItem.AncestorNameMatches</code>: tests the names of an item's ancestors.</li>
 </ul>
@@ -287,18 +293,18 @@
 <ul>
 <li>Lacing tolerates nulls: a null element gives a null result at its place instead of failing the whole node.</li>
 </ul>
-<h3 id="added_17">Added</h3>
+<h3 id="added_18">Added</h3>
 <ul>
 <li><code>List.Clean</code>, <code>IsNull</code> and <code>IsNullOrEmpty</code>.</li>
 </ul>
 <h2 id="0270---2026-08-17">0.27.0 - 2026-08-17</h2>
-<h3 id="added_18">Added</h3>
+<h3 id="added_19">Added</h3>
 <ul>
 <li>The clash triage set (eight nodes): explicit grouping with <code>Clash.GroupResults</code>, <code>Clash.FilterByOrientation</code>, <code>ClashResult.Focus</code>, <code>ClashGroup.ByName</code> and <code>ClashTest.Groups</code>.</li>
 </ul>
 <h2 id="026x---2026-07-29">0.26.x - 2026-07-29</h2>
 <p>0.26.0 to 0.26.2 (until 2026-08-14).</p>
-<h3 id="added_19">Added</h3>
+<h3 id="added_20">Added</h3>
 <ul>
 <li><code>Viewpoints.ExportFile</code> and <code>Viewpoints.ImportFile</code> copy saved viewpoints between models.</li>
 </ul>
@@ -311,39 +317,39 @@
 <li>The viewpoint package nodes no longer fail with a bare "access denied" for a folder, a relative path or a quoted path.</li>
 </ul>
 <h2 id="025x---2026-07-27">0.25.x - 2026-07-27</h2>
-<h3 id="added_20">Added</h3>
+<h3 id="added_21">Added</h3>
 <ul>
 <li><strong>List@Level</strong>: choose the nesting level an input port consumes, as in Dynamo (0.25.0).</li>
 <li>The sample <em>Section Box Viewpoints per Group</em> (0.25.1).</li>
 </ul>
 <h2 id="0240---2026-07-27">0.24.0 - 2026-07-27</h2>
-<h3 id="added_21">Added</h3>
+<h3 id="added_22">Added</h3>
 <ul>
 <li><code>ModelItem.CombinedBoundingBox</code>: one box around a whole group of items.</li>
 </ul>
 <h2 id="023x---2026-07-27">0.23.x - 2026-07-27</h2>
-<h3 id="added_22">Added</h3>
+<h3 id="added_23">Added</h3>
 <ul>
 <li><code>Color.Random</code>, <code>Color.RandomList</code>, <code>Color.Gradient</code> and <code>Color.ByValues</code>, with <code>Appearance.ColorByValues</code>. 0.23.1 refreshed the docs.</li>
 </ul>
 <h2 id="022x---2026-07-27">0.22.x - 2026-07-27</h2>
-<h3 id="added_23">Added</h3>
+<h3 id="added_24">Added</h3>
 <ul>
 <li><code>Proximity.Cluster</code> groups touching geometry into elements. A precise <code>mesh</code> mode confirms each connection with the Clash engine.</li>
 </ul>
 <h2 id="0210---2026-07-23">0.21.0 - 2026-07-23</h2>
-<h3 id="added_24">Added</h3>
+<h3 id="added_25">Added</h3>
 <ul>
 <li>Experimental <code>Markup.*</code> nodes that draw redlines on saved viewpoints through a hidden Navisworks API.</li>
 </ul>
 <h2 id="0200---2026-07-23">0.20.0 - 2026-07-23</h2>
-<h3 id="added_25">Added</h3>
+<h3 id="added_26">Added</h3>
 <ul>
 <li><code>Viewpoint.VisibleItems</code>: which items does this viewpoint show?</li>
 </ul>
 <h2 id="019x---2026-07-19">0.19.x - 2026-07-19</h2>
 <p>0.19.0 to 0.19.3 (until 2026-07-21).</p>
-<h3 id="added_26">Added</h3>
+<h3 id="added_27">Added</h3>
 <ul>
 <li>A single <strong>BIMCamel</strong> ribbon tab shared with the IFC exporter, a shared About window, and an update check when the editor opens.</li>
 <li><code>Flow.Then</code> pins the order of side-effect nodes as a data dependency.</li>
@@ -353,24 +359,24 @@
 <li>The order of nodes that have no wire between them is no longer taken from their position on the canvas (0.19.3).</li>
 </ul>
 <h2 id="0180---2026-07-17">0.18.0 - 2026-07-17</h2>
-<h3 id="added_27">Added</h3>
+<h3 id="added_28">Added</h3>
 <ul>
 <li><strong>Watch Image</strong> node, an index gutter on Watch List, quick node search with <code>Space</code>, and port tooltips generated from the API documentation.</li>
 </ul>
 <h2 id="017x---2026-07-15">0.17.x - 2026-07-15</h2>
 <p>0.17.0 to 0.17.1 (until 2026-07-17).</p>
-<h3 id="added_28">Added</h3>
+<h3 id="added_29">Added</h3>
 <ul>
 <li><code>FallHazard.FloorOpeningMap</code> takes a two-colour gradient and prints gap-over-limit labels.</li>
 <li>Each release also publishes a checksum file for the stable download name (0.17.1).</li>
 </ul>
 <h2 id="0160---2026-07-15">0.16.0 - 2026-07-15</h2>
-<h3 id="added_29">Added</h3>
+<h3 id="added_30">Added</h3>
 <ul>
 <li><code>FallHazard.EdgeHandrailCheck</code> takes custom edge colours and prints gap-over-limit labels.</li>
 </ul>
 <h2 id="0150---2026-07-15">0.15.0 - 2026-07-15</h2>
-<h3 id="added_30">Added</h3>
+<h3 id="added_31">Added</h3>
 <ul>
 <li><code>minPassage</code> input on <code>FallHazard.EdgeHandrailCheck</code>.</li>
 </ul>
@@ -379,13 +385,13 @@
 <li>Corner cells were classified as safe.</li>
 </ul>
 <h2 id="0140---2026-07-15">0.14.0 - 2026-07-15</h2>
-<h3 id="added_31">Added</h3>
+<h3 id="added_32">Added</h3>
 <ul>
 <li>A <code>units</code> input on the fall-hazard nodes, so numbers can be entered in metres whatever units the document stores.</li>
 </ul>
 <h2 id="013x---2026-07-15">0.13.x - 2026-07-15</h2>
 <p>0.13.0 to 0.13.8.</p>
-<h3 id="added_32">Added</h3>
+<h3 id="added_33">Added</h3>
 <ul>
 <li><code>FallHazard.EdgeHandrailCheck</code> (0.13.4) and the Captured Selection node (0.13.3).</li>
 <li>
@@ -400,19 +406,19 @@
 <li>The fall-hazard clearance collapsed to about one cell (0.13.1); the edge gap measured the length of a slot instead of its width (0.13.5); a half-cell bias in the clearance (0.13.6).</li>
 </ul>
 <h2 id="012x---2026-07-15">0.12.x - 2026-07-15</h2>
-<h3 id="added_33">Added</h3>
+<h3 id="added_34">Added</h3>
 <ul>
 <li><code>FallHazard.FloorOpeningMap</code> gets a diagnostic <code>report</code> output (0.12.3), and its heat map pivots on the clearance limit (0.12.4).</li>
 </ul>
 <p>The whole 0.12 to 0.23 wave is described in <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/WHATS_NEW_0.23.md">docs/WHATS_NEW_0.23.md</a>.</p>
 <h2 id="010x---2026-07-13">0.10.x - 2026-07-13</h2>
-<h3 id="added_34">Added</h3>
+<h3 id="added_35">Added</h3>
 <ul>
 <li>The <strong>universal loop</strong>: <code>Loop.Item</code> and <code>Loop.Collect</code> run any nodes once per item (0.10.0).</li>
 <li><code>BoundingBox.Scale</code>, <code>Camera.SetProjection</code>, <code>Camera.SetFieldOfView</code>, <code>ModelItem.ObjectAncestor</code> (0.10.1); an HSV colour picker dialog, an editable slider step and <code>ModelItem.CommonAncestor</code> (0.10.2).</li>
 </ul>
 <h2 id="09x---2026-07-13">0.9.x - 2026-07-13</h2>
-<h3 id="added_35">Added</h3>
+<h3 id="added_36">Added</h3>
 <ul>
 <li><strong>Per-item workflows</strong>: <code>Workflow.ForEach</code> and the <code>Action.*</code> builders (0.9.0), with temporary-override <code>Action.Highlight</code> and <code>Action.Ghost</code> so each saved view keeps its own colours (0.9.1).</li>
 <li>The bundle ships folders for <strong>Navisworks 2024, 2025 and 2026</strong> (0.9.0).</li>
@@ -428,9 +434,9 @@
 <li><strong>0.2</strong>: 103 new nodes, copy and paste, node frames, value previews, library favourites. Notes: <a href="https://github.com/mrshoma99-rgb/dyncamelo/blob/main/docs/WHATS_NEW_0.2.md">docs/WHATS_NEW_0.2.md</a>.</li>
 </ul>
 </main>
-<aside class="toc"><h4>On this page</h4><a class="l2" href="#unreleased">Unreleased</a><a class="l3" href="#added">Added</a><a class="l3" href="#fixed">Fixed</a><a class="l3" href="#faster">Faster</a><a class="l3" href="#changed">Changed</a><a class="l3" href="#fixed_1">Fixed</a><a class="l2" href="#0460---2026-10-02">0.46.0 - 2026-10-02</a><a class="l3" href="#added_1">Added</a><a class="l3" href="#fixed_2">Fixed</a><a class="l3" href="#changed_1">Changed</a><a class="l2" href="#0451---2026-10-01">0.45.1 - 2026-10-01</a><a class="l3" href="#fixed_3">Fixed</a><a class="l2" href="#0450---2026-10-01">0.45.0 - 2026-10-01</a><a class="l3" href="#added_2">Added</a><a class="l3" href="#changed_2">Changed</a><a class="l3" href="#removed">Removed</a><a class="l2" href="#0440---2026-10-01">0.44.0 - 2026-10-01</a><a class="l3" href="#fixed_4">Fixed</a><a class="l3" href="#changed_3">Changed</a><a class="l2" href="#0430---2026-09-30">0.43.0 - 2026-09-30</a><a class="l3" href="#added_3">Added</a><a class="l2" href="#0420---2026-09-30">0.42.0 - 2026-09-30</a><a class="l3" href="#added_4">Added</a><a class="l2" href="#0410---2026-09-30">0.41.0 - 2026-09-30</a><a class="l3" href="#added_5">Added</a><a class="l3" href="#changed_4">Changed</a><a class="l2" href="#0400---2026-09-30">0.40.0 - 2026-09-30</a><a class="l3" href="#added_6">Added</a><a class="l2" href="#0390---2026-09-30">0.39.0 - 2026-09-30</a><a class="l3" href="#added_7">Added</a><a class="l3" href="#fixed_5">Fixed</a><a class="l2" href="#0380---2026-09-30">0.38.0 - 2026-09-30</a><a class="l3" href="#added_8">Added</a><a class="l2" href="#0370---2026-09-30">0.37.0 - 2026-09-30</a><a class="l3" href="#changed_5">Changed</a><a class="l2" href="#0360---2026-09-30">0.36.0 - 2026-09-30</a><a class="l3" href="#added_9">Added</a><a class="l2" href="#0350---2026-09-30">0.35.0 - 2026-09-30</a><a class="l3" href="#added_10">Added</a><a class="l2" href="#0340---2026-09-30">0.34.0 - 2026-09-30</a><a class="l3" href="#added_11">Added</a><a class="l3" href="#fixed_6">Fixed</a><a class="l2" href="#033x---2026-08-31">0.33.x - 2026-08-31</a><a class="l3" href="#added_12">Added</a><a class="l3" href="#fixed_7">Fixed</a><a class="l2" href="#0320---2026-08-31">0.32.0 - 2026-08-31</a><a class="l3" href="#added_13">Added</a><a class="l2" href="#031x---2026-08-21">0.31.x - 2026-08-21</a><a class="l3" href="#added_14">Added</a><a class="l3" href="#fixed_8">Fixed</a><a class="l2" href="#0300---2026-08-21">0.30.0 - 2026-08-21</a><a class="l3" href="#added_15">Added</a><a class="l2" href="#0290---2026-08-21">0.29.0 - 2026-08-21</a><a class="l3" href="#added_16">Added</a><a class="l2" href="#0280---2026-08-21">0.28.0 - 2026-08-21</a><a class="l3" href="#changed_6">Changed</a><a class="l3" href="#added_17">Added</a><a class="l2" href="#0270---2026-08-17">0.27.0 - 2026-08-17</a><a class="l3" href="#added_18">Added</a><a class="l2" href="#026x---2026-07-29">0.26.x - 2026-07-29</a><a class="l3" href="#added_19">Added</a><a class="l3" href="#changed_7">Changed</a><a class="l3" href="#fixed_9">Fixed</a><a class="l2" href="#025x---2026-07-27">0.25.x - 2026-07-27</a><a class="l3" href="#added_20">Added</a><a class="l2" href="#0240---2026-07-27">0.24.0 - 2026-07-27</a><a class="l3" href="#added_21">Added</a><a class="l2" href="#023x---2026-07-27">0.23.x - 2026-07-27</a><a class="l3" href="#added_22">Added</a><a class="l2" href="#022x---2026-07-27">0.22.x - 2026-07-27</a><a class="l3" href="#added_23">Added</a><a class="l2" href="#0210---2026-07-23">0.21.0 - 2026-07-23</a><a class="l3" href="#added_24">Added</a><a class="l2" href="#0200---2026-07-23">0.20.0 - 2026-07-23</a><a class="l3" href="#added_25">Added</a><a class="l2" href="#019x---2026-07-19">0.19.x - 2026-07-19</a><a class="l3" href="#added_26">Added</a><a class="l3" href="#changed_8">Changed</a><a class="l2" href="#0180---2026-07-17">0.18.0 - 2026-07-17</a><a class="l3" href="#added_27">Added</a><a class="l2" href="#017x---2026-07-15">0.17.x - 2026-07-15</a><a class="l3" href="#added_28">Added</a><a class="l2" href="#0160---2026-07-15">0.16.0 - 2026-07-15</a><a class="l3" href="#added_29">Added</a><a class="l2" href="#0150---2026-07-15">0.15.0 - 2026-07-15</a><a class="l3" href="#added_30">Added</a><a class="l3" href="#fixed_10">Fixed</a><a class="l2" href="#0140---2026-07-15">0.14.0 - 2026-07-15</a><a class="l3" href="#added_31">Added</a><a class="l2" href="#013x---2026-07-15">0.13.x - 2026-07-15</a><a class="l3" href="#added_32">Added</a><a class="l3" href="#fixed_11">Fixed</a><a class="l2" href="#012x---2026-07-15">0.12.x - 2026-07-15</a><a class="l3" href="#added_33">Added</a><a class="l2" href="#010x---2026-07-13">0.10.x - 2026-07-13</a><a class="l3" href="#added_34">Added</a><a class="l2" href="#09x---2026-07-13">0.9.x - 2026-07-13</a><a class="l3" href="#added_35">Added</a><a class="l3" href="#fixed_12">Fixed</a><a class="l2" href="#02-to-04-no-dates-recorded-in-this-repository">0.2 to 0.4 (no dates recorded in this repository)</a></aside>
+<aside class="toc"><h4>On this page</h4><a class="l2" href="#unreleased">Unreleased</a><a class="l3" href="#added">Added</a><a class="l2" href="#0470---2026-10-03">0.47.0 - 2026-10-03</a><a class="l3" href="#added_1">Added</a><a class="l3" href="#fixed">Fixed</a><a class="l3" href="#faster">Faster</a><a class="l3" href="#changed">Changed</a><a class="l3" href="#fixed_1">Fixed</a><a class="l2" href="#0460---2026-10-02">0.46.0 - 2026-10-02</a><a class="l3" href="#added_2">Added</a><a class="l3" href="#fixed_2">Fixed</a><a class="l3" href="#changed_1">Changed</a><a class="l2" href="#0451---2026-10-01">0.45.1 - 2026-10-01</a><a class="l3" href="#fixed_3">Fixed</a><a class="l2" href="#0450---2026-10-01">0.45.0 - 2026-10-01</a><a class="l3" href="#added_3">Added</a><a class="l3" href="#changed_2">Changed</a><a class="l3" href="#removed">Removed</a><a class="l2" href="#0440---2026-10-01">0.44.0 - 2026-10-01</a><a class="l3" href="#fixed_4">Fixed</a><a class="l3" href="#changed_3">Changed</a><a class="l2" href="#0430---2026-09-30">0.43.0 - 2026-09-30</a><a class="l3" href="#added_4">Added</a><a class="l2" href="#0420---2026-09-30">0.42.0 - 2026-09-30</a><a class="l3" href="#added_5">Added</a><a class="l2" href="#0410---2026-09-30">0.41.0 - 2026-09-30</a><a class="l3" href="#added_6">Added</a><a class="l3" href="#changed_4">Changed</a><a class="l2" href="#0400---2026-09-30">0.40.0 - 2026-09-30</a><a class="l3" href="#added_7">Added</a><a class="l2" href="#0390---2026-09-30">0.39.0 - 2026-09-30</a><a class="l3" href="#added_8">Added</a><a class="l3" href="#fixed_5">Fixed</a><a class="l2" href="#0380---2026-09-30">0.38.0 - 2026-09-30</a><a class="l3" href="#added_9">Added</a><a class="l2" href="#0370---2026-09-30">0.37.0 - 2026-09-30</a><a class="l3" href="#changed_5">Changed</a><a class="l2" href="#0360---2026-09-30">0.36.0 - 2026-09-30</a><a class="l3" href="#added_10">Added</a><a class="l2" href="#0350---2026-09-30">0.35.0 - 2026-09-30</a><a class="l3" href="#added_11">Added</a><a class="l2" href="#0340---2026-09-30">0.34.0 - 2026-09-30</a><a class="l3" href="#added_12">Added</a><a class="l3" href="#fixed_6">Fixed</a><a class="l2" href="#033x---2026-08-31">0.33.x - 2026-08-31</a><a class="l3" href="#added_13">Added</a><a class="l3" href="#fixed_7">Fixed</a><a class="l2" href="#0320---2026-08-31">0.32.0 - 2026-08-31</a><a class="l3" href="#added_14">Added</a><a class="l2" href="#031x---2026-08-21">0.31.x - 2026-08-21</a><a class="l3" href="#added_15">Added</a><a class="l3" href="#fixed_8">Fixed</a><a class="l2" href="#0300---2026-08-21">0.30.0 - 2026-08-21</a><a class="l3" href="#added_16">Added</a><a class="l2" href="#0290---2026-08-21">0.29.0 - 2026-08-21</a><a class="l3" href="#added_17">Added</a><a class="l2" href="#0280---2026-08-21">0.28.0 - 2026-08-21</a><a class="l3" href="#changed_6">Changed</a><a class="l3" href="#added_18">Added</a><a class="l2" href="#0270---2026-08-17">0.27.0 - 2026-08-17</a><a class="l3" href="#added_19">Added</a><a class="l2" href="#026x---2026-07-29">0.26.x - 2026-07-29</a><a class="l3" href="#added_20">Added</a><a class="l3" href="#changed_7">Changed</a><a class="l3" href="#fixed_9">Fixed</a><a class="l2" href="#025x---2026-07-27">0.25.x - 2026-07-27</a><a class="l3" href="#added_21">Added</a><a class="l2" href="#0240---2026-07-27">0.24.0 - 2026-07-27</a><a class="l3" href="#added_22">Added</a><a class="l2" href="#023x---2026-07-27">0.23.x - 2026-07-27</a><a class="l3" href="#added_23">Added</a><a class="l2" href="#022x---2026-07-27">0.22.x - 2026-07-27</a><a class="l3" href="#added_24">Added</a><a class="l2" href="#0210---2026-07-23">0.21.0 - 2026-07-23</a><a class="l3" href="#added_25">Added</a><a class="l2" href="#0200---2026-07-23">0.20.0 - 2026-07-23</a><a class="l3" href="#added_26">Added</a><a class="l2" href="#019x---2026-07-19">0.19.x - 2026-07-19</a><a class="l3" href="#added_27">Added</a><a class="l3" href="#changed_8">Changed</a><a class="l2" href="#0180---2026-07-17">0.18.0 - 2026-07-17</a><a class="l3" href="#added_28">Added</a><a class="l2" href="#017x---2026-07-15">0.17.x - 2026-07-15</a><a class="l3" href="#added_29">Added</a><a class="l2" href="#0160---2026-07-15">0.16.0 - 2026-07-15</a><a class="l3" href="#added_30">Added</a><a class="l2" href="#0150---2026-07-15">0.15.0 - 2026-07-15</a><a class="l3" href="#added_31">Added</a><a class="l3" href="#fixed_10">Fixed</a><a class="l2" href="#0140---2026-07-15">0.14.0 - 2026-07-15</a><a class="l3" href="#added_32">Added</a><a class="l2" href="#013x---2026-07-15">0.13.x - 2026-07-15</a><a class="l3" href="#added_33">Added</a><a class="l3" href="#fixed_11">Fixed</a><a class="l2" href="#012x---2026-07-15">0.12.x - 2026-07-15</a><a class="l3" href="#added_34">Added</a><a class="l2" href="#010x---2026-07-13">0.10.x - 2026-07-13</a><a class="l3" href="#added_35">Added</a><a class="l2" href="#09x---2026-07-13">0.9.x - 2026-07-13</a><a class="l3" href="#added_36">Added</a><a class="l3" href="#fixed_12">Fixed</a><a class="l2" href="#02-to-04-no-dates-recorded-in-this-repository">0.2 to 0.4 (no dates recorded in this repository)</a></aside>
 </div>
-<footer class="foot">Dyncamelo v0.46.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
+<footer class="foot">Dyncamelo v0.47.0 by <a href="https://www.bimcamel.com">BIMCamel</a> &middot; licensed under the PolyForm Noncommercial License 1.0.0 &middot; <a href="https://github.com/mrshoma99-rgb/dyncamelo/issues">Report a problem</a></footer>
 <script src="assets/search-index.js"></script>
 <script src="assets/wiki.js"></script>
 </body>

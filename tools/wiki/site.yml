@@ -1,0 +1,17 @@
+# Addresses the wiki links to. tools/build_wiki.py reads this file and passes the values to MkDocs as `extra:`,
+# where the header buttons, the announcement bar, the footer and the "edit this page" links use them.
+# Change an address here, not in the templates.
+
+# The "Get on GitHub" button and the GitHub links: the newest release.
+github_url: https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest
+
+# The "Get on Autodesk App Store" button.
+# PLACEHOLDER: the Autodesk App Store listing does not exist yet, so this is the store's home page.
+# The owner replaces it with the address of the real listing once it is published.
+app_store_url: https://apps.autodesk.com/
+
+# The BIMCamel logo in the header and the "bimcamel.com" links.
+bimcamel_url: https://www.bimcamel.com/plugins/dyncamelo
+
+# The repository: the footer link and the base of the "edit this page" links (edit/main/<file>).
+repo_url: https://github.com/mrshoma99-rgb/Dyncamelo

@@ -1,0 +1,24 @@
+{#-
+  The footer text of the Dyncamelo wiki: links, the version line and the note about Autodesk.
+  The addresses come from tools/wiki/site.yml; config.copyright is written by tools/build_wiki.py.
+-#}
+<div class="md-copyright dyc-footer">
+  <div class="dyc-footer__links">
+    <a href="{{ config.extra.github_url }}" target="_blank" rel="noopener">GitHub</a>
+    <a href="{{ config.extra.bimcamel_url }}" target="_blank" rel="noopener">bimcamel.com</a>
+    <a href="{{ 'privacy-and-safety.html' | url }}">Privacy and safety</a>
+    <a href="{{ 'licence.html' | url }}">Licence</a>
+  </div>
+  {% if config.copyright %}
+    <div class="md-copyright__highlight">
+      {{ config.copyright }}
+    </div>
+  {% endif %}
+  <div class="md-copyright__highlight">Dyncamelo is not affiliated with or endorsed by Autodesk.</div>
+  {% if not config.extra.generator == false %}
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  {% endif %}
+</div>

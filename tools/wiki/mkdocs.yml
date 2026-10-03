@@ -1,0 +1,117 @@
+# Settings of the Dyncamelo wiki (MkDocs with the Material theme). Build it with `python tools/build_wiki.py`;
+# see tools/wiki/README.md.
+#
+# The build puts the pages in a staging folder (build/wiki-docs) and writes build/wiki-mkdocs.yml, a small file that
+# inherits this one and adds what changes from build to build: the folders, the navigation (from docs/wiki-src/nav.yml),
+# the addresses in tools/wiki/site.yml and the footer line with the version.
+
+site_name: Dyncamelo Wiki
+site_description: The user guide for Dyncamelo, visual programming for Autodesk Navisworks.
+site_author: BIMCamel
+
+# No site_url on purpose: every link is relative, so the folder works wherever it is uploaded, and from a file:// address.
+use_directory_urls: false
+
+# Defaults for running `mkdocs build -f tools/wiki/mkdocs.yml` by hand after `python tools/build_wiki.py --stage-only`.
+# The build overrides them.
+docs_dir: ../../build/wiki-docs
+site_dir: ../../build/wiki-site
+hooks:
+  - hooks.py
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  # No web fonts: the page asks no other server for anything.
+  font: false
+  favicon: assets/favicon.png
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.code.copy
+    - navigation.footer
+    - navigation.indexes
+    - navigation.path
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  # The first entry is used when the visitor's system has no preference. The toggle cycles system, light, dark.
+  palette:
+    - media: "(prefers-color-scheme)"
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-auto
+        name: Colours follow the system. Switch to light.
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Light colours. Switch to dark.
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Dark colours. Switch to the system setting.
+
+extra_css:
+  - assets/stylesheets/dyncamelo.css
+
+plugins:
+  - search:
+      lang: en
+  # Click a picture to see it large. Pictures that come in a dark and a light version open in their own theme.
+  - glightbox:
+      auto_themed: true
+      background: none
+      effect: fade
+      loop: false
+      shadow: false
+  # Lets the unzipped site work from a folder (file://): the search index is loaded as a script, not fetched.
+  - offline
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - sane_lists
+  - tables
+  - toc:
+      permalink: true
+      # The same heading ids as GitHub, because the links in the repository documents were written for GitHub.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+# Every problem is a warning, and the build runs with --strict, so a broken link, anchor or picture fails it.
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: warn
+    anchors: warn
+strict: true

@@ -14,6 +14,9 @@ src/Dyncamelo.Core/Loader/AssemblyNodeLoader.cs:
               [return: NodeName], or "result"; void methods pass input 0 through
   * methods with `params`, by-ref or delegate parameters and
     [IsVisibleInLibrary(false)] / [NodeDeprecated] / [TypeConverterRegistration] members are skipped
+  * id      = the identity a saved graph (.dyc) uses for the node: for a zero-touch node the definition id
+              AssemblyNodeLoader.GetFunctionSignature builds (`Namespace.Class.Method@type1,type2`, "DefinitionId" in
+              the file, with `assembly` as "Assembly"), for an interactive node its serialized type tag ("NodeType")
 
 The output feeds the node-library browser on bimcamel.com/plugins/dyncamelo, so
 types are prettified (IEnumerable<ModelItem> -> "ModelItem[]", double ->
@@ -265,6 +268,136 @@ def friendly_default(expr: str) -> str:
     return re.sub(r"[dDfFmM]$", "", e) if re.match(r"^-?[\d.]+[dDfFmM]$", e) else e
 
 
+# ------------------------------------------------------------ definition ids
+
+# Parameter types as the loader writes them into an id (AssemblyNodeLoader.GetMangledTypeName): C# keywords for the
+# built-in types, the full name for everything else, `Name<arg,arg>` for generics (no spaces), `T[]` and `T?`.
+KEYWORD_TYPES = {
+    "bool", "byte", "sbyte", "char", "short", "ushort", "int", "uint", "long", "ulong",
+    "float", "double", "decimal", "string", "object",
+}
+SYSTEM_TYPES = {
+    "DateTime": "System.DateTime",
+    "DateTimeOffset": "System.DateTimeOffset",
+    "TimeSpan": "System.TimeSpan",
+    "Guid": "System.Guid",
+    "IEnumerable": "System.Collections.Generic.IEnumerable",
+    "ICollection": "System.Collections.Generic.ICollection",
+    "IList": "System.Collections.Generic.IList",
+    "List": "System.Collections.Generic.List",
+    "IReadOnlyList": "System.Collections.Generic.IReadOnlyList",
+    "IReadOnlyCollection": "System.Collections.Generic.IReadOnlyCollection",
+    "Dictionary": "System.Collections.Generic.Dictionary",
+}
+SYSTEM_VALUE_TYPES = {"DateTime", "DateTimeOffset", "TimeSpan", "Guid"}
+# Types that node signatures take from the host application or a vendored library rather than from this repository.
+# Unknown type names fail the generator (see full_type_name), so a new one has to be added here on purpose.
+EXTERNAL_TYPES = {
+    "ClashResult": "Autodesk.Navisworks.Api.Clash.ClashResult",
+    "ClashResultGroup": "Autodesk.Navisworks.Api.Clash.ClashResultGroup",
+    "ClashTest": "Autodesk.Navisworks.Api.Clash.ClashTest",
+    "DataProperty": "Autodesk.Navisworks.Api.DataProperty",
+    "Document": "Autodesk.Navisworks.Api.Document",
+    "FolderItem": "Autodesk.Navisworks.Api.FolderItem",
+    "Model": "Autodesk.Navisworks.Api.Model",
+    "ModelItem": "Autodesk.Navisworks.Api.ModelItem",
+    "SavedItem": "Autodesk.Navisworks.Api.SavedItem",
+    "SavedViewpoint": "Autodesk.Navisworks.Api.SavedViewpoint",
+    "SelectionSet": "Autodesk.Navisworks.Api.SelectionSet",
+    "TimelinerTask": "Autodesk.Navisworks.Api.Timeliner.TimelinerTask",
+    "Units": "Autodesk.Navisworks.Api.Units",
+    "CoordOptions": "BIMCamel.Ifc.CoordOptions",
+    "ParamMapRule": "BIMCamel.Data.ParamMapRule",
+    "PropertyRoles": "BIMCamel.Data.PropertyRoles",
+    "SpatialNames": "BIMCamel.Ifc.SpatialNames",
+}
+EXTERNAL_VALUE_TYPES = {"Units"}  # an enum
+
+TYPE_DECL_RE = re.compile(
+    r"^\s*public\s+(?:static\s+|sealed\s+|abstract\s+|partial\s+|readonly\s+)*(class|struct|enum|interface|record)\s+([A-Za-z_][A-Za-z0-9_]*)"
+)
+NAMESPACE_RE = re.compile(r"^\s*namespace\s+([\w.]+)", re.M)
+USING_RE = re.compile(r"^\s*using\s+([\w.]+)\s*;", re.M)
+
+_repo_types: dict | None = None
+
+
+def repo_types() -> dict:
+    """Public types declared in this repository's node sources: simple name -> [(namespace, is_value_type)]."""
+    global _repo_types
+    if _repo_types is None:
+        found: dict = {}
+        for d in (REPO / "src" / "Dyncamelo.Core", *ZERO_TOUCH_DIRS):
+            for f in sorted(d.rglob("*.cs")):
+                if EXCLUDED_PARTS.intersection(f.relative_to(d).parts):
+                    continue
+                text = f.read_text(encoding="utf-8-sig")
+                ns = NAMESPACE_RE.search(text)
+                if not ns:
+                    continue
+                for line in text.splitlines():
+                    m = TYPE_DECL_RE.match(line)
+                    if m:
+                        found.setdefault(m.group(2), []).append((ns.group(1), m.group(1) in ("struct", "enum")))
+        _repo_types = found
+    return _repo_types
+
+
+class IdContext:
+    """The namespace and `using` directives of the file a method is declared in (they decide what a type name means)."""
+
+    def __init__(self, ns: str, usings: set[str], where: str):
+        self.ns, self.usings, self.where = ns, usings, where
+
+
+def full_type_name(name: str, ctx: IdContext) -> tuple[str, bool]:
+    """(full name, is a value type) of a simple type name as it appears in a signature of the file in ctx."""
+    if name in KEYWORD_TYPES:
+        return name, name not in ("string", "object")
+    if "." in name:  # already qualified in the source
+        name = name.rsplit(".", 1)[1]
+    if name in SYSTEM_TYPES:
+        return SYSTEM_TYPES[name], name in SYSTEM_VALUE_TYPES
+    if name in EXTERNAL_TYPES:
+        return EXTERNAL_TYPES[name], name in EXTERNAL_VALUE_TYPES
+    candidates = repo_types().get(name, [])
+    if len(candidates) > 1:
+        scoped = [c for c in candidates if c[0] == ctx.ns or c[0] in ctx.usings]
+        candidates = scoped or candidates
+    if len({c[0] for c in candidates}) == 1:
+        return candidates[0][0] + "." + name, candidates[0][1]
+    raise ValueError(
+        f"{ctx.where}: cannot work out the full name of the type '{name}' for the node id "
+        f"({'ambiguous' if candidates else 'unknown'}); add it to EXTERNAL_TYPES in tools/generate_node_catalog.py"
+    )
+
+
+def mangle_type(cs: str, ctx: IdContext) -> str:
+    """The text AssemblyNodeLoader.GetMangledTypeName gives the C# type `cs`."""
+    t = re.sub(r"\s+", "", cs)
+    value_nullable = False
+    if t.endswith("?"):
+        t = t[:-1]
+        value_nullable = True  # only kept when it turns out to be Nullable<T>, a reference type's `?` is just an annotation
+    if t.endswith("[]"):
+        return mangle_type(t[:-2], ctx) + "[]"
+    m = re.match(r"^([A-Za-z_][A-Za-z0-9_.]*)<(.+)>$", t)
+    if m:
+        outer = m.group(1).rsplit(".", 1)[-1]
+        if outer == "Nullable":
+            return mangle_type(m.group(2), ctx) + "?"
+        if outer == "IDictionary" or outer == "Dictionary" or outer in SYSTEM_TYPES:
+            base = ("System.Collections.Generic." + outer) if outer.endswith("Dictionary") else SYSTEM_TYPES[outer]
+        else:
+            base = full_type_name(outer, ctx)[0]
+        args = ",".join(mangle_type(a, ctx) for a in split_top_level(m.group(2)))
+        return f"{base}<{args}>"
+    if t == "IDictionary":
+        return "System.Collections.IDictionary"
+    full, is_value = full_type_name(t, ctx)
+    return full + ("?" if value_nullable and is_value else "")
+
+
 # ----------------------------------------------------------- source scanning
 
 
@@ -292,6 +425,7 @@ def parse_zero_touch_file(path: Path, nodes: list[dict]) -> None:
         "",
     )
     assembly = "Dyncamelo.Navisworks" if "Dyncamelo.Navisworks" in str(path) else "Dyncamelo.Nodes"
+    usings = {m.group(1) for m in USING_RE.finditer("\n".join(lines))}
 
     doc_lines: list[str] = []
     attr_lines: list[str] = []
@@ -339,7 +473,7 @@ def parse_zero_touch_file(path: Path, nodes: list[dict]) -> None:
                 i += 1
                 buf.append(lines[i])
             signature = re.sub(r"\s+", " ", " ".join(s.strip() for s in buf))
-            node = parse_method(signature, "\n".join(attr_lines), doc_lines, cls, ns, assembly)
+            node = parse_method(signature, "\n".join(attr_lines), doc_lines, cls, ns, assembly, usings, path)
             if node:
                 nodes.append(node)
             doc_lines, attr_lines = [], []
@@ -376,7 +510,8 @@ def _balanced(text: str, open_c: str, close_c: str) -> bool:
 
 
 def parse_method(
-    signature: str, attr_block: str, doc_lines: list[str], cls: dict, ns: str, assembly: str
+    signature: str, attr_block: str, doc_lines: list[str], cls: dict, ns: str, assembly: str,
+    usings: set[str], path: Path,
 ) -> dict | None:
     # signature: "public static <return type> <Name>(<params>) ..."
     m = re.match(r"public\s+static\s+(.*?)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", signature)
@@ -420,6 +555,7 @@ def parse_method(
 
     docs = parse_xml_docs(doc_lines)
     inputs = []
+    id_types: list[str] = []
     for p in split_top_level(params_text):
         multi_input = "[MultiInput]" in p
         p = re.sub(r"^(?:\[[^\]]*\]\s*)+", "", p)  # parameter attributes
@@ -430,6 +566,7 @@ def parse_method(
         if len(tokens) != 2:
             continue
         ptype, pname = tokens
+        id_types.append(ptype)
         entry = {
             "name": pname,
             "type": friendly_type(ptype),
@@ -476,8 +613,16 @@ def parse_method(
         "description"
     ] or docs["summary"]
 
+    # What a saved graph calls this node: AssemblyNodeLoader.GetFunctionSignature ("Namespace.Class.Method@type1,type2").
+    ctx = IdContext(ns, usings, f"{path.relative_to(REPO).as_posix()}: {cls['name']}.{name}")
+    definition_id = f"{ns}.{cls['name']}.{name}"
+    if id_types:
+        definition_id += "@" + ",".join(mangle_type(t, ctx) for t in id_types)
+
     return {
         "name": node_name,
+        "id": definition_id,
+        "assembly": assembly,
         "category": category,
         "description": description or "",
         "tags": attr_strings(attr_block, "NodeSearchTags") or [],
@@ -517,6 +662,7 @@ def parse_interactive_file(path: Path, nodes: list[dict]) -> None:
 
     node = {
         "name": const("Name"),
+        "id": const("TypeName"),
         "category": const("Category"),
         "description": const("Description"),
         "tags": [],

@@ -1,0 +1,12 @@
+{#-
+  The two buttons of the header (and of the drawer on a phone): "Get on GitHub" and "Get on Autodesk App Store".
+  Both open in a new tab. The addresses come from tools/wiki/site.yml.
+-#}
+<a class="dyc-btn dyc-btn--primary" href="{{ config.extra.github_url }}" target="_blank" rel="noopener" title="Get on GitHub" aria-label="Get on GitHub (opens in a new tab)">
+  {% include ".icons/fontawesome/brands/github.svg" %}
+  <span class="dyc-btn__text">Get on GitHub</span>
+</a>
+<a class="dyc-btn dyc-btn--secondary" href="{{ config.extra.app_store_url }}" target="_blank" rel="noopener" title="Get on Autodesk App Store" aria-label="Get on Autodesk App Store (opens in a new tab)">
+  {% include ".icons/material/store-outline.svg" %}
+  <span class="dyc-btn__text">Get on Autodesk App Store</span>
+</a>

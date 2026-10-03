@@ -1,0 +1,14 @@
+{#-
+  The page template of the Dyncamelo wiki: Material's own, plus the announcement bar.
+  The addresses come from tools/wiki/site.yml (config.extra.*).
+-#}
+{% extends "base.html" %}
+
+{% block announce %}
+  Dyncamelo is free for personal use
+  (<a href="{{ config.extra.github_url }}" target="_blank" rel="noopener">GitHub</a>
+  or <a href="{{ config.extra.bimcamel_url }}" target="_blank" rel="noopener">bimcamel.com</a>).
+  For professional use, get it on the
+  <a href="{{ config.extra.app_store_url }}" target="_blank" rel="noopener">Autodesk App Store</a>.
+  See the <a href="{{ 'licence.html' | url }}">Licence</a>.
+{% endblock %}

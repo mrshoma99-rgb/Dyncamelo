@@ -232,7 +232,7 @@ def load_handwritten(strict, problems):
     if SRC.exists():
         for path in sorted(SRC.rglob("*.md")):
             key = path.relative_to(SRC).with_suffix("").as_posix()
-            if key not in listed and key != "README":
+            if key not in listed and key != "README" and not key.startswith(("howto/", "graphs/")) and key != "glossary":   # these are built by the MkDocs pipeline that replaces this script
                 problems.append("docs/wiki-src/%s.md is not listed in NAV (tools/build_wiki.py)" % key)
     return pages
 
