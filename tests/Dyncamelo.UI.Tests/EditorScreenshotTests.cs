@@ -149,9 +149,11 @@ public class EditorScreenshotTests
     }
 
     [Theory]
-    [InlineData("DyncameloDark", "editor-start.png")]
-    [InlineData("Light", "editor-start-light.png")]
-    public void RenderTheStartScreenOfAnEmptyEditor(string palette, string fileName)
+    [InlineData("DyncameloDark", "editor-start.png", 1100, 760, false)]
+    [InlineData("Light", "editor-start-light.png", 1100, 760, false)]
+    [InlineData("DyncameloDark", "editor-start-update.png", 1100, 760, true)]
+    [InlineData("DyncameloDark", "editor-start-narrow.png", 560, 700, true)]
+    public void RenderTheStartScreenOfAnEmptyEditor(string palette, string fileName, int width, int height, bool withUpdate)
     {
         var folder = Environment.GetEnvironmentVariable("DYNCAMELO_SCREENSHOT_DIR");
         if (string.IsNullOrWhiteSpace(folder))
@@ -161,10 +163,10 @@ public class EditorScreenshotTests
 
         Directory.CreateDirectory(folder);
         var root = Path.Combine(Path.GetTempPath(), "dyc-shot-start-" + Guid.NewGuid().ToString("N"));
-        var scripts = Path.Combine(root, "Clash Coordination");
+        var scripts = Path.Combine(root, "Scripts");
         Directory.CreateDirectory(scripts);
         var settings = new UiSettingsService(Path.Combine(root, "settings.json"));
-        foreach (var name in new[] { "csv-roundtrip", "Table Summary from Text", "string-report" })
+        foreach (var name in new[] { "Clash Triage and BCF Export", "Export Properties to Excel", "Color Elements by Property" })
         {
             var path = Path.Combine(scripts, name + ".dyc");
             File.Copy(Path.Combine(RepoRoot(), "samples", name + ".dyc"), path);
@@ -183,14 +185,19 @@ public class EditorScreenshotTests
                 var vm = new GraphEditorViewModel(registry, new StubDialogs(), settings) { PaletteId = palette };
                 vm.SamplesDirectoryOverride = Path.Combine(RepoRoot(), "samples");
                 vm.RefreshSampleGraphs();
-                vm.SetAvailableUpdate("0.47.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
-                control = new DyncameloEditorControl { ViewModel = vm, Width = 1100d, Height = 760d };
+                if (withUpdate)
+                {
+                    // Not a real release: the picture shows what the notice looks like.
+                    vm.SetAvailableUpdate("0.47.0", "https://github.com/mrshoma99-rgb/dyncamelo/releases/latest");
+                }
+
+                control = new DyncameloEditorControl { ViewModel = vm, Width = width, Height = height };
                 var canvas = new Canvas();
                 canvas.Children.Add(control);
                 window = new Window
                 {
-                    Width = 1100d,
-                    Height = 760d,
+                    Width = width,
+                    Height = height,
                     Content = canvas,
                     ShowInTaskbar = false,
                     ShowActivated = false,
@@ -201,7 +208,7 @@ public class EditorScreenshotTests
             StaHost.Flush();
             StaHost.Flush();
 
-            Save(control!, folder, fileName, 1100, 760);
+            Save(control!, folder, fileName, width, height);
         }
         finally
         {

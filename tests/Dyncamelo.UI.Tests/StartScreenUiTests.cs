@@ -85,6 +85,9 @@ public class StartScreenUiTests : IDisposable
             Assert.False(vm.HasRecentCards);
             Assert.True(vm.HasExampleCards, "the repository's samples folder should be found from the test run");
             Assert.Equal("Getting Started - Math and Watch", vm.ExampleCards[0].Title);   // the gentlest example first
+            Assert.Equal(
+                new[] { "Getting Started - Math and Watch", "Table Summary from Text", "Color Elements by Property", "Export Properties to Excel", "Bulk Selection Sets from Values", "Clash Triage and BCF Export" },
+                vm.ExampleCards.Select(c => c.Title).ToArray());   // the featured six, in the order worth opening them; the developer graphs wait behind them
             Assert.True(vm.ExampleCards.Count <= 6);
             Assert.All(vm.ExampleCards, c => Assert.Equal("Example", c.Kind));
         });

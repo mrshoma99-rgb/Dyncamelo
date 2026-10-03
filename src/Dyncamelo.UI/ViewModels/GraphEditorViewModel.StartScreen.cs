@@ -54,6 +54,23 @@ public partial class GraphEditorViewModel
     private const int MaxRecentCards = 4;
     private const int MaxExampleCards = 6;
 
+    // The examples worth opening first, in this order: the gentlest, then the ones most people come for. Any other example follows alphabetically.
+    private static readonly string[] FeaturedExamples =
+    {
+        "Getting Started - Math and Watch",
+        "Table Summary from Text",
+        "Color Elements by Property",
+        "Export Properties to Excel",
+        "Bulk Selection Sets from Values",
+        "Clash Triage and BCF Export",
+    };
+
+    private static int FeaturedRank(string name)
+    {
+        var index = Array.FindIndex(FeaturedExamples, f => string.Equals(f, name, StringComparison.OrdinalIgnoreCase));
+        return index < 0 ? FeaturedExamples.Length : index;
+    }
+
     private bool _startScreenDismissed;
     private string _updateVersion = string.Empty;
     private string _updateUrl = string.Empty;
@@ -170,7 +187,7 @@ public partial class GraphEditorViewModel
 
         ExampleCards.Clear();
         foreach (var sample in SampleGraphs
-                     .OrderBy(s => s.Name.StartsWith("Getting Started", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                     .OrderBy(s => FeaturedRank(s.Name))
                      .ThenBy(s => s.Name, StringComparer.OrdinalIgnoreCase)
                      .Take(MaxExampleCards))
         {

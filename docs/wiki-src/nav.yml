@@ -1,0 +1,45 @@
+# The order and grouping of the wiki's navigation. One entry per section; a page is its file name without .md (relative to docs/wiki-src).
+# The pages "troubleshooting", "recipes" and "extending" are built from docs/TROUBLESHOOTING.md, docs/RECIPES.md and docs/EXTENDING.md,
+# "whats-new" from CHANGELOG.md, and "nodes/index" with a page per category from docs/dyncamelo-nodes.json; they are listed here too.
+# A section with `glob` takes every matching file, ordered by the `order:` number in the file's front matter, then by file name.
+- section: Start here
+  pages:
+    - {key: index, label: Home}
+    - {key: installation, label: Installation}
+    - {key: requirements, label: Requirements}
+    - {key: first-steps, label: Your first script}
+    - {key: updating, label: Updating}
+    - {key: uninstall, label: Uninstalling}
+- section: Using Dyncamelo
+  pages:
+    - {key: concepts, label: Concepts}
+    - {key: ports-and-kinds, label: "Inputs, outputs and kinds"}
+    - {key: canvas-and-nodes, label: The editor}
+    - {key: library-and-search, label: Node library and search}
+    - {key: running-graphs, label: Running a graph}
+    - {key: saving-opening, label: Saving and opening}
+    - {key: node-groups, label: Node groups}
+    - {key: player, label: The Script Player}
+    - {key: settings, label: Settings}
+    - {key: shortcuts, label: Keyboard and mouse}
+- section: How-to guides
+  glob: howto/*.md
+- section: Learn by example
+  pages:
+    - {key: samples, label: Sample scripts}
+    - {key: recipes, label: Recipes}
+    - {key: exchange-formats, label: "IFC, BCF, Excel and CSV"}
+- section: Node reference
+  pages:
+    - {key: nodes/index, label: All nodes}
+- section: Help
+  pages:
+    - {key: troubleshooting, label: Troubleshooting}
+    - {key: faq, label: FAQ}
+    - {key: glossary, label: Glossary}
+    - {key: privacy-and-safety, label: Privacy and safety}
+    - {key: licence, label: Licence}
+    - {key: whats-new, label: What's new}
+- section: For developers
+  pages:
+    - {key: extending, label: Writing your own nodes}

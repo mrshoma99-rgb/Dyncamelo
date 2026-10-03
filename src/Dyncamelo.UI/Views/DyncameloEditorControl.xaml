@@ -33,7 +33,7 @@
                                   Data="{StaticResource Dyc.Icon.Cat.File}" />
                         </Border>
                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Dyc.TextBrush}" />
+                            <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" MaxHeight="36" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Dyc.TextBrush}" />
                             <TextBlock Text="{Binding Subtitle}" Margin="0,1,0,0" FontSize="10.5" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                         </StackPanel>
                     </Grid>
@@ -1445,30 +1445,30 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="46" Height="46" CornerRadius="12" Background="{DynamicResource Dyc.LogoChipBrush}" VerticalAlignment="Center">
+                        <Border Width="46" Height="46" CornerRadius="12" Background="{DynamicResource Dyc.LogoChipBrush}" VerticalAlignment="Top">
                             <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
                                    Width="36" Height="36"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
-                        <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <WrapPanel>
                                 <TextBlock Text="Dyncamelo" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.TextBrush}" />
                                 <Border Margin="10,0,0,0" Padding="8,1" CornerRadius="9" VerticalAlignment="Center"
                                         Background="{DynamicResource Dyc.HoverBrush}" ToolTip="The installed version">
                                     <TextBlock Text="{Binding ProductVersionText}" FontSize="11" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                 </Border>
-                            </StackPanel>
-                            <TextBlock Text="Visual programming for Navisworks" FontSize="12" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                            </WrapPanel>
+                            <WrapPanel Margin="0,2,0,0">
+                                <TextBlock Text="Visual programming for Navisworks" Margin="0,0,12,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                                <Button Style="{StaticResource Dyc.SmallButton}"
+                                        Margin="0,2,0,0"
+                                        Padding="10,3"
+                                        Content="bimcamel.com ↗"
+                                        ToolTip="Open bimcamel.com: guides, the node library and updates"
+                                        Command="{Binding OpenWebsiteCommand}" />
+                            </WrapPanel>
                         </StackPanel>
-                        <Button Grid.Column="2"
-                                Style="{StaticResource Dyc.SmallButton}"
-                                VerticalAlignment="Center"
-                                Padding="10,4"
-                                Content="bimcamel.com ↗"
-                                ToolTip="Open bimcamel.com: guides, the node library and updates"
-                                Command="{Binding OpenWebsiteCommand}" />
                     </Grid>
 
                     <Border Margin="0,0,0,16" Padding="12,8" CornerRadius="4"
