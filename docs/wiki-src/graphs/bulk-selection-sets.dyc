@@ -1,0 +1,118 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "a414d79a57c0ea94ee3f4437cbfe7401",
+  "Name": "Bulk selection sets",
+  "Description": "Creates one selection set for each distinct value of a property, here one per Level, filed in a folder.",
+  "Nodes": [
+    {
+      "Id": "d3649d5ed8e8183d9bfa3381f7f89d33",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "SelectionSets.BulkByPropertyValues",
+      "X": 0.0,
+      "Y": 110.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Element"
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Level"
+        },
+        {
+          "Name": "folderName",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Levels"
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "selectionSets"
+        },
+        {
+          "Name": "values"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "b478453fb83ebcfb21aa213994212881",
+      "NodeType": "WatchList",
+      "Name": "Values found",
+      "X": 350.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "list"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "dcd8b71901cb6f1610a3a825170516d6",
+      "FromNode": "d3649d5ed8e8183d9bfa3381f7f89d33",
+      "FromPort": "values",
+      "ToNode": "b478453fb83ebcfb21aa213994212881",
+      "ToPort": "list"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "157b3d7e7fdb14a6312eb52ba2ec9f67",
+      "Text": "WHAT IT DOES: makes one search set per distinct Element > Level value, inside the folder \"Levels\", and lists the values it found. A set with the same name in that folder is replaced. TO CHANGE: type another category, property or folder name, then press Run.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

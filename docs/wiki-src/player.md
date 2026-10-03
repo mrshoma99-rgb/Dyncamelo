@@ -4,6 +4,11 @@ The Script Player runs a saved script from a simple form, without opening the no
 
 It is made for the people who should use a tested script but should not have to edit one: a coordinator running a weekly check, or a colleague you have handed an audit script. The Player is a pane of its own, it does not load the editor, so it opens quickly and stays small.
 
+![The Script Player with a script chosen: the script bar, the form fields and the Run, Reset, Edit and File buttons.](../images/wiki-player-form.png)
+
+!!! tip "Build a form step by step"
+    [Give colleagues a form with the Script Player](howto/form-for-colleagues.md) makes a small graph and runs it from the Player.
+
 ## Opening the Player
 
 * Click the **Player** button on the **BIMCamel** ribbon tab (in the *Visual Programming* panel, beside the **Dyncamelo** and **About** buttons). The pane itself is titled **Script Player**.
@@ -58,12 +63,17 @@ A Player run runs **every node of the script afresh**, because a script talks to
 
 After a run the Player shows a **results card**:
 
+![The Script Player after a run: the summary line, the Watch results and the Copy button.](../images/wiki-player-results.png)
+
 * a summary line with a green or red dot, such as "Finished in 1.2 s — 14 nodes", "Finished with errors in …" or "Stopped after …";
 * the value of every **Watch node** (`Watch`, `Watch List`, `Watch Image`, `Watch Table`) and of any other node the author marked to show, each in a scrolling box titled with the node's name. Very long results are cut after 300 lines with a note saying how many more there are;
 * below them, every node that **failed or warned**, with the reason, errors in red and warnings in amber;
 * a **Copy** button that puts the whole report (script name, summary, results and problems) on the clipboard as text, ready to paste into an email.
 
 ## Safety: scripts that change things
+
+!!! warning "Scripts can change things"
+    A script can change your model, write files, run programs or use the network. Read the note above the form before you press **Run** on a script you did not write.
 
 A script can change your model, write files, run programs or use the network. The Player tells you before it does:
 
@@ -97,4 +107,8 @@ Developers and automation can run a script by path through the add-in plug-in `D
 
 The Player uses the colour palette you chose in the editor's Settings (see [Settings](settings.md)).
 
-Related pages: [Saving and opening scripts](saving-opening.md), [Running scripts](running-graphs.md), [The editor: canvas and nodes](canvas-and-nodes.md).
+## Next steps
+
+* [Give colleagues a form with the Script Player](howto/form-for-colleagues.md).
+* [Saving and opening scripts](saving-opening.md), [Running scripts](running-graphs.md) and [The editor: canvas and nodes](canvas-and-nodes.md).
+* [Privacy and safety](privacy-and-safety.md#running-graphs-from-other-people) for scripts that other people made.

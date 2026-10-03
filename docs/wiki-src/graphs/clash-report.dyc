@@ -1,0 +1,278 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "736e7730527035925aa64a724ff16926",
+  "Name": "Clash report",
+  "Description": "Summarises every clash test by status and writes the summary as an HTML report.",
+  "Nodes": [
+    {
+      "Id": "f67880b74235e70a447812fc1e62c1fa",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Tests@Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.Tests",
+      "X": 0.0,
+      "Y": 350.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "tests"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "ea426ef0d46621ab6e236a2f132ef0ab",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashEditNodes.SummaryTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.SummaryTable",
+      "X": 350.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "tests",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "rows"
+        },
+        {
+          "Name": "headers"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "70f2e7f29766d574e47f3b8be4362139",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromRows@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,bool",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Table.FromRows",
+      "X": 700.0,
+      "Y": 260.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "rows",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "headers",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "firstRowIsHeader",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "a2f713af45d852babdb0236732da69ef",
+      "NodeType": "WatchTable",
+      "Name": "Summary",
+      "X": 1050.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "table",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "table"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    },
+    {
+      "Id": "1106fd9e92ed8a0f210181cd4e520ad7",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ReportNodes.Html@string,System.Collections.Generic.IList<object>,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Report.Html",
+      "X": 1050.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "title",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Clash summary"
+        },
+        {
+          "Name": "sections",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "subtitle",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "Weekly coordination meeting"
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "html"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "7e4531a41f87769fc2287c08bba92189",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.FileNodes.WriteText@string,string",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Text.WriteToFile",
+      "X": 1430.0,
+      "Y": 240.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "path",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Reports\\clash-summary.html"
+        },
+        {
+          "Name": "text",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "path"
+        }
+      ],
+      "Data": {}
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "c65a39e875c2b3c74615ffd081bf66d7",
+      "FromNode": "f67880b74235e70a447812fc1e62c1fa",
+      "FromPort": "tests",
+      "ToNode": "ea426ef0d46621ab6e236a2f132ef0ab",
+      "ToPort": "tests"
+    },
+    {
+      "Id": "c67e6360ed7fc82e94fb4a090e47d1e1",
+      "FromNode": "ea426ef0d46621ab6e236a2f132ef0ab",
+      "FromPort": "rows",
+      "ToNode": "70f2e7f29766d574e47f3b8be4362139",
+      "ToPort": "rows"
+    },
+    {
+      "Id": "f1c6640e421e1b34e79894bf24557ba4",
+      "FromNode": "ea426ef0d46621ab6e236a2f132ef0ab",
+      "FromPort": "headers",
+      "ToNode": "70f2e7f29766d574e47f3b8be4362139",
+      "ToPort": "headers"
+    },
+    {
+      "Id": "bf63e74a87255fe84afab3b973c572aa",
+      "FromNode": "70f2e7f29766d574e47f3b8be4362139",
+      "FromPort": "table",
+      "ToNode": "a2f713af45d852babdb0236732da69ef",
+      "ToPort": "table"
+    },
+    {
+      "Id": "9611ed60613c38cd335c814ab1759a22",
+      "FromNode": "70f2e7f29766d574e47f3b8be4362139",
+      "FromPort": "table",
+      "ToNode": "1106fd9e92ed8a0f210181cd4e520ad7",
+      "ToPort": "sections"
+    },
+    {
+      "Id": "e703ee44a5cadf3b5f18600424b6902e",
+      "FromNode": "1106fd9e92ed8a0f210181cd4e520ad7",
+      "FromPort": "html",
+      "ToNode": "7e4531a41f87769fc2287c08bba92189",
+      "ToPort": "text"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "e0b4c492adc3ca35f12d5340c7c2c7a1",
+      "Text": "WHAT IT DOES: counts the results of every clash test by status (New, Active, Reviewed, Approved, Resolved), shows the table and saves it as a self-contained HTML page. TO CHANGE: the report title and subtitle, and the file path on Text.WriteToFile.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

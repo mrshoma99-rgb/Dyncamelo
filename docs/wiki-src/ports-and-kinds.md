@@ -2,6 +2,8 @@
 
 Every node has **inputs** (sockets on its left edge) and **outputs** (on its right edge). This page explains what the sockets tell you, how to give an input a value, and how values are converted between kinds.
 
+![One node close up: the header, sockets, inline editors for a number, text, a drop-down and a colour, and the value preview bubble.](../images/wiki-node-anatomy.png)
+
 ## Hover to find out
 
 Hover any socket for a tooltip. It shows:
@@ -36,6 +38,8 @@ The colour of a socket names the kind of data. With **Settings ▸ Appearance �
 | File | A path to a file or folder (a text input whose name says it is a path). | `P` |
 | Action | A recipe step for `Workflow.ForEach`. | `A` |
 
+![One small node for each socket kind, with the type letters switched on.](../images/wiki-socket-kinds.png)
+
 On the node reference pages the type is written as a programming type: `string`, `number`, `integer`, `boolean`, `ModelItem`, `Document`, `DyncameloTable` and so on. A type ending in `[]` is a **list**.
 
 ## Shape: one value or a list
@@ -49,6 +53,11 @@ On the node reference pages the type is written as a programming type: `string`,
 | **Pill** (an elongated socket) | A **multi-input**: it takes any number of wires and combines them into one list. |
 
 A **dashed wire** means a list is going into a one-value input, so the node will run once per item (see [replication](concepts.md#lists-replication-and-lacing)).
+
+![A single value, a list, a list of lists, and a multi-input pill with three wires.](../images/wiki-socket-shapes.png)
+
+!!! note "Diamond sockets take a list as one value"
+    An input of kind *Any* (a diamond) gets the value as it is. A list wired into it is **not** run once per item, and no dashed wire is drawn. To run the node once per item, right-click the input, choose **List Levels** and then `@L1 — items` (see [Concepts](concepts.md#lists-replication-and-lacing)).
 
 ## Giving an input a value
 
@@ -67,12 +76,14 @@ An input can get its value from four places. The first that applies wins:
 | Check box | Boolean | |
 | Text box | Text | Grows with long or multi-line text. |
 | Drop-down or switch | Named choices | For example `mode` on `Search.ByProperty`. |
-| Colour swatch | Colour | Click it for a picker with an eyedropper; the dropper can pick any colour on screen, the Navisworks view included. |
+| Colour swatch | Colour | Click it for a picker with an eyedropper; the dropper can pick any colour on screen, the Navisworks view included. The picture below shows the popup. |
 | File field with `…` | File and folder paths | |
 | Element picker | A Navisworks item or items | Press it to take the **current selection**. |
 | Vector fields | Points and vectors | Paste `1, 2, 3` (or cells from a spreadsheet) into the first field and the values spread over the next fields. |
 
 Optional inputs that are unconnected can be hidden: **Hide / Show Unused Sockets** (++ctrl+h++). Rarely-used inputs of some nodes sit in an **Advanced** panel.
+
+![The colour popup with swatches and the eyedropper button.](../images/wiki-colour-popup.png)
 
 ### Choosing a tab or a property name
 
@@ -82,6 +93,11 @@ On nodes that read a property of an element, the **tab** (category) and **proper
 * Only that element is read, at most the first 100 if the input carries a longer list. The model is never searched to fill the list.
 * Pick an element on the node, or wire one in and run the graph, before you search.
 * On `Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch` and `SelectionSets.BulkByPropertyValues` there is no element input, so the magnifier lists the tabs and properties of the **elements selected in Navisworks right now**.
+
+![The magnifier popup on Properties.Value, listing tab names.](../images/wiki-magnifier.png)
+
+!!! tip "Step by step"
+    [Find the name of a tab or property](howto/find-property-names.md) walks through both kinds of magnifier and `Properties.Discover`.
 
 ## Defaults for documents
 
@@ -108,3 +124,11 @@ When a conversion fails, the node shows a warning or an error that names the inp
 ## The Watch nodes
 
 Wire any output into a **Watch** node to see the value: **Watch** (text), **Watch List** (one entry per line, with an index gutter), **Watch Table** (a table) and **Watch Image** (a picture, such as a heat-map PNG). Under every node, **value previews** show the first results after a run (toggle with **Preview** in the toolbar); click a preview that says "… N more" to expand the full list.
+
+![A Watch Table close up: a grouped table with a row for each category.](../images/wiki-watch-table.png)
+
+## Next steps
+
+* [The editor: canvas and nodes](canvas-and-nodes.md) shows how to wire, move and tidy nodes.
+* [Running a graph](running-graphs.md) explains what happens when you press Run.
+* [Glossary](glossary.md) for the words used here.

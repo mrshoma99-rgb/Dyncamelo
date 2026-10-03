@@ -1,0 +1,237 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "b38cc92866d4e41f083636ef8b9f3394",
+  "Name": "BCF export",
+  "Description": "Exports the results of the first clash test as BCF issues for another coordination tool.",
+  "Nodes": [
+    {
+      "Id": "1f1e0d46107ebfb9975331b3d4259ccb",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Tests@Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Clash.Tests",
+      "X": 0.0,
+      "Y": 230.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "tests"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "cfe964a49fe2a460b08886341b516056",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
+      "Assembly": "Dyncamelo.Nodes",
+      "Name": "Pick a test",
+      "X": 350.0,
+      "Y": 200.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "list",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "index",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": 0
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "item"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "d5e0d7ab10c3f671b2dfebc39a5fc240",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Results@Autodesk.Navisworks.Api.Clash.ClashTest",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "ClashTest.Results",
+      "X": 700.0,
+      "Y": 170.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "test",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "results"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "da43bb18ff8fa0d3af63220609eb3819",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "BCF.ExportIssues",
+      "X": 1050.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "filePath",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false,
+          "UserValue": "C:\\Reports\\clash-issues.bcfzip"
+        },
+        {
+          "Name": "results",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "viewpoints",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "includeSnapshots",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "statusMap",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "filePath"
+        },
+        {
+          "Name": "topicCount"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "8ce9eb535c0984896fa46b7b0a90bf5e",
+      "NodeType": "Watch",
+      "Name": "Topics exported",
+      "X": 1400.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "a6a0f26709f494c717af8809d285f036",
+      "FromNode": "1f1e0d46107ebfb9975331b3d4259ccb",
+      "FromPort": "tests",
+      "ToNode": "cfe964a49fe2a460b08886341b516056",
+      "ToPort": "list"
+    },
+    {
+      "Id": "53b2c5f1103f7a6a57846d4016d3a055",
+      "FromNode": "cfe964a49fe2a460b08886341b516056",
+      "FromPort": "item",
+      "ToNode": "d5e0d7ab10c3f671b2dfebc39a5fc240",
+      "ToPort": "test"
+    },
+    {
+      "Id": "240736d7da9cf24ca4bbb82d054cdd17",
+      "FromNode": "d5e0d7ab10c3f671b2dfebc39a5fc240",
+      "FromPort": "results",
+      "ToNode": "da43bb18ff8fa0d3af63220609eb3819",
+      "ToPort": "results"
+    },
+    {
+      "Id": "9277dc1e56a2f8aea130e0d51cdf559f",
+      "FromNode": "da43bb18ff8fa0d3af63220609eb3819",
+      "FromPort": "topicCount",
+      "ToNode": "8ce9eb535c0984896fa46b7b0a90bf5e",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "dd86829fd0eb5409c4e4052a8e9438d1",
+      "Text": "WHAT IT DOES: takes one clash test from the document, lists its results and writes each as a BCF topic (with camera, component GUIDs and a snapshot) into the .bcfzip. TO CHANGE: the test number (0 is the first) and the file path.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

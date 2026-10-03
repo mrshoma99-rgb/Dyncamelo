@@ -1,0 +1,287 @@
+{
+  "Dyncamelo": {
+    "FormatVersion": 1,
+    "MinReaderVersion": 1,
+    "AppVersion": "0.47.0"
+  },
+  "Uuid": "c95246cc7696a15eb4ad3fb9222789da",
+  "Name": "Colour by value",
+  "Description": "Colours every item that has a property by that property's value, one colour per value, and shows the legend.",
+  "Nodes": [
+    {
+      "Id": "90d04fdb3f17b0662bad8e6c10e8c2c4",
+      "NodeType": "StringInput",
+      "Name": "Property tab",
+      "X": 0.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Element"
+      }
+    },
+    {
+      "Id": "22c7c020a557dc87e091ced4dbd9b110",
+      "NodeType": "StringInput",
+      "Name": "Property",
+      "X": 0.0,
+      "Y": 300.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "Value": "Level"
+      }
+    },
+    {
+      "Id": "b1d7a1df9b81c05dec6aeda6e983ff86",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Search.HasProperty",
+      "X": 350.0,
+      "Y": 170.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "resolveTo",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "38dae30bc8c3600b7ce3d057b0c3f2d0",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.PropertyNodes.Value@Autodesk.Navisworks.Api.ModelItem,string,string",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Properties.Value",
+      "X": 700.0,
+      "Y": 140.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "item",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "categoryName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "propertyName",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "79f86303d84a6e522c7853c5a48da47b",
+      "NodeType": "ZeroTouch",
+      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.ColorByValues@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "Dyncamelo.Navisworks",
+      "Name": "Appearance.ColorByValues",
+      "X": 1050.0,
+      "Y": 90.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "items",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "values",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "palette",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Name": "document",
+          "UsingDefaultValue": true,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "items"
+        },
+        {
+          "Name": "legend"
+        }
+      ],
+      "Data": {}
+    },
+    {
+      "Id": "3a42d0eab018274348aca279fe73f67f",
+      "NodeType": "Watch",
+      "Name": "Legend",
+      "X": 1400.0,
+      "Y": 0.0,
+      "Lacing": "Auto",
+      "IsFrozen": false,
+      "InputPorts": [
+        {
+          "Name": "value",
+          "UsingDefaultValue": false,
+          "Level": -1,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "OutputPorts": [
+        {
+          "Name": "value"
+        }
+      ],
+      "Data": {
+        "ViewWidth": 0.0,
+        "ViewHeight": 0.0
+      }
+    }
+  ],
+  "Connectors": [
+    {
+      "Id": "3e08a9d92da8a728a7a349c461e82d30",
+      "FromNode": "90d04fdb3f17b0662bad8e6c10e8c2c4",
+      "FromPort": "value",
+      "ToNode": "b1d7a1df9b81c05dec6aeda6e983ff86",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "018be68508b30432a47221df5c343dfa",
+      "FromNode": "22c7c020a557dc87e091ced4dbd9b110",
+      "FromPort": "value",
+      "ToNode": "b1d7a1df9b81c05dec6aeda6e983ff86",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "84ea0a2878169f15c27c4deabd87cc13",
+      "FromNode": "90d04fdb3f17b0662bad8e6c10e8c2c4",
+      "FromPort": "value",
+      "ToNode": "38dae30bc8c3600b7ce3d057b0c3f2d0",
+      "ToPort": "categoryName"
+    },
+    {
+      "Id": "d4cc6af5c8cce05301b06c0fa3698bf6",
+      "FromNode": "22c7c020a557dc87e091ced4dbd9b110",
+      "FromPort": "value",
+      "ToNode": "38dae30bc8c3600b7ce3d057b0c3f2d0",
+      "ToPort": "propertyName"
+    },
+    {
+      "Id": "3300c4819b7bd2402338c66b9f03dcb2",
+      "FromNode": "b1d7a1df9b81c05dec6aeda6e983ff86",
+      "FromPort": "items",
+      "ToNode": "38dae30bc8c3600b7ce3d057b0c3f2d0",
+      "ToPort": "item"
+    },
+    {
+      "Id": "f99f02d70704b0ecf90721c70f30a67a",
+      "FromNode": "b1d7a1df9b81c05dec6aeda6e983ff86",
+      "FromPort": "items",
+      "ToNode": "79f86303d84a6e522c7853c5a48da47b",
+      "ToPort": "items"
+    },
+    {
+      "Id": "d9d0099922f3f336922529fa2776bc9e",
+      "FromNode": "38dae30bc8c3600b7ce3d057b0c3f2d0",
+      "FromPort": "value",
+      "ToNode": "79f86303d84a6e522c7853c5a48da47b",
+      "ToPort": "values"
+    },
+    {
+      "Id": "60a0a6fc304798c66f6d9035923b4cbe",
+      "FromNode": "79f86303d84a6e522c7853c5a48da47b",
+      "FromPort": "legend",
+      "ToNode": "3a42d0eab018274348aca279fe73f67f",
+      "ToPort": "value"
+    }
+  ],
+  "Notes": [
+    {
+      "Id": "357603add19476738770b76f57b5f3b5",
+      "Text": "WHAT IT DOES: finds every item that carries the property, reads its value, and gives each distinct value its own colour. The Watch shows which colour went with which value. TO CHANGE: edit the two text inputs on the left (Element > Level here), then press Run.",
+      "X": 0.0,
+      "Y": -160.0
+    }
+  ],
+  "Groups": [],
+  "View": {
+    "RunType": "Manual",
+    "Camera": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Zoom": 1.0
+    }
+  }
+}

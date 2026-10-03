@@ -22,6 +22,10 @@ A graph saved with run mode Auto is **not** run when you open it from a file. Th
 
 While a graph runs, the window says which node is working (`12 / 40 - name`; inside a node group the path is shown). Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends.
 
+![The progress overlay during a run: the working node, its place in the run and the Esc hint.](../images/wiki-run-progress.png)
+
+![A list wired into a one-value input: a dashed wire, so the node runs once for each item, and a list of results.](../images/wiki-replication.png)
+
 ## Stopping a run
 
 Press **++esc++** (switchable in **Settings ▸ Editing ▸ Esc cancels a running graph**). The run halts:
@@ -42,6 +46,10 @@ A single Navisworks call already under way cannot be interrupted. What nodes alr
 
 Mute, freeze and muted wires are undoable and saved with the graph.
 
+![A muted node (MUTED badge) in a live chain and a frozen branch (FROZEN badge), ghosted.](../images/wiki-mute-freeze.png)
+
+!!! tip "Mute or freeze?"
+    Mute a step you want switched off while the rest still runs, such as a recolour. Freeze a slow branch you do not want recalculated while you work elsewhere.
 ## Node states
 
 After a run, the border and badge of each node show its state. Hover the node, or read the balloon above it, for the message.
@@ -55,11 +63,15 @@ After a run, the border and badge of each node show its state. Hover the node, o
 | ghosted, *FROZEN* | Frozen | Held, with stale values. |
 | bypassed, *MUTED* | Muted | Passing data through. |
 
+![A red node with its message, an amber node, idle nodes behind a false Flow.When, and the counts in the status bar.](../images/wiki-errors-and-warnings.png)
+
 ## Finding out why
 
 * The **Errors** and **Warnings** counts in the status bar are buttons (or press ++ctrl+shift+e++). They list every node that failed or warned in the last run, errors first. Click a row to select the node and bring it into view. ++f8++ and ++shift+f8++ step through them.
 * Select a node and press ++i++ (*Why Didn't This Run?*). The status bar explains in words whether the node is frozen, sits after a frozen node, is muted, failed (and with what), is waiting for an input, or is just waiting for the next Run, and names the node responsible when it is another one.
 * Put **`Flow.Try`** after a node that may fail: it gives your fallback plus the error text, and nothing after it turns red.
+
+![The Problems list, with errors first.](../images/wiki-problems-list.png)
 
 See also [Troubleshooting: Nothing happens when I press Run](troubleshooting.md#nothing-happens-when-i-press-run).
 
@@ -78,7 +90,9 @@ The status bar shows the time of each run and, when a run takes a second or more
 
 Nodes that change the model do so in the open Navisworks document. Many are real overrides (a colour, a hide, a transparency) saved with the file, and **Appearance.Reset** or **Appearance.ResetAll** undo them from a graph. Others are *temporary* overrides that live until you reset or close the view.
 
-* **Save the model before you try something new.** Whether a single Navisworks **Undo** reverses a whole run has not been checked.
+!!! warning "Save the model before you try something new"
+    Whether a single Navisworks **Undo** reverses a whole run has not been checked.
+
 * The editor's own **Undo** (++ctrl+z++ while the pane has the focus) changes the **graph** only, and says so.
 * A run is not atomic. If it is cancelled or a node fails, nodes that already ran have already changed the model.
 
@@ -87,3 +101,10 @@ Nodes that change the model do so in the open Navisworks document. Many are real
 * The **[Script Player](player.md)** runs a saved graph from a form built out of its input nodes.
 * The add-in plugin **`Dyncamelo.Run.DYNC`** runs a script by path, for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation as the Player. In an unattended run nobody can answer that question, so run the script once by hand in the Player first.
 * The command line tool `Dyncamelo.Cli` (built from source) runs graphs that use only the general nodes, with no Navisworks: `dotnet run --project src/Dyncamelo.Cli -- run samples/hello-math.dyc`. It exits with `0` when no node ended in the error state, `1` when at least one did, and `2` for unreadable input. It never asks before running a graph.
+
+## Next steps
+
+* [Read errors and warnings](howto/read-errors-and-warnings.md) is a short walk through the Problems list and the messages.
+* [Speed up a slow graph](howto/speed-up-slow-graph.md) turns the tips above into steps.
+* [Keep a graph going when a node fails](howto/keep-going-after-failure.md) shows `Flow.Try` in a graph.
+* [The Script Player](player.md) runs a saved graph from a form.

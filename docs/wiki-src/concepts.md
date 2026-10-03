@@ -53,6 +53,11 @@ A list is an ordinary value in Dyncamelo, and most power comes from lists.
 
 Whether an input wants one value or a list is shown by its socket shape and by its tooltip. A list of lists wired into a one-value input runs the node once per item at the deepest level, and the result has the same nesting.
 
+![A list wired into a one-value input: a dashed wire, and a list of results.](../images/wiki-replication.png)
+
+!!! warning "Inputs of kind Any do not run once per item by themselves"
+    An input that accepts any value, such as the `value` of `Search.ByProperty` (a diamond socket), takes a whole list as one single value. To make it run once per item, right-click the socket, choose **List Levels** and then `@L1 — items`. See [step 8 of Your first script](first-steps.md#8-one-search-for-many-values).
+
 **Lacing.** When two inputs both receive lists, *lacing* says how they pair up. Right-click the node to change it. A small badge on the node shows a setting other than the default.
 
 | Lacing | Pairing | `[1,2,3]` + `[10,20]` |
@@ -60,6 +65,8 @@ Whether an input wants one value or a list is shown by its socket shape and by i
 | **Shortest** (default) | Item by item, stopping at the shorter list | `[11, 22]` |
 | **Longest** | Item by item; the shorter list repeats its last item | `[11, 22, 23]` |
 | **Cross-Product** | Every combination, as a list of lists | `[[11,21,31],[12,22,32]]` |
+
+![The three lacing modes with their results: Shortest, Longest and Cross-Product.](../images/wiki-lacing-modes.png)
 
 Rules of thumb: parallel lists that belong together, such as names and item lists, use **Shortest**. One list against one fixed value uses **Longest** (or just wire the single value; it is repeated by itself). "Try everything against everything", such as all colours against all searches, uses **Cross-Product**.
 
@@ -70,6 +77,8 @@ Rules of thumb: parallel lists that belong together, such as names and item list
 ## Many wires into one input
 
 A **pill-shaped** socket accepts any number of wires. The node receives everything combined into one list, in the order the wires were made. It is used for item lists: drop several searches and the current selection onto one input of **Appearance.OverrideColor** and the node works on all of them together.
+
+![A single value, a list, a list of lists, and a multi-input pill with three wires.](../images/wiki-socket-shapes.png)
 
 ## Doing things in order
 
@@ -88,6 +97,8 @@ Nodes are of two kinds. **Reading** nodes only look at the model and compute (`S
 
 After a run every node carries a state, shown by its border and a badge: **idle** (not run, or missing an input), **executed**, **warning** (ran, with a recoverable problem) and **error** (failed). **Muted**, **frozen** and **muted wire** are things you set yourself. [Running a graph](running-graphs.md#node-states) explains each.
 
+![A red node with its message, an amber node, and idle nodes behind a false Flow.When.](../images/wiki-errors-and-warnings.png)
+
 ## The `.dyc` file
 
 A graph is saved as a small, versioned JSON document. It stores the nodes, their positions, the wires, the values typed into inputs, notes, bookmarks, lacing and node groups. It does **not** store results, so a graph you open computes afresh on its first run. See [Saving and opening](saving-opening.md).
@@ -97,3 +108,10 @@ A `.dyc` file contains no program code. But the nodes in it do real work when it
 ## Document
 
 Most Navisworks nodes have a **`document`** input. Leave it empty and the node uses the **active document**, so the same graph works on whatever model you have open. Wire a document only when you work with several.
+
+## Next steps
+
+* [Inputs, outputs and kinds](ports-and-kinds.md) explains sockets, shapes and how values are converted.
+* [Running a graph](running-graphs.md) covers Run, Auto, stopping, mute and freeze.
+* [Your first script](first-steps.md) puts these ideas to work in ten minutes.
+* [Glossary](glossary.md) lists every term with a link.

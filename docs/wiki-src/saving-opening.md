@@ -25,6 +25,8 @@ Other ways in and out:
 
 * **Drag a `.dyc` file from Windows Explorer onto the canvas** to open it. Only `.dyc` files are accepted; if you drop several files, the first `.dyc` is opened.
 * On the [start screen](canvas-and-nodes.md#the-start-screen), the cards for **recent scripts** and **examples** open them with one click.
+
+![The start screen with the New script card, recent scripts and the examples row.](../images/wiki-start-screen.png)
 * **Rename Graph** (++f2++, Graph menu) renames the `.dyc` file on disk. For a script that has not been saved yet, it works like Save As.
 * The sample scripts open as read-only templates: **Save** asks you for a new name, so the shipped sample is never overwritten.
 
@@ -47,6 +49,9 @@ Closing the editor pane cannot show a question, so Dyncamelo keeps a safety copy
 
 Autosave protects you from a crash or a forgotten **Save**. It is not a version history: keep your own copies of important scripts.
 
+!!! warning "Autosave is not a backup"
+    A safety copy is deleted when you save, and also when you answer *No* to the restore question. Keep a saved copy of any script you cannot afford to lose.
+
 ## Script description and the scripts folder
 
 **Graph ▸ Script Description…** lets you type what the script does. The text is saved in the file and shown above the form in the Player.
@@ -54,6 +59,9 @@ Autosave protects you from a crash or a forgotten **Save**. It is not a version 
 The Script Player looks for scripts in the folder **`Documents\Dyncamelo\Scripts`** (your own Documents folder) and its sub-folders, down to four levels. Save scripts you want to run from the Player there, or add other folders, such as a shared network folder, in the Player itself. The editor's Save As dialog does not default to that folder, so browse to it the first time.
 
 ## Sharing a script
+
+!!! tip "Before you send a script"
+    Add a **Script Description** and a few notes, and replace paths such as `C:\Projects\…` with ones the other person has. Open the file in a text editor first: it can hold file paths, names and values.
 
 A `.dyc` file is small and can be emailed, put on a shared drive or kept in version control. Before you send one, think about what the other person needs:
 
@@ -78,4 +86,8 @@ Nodes that Dyncamelo has retired in newer versions keep loading and running in o
 
 Everything Dyncamelo stores about you is under `%APPDATA%\Dyncamelo`: your settings and recent files (`ui-settings.json`), the autosave folder (`recovery`), and a log of caught errors (`errors.log`). Your `.dyc` scripts are never stored there; they are wherever you saved them. See [Privacy and safety](privacy-and-safety.md).
 
-Related pages: [The editor: canvas and nodes](canvas-and-nodes.md), [Settings](settings.md), [Troubleshooting](troubleshooting.md).
+## Next steps
+
+* [The Script Player](player.md) runs a saved script from a form.
+* [Give colleagues a form with the Script Player](howto/form-for-colleagues.md) builds one.
+* [The editor: canvas and nodes](canvas-and-nodes.md), [Settings](settings.md) and [Troubleshooting](troubleshooting.md).

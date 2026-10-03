@@ -1,0 +1,26 @@
+{
+  "name": "Colour by value",
+  "description": "Colours every item that has a property by that property's value, one colour per value, and shows the legend.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "tab", "node": "String", "title": "Property tab", "value": "Element"},
+    {"id": "prop", "node": "String", "title": "Property", "value": "Level"},
+    {"id": "has", "node": "Search.HasProperty"},
+    {"id": "read", "node": "Properties.Value"},
+    {"id": "colour", "node": "Appearance.ColorByValues"},
+    {"id": "legend", "node": "Watch", "title": "Legend"}
+  ],
+  "wires": [
+    "tab.value -> has.categoryName",
+    "prop.value -> has.propertyName",
+    "tab.value -> read.categoryName",
+    "prop.value -> read.propertyName",
+    "has.items -> read.item",
+    "has.items -> colour.items",
+    "read.value -> colour.values",
+    "colour.legend -> legend.value"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: finds every item that carries the property, reads its value, and gives each distinct value its own colour. The Watch shows which colour went with which value. TO CHANGE: edit the two text inputs on the left (Element > Level here), then press Run."}
+  ]
+}

@@ -8,6 +8,8 @@ For the full list of nodes with their inputs and outputs, see the [node referenc
 
 The panel sits on the left of the canvas. Drag the thin bar between the panel and the canvas to change its width.
 
+![The node library panel with "clash" typed in the search box, a flat list of matches and the category icons.](../images/wiki-library-search.png)
+
 | Control | What it does |
 |---|---|
 | Search box | Type to search all nodes (see below). The ✕ at the right of the box clears it. |
@@ -43,6 +45,9 @@ Hover a node in the list and a **star** appears at its right. Click it to add th
 
 ### Searching the panel
 
+!!! tip "Search by what you want to do"
+    Every word you type has to appear in a node's name, folder, search keywords or description, so `clash status` finds clash nodes about status, and `average` finds `List.Average` even if you do not know its name.
+
 Type in the search box and the folder tree is replaced by a flat list of matches. Clear the box and the tree comes back exactly as you left it.
 
 * Every word you type has to appear somewhere in a node's **name, folder, search keywords or description**, in any order. Case does not matter.
@@ -53,6 +58,8 @@ Type in the search box and the folder tree is replaced by a flat list of matches
 ## Quick search with `Space`
 
 Press ++space++ while the pointer is over the canvas and a small search box opens near the top of it. This is the fastest way to add a node.
+
+![The quick search box with a few letters typed and a list of matching nodes.](../images/wiki-quick-search.png)
 
 1. Type a few letters of what you want. The list updates as you type (up to 50 matches).
 2. Move through the list with the up and down arrow keys, or click a result.
@@ -72,6 +79,8 @@ If you drag a wire from a socket and let go on empty canvas, the same search box
 
 The `@` search is for nodes you have already placed, not for the library. Press ++ctrl+f++ (**Find Node on Canvas…**) or open the command palette (++ctrl+shift+p++) and start with `@`. Type part of a node's name or folder, move to a result and press ++enter++: the node is selected and brought into view. Without the `@`, the palette lists matching commands first, then a few canvas nodes, then matching settings. See [The editor: canvas and nodes](canvas-and-nodes.md).
 
+![The command palette with a word typed: matching commands, canvas nodes and settings.](../images/wiki-command-palette.png)
+
 ## Tooltips and help
 
 | Hover over… | You see |
@@ -89,4 +98,8 @@ The `@` search is for nodes you have already placed, not for the library. Press 
 * The interactive input and display nodes have plain names instead: `Number`, `Number Slider`, `Boolean`, `String`, `Choice`, `Watch`, `Watch List`, `Color Picker` and so on.
 * Nodes you add yourself (see [Writing your own nodes](extending.md)) are placed in whichever folder their author chose.
 
-Next: [The editor: canvas and nodes](canvas-and-nodes.md), [Concepts](concepts.md) and the [keyboard and mouse reference](shortcuts.md).
+## Next steps
+
+* [The editor: canvas and nodes](canvas-and-nodes.md), [Concepts](concepts.md) and the [keyboard and mouse reference](shortcuts.md).
+* [Your first script](first-steps.md) uses the quick search from the first minute.
+* [Node reference](nodes/index.md) lists every node by category.

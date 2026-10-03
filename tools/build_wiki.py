@@ -127,8 +127,8 @@ def md_text(text):
     return result
 
 
-def code(text):
-    return "<code>%s</code>" % md_text(text)
+def code(text, nowrap=False):
+    return '<code%s>%s</code>' % (' class="nowrap"' if nowrap else "", md_text(text))
 
 
 def chip(text, extra=""):
@@ -505,7 +505,7 @@ def render_node(node):
                 default = "&mdash;"
             else:
                 default = code(port["default"]) if port["default"] != "" else "*empty*"
-            out.append("| %s%s | %s | %s | %s |" % (code(port["name"]), flags, code(port["type"]), default,
+            out.append("| %s%s | %s | %s | %s |" % (code(port["name"], True), flags, code(port["type"], True), default,
                                                     md_text(port.get("description", ""))))
         out.append("")
     else:
@@ -515,7 +515,7 @@ def render_node(node):
         out += ['<p class="node-sub">Outputs</p>', ""]
         out += ["| Output | Type | What it gives |", "|---|---|---|"] if described else ["| Output | Type |", "|---|---|"]
         for port in node["outputs"]:
-            row = "| %s | %s |" % (code(port["name"]), code(port["type"]))
+            row = "| %s | %s |" % (code(port["name"], True), code(port["type"], True))
             if described:
                 row += " %s |" % md_text(port.get("description", ""))
             out.append(row)

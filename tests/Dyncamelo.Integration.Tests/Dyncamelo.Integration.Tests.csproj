@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Shared test support: the Navisworks node stand-ins (built from docs/dyncamelo-nodes.json), compiled into both test projects. -->
+    <Compile Include="..\Shared\**\*.cs" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Dyncamelo.Core\Dyncamelo.Core.csproj" />
     <ProjectReference Include="..\..\src\Dyncamelo.Nodes\Dyncamelo.Nodes.csproj" />
   </ItemGroup>

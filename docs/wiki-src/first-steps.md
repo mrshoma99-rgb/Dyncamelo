@@ -14,13 +14,15 @@ On the **BIMCamel** ribbon tab, click **Dyncamelo**. The editor opens as a pane.
 
 While the canvas is empty the **start screen** shows cards: **New script**, your recent scripts and the examples. It disappears when you add a node or open a script.
 
+![The start screen of an empty canvas: the version, a New script card, recent scripts and the examples.](../images/wiki-start-screen.png)
+
 Every node shows its **inputs on the left** and its **outputs on the right**. Drag from an output socket to an input socket to make a **wire**. The wire is the data flow.
 
 Three habits that save time from day one:
 
-* Press **Space** over the canvas to search for a node right where the cursor is. Type part of the name, `↑`/`↓` to choose, ++enter++ to insert, ++esc++ to close.
+* Press ++space++ over the canvas to search for a node right where the cursor is. Type part of the name, ++up++ and ++down++ to choose, ++enter++ to insert, ++esc++ to close.
 * **Hover a socket** to see what it expects: its name, its [kind](ports-and-kinds.md), whether it is required, its default and a description.
-* Press **++ctrl+shift+p++** for the command palette: type a word of any command or setting.
+* Press ++ctrl+shift+p++ for the command palette: type a word of any command or setting.
 
 ## 2. Find the names in Navisworks
 
@@ -38,7 +40,14 @@ Click a concrete element in Navisworks and look at the **Properties** window. Fi
 4. Add a **Watch List** node (category *Display*) and wire `items` from the search into its `list`.
 5. Press **Run** (++f5++).
 
+![The search node with its inputs filled in: Element, Material, Concrete and the contains mode.](../images/wiki-first-script-search.png)
+
 The Watch List fills with every matching item. If it is empty, the names do not match what Navisworks shows. The `categoryName` and `propertyName` boxes have a small **magnifier** button: select an element in Navisworks, press the magnifier, and pick the tab and then the property from a list that shows only what that element has. Nothing is read until you press it.
+
+![The magnifier popup on a node, listing the tabs of the element you picked.](../images/wiki-magnifier.png)
+
+!!! tip "The search text is case sensitive"
+    The contains search is documented as case sensitive, like Find Items in Navisworks. Type `Concrete` the way the Properties window shows it. To see all the ways to find a name, read [Find the name of a tab or property](howto/find-property-names.md).
 
 ## 4. Colour the result
 
@@ -49,7 +58,8 @@ The Watch List fills with every matching item. If it is empty, the names do not 
 
 This is a real Navisworks colour override, as if you had used *Item Tools ▸ Override Color*. To take it back from a graph, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before you colour again).
 
-> **Save the model before you experiment.** Whether one Navisworks **Undo** reverses a whole run has not been confirmed. The editor's own undo (++ctrl+z++ while the pane has the focus) changes the graph only.
+!!! warning "Save the model before you experiment"
+    Whether one Navisworks **Undo** reverses a whole run has not been confirmed. The editor's own undo (++ctrl+z++ while the pane has the focus) changes the graph only.
 
 ## 5. Save it as a selection set
 
@@ -67,6 +77,10 @@ Search.ByProperty ──items──▶ Appearance.OverrideColor ──items─�
         └──items──▶ Watch List
 ```
 
+![The finished first script: Search.ByProperty into Appearance.OverrideColor and SelectionSet.Create, with a Watch List on the search result.](../images/wiki-first-script.png)
+
+The same steps with a download, and a version that gives every value its own colour, are in [Colour elements by a property](howto/colour-elements-by-property.md) and [Save selection sets](howto/save-selection-sets.md).
+
 ## 6. Make it live
 
 Switch the run bar from **Manual** to **Auto**. Change `Concrete` to `Steel`: the graph runs again by itself and recolours the model. Only the nodes **after** your edit run again; the rest serve their stored results, which is what keeps large graphs fast.
@@ -77,9 +91,15 @@ Press ++ctrl+s++ and save a `.dyc` file. It stores the nodes, wires and the valu
 
 ## 8. One search for many values
 
-Lists are where Dyncamelo pays off. Add a **String.Split** node with the text `Concrete,Steel,Masonry` and the separator `,`, and wire its result into the `value` input of the search. The search now receives a **list** of three values on an input that wants **one**, so the node runs three times and gives three lists of items. The wire is drawn dashed to show this. Wire the same three texts into the `name` input of **SelectionSet.Create**, and one run makes three sets.
+Lists are where Dyncamelo pays off. Add a **String.Split** node (category *String*) with the text `Concrete,Steel,Masonry` and the separator `,`. Its result is a list of three texts.
+
+1. Wire the result into the `name` input of **SelectionSet.Create**. `name` wants **one** text, so the node runs three times, once for each text. The wire is drawn dashed to show this.
+2. Wire the same result into the `value` input of the search. This input accepts any kind of value, so it takes a list as one single value unless you ask for more. Right-click the `value` socket, choose **List Levels** and then `@L1 — items`. A small `@L1` badge appears, and the search now runs three times and gives three lists of items.
+3. Press **Run**. The three lists pair up with the three names, and one run makes three sets.
 
 This is *replication*, and how several lists pair up is *lacing*. Both are explained in [Concepts](concepts.md#lists-replication-and-lacing).
+
+![A list wired into a one-value input: a dashed wire, and a list of results.](../images/wiki-replication.png)
 
 ## When something is red
 
@@ -87,6 +107,7 @@ A node that fails shows a red border and a message; hover it, or open the **Erro
 
 ## Where next
 
+* The **How-to guides** in the menu each solve one job with a graph you can download, for example [Take quantities out to Excel](howto/quantity-takeoff-to-excel.md) and [Read errors and warnings](howto/read-errors-and-warnings.md).
 * [Concepts](concepts.md) and [Inputs, outputs and kinds](ports-and-kinds.md) explain how graphs behave.
 * [Sample scripts](samples.md) are finished graphs to open, run and take apart.
 * [Recipes](recipes.md) list node chains for the jobs of a BIM coordinator, a manager and a model maintainer.

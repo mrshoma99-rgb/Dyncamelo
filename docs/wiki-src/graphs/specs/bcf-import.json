@@ -1,0 +1,26 @@
+{
+  "name": "BCF import",
+  "description": "Reads a BCF package, shows the title of one topic and selects the model items that topic refers to.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "import", "node": "BCF.ImportIssues", "values": {"filePath": "C:\\Reports\\clash-issues.bcfzip"}},
+    {"id": "number", "node": "Integer", "title": "Topic number", "value": 0},
+    {"id": "topic", "node": "List.GetItemAtIndex", "title": "Topic"},
+    {"id": "its-items", "node": "List.GetItemAtIndex", "title": "Items of the topic"},
+    {"id": "title", "node": "Dictionary.ValueOrDefault", "values": {"key": "title"}},
+    {"id": "show", "node": "Watch", "title": "Topic title"},
+    {"id": "select", "node": "Selection.SetCurrent"}
+  ],
+  "wires": [
+    "import.topics -> topic.list",
+    "import.modelItems -> its-items.list",
+    "number.value -> topic.index",
+    "number.value -> its-items.index",
+    "topic.item -> title.dictionary",
+    "title.value -> show.value",
+    "its-items.item -> select.items"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: reads every topic in the package, then picks one by its number (0 is the first), shows its title and selects the model items its components match. TO CHANGE: the file path and the topic number."}
+  ]
+}

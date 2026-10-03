@@ -6,6 +6,11 @@ Use a group to tidy up a big script, or to build a routine once (for example "fi
 
 Do not confuse node groups with **frames**. A frame (++ctrl+g++, "Group Selection" in the Graph menu) is only a coloured rectangle drawn behind some nodes. See [The editor: canvas and nodes](canvas-and-nodes.md#notes-and-frames).
 
+![A node group instance, with its inputs and outputs, next to the rest of the graph.](../images/wiki-node-group-instance.png)
+
+!!! tip "Learn it by doing"
+    [Make and reuse a node group](howto/reusable-node-group.md) builds a group from two nodes in eight steps.
+
 ## The pieces
 
 * The **group** is the definition: the nodes inside it and its interface.
@@ -35,6 +40,8 @@ Dyncamelo will not make a group in a few cases, and the status bar says why:
 * Select an instance and press ++tab++, or click the small arrow in its title bar (or right-click ▸ **Open Node Group**). The canvas now shows the group's nodes between a **Group Input** and a **Group Output** node, fitted to the window.
 * A **breadcrumb bar** appears at the top left of the canvas, such as `My script ▸ Level colours`. Click any step to go back to that level, or click **Close group**. ++shift+tab++ also closes the group, and ++tab++ closes it when no group is selected. When you leave, the view returns to where it was and the instance you opened is selected again.
 * Groups can contain other groups, so you can go several levels deep; the breadcrumb shows the whole path.
+
+![The same group opened: Group Input, the nodes, Group Output and the breadcrumb bar.](../images/wiki-node-group-open.png)
 
 While a group is open you edit it like any other script. You can add nodes with ++space++, wire, move, mute, freeze and so on. Running (++f5++) still runs the **whole script**, so you see the effect of an edit at once. ++esc++ stops a run from inside a group too, and the progress text names the path, for example `Outer ▸ Inner ▸ node`. You cannot open or close a group while a run is in progress.
 
@@ -91,3 +98,9 @@ Copying an instance and pasting it into another script brings its group along.
 | Delete Unused Node Groups | none |
 
 You can change any of these in **Settings ▸ Shortcuts** (see [Settings](settings.md)). The complete list of keys is in the [keyboard and mouse reference](shortcuts.md).
+
+## Next steps
+
+* [Make and reuse a node group](howto/reusable-node-group.md) walks through the commands above.
+* [The Script Player](player.md) explains why inputs should stay outside a group.
+* [Keyboard and mouse reference](shortcuts.md#node-groups).

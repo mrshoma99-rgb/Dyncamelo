@@ -4,6 +4,8 @@ The Dyncamelo editor is a pane inside Navisworks where you build a script by pla
 
 This page tours the editor window and everything you do on the canvas. The node library has its own page ([Node library and search](library-and-search.md)), and every key is listed in the [keyboard and mouse reference](shortcuts.md).
 
+![The whole editor: the library on the left, the canvas with a sample graph after a run, and the status bar.](../images/wiki-editor-overview.png)
+
 ## Opening the editor
 
 Open a model in Navisworks, then click **Dyncamelo** on the **BIMCamel** ribbon tab. The button shows or hides the editor pane. It is a normal Navisworks dock pane, so you can dock it, float it or put it on a second monitor.
@@ -23,6 +25,8 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 
 A run blocks Navisworks while it works, so during a run a dark overlay shows which node is working (for example `12 / 40 — name`) and reminds you that **Esc** cancels it. See [Running scripts](running-graphs.md).
 
+![The progress overlay during a run: the working node and the Esc hint.](../images/wiki-run-progress.png)
+
 ## The canvas
 
 **Moving around**
@@ -31,8 +35,10 @@ A run blocks Navisworks while it works, so during a run a dark overlay shows whi
 * **Zoom** with the mouse wheel. **View ▸ Zoom In** and **Zoom Out** do the same from the menu.
 * **Fit to Screen** brings the whole script into view. It is in the View menu and the canvas right-click menu, and ++home++ does it from the keyboard.
 * ++shift+f++ (**Frame Selected**) zooms to what you have selected.
-* The **minimap** is a small overview in the bottom-right corner. Drag its frame to pan and use the wheel to zoom. It appears by itself once a script has 40 or more nodes; ++ctrl+m++ or the map button in the menu bar switches it on and off, and **Settings ▸ Canvas ▸ Minimap** chooses Automatic, Always or Never.
+* The **minimap** is a small overview in the bottom-right corner (picture below). Drag its frame to pan and use the wheel to zoom. It appears by itself once a script has 40 or more nodes; ++ctrl+m++ or the map button in the menu bar switches it on and off, and **Settings ▸ Canvas ▸ Minimap** chooses Automatic, Always or Never.
 * **Bookmarks** save a view so you can come back to it (see below).
+
+![The minimap on a graph of more than 40 nodes.](../images/wiki-minimap.png)
 
 **Grid.** The canvas draws grid lines, and nodes snap to the grid when you drag them. Both can be switched off in [Settings](settings.md) under Canvas.
 
@@ -53,7 +59,11 @@ Click a card to open it. The cards disappear as soon as you add a node or open a
 
 You can switch the start screen off with **Settings ▸ Appearance ▸ Start screen on an empty canvas**.
 
+![The start screen of an empty canvas: New script, recent scripts, examples, the version and an update notice.](../images/wiki-start-screen.png)
+
 ## Nodes
+
+![One node close up: header, sockets, inline editors and the value preview bubble.](../images/wiki-node-anatomy.png)
 
 A node is one step of the script. It has a title bar, **inputs** on the left and **outputs** on the right. Add nodes from the library (++space++ over the canvas is the fastest way), then fill in or wire their inputs. How sockets are coloured and shaped is explained in [Inputs, outputs and kinds](ports-and-kinds.md).
 
@@ -62,6 +72,7 @@ A node is one step of the script. It has a title bar, **inputs** on the left and
 | Move a node | Drag it. Drag a selection to move several together. |
 | Rename a node | Double-click its title. |
 | Read what a node does | Hover its title for the description. The small dot beside the title tells whether the node creates, modifies or only reads (Create, Modify, Info). |
+| Pick a colour | Click the colour swatch on a colour input. The popup has swatches and an eyedropper that can take any colour on the screen, the Navisworks view included. |
 | Change the width | Drag the node's right edge; double-click the edge for automatic width. **View ▸ Reset Node Width** does the same for the selected nodes. |
 | Collapse or expand | ++h++, the arrow in the title bar, or the node's right-click menu. A collapsed node becomes a capsule that still has its sockets, so it can still be wired. **View ▸ Collapse All Nodes** and **Expand All Nodes** act on everything. |
 | Hide the inputs you are not using | ++ctrl+h++ hides optional inputs that have no wire; click the row that stands in for them to show them again. **Settings ▸ Editing ▸ Hide unused inputs by default** makes it the rule. |
@@ -74,8 +85,12 @@ A node is one step of the script. It has a title bar, **inputs** on the left and
 
 **Mute and freeze.** Both stop a node from running, but they behave differently around it.
 
+![A muted node in a live chain, and a frozen branch drawn ghosted.](../images/wiki-mute-freeze.png)
+
 * A **muted** node (++m++, badge MUTED) is bypassed. Each of its outputs passes along the first input of a matching kind, and everything after it still runs. Use it to switch a step off inside a live chain, such as a filter or a recolour.
 * A **frozen** node (++shift+m++, badge FROZEN) is held. It and everything after it are skipped by runs and keep the results of their last run. Use it to stop a slow branch from being recalculated while you work elsewhere.
+
+![The colour popup with swatches and the eyedropper button.](../images/wiki-colour-popup.png)
 
 Both are undoable and saved with the script. The node's right-click menu also offers **Lacing** (Auto, Shortest, Longest, Cross Product), which decides how lists pair up (see [Concepts](concepts.md)).
 
@@ -123,7 +138,12 @@ Frames are only for tidiness. For a reusable piece of script with its own inputs
 
 ++ctrl+z++ undoes and ++ctrl+y++ (or ++ctrl+shift+z++) redoes; the menu-bar buttons do the same and their tooltips name the edit. Undo covers edits to the script only. It does **not** reverse changes a run has already made in Navisworks, and the status bar says so.
 
-++ctrl+shift+h++ (**Undo History…**) lists every step. Click a step to jump back or forward to exactly that point; steps you undid appear dimmed until you make a new edit. Inside a [node group](node-groups.md), each level keeps its own history.
+++ctrl+shift+h++ (**Undo History…**) lists every step. Click a step to jump back or forward to exactly that point; steps you undid appear dimmed until you make a new edit.
+
+![The Undo History panel with a few steps, some dimmed.](../images/wiki-undo-history.png)
+
+!!! warning "Undo is for the script, not the model"
+    The editor's undo does not reverse what a run already changed in Navisworks. Save the model before you try something new, and use the nodes made for it, such as `Appearance.Reset`. Inside a [node group](node-groups.md), each level keeps its own history.
 
 ## Bookmarks
 
@@ -137,6 +157,11 @@ Frames are only for tidiness. For a reusable piece of script with its own inputs
 
 ++ctrl+shift+p++ opens the command palette. Type a word and the list shows matching **commands**, matching **settings** (choosing one opens the Settings page on it) and matching **nodes on your canvas**. Use the up and down arrows, press ++enter++ to run the highlighted entry and ++esc++ to close. Start the text with `@` to list only canvas nodes. The palette only lists commands that can run right now.
 
+![The command palette with a word typed and matching commands, settings and canvas nodes.](../images/wiki-command-palette.png)
+
+!!! tip "Lost? Open the palette"
+    If you cannot remember where a function is, press ++ctrl+shift+p++ and type a word of its name. Every command is there, with its shortcut at the right.
+
 ## Hints and the status bar
 
 The status bar's hint line follows what you are doing: the keys for the selected nodes, what releasing a dragged wire will do, how to leave a node group. It hides itself first when the pane is narrow. ++f1++ opens a sheet of every keyboard shortcut and mouse gesture, showing the keys currently in force, including any you have changed. **Settings ▸ Appearance** switches the hints off and sets the **Window scale** (90 to 150 per cent) for high-resolution screens or a small pane.
@@ -147,3 +172,4 @@ The status bar's hint line follows what you are doing: the keys for the selected
 * [Saving and opening scripts](saving-opening.md): `.dyc` files, autosave and recovery.
 * [Settings](settings.md) and the [keyboard and mouse reference](shortcuts.md).
 * [Node groups](node-groups.md): reusable pieces of script.
+* [How-to guides](howto/read-errors-and-warnings.md) for reading errors and warnings, and for [speeding up a slow graph](howto/speed-up-slow-graph.md).

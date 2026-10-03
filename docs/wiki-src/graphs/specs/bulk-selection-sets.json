@@ -1,0 +1,16 @@
+{
+  "name": "Bulk selection sets",
+  "description": "Creates one selection set for each distinct value of a property, here one per Level, filed in a folder.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "bulk", "node": "SelectionSets.BulkByPropertyValues",
+     "values": {"categoryName": "Element", "propertyName": "Level", "folderName": "Levels"}},
+    {"id": "values", "node": "Watch List", "title": "Values found"}
+  ],
+  "wires": [
+    "bulk.values -> values.list"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: makes one search set per distinct Element > Level value, inside the folder \"Levels\", and lists the values it found. A set with the same name in that folder is replaced. TO CHANGE: type another category, property or folder name, then press Run."}
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "BCF export",
+  "description": "Exports the results of the first clash test as BCF issues for another coordination tool.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "tests", "node": "Clash.Tests"},
+    {"id": "first", "node": "List.GetItemAtIndex", "title": "Pick a test", "values": {"index": 0}},
+    {"id": "results", "node": "ClashTest.Results"},
+    {"id": "export", "node": "BCF.ExportIssues", "values": {"filePath": "C:\\Reports\\clash-issues.bcfzip"}},
+    {"id": "count", "node": "Watch", "title": "Topics exported"}
+  ],
+  "wires": [
+    "tests.tests -> first.list",
+    "first.item -> results.test",
+    "results.results -> export.results",
+    "export.topicCount -> count.value"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: takes one clash test from the document, lists its results and writes each as a BCF topic (with camera, component GUIDs and a snapshot) into the .bcfzip. TO CHANGE: the test number (0 is the first) and the file path."}
+  ]
+}

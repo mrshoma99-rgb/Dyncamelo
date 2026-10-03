@@ -1,0 +1,24 @@
+{
+  "name": "Clash report",
+  "description": "Summarises every clash test by status and writes the summary as an HTML report.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "tests", "node": "Clash.Tests"},
+    {"id": "summary", "node": "Clash.SummaryTable"},
+    {"id": "table", "node": "Table.FromRows"},
+    {"id": "show", "node": "Watch Table", "title": "Summary"},
+    {"id": "report", "node": "Report.Html", "values": {"title": "Clash summary", "subtitle": "Weekly coordination meeting"}},
+    {"id": "write", "node": "Text.WriteToFile", "values": {"path": "C:\\Reports\\clash-summary.html"}}
+  ],
+  "wires": [
+    "tests.tests -> summary.tests",
+    "summary.rows -> table.rows",
+    "summary.headers -> table.headers",
+    "table.table -> show.table",
+    "table.table -> report.sections",
+    "report.html -> write.text"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: counts the results of every clash test by status (New, Active, Reviewed, Approved, Resolved), shows the table and saves it as a self-contained HTML page. TO CHANGE: the report title and subtitle, and the file path on Text.WriteToFile."}
+  ]
+}

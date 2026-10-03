@@ -1,0 +1,33 @@
+{
+  "name": "Quantities to Excel",
+  "description": "Totals the volume of every item by category and writes the result, largest first, to an Excel workbook.",
+  "run": "Manual",
+  "nodes": [
+    {"id": "min", "node": "Number", "title": "Minimum volume", "value": 0},
+    {"id": "search", "node": "Search.ByProperty", "values": {"categoryName": "Element", "propertyName": "Volume", "mode": ">"}},
+    {"id": "columns", "node": "String", "title": "Columns to read", "value": "@Name,Element.Category,Element.Volume"},
+    {"id": "split-columns", "node": "String.Split", "title": "Split columns", "values": {"separator": ","}},
+    {"id": "table", "node": "Properties.ToTable"},
+    {"id": "totals", "node": "String", "title": "Totals to work out", "value": "count,sum:Element.Volume as Volume"},
+    {"id": "split-totals", "node": "String.Split", "title": "Split totals", "values": {"separator": ","}},
+    {"id": "group", "node": "Table.GroupBy", "values": {"by": "Element.Category"}},
+    {"id": "sort", "node": "Table.Sort", "values": {"columns": "Volume", "descending": true}},
+    {"id": "show", "node": "Watch Table", "title": "Quantities"},
+    {"id": "excel", "node": "Table.ToExcelFile", "values": {"path": "C:\\Reports\\qto.xlsx", "sheet": "Quantities"}}
+  ],
+  "wires": [
+    "min.value -> search.value",
+    "columns.value -> split-columns.text",
+    "search.items -> table.items",
+    "split-columns.list -> table.properties",
+    "totals.value -> split-totals.text",
+    "table.table -> group.table",
+    "split-totals.list -> group.aggregations",
+    "group.table -> sort.table",
+    "sort.table -> show.table",
+    "sort.table -> excel.table"
+  ],
+  "notes": [
+    {"text": "WHAT IT DOES: takes every item with a volume above the minimum, reads the columns you list, adds up count and volume per category, sorts the biggest first and writes the sheet. TO CHANGE: the columns, the totals (for example sum:Element.Area as Area) and the file path on Table.ToExcelFile."}
+  ]
+}

@@ -10,12 +10,28 @@ namespace Dyncamelo.TestSupport.StandIns;
 /// <summary>An attribute as written in a C# source file: <c>[NodeRange(0, 100, Step = 5)]</c>.</summary>
 internal sealed class SourceAttribute
 {
-    public SourceAttribute(string name, string? target, IReadOnlyList<string> positional, IReadOnlyDictionary<string, string> named)
+    public SourceAttribute(string name, string? target, IReadOnlyList<string> positional, IReadOnlyDictionary<string, string> named, IReadOnlyDictionary<string, string> constants)
     {
         Name = name;
         Target = target;
         Positional = positional;
         Named = named;
+        Constants = constants;
+    }
+
+    /// <summary>Named constants of the scanned sources (<c>const int Limit = 500;</c>), for arguments that name one.</summary>
+    public IReadOnlyDictionary<string, string> Constants { get; }
+
+    private double? Resolve(string text)
+    {
+        var t = text.Trim();
+        if (TypeNames.TryParseDefault(t, typeof(double), out var d) && d is double x)
+        {
+            return x;
+        }
+
+        var name = t.Substring(t.LastIndexOf('.') + 1);
+        return Constants.TryGetValue(name, out var value) && TypeNames.TryParseDefault(value, typeof(double), out var d2) && d2 is double y ? y : (double?)null;
     }
 
     /// <summary>The attribute's name without the <c>Attribute</c> suffix.</summary>
@@ -31,15 +47,34 @@ internal sealed class SourceAttribute
     public IReadOnlyDictionary<string, string> Named { get; }
 
     /// <summary>The positional arguments read as string literals; an argument that is not one is skipped.</summary>
-    public string[] Strings() => Positional.Select(p => TypeNames.ParseStringLiteralExpression(p)).Where(s => s != null).Select(s => s!).ToArray();
+    public string[] Strings() => Positional.Select(ResolveString).Where(s => s != null).Select(s => s!).ToArray();
 
-    public string? NamedString(string name) => Named.TryGetValue(name, out var v) ? TypeNames.ParseStringLiteralExpression(v) : null;
+    public string? NamedString(string name) => Named.TryGetValue(name, out var v) ? ResolveString(v) : null;
 
-    public double? NamedNumber(string name) => Named.TryGetValue(name, out var v) && TypeNames.TryParseDefault(v, typeof(double), out var d) && d is double x ? x : (double?)null;
+    // A string literal, or the name of a string constant (NodeDataSource.Selection, or one declared in the scanned sources).
+    private string? ResolveString(string text)
+    {
+        var literal = TypeNames.ParseStringLiteralExpression(text);
+        if (literal != null)
+        {
+            return literal;
+        }
+
+        var t = text.Trim();
+        if (t == "NodeDataSource.Selection" || t.EndsWith(".NodeDataSource.Selection", StringComparison.Ordinal))
+        {
+            return Dyncamelo.Core.Loader.NodeDataSource.Selection;
+        }
+
+        var name = t.Substring(t.LastIndexOf('.') + 1);
+        return Constants.TryGetValue(name, out var value) ? TypeNames.ParseStringLiteralExpression(value) : null;
+    }
+
+    public double? NamedNumber(string name) => Named.TryGetValue(name, out var v) ? Resolve(v) : null;
 
     public bool NamedBool(string name) => Named.TryGetValue(name, out var v) && v.Trim() == "true";
 
-    public double? Number(int index) => index < Positional.Count && TypeNames.TryParseDefault(Positional[index], typeof(double), out var d) && d is double x ? x : (double?)null;
+    public double? Number(int index) => index < Positional.Count ? Resolve(Positional[index]) : null;
 }
 
 /// <summary>A parameter of a node method as written in the source.</summary>
@@ -139,6 +174,9 @@ internal sealed class SourceScan
         @"^[ \t]*public\s+static\s+(?<ret>[\w\.\<\>\[\]\?,\s]+?)\s+(?<name>\w+)\s*\(",
         RegexOptions.Multiline);
 
+    private static readonly Regex ConstantRegex = new Regex(
+        @"\bconst\s+(?:int|long|double|float|decimal|string)\s+(?<name>\w+)\s*=\s*(?<value>[^;]+);");
+
     private readonly List<SourceMethod> _methods;
 
     private SourceScan(List<SourceMethod> methods)
@@ -151,7 +189,8 @@ internal sealed class SourceScan
     /// <summary>Reads every <c>.cs</c> file under a source folder (not <c>obj</c> or <c>bin</c>).</summary>
     public static SourceScan Read(string directory)
     {
-        var methods = new List<SourceMethod>();
+        var texts = new List<(string File, string Text)>();
+        var constants = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var file in Directory.EnumerateFiles(directory, "*.cs", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
         {
             var relative = file.Substring(directory.Length).Replace('\\', '/');
@@ -160,7 +199,18 @@ internal sealed class SourceScan
                 continue;
             }
 
-            methods.AddRange(ParseFile(File.ReadAllText(file).Replace("\r\n", "\n"), Path.GetFileName(file)));
+            var text = File.ReadAllText(file).Replace("\r\n", "\n");
+            texts.Add((Path.GetFileName(file), text));
+            foreach (Match constant in ConstantRegex.Matches(text))
+            {
+                constants[constant.Groups["name"].Value] = constant.Groups["value"].Value.Trim();
+            }
+        }
+
+        var methods = new List<SourceMethod>();
+        foreach (var (name, text) in texts)
+        {
+            methods.AddRange(ParseFile(text, name, constants));
         }
 
         return new SourceScan(methods);
@@ -176,7 +226,7 @@ internal sealed class SourceScan
         return _methods.FirstOrDefault(m => m.Path == path && m.Parameters.Select(p => p.Name).SequenceEqual(names));
     }
 
-    private static IEnumerable<SourceMethod> ParseFile(string text, string fileName)
+    private static IEnumerable<SourceMethod> ParseFile(string text, string fileName, IReadOnlyDictionary<string, string> constants)
     {
         var ns = NamespaceRegex.Match(text);
         if (!ns.Success)
@@ -200,20 +250,20 @@ internal sealed class SourceScan
                 continue;
             }
 
-            var parameters = TypeNames.SplitTopLevel(parameterText, ',').Select(ParseParameter).Where(p => p != null).Select(p => p!).ToList();
+            var parameters = TypeNames.SplitTopLevel(parameterText, ',').Select(p => ParseParameter(p, constants)).Where(p => p != null).Select(p => p!).ToList();
             yield return new SourceMethod(
                 fileName,
                 ns.Groups[1].Value,
                 owner.Groups["name"].Value,
-                ParseAttributes(owner.Groups["attrs"].Value),
+                ParseAttributes(owner.Groups["attrs"].Value, constants),
                 method.Groups["name"].Value,
                 Regex.Replace(method.Groups["ret"].Value.Trim(), @"\s+", " "),
                 parameters,
-                ParseAttributes(method.Groups["attrs"].Value));
+                ParseAttributes(method.Groups["attrs"].Value, constants));
         }
     }
 
-    private static SourceParameter? ParseParameter(string text)
+    private static SourceParameter? ParseParameter(string text, IReadOnlyDictionary<string, string> constants)
     {
         var rest = text.Trim();
         var attributes = new List<SourceAttribute>();
@@ -225,7 +275,7 @@ internal sealed class SourceScan
                 break;
             }
 
-            attributes.AddRange(ParseAttributes(rest.Substring(0, end + 1)));
+            attributes.AddRange(ParseAttributes(rest.Substring(0, end + 1), constants));
             rest = rest.Substring(end + 1).Trim();
         }
 
@@ -296,7 +346,7 @@ internal sealed class SourceScan
     }
 
     /// <summary>Reads every <c>[...]</c> section of a text (comment lines are ignored) into attributes.</summary>
-    private static List<SourceAttribute> ParseAttributes(string block)
+    private static List<SourceAttribute> ParseAttributes(string block, IReadOnlyDictionary<string, string> constants)
     {
         var attributes = new List<SourceAttribute>();
         var cleaned = string.Join("\n", block.Split('\n').Where(l => !l.TrimStart().StartsWith("//", StringComparison.Ordinal)));
@@ -326,7 +376,7 @@ internal sealed class SourceScan
 
             foreach (var one in TypeNames.SplitTopLevel(inner, ','))
             {
-                var attribute = ParseAttribute(one, target);
+                var attribute = ParseAttribute(one, target, constants);
                 if (attribute != null)
                 {
                     attributes.Add(attribute);
@@ -339,7 +389,7 @@ internal sealed class SourceScan
         return attributes;
     }
 
-    private static SourceAttribute? ParseAttribute(string text, string? target)
+    private static SourceAttribute? ParseAttribute(string text, string? target, IReadOnlyDictionary<string, string> constants)
     {
         var m = Regex.Match(text.Trim(), @"^(?<name>[\w\.]+)\s*(?:\((?<args>.*)\))?\s*$", RegexOptions.Singleline);
         if (!m.Success)
@@ -369,7 +419,7 @@ internal sealed class SourceScan
             }
         }
 
-        return new SourceAttribute(name, target, positional, named);
+        return new SourceAttribute(name, target, positional, named, constants);
     }
 
     /// <summary>The index of the ']' matching the '[' at <paramref name="open"/>, or -1.</summary>
