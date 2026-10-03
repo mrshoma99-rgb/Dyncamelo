@@ -2,13 +2,20 @@
 
 All notable changes to Dyncamelo are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
 
-Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.46.0](dist/RELEASE_NOTES.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
+Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.47.0](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.47.0 - 2026-10-03
+
+The first release since 0.45.1 with an installer and the bundle zip. These downloads (GitHub, bimcamel.com) are the **personal-use edition**; professional use is the copy sold in the Autodesk App Store.
+
 ### Added
+* **Two editions, marked as such.** A copy from GitHub or bimcamel.com is the free *Personal use* edition (PolyForm Noncommercial 1.0.0): the installer, the About window and the start screen say so and point to the Autodesk App Store for professional use (work at a company, a paid project or product), where the professional copy costs 100 euros and comes with a commercial licence from BIMCamel. A copy installed from the store (it carries the `distribution.txt` marker) says *Professional* and does not check GitHub for updates. New command **Help > Autodesk App Store…**. The README, the store listing and the help page say the same.
 * **A small search button next to tab and property names.** On the nodes that read a property of an element (Properties.Value, ValueAsString, HasProperty and InCategory, ModelItem.AncestorPropertyMatches, Audit.MissingProperty, Takeoff.SumPropertyByGroup) the category and property inputs stay plain text boxes you can type in; a magnifier beside each lists the tabs, or the properties of the chosen tab, **of that node's own element** — the one picked on it or wired in — and a click fills the box. Nothing is read until the button is pressed, only that one element is read (the first 100 of a longer list), and what you typed narrows the list. The nodes that search the whole model (Search.ByProperty, HasProperty, HasCategory, SelectionSet.CreateFromSearch, SelectionSets.BulkByPropertyValues) have no element input, so their magnifier lists the tabs and properties of **the elements selected in Navisworks right now** (the first 100) and never searches the model to fill the list; Search.InItems offers those of its own items. Node authors get `[NodeTabChoice]` and `[NodePropertyChoice]` for it (see docs/EXTENDING.md).
 * **Help > Run Self-Test** has one more check: a search for the name of the first model's root item must find it.
 * **A start screen on an empty canvas.** Opening Dyncamelo (or deleting every node) now shows the installed version, a link to bimcamel.com, a "newer version available" notice with a **Get it** button when the daily update check found one, and cards: **New script**, your four newest recent scripts and the examples. The cards go away as soon as you open a script or add a node. *Help > BIMCamel Website* and *Help > Get the Newest Version…* are new commands too; the old plain hint is what remains after you press **New script**. Settings > Appearance > *Start screen on an empty canvas* switches it off.

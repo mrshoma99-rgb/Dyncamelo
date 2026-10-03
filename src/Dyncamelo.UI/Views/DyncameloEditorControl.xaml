@@ -1458,6 +1458,11 @@
                                         Background="{DynamicResource Dyc.HoverBrush}" ToolTip="The installed version">
                                     <TextBlock Text="{Binding ProductVersionText}" FontSize="11" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
                                 </Border>
+                                <Border Margin="6,0,0,0" Padding="8,1" CornerRadius="9" VerticalAlignment="Center"
+                                        BorderBrush="{DynamicResource Dyc.AccentBrush}" BorderThickness="1"
+                                        ToolTip="{Binding EditionNote}">
+                                    <TextBlock Text="{Binding EditionName}" FontSize="11" Foreground="{DynamicResource Dyc.AccentBrush}" />
+                                </Border>
                             </WrapPanel>
                             <WrapPanel Margin="0,2,0,0">
                                 <TextBlock Text="Visual programming for Navisworks" Margin="0,0,12,0" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
@@ -1518,6 +1523,21 @@
                     <TextBlock Margin="0,18,0,0" FontSize="11.5" TextWrapping="Wrap" Opacity="0.65"
                                Text="{Binding EmptyCanvasHintText}"
                                Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+
+                    <DockPanel Margin="0,16,0,0" LastChildFill="True">
+                        <Button DockPanel.Dock="Right"
+                                Style="{StaticResource Dyc.SmallButton}"
+                                Margin="12,0,0,0"
+                                Padding="10,3"
+                                VerticalAlignment="Center"
+                                Content="Autodesk App Store ↗"
+                                ToolTip="Open the Autodesk App Store, where the professional copy is sold"
+                                Command="{Binding OpenStoreCommand}"
+                                Visibility="{Binding IsPersonalEdition, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                        <TextBlock FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Text="{Binding EditionNote}"
+                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                    </DockPanel>
                 </StackPanel>
             </ScrollViewer>
 

@@ -294,8 +294,15 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $checksum = Get-Content "$env:ZIP.sha256" -Raw
           $setupChecksum = Get-Content "DyncameloSetup.exe.sha256" -Raw
+          # The notes of the release: the personal-use notice and what is new come from dist/RELEASE_NOTES.md (its first heading is dropped).
+          $changes = ''
+          if (Test-Path dist/RELEASE_NOTES.md) {
+            $changes = ((Get-Content dist/RELEASE_NOTES.md -Raw) -replace '(?s)^# [^\r\n]*\r?\n', '').Trim()
+          }
           $notes = @"
-          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks.
+          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks. **Personal-use edition**: free for personal and other noncommercial use; for professional use get Dyncamelo from the Autodesk App Store.
+
+          $changes
 
           ## Install (recommended)
 
@@ -325,7 +332,7 @@ jobs:
             "Dyncamelo-navisworks.zip" "Dyncamelo-navisworks.zip.sha256" `
             "DyncameloSetup.exe" "DyncameloSetup.exe.sha256" `
             --target $env:GITHUB_SHA `
-            --title "Dyncamelo $env:VERSION (Navisworks 2024-2026)" `
+            --title "Dyncamelo $env:VERSION (personal use, Navisworks 2024-2026)" `
             --notes-file notes.md
           if ($LASTEXITCODE -ne 0) { exit 1 }
 

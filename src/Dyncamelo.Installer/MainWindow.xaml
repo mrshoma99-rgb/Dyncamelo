@@ -44,6 +44,9 @@
                            FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,4"/>
                 <TextBlock Text="Visual programming for Autodesk Navisworks 2024, 2025 &amp; 2026"
                            Style="{StaticResource Body}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock Text="Personal-use edition: free for personal and other noncommercial use. For professional use, get Dyncamelo from the Autodesk App Store."
+                           Style="{StaticResource Fine}" HorizontalAlignment="Center" TextAlignment="Center"
+                           Margin="0,14,0,0" TextWrapping="Wrap"/>
                 <TextBlock x:Name="DetectedText" Style="{StaticResource Fine}"
                            HorizontalAlignment="Center" TextAlignment="Center" Margin="0,10,0,0"
                            TextWrapping="Wrap"

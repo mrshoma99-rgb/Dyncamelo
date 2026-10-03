@@ -10,7 +10,7 @@ Everything the submission form asks for, ready to paste. Limits come from Autode
 | Type | Desktop app, plug-in |
 | Programs | Navisworks Manage, Navisworks Simulate |
 | Operating system | Windows 64-bit |
-| Price | Free |
+| Price | 100 EUR, for professional use. The free copy for personal use is on GitHub and bimcamel.com |
 | Publisher name | **YOU**: the name on your Autodesk publisher profile (the package says "BIMCamel") |
 | Support email | **YOU**: an address you read; also goes into `appstore/publisher.json` |
 | Support / contact page | https://github.com/mrshoma99-rgb/Dyncamelo/issues |
@@ -53,7 +53,7 @@ PRIVACY
 Dyncamelo has no account, no analytics and no licence server, and it sends nothing about you or your models anywhere. The privacy policy is inside the app under Help > Privacy Policy.
 
 LICENCE AND SUPPORT
-Free for personal and other noncommercial use: hobby projects, learning, research, charities, schools, public bodies. Using Dyncamelo for work at a company, or in a paid project, needs a commercial licence from BIMCamel; ask through the support contact on this page. Licence: PolyForm Noncommercial 1.0.0, the text is in the download and at github.com/mrshoma99-rgb/Dyncamelo. Help is in the app (F1 and Help > Run Self-Test), in the quick-start page that comes with the download and at the same address.
+This is the professional copy: it comes with a commercial licence from BIMCamel for use at work (a contractor, consultancy, design office or any company) and in paid projects and products. A free copy for personal use (learning, hobby projects, research, charities, schools, public bodies) is available from github.com/mrshoma99-rgb/Dyncamelo and bimcamel.com under the PolyForm Noncommercial 1.0.0 licence. Help is in the app (F1 and Help > Run Self-Test), in the quick-start page that comes with the download and at the same address.
 
 Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.
 ```
@@ -111,6 +111,6 @@ Use the entry for the version in `CHANGELOG.md`; the form asks for a version num
 
 ## EULA and licence
 
-Autodesk gives every store app its standard end-user licence agreement; you do not need your own, and the FAQ says not to add terms that conflict with it. Dyncamelo's own licence (PolyForm Noncommercial 1.0.0, in `LICENSE`) is shipped in the package under `Contents/Resources` and stated in the description above, because the FAQ asks for extra conditions to be written in the description or the help file.
+Autodesk gives every store app its standard end-user licence agreement; you do not need your own, and the FAQ says not to add terms that conflict with it. The source licence (PolyForm Noncommercial 1.0.0, in `LICENSE`) is shipped in the package under `Contents/Resources`, and the description above says that this paid copy comes with a commercial licence from BIMCamel, because the FAQ asks for extra conditions to be written in the description or the help file. **YOU** decide the exact terms of that commercial grant (per user or per company, perpetual or yearly, what updates include); write them down and make sure the description says the same.
 
-Whether a free listing with a noncommercial licence is accepted next to the standard EULA is for Autodesk to say; the publisher asks before submitting.
+Whether a paid listing whose description grants a commercial licence on top of the source licence is accepted next to the standard EULA is for Autodesk to say; the publisher asks before submitting.

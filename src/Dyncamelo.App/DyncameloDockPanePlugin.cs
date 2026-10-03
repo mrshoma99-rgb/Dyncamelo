@@ -89,6 +89,9 @@ public class DyncameloDockPanePlugin : DockPanePlugin
             editor.Dispatcher.BeginInvoke(new Action(() => _viewModel?.OpenDroppedFiles(new[] { pending })));
         }
 
+        // Which edition this install is (the Autodesk App Store package carries a marker file); the start screen and Help say so.
+        _viewModel?.SetDistribution(DistributionChannel.Detect(InstallFolder));
+
         // Non-blocking, once-a-day update check; prompts on the UI thread if a newer release exists. A copy installed from the
         // Autodesk App Store is updated by the store, so it never offers the GitHub download.
         // The start screen of the empty editor shows the newer version too, so the prompt is not the only place it is mentioned.

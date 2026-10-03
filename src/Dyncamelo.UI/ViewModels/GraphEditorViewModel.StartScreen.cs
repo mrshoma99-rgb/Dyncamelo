@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using Dyncamelo.Core.Editing;
 using Dyncamelo.UI.Mvvm;
 using Dyncamelo.UI.Services;
 
@@ -96,6 +97,30 @@ public partial class GraphEditorViewModel
     /// <summary>Opens the download page of the newer version; available only when an update is known.</summary>
     public ICommand OpenUpdateCommand { get; private set; } = null!;
 
+    /// <summary>Opens the Autodesk App Store, where the professional copy is sold.</summary>
+    public ICommand OpenStoreCommand { get; private set; } = null!;
+
+    /// <summary>"Personal use" or "Professional": which edition this install is (shown beside the version).</summary>
+    public string EditionName { get; private set; } = DistributionChannel.EditionName(DistributionChannel.Direct);
+
+    /// <summary>What the licence of this install allows.</summary>
+    public string EditionNote { get; private set; } = DistributionChannel.EditionNote(DistributionChannel.Direct);
+
+    /// <summary>True for the free personal-use copy (GitHub, bimcamel.com), which points at the store for professional use.</summary>
+    public bool IsPersonalEdition { get; private set; } = true;
+
+    /// <summary>Tells the editor which channel this install came from (the host reads the marker file beside the plug-in).</summary>
+    /// <param name="channel">A <see cref="DistributionChannel"/> value.</param>
+    public void SetDistribution(string channel)
+    {
+        EditionName = DistributionChannel.EditionName(channel);
+        EditionNote = DistributionChannel.EditionNote(channel);
+        IsPersonalEdition = channel != DistributionChannel.AppStore;
+        OnPropertyChanged(nameof(EditionName));
+        OnPropertyChanged(nameof(EditionNote));
+        OnPropertyChanged(nameof(IsPersonalEdition));
+    }
+
     /// <summary>Opens a web address; the host's default launches the browser (tests replace it).</summary>
     public Func<string, bool> UrlOpener { get; set; } = UrlLauncher.Open;
 
@@ -146,6 +171,7 @@ public partial class GraphEditorViewModel
         StartNewScriptCommand = new RelayCommand(StartNewScript);
         OpenWebsiteCommand = new RelayCommand(() => OpenAddress(WebsiteUrl));
         OpenUpdateCommand = new RelayCommand(() => OpenAddress(_updateUrl), () => HasUpdate && _updateUrl.Length > 0);
+        OpenStoreCommand = new RelayCommand(() => OpenAddress(DistributionChannel.AppStorePage));
         RecentFiles.CollectionChanged += (_, _) => RefreshStartCards();
         SampleGraphs.CollectionChanged += (_, _) => RefreshStartCards();
         RefreshSampleGraphs();

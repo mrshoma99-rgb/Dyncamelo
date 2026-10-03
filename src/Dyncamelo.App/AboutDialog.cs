@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Dyncamelo.Core.Editing;
 
 namespace Dyncamelo.App;
 
@@ -100,6 +101,21 @@ internal static class AboutDialog
         });
         body.Children.Add(LinkBlock(Url, "bimcamel.com/plugins/dyncamelo", Paper, 13.5, FontWeights.SemiBold, topMargin: 10));
         body.Children.Add(LinkBlock(IfcExporterUrl, "Also from BIMCamel: the free IFC Exporter — fast Navisworks → IFC", Paper70, 12.5, FontWeights.Normal, topMargin: 6));
+
+        // Which licence this copy carries: the free personal-use copy (GitHub, bimcamel.com) or the professional one (Autodesk App Store).
+        var channel = DistributionChannel.Detect(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+        body.Children.Add(new TextBlock
+        {
+            Text = DistributionChannel.EditionName(channel) + " edition. " + DistributionChannel.EditionNote(channel),
+            Foreground = Paper70,
+            FontSize = 12.5,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 14, 0, 0),
+        });
+        if (channel != DistributionChannel.AppStore)
+        {
+            body.Children.Add(LinkBlock(DistributionChannel.AppStorePage, "Autodesk App Store: Dyncamelo for professional use", Paper, 12.5, FontWeights.SemiBold, topMargin: 6));
+        }
 
         body.Children.Add(new Border { BorderBrush = Hairline, BorderThickness = new Thickness(0, 1, 0, 0), Margin = new Thickness(0, 20, 0, 0) });
 

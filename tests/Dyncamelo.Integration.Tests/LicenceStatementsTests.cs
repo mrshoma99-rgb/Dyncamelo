@@ -6,7 +6,7 @@ namespace Dyncamelo.Integration.Tests;
 
 /// <summary>
 /// Dyncamelo is licensed under the PolyForm Noncommercial License 1.0.0 (free for personal and other noncommercial use, a commercial
-/// licence from BIMCamel for the rest). The licence is stated in several places (the file, the README, the build properties that end up in
+/// licence, which comes with the professional copy sold in the Autodesk App Store, for the rest). The licence is stated in several places (the file, the README, the build properties that end up in
 /// the DLLs, the contributing guide, the store listing and help page); these tests keep them saying the same thing and keep the previous
 /// licence out of the places that describe the current one.
 /// </summary>
@@ -72,6 +72,27 @@ public class LicenceStatementsTests
         Assert.Contains("Commons Clause", old);
         Assert.Contains("Apache License", old);
         Assert.Contains("v0.26.2 to v0.45.1", Read("docs", "licenses", "README.md"));
+    }
+
+    [Fact]
+    public void TheTwoEditionsAreSaidTheSameWayWhereTheyAreDescribed()
+    {
+        // Free personal-use copies from GitHub and bimcamel.com; the professional copy is sold in the Autodesk App Store for 100 euros.
+        var readme = Read("README.md");
+        Assert.Contains("Autodesk App Store", readme);
+        Assert.Contains("100 euros", readme);
+        Assert.Contains("Personal use", readme);
+
+        var listing = Read("appstore", "listing.md");
+        Assert.Contains("100 EUR", listing);
+        Assert.Contains("commercial licence from BIMCamel", listing);
+
+        var notes = Read("dist", "RELEASE_NOTES.md");
+        Assert.Contains("Personal use only", notes);
+        Assert.Contains("Autodesk App Store", notes);
+
+        var workflow = Read(".github", "workflows", "release.yml");
+        Assert.Contains("personal use, Navisworks 2024-2026", workflow);
     }
 
     [Fact]

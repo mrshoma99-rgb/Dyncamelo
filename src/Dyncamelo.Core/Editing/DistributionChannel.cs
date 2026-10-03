@@ -19,6 +19,22 @@ public static class DistributionChannel
     /// <summary>The channel of every other install (GitHub installer, zip, a build from source).</summary>
     public const string Direct = "direct";
 
+    /// <summary>
+    /// The Autodesk App Store, where the professional (commercial-use) copy is sold. This is the store's address until the listing
+    /// exists; replace it with the listing's own address when the app is published.
+    /// </summary>
+    public const string AppStorePage = "https://apps.autodesk.com/";
+
+    /// <summary>The name of the edition of an install: "Personal use" (GitHub installer, zip, bimcamel.com, a build from source) or "Professional" (Autodesk App Store).</summary>
+    /// <param name="channel">The channel, from <see cref="Detect"/>.</param>
+    public static string EditionName(string channel) => channel == AppStore ? "Professional" : "Personal use";
+
+    /// <summary>One sentence saying what the licence of an install allows and where the other edition is.</summary>
+    /// <param name="channel">The channel, from <see cref="Detect"/>.</param>
+    public static string EditionNote(string channel) => channel == AppStore
+        ? "Licensed for professional use. Updates come from the Autodesk App Store."
+        : "Free for personal and other noncommercial use. For professional use (work at a company, a paid project) get Dyncamelo from the Autodesk App Store.";
+
     /// <summary>The channel named by the first non-empty line of a marker file; anything unrecognised is <see cref="Direct"/>.</summary>
     /// <param name="markerText">The marker file's text, or null.</param>
     public static string Parse(string? markerText)

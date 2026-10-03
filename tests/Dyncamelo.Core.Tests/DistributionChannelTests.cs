@@ -22,6 +22,17 @@ public class DistributionChannelTests
     }
 
     [Fact]
+    public void TheEditionsAreNamedAndTheFreeOneSendsProfessionalUsersToTheStore()
+    {
+        Assert.Equal("Personal use", DistributionChannel.EditionName(DistributionChannel.Direct));
+        Assert.Equal("Professional", DistributionChannel.EditionName(DistributionChannel.AppStore));
+        Assert.Contains("Free for personal", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.Contains("Autodesk App Store", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.DoesNotContain("Free for personal", DistributionChannel.EditionNote(DistributionChannel.AppStore));
+        Assert.StartsWith("https://", DistributionChannel.AppStorePage);
+    }
+
+    [Fact]
     public void AFolderWithTheMarkerIsAStoreInstallAndAnyOtherFolderIsNot()
     {
         var folder = Path.Combine(Path.GetTempPath(), "dyc-dist-" + Guid.NewGuid().ToString("N"));

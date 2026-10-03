@@ -218,8 +218,31 @@ public class StartScreenUiTests : IDisposable
     }
 
     [Fact]
+    public void ADirectInstallIsThePersonalEditionWithAStoreLinkAndAStoreInstallIsTheProfessionalOne()
+    {
+        StaHost.Run(() =>
+        {
+            var vm = NewEditor();
+            var opened = new List<string>();
+            vm.UrlOpener = url => { opened.Add(url); return true; };
+
+            Assert.True(vm.IsPersonalEdition);                   // a copy nobody told otherwise is the free one
+            Assert.Equal("Personal use", vm.EditionName);
+            Assert.Contains("Autodesk App Store", vm.EditionNote);
+            vm.OpenStoreCommand.Execute(null);
+            Assert.Equal(new[] { Dyncamelo.Core.Editing.DistributionChannel.AppStorePage }, opened.ToArray());
+
+            vm.SetDistribution(Dyncamelo.Core.Editing.DistributionChannel.AppStore);
+            Assert.False(vm.IsPersonalEdition);
+            Assert.Equal("Professional", vm.EditionName);
+            Assert.DoesNotContain("get Dyncamelo from", vm.EditionNote);
+        });
+    }
+
+    [Fact]
     public void TheWebsiteAndUpdateCommandsAreInTheCatalogueForTheMenuAndThePalette()
     {
+        Assert.NotNull(Dyncamelo.Core.Editing.CommandCatalog.Find("help.store"));
         Assert.NotNull(Dyncamelo.Core.Editing.CommandCatalog.Find("help.website"));
         Assert.NotNull(Dyncamelo.Core.Editing.CommandCatalog.Find("help.update"));
         Assert.Equal("Help", Dyncamelo.Core.Editing.CommandCatalog.Find("help.website")!.Category);

@@ -242,6 +242,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | UI Guide (online) | — | Canvas |
 | BIMCamel Website | — | Canvas |
 | Get the Newest Version… | — | Canvas |
+| Autodesk App Store… | — | Canvas |
 | Keyboard & Mouse Shortcuts | `F1` | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |

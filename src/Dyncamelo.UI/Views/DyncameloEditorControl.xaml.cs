@@ -368,6 +368,7 @@ public partial class DyncameloEditorControl : UserControl, IHostKeyTarget
             case "help.guide": return _guideCommand ??= new RelayCommand(OpenGuide);
             case "help.website": return vm.OpenWebsiteCommand;
             case "help.update": return vm.OpenUpdateCommand;
+            case "help.store": return vm.OpenStoreCommand;
             case "wire.mute": return vm.MuteSelectedWiresCommand;
             case "wire.reroute": return vm.RerouteSelectedWiresCommand;
             case "wire.disconnect": return vm.DisconnectSelectedWiresCommand;
