@@ -33,7 +33,7 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 *The editor with the "Table Summary from Text" sample after a run: nodes, wires, the values under each node and a Watch Table. The same editor has a [light theme](docs/images/editor-screenshot-light.png). It docks inside Navisworks as a pane.*
 
-More pictures: [light theme](docs/images/editor-screenshot-light.png) · [quick node search](docs/images/quick-search.png) · [command palette](docs/images/command-palette.png) · [keyboard and mouse sheet](docs/images/shortcuts.png) · [settings](docs/images/settings.png) · [Script Player](docs/images/player.png)
+More pictures: [start screen](docs/images/editor-start.png) · [light theme](docs/images/editor-screenshot-light.png) · [quick node search](docs/images/quick-search.png) · [command palette](docs/images/command-palette.png) · [keyboard and mouse sheet](docs/images/shortcuts.png) · [settings](docs/images/settings.png) · [Script Player](docs/images/player.png)
 
 ---
 
