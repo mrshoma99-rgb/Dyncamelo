@@ -54,6 +54,11 @@ public sealed class PlayerFieldViewModel : ObservableObject
             {
                 OnPropertyChanged(nameof(IsChanged));
             }
+            else if (e.PropertyName == nameof(ConnectorViewModel.EditorKind))
+            {
+                OnPropertyChanged(nameof(KindLabel));
+                OnPropertyChanged(nameof(HasKindLabel));
+            }
         };
     }
 
@@ -74,6 +79,21 @@ public sealed class PlayerFieldViewModel : ObservableObject
 
     /// <summary>True when the value differs from the one saved in the script.</summary>
     public bool IsChanged => Field.IsChanged;
+
+    /// <summary>What kind of control the field is, as a short tag next to the label, so a text box, a number and a choice do not all look alike.</summary>
+    public string KindLabel => Connector.EditorKind switch
+    {
+        PortEditorKind.Number => "NUMBER",
+        PortEditorKind.Text => "TEXT",
+        PortEditorKind.Choice => "CHOICE",
+        PortEditorKind.Colour => "COLOUR",
+        PortEditorKind.Path => "FILE OR FOLDER",
+        PortEditorKind.Model => "SELECTION",
+        _ => string.Empty,
+    };
+
+    /// <summary>True when the tag is shown. An on/off switch sits on the label's row and says what it is by itself.</summary>
+    public bool HasKindLabel => KindLabel.Length > 0;
 
     /// <summary>Brings back the value saved in the script.</summary>
     public ICommand ResetCommand => Connector.ResetCommand;

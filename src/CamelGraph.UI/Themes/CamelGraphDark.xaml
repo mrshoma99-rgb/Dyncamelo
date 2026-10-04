@@ -2466,9 +2466,9 @@
          The Player has room the node editor does not: its fields are taller, and a text field wraps and grows with its text
          (up to a limit, then it scrolls) instead of cutting a long or multi-line value off at one line. Same view models and
          bindings as the node editors; only the templates differ. -->
+    <!-- The label of a number is drawn above the field, in bold like every other field's, so none inside the box. -->
     <DataTemplate x:Key="PlayerEditor.Number">
         <views:ScrubNumberBox FieldHeight="28"
-                              Label="{Binding Title}"
                               Value="{Binding NumberValue, Mode=TwoWay}"
                               Minimum="{Binding NumberMin}"
                               Maximum="{Binding NumberMax}"
