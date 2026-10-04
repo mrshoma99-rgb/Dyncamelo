@@ -120,7 +120,8 @@ public static class ClashFilterNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var resolved = new List<ModelItem>();
         ResolveSetItems(set, doc, resolved);
-        var members = new HashSet<ModelItem>(resolved);
+        // Two wrappers of one scene node are distinct objects (and every Parent access makes a new one): compare by identity.
+        var members = new HashSet<ModelItem>(resolved, ModelItemIdentityComparer.Instance);
 
         var normalizedWhich = (which ?? string.Empty).Trim().ToLowerInvariant();
         if (normalizedWhich != "either" && normalizedWhich != "both" &&

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks.Internal;
 
@@ -94,7 +95,8 @@ internal static class ClashHelpers
     /// (selections, tolerance, type) and silently ignores the children, so
     /// regrouping through it reports success while the Clash Detective tree
     /// stays untouched. Wrapped in a document transaction so a regroup is one
-    /// undo step, matching Navisworks' own grouping commands.
+    /// undo step, matching Navisworks' own grouping commands. A test inside a Clash Detective folder is replaced in its
+    /// folder (the parent overload of <c>TestsReplaceWithCopy</c>), not looked for at the top level only.
     /// </summary>
     /// <param name="doc">The document owning the clash data.</param>
     /// <param name="clash">The Clash Detective document part.</param>
@@ -105,19 +107,27 @@ internal static class ClashHelpers
     internal static ClashTest CommitTestTree(
         Document doc, DocumentClash clash, ClashTest stored, ClashTest editedCopy, string undoLabel)
     {
-        var index = IndexOfTest(clash, stored);
-        if (index < 0)
+        // The test may sit in a Clash Detective folder: replace it in the folder that holds it.
+        if (!TryLocateTest(clash, stored, out var parent, out var index))
         {
             throw new InvalidOperationException(
-                "The clash test '" + stored.DisplayName + "' is no longer in the document — it may have been " +
-                "deleted or renamed while the graph ran.");
+                "The clash test '" + stored.DisplayName + "' is no longer in the document (not at the top level and not " +
+                "inside a folder) — it may have been deleted or renamed while the graph ran.");
         }
 
         var guid = stored.Guid;
         var name = stored.DisplayName;
         using (var transaction = doc.BeginTransaction(undoLabel))
         {
-            clash.TestsData.TestsReplaceWithCopy(index, editedCopy);
+            if (parent == null)
+            {
+                clash.TestsData.TestsReplaceWithCopy(index, editedCopy);
+            }
+            else
+            {
+                clash.TestsData.TestsReplaceWithCopy(parent, index, editedCopy);
+            }
+
             transaction.Commit();
         }
 
@@ -147,26 +157,31 @@ internal static class ClashHelpers
             "Flow.Then to order it after any earlier grouping edit.", inner);
     }
 
-    /// <summary>Position of a stored test among the top-level tests, by identity (-1 when absent).</summary>
-    internal static int IndexOfTest(DocumentClash clash, ClashTest test)
+    /// <summary>
+    /// Where a stored test sits in the tests tree: the folder that holds it (null for a top-level test) and its position
+    /// there. A test is recognised by reference, then by Guid, then (when it has none) by display name, in folders as well
+    /// as at the top level.
+    /// </summary>
+    /// <param name="clash">The Clash Detective document part.</param>
+    /// <param name="test">The stored test to find.</param>
+    /// <param name="parent">The folder holding the test, or null at the top level.</param>
+    /// <param name="index">The test's position in its folder, or -1 when absent.</param>
+    /// <returns>True when the test is in the document.</returns>
+    internal static bool TryLocateTest(DocumentClash clash, ClashTest test, out GroupItem? parent, out int index)
     {
-        var tests = clash.TestsData.Tests;
-        for (int i = 0; i < tests.Count; i++)
-        {
-            if (!(tests[i] is ClashTest candidate))
-            {
-                continue;
-            }
-
-            if (ReferenceEquals(candidate, test) ||
-                (test.Guid != Guid.Empty && candidate.Guid == test.Guid) ||
-                (test.Guid == Guid.Empty && string.Equals(candidate.DisplayName, test.DisplayName, StringComparison.Ordinal)))
-            {
-                return i;
-            }
-        }
-
-        return -1;
+        var guid = test.Guid;
+        var name = test.DisplayName;
+        var found = SavedTreeLocator.TryFind<SavedItem>(
+            clash.TestsData.Tests,
+            item => item is ClashTest candidate &&
+                    (ReferenceEquals(candidate, test) ||
+                     (guid != Guid.Empty && candidate.Guid == guid) ||
+                     (guid == Guid.Empty && string.Equals(candidate.DisplayName, name, StringComparison.Ordinal))),
+            item => item is GroupItem folder && !(item is ClashTest) ? folder.Children : null,
+            out var holder,
+            out index);
+        parent = holder as GroupItem;
+        return found;
     }
 
     /// <summary>

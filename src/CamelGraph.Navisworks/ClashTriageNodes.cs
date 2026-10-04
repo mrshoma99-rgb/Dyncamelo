@@ -542,7 +542,7 @@ public static class ClashTriageNodes
         var resultList = MaterializeResults(results);
         var doc = NavisworksContext.ResolveDocument(document);
         var items = new List<ModelItem>();
-        var seen = new HashSet<ModelItem>();
+        var seen = new HashSet<ModelItem>(ModelItemIdentityComparer.Instance);
         foreach (var result in resultList)
         {
             AddItem(result.Item1, items, seen);
@@ -611,7 +611,7 @@ public static class ClashTriageNodes
     private static List<ModelItem> ResolveGeometry(List<ModelItem> items)
     {
         var resolved = new List<ModelItem>(items.Count);
-        var seen = new HashSet<ModelItem>();
+        var seen = new HashSet<ModelItem>(ModelItemIdentityComparer.Instance);
         foreach (var item in items)
         {
             if (item.HasGeometry)
