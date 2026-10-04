@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 580,
  "categories": [
   {
    "name": "Annotation",
@@ -136,7 +136,7 @@
   },
   {
    "name": "Navisworks.TimeLiner",
-   "count": 10
+   "count": 11
   },
   {
    "name": "Navisworks.Transform",
@@ -11068,7 +11068,7 @@
    "id": "CamelGraph.Navisworks.SectionBoxNodes.SetSectionBox@object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.",
+   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off. It works on Navisworks 2024 only: on 2025 and 2026 the node stops with a message, because the section-box call differs there. It acts on the view like the Camera nodes (hence its place under Camera): set the box first, then save the view with Viewpoint.Save.",
    "tags": [
     "section",
     "box",
@@ -11076,7 +11076,9 @@
     "sectioning",
     "viewpoint",
     "crop",
-    "isolate"
+    "isolate",
+    "camera",
+    "camera section"
    ],
    "inputs": [
     {
@@ -17581,10 +17583,10 @@
   },
   {
    "name": "TimeLiner.AutoAttachByProperty",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks.",
+   "description": "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name (or, with matchOn \"Display id\", the task's display id) and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks. The search buttons next to category and property list what the elements selected in Navisworks right now carry.",
    "tags": [
     "timeliner",
     "auto",
@@ -17593,7 +17595,9 @@
     "4d",
     "link",
     "schedule",
-    "property"
+    "property",
+    "timelinertask",
+    "activity id"
    ],
    "inputs": [
     {
@@ -17605,6 +17609,12 @@
      "name": "property",
      "type": "string",
      "description": "Property display name (e.g. \"Task Name\"). Internal names do not match."
+    },
+    {
+     "name": "matchOn",
+     "type": "string",
+     "description": "What the property value is compared with: the task's \"Name\" (default) or its \"Display id\" (the Activity ID column of an imported schedule).",
+     "default": "\"Name\""
     },
     {
      "name": "document",
@@ -17629,18 +17639,26 @@
   },
   {
    "name": "TimeLiner.Tasks",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Tasks@Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Tasks@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "All TimeLiner tasks in a document, with subtasks flattened into one list.",
+   "description": "All TimeLiner tasks in a document, with subtasks flattened into one list, read again on every run. Each task comes before its subtasks (\"parents first\"). Navisworks replaces a task's subtasks when the task itself is edited, so when you edit or delete a whole list that holds tasks together with their subtasks (TimelinerTask.SetProgress, SetDates, SetActual, Delete over the list), set order to \"children first\" in the Advanced panel: the subtasks are then handled before their task and none is already replaced when its turn comes.",
    "tags": [
     "timeliner",
     "tasks",
     "schedule",
     "4d",
-    "all"
+    "all",
+    "timelinertask",
+    "timeliner task"
    ],
    "inputs": [
+    {
+     "name": "order",
+     "type": "string",
+     "description": "\"parents first\" (default) lists each task before its subtasks; \"children first\" lists the subtasks before their task.",
+     "default": "\"parents first\""
+    },
     {
      "name": "document",
      "type": "Document",
@@ -17659,10 +17677,10 @@
   },
   {
    "name": "TimelinerTask.AttachSet",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.AttachSet@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.AttachSet@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation.",
+   "description": "Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation. Give the set itself, its name, or its folder path and name; a list of tasks and a list of sets link each task to the set at the same position.",
    "tags": [
     "timeliner",
     "task",
@@ -17678,9 +17696,9 @@
      "description": "The stored TimeLiner task (from TimeLiner.Tasks or TimelinerTask.Create)."
     },
     {
-     "name": "setName",
-     "type": "string",
-     "description": "The saved set's display name (folders are searched too)."
+     "name": "set",
+     "type": "any",
+     "description": "The saved selection or search set: the set itself (SelectionSet.ByName, SelectionSets.All), its display name or its folder path and name."
     },
     {
      "name": "document",
@@ -17693,30 +17711,71 @@
     {
      "name": "task",
      "type": "TimelinerTask",
-     "description": "The updated stored task. Lace over task/set-name lists for bulk 4D linking."
+     "description": "The updated stored task. Lace over task/set lists for bulk 4D linking."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "TimelinerTask.ByName",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.ByName@string,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.TimeLiner",
+   "description": "Finds a TimeLiner task by its name (subtasks too). When several tasks share the name the first one in the list is used and the node shows a warning; give the path through the parent tasks (\"Structure/Level 2\") to choose one exactly. Fails when there is no such task.",
+   "tags": [
+    "timeliner",
+    "task",
+    "byname",
+    "find",
+    "lookup",
+    "schedule",
+    "4d",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The task's name, or its path through the parent tasks such as \"Structure/Level 2\"."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The stored task."
     }
    ],
    "returns": ""
   },
   {
    "name": "TimelinerTask.Create",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Create@string,System.DateTime,System.DateTime,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Create@string,System.DateTime,System.DateTime,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Creates a top-level TimeLiner task with planned dates and optionally attaches model items.",
+   "description": "Creates a TimeLiner task with planned dates and optionally attaches model items. Leave parent empty for a top-level task, or give the parent task (TimelinerTask.ByName, or its name or path) to build a schedule hierarchy. A task of the same name under the same parent is updated instead of added again, so running the graph twice does not duplicate the schedule; set onExisting (Advanced) to \"add\" to always add one or to \"error\" to stop.",
    "tags": [
     "timeliner",
     "task",
     "create",
     "new",
     "schedule",
-    "4d"
+    "4d",
+    "subtask",
+    "parent",
+    "hierarchy"
    ],
    "inputs": [
     {
      "name": "name",
      "type": "string",
-     "description": "Display name for the new task."
+     "description": "Display name for the task."
     },
     {
      "name": "plannedStart",
@@ -17737,8 +17796,20 @@
     {
      "name": "taskType",
      "type": "string",
-     "description": "Simulation task type name: \"Construct\", \"Demolish\" or \"Temporary\".",
+     "description": "Simulation task type: Construct, Demolish or Temporary (a custom task type of the document can be wired in as text).",
      "default": "\"Construct\""
+    },
+    {
+     "name": "parent",
+     "type": "any",
+     "description": "The task to create this one under: a task, its name or its path such as \"Structure/Level 2\". Empty creates a top-level task.",
+     "default": "null"
+    },
+    {
+     "name": "onExisting",
+     "type": "string",
+     "description": "What to do when the same parent already has a task of this name: \"update\" changes that task (dates, type, items), \"add\" always adds another, \"error\" stops.",
+     "default": "\"update\""
     },
     {
      "name": "document",
@@ -17761,7 +17832,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.Delete@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document, so a clean-up step can run twice.",
+   "description": "Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document or was already removed by an earlier delete in the same run, so a clean-up step can run twice and a list holding a task and its subtasks can be deleted whole (set TimeLiner.Tasks to order \"children first\" for that).",
    "tags": [
     "timeliner",
     "task",
@@ -17798,13 +17869,16 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Info@Autodesk.Navisworks.Api.Timeliner.TimelinerTask",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Name, id, planned and actual dates, task type and progress of a TimeLiner task.",
+   "description": "Name, id, planned and actual dates, task type and progress of a TimeLiner task, the name of its parent task (empty for a top-level task) and its depth (0 for a top-level task, 1 for a subtask ...).",
    "tags": [
     "timeliner",
     "task",
     "info",
     "dates",
-    "schedule"
+    "schedule",
+    "parent",
+    "depth",
+    "hierarchy"
    ],
    "inputs": [
     {
@@ -17853,9 +17927,19 @@
      "name": "progress",
      "type": "number",
      "description": ""
+    },
+    {
+     "name": "parent",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "depth",
+     "type": "integer",
+     "description": ""
     }
    ],
-   "returns": "Name, id, planned/actual dates, task type and progress."
+   "returns": "Name, id, planned/actual dates, task type, progress, the parent task's name and the depth in the hierarchy."
   },
   {
    "name": "TimelinerTask.Items",
@@ -17894,10 +17978,10 @@
   },
   {
    "name": "TimelinerTask.SetActual",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime?,System.DateTime?,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Sets a task's ACTUAL start and end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan.",
+   "description": "Sets a task's ACTUAL start and/or end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan. A date you leave unwired is kept as it is, so \"started today, end not known yet\" is just the start. With neither date the node changes nothing and shows a warning. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",
@@ -17918,12 +18002,14 @@
     {
      "name": "start",
      "type": "datetime",
-     "description": "Actual start date."
+     "description": "Actual start date; leave it unwired to keep the task's actual start as it is.",
+     "default": "null"
     },
     {
      "name": "end",
      "type": "datetime",
-     "description": "Actual end date."
+     "description": "Actual end date; leave it unwired to keep the task's actual end as it is (a task that has started and not finished).",
+     "default": "null"
     },
     {
      "name": "document",
@@ -17946,7 +18032,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.SetDates@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Updates a task's planned start/end dates in place — bulk schedule edits without a re-import.",
+   "description": "Updates a task's planned start/end dates in place — bulk schedule edits without a re-import. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",
@@ -17992,7 +18078,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetProgress@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,double,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages.",
+   "description": "Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",

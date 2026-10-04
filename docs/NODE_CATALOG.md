@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**580 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -39,7 +39,7 @@
 | [Navisworks.Search](#navisworkssearch) | 5 |
 | [Navisworks.Selection](#navisworksselection) | 9 |
 | [Navisworks.SelectionSets](#navisworksselectionsets) | 13 |
-| [Navisworks.TimeLiner](#navisworkstimeliner) | 10 |
+| [Navisworks.TimeLiner](#navisworkstimeliner) | 11 |
 | [Navisworks.Transform](#navisworkstransform) | 7 |
 | [Navisworks.Units](#navisworksunits) | 4 |
 | [Navisworks.Viewpoints](#navisworksviewpoints) | 15 |
@@ -669,14 +669,15 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `TimeLiner.AutoAttachByProperty` | category, property, document? | attachedCount, unmatchedTasks | For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them |
-| `TimeLiner.Tasks` | document? | tasks | All TimeLiner tasks in a document, with subtasks flattened into one list |
-| `TimelinerTask.AttachSet` | task, setName, document? | task | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) |
-| `TimelinerTask.Create` | name, plannedStart, plannedEnd, items?, taskType?, document? | task | Creates a top-level TimeLiner task with planned dates and optionally attaches model items |
+| `TimeLiner.AutoAttachByProperty` | category, property, matchOn?, document? | attachedCount, unmatchedTasks | For every TimeLiner task (subtasks included), finds all items whose property value equals the task name (or, with matchOn "Display id", the task's display id) and attach… |
+| `TimeLiner.Tasks` | order?, document? | tasks | All TimeLiner tasks in a document, with subtasks flattened into one list, read again on every run |
+| `TimelinerTask.AttachSet` | task, set, document? | task | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) |
+| `TimelinerTask.ByName` | name, document? | task | Finds a TimeLiner task by its name (subtasks too) |
+| `TimelinerTask.Create` | name, plannedStart, plannedEnd, items?, taskType?, parent?, onExisting?, document? | task | Creates a TimeLiner task with planned dates and optionally attaches model items |
 | `TimelinerTask.Delete` | task, document? | deleted | Deletes a TimeLiner task together with its subtasks |
-| `TimelinerTask.Info` | task | name, displayId, plannedStart, plannedEnd, actualStart, actualEnd, taskType, progress | Name, id, planned and actual dates, task type and progress of a TimeLiner task |
+| `TimelinerTask.Info` | task | name, displayId, plannedStart, plannedEnd, actualStart, actualEnd, taskType, progress, parent, depth | Name, id, planned and actual dates, task type and progress of a TimeLiner task, the name of its parent task (empty for a top-level task) and its depth (0 for a top-level… |
 | `TimelinerTask.Items` | task, document? | items | The model items attached to a TimeLiner task |
-| `TimelinerTask.SetActual` | task, start, end, document? | task | Sets a task's ACTUAL start and end dates (the planned dates are untouched |
+| `TimelinerTask.SetActual` | task, start?, end?, document? | task | Sets a task's ACTUAL start and/or end dates (the planned dates are untouched |
 | `TimelinerTask.SetDates` | task, plannedStart, plannedEnd, document? | task | Updates a task's planned start/end dates in place |
 | `TimelinerTask.SetProgress` | task, percent, document? | task | Sets a task's percent complete (0-100 |
 

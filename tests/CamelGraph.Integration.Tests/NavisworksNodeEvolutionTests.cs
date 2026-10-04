@@ -55,6 +55,26 @@ public class NavisworksNodeEvolutionTests
         yield return new object[] { "CamelGraph.Navisworks.ViewpointNodes.Delete@string," + doc, "SavedViewpoint.Delete", "viewpoint" };
         yield return new object[] { "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int," + doc, "Export.ViewpointImage", "viewpoint" };
         yield return new object[] { "CamelGraph.Navisworks.AuditNodes.DuplicateItems@" + items + ",double," + doc, "Audit.DuplicateItems", "units" };
+        yield return new object[] { "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Tasks@" + doc, "TimeLiner.Tasks", "order" };
+        yield return new object[]
+        {
+            "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Create@string,System.DateTime,System.DateTime," + items + ",string," + doc,
+            "TimelinerTask.Create",
+            "parent",
+        };
+        yield return new object[]
+        {
+            "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime," + doc,
+            "TimelinerTask.SetActual",
+            "start",
+        };
+        yield return new object[]
+        {
+            "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.AttachSet@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,string," + doc,
+            "TimelinerTask.AttachSet",
+            "set",
+        };
+        yield return new object[] { "CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string," + doc, "TimeLiner.AutoAttachByProperty", "matchOn" };
     }
 
     [Theory]
@@ -67,7 +87,7 @@ public class NavisworksNodeEvolutionTests
 
         // The input the node gained is optional, so the old file (which cannot feed it) is complete.
         var added = definition.Inputs.Single(i => i.Name == addedInput);
-        Assert.True(added.HasDefault || addedInput == "viewpoint", addedInput + " must be optional.");
+        Assert.True(added.HasDefault || addedInput == "viewpoint" || addedInput == "set", addedInput + " must be optional (or be a renamed input).");
 
         LoadAsSavedUnder(definition, earlierId);
     }
