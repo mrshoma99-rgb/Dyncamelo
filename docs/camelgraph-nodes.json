@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 574,
+ "count": 575,
  "categories": [
   {
    "name": "Annotation",
@@ -92,7 +92,7 @@
   },
   {
    "name": "Navisworks.Comments",
-   "count": 3
+   "count": 4
   },
   {
    "name": "Navisworks.Document",
@@ -13153,7 +13153,7 @@
    "id": "CamelGraph.Navisworks.SavedItemCommentNodes.AddComment@Autodesk.Navisworks.Api.SavedItem,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Comments",
-   "description": "Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk.",
+   "description": "Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk. Every run adds another comment: running the graph twice leaves two identical comments (SavedItem.ClearComments empties the thread first, SavedItem.SetCommentStatus changes the status of one that is already there).",
    "tags": [
     "comment",
     "add",
@@ -13207,7 +13207,7 @@
    "id": "CamelGraph.Navisworks.SavedItemCommentNodes.ClearComments@Autodesk.Navisworks.Api.SavedItem,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Comments",
-   "description": "Deletes every comment on a saved viewpoint, selection/search set or folder (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment.",
+   "description": "Deletes every comment on a saved viewpoint, selection/search set, folder, clash result or result group (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment. A clash test itself has no comment thread here.",
    "tags": [
     "comment",
     "clear",
@@ -13220,7 +13220,7 @@
     {
      "name": "item",
      "type": "SavedItem",
-     "description": "The saved item (a viewpoint, selection/search set, or one of their folders)."
+     "description": "The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group)."
     },
     {
      "name": "document",
@@ -13282,6 +13282,58 @@
     }
    ],
    "returns": "Index-aligned comment bodies, authors, statuses and creation dates."
+  },
+  {
+   "name": "SavedItem.SetCommentStatus",
+   "id": "CamelGraph.Navisworks.SavedItemCommentNodes.SetCommentStatus@Autodesk.Navisworks.Api.SavedItem,string,int,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Comments",
+   "description": "Changes the status (New, Active, Approved, Resolved) of one comment, or of every comment, on a saved viewpoint, selection/search set, folder, clash result or result group, keeping its text, its author and its place in the thread — close out review comments without clearing the thread. Navisworks cannot edit a comment in place, so a changed comment is replaced by a copy: its date becomes the time of the change. Comments that already have the status are left alone. Wire a list of items to change several threads.",
+   "tags": [
+    "comment",
+    "status",
+    "resolve",
+    "resolved",
+    "approve",
+    "approved",
+    "close",
+    "review",
+    "active",
+    "new",
+    "set"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "SavedItem",
+     "description": "The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group). Wire a list to change several items."
+    },
+    {
+     "name": "status",
+     "type": "string",
+     "description": "\"New\", \"Active\", \"Approved\" or \"Resolved\"."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The 0-based position of the comment in the thread (0 is the first); -1 changes every comment.",
+     "default": "-1"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "SavedItem",
+     "description": "The item (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
   },
   {
    "name": "Application.Version",

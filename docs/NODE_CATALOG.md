@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**574 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**575 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -28,7 +28,7 @@
 | [Navisworks.Clash.Report](#navisworksclashreport) | 3 |
 | [Navisworks.Clash.Results](#navisworksclashresults) | 14 |
 | [Navisworks.Clash.Tests](#navisworksclashtests) | 16 |
-| [Navisworks.Comments](#navisworkscomments) | 3 |
+| [Navisworks.Comments](#navisworkscomments) | 4 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
 | [Navisworks.Export](#navisworksexport) | 14 |
 | [Navisworks.Grids](#navisworksgrids) | 3 |
@@ -514,8 +514,9 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `SavedItem.AddComment` | item, body, status?, author?, document? | item | Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group |
-| `SavedItem.ClearComments` | item, document? | item | Deletes every comment on a saved viewpoint, selection/search set or folder (replace-all with an empty thread) |
+| `SavedItem.ClearComments` | item, document? | item | Deletes every comment on a saved viewpoint, selection/search set, folder, clash result or result group (replace-all with an empty thread) |
 | `SavedItem.Comments` | item | bodies, authors, statuses, dates | The comment thread on any saved item (viewpoint, set, folder, clash test): bodies, authors, statuses and creation dates, index-aligned |
+| `SavedItem.SetCommentStatus` | item, status, index?, document? | item | Changes the status (New, Active, Approved, Resolved) of one comment, or of every comment, on a saved viewpoint, selection/search set, folder, clash result or result grou… |
 
 ## Navisworks.Document
 

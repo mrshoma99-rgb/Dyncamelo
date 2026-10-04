@@ -506,6 +506,80 @@ public class NavisworksModelAuditTests
         Assert.Contains("ModelItem.GetTransform.origin", Def("ModelItem.ReferencePoints").Description);
     }
 
+    // ================================================================= NVM-32, NVM-37: comments and markup
+
+    [Fact]
+    public void SetCommentStatusChangesTheStatusOfOneOrAllComments()
+    {
+        var node = Def("SavedItem.SetCommentStatus");
+
+        Assert.Equal(NodeFunction.Modify, node.Function);
+        Assert.Equal(new[] { "item", "status", "index", "document" }, node.Inputs.Select(i => i.Name));
+        Assert.Equal(new[] { "New", "Active", "Approved", "Resolved" }, node.Inputs[1].Choices);
+        Assert.Equal(-1, node.Inputs[2].DefaultValue);
+        Assert.Contains("resolve", node.SearchTags);
+        Assert.Contains("keeping its text, its author and its place in the thread", node.Description);
+        Assert.Contains("its date becomes the time of the change", node.Description);
+    }
+
+    [Fact]
+    public void SetCommentStatusRewritesTheThreadOnTheOwningPartOrTheClashTests()
+    {
+        var text = FileText("SavedItemCommentNodes.cs");
+        var body = Body(text, "public static SavedItem SetCommentStatus(");
+
+        Assert.Contains("TestsEditResultComments(clashResult, clashEdited)", body);
+        Assert.Contains("doc.SavedViewpoints.EditComments(stored, edited)", body);
+        Assert.Contains("doc.SelectionSets.EditComments(stored, edited)", body);
+        Assert.Contains("CommentSelection.Positions(", Body(text, "private static CommentCollection Retag("));
+    }
+
+    [Fact]
+    public void ClearCommentsAlsoWorksOnAClashResultAndNoLongerSendsPeopleToDeprecatedNodes()
+    {
+        var text = FileText("SavedItemCommentNodes.cs");
+
+        Assert.Contains("IClashResult clashResult", Body(text, "public static SavedItem ClearComments("));
+        Assert.Contains("TestsEditResultComments(clashResult, new CommentCollection())", Body(text, "public static SavedItem ClearComments("));
+        Assert.DoesNotContain("use the ClashResult comment nodes", text);
+        Assert.DoesNotContain("ClashResult comment nodes instead", text);
+        Assert.Contains("clash result or result group", Def("SavedItem.ClearComments").Description);
+    }
+
+    [Fact]
+    public void AddCommentSaysThatEveryRunAddsAnotherComment()
+    {
+        Assert.Contains("Every run adds another comment", Def("SavedItem.AddComment").Description);
+    }
+
+    [Theory]
+    [InlineData("SavedItem.AddComment")]
+    [InlineData("SavedItem.ClearComments")]
+    [InlineData("SavedItem.SetCommentStatus")]
+    [InlineData("Markup.AddText")]
+    [InlineData("Markup.AddShape")]
+    [InlineData("Markup.AddCloud")]
+    [InlineData("Markup.AddNumberTag")]
+    [InlineData("Markup.Clear")]
+    [InlineData("Markup.AddLine")]
+    [InlineData("Markup.AddArrow")]
+    [InlineData("Markup.AddEllipse")]
+    public void CommentAndMarkupNodesThatEditTheDocumentSayTheyChangeTheModel(string node)
+    {
+        Assert.Contains("ChangesModel", Method(node).Attribute("NodeEffects")!.Positional[0]);
+    }
+
+    [Fact]
+    public void TheRetiredMarkupNodesStillSitNextToTheirNodeNameForTheRetirementTest()
+    {
+        foreach (var node in new[] { "Markup.AddLine", "Markup.AddArrow", "Markup.AddEllipse" })
+        {
+            Assert.Matches(
+                new Regex("\\[NodeName\\(\"" + Regex.Escape(node) + "\"\\)\\]\\s*\\[NodeDeprecated\\(\"Markup.AddShape\"\\)\\]"),
+                FileText("RedlineNodes.cs"));
+        }
+    }
+
     // ----------------------------------------------------------------- helpers
 
     /// <summary>The text of a method from the line with its signature to its closing brace.</summary>

@@ -35,6 +35,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddText")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List. Wire a list of viewpoints and every one gets the text.")]
     [NodeSearchTags("markup", "redline", "text", "annotate", "label", "viewpoint", "tag")]
     [return: NodeName("viewpoint")]
@@ -68,6 +69,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the shape.")]
     [NodeSearchTags("markup", "redline", "line", "arrow", "ellipse", "circle", "shape", "draw", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -108,6 +110,7 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddLine")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "line", "draw", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -137,6 +140,7 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddArrow")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "arrow", "pointer", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -166,6 +170,7 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddEllipse")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "ellipse", "circle", "ring", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -191,6 +196,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddCloud")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list. Wire a list of viewpoints and every one gets the cloud (the points input stays one outline).")]
     [NodeSearchTags("markup", "redline", "cloud", "revision", "revcloud", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -236,6 +242,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddNumberTag")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the tag.")]
     [NodeSearchTags("markup", "redline", "tag", "number", "bubble", "comment", "viewpoint")]
     [return: NodeName("viewpoint")]
@@ -327,6 +334,7 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.Clear")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API). Wire a list of viewpoints and every one is cleared.")]
     [NodeSearchTags("markup", "redline", "clear", "delete", "remove", "viewpoint")]
     [return: NodeName("viewpoint")]
