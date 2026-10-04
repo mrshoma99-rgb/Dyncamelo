@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**581 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -21,8 +21,8 @@
 | [Logic](#logic) | 18 |
 | [Math](#math) | 37 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
-| [Navisworks.Appearance](#navisworksappearance) | 13 |
-| [Navisworks.Camera](#navisworkscamera) | 7 |
+| [Navisworks.Appearance](#navisworksappearance) | 14 |
+| [Navisworks.Camera](#navisworkscamera) | 9 |
 | [Navisworks.Clash.Filter](#navisworksclashfilter) | 7 |
 | [Navisworks.Clash.Group](#navisworksclashgroup) | 9 |
 | [Navisworks.Clash.Report](#navisworksclashreport) | 3 |
@@ -42,9 +42,9 @@
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 10 |
 | [Navisworks.Transform](#navisworkstransform) | 7 |
 | [Navisworks.Units](#navisworksunits) | 4 |
-| [Navisworks.Viewpoints](#navisworksviewpoints) | 17 |
+| [Navisworks.Viewpoints](#navisworksviewpoints) | 15 |
 | [Navisworks.Viewpoints.Files](#navisworksviewpointsfiles) | 2 |
-| [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 5 |
+| [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 6 |
 | [Report](#report) | 2 |
 | [String](#string) | 36 |
 | [System](#system) | 5 |
@@ -410,13 +410,14 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Appearance.ColorByValues` | items, values, palette?, document? | items, legend | One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs t… |
+| `Appearance.ColorByValuesTemporary` | items, values, palette?, document? | items, legend | Like Appearance.ColorByValues, but the colours are TEMPORARY (viewpoint-scoped) overrides: nothing is written into the file, Viewpoint.Save with bakeOverrides on keeps t… |
 | `Appearance.Focus` | items, otherTransparency?, resetFirst?, document? | items | Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparenc… |
 | `Appearance.Hide` | items, document? | items | Hides model items in the viewport |
 | `Appearance.Isolate` | items, document? | items | Shows only these items and hides everything else (undo with Appearance.ShowAll) |
 | `Appearance.OverrideColor` | items, color, document? | items | Overrides the color of model items (a permanent override: saved with the file and undoable) |
 | `Appearance.OverrideColorTemporary` | items, color, document? | items | Applies a TEMPORARY (viewpoint-scoped) color override |
-| `Appearance.OverrideTransparency` | items, transparency, document? | items | Overrides the transparency of model items (0 = opaque, 1 = invisible) |
-| `Appearance.OverrideTransparencyTemporary` | items, transparency, document? | items | Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) |
+| `Appearance.OverrideTransparency` | items, transparency, document? | items | Overrides the transparency of model items, from 0 (opaque) to 1 (invisible) |
+| `Appearance.OverrideTransparencyTemporary` | items, transparency, document? | items | Applies a TEMPORARY (viewpoint-scoped) transparency override (from 0 = opaque to 1 = invisible |
 | `Appearance.Reset` | items, document? | items | Removes permanent color and transparency overrides from model items, restoring their original materials |
 | `Appearance.ResetAll` | document? | done | Removes every permanent color/transparency override in the model |
 | `Appearance.ResetTemporary` | after?, document? | done, after | Clears every TEMPORARY color/transparency override in the model |
@@ -427,12 +428,14 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Camera.Current` | document? | position, focalDistance, heightField | The current camera position, focal distance and vertical field height |
-| `Camera.LookAt` | eye, target, document? | done | Moves the camera to 'eye' looking at 'target' (up stays +Z) |
-| `Camera.SetFieldOfView` | degrees, document? | done | Sets the camera's vertical field of view in degrees (perspective camera) |
-| `Camera.SetProjection` | perspective, document? | done | Switches the camera between perspective (true) and orthographic (false) projection |
-| `Camera.SetStandardView` | view?, items?, paddingFactor?, document? | viewpoint | Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items |
-| `Camera.ZoomToItems` | items, paddingFactor?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
+| `Camera.Current` | after?, document? | position, focalDistance, heightField | The current camera position, focal distance and vertical field height, read again on every run |
+| `Camera.LookAt` | eye, target, after?, document? | done | Moves the camera to 'eye' looking at 'target' (up stays +Z) |
+| `Camera.Restore` | viewpoint, after?, document? | done | Puts a camera back on the current view: the viewpoint kept by Camera.Save, or a saved viewpoint |
+| `Camera.Save` | after?, document? | viewpoint | Keeps a copy of the current camera inside the graph (nothing is added to the Saved Viewpoints window |
+| `Camera.SetFieldOfView` | degrees, after?, document? | done | Sets the camera's vertical field of view in degrees (perspective camera) |
+| `Camera.SetProjection` | perspective, after?, document? | done | Switches the camera between perspective (true) and orthographic (false) projection |
+| `Camera.SetStandardView` | view?, items?, paddingFactor?, after?, document? | viewpoint | Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items |
+| `Camera.ZoomToItems` | items, paddingFactor?, after?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
 | `Viewpoint.SetSectionBox` | boundingBox, enabled?, document? | done | Applies a section box around a region on the current view (Sectioning > Box, scriptable) |
 
 ## Navisworks.Clash.Filter
@@ -704,23 +707,21 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `SavedViewpoint.Apply` | viewpoint, document? | viewpoint | Makes a saved viewpoint the current view (camera, plus any saved overrides) |
+| `SavedViewpoint.Apply` | viewpoint, after?, document? | viewpoint | Makes a saved viewpoint the current view (camera, plus any saved overrides) |
 | `SavedViewpoint.ByName` | name, document? | viewpoint | Finds a saved viewpoint by its display name (searches folders too) |
 | `SavedViewpoint.CopyOverrides` | fromViewpoint, toViewpoint, document? | viewpoint | Copies the appearance the way one saved view looks |
-| `SavedViewpoint.Delete` | name, document? | deleted | Deletes a saved viewpoint by name (searches folders too) |
+| `SavedViewpoint.Delete` | viewpoint, document? | deleted | Deletes a saved viewpoint: wire the viewpoint itself (so exactly that one goes, whatever its folder), or its name, or its folder path and name ("Reviews/Week 12/Level 1") |
 | `SavedViewpoint.Duplicate` | viewpoint, newName?, document? | viewpoint | Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides |
 | `SavedViewpoint.Folder` | viewpoint, document? | folderPath, folder | The folder containing a saved viewpoint: its path as "A/B" ("" for top-level viewpoints) and the folder itself |
 | `SavedViewpoint.Info` | viewpoint, document? | name, folder, hasSection, hasOverrides, commentCount, position, lookAt | Reads a saved viewpoint: its name, folder path ("A/B", "" at the top level), whether it carries a section box, whether it has baked appearance or visibility overrides, i… |
 | `SavedViewpoint.MoveToFolder` | viewpoint, folder, document? | viewpoint | Moves a saved viewpoint into a folder (appended at the end) |
 | `SavedViewpoint.Name` | viewpoint | name | The display name of a saved viewpoint |
-| `SavedViewpoint.Rename` | viewpoint, newName, document? | viewpoint | Renames a saved viewpoint (accepts the viewpoint or its current name |
-| `SavedViewpoint.Update` | viewpoint, document? | viewpoint | Re-captures the current view into an existing saved viewpoint |
-| `Viewpoint.SaveCurrent` | name, document? | viewpoint | Saves the current view as a new saved viewpoint |
-| `Viewpoint.SaveWithOverrides` | name, folderName?, document? | viewpoint | Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) |
-| `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
-| `ViewpointPackageFile.Parse` | json | result | Parses a package from JSON with node-friendly errors: malformed text and files written by a newer CamelGraph both fail with a message that says what to do, never a raw s… |
+| `SavedViewpoint.Rename` | viewpoint, newName, document? | viewpoint | Renames a saved viewpoint (accepts the viewpoint, its current name or a folder path and name such as "Reviews/Week 12/Level 1" |
+| `SavedViewpoint.Update` | viewpoint, after?, document? | viewpoint | Re-captures the current view into an existing saved viewpoint |
+| `Viewpoint.Save` | name, folder?, bakeOverrides?, after?, document? | viewpoint | Saves the current view as a saved viewpoint in the Saved Viewpoints window |
+| `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, after?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
 | `Viewpoints.All` | document? | viewpoints | All saved viewpoints in a document, including those inside folders |
-| `Viewpoints.FromClashResults` | results, folderName?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result |
+| `Viewpoints.FromClashResults` | results, folderName?, nameFormat?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash |
 
 ## Navisworks.Viewpoints.Files
 
@@ -734,10 +735,11 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Viewpoints.CreateFolder` | name, parentFolder?, document? | folder | Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder |
+| `Viewpoints.DeleteFolder` | folder, contentsOnly?, document? | deleted, viewpointCount | Deletes a Saved Viewpoints folder together with every viewpoint and sub-folder in it, or with contentsOnly on empties the folder and keeps it |
 | `Viewpoints.DuplicateFolder` | folder, newName, document? | folder | Duplicates a Saved Viewpoints folder |
 | `Viewpoints.InFolder` | folder?, recursive?, document? | viewpoints, names, subfolders, count | All saved viewpoints inside a folder, in Saved Viewpoints window order |
-| `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder or its current name |
-| `Viewpoints.SortFolder` | folder?, recursive?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) |
+| `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder, its current name or a path such as "Reviews/Week 12" |
+| `Viewpoints.SortFolder` | folder?, recursive?, numeric?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z), ignoring case |
 
 ## Report
 
@@ -882,4 +884,7 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Search.ByPropertyContains` | Search.ByProperty |
 | `Search.ByPropertyValue` | Search.ByProperty |
 | `Search.ByPropertyWildcard` | Search.ByProperty |
+| `Viewpoint.SaveCurrent` | Viewpoint.Save |
+| `Viewpoint.SaveWithOverrides` | Viewpoint.Save |
+| `ViewpointPackageFile.Parse` | Viewpoints.ImportFile |
 

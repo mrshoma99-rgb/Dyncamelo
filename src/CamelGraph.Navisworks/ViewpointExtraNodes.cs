@@ -22,6 +22,7 @@ public static class ViewpointExtraNodes
     /// <returns>Name, folder path, section / overrides flags, comment count, camera position and look-at point.</returns>
     [NodeName("SavedViewpoint.Info")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [LiveState]
     [NodeDescription(
         "Reads a saved viewpoint: its name, folder path (\"A/B\", \"\" at the top level), whether it carries a section box, " +
         "whether it has baked appearance or visibility overrides, its comment count and its camera — the position and the " +
@@ -67,17 +68,21 @@ public static class ViewpointExtraNodes
 
     /// <summary>Replaces a saved viewpoint's camera with the current view.</summary>
     /// <param name="viewpoint">The saved viewpoint to refresh (or wire it by name through SavedViewpoint.ByName).</param>
+    /// <param name="after">Anything at all, only to run this node after the node it comes from: the view is read when this node runs, and the engine does not order nodes that share no wire.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The updated stored viewpoint, still in its folder and position with its name.</returns>
     [NodeName("SavedViewpoint.Update")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ViewpointExtraNodes.Update@Autodesk.Navisworks.Api.SavedViewpoint,Autodesk.Navisworks.Api.Document")]
     [NodeDescription(
         "Re-captures the current view into an existing saved viewpoint — the UI's \"Update\" — keeping its name, folder and " +
-        "place in the list. Set the camera first (Camera.LookAt, Camera.ZoomToItems, Camera.SetStandardView), then update " +
-        "the view; compare Viewpoint.SaveCurrent, which replaces a view by name with a new one.")]
+        "place in the list. Set the camera first (Camera.LookAt, Camera.ZoomToItems, Camera.SetStandardView) and wire the " +
+        "output of the last of those nodes into 'after', because the view is read when this node runs. Compare Viewpoint.Save, " +
+        "which replaces a view by name with a new one.")]
     [NodeSearchTags("viewpoint", "view", "update", "refresh", "recapture", "replace", "camera", "current")]
     [return: NodeName("viewpoint")]
-    public static SavedViewpoint Update(SavedViewpoint viewpoint, Document? document = null)
+    public static SavedViewpoint Update(SavedViewpoint viewpoint, object? after = null, Document? document = null)
     {
         if (viewpoint == null)
         {
@@ -121,16 +126,19 @@ public static class ViewpointExtraNodes
     /// <param name="view">One of top, bottom, front, back, left, right, iso.</param>
     /// <param name="items">The items to frame (leave unwired to frame the whole model).</param>
     /// <param name="paddingFactor">Space to leave around the framed box (1 = tight fit).</param>
+    /// <param name="after">Anything at all, only to run this node after the node it comes from: the camera moves when this node runs, and the engine does not order nodes that share no wire.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.SaveCurrent).</returns>
+    /// <returns>A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.Save).</returns>
     [NodeName("Camera.SetStandardView")]
     [NodeCategory("Navisworks.Camera")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeAliases("CamelGraph.Navisworks.ViewpointExtraNodes.SetStandardView@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document")]
     [NodeDescription(
         "Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items — or the " +
         "whole model when none are wired. Convention: Z is up and +Y is north, so top is a plan with north at the top of the " +
         "screen, front looks north from the south side, left looks east from the west side, and iso looks from the " +
-        "south-east above. Assumes a Z-up model; for others use Camera.LookAt.")]
+        "south-east above. Assumes a Z-up model; for others use Camera.LookAt. Wire the output of the node that must run " +
+        "before this one into 'after'.")]
     [NodeSearchTags("camera", "standard", "view", "top", "plan", "front", "back", "left", "right", "iso", "isometric", "elevation")]
     [return: NodeName("viewpoint")]
     public static Viewpoint SetStandardView(
@@ -138,6 +146,7 @@ public static class ViewpointExtraNodes
         string view = "iso",
         [MultiInput] IEnumerable<ModelItem>? items = null,
         [NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.2,
+        object? after = null,
         Document? document = null)
     {
         var viewName = CameraMath.NormalizeViewName(view);

@@ -77,7 +77,7 @@ Two ideas make most of these short:
 
 **Everything but the selection.** `Selection.Invert` → `Appearance.Hide`; `Selection.Remove` takes items out of the current selection.
 
-**Standard views.** `Camera.SetStandardView` (top, front, iso …) zoomed to a set, then `Viewpoint.SaveCurrent` per level.
+**Standard views.** `Camera.SetStandardView` (top, front, iso …) zoomed to a set, then `Viewpoint.Save` per level (give `folder` to file them in a folder).
 
 **Move and scale.** `ModelItem.MoveTo` puts an assembly's centre on a point; `ModelItem.Scale` scales about a point (a transform override, not a change to the model file).
 

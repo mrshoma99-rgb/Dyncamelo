@@ -16,7 +16,7 @@ Goal: make a graph that takes too long on a large model quicker to work with.
 
 ## Steps
 
-1. **Read the status bar.** It shows the time of each run. When a run takes a second or more, it also names the slowest node, for example "slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)". Start with that node.
+1. **Read the status bar.** It shows the time of each run. When a run takes a second or more, it also names the slowest node, for example "slowest: Viewpoint.Save 71,200 ms (17×)". Start with that node.
 2. **Stop a run you do not need.** Press ++esc++. The run halts before the next node, between the items of a node that is working through a list, or between the passes of a loop. A single Navisworks call already under way cannot be interrupted. The next **Run** carries on where it stopped, and what finished nodes already changed is kept.
 3. **Switch Auto off.** In the run bar, set **Manual** and press ++f5++ when you are ready. In Auto mode a run starts after every edit.
 4. **Run only part of the graph.** Select a node and press ++shift+f5++ (**Run Up to Selected Node**). It runs that node and what it depends on, then stops. Everything after it waits for the next ordinary Run.

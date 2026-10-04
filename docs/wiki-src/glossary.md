@@ -196,7 +196,7 @@ Run up to a node
 ## S to T
 
 Saved viewpoint
-:   A named view in the Navisworks Saved Viewpoints window: a camera, and optionally the overrides. `Viewpoint.SaveCurrent` and `Viewpoint.SaveWithOverrides` make them. See [Save one viewpoint for every item](howto/viewpoint-per-item.md).
+:   A named view in the Navisworks Saved Viewpoints window: a camera, and optionally the overrides. `Viewpoint.Save` makes them (with or without the overrides). See [Save one viewpoint for every item](howto/viewpoint-per-item.md).
 
 Script
 :   A graph kept in a folder the Script Player knows. See [Saving and opening](saving-opening.md#script-description-and-the-scripts-folder).

@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Interop;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Portable;
@@ -25,27 +26,29 @@ namespace CamelGraph.Navisworks;
 public static class ViewpointTransferNodes
 {
     /// <summary>Exports saved viewpoints to a portable package file.</summary>
-    /// <param name="filePath">Where to write the package: a .json file path, or a folder (a camelgraph-viewpoints.json is created inside). Relative paths land in Documents.</param>
+    /// <param name="filePath">Where to write the package: a .json file path, or a folder (a camelgraph-viewpoints.json is created inside). A relative path is next to the graph file.</param>
     /// <param name="viewpoints">What to export: nothing = every saved viewpoint; or a viewpoint, a folder, a name (viewpoint first, then folder), or a list of these.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path, how many viewpoints it holds, and a summary report.</returns>
     [NodeName("Viewpoints.ExportFile")]
     [NodeCategory("Navisworks.Viewpoints.Files")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeDescription(
         "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package " +
         "for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave " +
         "viewpoints empty to export them all, or wire specific viewpoints, folders or names. Element " +
-        "overrides are not carried (they only exist relative to the source model's items).")]
+        "overrides are not carried (they only exist relative to the source model's items). A relative file " +
+        "path is next to the graph file; a folder gets a camelgraph-viewpoints.json inside it.")]
     [NodeSearchTags("viewpoints", "export", "transfer", "copy", "between", "models", "package", "camera", "section", "box")]
     [MultiReturn("filePath", "count", "report")]
     [PortKinds("file", "integer", "")]
     public static Dictionary<string, object?> ExportFile(
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "Viewpoint package (*.json)|*.json|All files (*.*)|*.*")] string filePath,
         object? viewpoints = null,
         Document? document = null)
     {
         filePath = ViewpointPackagePaths.ResolveForWrite(
-            filePath, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            PathResolver.Resolve(filePath), Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
 
         var doc = NavisworksContext.ResolveDocument(document);
         var tree = doc.SavedViewpoints;
@@ -126,6 +129,7 @@ public static class ViewpointTransferNodes
     /// <returns>The stored viewpoints, how many were imported, and a summary report.</returns>
     [NodeName("Viewpoints.ImportFile")]
     [NodeCategory("Navisworks.Viewpoints.Files")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription(
         "Rebuilds the viewpoints from a Viewpoints.ExportFile package in THIS model: camera, section box " +
         "and folder structure. Positions are converted automatically when the source model used different " +
@@ -134,13 +138,13 @@ public static class ViewpointTransferNodes
     [MultiReturn("viewpoints", "count", "report")]
     [PortKinds("viewpoint*", "integer", "")]
     public static Dictionary<string, object?> ImportFile(
-        string filePath,
+        [NodePath(NodePathMode.Open, Filter = "Viewpoint package (*.json)|*.json|All files (*.*)|*.*")] string filePath,
         string? folderName = null,
         bool overwrite = true,
         Document? document = null)
     {
         filePath = ViewpointPackagePaths.ResolveForRead(
-            filePath, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            PathResolver.Resolve(filePath), Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         if (!File.Exists(filePath))
         {
             throw new FileNotFoundException("The file '" + filePath + "' does not exist.", filePath);
@@ -556,18 +560,6 @@ public static class ViewpointTransferNodes
     private static FolderItem? ResolveTargetFolder(
         Autodesk.Navisworks.Api.DocumentParts.DocumentSavedViewpoints tree, List<string> segments)
     {
-        FolderItem? current = null;
-        foreach (var segment in segments)
-        {
-            current = SavedItemTreeNodesShared.FindOrCreateFolder(
-                tree.RootItem,
-                current,
-                segment,
-                item => tree.AddCopy(item),
-                (parent, item) => tree.AddCopy(parent, item),
-                "viewpoint");
-        }
-
-        return current;
+        return ViewpointStore.ResolveFolder(tree, segments);
     }
 }

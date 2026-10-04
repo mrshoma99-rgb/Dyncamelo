@@ -24,7 +24,7 @@ Goal: for every item a search finds, isolate it, frame it in the view and save a
 4. Add `Camera.ZoomToItems` (*Navisworks ▸ Camera*). Wire the `items` output of `Appearance.Isolate` into its `items`. Passing the items on makes the zoom wait for the isolate.
 5. Add `ModelItem.DisplayName` (*Navisworks ▸ ModelItem*). Wire `item` from `Loop.Item` into its `item`. This is the name for the viewpoint.
 6. Add `Flow.Then` (*Workflow*). Wire `name` into its `value` and the `done` output of `Camera.ZoomToItems` into its `after`. The name now reaches the next node only after the zoom is done.
-7. Add `Viewpoint.SaveWithOverrides` (*Navisworks ▸ Viewpoints*). Wire the `value` output of `Flow.Then` into its `name`. Type `CamelGraph Views` into `folderName`.
+7. Add `Viewpoint.Save` (*Navisworks ▸ Viewpoints*). Wire the `value` output of `Flow.Then` into its `name`. Type `CamelGraph Views` into `folder` (a name, or a path such as `Reviews/Week 12`; missing folders are created) and switch `bakeOverrides` on. (The sample graph was saved with the earlier node `Viewpoint.SaveWithOverrides`; it is the same as `Viewpoint.Save` with `bakeOverrides` on, and it still opens and runs.)
 8. Add `Loop.Collect` (*Workflow*). Wire `loop` from `Loop.Item` into its `loop` and `viewpoint` into its `value`.
 9. Add a `Watch List` (*Display*) on `results`, then press ++f5++.
 
@@ -38,7 +38,7 @@ The sample *Isolated Viewpoints per Item* does the same with ready-made steps. A
 
 ## What you get
 
-* One saved viewpoint for every item. `Viewpoint.SaveWithOverrides` stores the current view **and** the isolation, so recalling a viewpoint shows exactly that item.
+* One saved viewpoint for every item. `Viewpoint.Save` with `bakeOverrides` on stores the current view **and** the isolation, so recalling a viewpoint shows exactly that item. With it off only the camera is saved.
 * A viewpoint with the same name as an existing one replaces it. Items that share a name therefore leave one viewpoint.
 
 !!! warning "Why Flow.Then?"

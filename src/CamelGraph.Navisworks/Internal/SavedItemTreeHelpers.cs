@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks.Internal;
 
@@ -36,11 +38,11 @@ internal static class SavedItemTreeHelpers
                     throw new ArgumentException("No " + kindLabel + " name provided.", nameof(value));
                 }
 
-                return FindByName<T>(root.Children, name)
+                return FindByNameOrPath<T>(root, name, kindLabel)
                     ?? throw new InvalidOperationException(
                         "No " + kindLabel + " named '" + name + "' exists in the document.");
             case T item:
-                return FindStoredEquivalent(root, item)
+                return FindStoredEquivalentOrStale(root, item, kindLabel)
                     ?? throw new InvalidOperationException(
                         "The wired " + kindLabel + " '" + item.DisplayName +
                         "' is not stored in this document (was it deleted, or does it belong to another document?).");
@@ -91,6 +93,103 @@ internal static class SavedItemTreeHelpers
                 {
                     return candidate;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// <see cref="FindStoredEquivalent{T}"/> with a plain sentence for the one failure a wired saved item can have: Navisworks
+    /// disposed it when the tree was last edited (a node earlier in the graph replaced, renamed or removed items), so reading its
+    /// Guid or name throws "Object has been Disposed". A person is told to fetch the item again instead of reading that.
+    /// </summary>
+    internal static T? FindStoredEquivalentOrStale<T>(FolderItem root, T target, string kindLabel) where T : SavedItem
+    {
+        try
+        {
+            return FindStoredEquivalent(root, target);
+        }
+        catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
+        {
+            throw new InvalidOperationException(
+                "The wired " + kindLabel + " is stale: Navisworks disposed it when the tree was last edited (an earlier node of this " +
+                "graph, or an earlier run, replaced, renamed or removed items). Fetch it again right before this node, for " +
+                "example with SavedViewpoint.ByName or Viewpoints.InFolder, and use Flow.Then to run this node after the edit.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Finds an item by display name or by path. A plain name is the first item of that name anywhere in the tree (tree order), and
+    /// a Warning says so when more than one item has the name. A path such as <c>Reviews/Week 12/Clash 5</c> walks the folders
+    /// from the top and names the item last, so same-named items in different folders can be told apart. A name that really
+    /// contains a "/" still matches as a plain name first, so nothing that worked before changes.
+    /// </summary>
+    /// <param name="root">The tree root (<c>part.RootItem</c>).</param>
+    /// <param name="text">The display name or the path.</param>
+    /// <param name="kindLabel">Human label for the warning (e.g. "saved viewpoint").</param>
+    /// <returns>The stored item, or null when nothing matches.</returns>
+    internal static T? FindByNameOrPath<T>(FolderItem root, string text, string kindLabel) where T : SavedItem
+    {
+        var all = new List<T>();
+        CollectAll(root.Children, all);
+
+        T? first = null;
+        var count = 0;
+        foreach (var candidate in all)
+        {
+            if (string.Equals(candidate.DisplayName, text, StringComparison.Ordinal))
+            {
+                count++;
+                first ??= candidate;
+            }
+        }
+
+        if (first != null)
+        {
+            if (count > 1)
+            {
+                NodeWarnings.Add(
+                    count + " " + kindLabel + "s are named '" + text + "'; the first one in the tree was used. " +
+                    "Give the folder path (for example \"Folder/" + text + "\") to choose another.");
+            }
+
+            return first;
+        }
+
+        if (!SavedItemPath.IsPath(text))
+        {
+            return null;
+        }
+
+        var segments = SavedItemPath.Split(text);
+        GroupItem current = root;
+        for (int i = 0; i < segments.Count - 1; i++)
+        {
+            GroupItem? next = null;
+            foreach (var child in current.Children)
+            {
+                if (child is FolderItem folder && string.Equals(folder.DisplayName, segments[i], StringComparison.Ordinal))
+                {
+                    next = folder;
+                    break;
+                }
+            }
+
+            if (next == null)
+            {
+                return null;
+            }
+
+            current = next;
+        }
+
+        var leaf = segments[segments.Count - 1];
+        foreach (var child in current.Children)
+        {
+            if (child is T match && string.Equals(match.DisplayName, leaf, StringComparison.Ordinal))
+            {
+                return match;
             }
         }
 

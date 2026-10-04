@@ -230,9 +230,16 @@ public class SampleGraphStaticValidationTests
         if (node.Value<string>("Assembly") == NavisworksAssemblyName)
         {
             var inputNames = ((JArray)node["InputPorts"]!).OfType<JObject>().Select(p => p.Value<string>("Name")).ToList();
-            var method = navisworksMethods.First(m =>
+            var method = navisworksMethods.FirstOrDefault(m =>
                 m.MatchesDefinitionId(definitionId) && m.ParameterNames.SequenceEqual(inputNames));
-            return method.ParameterIsOptional.ToList();
+            if (method != null)
+            {
+                return method.ParameterIsOptional.ToList();
+            }
+
+            // Saved under an earlier id ([NodeAliases]): each saved input is looked up by its name now (or its [PortAlias]).
+            var earlier = navisworksMethods.First(m => m.AliasIds.Contains(definitionId));
+            return inputNames.Select(name => earlier.ParameterIsOptional[earlier.InputIndexOf(name!)]).ToList();
         }
 
         Assert.True(registry.TryGetDefinition(definitionId, out var definition), "definition '" + definitionId + "' is not registered.");
@@ -256,10 +263,44 @@ public class SampleGraphStaticValidationTests
             var candidates = navisworksMethods
                 .Where(m => m.MatchesDefinitionId(definitionId))
                 .ToList();
+            var earlierOwners = navisworksMethods.Where(m => m.AliasIds.Contains(definitionId)).ToList();
             Assert.True(
-                candidates.Count > 0,
+                candidates.Count > 0 || earlierOwners.Count > 0,
                 label + ": definition id '" + definitionId +
                 "' matches no public static method in the CamelGraph.Navisworks source.");
+
+            if (candidates.Count == 0)
+            {
+                // The sample was saved under an earlier id of this node (a [NodeAliases] entry: its signature grew or changed
+                // since). The loader finds each saved wire and value by port name or earlier port name, so that is what is
+                // pinned here: every saved port still resolves to a port of the method as it is now, and every parameter the
+                // file does not know (added later) is optional, because the old file cannot feed it.
+                var owner = earlierOwners[0];
+                foreach (var name in inputNames)
+                {
+                    Assert.True(
+                        owner.InputIndexOf(name!) >= 0,
+                        label + ": saved input '" + name + "' no longer exists on '" + owner.FullPath + "' and has no [PortAlias].");
+                }
+
+                for (int i = 0; i < owner.ParameterNames.Count(); i++)
+                {
+                    var current = owner.ParameterNames.ElementAt(i);
+                    var saved = inputNames.Any(n => owner.InputIndexOf(n!) == i);
+                    Assert.True(
+                        saved || owner.ParameterIsOptional[i],
+                        label + ": '" + owner.FullPath + "' has a required input '" + current + "' the saved file does not know.");
+                }
+
+                foreach (var name in outputNames)
+                {
+                    Assert.True(
+                        owner.HasOutput(name!),
+                        label + ": saved output '" + name + "' no longer exists on '" + owner.FullPath + "' and has no [PortAlias].");
+                }
+
+                return;
+            }
 
             Assert.True(
                 candidates.Any(m =>
@@ -396,10 +437,23 @@ public class SampleGraphStaticValidationTests
                 outputs = new List<string> { returnName.Success ? returnName.Groups[1].Value : "result" };
             }
 
+            var aliasIds = new List<string>();
+            foreach (Match alias in Regex.Matches(attrs, @"\[NodeAliases\((?<args>(?:[^\)""]|""[^""]*"")*)\)\]"))
+            {
+                aliasIds.AddRange(Regex.Matches(alias.Groups["args"].Value, "\"([^\"]*)\"").Cast<Match>().Select(m => m.Groups[1].Value));
+            }
+
+            var portAliases = Regex.Matches(attrs, @"\[PortAlias\(\s*""([^""]*)""\s*,\s*""([^""]*)""\s*\)\]")
+                .Cast<Match>()
+                .Select(m => (m.Groups[1].Value, m.Groups[2].Value))
+                .ToList();
+
             yield return new SourceMethod(
                 ns + "." + owner.Groups[1].Value + "." + method.Groups["name"].Value,
                 parameters,
-                outputs);
+                outputs,
+                aliasIds,
+                portAliases);
         }
     }
 
@@ -591,11 +645,51 @@ public class SampleGraphStaticValidationTests
     {
         private readonly List<SourceParameter> _parameters;
 
-        public SourceMethod(string fullPath, List<SourceParameter> parameters, List<string> outputs)
+        private readonly List<(string Old, string Current)> _portAliases;
+
+        public SourceMethod(
+            string fullPath,
+            List<SourceParameter> parameters,
+            List<string> outputs,
+            List<string> aliasIds,
+            List<(string Old, string Current)> portAliases)
         {
             FullPath = fullPath;
             _parameters = parameters;
             OutputNames = outputs;
+            AliasIds = aliasIds;
+            _portAliases = portAliases;
+        }
+
+        /// <summary>Earlier definition ids ([NodeAliases]) that now resolve to this method.</summary>
+        public IReadOnlyList<string> AliasIds { get; }
+
+        /// <summary>Index of the parameter a saved input name denotes now (the name itself or its [PortAlias]), or -1.</summary>
+        public int InputIndexOf(string savedName)
+        {
+            var direct = _parameters.FindIndex(p => p.Name == savedName);
+            if (direct >= 0)
+            {
+                return direct;
+            }
+
+            foreach (var alias in _portAliases.Where(a => a.Old == savedName))
+            {
+                var index = _parameters.FindIndex(p => p.Name == alias.Current);
+                if (index >= 0)
+                {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>Whether a saved output name is an output of the method now (the name itself or its [PortAlias]).</summary>
+        public bool HasOutput(string savedName)
+        {
+            return OutputNames.Contains(savedName) ||
+                   _portAliases.Any(a => a.Old == savedName && OutputNames.Contains(a.Current));
         }
 
         /// <summary>Namespace.Class.Method.</summary>
