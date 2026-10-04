@@ -236,7 +236,15 @@ public class SampleGraphStaticValidationTests
         }
 
         Assert.True(registry.TryGetDefinition(definitionId, out var definition), "definition '" + definitionId + "' is not registered.");
-        return definition!.Inputs.Select(i => i.HasDefault).ToList();
+        var optional = definition!.Inputs.Select(i => i.HasDefault).ToList();
+        if (definition.Id != definitionId)
+        {
+            // Saved under an older id that a [NodeAliases] maps to the node: the file lists the ports that signature had, and the
+            // optional inputs added since are not in it.
+            return optional.Take(((JArray)node["InputPorts"]!).Count).ToList();
+        }
+
+        return optional;
     }
 
     private static void ValidateZeroTouchNode(
@@ -275,7 +283,10 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 registry.TryGetDefinition(definitionId, out var definition),
                 label + ": definition id '" + definitionId + "' is not registered.");
-            Assert.Equal(definition!.Inputs.Select(i => i.Name), inputNames);
+            // A file saved under an older id that a [NodeAliases] maps to this node lists the ports of the old signature; the optional
+            // inputs added at the end since then are not in it, and that is fine (they take their defaults when the graph loads).
+            var currentInputs = definition!.Inputs.Select(i => i.Name);
+            Assert.Equal(definition.Id == definitionId ? currentInputs : currentInputs.Take(inputNames.Count), inputNames);
             Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
             for (int i = 0; i < inputPorts.Count; i++)
             {

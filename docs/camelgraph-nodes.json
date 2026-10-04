@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 582,
  "categories": [
   {
    "name": "Annotation",
@@ -28,7 +28,7 @@
   },
   {
    "name": "File",
-   "count": 36
+   "count": 37
   },
   {
    "name": "Geometry",
@@ -168,7 +168,7 @@
   },
   {
    "name": "System",
-   "count": 5
+   "count": 7
   },
   {
    "name": "Table",
@@ -2273,23 +2273,26 @@
   },
   {
    "name": "CSV.AppendToFile",
-   "id": "CamelGraph.Nodes.FileExtraNodes.AppendCsv@string,System.Collections.Generic.IList<object>,string,System.Collections.Generic.IList<object>",
+   "id": "CamelGraph.Nodes.FileExtraNodes.AppendCsv@string,System.Collections.Generic.IList<object>,string,System.Collections.Generic.IList<object>,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Appends rows to a CSV file (same quoting as CSV.WriteToFile), writing the optional headers only when the file is new or empty.",
+   "description": "Appends rows to a CSV file (same quoting and date format as CSV.WriteToFile), writing the optional headers only when the file is new or empty. In a loop, wire the loop item (or something made from it) into the rows: a node with only fixed inputs belongs to no loop and runs once. A relative path starts in the graph's folder.",
    "tags": [
     "csv",
     "append",
     "add rows",
     "table",
     "report",
-    "export"
+    "export",
+    "tab",
+    "tsv",
+    "encoding"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "The CSV file to append to."
+     "description": "The CSV file to append to. A relative path starts in the graph's folder."
     },
     {
      "name": "rows",
@@ -2299,7 +2302,7 @@
     {
      "name": "delimiter",
      "type": "string",
-     "description": "Single-character cell delimiter.",
+     "description": "Single-character cell delimiter: a comma, semicolon, bar, or \"tab\".",
      "default": "\",\""
     },
     {
@@ -2307,6 +2310,12 @@
      "type": "any[]",
      "description": "Optional header cells, written once when the file is new or empty.",
      "default": "null"
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16; a mark is written only when the file is new.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -2320,27 +2329,44 @@
   },
   {
    "name": "CSV.ReadFromFile",
-   "id": "CamelGraph.Nodes.FileNodes.ReadCsv@string,string",
+   "id": "CamelGraph.Nodes.FileNodes.ReadCsv@string,string,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Reads a CSV file into a list of rows (numeric cells become numbers).",
+   "description": "Reads a CSV file into a list of rows. Plain numbers become numbers; codes with leading zeros (007), whole numbers of more than 15 digits and the words NaN and Infinity stay text, and Advanced > numbers = text keeps every cell as text. Delimiter: comma, semicolon, bar or tab. The encoding is detected (a file that is not valid UTF-8 is read as Windows-1252). For a table with column names use Table.FromCsvFile. A relative path starts in the graph's folder.",
    "tags": [
     "csv",
     "table",
     "spreadsheet",
-    "import"
+    "import",
+    "tab",
+    "tsv",
+    "delimiter",
+    "encoding",
+    "leading zeros"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Path to the CSV file."
+     "description": "Path to the CSV file. A relative path starts in the graph's folder."
     },
     {
      "name": "delimiter",
      "type": "string",
-     "description": "Single-character cell delimiter.",
+     "description": "Single-character cell delimiter: a comma, semicolon, bar, or \"tab\".",
      "default": "\",\""
+    },
+    {
+     "name": "numbers",
+     "type": "string",
+     "description": "auto (default) turns plain numbers into numbers; text keeps every cell as text.",
+     "default": "\"auto\""
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "auto (default), UTF-8, Windows-1252 or UTF-16.",
+     "default": "\"auto\""
     }
    ],
    "outputs": [
@@ -2354,21 +2380,26 @@
   },
   {
    "name": "CSV.WriteToFile",
-   "id": "CamelGraph.Nodes.FileNodes.WriteCsv@string,System.Collections.Generic.IList<object>,string",
+   "id": "CamelGraph.Nodes.FileNodes.WriteCsv@string,System.Collections.Generic.IList<object>,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Writes a list of rows to a CSV file (overwrites; creates missing directories).",
+   "description": "Writes a list of rows to a CSV file, replacing what was there, and creates missing folders. Cells with the delimiter, quotes or line breaks are quoted; dates are written as 2026-10-04 14:30:00 (the same in every country); empty cells stay empty. Delimiter: comma, semicolon, bar or tab. Advanced > encoding: \"UTF-8 with BOM\" makes Excel show accents and symbols correctly. For a table use Table.ToCsvFile; to add rows to a file use CSV.AppendToFile. A relative path starts in the graph's folder.",
    "tags": [
     "csv",
     "table",
     "spreadsheet",
-    "export"
+    "export",
+    "tab",
+    "tsv",
+    "delimiter",
+    "encoding",
+    "bom"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Destination file path."
+     "description": "Destination file path. A relative path starts in the graph's folder."
     },
     {
      "name": "data",
@@ -2378,8 +2409,14 @@
     {
      "name": "delimiter",
      "type": "string",
-     "description": "Single-character cell delimiter.",
+     "description": "Single-character cell delimiter: a comma, semicolon, bar, or \"tab\".",
      "default": "\",\""
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -2392,11 +2429,55 @@
    "returns": ""
   },
   {
+   "name": "Directory.Copy",
+   "id": "CamelGraph.Nodes.FileExtraNodes.CopyDirectory@string,string,bool",
+   "assembly": "CamelGraph.Nodes",
+   "category": "File",
+   "description": "Copies a folder with all its files and sub-folders to another place (creates the destination; files already there are kept, and a file with the same name is only replaced when overwrite is true - checked before anything is copied). The destination cannot be inside the source. A relative path starts in the graph's folder.",
+   "tags": [
+    "copy",
+    "folder",
+    "directory",
+    "backup",
+    "stage",
+    "deliverable",
+    "duplicate",
+    "robocopy",
+    "xcopy"
+   ],
+   "inputs": [
+    {
+     "name": "source",
+     "type": "string",
+     "description": "The folder to copy. A relative path starts in the graph's folder."
+    },
+    {
+     "name": "destination",
+     "type": "string",
+     "description": "The folder to copy it to (created when needed; its content is kept and merged with the copy)."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace files that already exist in the destination; false (default) to fail, before anything is copied, if any would be replaced.",
+     "default": "false"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The destination folder, for sequencing further file nodes."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Directory.Create",
    "id": "CamelGraph.Nodes.FileExtraNodes.CreateDirectory@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Creates a folder including any missing parent folders (does nothing when it already exists).",
+   "description": "Creates a folder including any missing parent folders (does nothing when it already exists). A relative path starts in the graph's folder.",
    "tags": [
     "mkdir",
     "make",
@@ -2408,7 +2489,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The folder to create."
+     "description": "The folder to create. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
@@ -2425,7 +2506,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.DeleteDirectory@string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Deletes a folder (an empty one, or with its whole content when recursive is true); returns false when it did not exist.",
+   "description": "Deletes a folder (an empty one, or with its whole content when recursive is true); returns false when it did not exist. A relative path starts in the graph's folder.",
    "tags": [
     "remove",
     "rmdir",
@@ -2438,7 +2519,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The folder to delete."
+     "description": "The folder to delete. A relative path starts in the graph's folder."
     },
     {
      "name": "recursive",
@@ -2461,7 +2542,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.DirectoryExists@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Tests whether a folder exists at the given path.",
+   "description": "Tests whether a folder exists at the given path; a file, a missing folder and a blank path all give false. A relative path starts in the graph's folder.",
    "tags": [
     "folder",
     "check",
@@ -2473,24 +2554,24 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The folder path to test."
+     "description": "The folder path to test. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
     {
      "name": "exists",
      "type": "boolean",
-     "description": "True when a folder exists at the path (false for files and missing paths)."
+     "description": "True when a folder exists at the path (false for files, missing paths and a blank path)."
     }
    ],
    "returns": ""
   },
   {
-   "name": "Directory.FindFiles",
-   "id": "CamelGraph.Nodes.FileExtraNodes.FindFiles@string,string,bool,string,bool,int",
+   "name": "Directory.Find",
+   "id": "CamelGraph.Nodes.FileExtraNodes.Find@string,string,string,bool,string,bool,int",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Finds files under a folder by wildcard (several allowed, separated by \";\"), sorted by name, date or size, with an optional limit - the newest file is sortBy modified + descending + limit 1.",
+   "description": "Finds files or folders under a folder by wildcard (several allowed, separated by \";\"), in every sub-folder unless recursive is off. kind chooses files or folders. The paths come sorted by name, ignoring case and with numbers in order (c2 before c10); Advanced sorts by date or size instead and can keep only the first few - the newest file is sortBy modified + descending + limit 1. A pattern must match the whole name, so \"*.ifc\" never also finds .ifcxml. A relative path starts in the graph's folder.",
    "tags": [
     "search",
     "find",
@@ -2500,19 +2581,32 @@
     "list",
     "wildcard",
     "files",
-    "directory"
+    "folders",
+    "subfolders",
+    "directory",
+    "tree",
+    "browse",
+    "batch",
+    "get files",
+    "get directories"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "The folder to search."
+     "description": "The folder to search. A relative path starts in the graph's folder."
     },
     {
      "name": "pattern",
      "type": "string",
-     "description": "Wildcard filter on the file name (\"*\" and \"?\"); several patterns can be separated by \";\" (e.g. \"*.nwd;*.nwf\").",
+     "description": "Wildcard filter on the file or folder name (\"*\" and \"?\"); several patterns can be separated by \";\" (e.g. \"*.nwd;*.nwf\").",
      "default": "\"*\""
+    },
+    {
+     "name": "kind",
+     "type": "string",
+     "description": "files (default) or folders.",
+     "default": "\"files\""
     },
     {
      "name": "recursive",
@@ -2523,7 +2617,7 @@
     {
      "name": "sortBy",
      "type": "string",
-     "description": "name (full path, alphabetical), modified, created or size.",
+     "description": "name (full path, alphabetical, case ignored, numbers in order), modified, created or size (files only).",
      "default": "\"name\""
     },
     {
@@ -2535,115 +2629,82 @@
     {
      "name": "limit",
      "type": "integer",
-     "description": "Keep only the first N files after sorting; 0 keeps all.",
+     "description": "Keep only the first N results after sorting; 0 keeps all.",
      "default": "0"
     }
    ],
    "outputs": [
     {
-     "name": "files",
+     "name": "paths",
      "type": "string[]",
-     "description": "The full file paths in the requested order."
+     "description": "The full paths in the requested order."
     }
    ],
    "returns": ""
   },
   {
-   "name": "Directory.GetDirectories",
-   "id": "CamelGraph.Nodes.FileExtraNodes.GetDirectories@string,string,bool",
+   "name": "Directory.Move",
+   "id": "CamelGraph.Nodes.FileExtraNodes.MoveDirectory@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Lists the sub-folders of a folder as full paths (optionally filtered by a wildcard such as \"2026*\" and optionally at every depth).",
+   "description": "Moves or renames a folder with everything in it. When the destination already exists it is an error unless overwrite is true, which moves the content into it and replaces files with the same name. Moving to another drive copies first and removes the original afterwards. The destination cannot be inside the source. A relative path starts in the graph's folder.",
    "tags": [
-    "folders",
-    "subfolders",
-    "list",
-    "browse",
+    "move",
+    "rename",
+    "folder",
     "directory",
-    "tree"
+    "relocate",
+    "archive",
+    "stage"
    ],
    "inputs": [
     {
-     "name": "path",
+     "name": "source",
      "type": "string",
-     "description": "The folder to list."
+     "description": "The folder to move. A relative path starts in the graph's folder."
     },
     {
-     "name": "pattern",
+     "name": "destination",
      "type": "string",
-     "description": "Wildcard filter on the folder name (\"*\" and \"?\"); several patterns can be separated by \";\".",
-     "default": "\"*\""
+     "description": "The new place of the folder (its parent is created when needed)."
     },
     {
-     "name": "recursive",
+     "name": "overwrite",
      "type": "boolean",
-     "description": "True to include sub-folders of sub-folders.",
+     "description": "True to move the content into a destination that already exists (files with the same name are replaced); false (default) to fail instead.",
      "default": "false"
     }
    ],
    "outputs": [
     {
-     "name": "directories",
-     "type": "string[]",
-     "description": "The full folder paths, sorted alphabetically."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Directory.GetFiles",
-   "id": "CamelGraph.Nodes.FileNodes.GetFiles@string,string",
-   "assembly": "CamelGraph.Nodes",
-   "category": "File",
-   "description": "Lists the files in a folder (optionally filtered by a wildcard such as \"*.nwd\").",
-   "tags": [
-    "folder",
-    "list",
-    "batch",
-    "directory",
-    "browse"
-   ],
-   "inputs": [
-    {
      "name": "path",
      "type": "string",
-     "description": "The folder to list."
-    },
-    {
-     "name": "pattern",
-     "type": "string",
-     "description": "Wildcard filter; the default matches every file.",
-     "default": "\"*.*\""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "files",
-     "type": "string[]",
-     "description": "The full file paths, sorted."
+     "description": "The destination folder, for sequencing further file nodes."
     }
    ],
    "returns": ""
   },
   {
    "name": "Excel.ReadFromFile",
-   "id": "CamelGraph.Nodes.ExcelNodes.ReadFromFile@string,string,bool",
+   "id": "CamelGraph.Nodes.ExcelNodes.ReadFromFile@string,string,bool,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Reads an .xlsx worksheet into rows + headers (dates arrive as Excel serial numbers; .xls is not supported).",
+   "description": "Reads an .xlsx worksheet into rows + headers + the sheet names (dates arrive as Excel serial numbers, convert them with DateTime.FromExcelSerial; .xls is not supported). Text cells such as 007 stay text. Every row is padded with empty cells to the widest row, and empty rows at the end of the sheet - the ones that only carry formatting - are dropped (Advanced > trimEmptyRows; blank rows in the middle are kept so row numbers stay true). For a table use Table.FromExcelFile. A relative path starts in the graph's folder.",
    "tags": [
     "xlsx",
     "excel",
     "spreadsheet",
     "workbook",
     "table",
-    "import"
+    "import",
+    "sheet",
+    "dates"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Path to the .xlsx file."
+     "description": "Path to the .xlsx file. A relative path starts in the graph's folder."
     },
     {
      "name": "sheet",
@@ -2655,6 +2716,12 @@
      "name": "hasHeaders",
      "type": "boolean",
      "description": "True when the first row is a header row (it is split off into \"headers\").",
+     "default": "true"
+    },
+    {
+     "name": "trimEmptyRows",
+     "type": "boolean",
+     "description": "True (default) to drop the empty rows at the end of the sheet (rows that only carry formatting).",
      "default": "true"
     }
    ],
@@ -2682,20 +2749,22 @@
    "id": "CamelGraph.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Writes rows (+ optional headers) to an .xlsx worksheet; append adds a sheet to an existing workbook (foreign styles/formulas are not preserved).",
+   "description": "Writes rows (+ optional headers) to an .xlsx worksheet. Dates become real date cells (shown as dates in Excel), a list in a cell is written as text like [1, 2], and NaN or Infinity as text. Advanced > append adds the sheet to an existing workbook and replaces a sheet of the same name; the workbook is rebuilt from its cell values, so formulas, formatting, charts and pictures of a workbook made in Excel are not kept (a warning says so). The file is built beside the target and then put in place, so a failure never leaves a broken workbook. For a table use Table.ToExcelFile. A relative path starts in the graph's folder.",
    "tags": [
     "xlsx",
     "excel",
     "spreadsheet",
     "workbook",
     "export",
-    "save"
+    "save",
+    "sheet",
+    "dates"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Destination .xlsx path (missing directories are created)."
+     "description": "Destination .xlsx path (missing directories are created). A relative path starts in the graph's folder."
     },
     {
      "name": "rows",
@@ -2735,7 +2804,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.CopyFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Copies a file to a new path (creates the destination folder; refuses to replace an existing file unless overwrite is true).",
+   "description": "Copies a file to a new path (creates the destination folder; refuses to replace an existing file unless overwrite is true). A relative path starts in the graph's folder.",
    "tags": [
     "duplicate",
     "backup",
@@ -2747,7 +2816,7 @@
     {
      "name": "source",
      "type": "string",
-     "description": "The file to copy."
+     "description": "The file to copy. A relative path starts in the graph's folder."
     },
     {
      "name": "destination",
@@ -2775,7 +2844,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.DeleteFile@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Deletes a file; returns true when it was deleted and false when it did not exist.",
+   "description": "Deletes a file; returns true when it was deleted and false when it did not exist. A relative path starts in the graph's folder.",
    "tags": [
     "remove",
     "erase",
@@ -2787,7 +2856,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The file to delete."
+     "description": "The file to delete. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
@@ -2804,7 +2873,7 @@
    "id": "CamelGraph.Nodes.FileNodes.FileExists@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Tests whether a file exists at the given path.",
+   "description": "Tests whether a file exists at the given path; a folder, a missing file and a blank path all give false. A relative path starts in the graph's folder.",
    "tags": [
     "file",
     "check",
@@ -2815,7 +2884,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The file path to test."
+     "description": "The file path to test. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
@@ -2832,7 +2901,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.GetFileHash@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Computes a checksum of a file's content (SHA256, SHA1 or MD5) as lower-case hex text - handy for change detection.",
+   "description": "Computes a checksum of a file's content (SHA256, SHA1 or MD5) as lower-case hex text - handy for change detection. A relative path starts in the graph's folder.",
    "tags": [
     "checksum",
     "sha",
@@ -2846,7 +2915,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The file to hash."
+     "description": "The file to hash. A relative path starts in the graph's folder."
     },
     {
      "name": "algorithm",
@@ -2869,7 +2938,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.GetFileInfo@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Reads a file's name, extension, folder, size in bytes and modified / created dates; a missing file gives exists = false and empty values instead of an error.",
+   "description": "Reads a file's name, extension, folder, size in bytes and modified / created dates; a missing file gives exists = false and empty values instead of an error. A relative path starts in the graph's folder.",
    "tags": [
     "size",
     "date",
@@ -2884,7 +2953,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The file to inspect."
+     "description": "The file to inspect. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
@@ -2931,7 +3000,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.MoveFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Moves or renames a file (creates the destination folder; refuses to replace an existing file unless overwrite is true).",
+   "description": "Moves or renames a file (creates the destination folder; refuses to replace an existing file unless overwrite is true). With overwrite, the old destination file is replaced only once the move can succeed: if the source is locked by another program, the destination stays as it was. A relative path starts in the graph's folder.",
    "tags": [
     "rename",
     "relocate",
@@ -2943,7 +3012,7 @@
     {
      "name": "source",
      "type": "string",
-     "description": "The file to move."
+     "description": "The file to move. A relative path starts in the graph's folder."
     },
     {
      "name": "destination",
@@ -2968,20 +3037,27 @@
   },
   {
    "name": "JSON.ReadFromFile",
-   "id": "CamelGraph.Nodes.FileNodes.ReadJson@string",
+   "id": "CamelGraph.Nodes.FileNodes.ReadJson@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Reads a JSON file into dictionaries, lists and values.",
+   "description": "Reads a JSON file into dictionaries, lists and values (every number becomes a double). The encoding is detected. A relative path starts in the graph's folder.",
    "tags": [
     "json",
     "parse",
-    "import"
+    "import",
+    "encoding"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Path to the JSON file."
+     "description": "Path to the JSON file. A relative path starts in the graph's folder."
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "auto (default), UTF-8, Windows-1252 or UTF-16.",
+     "default": "\"auto\""
     }
    ],
    "outputs": [
@@ -2995,31 +3071,38 @@
   },
   {
    "name": "JSON.WriteToFile",
-   "id": "CamelGraph.Nodes.FileNodes.WriteJson@string,object,bool",
+   "id": "CamelGraph.Nodes.FileNodes.WriteJson@string,object,bool,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Writes any value to a JSON file (overwrites; creates missing directories).",
+   "description": "Writes any value to a JSON file, replacing what was there, and creates missing folders. Nothing wired (null) is an error that leaves the file alone. A relative path starts in the graph's folder.",
    "tags": [
     "json",
     "serialize",
-    "export"
+    "export",
+    "encoding"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Destination file path."
+     "description": "Destination file path. A relative path starts in the graph's folder."
     },
     {
      "name": "data",
      "type": "any",
-     "description": "The value to serialize."
+     "description": "The value to serialize; null is an error."
     },
     {
      "name": "indented",
      "type": "boolean",
      "description": "True for pretty-printed output.",
      "default": "true"
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -3033,10 +3116,10 @@
   },
   {
    "name": "Log.Write",
-   "id": "CamelGraph.Nodes.FileExtraNodes.WriteLog@string,string,string",
+   "id": "CamelGraph.Nodes.FileExtraNodes.WriteLog@string,string,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Appends one line \"yyyy-MM-dd HH:mm:ss  LEVEL  message\" (local time) to a log file and returns that line.",
+   "description": "Appends one line \"yyyy-MM-dd HH:mm:ss  LEVEL  message\" (local time) to a log file and returns that line. In a loop, wire the loop item (or something made from it) into the message to get one line per pass: a Log.Write with only fixed inputs belongs to no loop and writes once. A relative path starts in the graph's folder.",
    "tags": [
     "log",
     "logging",
@@ -3050,7 +3133,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The log file."
+     "description": "The log file. A relative path starts in the graph's folder."
     },
     {
      "name": "message",
@@ -3062,6 +3145,12 @@
      "type": "string",
      "description": "INFO (default), WARN, ERROR or DEBUG, in any case.",
      "default": "\"INFO\""
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16; a mark is written only when the file is new.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -3113,7 +3202,7 @@
    "id": "CamelGraph.Nodes.FileNodes.CombinePath@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Joins a folder path and a file name with the correct separator.",
+   "description": "Joins a folder path and a file name with the correct separator. Trap: if the file name is itself a full path (it starts with a drive such as C:\\ or with a backslash), the result is that part alone and the folder is dropped; Path.Join does not do that and takes any number of parts.",
    "tags": [
     "join",
     "folder",
@@ -3263,7 +3352,7 @@
    "id": "CamelGraph.Nodes.PathNodes.GetFullPath@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Resolves a path to an absolute path (relative paths start from the current folder); the file does not have to exist.",
+   "description": "Resolves a path to an absolute path the way the file nodes do: a relative path starts in the graph's folder (the folder of the saved graph file; Documents\\CamelGraph for a graph that was never saved), and the quotes of a path pasted from Explorer are removed. The file does not have to exist.",
    "tags": [
     "absolute",
     "resolve",
@@ -3292,7 +3381,7 @@
    "id": "CamelGraph.Nodes.PathNodes.GetRelativePath@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Expresses a path relative to a base folder; returns the full path when they are on different drives.",
+   "description": "Expresses a path relative to a base folder; returns the full path when they are on different drives. Relative inputs start in the graph's folder.",
    "tags": [
     "relative",
     "base",
@@ -3303,7 +3392,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The path to express (absolute, or relative to the current folder)."
+     "description": "The path to express (absolute, or relative to the graph's folder)."
     },
     {
      "name": "baseDirectory",
@@ -3350,6 +3439,39 @@
    "returns": ""
   },
   {
+   "name": "Path.Join",
+   "id": "CamelGraph.Nodes.PathNodes.Join@System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "File",
+   "description": "Joins any number of folder and file name parts into one path with the correct separator, for example C:\\Projects + North + HVAC + model.nwd. Blank parts are skipped, and several wires, lists and lists of lists are joined in order. Unlike Path.Combine, a part that starts with a backslash or slash does not throw away what came before it, and a part with its own drive (D:\\x) is an error instead of silently replacing the folder.",
+   "tags": [
+    "join",
+    "combine",
+    "concat",
+    "folder",
+    "filename",
+    "append",
+    "segments",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "parts",
+     "type": "any[]",
+     "description": "The parts, in order: folders and a last file name. Several wires, lists and lists of lists are joined in order; blank parts are skipped.",
+     "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The joined path, with the separator of this operating system."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Path.Normalize",
    "id": "CamelGraph.Nodes.PathNodes.Normalize@string",
    "assembly": "CamelGraph.Nodes",
@@ -3382,34 +3504,41 @@
   },
   {
    "name": "Text.AppendToFile",
-   "id": "CamelGraph.Nodes.FileExtraNodes.AppendText@string,string,bool",
+   "id": "CamelGraph.Nodes.FileExtraNodes.AppendText@string,string,bool,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed.",
+   "description": "Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed. A list of texts appends every item as its own line. Nothing wired is an error; empty text with the line break on adds a blank line. In a loop, wire the loop item (or something made from it) into the text: a node with only fixed inputs belongs to no loop and runs once. A relative path starts in the graph's folder.",
    "tags": [
     "append",
     "add",
     "log",
     "write",
     "txt",
-    "export"
+    "export",
+    "encoding"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "The file to append to."
+     "description": "The file to append to. A relative path starts in the graph's folder."
     },
     {
      "name": "text",
      "type": "string",
-     "description": "The text to append."
+     "description": "The text to append; null is an error."
     },
     {
      "name": "newLine",
      "type": "boolean",
      "description": "True (default) to end the appended text with a line break.",
      "default": "true"
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16; a mark is written only when the file is new.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -3423,21 +3552,31 @@
   },
   {
    "name": "Text.ReadFromFile",
-   "id": "CamelGraph.Nodes.FileNodes.ReadText@string",
+   "id": "CamelGraph.Nodes.FileNodes.ReadText@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Reads the entire content of a text file.",
+   "description": "Reads the entire content of a text file as one text. The encoding is detected: UTF-8 or UTF-16 as the file marks it, and a file that is not valid UTF-8 is read as Windows-1252 (what a European Excel \"CSV (Comma delimited)\" export uses); Advanced > encoding forces one. A relative path starts in the graph's folder. To split the text into lines use String.Split.",
    "tags": [
     "read",
     "load",
     "txt",
-    "import"
+    "import",
+    "encoding",
+    "utf-8",
+    "ansi",
+    "lines"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Path to the file, e.g. from a File Path node."
+     "description": "Path to the file, e.g. from a File Path node. A relative path starts in the graph's folder."
+    },
+    {
+     "name": "encoding",
+     "type": "string",
+     "description": "auto (default), UTF-8, Windows-1252 or UTF-16.",
+     "default": "\"auto\""
     }
    ],
    "outputs": [
@@ -3451,26 +3590,36 @@
   },
   {
    "name": "Text.WriteToFile",
-   "id": "CamelGraph.Nodes.FileNodes.WriteText@string,string",
+   "id": "CamelGraph.Nodes.FileNodes.WriteText@string,object,string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Writes text to a file (overwrites; creates missing directories).",
+   "description": "Writes text to a file, replacing what was there, and creates missing folders; returns the path. A list of texts is written one item per line (joined with line breaks, no final line break). Nothing wired is an error that leaves the file alone; empty text \"\" empties it. A list of paths writes every file with the same text - set the text input to @L1 to write one text per path. Advanced > encoding: \"UTF-8 with BOM\" makes Excel show accents and symbols correctly. A relative path starts in the graph's folder. To add to a file use Text.AppendToFile.",
    "tags": [
     "write",
     "save",
     "txt",
-    "export"
+    "export",
+    "encoding",
+    "utf-8",
+    "bom",
+    "lines"
    ],
    "inputs": [
     {
      "name": "path",
      "type": "string",
-     "description": "Destination file path."
+     "description": "Destination file path. A relative path starts in the graph's folder."
     },
     {
      "name": "text",
+     "type": "any",
+     "description": "The text to write. A list is written one item per line (joined with line breaks, no final line break); null is an error."
+    },
+    {
+     "name": "encoding",
      "type": "string",
-     "description": "The text to write."
+     "description": "UTF-8 (default, no byte-order mark), UTF-8 with BOM, Windows-1252 or UTF-16.",
+     "default": "\"UTF-8\""
     }
    ],
    "outputs": [
@@ -3487,7 +3636,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.CreateZip@System.Collections.Generic.IList<object>,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Packs files and folders into a zip archive (a folder is stored with its structure under its own name); a missing source is an error.",
+   "description": "Packs files and folders into a zip archive (a folder is stored with its structure under its own name); a missing source is an error. Several wires, lists and lists of lists of paths can go into sources (for example a list of files plus one extra folder); they are packed in order. The zip is built beside the target and then put in place, so a failure never leaves a half-written file. A relative path starts in the graph's folder.",
    "tags": [
     "zip",
     "compress",
@@ -3501,12 +3650,13 @@
     {
      "name": "sources",
      "type": "any[]",
-     "description": "The files and/or folders to pack (a list of paths)."
+     "description": "The files and/or folders to pack (a list of paths; several wires and lists of lists are joined).",
+     "multiInput": true
     },
     {
      "name": "zipPath",
      "type": "string",
-     "description": "The zip file to create (its folder is created when needed)."
+     "description": "The zip file to create (its folder is created when needed). A relative path starts in the graph's folder."
     },
     {
      "name": "overwrite",
@@ -3529,7 +3679,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.ExtractZip@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Unpacks a zip archive into a folder; refuses entries that would escape the folder and files that already exist unless overwrite is true.",
+   "description": "Unpacks a zip archive into a folder; refuses entries that would escape the folder and files that already exist unless overwrite is true. A relative path starts in the graph's folder.",
    "tags": [
     "unzip",
     "extract",
@@ -3542,7 +3692,7 @@
     {
      "name": "zipPath",
      "type": "string",
-     "description": "The zip file to unpack."
+     "description": "The zip file to unpack. A relative path starts in the graph's folder."
     },
     {
      "name": "directory",
@@ -3570,7 +3720,7 @@
    "id": "CamelGraph.Nodes.FileExtraNodes.ListZip@string",
    "assembly": "CamelGraph.Nodes",
    "category": "File",
-   "description": "Lists the entry names inside a zip archive without extracting it.",
+   "description": "Lists the entry names inside a zip archive without extracting it. A relative path starts in the graph's folder.",
    "tags": [
     "zip",
     "contents",
@@ -3583,7 +3733,7 @@
     {
      "name": "zipPath",
      "type": "string",
-     "description": "The zip file to read."
+     "description": "The zip file to read. A relative path starts in the graph's folder."
     }
    ],
    "outputs": [
@@ -20770,11 +20920,37 @@
    "returns": ""
   },
   {
+   "name": "Graph.Folder",
+   "id": "CamelGraph.Nodes.SystemNodes.GraphFolder",
+   "assembly": "CamelGraph.Nodes",
+   "category": "System",
+   "description": "The folder of the graph file, which is where a relative path in a file node starts (for a graph that was never saved: Documents\\CamelGraph; in the Script Player and the command line: the folder of the script). Combine it with a file name using Path.Join to build a path that works wherever the graph and its files are moved together.",
+   "tags": [
+    "graph",
+    "folder",
+    "directory",
+    "location",
+    "relative",
+    "portable",
+    "script folder",
+    "next to graph"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "string",
+     "description": "The full path of the graph's folder."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "System.Environment",
    "id": "CamelGraph.Nodes.SystemNodes.GetEnvironment",
    "assembly": "CamelGraph.Nodes",
    "category": "System",
-   "description": "Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders.",
+   "description": "Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders. currentDirectory is the folder of the running program (for Navisworks its install folder), not the folder of the graph: use Graph.Folder for that.",
    "tags": [
     "user",
     "username",
@@ -20833,7 +21009,7 @@
    "id": "CamelGraph.Nodes.SystemNodes.OpenPath@string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "System",
-   "description": "Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true.",
+   "description": "Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true. A relative path starts in the graph's folder.",
    "tags": [
     "open",
     "explorer",
@@ -20848,7 +21024,7 @@
     {
      "name": "path",
      "type": "string",
-     "description": "The file or folder to open."
+     "description": "The file or folder to open. A relative path starts in the graph's folder."
     },
     {
      "name": "reveal",
@@ -20871,7 +21047,7 @@
    "id": "CamelGraph.Nodes.SystemNodes.Run@string,string,string,int",
    "assembly": "CamelGraph.Nodes",
    "category": "System",
-   "description": "Runs a program with arguments, waits for it (stopped after the timeout) and returns its exit code, output and error text.",
+   "description": "Runs a program with arguments, waits for it (stopped after Advanced > timeoutSeconds, 60 by default) and returns its exit code, output and error text. A bare program name is searched on the PATH; a path with folders that is not a full path starts in the graph's folder. Advanced > workingDirectory chooses the folder it runs in. In a loop, wire the loop item (or something made from it) into arguments: a node with only fixed inputs belongs to no loop and runs once.",
    "tags": [
     "run",
     "execute",
@@ -20887,7 +21063,7 @@
     {
      "name": "executable",
      "type": "string",
-     "description": "The program to start: a full path, or a name found on the PATH."
+     "description": "The program to start: a full path, or a name found on the PATH. A path with folders that is not full starts in the graph's folder."
     },
     {
      "name": "arguments",
@@ -20898,7 +21074,7 @@
     {
      "name": "workingDirectory",
      "type": "string",
-     "description": "The folder to run in; empty uses the current folder.",
+     "description": "The folder to run in; empty uses the folder of the running program (for Navisworks its install folder).",
      "default": "\"\""
     },
     {
@@ -20928,11 +21104,85 @@
    "returns": "Dictionary with \"exitCode\", \"output\" (standard output) and \"error\" (standard error)."
   },
   {
+   "name": "Web.Download",
+   "id": "CamelGraph.Nodes.SystemNodes.Download@string,string,bool,System.Collections.IDictionary,int",
+   "assembly": "CamelGraph.Nodes",
+   "category": "System",
+   "description": "Downloads a file (IFC, BCF, zip, picture, anything) from an http(s) address and saves it byte for byte; missing folders are created and an existing file is only replaced when overwrite is true. The file is received beside the target and put in place when complete, so a failed or too slow download leaves nothing half-written. An error status such as 404 is returned (ok = false, path empty) and writes nothing; a network failure or timeout is an error. A relative path starts in the graph's folder.",
+   "tags": [
+    "download",
+    "http",
+    "https",
+    "fetch",
+    "file",
+    "save",
+    "ifc",
+    "zip",
+    "bcf",
+    "url",
+    "web",
+    "get file"
+   ],
+   "inputs": [
+    {
+     "name": "url",
+     "type": "string",
+     "description": "The address, starting with http:// or https://."
+    },
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The file to write. A relative path starts in the graph's folder; missing folders are created."
+    },
+    {
+     "name": "overwrite",
+     "type": "boolean",
+     "description": "True to replace an existing file; false (default) to fail instead.",
+     "default": "false"
+    },
+    {
+     "name": "headers",
+     "type": "IDictionary",
+     "description": "Optional request headers (name to value), e.g. an Authorization token.",
+     "default": "null"
+    },
+    {
+     "name": "timeoutSeconds",
+     "type": "integer",
+     "description": "How long the whole download may take (1 to 3600 seconds).",
+     "default": "120"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "file",
+     "description": ""
+    },
+    {
+     "name": "status",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "ok",
+     "type": "boolean",
+     "description": ""
+    },
+    {
+     "name": "sizeBytes",
+     "type": "number",
+     "description": ""
+    }
+   ],
+   "returns": "Dictionary with \"path\" (the file written, null when the answer was an error), \"status\" (HTTP code), \"ok\" (true for 2xx) and \"sizeBytes\"."
+  },
+  {
    "name": "Web.Get",
    "id": "CamelGraph.Nodes.SystemNodes.Get@string,System.Collections.IDictionary,int",
    "assembly": "CamelGraph.Nodes",
    "category": "System",
-   "description": "Downloads text from an http(s) address with GET; an error status such as 404 is returned (ok = false), only a network failure or timeout is an error.",
+   "description": "Downloads text from an http(s) address with GET; an error status such as 404 is returned (ok = false), only a network failure or timeout is an error. The body is decoded as text, so use Web.Download for files such as IFC, zip or pictures.",
    "tags": [
     "http",
     "https",
@@ -22285,7 +22535,7 @@
    "id": "CamelGraph.Nodes.FlowWaitNodes.Wait@object,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Workflow",
-   "description": "Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow.",
+   "description": "Waits the given number of seconds (at most 600; nothing can stop the wait early, so Navisworks looks frozen meanwhile), then passes the value through unchanged - use it to pause between steps of a workflow. In a loop, wire the loop item (or something made from it) into value: a Flow.Wait with only fixed inputs belongs to no loop and waits once.",
    "tags": [
     "wait",
     "sleep",
@@ -22304,7 +22554,7 @@
     {
      "name": "seconds",
      "type": "number",
-     "description": "How long to wait, 0 to 3600 seconds (fractions allowed).",
+     "description": "How long to wait, 0 to 600 seconds (fractions allowed). Nothing can stop the wait before it is over, so it is kept short.",
      "default": "1"
     }
    ],

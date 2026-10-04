@@ -27,13 +27,15 @@ public class FlowWaitNodesTests
 
     [Theory]
     [InlineData(-1)]
-    [InlineData(3601)]
+    [InlineData(601)]
+    [InlineData(3600)]
     [InlineData(double.NaN)]
     [InlineData(double.PositiveInfinity)]
     public void Wait_RefusesAnAbsurdDuration(double seconds)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => FlowWaitNodes.Wait("x", seconds));
-        Assert.Contains("0 and 3600", ex.Message);
+        // Wave D (SYS-21): the hard maximum came down from 3600 to 600 seconds; the slider only reaches 60.
+        Assert.Contains("0 and 600", ex.Message);
     }
 
     [Fact]
@@ -45,5 +47,10 @@ public class FlowWaitNodesTests
         Assert.Equal("Workflow", definition.Category);
         Assert.Equal(CamelGraph.Core.Graph.NodeFunction.Create, definition.Function);
         Assert.True(definition.Inputs.Single(i => i.Name == "seconds").HasDefault);
+        var range = definition.Inputs.Single(i => i.Name == "seconds").Range!;
+        Assert.Equal(600d, range.Max);
+        Assert.Equal(60d, range.SoftMax);
+        Assert.Equal(0.5d, range.Step);
+        Assert.Contains("loop", definition.Description);
     }
 }
