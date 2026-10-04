@@ -277,7 +277,7 @@ public class WikiScreenshotTests : IClassFixture<WikiRun>
         Assert.True(standIns.Definitions.Count > 200, "only " + standIns.Definitions.Count + " Navisworks stand-ins");
         var search = WikiWorld.Definition("Search.ByProperty");
         Assert.Equal("CamelGraph.Navisworks", search.AssemblyName);
-        Assert.Equal(new[] { "equals", "contains", "wildcard", ">", ">=", "<", "<=" }, search.Inputs.Single(i => i.Name == "mode").Choices);
+        Assert.Equal(new[] { "equals", "contains", "wildcard", ">", ">=", "<", "<=", "exists" }, search.Inputs.Single(i => i.Name == "mode").Choices);
         Assert.NotNull(WikiWorld.Registry.CreateNode("CapturedSelection"));
     }
 }
