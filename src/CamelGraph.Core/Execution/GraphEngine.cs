@@ -93,13 +93,17 @@ public class GraphEngine
             var plan = LoopPlanner.Plan(graph);
             var frozen = CollectFrozenSet(graph);
             var units = OrderUnits(graph, plan);
+
+            // Nodes that read live host state run every time (without telling the editor the graph was edited).
+            var liveOnly = MarkLiveNodes(graph, plan, frozen, scope);
             planned = units.Count(unit => WillRun(unit, frozen, scope));
             var done = 0;
 
             try
             {
-                foreach (var unit in units)
+                for (var unitIndex = 0; unitIndex < units.Count; unitIndex++)
                 {
+                    var unit = units[unitIndex];
                     if (!WillRun(unit, frozen, scope))
                     {
                         continue;
@@ -118,12 +122,34 @@ public class GraphEngine
                     }
 
                     var node = (NodeModel)unit;
+                    var before = liveOnly.Contains(node) ? node.OutPorts.Select(p => p.Value).ToArray() : null;
                     ExecuteNode(graph, node, context);
                     ApplyPlanProblem(plan, node);
                     node.IsDirty = false;
                     executed.Add(node);
                     NodeExecuted?.Invoke(this, new NodeEventArgs(node));
                     done++;
+
+                    if (before != null && !SameValues(before, node))
+                    {
+                        // A live-state node produced something new: what is wired after it has to run again too.
+                        foreach (var affected in graph.CollectDownstream(node))
+                        {
+                            affected.IsDirty = true;
+                        }
+
+                        node.IsDirty = false;
+                        var remaining = 0;
+                        for (var next = unitIndex + 1; next < units.Count; next++)
+                        {
+                            if (WillRun(units[next], frozen, scope))
+                            {
+                                remaining++;
+                            }
+                        }
+
+                        planned = done + remaining;
+                    }
                 }
             }
             catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
@@ -150,6 +176,94 @@ public class GraphEngine
         }
 
         return timings;
+    }
+
+    /// <summary>
+    /// Makes every node that reads live host state due to run, whatever its inputs did. A live node that nothing else made
+    /// dirty is returned: the engine runs it and re-runs what is wired after it only when its output turned out different.
+    /// One inside a loop is not compared (the loop runs as a whole), so what is wired after it is simply made due as well.
+    /// Nothing here raises the graph's Modified event, so Auto-run is not set off by it.
+    /// </summary>
+    private static HashSet<NodeModel> MarkLiveNodes(GraphModel graph, LoopPlan plan, HashSet<NodeModel> frozen, HashSet<NodeModel>? scope)
+    {
+        var liveOnly = new HashSet<NodeModel>();
+        foreach (var node in graph.Nodes)
+        {
+            if (!node.IsLiveState || node.IsMuted || frozen.Contains(node) || (scope != null && !scope.Contains(node)))
+            {
+                continue;
+            }
+
+            if (plan.NodeToRegion.ContainsKey(node))
+            {
+                foreach (var affected in graph.CollectDownstream(node))
+                {
+                    affected.IsDirty = true;
+                }
+
+                continue;
+            }
+
+            if (!node.IsDirty)
+            {
+                node.IsDirty = true;
+                liveOnly.Add(node);
+            }
+        }
+
+        return liveOnly;
+    }
+
+    /// <summary>True when the outputs a node has now are the same values as <paramref name="before"/> (lists compared element by element).</summary>
+    private static bool SameValues(object?[] before, NodeModel node)
+    {
+        if (before.Length != node.OutPorts.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < before.Length; i++)
+        {
+            if (!SameValue(before[i], node.OutPorts[i].Value))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool SameValue(object? a, object? b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        if (a == null || b == null || a is string || b is string)
+        {
+            return a != null && b != null && a.Equals(b);
+        }
+
+        if (a is IList left && b is IList right)
+        {
+            if (left.Count != right.Count)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < left.Count; i++)
+            {
+                if (!SameValue(left[i], right[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return a.Equals(b);
     }
 
     private static bool WillRun(object unit, HashSet<NodeModel> frozen, HashSet<NodeModel>? scope)

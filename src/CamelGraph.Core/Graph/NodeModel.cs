@@ -72,6 +72,13 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// </summary>
     public virtual bool CatchesUpstreamErrors => false;
 
+    /// <summary>
+    /// True when the node reads live host state (the selection, the open document) and so must run on every run instead of
+    /// serving its cached output (zero-touch: <see cref="CamelGraph.Core.Loader.LiveStateAttribute"/>). The nodes after it run
+    /// again only when its output is different from the previous run.
+    /// </summary>
+    public virtual bool IsLiveState => false;
+
     /// <summary>True when the last run stopped this node because a node feeding it had failed (it did not execute).</summary>
     public bool FailedUpstream { get; internal set; }
 

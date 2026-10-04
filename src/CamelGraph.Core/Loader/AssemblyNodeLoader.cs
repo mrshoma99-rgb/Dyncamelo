@@ -276,6 +276,7 @@ public static class AssemblyNodeLoader
         definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys, docs);
 
         definition.CatchesUpstreamErrors = method.GetCustomAttribute<CatchesUpstreamErrorsAttribute>() != null;
+        definition.IsLiveState = method.GetCustomAttribute<LiveStateAttribute>() != null;
 
         var deprecated = method.GetCustomAttribute<NodeDeprecatedAttribute>();
         if (deprecated != null)

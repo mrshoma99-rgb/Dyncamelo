@@ -189,6 +189,37 @@ public sealed class NodeGroup : INotifyPropertyChanged
     public bool Uses(NodeGroup other) => Uses(other, new HashSet<NodeGroup>());
 
     /// <summary>
+    /// True when the body (or a group used inside it) holds a node that reads live host state, so its instances must run on every
+    /// run instead of serving their cached outputs.
+    /// </summary>
+    public bool ContainsLiveState => HasLiveNode(new HashSet<NodeGroup>());
+
+    private bool HasLiveNode(HashSet<NodeGroup> seen)
+    {
+        if (!seen.Add(this))
+        {
+            return false;
+        }
+
+        foreach (var node in Graph.Nodes)
+        {
+            if (node is GroupInstanceNode instance)
+            {
+                if (instance.Definition != null && instance.Definition.HasLiveNode(seen))
+                {
+                    return true;
+                }
+            }
+            else if (node.IsLiveState && !node.IsMuted)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Runs the body for one set of inputs with a fresh engine on the caller's thread: every body node is marked to run, the
     /// Group Input node supplies <paramref name="inputs"/>, and what reaches the Group Output node is returned.
     /// Cancelling the run, progress reports and the group path all pass through <paramref name="context"/>.

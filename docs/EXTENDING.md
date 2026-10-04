@@ -313,6 +313,13 @@ public static bool IsBlank([AcceptsNull] string text) => string.IsNullOrWhiteSpa
 public static object Rename(object item, [ScalarInput] object name) { /* ... */ }
 ```
 
+- **`[LiveState]` on a method** — the engine only runs nodes whose inputs changed and serves the stored output of the rest. A node that reads live host state (the current selection, the open document, the list of selection sets) has no input that changes when that state does, so without help it shows the state of its first run for ever. Mark it and the engine runs it on every run. The nodes wired after it run again only when what it produced is different from the previous run (lists are compared item by item), so a second **Run** with the same selection does not repeat the edits further down. A node group with such a node inside runs on every run too. Auto-run is not set off by it (nothing in the graph was edited), and a frozen or muted node is left alone.
+
+```csharp
+[LiveState]
+public static List<ModelItem> Current() => /* read the host's selection now */;
+```
+
 ## 10. Changing a node that is already shipped
 
 Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its **definition id** — `Namespace.Class.Method@parameterTypes` — and stores each wire and each typed-in value by the **port name** (the parameter name, the `[MultiReturn]` key, or the return name). What you may change:

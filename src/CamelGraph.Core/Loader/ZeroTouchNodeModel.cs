@@ -72,6 +72,9 @@ public class ZeroTouchNodeModel : NodeModel
     public override bool CatchesUpstreamErrors => Definition.CatchesUpstreamErrors;
 
     /// <inheritdoc />
+    public override bool IsLiveState => Definition.IsLiveState;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         // Inside a run the replicator already collects per call. Evaluated on its own (a test, another tool), the node still

@@ -14,6 +14,10 @@ namespace CamelGraph.Core.Tests;
 /// <summary>Zero-touch nodes that use the platform attributes and the warning channel.</summary>
 public static class PlatformFixtures
 {
+    public static int LiveReads;
+    public static int LiveValue = 1;
+    public static int DownstreamCalls;
+
     public static double WarnIfNegative(double x)
     {
         if (x < 0)
@@ -53,6 +57,32 @@ public static class PlatformFixtures
     public static string WhatIsAny(object value) => value == null ? "null" : value.GetType().Name;
 
     public static string NotAnObject([ScalarInput] string text) => text;
+
+    [LiveState]
+    public static int ReadLive()
+    {
+        LiveReads++;
+        return LiveValue;
+    }
+
+    [LiveState]
+    public static List<object> ReadLiveList()
+    {
+        LiveReads++;
+        return new List<object> { LiveValue, "x" };
+    }
+
+    public static int Downstream(int x)
+    {
+        DownstreamCalls++;
+        return x * 10;
+    }
+
+    public static int Downstream(object x)
+    {
+        DownstreamCalls++;
+        return 0;
+    }
 }
 
 public class PlatformApiTests
@@ -315,5 +345,165 @@ public class PlatformApiTests
         Assert.Equal(PortFamily.Any, kind.Family);
         Assert.Equal(PortDepth.Unknown, plain.Depth);
         Assert.Equal(PortEditorKind.None, PortEditors.Resolve(Node("WhatIs").InPorts[0]));
+    }
+
+    // --------------------------------------------------------------- LiveState
+
+    private static void ResetLive()
+    {
+        PlatformFixtures.LiveReads = 0;
+        PlatformFixtures.LiveValue = 1;
+        PlatformFixtures.DownstreamCalls = 0;
+    }
+
+    private static (GraphModel Graph, ZeroTouchNodeModel Live, ZeroTouchNodeModel After) LiveGraph()
+    {
+        var graph = new GraphModel();
+        var live = Node("ReadLive");
+        // Downstream(int) and Downstream(object) exist: take the int overload.
+        var after = new ZeroTouchNodeModel(Definitions.Single(d => d.Method.Name == "Downstream" && d.Method.GetParameters()[0].ParameterType == typeof(int)));
+        graph.AddNode(live);
+        graph.AddNode(after);
+        ZT.Wire(graph, live, 0, after, 0);
+        return (graph, live, after);
+    }
+
+    [Fact]
+    public void ALiveStateNodeRunsOnEveryRunAndSeesTheNewState()
+    {
+        ResetLive();
+        var (graph, live, after) = LiveGraph();
+        var engine = new GraphEngine();
+
+        engine.Run(graph);
+        Assert.Equal(1, live.OutPorts[0].Value);
+        Assert.Equal(10, after.OutPorts[0].Value);
+
+        PlatformFixtures.LiveValue = 4;   // the user changed the selection; nothing in the graph changed
+        engine.Run(graph);
+
+        Assert.Equal(2, PlatformFixtures.LiveReads);
+        Assert.Equal(4, live.OutPorts[0].Value);
+        Assert.Equal(40, after.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void NodesAfterALiveStateNodeRunAgainOnlyWhenItsOutputChanged()
+    {
+        ResetLive();
+        var (graph, _, after) = LiveGraph();
+        var engine = new GraphEngine();
+
+        engine.Run(graph);
+        var second = engine.Run(graph);   // same state: the live node reads again, the node after it does not
+
+        Assert.Equal(2, PlatformFixtures.LiveReads);
+        Assert.Equal(1, PlatformFixtures.DownstreamCalls);
+        Assert.Single(second.ExecutedNodes);
+        Assert.Equal(10, after.OutPorts[0].Value);
+
+        PlatformFixtures.LiveValue = 2;
+        var third = engine.Run(graph);
+
+        Assert.Equal(2, PlatformFixtures.DownstreamCalls);
+        Assert.Equal(2, third.ExecutedNodes.Count);
+        Assert.Equal(2, third.PlannedCount);
+        Assert.Equal(20, after.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void ALiveListOutputIsComparedByContent()
+    {
+        ResetLive();
+        var graph = new GraphModel();
+        var live = Node("ReadLiveList");
+        var after = new ZeroTouchNodeModel(Definitions.Single(d => d.Method.Name == "Downstream" && d.Method.GetParameters()[0].ParameterType == typeof(object)));
+        graph.AddNode(live);
+        graph.AddNode(after);
+        ZT.Wire(graph, live, 0, after, 0);
+        var engine = new GraphEngine();
+
+        engine.Run(graph);
+        engine.Run(graph);
+
+        Assert.Equal(2, PlatformFixtures.LiveReads);
+        Assert.Equal(1, PlatformFixtures.DownstreamCalls);
+    }
+
+    [Fact]
+    public void RunningALiveStateNodeDoesNotCountAsAnEditOfTheGraph()
+    {
+        ResetLive();
+        var (graph, _, _) = LiveGraph();
+        var engine = new GraphEngine();
+        engine.Run(graph);
+        var modified = 0;
+        graph.Modified += (_, _) => modified++;
+
+        PlatformFixtures.LiveValue = 3;
+        engine.Run(graph);
+
+        Assert.Equal(0, modified);
+    }
+
+    [Fact]
+    public void AFrozenOrMutedLiveStateNodeIsLeftAlone()
+    {
+        ResetLive();
+        var (graph, live, _) = LiveGraph();
+        var engine = new GraphEngine();
+        engine.Run(graph);
+
+        live.IsFrozen = true;
+        engine.Run(graph);
+        Assert.Equal(1, PlatformFixtures.LiveReads);
+        live.IsFrozen = false;
+        live.IsMuted = true;
+        engine.Run(graph);
+        Assert.Equal(1, PlatformFixtures.LiveReads);
+    }
+
+    [Fact]
+    public void AGroupWithALiveStateNodeInsideRunsOnEveryRun()
+    {
+        ResetLive();
+        var doc = new GraphModel();
+        var group = doc.NodeGroups.Create("Reader");
+        group.AddSocket(SocketSide.Output, "value");
+        var live = Node("ReadLive");
+        group.Graph.AddNode(live);
+        ZT.Wire(group.Graph, live, 0, group.OutputNode, 0);
+        var instance = new GroupInstanceNode(group);
+        doc.AddNode(instance);
+        var engine = new GraphEngine();
+
+        Assert.True(group.ContainsLiveState);
+        Assert.True(instance.IsLiveState);
+        engine.Run(doc);
+        PlatformFixtures.LiveValue = 9;
+        engine.Run(doc);
+
+        Assert.Equal(2, PlatformFixtures.LiveReads);
+        Assert.Equal(9, instance.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void AGroupWithoutALiveStateNodeIsNotLive()
+    {
+        var doc = new GraphModel();
+        var group = doc.NodeGroups.Create("Plain");
+        group.AddSocket(SocketSide.Input, "x");
+        var step = ZT.Node("AddStep");
+        group.Graph.AddNode(step);
+
+        Assert.False(group.ContainsLiveState);
+        Assert.False(new GroupInstanceNode(group).IsLiveState);
+    }
+
+    [Fact]
+    public void TheLoaderRecordsLiveState()
+    {
+        Assert.True(Node("ReadLive").IsLiveState);
+        Assert.False(ZT.Node("Sqrt").IsLiveState);
     }
 }

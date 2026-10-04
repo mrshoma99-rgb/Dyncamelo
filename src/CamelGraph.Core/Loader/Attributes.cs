@@ -292,6 +292,18 @@ public sealed class ScalarInputAttribute : Attribute
 }
 
 /// <summary>
+/// The node reads live host state (the current selection, the open document, the list of selection sets) instead of only its
+/// inputs, so its output can differ between two runs although nothing in the graph changed. The engine therefore runs it on
+/// every run instead of serving its cached output; the nodes after it run again only when what it produced is different
+/// from the previous run. A node group with such a node inside behaves the same way. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class LiveStateAttribute : Attribute
+{
+}
+
+/// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
 /// renaming a port would silently drop them; with this attribute a graph that still says the old name finds the
 /// port now called the current name. Repeat the attribute for several ports.

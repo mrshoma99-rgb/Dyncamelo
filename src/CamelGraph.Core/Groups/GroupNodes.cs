@@ -224,6 +224,9 @@ public sealed class GroupInstanceNode : GroupBoundNode
     /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Modify;
 
+    /// <summary>True when the group's body holds a node that reads live host state: the instance then runs on every run.</summary>
+    public override bool IsLiveState => _definition != null && _definition.ContainsLiveState;
+
     /// <summary>The group this node runs.</summary>
     public NodeGroup? Definition => _definition;
 
