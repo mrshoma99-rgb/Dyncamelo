@@ -772,10 +772,10 @@
 | `String.RegexSplit` | text, pattern | list | Splits a text into a list of parts wherever a regular expression matches |
 | `String.RemoveDiacritics` | text | text | Removes accents from letters ("é" becomes "e") so names compare and sort without them |
 | `String.Repeat` | text, count, separator? | text | Repeats a text a number of times (0 to 10000), optionally with a separator between the copies |
-| `String.Replace` | text, searchFor, replaceWith | result | Replaces all occurrences of a substring with another string |
+| `String.Replace` | text, searchFor, replaceWith, ignoreCase? | result | Replaces all occurrences of a substring with another string |
 | `String.Reverse` | text | text | Reverses the characters of a text |
 | `String.Right` | text, count | text | Returns the last characters of a text (the whole text when the count is larger) |
-| `String.Split` | text, separator | list | Splits a string into a list of substrings around a separator |
+| `String.Split` | text, separator, removeEmpty?, trim? | list | Splits a string into a list of substrings around a separator |
 | `String.StartsWith` | text, searchFor, ignoreCase? | result | Tests whether a string starts with the given prefix |
 | `String.Substring` | text, startIndex, length? | result | Extracts part of a string from a start index (-1 length = to the end) |
 | `String.Template` | template, dictionary, onMissing? | text | Replaces {name} placeholders in a text with the values of a dictionary ("{{" and "}}" are literal braces) |
@@ -783,7 +783,7 @@
 | `String.ToNumber` | text | result | Converts a numeric string (invariant culture, e.g |
 | `String.ToTitleCase` | text | text | Capitalises the first letter of every word and lowercases the rest ("bim COORDINATION" becomes "Bim Coordination") |
 | `String.ToUpper` | text | result | Converts a string to uppercase |
-| `String.Trim` | text | result | Removes leading and trailing whitespace from a string |
+| `String.Trim` | text, chars? | result | Removes whitespace (or the given characters) from both ends of a string |
 | `String.TrimEnd` | text, chars? | text | Removes whitespace (or the given characters) from the end of a text |
 | `String.TrimStart` | text, chars? | text | Removes whitespace (or the given characters) from the start of a text |
 

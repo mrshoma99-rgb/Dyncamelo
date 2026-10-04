@@ -136,14 +136,19 @@ public class StringNodesTests
     }
 
     [Fact]
-    public void Substring_OutOfRange_ThrowsWithClearMessage()
+    public void Substring_StartBeyondTheText_ThrowsWithClearMessage()
     {
         var startEx = Assert.Throws<ArgumentOutOfRangeException>(() => StringNodes.Substring("abc", 4));
         Assert.Contains("start index 4", startEx.Message);
         Assert.Contains("3 character", startEx.Message);
+    }
 
-        var lengthEx = Assert.Throws<ArgumentOutOfRangeException>(() => StringNodes.Substring("abc", 1, 5));
-        Assert.Contains("length 5", lengthEx.Message);
+    [Fact]
+    public void Substring_LengthPastTheEnd_GivesWhatIsLeft()
+    {
+        // VAL-14: used to throw "start index 1 plus length 5 exceeds the string's 3 character(s)"; now clamps like Left and Right.
+        Assert.Equal("bc", StringNodes.Substring("abc", 1, 5));
+        Assert.Equal("", StringNodes.Substring("abc", 3, 2));
     }
 
     [Fact]

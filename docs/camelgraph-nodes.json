@@ -20311,10 +20311,10 @@
   },
   {
    "name": "String.Replace",
-   "id": "CamelGraph.Nodes.StringNodes.Replace@string,string,string",
+   "id": "CamelGraph.Nodes.StringNodes.Replace@string,string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Replaces all occurrences of a substring with another string.",
+   "description": "Replaces all occurrences of a substring with another string. Case-sensitive unless ignoreCase is switched on.",
    "tags": [
     "substitute",
     "swap"
@@ -20334,6 +20334,12 @@
      "name": "replaceWith",
      "type": "string",
      "description": "Replacement text."
+    },
+    {
+     "name": "ignoreCase",
+     "type": "boolean",
+     "description": "True to find the substring whatever its upper/lower case (off by default: the search is case-sensitive).",
+     "default": "false"
     }
    ],
    "outputs": [
@@ -20410,14 +20416,16 @@
   },
   {
    "name": "String.Split",
-   "id": "CamelGraph.Nodes.StringNodes.Split@string,string",
+   "id": "CamelGraph.Nodes.StringNodes.Split@string,string,bool,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Splits a string into a list of substrings around a separator.",
+   "description": "Splits a string into a list of substrings around a separator. Empty parts are kept unless removeEmpty is on; trim removes the spaces around every part (\"a, b ,c\" with separator \",\" and trim gives a, b, c).",
    "tags": [
     "tokenize",
     "divide",
-    "delimiter"
+    "delimiter",
+    "csv",
+    "comma"
    ],
    "inputs": [
     {
@@ -20429,6 +20437,18 @@
      "name": "separator",
      "type": "string",
      "description": "Separator text."
+    },
+    {
+     "name": "removeEmpty",
+     "type": "boolean",
+     "description": "True to drop the empty parts, so \"a,b,,c\" gives three parts (off by default).",
+     "default": "false"
+    },
+    {
+     "name": "trim",
+     "type": "boolean",
+     "description": "True to remove the spaces around every part, so \"a, b ,c\" gives a, b and c (off by default). Trimming happens before the empty parts are dropped, so a part of only spaces counts as empty.",
+     "default": "false"
     }
    ],
    "outputs": [
@@ -20483,7 +20503,7 @@
    "id": "CamelGraph.Nodes.StringNodes.Substring@string,int,int",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Extracts part of a string from a start index (-1 length = to the end).",
+   "description": "Extracts part of a string from a start index (-1 length = to the end). A length that runs past the end gives what is left, like String.Left and String.Right; a start index beyond the end of the text is an error.",
    "tags": [
     "slice",
     "extract",
@@ -20499,12 +20519,12 @@
     {
      "name": "startIndex",
      "type": "integer",
-     "description": "Zero-based index of the first character to take."
+     "description": "Zero-based index of the first character to take (0 to the text's length)."
     },
     {
      "name": "length",
      "type": "integer",
-     "description": "Number of characters to take; -1 = to the end.",
+     "description": "Number of characters to take; -1 = to the end. More than the text has left gives what is left.",
      "default": "-1"
     }
    ],
@@ -20672,10 +20692,10 @@
   },
   {
    "name": "String.Trim",
-   "id": "CamelGraph.Nodes.StringNodes.Trim@string",
+   "id": "CamelGraph.Nodes.StringNodes.Trim@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Removes leading and trailing whitespace from a string.",
+   "description": "Removes whitespace (or the given characters) from both ends of a string. See String.TrimStart and String.TrimEnd for one end only.",
    "tags": [
     "whitespace",
     "strip",
@@ -20686,6 +20706,12 @@
      "name": "text",
      "type": "string",
      "description": "The string to trim."
+    },
+    {
+     "name": "chars",
+     "type": "string",
+     "description": "The characters to remove (each character of this text counts); empty means whitespace.",
+     "default": "\"\""
     }
    ],
    "outputs": [

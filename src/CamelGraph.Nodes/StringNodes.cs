@@ -71,41 +71,58 @@ public static class StringNodes
     /// <summary>
     /// Splits a string on a separator. An empty separator returns the whole
     /// string as a single-element list; empty segments between adjacent
-    /// separators are preserved.
+    /// separators are preserved unless <paramref name="removeEmpty"/> is on.
     /// </summary>
     /// <param name="text">The string to split.</param>
     /// <param name="separator">Separator text.</param>
+    /// <param name="removeEmpty">True to drop the empty parts, so "a,b,,c" gives three parts (off by default).</param>
+    /// <param name="trim">True to remove the spaces around every part, so "a, b ,c" gives a, b and c (off by default). Trimming happens before the empty parts are dropped, so a part of only spaces counts as empty.</param>
     /// <returns>The list of segments.</returns>
     [NodeName("String.Split")]
     [PortAlias("str", "text")]
+    [NodeAliases("CamelGraph.Nodes.StringNodes.Split@string,string")]
     [return: NodeName("list")]
-    [NodeDescription("Splits a string into a list of substrings around a separator.")]
-    [NodeSearchTags("tokenize", "divide", "delimiter")]
-    public static IList<string> Split(string text, string separator)
+    [NodeDescription("Splits a string into a list of substrings around a separator. Empty parts are kept unless removeEmpty is on; trim removes the spaces around every part (\"a, b ,c\" with separator \",\" and trim gives a, b, c).")]
+    [NodeSearchTags("tokenize", "divide", "delimiter", "csv", "comma")]
+    public static IList<string> Split(string text, string separator, bool removeEmpty = false, bool trim = false)
     {
         if (text == null)
         {
             throw new ArgumentNullException(nameof(text), "String.Split requires a string.");
         }
 
-        if (string.IsNullOrEmpty(separator))
+        var parts = string.IsNullOrEmpty(separator)
+            ? new List<string> { text }
+            : new List<string>(text.Split(new[] { separator }, StringSplitOptions.None));
+
+        if (trim)
         {
-            return new List<string> { text };
+            for (var i = 0; i < parts.Count; i++)
+            {
+                parts[i] = parts[i].Trim();
+            }
         }
 
-        return new List<string>(text.Split(new[] { separator }, StringSplitOptions.None));
+        if (removeEmpty)
+        {
+            parts.RemoveAll(part => part.Length == 0);
+        }
+
+        return parts;
     }
 
     /// <summary>Replaces every occurrence of a substring with another string.</summary>
     /// <param name="text">The string to modify.</param>
     /// <param name="searchFor">Substring to replace (must not be empty).</param>
     /// <param name="replaceWith">Replacement text.</param>
+    /// <param name="ignoreCase">True to find the substring whatever its upper/lower case (off by default: the search is case-sensitive).</param>
     /// <returns>The string with all occurrences replaced.</returns>
     [NodeName("String.Replace")]
     [PortAlias("str", "text")]
-    [NodeDescription("Replaces all occurrences of a substring with another string.")]
+    [NodeAliases("CamelGraph.Nodes.StringNodes.Replace@string,string,string")]
+    [NodeDescription("Replaces all occurrences of a substring with another string. Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("substitute", "swap")]
-    public static string Replace(string text, string searchFor, string replaceWith)
+    public static string Replace(string text, string searchFor, string replaceWith, bool ignoreCase = false)
     {
         if (text == null)
         {
@@ -117,7 +134,27 @@ public static class StringNodes
             throw new ArgumentException("String.Replace requires a non-empty search string.", nameof(searchFor));
         }
 
-        return text.Replace(searchFor, replaceWith ?? string.Empty);
+        if (!ignoreCase)
+        {
+            return text.Replace(searchFor, replaceWith ?? string.Empty);
+        }
+
+        var replacement = replaceWith ?? string.Empty;
+        var result = new System.Text.StringBuilder(text.Length);
+        var position = 0;
+        while (true)
+        {
+            var found = text.IndexOf(searchFor, position, StringComparison.OrdinalIgnoreCase);
+            if (found < 0)
+            {
+                break;
+            }
+
+            result.Append(text, position, found - position).Append(replacement);
+            position = found + searchFor.Length;
+        }
+
+        return result.Append(text, position, text.Length - position).ToString();
     }
 
     /// <summary>Length of a string in characters.</summary>
@@ -216,14 +253,15 @@ public static class StringNodes
 
     /// <summary>
     /// Extracts part of a string. The default length (-1) takes everything from
-    /// the start index to the end of the string.
+    /// the start index to the end of the string. A length that runs past the end of the text
+    /// gives what is left, like String.Left and String.Right.
     /// </summary>
     /// <param name="text">The string to slice.</param>
-    /// <param name="startIndex">Zero-based index of the first character to take.</param>
-    /// <param name="length">Number of characters to take; -1 = to the end.</param>
+    /// <param name="startIndex">Zero-based index of the first character to take (0 to the text's length).</param>
+    /// <param name="length">Number of characters to take; -1 = to the end. More than the text has left gives what is left.</param>
     /// <returns>The extracted substring.</returns>
     [NodeName("String.Substring")]
-    [NodeDescription("Extracts part of a string from a start index (-1 length = to the end).")]
+    [NodeDescription("Extracts part of a string from a start index (-1 length = to the end). A length that runs past the end gives what is left, like String.Left and String.Right; a start index beyond the end of the text is an error.")]
     [NodeSearchTags("slice", "extract", "mid", "part")]
     public static string Substring(string text, int startIndex, int length = -1)
     {
@@ -240,21 +278,8 @@ public static class StringNodes
                 " is out of range for a string of " + text.Length.ToString(CultureInfo.InvariantCulture) + " character(s).");
         }
 
-        if (length < 0)
-        {
-            return text.Substring(startIndex);
-        }
-
-        if (startIndex + length > text.Length)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(length),
-                "String.Substring: start index " + startIndex.ToString(CultureInfo.InvariantCulture) +
-                " plus length " + length.ToString(CultureInfo.InvariantCulture) +
-                " exceeds the string's " + text.Length.ToString(CultureInfo.InvariantCulture) + " character(s).");
-        }
-
-        return text.Substring(startIndex, length);
+        var left = text.Length - startIndex;
+        return length < 0 || length >= left ? text.Substring(startIndex) : text.Substring(startIndex, length);
     }
 
     /// <summary>Converts a string to uppercase (invariant culture).</summary>
@@ -289,19 +314,21 @@ public static class StringNodes
         return text.ToLowerInvariant();
     }
 
-    /// <summary>Removes leading and trailing whitespace from a string.</summary>
+    /// <summary>Removes leading and trailing whitespace (or the given characters) from a string.</summary>
     /// <param name="text">The string to trim.</param>
+    /// <param name="chars">The characters to remove (each character of this text counts); empty means whitespace.</param>
     /// <returns>The trimmed string.</returns>
     [NodeName("String.Trim")]
-    [NodeDescription("Removes leading and trailing whitespace from a string.")]
+    [NodeAliases("CamelGraph.Nodes.StringNodes.Trim@string")]
+    [NodeDescription("Removes whitespace (or the given characters) from both ends of a string. See String.TrimStart and String.TrimEnd for one end only.")]
     [NodeSearchTags("whitespace", "strip", "clean")]
-    public static string Trim(string text)
+    public static string Trim(string text, string chars = "")
     {
         if (text == null)
         {
             throw new ArgumentNullException(nameof(text), "String.Trim requires a string.");
         }
 
-        return text.Trim();
+        return string.IsNullOrEmpty(chars) ? text.Trim() : text.Trim(chars.ToCharArray());
     }
 }

@@ -120,18 +120,18 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 |---|---|---|---|---|---|---|
 | String.Concat | String | a: string, b: string, c: string = "" | text: string | Concatenate up to three strings (defaulted ports). | String.Concat | MVP |
 | String.Contains | String | text: string, searchFor: string, ignoreCase: bool = true | contains: bool | Substring test (property-value filtering workhorse). | String.IndexOf(OrdinalIgnoreCase) | MVP |
-| String.Split | String | text: string, separator: string = "," | parts: List&lt;string&gt; | Split into a list. | String.Split | MVP |
-| String.Replace | String | text: string, searchFor: string, replaceWith: string | text: string | Replace all occurrences. | String.Replace | MVP |
+| String.Split | String | text: string, separator: string = ",", removeEmpty: bool = false, trim: bool = false | parts: List&lt;string&gt; | Split into a list; optionally drop empty parts and trim every part. | String.Split | MVP |
+| String.Replace | String | text: string, searchFor: string, replaceWith: string, ignoreCase: bool = false | text: string | Replace all occurrences (case-sensitive unless ignoreCase). | String.Replace | MVP |
 | String.Length | String | text: string | length: int | Character count. | String.Length | MVP |
 | String.ToNumber | String | text: string | number: double | Parse a number (invariant + current culture fallback); warns and returns null on failure. | Double.TryParse | MVP |
 | String.FromObject | String | object: object | text: string | Convert any value to its display string (invariant). | Convert.ToString | MVP |
 | String.Join | String | list: List&lt;object&gt;, separator: string = ", " | text: string | Join list items into one string. | String.Join | Implemented (v0.1) |
 | String.StartsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Prefix test. | String.StartsWith | Implemented (v0.2) |
 | String.EndsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Suffix test. | String.EndsWith | Implemented (v0.2) |
-| String.Substring | String | text: string, startIndex: int, length: int = -1 | text: string | Extract a substring (-1 length = to end). | String.Substring | Implemented (v0.2) |
+| String.Substring | String | text: string, startIndex: int, length: int = -1 | text: string | Extract a substring (-1 length = to end; a length past the end gives what is left). | String.Substring | Implemented (v0.2) |
 | String.ToUpper | String | text: string | text: string | Uppercase. | String.ToUpperInvariant | Implemented (v0.2) |
 | String.ToLower | String | text: string | text: string | Lowercase. | String.ToLowerInvariant | Implemented (v0.2) |
-| String.Trim | String | text: string | text: string | Strip leading/trailing whitespace. | String.Trim | Implemented (v0.2) |
+| String.Trim | String | text: string, chars: string = "" | text: string | Strip leading/trailing whitespace, or the given characters. | String.Trim | Implemented (v0.2) |
 
 ## List
 
