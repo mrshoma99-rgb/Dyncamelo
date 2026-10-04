@@ -35,11 +35,11 @@ Two ideas make most of these short:
 
 ## Model maintainer / compiler
 
-**Compile the newest files.** `Directory.FindFiles` (pattern `*.nwc;*.nwd`, sort *modified*, descending) → `Document.AppendFiles` → `Document.Save`. Put `Flow.Try` after a risky step so one bad file is logged with `Log.Write` instead of stopping the run.
+**Compile the newest files.** `Directory.Find` (pattern `*.nwc;*.nwd`, *Advanced* > sortBy *modified*, descending) → `Document.AppendFiles` → `Document.Save`. Put `Flow.Try` after a risky step so one bad file is logged with `Log.Write` instead of stopping the run.
 
 **Keep a log.** `Log.Write` appends a time-stamped line (`INFO`, `WARN`, `ERROR`); feed it the message from `String.Format` (`{0} files appended in {1} s`).
 
-**Housekeeping on disk.** `File.Info` (size, modified) for a report, `File.Copy` / `File.Move` for archiving, `Zip.Create` for the deliverable. These change files, so the Script Player asks before running a script that holds them.
+**Housekeeping on disk.** `File.Info` (size, modified) for a report, `File.Copy` / `File.Move` (and `Directory.Copy` / `Directory.Move` for whole folders) for archiving, `Zip.Create` for the deliverable. These change files, so the Script Player asks before running a script that holds them.
 
 **Sets and views.** `SelectionSet.Info` (kind, item count) over `SelectionSets.All` finds empty or stale sets; `SelectionSet.Duplicate` and `SavedViewpoint.Update` re-use what exists.
 

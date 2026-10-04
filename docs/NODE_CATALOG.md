@@ -2,17 +2,17 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**583 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**587 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
 | [Color](#color) | 17 |
-| [Data](#data) | 4 |
+| [Data](#data) | 5 |
 | [DateTime](#datetime) | 18 |
 | [Dictionary](#dictionary) | 17 |
 | [Display](#display) | 4 |
-| [File](#file) | 36 |
+| [File](#file) | 37 |
 | [Geometry](#geometry) | 42 |
 | [IFC](#ifc) | 4 |
 | [Input](#input) | 11 |
@@ -47,7 +47,7 @@
 | [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 5 |
 | [Report](#report) | 2 |
 | [String](#string) | 36 |
-| [System](#system) | 5 |
+| [System](#system) | 7 |
 | [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
 | [Workflow](#workflow) | 8 |
@@ -89,6 +89,7 @@
 | `JSON.Stringify` | value, indented? | json | Serializes any value to a JSON string |
 | `Snapshot.Diff` | oldValue, newValue | addedKeys, removedKeys, changedKeys | Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality |
 | `XML.Parse` | xml, listElements? | value | Parses XML into dictionaries, lists and strings (attributes as "@name", repeated elements as lists, mixed text as "#text") |
+| `XML.ReadFromFile` | path | value | Reads an XML file into dictionaries, lists and strings, in the same shape as XML.Parse (attributes as "@name", repeated elements as lists, mixed text as "#text") |
 
 ## DateTime
 
@@ -148,16 +149,16 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `CSV.AppendToFile` | path, rows, delimiter?, headers? | path | Appends rows to a CSV file (same quoting as CSV.WriteToFile), writing the optional headers only when the file is new or empty |
-| `CSV.ReadFromFile` | path, delimiter? | data | Reads a CSV file into a list of rows (numeric cells become numbers) |
-| `CSV.WriteToFile` | path, data, delimiter? | path | Writes a list of rows to a CSV file (overwrites |
+| `CSV.AppendToFile` | path, rows, delimiter?, headers?, encoding? | path | Appends rows to a CSV file (same quoting and date format as CSV.WriteToFile), writing the optional headers only when the file is new or empty |
+| `CSV.ReadFromFile` | path, delimiter?, numbers?, encoding? | data | Reads a CSV file into a list of rows |
+| `CSV.WriteToFile` | path, data, delimiter?, encoding? | path | Writes a list of rows to a CSV file, replacing what was there, and creates missing folders |
+| `Directory.Copy` | source, destination, overwrite? | path | Copies a folder with all its files and sub-folders to another place (creates the destination |
 | `Directory.Create` | path | path | Creates a folder including any missing parent folders (does nothing when it already exists) |
 | `Directory.Delete` | path, recursive? | deleted | Deletes a folder (an empty one, or with its whole content when recursive is true) |
 | `Directory.Exists` | path | exists | Tests whether a folder exists at the given path |
-| `Directory.FindFiles` | path, pattern?, recursive?, sortBy?, descending?, limit? | files | Finds files under a folder by wildcard (several allowed, separated by ";"), sorted by name, date or size, with an optional limit - the newest file is sortBy modified + d… |
-| `Directory.GetDirectories` | path, pattern?, recursive? | directories | Lists the sub-folders of a folder as full paths (optionally filtered by a wildcard such as "2026*" and optionally at every depth) |
-| `Directory.GetFiles` | path, pattern? | files | Lists the files in a folder (optionally filtered by a wildcard such as "*.nwd") |
-| `Excel.ReadFromFile` | path, sheet?, hasHeaders? | rows, headers, sheetNames | Reads an .xlsx worksheet into rows + headers (dates arrive as Excel serial numbers |
+| `Directory.Find` | path, pattern?, kind?, recursive?, sortBy?, descending?, limit? | paths | Finds files or folders under a folder by wildcard (several allowed, separated by ";"), in every sub-folder unless recursive is off |
+| `Directory.Move` | source, destination, overwrite? | path | Moves or renames a folder with everything in it |
+| `Excel.ReadFromFile` | path, sheet?, hasHeaders?, trimEmptyRows? | rows, headers, sheetNames | Reads an .xlsx worksheet into rows + headers + the sheet names (dates arrive as Excel serial numbers, convert them with DateTime.FromExcelSerial |
 | `Excel.WriteToFile` | path, rows, headers?, sheet?, append? | path | Writes rows (+ optional headers) to an .xlsx worksheet |
 | `File.Copy` | source, destination, overwrite? | path | Copies a file to a new path (creates the destination folder |
 | `File.Delete` | path | deleted | Deletes a file |
@@ -165,22 +166,23 @@
 | `File.Hash` | path, algorithm? | hash | Computes a checksum of a file's content (SHA256, SHA1 or MD5) as lower-case hex text - handy for change detection |
 | `File.Info` | path | exists, name, extension, directory, sizeBytes, modified, created | Reads a file's name, extension, folder, size in bytes and modified / created dates |
 | `File.Move` | source, destination, overwrite? | path | Moves or renames a file (creates the destination folder |
-| `JSON.ReadFromFile` | path | data | Reads a JSON file into dictionaries, lists and values |
-| `JSON.WriteToFile` | path, data, indented? | path | Writes any value to a JSON file (overwrites |
-| `Log.Write` | path, message, level? | line | Appends one line "yyyy-MM-dd HH:mm:ss LEVEL message" (local time) to a log file and returns that line |
+| `JSON.ReadFromFile` | path, encoding? | data | Reads a JSON file into dictionaries, lists and values (every number becomes a double) |
+| `JSON.WriteToFile` | path, data, indented?, encoding? | path | Writes any value to a JSON file, replacing what was there, and creates missing folders |
+| `Log.Write` | path, message, level?, encoding? | line | Appends one line "yyyy-MM-dd HH:mm:ss LEVEL message" (local time) to a log file and returns that line |
 | `Path.ChangeExtension` | path, extension | path | Replaces the extension of a path ("a.nwd" + "nwf" gives "a.nwf") |
 | `Path.Combine` | directory, fileName | path | Joins a folder path and a file name with the correct separator |
 | `Path.GetDirectory` | path | directory | Returns the folder part of a path ("C:\Models\site.nwd" gives "C:\Models") |
 | `Path.GetExtension` | path | extension | Returns the extension of a path with its leading dot (".nwd"), or empty text when there is none |
 | `Path.GetFileName` | path | fileName | Returns the file name of a path including its extension ("C:\Models\site.nwd" gives "site.nwd") |
 | `Path.GetFileNameWithoutExtension` | path | name | Returns the file name of a path without its extension ("C:\Models\site.nwd" gives "site") |
-| `Path.GetFullPath` | path | path | Resolves a path to an absolute path (relative paths start from the current folder) |
+| `Path.GetFullPath` | path | path | Resolves a path to an absolute path the way the file nodes do: a relative path starts in the graph's folder (the folder of the saved graph file |
 | `Path.GetRelativePath` | path, baseDirectory | path | Expresses a path relative to a base folder |
 | `Path.IsAbsolute` | path | isAbsolute | Tests whether a path is absolute (starts at a drive, network share or root) rather than relative |
+| `Path.Join` | parts | path | Joins any number of folder and file name parts into one path with the correct separator, for example C:\Projects + North + HVAC + model.nwd |
 | `Path.Normalize` | path | path | Cleans a path as text: one separator style, no trailing separator, "." and ".." resolved (the disk is never read) |
-| `Text.AppendToFile` | path, text, newLine? | path | Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed |
-| `Text.ReadFromFile` | path | text | Reads the entire content of a text file |
-| `Text.WriteToFile` | path, text | path | Writes text to a file (overwrites |
+| `Text.AppendToFile` | path, text, newLine?, encoding? | path | Appends text (plus a line break by default) to the end of a text file, creating the file and folder if needed |
+| `Text.ReadFromFile` | path, encoding? | text | Reads the entire content of a text file as one text |
+| `Text.WriteToFile` | path, text, encoding? | path | Writes text to a file, replacing what was there, and creates missing folders |
 | `Zip.Create` | sources, zipPath, overwrite? | path | Packs files and folders into a zip archive (a folder is stored with its structure under its own name) |
 | `Zip.Extract` | zipPath, directory, overwrite? | directory | Unpacks a zip archive into a folder |
 | `Zip.List` | zipPath | entries | Lists the entry names inside a zip archive without extracting it |
@@ -794,9 +796,11 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
+| `Graph.Folder` | — | folder | The folder of the graph file, which is where a relative path in a file node starts (for a graph that was never saved: Documents\CamelGraph |
 | `System.Environment` | — | userName, machineName, osVersion, currentDirectory, tempPath, documentsPath, appDataPath | Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders |
 | `System.OpenPath` | path, reveal? | path | Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true |
-| `System.Run` | executable, arguments?, workingDirectory?, timeoutSeconds? | exitCode, output, error | Runs a program with arguments, waits for it (stopped after the timeout) and returns its exit code, output and error text |
+| `System.Run` | executable, arguments?, workingDirectory?, timeoutSeconds? | exitCode, output, error | Runs a program with arguments, waits for it (stopped after Advanced > timeoutSeconds, 60 by default) and returns its exit code, output and error text |
+| `Web.Download` | url, path, overwrite?, headers?, timeoutSeconds? | path, status, ok, sizeBytes | Downloads a file (IFC, BCF, zip, picture, anything) from an http(s) address and saves it byte for byte |
 | `Web.Get` | url, headers?, timeoutSeconds? | status, body, ok | Downloads text from an http(s) address with GET |
 | `Web.Post` | url, body, contentType?, headers?, timeoutSeconds? | status, body, ok | Sends data to an http(s) address with POST (JSON by default, e.g |
 
@@ -846,7 +850,7 @@
 | `Flow.Require` | value, condition, message? | value | Stops with your own error message when a condition is false |
 | `Flow.Then` | value, after | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
 | `Flow.Try` | value, fallback? | result, failed, error | Carries on after a failure: gives the node's result, or your fallback plus the error text when that node failed |
-| `Flow.Wait` | value, seconds? | value | Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow |
+| `Flow.Wait` | value, seconds? | value | Waits the given number of seconds (at most 600 |
 | `Flow.When` | value, condition | value | Runs the nodes wired after it only when the condition is true |
 | `Loop.Collect` *(interactive)* | loop, value | results | Closes a loop and collects one value per iteration |
 | `Loop.Item` *(interactive)* | items | item, index, count, loop | Yields the current item of a loop |
@@ -881,6 +885,9 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `DateTime.AddMonths` | DateTime.Add |
 | `DateTime.AddYears` | DateTime.Add |
 | `DateTime.AgeInDays` | DateTime.DaysBetween |
+| `Directory.FindFiles` | Directory.Find |
+| `Directory.GetDirectories` | Directory.Find |
+| `Directory.GetFiles` | Directory.Find |
 | `List.Join` | List.Merge |
 | `List.SortDescending` | List.Sort with 'descending' ticked |
 | `Markup.AddArrow` | Markup.AddShape |

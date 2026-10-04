@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using Newtonsoft.Json;
 
@@ -36,7 +37,7 @@ public static class SystemNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("userName", "machineName", "osVersion", "currentDirectory", "tempPath", "documentsPath", "appDataPath")]
     [PortKinds("text", "text", "text", "file", "file", "file", "file")]
-    [NodeDescription("Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders.")]
+    [NodeDescription("Reports the Windows user, computer name, operating system and the current, temp, Documents and AppData folders. currentDirectory is the folder of the running program (for Navisworks its install folder), not the folder of the graph: use Graph.Folder for that.")]
     [NodeSearchTags("user", "username", "machine", "computer", "os", "windows", "temp", "documents", "appdata", "folder", "whoami")]
     public static Dictionary<string, object?> GetEnvironment()
     {
@@ -52,21 +53,35 @@ public static class SystemNodes
         };
     }
 
+    /// <summary>The folder the graph lives in: where a relative path typed into a file node starts.</summary>
+    /// <returns>The full path of the graph's folder.</returns>
+    [NodeName("Graph.Folder")]
+    [LiveState]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [return: NodeName("folder")]
+    [NodeDescription("The folder of the graph file, which is where a relative path in a file node starts (for a graph that was never saved: Documents\\CamelGraph; in the Script Player and the command line: the folder of the script). Combine it with a file name using Path.Join to build a path that works wherever the graph and its files are moved together.")]
+    [NodeSearchTags("graph", "folder", "directory", "location", "relative", "portable", "script folder", "next to graph")]
+    public static string GraphFolder()
+    {
+        return PathResolver.Resolve(".");
+    }
+
     /// <summary>
     /// Opens a file or folder with its default application, or (reveal = true) shows it selected in the file manager.
     /// </summary>
-    /// <param name="path">The file or folder to open.</param>
+    /// <param name="path">The file or folder to open. A relative path starts in the graph's folder.</param>
     /// <param name="reveal">True to show the item in Explorer (Windows) / open its containing folder (other systems) instead of opening it.</param>
     /// <returns>The path that was opened, for sequencing further nodes.</returns>
     [NodeName("System.OpenPath")]
     [NodeEffects(CamelGraph.Core.Graph.NodeEffects.RunsPrograms)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [return: NodeName("path")]
-    [NodeDescription("Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true.")]
+    [NodeDescription("Opens a file or folder with its default application, or shows it selected in Explorer when reveal is true. A relative path starts in the graph's folder.")]
     [NodeSearchTags("open", "explorer", "reveal", "show", "launch", "folder", "default app", "finder")]
-    public static string OpenPath(string path, bool reveal = false)
+    public static string OpenPath([NodePath(NodePathMode.Open, Filter = FileFilters.All)] string path, bool reveal = false)
     {
         PathNodes.RequireText(path, "System.OpenPath", nameof(path), "a file or folder path");
+        path = FileNodes.ResolveChecked(path, "System.OpenPath", nameof(path));
         if (!File.Exists(path) && !Directory.Exists(path))
         {
             throw new FileNotFoundException("System.OpenPath: '" + path + "' does not exist, so there is nothing to open.", path);
@@ -91,9 +106,9 @@ public static class SystemNodes
     /// Runs a program and waits for it to finish, capturing what it prints. The whole process tree is stopped when the
     /// timeout expires.
     /// </summary>
-    /// <param name="executable">The program to start: a full path, or a name found on the PATH.</param>
+    /// <param name="executable">The program to start: a full path, or a name found on the PATH. A path with folders that is not full starts in the graph's folder.</param>
     /// <param name="arguments">The command-line arguments as one string.</param>
-    /// <param name="workingDirectory">The folder to run in; empty uses the current folder.</param>
+    /// <param name="workingDirectory">The folder to run in; empty uses the folder of the running program (for Navisworks its install folder).</param>
     /// <param name="timeoutSeconds">How long to wait before stopping the program (1 to 3600 seconds).</param>
     /// <returns>Dictionary with "exitCode", "output" (standard output) and "error" (standard error).</returns>
     [NodeName("System.Run")]
@@ -101,13 +116,13 @@ public static class SystemNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [MultiReturn("exitCode", "output", "error")]
     [PortKinds("integer", "text", "text")]
-    [NodeDescription("Runs a program with arguments, waits for it (stopped after the timeout) and returns its exit code, output and error text.")]
+    [NodeDescription("Runs a program with arguments, waits for it (stopped after Advanced > timeoutSeconds, 60 by default) and returns its exit code, output and error text. A bare program name is searched on the PATH; a path with folders that is not a full path starts in the graph's folder. Advanced > workingDirectory chooses the folder it runs in. In a loop, wire the loop item (or something made from it) into arguments: a node with only fixed inputs belongs to no loop and runs once.")]
     [NodeSearchTags("run", "execute", "process", "command", "exe", "cmd", "shell", "script", "launch")]
     public static Dictionary<string, object?> Run(
-        string executable,
+        [NodePath(NodePathMode.Open, Filter = FileFilters.Programs)] string executable,
         string arguments = "",
-        string workingDirectory = "",
-        [NodeRange(1, 3600)] int timeoutSeconds = 60)
+        [NodePanel("Advanced")][NodePath(NodePathMode.Folder)] string workingDirectory = "",
+        [NodePanel("Advanced")][NodeRange(1, 3600, SoftMax = 300, Step = 1)] int timeoutSeconds = 60)
     {
         if (timeoutSeconds < 1 || timeoutSeconds > 3600)
         {
@@ -129,12 +144,12 @@ public static class SystemNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("status", "body", "ok")]
     [PortKinds("integer", "text", "boolean")]
-    [NodeDescription("Downloads text from an http(s) address with GET; an error status such as 404 is returned (ok = false), only a network failure or timeout is an error.")]
+    [NodeDescription("Downloads text from an http(s) address with GET; an error status such as 404 is returned (ok = false), only a network failure or timeout is an error. The body is decoded as text, so use Web.Download for files such as IFC, zip or pictures.")]
     [NodeSearchTags("http", "https", "request", "download", "api", "rest", "url", "fetch", "json", "web")]
     public static Dictionary<string, object?> Get(
         string url,
-        IDictionary? headers = null,
-        [NodeRange(1, 600)] int timeoutSeconds = 30)
+        [NodePanel("Advanced")] IDictionary? headers = null,
+        [NodePanel("Advanced")][NodeRange(1, 600, SoftMax = 120, Step = 1)] int timeoutSeconds = 30)
     {
         RequireTimeout(timeoutSeconds, "Web.Get");
         return SendRequest("Web.Get", HttpMethod.Get, url, null, null, headers, TimeSpan.FromSeconds(timeoutSeconds));
@@ -157,13 +172,42 @@ public static class SystemNodes
     public static Dictionary<string, object?> Post(
         string url,
         object? body,
-        string contentType = "application/json",
-        IDictionary? headers = null,
-        [NodeRange(1, 600)] int timeoutSeconds = 30)
+        [NodePanel("Advanced")][NodeChoices("application/json", "text/plain", "text/csv", "application/x-www-form-urlencoded", "application/xml", "text/xml")] string contentType = "application/json",
+        [NodePanel("Advanced")] IDictionary? headers = null,
+        [NodePanel("Advanced")][NodeRange(1, 600, SoftMax = 120, Step = 1)] int timeoutSeconds = 30)
     {
         RequireTimeout(timeoutSeconds, "Web.Post");
         var type = string.IsNullOrWhiteSpace(contentType) ? "application/json" : contentType.Trim();
         return SendRequest("Web.Post", HttpMethod.Post, url, BodyText(body, type), type, headers, TimeSpan.FromSeconds(timeoutSeconds));
+    }
+
+    /// <summary>Downloads a file from an http(s) address to a path, byte for byte (nothing is decoded as text).</summary>
+    /// <param name="url">The address, starting with http:// or https://.</param>
+    /// <param name="path">The file to write. A relative path starts in the graph's folder; missing folders are created.</param>
+    /// <param name="overwrite">True to replace an existing file; false (default) to fail instead.</param>
+    /// <param name="headers">Optional request headers (name to value), e.g. an Authorization token.</param>
+    /// <param name="timeoutSeconds">How long the whole download may take (1 to 3600 seconds).</param>
+    /// <returns>Dictionary with "path" (the file written, null when the answer was an error), "status" (HTTP code), "ok" (true for 2xx) and "sizeBytes".</returns>
+    [NodeName("Web.Download")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.UsesNetwork | CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [MultiReturn("path", "status", "ok", "sizeBytes")]
+    [PortKinds("file", "integer", "boolean", "number")]
+    [NodeDescription("Downloads a file (IFC, BCF, zip, picture, anything) from an http(s) address and saves it byte for byte; missing folders are created and an existing file is only replaced when overwrite is true. The file is received beside the target and put in place when complete, so a failed or too slow download leaves nothing half-written. An error status such as 404 is returned (ok = false, path empty) and writes nothing; a network failure or timeout is an error. A relative path starts in the graph's folder.")]
+    [NodeSearchTags("download", "http", "https", "fetch", "file", "save", "ifc", "zip", "bcf", "url", "web", "get file")]
+    public static Dictionary<string, object?> Download(
+        string url,
+        [NodePath(NodePathMode.Save, Filter = FileFilters.All)] string path,
+        bool overwrite = false,
+        [NodePanel("Advanced")] IDictionary? headers = null,
+        [NodePanel("Advanced")][NodeRange(1, 3600, SoftMax = 600, Step = 1)] int timeoutSeconds = 120)
+    {
+        if (timeoutSeconds < 1 || timeoutSeconds > 3600)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timeoutSeconds), "Web.Download: 'timeoutSeconds' must be between 1 and 3600.");
+        }
+
+        return DownloadFile("Web.Download", url, path, overwrite, headers, TimeSpan.FromSeconds(timeoutSeconds));
     }
 
     // ------------------------------------------------------------------
@@ -214,9 +258,11 @@ public static class SystemNodes
             throw new ArgumentException("System.Run requires a program to start. Wire the program's name or full path into the 'executable' input.", nameof(executable));
         }
 
+        // A bare name is looked up on the PATH; a path with folders in it is a file, so it starts in the graph's folder.
+        var program = executable.IndexOfAny(new[] { '\\', '/' }) >= 0 ? PathResolver.Resolve(executable) : executable.Trim();
         var startInfo = new ProcessStartInfo
         {
-            FileName = executable,
+            FileName = program,
             Arguments = arguments ?? string.Empty,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -227,12 +273,13 @@ public static class SystemNodes
 
         if (!string.IsNullOrWhiteSpace(workingDirectory))
         {
-            if (!Directory.Exists(workingDirectory))
+            var folder = PathResolver.Resolve(workingDirectory);
+            if (!Directory.Exists(folder))
             {
-                throw new DirectoryNotFoundException("System.Run: the working directory '" + workingDirectory + "' does not exist.");
+                throw new DirectoryNotFoundException("System.Run: the working directory '" + folder + "' does not exist.");
             }
 
-            startInfo.WorkingDirectory = workingDirectory;
+            startInfo.WorkingDirectory = folder;
         }
 
         var output = new List<string>();
@@ -553,6 +600,92 @@ public static class SystemNodes
         public string Body { get; }
 
         public bool Ok { get; }
+    }
+
+    /// <summary>Downloads to a file: received into a temporary file beside the target, put in place when complete.</summary>
+    internal static Dictionary<string, object?> DownloadFile(
+        string nodeName, string url, string path, bool overwrite, IDictionary? headers, TimeSpan timeout)
+    {
+        var uri = ParseHttpUrl(url, nodeName);
+        var file = FileNodes.ResolveForWriting(path, nodeName);
+        if (File.Exists(file) && !overwrite)
+        {
+            throw new IOException(nodeName + ": the file '" + file + "' already exists. Set 'overwrite' to true to replace it.");
+        }
+
+        var temp = file + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+        {
+            ApplyHeaders(request, headers, nodeName);
+            using (var cancellation = new CancellationTokenSource(timeout))
+            {
+                try
+                {
+                    FileNodes.EnsureParentFolder(file);
+                    var result = Task.Run(() => DownloadAsync(request, temp, cancellation.Token)).GetAwaiter().GetResult();
+                    if (!result.Ok)
+                    {
+                        return new Dictionary<string, object?> { ["path"] = null, ["status"] = result.Status, ["ok"] = false, ["sizeBytes"] = 0d };
+                    }
+
+                    FileExtraNodes.MoveOver(temp, file);
+                    return new Dictionary<string, object?> { ["path"] = file, ["status"] = result.Status, ["ok"] = true, ["sizeBytes"] = (double)result.Size };
+                }
+                catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                {
+                    throw new TimeoutException(
+                        nodeName + ": the download from '" + url + "' did not finish within " +
+                        timeout.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture) + " second(s) and was stopped; nothing was saved. Raise 'timeoutSeconds' or check the address.");
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new HttpRequestException(nodeName + ": the request to '" + url + "' failed: " + Innermost(ex).Message, ex);
+                }
+                catch (Exception ex) when (FileErrors.IsFileProblem(ex))
+                {
+                    throw FileErrors.Friendly(ex, nodeName, file, true);
+                }
+                finally
+                {
+                    FileExtraNodes.TryDelete(temp);
+                }
+            }
+        }
+    }
+
+    private sealed class DownloadResult
+    {
+        public DownloadResult(int status, bool ok, long size)
+        {
+            Status = status;
+            Ok = ok;
+            Size = size;
+        }
+
+        public int Status { get; }
+
+        public bool Ok { get; }
+
+        public long Size { get; }
+    }
+
+    private static async Task<DownloadResult> DownloadAsync(HttpRequestMessage request, string tempPath, CancellationToken token)
+    {
+        using (var response = await Http.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false))
+        {
+            var status = (int)response.StatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                return new DownloadResult(status, false, 0);
+            }
+
+            using (var source = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+            using (var target = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                await source.CopyToAsync(target, 81920, token).ConfigureAwait(false);
+                return new DownloadResult(status, true, target.Length);
+            }
+        }
     }
 
     private static async Task<Answer> ExchangeAsync(HttpRequestMessage request, CancellationToken token)
