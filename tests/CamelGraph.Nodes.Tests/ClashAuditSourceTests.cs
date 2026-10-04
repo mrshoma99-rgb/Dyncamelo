@@ -415,4 +415,65 @@ public class ClashAuditSourceTests
         var edit = Method(Source("ClashTestMaintenanceNodes.cs"), "public static ClashTest Edit(");
         Assert.Contains("if (tolerance >= 0)", edit);
     }
+
+    // ----------------------------------------------------------------------------------------------- NVC-36, NVC-37, NVC-38
+
+    [Fact]
+    public void TheResultsTableTurnsFilteredResultsIntoATable()
+    {
+        var source = Source("ClashLookupNodes.cs");
+        var body = Method(source, "public static CamelGraphTable ResultsTable(");
+
+        Assert.Contains("[MultiInput] IEnumerable<ClashResult> results", body);
+        Assert.Contains("[NodePanel(\"Advanced\")][NodeChoicesFromEnum(typeof(Units), \"document\")] string units = \"document\"", body);
+        Assert.Contains("new CamelGraphTable(ClashResultColumns.Headers, rows)", body);
+        Assert.Contains("result.Distance / scale", body);
+        Assert.Contains("result.CreatedTime,", body); // a real date, not text
+        Assert.Contains("[NodeName(\"Clash.ResultsTable\")]", source);
+    }
+
+    [Fact]
+    public void TheResultInfoGivesTheGuidTheTestAndTheGroupAsNewTrailingOutputs()
+    {
+        var source = Source("ClashNodes.cs");
+
+        Assert.Contains("[MultiReturn(\"name\", \"status\", \"distance\", \"description\", \"assignedTo\", \"createdTime\", \"guid\", \"testName\", \"group\")]", source);
+        var body = Method(source, "public static Dictionary<string, object?> ResultInfo(");
+        Assert.Contains("[\"guid\"] = clashResult.Guid", body);
+        Assert.Contains("[\"testName\"] = testName", body);
+        Assert.Contains("[\"group\"] = groupName", body);
+    }
+
+    [Fact]
+    public void AResultOrGroupIsFoundAgainFromItsGuid()
+    {
+        var source = Source("ClashLookupNodes.cs");
+        var body = Method(source, "public static Dictionary<string, object?> ByGuid(");
+
+        Assert.Contains("[NodeName(\"ClashResult.ByGuid\")]", source);
+        Assert.Contains("[MultiReturn(\"results\", \"missing\")]", source);
+        Assert.Contains("ClashInputs.SelectedOrAll<ClashTest>(", body);
+        Assert.Contains("ClashHelpers.CollectResultsAndGroups(test.Children, candidates)", body);
+        Assert.Contains("ClashGuids.Match(guids, candidates, out var found, out var missing)", body);
+        Assert.Contains("[LiveState]", Header("ClashLookupNodes.cs", "ClashResult.ByGuid"));
+    }
+
+    [Fact]
+    public void TheLiveResultsThatTheSnapshotDidNotHaveAreTheNewOnes()
+    {
+        var source = Source("ClashLookupNodes.cs");
+        var body = Method(source, "public static Dictionary<string, object?> FilterBySnapshot(");
+
+        Assert.Contains("[NodePath(NodePathMode.Open", body);
+        Assert.Contains("[NodeChoices(\"new\", \"persisting\")] string keep = \"new\"", body);
+        Assert.Contains("PathResolver.Resolve(snapshotPath)", body);
+
+        // The key is built exactly the way Clash.SnapshotToFile writes it (test name, then the two item identities).
+        Assert.Contains("ClashSnapshotFile.MakeKey(", body);
+        Assert.Contains("NavisValues.ItemIdentity(result.Item1)", body);
+        Assert.Contains("ClashSnapshotMatch.WasInSnapshot(snapshotKeys, keys)", body);
+        var writer = Method(Source("ClashDeltaNodes.cs"), "public static Dictionary<string, object?> SnapshotToFile(");
+        Assert.Contains("NavisValues.ItemIdentity(result.Item1)", writer);
+        Assert.Contains("ClashSnapshotFile.MakeKey(testName, item1Id, item2Id)", writer);
+    }
 }

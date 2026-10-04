@@ -57,4 +57,22 @@ public class ClashSummaryTests
         Assert.Equal(0, table.RowCount);
         Assert.Equal(7, table.ColumnCount);
     }
+
+    [Fact]
+    public void TheResultsTableHasTheColumnsOfTheClashReportPlusTheGuid()
+    {
+        var headers = ClashResultColumns.Headers;
+
+        Assert.Equal(16, headers.Count);
+        Assert.Equal(headers.Count, new System.Collections.Generic.HashSet<string>(headers).Count);
+        foreach (var name in new[] { "Test", "Group", "Result", "Result GUID", "Status", "Distance", "Assigned To", "Description", "Created", "Item 1", "Item 1 GUID", "Item 2", "Item 2 GUID", "Center X", "Center Y", "Center Z" })
+        {
+            Assert.Contains(name, headers);
+        }
+
+        // A row of that shape is a table the Table nodes can address by column name.
+        var table = new CamelGraphTable(headers, new[] { (System.Collections.Generic.IReadOnlyList<object?>)new object?[headers.Count] });
+        Assert.Equal(0, table.IndexOf("Test", "test"));
+        Assert.Equal(3, table.IndexOf("Result GUID", "test"));
+    }
 }

@@ -58,3 +58,15 @@ public static class ClashSummary
         return row;
     }
 }
+
+/// <summary>The columns of the table Clash.ResultsTable makes: the columns of the clash CSV/HTML report, plus the result's GUID.</summary>
+[IsVisibleInLibrary(false)]
+public static class ClashResultColumns
+{
+    /// <summary>The column names, in order.</summary>
+    public static IReadOnlyList<string> Headers { get; } = new[]
+    {
+        "Test", "Group", "Result", "Result GUID", "Status", "Distance", "Assigned To", "Description", "Created",
+        "Item 1", "Item 1 GUID", "Item 2", "Item 2 GUID", "Center X", "Center Y", "Center Z",
+    };
+}

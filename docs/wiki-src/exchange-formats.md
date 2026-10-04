@@ -113,7 +113,7 @@ Reads a BCF 2.0 or 2.1 package. Outputs:
 
 `applyCameraTopicIndex` applies one topic's camera to the current view (the default, `-1`, leaves the view alone). To jump to issue 3, set it to `2`.
 
-The return leg of an issue round trip is built from the outputs: pick one topic's list from `modelItems` with `List.GetItemAtIndex` and wire it into `Selection.SetCurrent` to select that topic's elements (a whole `modelItems` list would select topic after topic and leave only the last one selected), or use the topic statuses with `ClashResult.SetStatus` to update clash results.
+The return leg of an issue round trip is built from the outputs: pick one topic's list from `modelItems` with `List.GetItemAtIndex` and wire it into `Selection.SetCurrent` to select that topic's elements (a whole `modelItems` list would select topic after topic and leave only the last one selected), or use the topic statuses with `ClashResult.SetStatus` to update clash results; `ClashResult.ByGuid` turns the topic `guid` list back into the live results (or result groups) to wire into it.
 
 ```
 BCF.ImportIssues ─ modelItems ─▶ List.GetItemAtIndex (topic number) ─▶ Selection.SetCurrent

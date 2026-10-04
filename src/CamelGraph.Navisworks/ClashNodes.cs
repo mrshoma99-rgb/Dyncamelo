@@ -78,16 +78,17 @@ public static class ClashNodes
 
     /// <summary>Summary information about a clash result.</summary>
     /// <param name="result">The clash result.</param>
-    /// <returns>Name, status, distance, description, assignee and creation time.</returns>
+    /// <returns>Name, status, distance, description, assignee, creation time, GUID, the name of its test and of its group.</returns>
     [NodeName("ClashResult.Info")]
     [NodeCategory("Navisworks.Clash.Results")]
-    [NodeDescription("Name, status, distance, description, assignee and creation time of a clash result.")]
+    [NodeDescription("Name, status, distance, description, assignee and creation time of a clash result, plus its GUID (what BCF topics and ClashResult.ByGuid use), the name of its test and the name of its group (empty when it is not in a group).")]
     [NodeSearchTags("clash", "result", "info", "status", "distance")]
-    [MultiReturn("name", "status", "distance", "description", "assignedTo", "createdTime")]
-    [PortKinds("text", "text", "number", "text", "text", "datetime")]
+    [MultiReturn("name", "status", "distance", "description", "assignedTo", "createdTime", "guid", "testName", "group")]
+    [PortKinds("text", "text", "number", "text", "text", "datetime", "text", "text", "text")]
     public static Dictionary<string, object?> ResultInfo(ClashResult result)
     {
         var clashResult = ClashHelpers.RequireResult(result);
+        ClashHelpers.OwnerNames(clashResult, out var testName, out var groupName);
         return new Dictionary<string, object?>
         {
             ["name"] = clashResult.DisplayName,
@@ -96,6 +97,9 @@ public static class ClashNodes
             ["description"] = clashResult.Description,
             ["assignedTo"] = ClashHelpers.AssigneeText(clashResult),
             ["createdTime"] = clashResult.CreatedTime,
+            ["guid"] = clashResult.Guid == Guid.Empty ? string.Empty : clashResult.Guid.ToString(),
+            ["testName"] = testName,
+            ["group"] = groupName,
         };
     }
 

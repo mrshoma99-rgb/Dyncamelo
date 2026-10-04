@@ -409,6 +409,46 @@ internal static class ClashHelpers
 #endif
     }
 
+    /// <summary>
+    /// The name of the test a result or group belongs to and of the nearest result group around it, found by walking its parents
+    /// (empty when it has none, e.g. a detached copy or an ungrouped result).
+    /// </summary>
+    internal static void OwnerNames(SavedItem item, out string testName, out string groupName)
+    {
+        testName = string.Empty;
+        groupName = string.Empty;
+        for (var current = item.Parent; current != null; current = current.Parent)
+        {
+            if (current is ClashTest test)
+            {
+                testName = test.DisplayName ?? string.Empty;
+                return;
+            }
+
+            if (groupName.Length == 0 && current is ClashResultGroup group)
+            {
+                groupName = group.DisplayName ?? string.Empty;
+            }
+        }
+    }
+
+    /// <summary>Every result and every result group under a test's children, each with its Guid (groups are descended into).</summary>
+    internal static void CollectResultsAndGroups(IEnumerable<SavedItem> children, List<KeyValuePair<Guid, SavedItem>> into)
+    {
+        foreach (var child in children)
+        {
+            if (child is ClashResult)
+            {
+                into.Add(new KeyValuePair<Guid, SavedItem>(child.Guid, child));
+            }
+            else if (child is ClashResultGroup group)
+            {
+                into.Add(new KeyValuePair<Guid, SavedItem>(group.Guid, group));
+                CollectResultsAndGroups(group.Children, into);
+            }
+        }
+    }
+
     /// <summary>Parses a clash result status name (New/Active/Reviewed/Approved/Resolved).</summary>
     internal static ClashResultStatus ParseResultStatus(string? status)
     {

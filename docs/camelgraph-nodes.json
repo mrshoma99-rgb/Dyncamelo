@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 582,
  "categories": [
   {
    "name": "Annotation",
@@ -72,7 +72,7 @@
   },
   {
    "name": "Navisworks.Clash.Filter",
-   "count": 7
+   "count": 8
   },
   {
    "name": "Navisworks.Clash.Group",
@@ -80,11 +80,11 @@
   },
   {
    "name": "Navisworks.Clash.Report",
-   "count": 3
+   "count": 4
   },
   {
    "name": "Navisworks.Clash.Results",
-   "count": 14
+   "count": 15
   },
   {
    "name": "Navisworks.Clash.Tests",
@@ -11236,6 +11236,57 @@
    "returns": ""
   },
   {
+   "name": "Clash.FilterBySnapshot",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.FilterBySnapshot@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Filter",
+   "description": "Turns \"what is new since last week\" into live clash results you can select, group, assign or report: compares the results with a snapshot saved by Clash.SnapshotToFile, using the same identity as Clash.CompareSnapshots (the test and the pair of items, by InstanceGuid or tree path), and keeps the new ones (not in the snapshot) or the persisting ones (already in it). The other group comes out on others. Clashes that were resolved no longer exist in the model, so they can only be listed by Clash.CompareSnapshots. The same two items clashing at several points are matched one for one, in order.",
+   "tags": [
+    "clash",
+    "filter",
+    "snapshot",
+    "new",
+    "persisting",
+    "delta",
+    "baseline",
+    "weekly",
+    "compare",
+    "history"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The live clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
+    },
+    {
+     "name": "snapshotPath",
+     "type": "string",
+     "description": "The snapshot .json written by Clash.SnapshotToFile (last week's file)."
+    },
+    {
+     "name": "keep",
+     "type": "string",
+     "description": "new keeps the results that are not in the snapshot; persisting keeps the ones that are.",
+     "default": "\"new\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": ""
+    },
+    {
+     "name": "others",
+     "type": "ClashResult[]",
+     "description": ""
+    }
+   ],
+   "returns": "The results that were kept, and the others, both in input order."
+  },
+  {
    "name": "Clash.FilterByStatus",
    "id": "CamelGraph.Navisworks.ClashNodes.FilterByStatus@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string",
    "assembly": "CamelGraph.Navisworks",
@@ -11800,6 +11851,47 @@
    "returns": "Result dictionaries per bucket plus a counts dictionary."
   },
   {
+   "name": "Clash.ResultsTable",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.ResultsTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Report",
+   "description": "Makes a table of the clash results you wire in: one row per result with its test, group, name, GUID, status, distance, assignee, description, creation date, the two items (path and GUID) and the clash point. Wire any filter's output, so \"the New clashes deeper than 25 mm\" is one row each, ready for the Table nodes, Table.ToCsvFile, Excel.WriteTable or Report.Html. Distance and clash point are in document units unless units names another unit; the creation date is a real date. An empty list gives a table with the headers and no rows.",
+   "tags": [
+    "clash",
+    "results",
+    "table",
+    "report",
+    "export",
+    "rows",
+    "csv",
+    "excel",
+    "list",
+    "filtered"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results or any Clash.FilterBy* node).",
+     "multiInput": true
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the distance and the clash point: \"document\" uses the file's internal unit (often feet!), or name the unit you want the numbers in.",
+     "default": "\"document\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "A table with the columns Test, Group, Result, Result GUID, Status, Distance, Assigned To, Description, Created, Item 1, Item 1 GUID, Item 2, Item 2 GUID, Center X, Center Y and Center Z."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Clash.SnapshotToFile",
    "id": "CamelGraph.Navisworks.ClashDeltaNodes.SnapshotToFile@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
@@ -11971,6 +12063,57 @@
    "returns": ""
   },
   {
+   "name": "ClashResult.ByGuid",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.ByGuid@System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Results",
+   "description": "Finds clash results again from their GUIDs — the way back from a BCF topic or a snapshot to the live result: wire the guid output of BCF.ImportIssues and send the results to ClashResult.SetStatus. A GUID that belongs to a result group finds the group (the BCF export writes one topic per result or group). GUIDs may be written with or without braces, in any case. results holds what was found, in the order of the GUIDs; missing holds the GUIDs that matched nothing (not a GUID, or a result that is no longer in the tests you looked in). Leave tests unwired to search every test in the document; a wired list means exactly those tests.",
+   "tags": [
+    "clash",
+    "result",
+    "guid",
+    "find",
+    "lookup",
+    "bcf",
+    "topic",
+    "id",
+    "byguid"
+   ],
+   "inputs": [
+    {
+     "name": "guids",
+     "type": "string[]",
+     "description": "The GUIDs as text (e.g. the guid output of BCF.ImportIssues or of ClashResult.Info): one, or a list."
+    },
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "The tests to look in. Leave unwired for every test in the document; a wired list means exactly those tests.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": ""
+    },
+    {
+     "name": "missing",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "The clash results or groups that were found, in the order of the GUIDs, and the GUIDs that were not found."
+  },
+  {
    "name": "ClashResult.Center",
    "id": "CamelGraph.Navisworks.ClashNodes.Center@Autodesk.Navisworks.Api.Clash.ClashResult",
    "assembly": "CamelGraph.Navisworks",
@@ -12109,7 +12252,7 @@
    "id": "CamelGraph.Navisworks.ClashNodes.ResultInfo@Autodesk.Navisworks.Api.Clash.ClashResult",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Name, status, distance, description, assignee and creation time of a clash result.",
+   "description": "Name, status, distance, description, assignee and creation time of a clash result, plus its GUID (what BCF topics and ClashResult.ByGuid use), the name of its test and the name of its group (empty when it is not in a group).",
    "tags": [
     "clash",
     "result",
@@ -12154,9 +12297,24 @@
      "name": "createdTime",
      "type": "datetime",
      "description": ""
+    },
+    {
+     "name": "guid",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "testName",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "group",
+     "type": "string",
+     "description": ""
     }
    ],
-   "returns": "Name, status, distance, description, assignee and creation time."
+   "returns": "Name, status, distance, description, assignee, creation time, GUID, the name of its test and of its group."
   },
   {
    "name": "ClashResult.Items",
