@@ -213,7 +213,7 @@ public static class ListStatsNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("values", "counts")]
     [PortKinds("", "integer*")]
-    [NodeDescription("Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.")]
+    [NodeDescription("Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs. Numbers compare by value, text with its case, and lists and dictionaries by their content.")]
     [NodeSearchTags("tally", "frequency", "distribution", "group", "count", "how many of each")]
     public static Dictionary<string, object> CountBy(IList<object?> list)
     {
@@ -258,7 +258,7 @@ public static class ListStatsNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("duplicates", "counts")]
     [PortKinds("", "integer*")]
-    [NodeDescription("The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.")]
+    [NodeDescription("The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names. Values compare as in List.CountBy (text with its case).")]
     [NodeSearchTags("duplicate", "repeated", "twice", "unique", "check", "audit")]
     public static Dictionary<string, object> Duplicates(IList<object?> list)
     {
@@ -287,7 +287,7 @@ public static class ListStatsNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("item", "count")]
     [PortKinds("", "integer")]
-    [NodeDescription("The value that occurs most often in a list (the earliest wins a tie) and how many times.")]
+    [NodeDescription("The value that occurs most often in a list (the earliest wins a tie) and how many times. Values compare as in List.CountBy (text with its case).")]
     [NodeSearchTags("mode", "frequent", "popular", "typical")]
     public static Dictionary<string, object> MostCommon(IList<object?> list)
     {

@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Globalization;
 using CamelGraph.Core.Loader;
+using CamelGraph.Core.Types;
 
 namespace CamelGraph.Nodes;
 
@@ -172,14 +174,29 @@ public static class LogicNodes
 
 /// <summary>
 /// Shared value-comparison helpers used by Logic and List nodes: numbers of any
-/// boxed CLR type compare by numeric value, strings ordinally, everything else
-/// by <see cref="object.Equals(object)"/>.
+/// boxed CLR type compare by numeric value, strings ordinally, lists element by
+/// element and dictionaries entry by entry (key order does not matter), everything
+/// else by <see cref="object.Equals(object)"/>.
 /// </summary>
 [IsVisibleInLibrary(false)]
 internal static class ValueComparison
 {
-    /// <summary>Tests two values for node-level equality.</summary>
-    internal static bool AreEqual(object? a, object? b)
+    // Lists inside lists inside lists... are compared recursively; a structure nested deeper than this (only a circular one can be)
+    // is not compared further, because a stack overflow would take the whole host down.
+    private const int MaxDepth = 64;
+
+    /// <summary>
+    /// Tests two values for node-level equality. Numbers of any numeric type are equal when they hold the same value, text is
+    /// compared ordinally (case matters), two lists are equal when they have the same items in the same order, two dictionaries
+    /// when they have the same keys with equal values (the order of the keys does not matter); the items and values are compared
+    /// by the same rules, at every level.
+    /// </summary>
+    internal static bool AreEqual(object? a, object? b) => AreEqual(a, b, 0);
+
+    /// <summary>Hash code consistent with <see cref="AreEqual"/> (numbers hash by double value, lists and dictionaries by content).</summary>
+    internal static int GetValueHashCode(object? value) => GetValueHashCode(value, 0);
+
+    private static bool AreEqual(object? a, object? b, int depth)
     {
         if (ReferenceEquals(a, b))
         {
@@ -196,18 +213,105 @@ internal static class ValueComparison
             return ToDouble(a).Equals(ToDouble(b));
         }
 
+        if (a is IDictionary || b is IDictionary)
+        {
+            return a is IDictionary dictionaryA && b is IDictionary dictionaryB && depth < MaxDepth && DictionariesEqual(dictionaryA, dictionaryB, depth);
+        }
+
+        if (a is IList listA && b is IList listB)
+        {
+            return depth < MaxDepth && ListsEqual(listA, listB, depth);
+        }
+
         return a.Equals(b);
     }
 
-    /// <summary>Hash code consistent with <see cref="AreEqual"/> (numbers hash by double value).</summary>
-    internal static int GetValueHashCode(object? value)
+    private static bool ListsEqual(IList a, IList b, int depth)
+    {
+        if (a.Count != b.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (!AreEqual(a[i], b[i], depth + 1))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool DictionariesEqual(IDictionary a, IDictionary b, int depth)
+    {
+        if (a.Count != b.Count)
+        {
+            return false;
+        }
+
+        foreach (DictionaryEntry entry in a)
+        {
+            // Keys are matched the way the Dictionary nodes match them: a string key by the dictionary's own rules, any other
+            // key by its text.
+            if (!DictionaryExtraNodes.TryGetValue(b, TypeCoercion.FormatValue(entry.Key), out var other) ||
+                !AreEqual(entry.Value, other, depth + 1))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int GetValueHashCode(object? value, int depth)
     {
         if (value == null)
         {
             return 0;
         }
 
-        return IsNumeric(value) ? ToDouble(value).GetHashCode() : value.GetHashCode();
+        if (IsNumeric(value))
+        {
+            return ToDouble(value).GetHashCode();
+        }
+
+        if (depth >= MaxDepth)
+        {
+            return value is IList || value is IDictionary ? 1 : value.GetHashCode();
+        }
+
+        if (value is IDictionary dictionary)
+        {
+            // Entries are added, not chained, so the order of the keys does not change the hash.
+            var sum = dictionary.Count;
+            unchecked
+            {
+                foreach (DictionaryEntry entry in dictionary)
+                {
+                    sum += StringComparer.Ordinal.GetHashCode(TypeCoercion.FormatValue(entry.Key)) * 397 ^ GetValueHashCode(entry.Value, depth + 1);
+                }
+            }
+
+            return sum;
+        }
+
+        if (value is IList list)
+        {
+            var hash = 17 + list.Count;
+            unchecked
+            {
+                foreach (var item in list)
+                {
+                    hash = hash * 31 + GetValueHashCode(item, depth + 1);
+                }
+            }
+
+            return hash;
+        }
+
+        return value.GetHashCode();
     }
 
     /// <summary>

@@ -221,7 +221,7 @@ public static class ListNodes
     /// <returns>A new list with duplicates removed, in original order.</returns>
     [NodeName("List.UniqueItems")]
     [return: NodeName("list")]
-    [NodeDescription("Removes duplicate elements from a list, preserving the original order.")]
+    [NodeDescription("Removes duplicate elements from a list, keeping the first of each and the original order. Numbers compare by value, text with its case, and lists and dictionaries by their content, so repeated pairs from List.Zip are removed too.")]
     [NodeSearchTags("distinct", "deduplicate", "unique")]
     public static IList<object?> UniqueItems(IList<object?> list)
     {
@@ -266,7 +266,7 @@ public static class ListNodes
     /// <returns>True when the value occurs in the list.</returns>
     [NodeName("List.Contains")]
     [return: NodeName("contains")]
-    [NodeDescription("Tests whether a list contains a value (numbers compare by value regardless of numeric type).")]
+    [NodeDescription("Tests whether a list contains a value. Numbers compare by value regardless of numeric type, text with its case, and a list or dictionary by its content, so a [level, type] pair can be looked up too.")]
     [NodeSearchTags("membership", "includes", "has", "any")]
     public static bool Contains(IList<object?> list, object? item)
     {
@@ -283,7 +283,7 @@ public static class ListNodes
     /// <returns>The zero-based index, or -1 when not found.</returns>
     [NodeName("List.IndexOf")]
     [return: NodeName("index")]
-    [NodeDescription("Returns the index of the first occurrence of a value in a list (-1 when absent).")]
+    [NodeDescription("Returns the index of the first occurrence of a value in a list (-1 when absent). Numbers compare by value, text with its case, and lists and dictionaries by their content.")]
     [NodeSearchTags("find", "position", "locate", "search")]
     public static int IndexOf(IList<object?> list, object? item)
     {
@@ -409,7 +409,7 @@ public static class ListNodes
     [NodeName("List.GroupByKey")]
     [MultiReturn("groups", "uniqueKeys")]
     [PortKinds("", "")]
-    [NodeDescription("Groups list elements by a parallel key list; returns the groups and their unique keys.")]
+    [NodeDescription("Groups list elements by a parallel key list of the same length; returns the groups (in the order each key first appears) and their unique keys. A key can be a list, such as [level, type], and two keys with the same content make one group; text keys keep their case.")]
     [NodeSearchTags("group", "bucket", "categorize", "partition")]
     public static Dictionary<string, object> GroupByKey(IList<object?> list, IList<object?> keys)
     {
@@ -500,7 +500,7 @@ public static class ListNodes
     /// <returns>The zero-based indices of every occurrence (empty when absent).</returns>
     [NodeName("List.AllIndicesOf")]
     [return: NodeName("indices")]
-    [NodeDescription("Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.")]
+    [NodeDescription("Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Values compare as in List.IndexOf. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.")]
     [NodeSearchTags("indices", "index", "all", "occurrences", "find", "positions", "where")]
     public static List<int> AllIndicesOf(IList<object?> list, object? item)
     {
@@ -523,7 +523,7 @@ public static class ListNodes
     /// <returns>The zero-based index of the last occurrence, or -1 when absent.</returns>
     [NodeName("List.LastIndexOf")]
     [return: NodeName("index")]
-    [NodeDescription("The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf.")]
+    [NodeDescription("The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf, with the same rules for comparing values.")]
     [NodeSearchTags("index", "last", "find", "position", "reverse")]
     public static int LastIndexOf(IList<object?> list, object? item)
     {
@@ -874,7 +874,7 @@ public static class ListNodes
     /// <returns>The union, first-seen order, duplicates removed.</returns>
     [NodeName("List.SetUnion")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements present in EITHER list (value equality, first-seen order) — combine two item sets without duplicates.")]
+    [NodeDescription("The distinct elements present in EITHER list (first-seen order) — combine two item sets without duplicates. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("union", "set", "combine", "merge", "distinct", "or")]
     public static IList<object?> SetUnion(IList<object?> list1, IList<object?> list2)
     {
@@ -899,7 +899,7 @@ public static class ListNodes
     /// <returns>The intersection, ordered as in the first list.</returns>
     [NodeName("List.SetIntersection")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements present in BOTH lists (value equality, ordered as in the first) — what two searches/sets have in common.")]
+    [NodeDescription("The distinct elements present in BOTH lists (ordered as in the first) — what two searches/sets have in common. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("intersection", "set", "common", "both", "and", "overlap")]
     public static IList<object?> SetIntersection(IList<object?> list1, IList<object?> list2)
     {
@@ -925,7 +925,7 @@ public static class ListNodes
     /// <returns>The difference, ordered as in the first list.</returns>
     [NodeName("List.SetDifference")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements of the FIRST list that are NOT in the second (value equality) — subtract an ignore-list from a result set.")]
+    [NodeDescription("The distinct elements of the FIRST list that are NOT in the second — subtract an ignore-list from a result set. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("difference", "set", "subtract", "except", "remove", "without")]
     public static IList<object?> SetDifference(IList<object?> list1, IList<object?> list2)
     {

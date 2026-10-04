@@ -262,7 +262,7 @@ public static class DictionaryExtraNodes
     // other key type by its invariant text. A miss is the normal answer of ContainsKey and ValueOrDefault, so it has to be cheap: the
     // search for a key that is not a string looks at every entry, which is pointless (and was the whole cost of a miss) in a
     // dictionary that cannot hold anything but string keys, so only a dictionary that can hold other keys is searched.
-    private static bool TryGetValue(IDictionary dictionary, string key, out object? value)
+    internal static bool TryGetValue(IDictionary dictionary, string key, out object? value)
     {
         if (dictionary.Contains(key))
         {

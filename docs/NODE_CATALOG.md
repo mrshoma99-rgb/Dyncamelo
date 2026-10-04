@@ -264,7 +264,7 @@
 | `List.AnyTrue` | list | anyTrue | True when AT LEAST ONE element of the list is true |
 | `List.Chop` | list, lengths | lists | Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]) |
 | `List.Clean` | list, removeEmptyLists? | list | Removes null elements from a list, at every nesting level |
-| `List.Contains` | list, item | contains | Tests whether a list contains a value (numbers compare by value regardless of numeric type) |
+| `List.Contains` | list, item | contains | Tests whether a list contains a value |
 | `List.Count` | list | count | Returns the number of elements in a list |
 | `List.CountTrue` | list | trueCount, falseCount | Counts the true and not-true elements of a mask |
 | `List.Create` *(interactive)* | item0 … itemN | list | Builds a list from the wired item inputs |
@@ -276,7 +276,7 @@
 | `List.FirstItem` | list | item | Returns the first element of a list |
 | `List.Flatten` | list, amount? | list | Flattens a nested list by a given number of levels (-1 = completely) |
 | `List.GetItemAtIndex` | list, index | item | Returns the element at the given index (negative indexes count from the end) |
-| `List.GroupByKey` | list, keys | groups, uniqueKeys | Groups list elements by a parallel key list |
+| `List.GroupByKey` | list, keys | groups, uniqueKeys | Groups list elements by a parallel key list of the same length |
 | `List.IndexOf` | list, item | index | Returns the index of the first occurrence of a value in a list (-1 when absent) |
 | `List.Insert` | list, item, index | list | Returns a new list with the value inserted at the index (0 = front |
 | `List.LastIndexOf` | list, item | index | The zero-based index of the LAST occurrence of the item (-1 when absent) |
@@ -292,9 +292,9 @@
 | `List.ReplaceNulls` | list, substitute | list | Replaces every null element with a substitute value, at every nesting level |
 | `List.RestOfItems` | list | list | Everything but the first element |
 | `List.Reverse` | list | reversed | Returns the list in reverse order |
-| `List.SetDifference` | list1, list2 | list | The distinct elements of the FIRST list that are NOT in the second (value equality) |
-| `List.SetIntersection` | list1, list2 | list | The distinct elements present in BOTH lists (value equality, ordered as in the first) |
-| `List.SetUnion` | list1, list2 | list | The distinct elements present in EITHER list (value equality, first-seen order) |
+| `List.SetDifference` | list1, list2 | list | The distinct elements of the FIRST list that are NOT in the second |
+| `List.SetIntersection` | list1, list2 | list | The distinct elements present in BOTH lists (ordered as in the first) |
+| `List.SetUnion` | list1, list2 | list | The distinct elements present in EITHER list (first-seen order) |
 | `List.ShiftIndices` | list, amount | list | Rotates the list: +1 moves every element one place towards the end and wraps the last to the front ([a,b,c] → [c,a,b]) |
 | `List.Shuffle` | list, seed? | list | Shuffles a list |
 | `List.Slice` | list, start, end, step? | list | A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element |
@@ -305,7 +305,7 @@
 | `List.TakeItems` | list, amount | list | Takes elements from the start of the list |
 | `List.TakeWhile` | list, mask | list | Takes items from the start of the list for as long as the mask is true (stops at the first false) |
 | `List.Transpose` | list | lists | Swaps rows and columns of a list of lists |
-| `List.UniqueItems` | list | list | Removes duplicate elements from a list, preserving the original order |
+| `List.UniqueItems` | list | list | Removes duplicate elements from a list, keeping the first of each and the original order |
 | `List.WithIndex` | list | pairs | Pairs each item with its position: [[0, item0], [1, item1], …] |
 | `List.Zip` | first, second | pairs | Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list |
 
