@@ -13,8 +13,8 @@ The panel is a rounded card that floats on the left of the canvas. Drag the gap 
 | Control | What it does |
 |---|---|
 | Search box | The full-width box at the top of the card. Type to search all nodes (see below). The ✕ at the right of the box clears it, and so does ++esc++. |
-| Down-arrow round button (under the search box) | **Expand all categories.** |
-| Up-arrow round button (under the search box) | **Collapse all categories.** |
+| Small round **+** button (under the search box) | **Expand all categories.** |
+| Small round **−** button (next to the +) | **Collapse all categories.** |
 | **HIDE** tab on the right edge of the card | **Hides the whole panel.** A **NODES** tab at the left edge of the canvas brings it back. |
 
 You can also hide or show the panel with ++ctrl+b++ or **View ▸ Node Library Panel**, and **Settings ▸ Appearance ▸ Node library panel** controls whether it is shown. **Settings ▸ Appearance ▸ Descriptions in the library** adds or removes the grey description line under each node name (see [Settings](settings.md)).
@@ -96,7 +96,7 @@ The `@` search is for nodes you have already placed, not for the library. Press 
 * Node names follow a `Category.Verb` or `Category.Noun` pattern, for example `Search.ByProperty`, `Appearance.OverrideColor` or `List.GetItemAtIndex`. The part before the dot tells you the family, which makes names easy to search and easy to read on a node.
 * The name and the library folder are related but not identical. The node `Appearance.OverrideColor`, for example, lives in the library folder Navisworks ▸ Appearance. You can search by either.
 * The interactive input and display nodes have plain names instead: `Number`, `Number Slider`, `Boolean`, `String`, `Choice`, `Watch`, `Watch List`, `Color Picker` and so on.
-* Nodes you add yourself (see [Writing your own nodes](extending.md)) are placed in whichever folder their author chose.
+* Nodes you add yourself (see [Writing your own nodes](extending.md)) are placed in whichever folder their author chose. They are loaded when Navisworks starts, from `%APPDATA%\CamelGraph\Packages`; **Help ▸ Node Packs…** shows which packs loaded.
 
 ## Next steps
 

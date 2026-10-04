@@ -403,7 +403,7 @@
                                     </Button.Template>
                                 </Button>
                             </Grid>
-                            <!-- The slim row under the search: what the list is, and the two round buttons that open and close every category. -->
+                            <!-- The slim row under the search: what the list is, and a small + and − that open and close every category. -->
                             <Grid DockPanel.Dock="Top" Margin="16,10,10,4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -414,23 +414,25 @@
                                 <Button x:Name="LibraryExpandAllButton"
                                         Grid.Column="1"
                                         Style="{StaticResource Dyc.Panel.IconButton}"
-                                        Margin="0,0,6,0"
+                                        Width="20" Height="20"
+                                        Margin="0,0,4,0"
                                         ToolTip="Expand all categories"
                                         AutomationProperties.Name="Expand all categories"
                                         Command="{Binding Library.ExpandAllCommand}">
-                                    <Path Width="13" Height="13" Stretch="Uniform"
+                                    <Path Width="10" Height="10" Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
-                                          Data="{StaticResource Dyc.Icon.ArrowDown}" />
+                                          Data="{StaticResource Dyc.Icon.Plus}" />
                                 </Button>
                                 <Button x:Name="LibraryCollapseAllButton"
                                         Grid.Column="2"
                                         Style="{StaticResource Dyc.Panel.IconButton}"
+                                        Width="20" Height="20"
                                         ToolTip="Collapse all categories"
                                         AutomationProperties.Name="Collapse all categories"
                                         Command="{Binding Library.CollapseAllCommand}">
-                                    <Path Width="13" Height="13" Stretch="Uniform"
+                                    <Path Width="10" Height="10" Stretch="Uniform"
                                           Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
-                                          Data="{StaticResource Dyc.Icon.ArrowUp}" />
+                                          Data="{StaticResource Dyc.Icon.Minus}" />
                                 </Button>
                             </Grid>
                             <Grid Margin="6,0,22,8">
