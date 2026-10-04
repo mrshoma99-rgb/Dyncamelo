@@ -633,7 +633,7 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Captured Selection` *(interactive)* | — | items | Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else |
+| `Captured Selection` *(interactive)* | — | items | Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else (Selection.Current, in contrast, reads… |
 | `Selection.AddToCurrent` | items, document? | items | Adds items to the existing Navisworks selection (union) and returns the result |
 | `Selection.Clear` | document? | cleared | Clears the interactive Navisworks selection |
 | `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks, read again on every run (press Run after selecting something else and the new selection comes through) |

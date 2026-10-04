@@ -16492,7 +16492,7 @@
    "name": "Captured Selection",
    "id": "CapturedSelection",
    "category": "Navisworks.Selection",
-   "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else. Press Capture to (re)store the live selection, Clear to forget it.",
+   "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else (Selection.Current, in contrast, reads the live selection again on every run). Press Capture to (re)store the live selection, Clear to forget it. Each element is stored with its GUID and checked when the graph runs: if the model changed or is another project, the elements are looked up by GUID and any that cannot be found are reported on the node and left out. The capture belongs to the graph file, so use the node outside node groups (every instance of a group would share one set) and capture again for each project.",
    "tags": [
     "snapshot",
     "freeze",
