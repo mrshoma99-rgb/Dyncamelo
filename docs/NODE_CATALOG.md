@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**587 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**588 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -36,9 +36,9 @@
 | [Navisworks.Model](#navisworksmodel) | 5 |
 | [Navisworks.ModelItem](#navisworksmodelitem) | 15 |
 | [Navisworks.Properties](#navisworksproperties) | 13 |
-| [Navisworks.Search](#navisworkssearch) | 5 |
+| [Navisworks.Search](#navisworkssearch) | 2 |
 | [Navisworks.Selection](#navisworksselection) | 9 |
-| [Navisworks.SelectionSets](#navisworksselectionsets) | 13 |
+| [Navisworks.SelectionSets](#navisworksselectionsets) | 17 |
 | [Navisworks.TimeLiner](#navisworkstimeliner) | 10 |
 | [Navisworks.Transform](#navisworkstransform) | 7 |
 | [Navisworks.Units](#navisworksunits) | 4 |
@@ -621,30 +621,27 @@
 | `Properties.InCategory` | item, categoryName | names, values | All property names and values inside one category of an item |
 | `Properties.RemoveCustomTab` | modelItems, tabName | modelItems, removedCount | Removes a user-defined property tab from items |
 | `Properties.RenameCustomTab` | modelItems, tabName, newTabName | modelItems | Renames a user-defined property tab in place (same properties, same internal name |
-| `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes a user-defined property tab onto items |
-| `Properties.ToTable` | items, properties | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
+| `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes ONE set of names and values as a user-defined property tab onto every item you give it |
+| `Properties.SetCustomFromTable` | table, modelItems?, columns?, tabName?, keyColumn?, merge?, document? | modelItems, written, missing | Writes a table onto model items as a user-defined property tab, a DIFFERENT row for every item |
+| `Properties.ToTable` | items, properties? | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
 | `Properties.Value` | item, categoryName, propertyName | value | Reads a property value from a model item, converted to a plain value |
 | `Properties.ValueAsString` | item, categoryName, propertyName | text | Reads a property value as text |
-| `Property.Info` | property | name, displayName, value | The internal name, display name and plain value of a raw data property |
 
 ## Navisworks.Search
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Search.ByGuid` | guids, document? | items, missing | Finds the items whose instance GUID equals any of the given GUIDs (text, a 22-character IFC GlobalId, or GUID values) in one pass over the model |
-| `Search.ByProperty` | categoryName, propertyName, value, mode?, resolveTo?, document? | items | Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, <… |
-| `Search.HasCategory` | categoryName, resolveTo?, document? | items | Finds every model item that carries a property tab (e.g |
-| `Search.HasProperty` | categoryName, propertyName, resolveTo?, document? | items | Finds every model item that carries the property at all, regardless of value |
-| `Search.InItems` | items, categoryName, propertyName, value, resolveTo?, document? | items | Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement) |
+| `Search.ByProperty` | categoryName, propertyName, value?, mode?, resolveTo?, within?, document? | items | Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), is >, >=, < or… |
 
 ## Navisworks.Selection
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Captured Selection` *(interactive)* | — | items | Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else |
+| `Captured Selection` *(interactive)* | — | items | Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else (Selection.Current, in contrast, reads… |
 | `Selection.AddToCurrent` | items, document? | items | Adds items to the existing Navisworks selection (union) and returns the result |
 | `Selection.Clear` | document? | cleared | Clears the interactive Navisworks selection |
-| `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks |
+| `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks, read again on every run (press Run after selecting something else and the new selection comes through) |
 | `Selection.Invert` | document? | items | The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each) |
 | `Selection.Remove` | items, document? | items | Takes the given items out of the current Navisworks selection and returns what is still selected |
 | `Selection.Resolve` | items, level? | items | Re-selects items at another selection-tree level |
@@ -656,11 +653,11 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `SelectionSet.ByName` | name, document? | selectionSet | Finds a saved selection or search set by its display name (searches folders too) |
-| `SelectionSet.Create` | name, items, document? | selectionSet | Creates a saved selection set from the given items |
-| `SelectionSet.CreateFromSearch` | name, categoryName, propertyName, value, document? | selectionSet | Creates a live SEARCH set from a property-equals rule |
+| `SelectionSet.Create` | name, items, folder?, document? | selectionSet | Creates a saved selection set from the given items, filed in the folder you name (a folder from SelectionSets.CreateFolder, a folder name, or a path such as "Walls/Level… |
+| `SelectionSet.CreateFromSearch` | name, categoryName, propertyName, value?, mode?, folder?, document? | selectionSet | Creates a live SEARCH set from a property rule, with the same modes as Search.ByProperty (equals, contains, wildcard, >, >=, <, <= or exists |
 | `SelectionSet.Delete` | name, document? | deleted | Deletes a saved selection or search set by name (searches folders too) |
 | `SelectionSet.Duplicate` | selectionSet, newName?, document? | selectionSet | Duplicates a saved selection or search set in its folder (a search set stays a live search) |
-| `SelectionSet.Info` | selectionSet, document? | name, kind, itemCount, folder | What a saved set is: its name, whether it is a fixed "selection" or a live "search" set, how many items it selects right now (a search set is evaluated once to count) an… |
+| `SelectionSet.Info` | selectionSet, includeCount?, document? | name, kind, itemCount, folder | What a saved set is: its name, whether it is a fixed "selection" or a live "search" set, how many items it selects right now (a search set is evaluated once to count |
 | `SelectionSet.Items` | selectionSet, document? | items | The model items a saved set selects |
 | `SelectionSet.MoveToFolder` | selectionSet, folder, document? | selectionSet | Moves a saved selection or search set into a folder (appended at the end) |
 | `SelectionSet.Name` | selectionSet | name | The display name of a saved selection or search set |
@@ -668,6 +665,10 @@
 | `SelectionSets.All` | document? | selectionSets | All saved selection and search sets in a document, including those inside folders |
 | `SelectionSets.BulkByPropertyValues` | categoryName, propertyName, folderName?, document? | selectionSets, values | One search set per distinct value of a property (e.g |
 | `SelectionSets.CreateFolder` | name, parentFolder?, document? | folder | Creates a folder in the Sets window, optionally nested under a parent folder |
+| `SelectionSets.DeleteFolder` | folder, deleteContents?, document? | deleted | Deletes a Sets window folder |
+| `SelectionSets.InFolder` | folder?, recursive?, document? | selectionSets, names, subfolders, count | All saved selection and search sets inside a folder, in Sets window order |
+| `SelectionSets.RenameFolder` | folder, newName, document? | folder | Renames a Sets window folder (accepts the folder, its current name or a path like "Walls/Level 1" |
+| `SelectionSets.SortFolder` | folder?, recursive?, document? | folder | Sorts a Sets window folder's contents alphabetically by name (A to Z, ignoring case |
 
 ## Navisworks.TimeLiner
 
@@ -903,10 +904,14 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `ModelItem.InstanceGuid` | ModelItem.Info |
 | `ModelItem.IsHidden` | ModelItem.Info |
 | `ModelItem.ObjectAncestor` | Selection.Resolve |
+| `Property.Info` | Properties.InCategory |
 | `Search.ByPropertyCompare` | Search.ByProperty |
 | `Search.ByPropertyContains` | Search.ByProperty |
 | `Search.ByPropertyValue` | Search.ByProperty |
 | `Search.ByPropertyWildcard` | Search.ByProperty |
+| `Search.HasCategory` | Search.ByProperty |
+| `Search.HasProperty` | Search.ByProperty |
+| `Search.InItems` | Search.ByProperty |
 | `Table.Headers` | Table.Info |
 | `Table.JoinByKey` | Table.Join |
 

@@ -459,7 +459,7 @@ public static class AssemblyNodeLoader
             if (tabChoice != null)
             {
                 descriptor.DataChoice = new CamelGraph.Core.Editing.ModelDataChoice(
-                    CamelGraph.Core.Editing.ModelDataKind.Tab, tabChoice.From, null, tabChoice.IncludeAncestors);
+                    CamelGraph.Core.Editing.ModelDataKind.Tab, tabChoice.From, null, tabChoice.IncludeAncestors, tabChoice.UserDefinedOnly);
             }
             else if (propertyChoice != null)
             {

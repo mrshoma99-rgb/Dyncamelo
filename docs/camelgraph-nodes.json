@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 587,
+ "count": 588,
  "categories": [
   {
    "name": "Annotation",
@@ -124,7 +124,7 @@
   },
   {
    "name": "Navisworks.Search",
-   "count": 5
+   "count": 2
   },
   {
    "name": "Navisworks.Selection",
@@ -132,7 +132,7 @@
   },
   {
    "name": "Navisworks.SelectionSets",
-   "count": 13
+   "count": 17
   },
   {
    "name": "Navisworks.TimeLiner",
@@ -16851,7 +16851,7 @@
    "id": "CamelGraph.Navisworks.CustomPropertyNodes.SetCustom@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<object>,string,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Properties",
-   "description": "Writes a user-defined property tab onto items — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Merge keeps existing same-tab properties; new values win on name collisions.",
+   "description": "Writes ONE set of names and values as a user-defined property tab onto every item you give it — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Each value must be a single text, number, true/false or date: a list in the values is refused with a message, because a property holds one value. For a different row of values per item (a table from Excel) use Properties.SetCustomFromTable. Merge keeps existing same-tab properties; new values win on name collisions. Inside a node group every instance writes the same tab name, so wire the name in from the group's input when instances must not share a tab.",
    "tags": [
     "property",
     "custom",
@@ -16878,7 +16878,7 @@
     {
      "name": "values",
      "type": "any[]",
-     "description": "Property values (string, number, boolean or date; index-aligned with names)."
+     "description": "Property values (string, number, boolean or date; index-aligned with names). Every value must be a single value: a list inside the values is refused."
     },
     {
      "name": "tabName",
@@ -16903,11 +16903,98 @@
    "returns": ""
   },
   {
+   "name": "Properties.SetCustomFromTable",
+   "id": "CamelGraph.Navisworks.CustomPropertyNodes.SetCustomFromTable@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>,string,string,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Properties",
+   "description": "Writes a table onto model items as a user-defined property tab, a DIFFERENT row for every item — the spreadsheet-to-model step in one node (Table.FromExcelFile, Table.Join with Properties.ToTable, then this). Each column becomes a property named after its header. Either row 1 goes to item 1, row 2 to item 2 and so on (the counts must match, or nothing is written), or give keyColumn the column that holds each row's GUID and every row finds its item by GUID in one pass (rows that match no item are skipped and listed in missing). Every value must be text, a number, true/false or a date (an empty cell is written as empty text), and all values are checked before the first item is touched. Values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified); merge keeps existing same-tab properties.",
+   "tags": [
+    "property",
+    "custom",
+    "table",
+    "excel",
+    "spreadsheet",
+    "import",
+    "write",
+    "user",
+    "tab",
+    "row",
+    "guid",
+    "stamp",
+    "cobie",
+    "classification",
+    "parameter"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "The table: one row per item, one column per property (the header is the property name)."
+    },
+    {
+     "name": "modelItems",
+     "type": "ModelItem[]",
+     "description": "The items. With no keyColumn row 1 goes to item 1, row 2 to item 2 and so on, so there must be as many rows as items. With a keyColumn these are the items the GUIDs are looked for among; leave it unwired to look in the whole model.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "columns",
+     "type": "any[]",
+     "description": "The headers of the columns to write; leave empty for every column except the key column and the @ columns that Properties.ToTable adds.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "tabName",
+     "type": "string",
+     "description": "User-visible tab name; a stable internal name is derived from it so search sets can target the tab.",
+     "default": "\"CamelGraph Data\""
+    },
+    {
+     "name": "keyColumn",
+     "type": "string",
+     "description": "The header of the column that holds each row's item GUID (instance GUID text, or a 22-character IFC id); leave empty to pair rows and items by position.",
+     "default": "null"
+    },
+    {
+     "name": "merge",
+     "type": "boolean",
+     "description": "True keeps existing properties of a same-named tab (new values win on name collisions); false replaces the tab's content entirely.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document); only used to look items up by GUID.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "modelItems",
+     "type": "ModelItem[]",
+     "description": ""
+    },
+    {
+     "name": "written",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "missing",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "The items that were written, how many, and the keys that matched no item."
+  },
+  {
    "name": "Properties.ToTable",
    "id": "CamelGraph.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Properties",
-   "description": "Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values.",
+   "description": "Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values. Leave properties unwired to read EVERY property the items carry instead, one \"Category.Property\" column each in the order first met (capped at one million cells; with the Table nodes and Table.ToCsvFile this is the all-properties CSV export). Several wires into properties are joined into one list.",
    "tags": [
     "properties",
     "table",
@@ -16919,7 +17006,9 @@
     "dataframe",
     "report",
     "schedule",
-    "quantities"
+    "quantities",
+    "all properties",
+    "dump"
    ],
    "inputs": [
     {
@@ -16931,14 +17020,16 @@
     {
      "name": "properties",
      "type": "any[]",
-     "description": "The columns: \"Category.Property\" or \"Category|Property\" (split at the first \"|\" if there is one, otherwise at the first \".\"), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid."
+     "description": "The columns: \"Category.Property\" or \"Category|Property\" (split at the first \"|\" if there is one, otherwise at the first \".\"), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid. Leave it unwired (or empty) to get every property the items carry.",
+     "default": "null",
+     "multiInput": true
     }
    ],
    "outputs": [
     {
      "name": "table",
      "type": "CamelGraphTable",
-     "description": "A table with one column per entry of properties, headed with the text as written."
+     "description": "A table with one column per entry of properties, headed with the text as written; with no properties, one column per category and property found, headed \"Category.Property\", in the order first met."
     }
    ],
    "returns": ""
@@ -17022,45 +17113,6 @@
    "returns": ""
   },
   {
-   "name": "Property.Info",
-   "id": "CamelGraph.Navisworks.PropertyNodes.Info@Autodesk.Navisworks.Api.DataProperty",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Properties",
-   "description": "The internal name, display name and plain value of a raw data property.",
-   "tags": [
-    "property",
-    "info",
-    "name",
-    "displayname",
-    "raw"
-   ],
-   "inputs": [
-    {
-     "name": "property",
-     "type": "DataProperty",
-     "description": "The data property (e.g. from Properties.InCategory workflows)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "name",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "displayName",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "value",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Internal name, display name, and the plain value."
-  },
-  {
    "name": "Search.ByGuid",
    "id": "CamelGraph.Navisworks.SelectionExtraNodes.ByGuid@System.Collections.Generic.IList<object>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
@@ -17082,7 +17134,8 @@
     {
      "name": "guids",
      "type": "any[]",
-     "description": "The GUIDs: text such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" (or a 22-character IFC GlobalId) or GUID values."
+     "description": "The GUIDs: text such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" (or a 22-character IFC GlobalId) or GUID values.",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -17107,10 +17160,10 @@
   },
   {
    "name": "Search.ByProperty",
-   "id": "CamelGraph.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Search",
-   "description": "Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), or is >, >=, < or <= a number (e.g. pipes with Diameter > 100).",
+   "description": "Finds every model item by one property, like Find Items with its condition drop-down: equals a value, contains text, matches a wildcard pattern (* and ?), is >, >=, < or <= a number (e.g. pipes with Diameter > 100), or exists (the item carries the property at all, with any value; leave propertyName empty to ask only for the tab). Wire a LIST into value to match ANY of its entries (\"is one of\") in a single pass over the model; an empty list matches nothing, and List Levels @L1 on value runs one search per entry instead. Wire items into within to look only inside those items and their descendants (a scoped search that refines an earlier result). Replaces Search.HasProperty, Search.HasCategory and Search.InItems.",
    "tags": [
     "search",
     "find",
@@ -17125,7 +17178,19 @@
     "less",
     "numeric",
     "text",
-    "query"
+    "query",
+    "has",
+    "exists",
+    "audit",
+    "category",
+    "tab",
+    "scoped",
+    "within",
+    "refine",
+    "subset",
+    "one of",
+    "any of",
+    "in list"
    ],
    "inputs": [
     {
@@ -17136,17 +17201,18 @@
     {
      "name": "propertyName",
      "type": "string",
-     "description": "Property display name (e.g. \"Category\"). Internal names do not match."
+     "description": "Property display name (e.g. \"Category\"). Internal names do not match. With mode \"exists\", leave it empty to ask only whether the item carries the category (tab)."
     },
     {
      "name": "value",
      "type": "any",
-     "description": "What to look for: any value for \"equals\"; text for \"contains\" and \"wildcard\" (* matches any text, ? one character); a number for >, >=, < and <=."
+     "description": "What to look for: any value for \"equals\"; text for \"contains\" and \"wildcard\" (* matches any text, ? one character); a number for >, >=, < and <=; not used by \"exists\". A list means \"any of these\": an item matches when it matches at least one entry, and the model is walked once however long the list is. An empty list matches nothing.",
+     "default": "null"
     },
     {
      "name": "mode",
      "type": "string",
-     "description": "How the property is matched: equals, contains, wildcard, >, >=, < or <=.",
+     "description": "How the property is matched: equals, contains, wildcard, >, >=, <, <= or exists.",
      "default": "\"equals\""
     },
     {
@@ -17154,6 +17220,13 @@
      "type": "string",
      "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
      "default": "\"Self\""
+    },
+    {
+     "name": "within",
+     "type": "ModelItem[]",
+     "description": "Optional: search only inside these items and their descendants (a scoped search that refines an earlier result). Leave it unwired to search the whole model; an empty list searches nothing.",
+     "default": "null",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -17172,157 +17245,10 @@
    "returns": ""
   },
   {
-   "name": "Search.HasCategory",
-   "id": "CamelGraph.Navisworks.SearchNodes.HasCategory@string,string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Search",
-   "description": "Finds every model item that carries a property tab (e.g. every item with \"TimeLiner\" data).",
-   "tags": [
-    "search",
-    "find",
-    "has",
-    "category",
-    "tab",
-    "audit"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"TimeLiner\"). Internal names do not match."
-    },
-    {
-     "name": "resolveTo",
-     "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document to search (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "All items carrying the category."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Search.HasProperty",
-   "id": "CamelGraph.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Search",
-   "description": "Finds every model item that carries the property at all, regardless of value.",
-   "tags": [
-    "search",
-    "find",
-    "has",
-    "property",
-    "exists",
-    "audit"
-   ],
-   "inputs": [
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name (e.g. \"Element\"). Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name (e.g. \"Level\"). Internal names do not match."
-    },
-    {
-     "name": "resolveTo",
-     "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document to search (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "All items carrying the property."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Search.InItems",
-   "id": "CamelGraph.Navisworks.SearchNodes.InItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,object,string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Search",
-   "description": "Scoped search: finds items whose property equals the value, looking only inside the given items (chained refinement).",
-   "tags": [
-    "search",
-    "find",
-    "scoped",
-    "within",
-    "refine",
-    "subset"
-   ],
-   "inputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The items (and their descendants) to search within.",
-     "multiInput": true
-    },
-    {
-     "name": "categoryName",
-     "type": "string",
-     "description": "Category display name. Internal names do not match."
-    },
-    {
-     "name": "propertyName",
-     "type": "string",
-     "description": "Property display name. Internal names do not match."
-    },
-    {
-     "name": "value",
-     "type": "any",
-     "description": "The value to match (string, number, boolean or date)."
-    },
-    {
-     "name": "resolveTo",
-     "type": "string",
-     "description": "Optional selection resolution applied to the matches, like Options > Interface > Selection > Resolution in Navisworks: Self (default, keep matches as found), File, Layer, FirstObject, LastObject, LastUnique or Geometry.",
-     "default": "\"Self\""
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The matching subset."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Captured Selection",
    "id": "CapturedSelection",
    "category": "Navisworks.Selection",
-   "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else. Press Capture to (re)store the live selection, Clear to forget it.",
+   "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else (Selection.Current, in contrast, reads the live selection again on every run). Press Capture to (re)store the live selection, Clear to forget it. Each element is stored with its GUID and checked when the graph runs: if the model changed or is another project, the elements are looked up by GUID and any that cannot be found are reported on the node and left out. The capture belongs to the graph file, so use the node outside node groups (every instance of a group would share one set) and capture again for each project.",
    "tags": [
     "snapshot",
     "freeze",
@@ -17413,7 +17339,7 @@
    "id": "CamelGraph.Navisworks.SelectionNodes.Current@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Selection",
-   "description": "The model items currently selected in Navisworks.",
+   "description": "The model items currently selected in Navisworks, read again on every run (press Run after selecting something else and the new selection comes through). The nodes after it run again only when the selection is different from the previous run.",
    "tags": [
     "selection",
     "selected",
@@ -17449,7 +17375,7 @@
    "id": "CamelGraph.Navisworks.SelectionExtraNodes.Invert@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Selection",
-   "description": "The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each); it does not change the selection — wire it into Selection.SetCurrent to select them.",
+   "description": "The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each); it does not change the selection — wire it into Selection.SetCurrent to select them. Read again on every run, so it follows the selection as it is now.",
    "tags": [
     "selection",
     "invert",
@@ -17635,7 +17561,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetNodes.ByName@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Finds a saved selection or search set by its display name (searches folders too).",
+   "description": "Finds a saved selection or search set by its display name (searches folders too). It only looks: nothing is created or changed. Looks again on every run.",
    "tags": [
     "selection",
     "set",
@@ -17666,16 +17592,17 @@
   },
   {
    "name": "SelectionSet.Create",
-   "id": "CamelGraph.Navisworks.SelectionSetNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.SelectionSetNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Creates a saved selection set from the given items. An existing top-level set with the same name is replaced.",
+   "description": "Creates a saved selection set from the given items, filed in the folder you name (a folder from SelectionSets.CreateFolder, a folder name, or a path such as \"Walls/Level 1\"; a folder that does not exist yet is created; empty means the top level). An existing set with the same name in the same place is replaced, so re-running a graph updates the set instead of piling up copies. A list of names with a list of item lists makes one set per pair. Inside a node group every instance uses the same name unless you wire it in, so two instances would replace each other's set.",
    "tags": [
     "selection",
     "set",
     "create",
     "save",
-    "new"
+    "new",
+    "folder"
    ],
    "inputs": [
     {
@@ -17688,6 +17615,12 @@
      "type": "ModelItem[]",
      "description": "The model items to store.",
      "multiInput": true
+    },
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "Where to file the set: a folder (e.g. from SelectionSets.CreateFolder), a folder name, or a path such as \"Walls/Level 1\". A folder that does not exist yet is created. Leave it empty for the top level.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -17707,17 +17640,21 @@
   },
   {
    "name": "SelectionSet.CreateFromSearch",
-   "id": "CamelGraph.Navisworks.SelectionSetNodes.CreateFromSearch@string,string,string,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.SelectionSetNodes.CreateFromSearch@string,string,string,object,string,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Creates a live SEARCH set from a property-equals rule — it re-evaluates as the model changes. An existing top-level set with the same name is replaced.",
+   "description": "Creates a live SEARCH set from a property rule, with the same modes as Search.ByProperty (equals, contains, wildcard, >, >=, <, <= or exists; a list in value means any of its entries) — it re-evaluates as the model changes, so \"Diameter > 100\" or \"Name contains DEMO\" stays up to date. It is filed in the folder you name (empty means the top level), and an existing set with the same name in the same place is replaced. Inside a node group every instance uses the same name unless you wire it in, so two instances would replace each other's set.",
    "tags": [
     "selection",
     "search",
     "set",
     "create",
     "live",
-    "rule"
+    "rule",
+    "folder",
+    "contains",
+    "wildcard",
+    "compare"
    ],
    "inputs": [
     {
@@ -17733,12 +17670,25 @@
     {
      "name": "propertyName",
      "type": "string",
-     "description": "Property display name (e.g. \"Level\"). Internal names do not match."
+     "description": "Property display name (e.g. \"Level\"). Internal names do not match. With mode \"exists\", leave it empty to ask only for the category (tab)."
     },
     {
      "name": "value",
      "type": "any",
-     "description": "The value to match (string, number, boolean or date)."
+     "description": "What to look for, as in Search.ByProperty: any value for \"equals\", text for \"contains\" and \"wildcard\", a number for the four comparisons, not used by \"exists\". A list means \"any of these\".",
+     "default": "null"
+    },
+    {
+     "name": "mode",
+     "type": "string",
+     "description": "How the property is matched: equals, contains, wildcard, >, >=, <, <= or exists.",
+     "default": "\"equals\""
+    },
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "Where to file the set: a folder, a folder name, or a path such as \"Walls/Level 1\". A folder that does not exist yet is created. Leave it empty for the top level.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -17835,10 +17785,10 @@
   },
   {
    "name": "SelectionSet.Info",
-   "id": "CamelGraph.Navisworks.SelectionExtraNodes.Info@Autodesk.Navisworks.Api.SelectionSet,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.SelectionExtraNodes.Info@Autodesk.Navisworks.Api.SelectionSet,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "What a saved set is: its name, whether it is a fixed \"selection\" or a live \"search\" set, how many items it selects right now (a search set is evaluated once to count) and its folder path (\"\" at the top level).",
+   "description": "What a saved set is: its name, whether it is a fixed \"selection\" or a live \"search\" set, how many items it selects right now (a search set is evaluated once to count; turn includeCount off when you only need the name, kind or folder of many sets) and its folder path (\"\" at the top level). Read again on every run.",
    "tags": [
     "selection",
     "set",
@@ -17855,6 +17805,12 @@
      "name": "selectionSet",
      "type": "SelectionSet",
      "description": "The selection or search set."
+    },
+    {
+     "name": "includeCount",
+     "type": "boolean",
+     "description": "True (default) counts the items the set selects, which evaluates a search set against the model; false leaves itemCount empty and skips that work, so reading only the name, kind or folder of many sets is fast.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -17885,14 +17841,14 @@
      "description": ""
     }
    ],
-   "returns": "The set's name, its kind (\"selection\" or \"search\"), how many items it selects and its folder path."
+   "returns": "The set's name, its kind (\"selection\" or \"search\"), how many items it selects (empty when includeCount is off) and its folder path."
   },
   {
    "name": "SelectionSet.Items",
    "id": "CamelGraph.Navisworks.SelectionSetNodes.Items@Autodesk.Navisworks.Api.SelectionSet,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "The model items a saved set selects. Search sets are re-evaluated against the model.",
+   "description": "The model items a saved set selects. Search sets are re-evaluated against the model, and the set is read again on every run, so the result follows the set as it is now.",
    "tags": [
     "selection",
     "set",
@@ -17927,7 +17883,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetTreeNodes.MoveToFolder@object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean.",
+   "description": "Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean. A list of sets moves each of them; a list of sets with a list of folders pairs them one by one.",
    "tags": [
     "selection",
     "set",
@@ -17995,7 +17951,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetTreeNodes.Rename@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename via lacing.",
+   "description": "Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename by wiring a list of sets and a list of new names: they are paired one by one.",
    "tags": [
     "selection",
     "set",
@@ -18035,7 +17991,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetNodes.All@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "All saved selection and search sets in a document, including those inside folders.",
+   "description": "All saved selection and search sets in a document, including those inside folders. Re-reads the Sets window on every run, so a set added or removed since the last run shows up.",
    "tags": [
     "selection",
     "sets",
@@ -18065,7 +18021,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "One search set per distinct value of a property (e.g. one set per Level) — bulk set generation without the Find Items dialog. Existing same-named sets in the target location are replaced.",
+   "description": "One search set per distinct value of a property (e.g. one set per Level) — bulk set generation without the Find Items dialog. A value that is stored as text in one file and as a number in another gets ONE set that finds both. The sets come in value order (numbers by size, so 2 before 10). Existing same-named sets in the target folder are replaced; the folder can be a path such as \"By Level/Walls\". Reads the property of every item that carries it once.",
    "tags": [
     "selection",
     "sets",
@@ -18089,7 +18045,7 @@
     {
      "name": "folderName",
      "type": "string",
-     "description": "Folder to file the sets under (null/empty stores them at the top level).",
+     "description": "Folder to file the sets under: a name, or a path such as \"By Level/Walls\" (folders that do not exist yet are created). Null or empty stores them at the top level.",
      "default": "null"
     },
     {
@@ -18118,7 +18074,7 @@
    "id": "CamelGraph.Navisworks.SelectionSetTreeNodes.CreateFolder@string,Autodesk.Navisworks.Api.FolderItem,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.SelectionSets",
-   "description": "Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.",
+   "description": "Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean. Inside a node group every instance uses the same name unless you wire it in, so two instances share one folder.",
    "tags": [
     "selection",
     "sets",
@@ -18151,6 +18107,195 @@
      "name": "folder",
      "type": "FolderItem",
      "description": "The stored folder (an existing same-named folder in that location is reused)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SelectionSets.DeleteFolder",
+   "id": "CamelGraph.Navisworks.SelectionSetFolderNodes.DeleteFolder@object,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.SelectionSets",
+   "description": "Deletes a Sets window folder. A folder that still holds sets or folders is refused with a message unless deleteContents is on, which deletes everything inside it as well — a run has no single undo, so check the folder first with SelectionSets.InFolder. Returns false when there is no such folder, so a clean-up graph can run again safely.",
+   "tags": [
+    "selection",
+    "sets",
+    "folder",
+    "delete",
+    "remove",
+    "clean",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder to delete: a folder object, its name or a path such as \"Walls/Level 1\"."
+    },
+    {
+     "name": "deleteContents",
+     "type": "boolean",
+     "description": "False (default) refuses to delete a folder that still holds sets or folders; true deletes the folder together with everything inside it.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": "True when a folder was deleted; false when there is no such folder."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SelectionSets.InFolder",
+   "id": "CamelGraph.Navisworks.SelectionSetFolderNodes.InFolder@object,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.SelectionSets",
+   "description": "All saved selection and search sets inside a folder, in Sets window order. Give it a folder object (SelectionSets.CreateFolder / SelectionSet.Info), a folder NAME, or a path like \"Walls/Level 1\" to pick between same-named folders; leave it empty for the top level. Nested subfolders are included unless recursive is off. A list of folders gives one result per folder (List Levels are not needed). Feeds straight into SelectionSet.Items, SelectionSet.Info or a Loop.Item. Re-reads the Sets window on every run.",
+   "tags": [
+    "selection",
+    "sets",
+    "folder",
+    "contents",
+    "children",
+    "list",
+    "inside",
+    "all"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder to read: a folder object, its name, a path such as \"Walls/Level 1\", or empty for the top level of the Sets window.",
+     "default": "null"
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True (default) includes sets in nested subfolders; false lists only the folder's direct children.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "selectionSets",
+     "type": "ModelItemCollection[]",
+     "description": ""
+    },
+    {
+     "name": "names",
+     "type": "string[]",
+     "description": ""
+    },
+    {
+     "name": "subfolders",
+     "type": "any",
+     "description": ""
+    },
+    {
+     "name": "count",
+     "type": "integer",
+     "description": ""
+    }
+   ],
+   "returns": "The sets in tree order, their names, the subfolders met on the way, and how many sets were found."
+  },
+  {
+   "name": "SelectionSets.RenameFolder",
+   "id": "CamelGraph.Navisworks.SelectionSetFolderNodes.RenameFolder@object,string,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.SelectionSets",
+   "description": "Renames a Sets window folder (accepts the folder, its current name or a path like \"Walls/Level 1\"; searches nested folders too). A list of folders with a list of new names renames them pair by pair.",
+   "tags": [
+    "selection",
+    "sets",
+    "folder",
+    "rename",
+    "name",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder (e.g. from SelectionSets.CreateFolder), its current name, or a path such as \"Walls/Level 1\"."
+    },
+    {
+     "name": "newName",
+     "type": "string",
+     "description": "The new folder name."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The renamed stored folder (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "SelectionSets.SortFolder",
+   "id": "CamelGraph.Navisworks.SelectionSetFolderNodes.SortFolder@object,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.SelectionSets",
+   "description": "Sorts a Sets window folder's contents alphabetically by name (A to Z, ignoring case; entries with the same name keep their order) so you never drag sets into order again. Give a folder object, a folder name or a path like \"Walls/Level 1\"; leave it empty to sort the top level, and turn recursive on to sort the nested folders too. Folders are sorted among the sets by name. A folder that is already in order is not touched, so re-runs are clean.",
+   "tags": [
+    "selection",
+    "sets",
+    "folder",
+    "sort",
+    "alphabetical",
+    "order",
+    "organize",
+    "arrange"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder to sort: a folder object, its name or a path; empty sorts the top level.",
+     "default": "null"
+    },
+    {
+     "name": "recursive",
+     "type": "boolean",
+     "description": "True to also sort every nested folder.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "folder",
+     "type": "FolderItem",
+     "description": "The sorted folder (null when the top level was sorted)."
     }
    ],
    "returns": ""

@@ -191,6 +191,7 @@ public static class PropertyNodes
     /// <param name="property">The data property (e.g. from Properties.InCategory workflows).</param>
     /// <returns>Internal name, display name, and the plain value.</returns>
     [NodeName("Property.Info")]
+    [NodeDeprecated("Properties.InCategory")]
     [NodeDescription("The internal name, display name and plain value of a raw data property.")]
     [NodeSearchTags("property", "info", "name", "displayname", "raw")]
     [MultiReturn("name", "displayName", "value")]

@@ -105,7 +105,7 @@ More in the [editor guide](UI_GUIDE.md#finding-your-way).
 
 Work down this list.
 
-1. **Run only runs what changed.** `F5` executes the nodes that changed since the last run and reuses the rest. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". This includes nodes that read Navisworks: nothing in the source marks `Selection.Current` as changed when you change the selection in Navisworks, so a plain Run does not read it again (not yet confirmed in Navisworks). Change one of the node's inputs (or its value) to make it run again. A change of the active document, or models added or removed, marks every node as changed.
+1. **Run only runs what changed.** `F5` executes the nodes that changed since the last run and reuses the rest. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". The exception is the nodes that read the live Navisworks state (`Selection.Current`, `Selection.Invert`, `SelectionSets.All`, `SelectionSet.Items`, `SelectionSet.ByName`, `SelectionSet.Info`, `SelectionSets.InFolder`, `Document.Info`, `Models.RootItems`): they are marked as live and read Navisworks again on every Run, and the nodes after them run again only when what they read is different. (This has not yet been confirmed in a running Navisworks; if a second Run still shows the old selection, change one of the node's inputs to make it run again and tell us.) A change of the active document, or models added or removed, marks every node as changed.
 2. **A frozen node holds back everything after it.** Frozen nodes (`Shift+M`, badge *FROZEN*) and everything downstream are skipped and keep their old results. Unfreeze with `Shift+M`.
 3. **A muted node passes data through** instead of running (`M`, badge *MUTED*). Downstream nodes still run, on the passed-through data.
 4. **A `Flow.When` is false.** The nodes after it are skipped and shown idle, not red, with the message "Skipped: ... (Flow.When was false)".
@@ -122,7 +122,7 @@ Select the node and press `I` to see which of these applies.
 
 **The magnifier shows no names.** The magnifier next to a tab or property input lists names of **one element only**, and says why when it has nothing to show:
 
-* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
+* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
 * "Pick an element on 'x' (or wire one in), then search its tabs." Nodes such as `Properties.Value` read the element on their own element input. Pick an element on that input, or wire one in.
 * "The element wired to 'x' has not been computed yet. Run the graph (or pick the element on the node itself), then search." The wire needs a value first: press **Run**.
 * "Choose the tab first (the 'x' input), then search its properties." Fill the tab input, then use the magnifier on the property input.

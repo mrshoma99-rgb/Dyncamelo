@@ -28,12 +28,14 @@ public sealed class ModelDataChoice
     /// <param name="from">The name of the input that carries the element (or elements) to read.</param>
     /// <param name="tab">For <see cref="ModelDataKind.Property"/>: the name of the input that holds the tab.</param>
     /// <param name="includeAncestors">True when the node also looks at the element's parents (the data may sit above the geometry).</param>
-    public ModelDataChoice(ModelDataKind kind, string from, string? tab = null, bool includeAncestors = false)
+    /// <param name="userDefinedOnly">True to list only the tabs a person added themselves (tabs only; not those from the model's source files).</param>
+    public ModelDataChoice(ModelDataKind kind, string from, string? tab = null, bool includeAncestors = false, bool userDefinedOnly = false)
     {
         Kind = kind;
         From = from ?? throw new ArgumentNullException(nameof(from));
         Tab = tab ?? string.Empty;
         IncludeAncestors = includeAncestors;
+        UserDefinedOnly = userDefinedOnly;
     }
 
     /// <summary>Tabs, or the properties of one tab.</summary>
@@ -47,6 +49,9 @@ public sealed class ModelDataChoice
 
     /// <summary>For properties: the input that holds the tab.</summary>
     public string Tab { get; }
+
+    /// <summary>True when only the user-defined tabs are listed (for tabs).</summary>
+    public bool UserDefinedOnly { get; }
 
     /// <summary>True when the element's parents are read as well.</summary>
     public bool IncludeAncestors { get; }

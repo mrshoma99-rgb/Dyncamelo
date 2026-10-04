@@ -54,7 +54,12 @@ public sealed class NavisworksPropertyCatalog : IModelPropertyCatalog
         {
             try
             {
-                if (choice.Kind == ModelDataKind.Tab)
+                if (choice.Kind == ModelDataKind.Tab && choice.UserDefinedOnly)
+                {
+                    // Only the tabs a person added (what the property-writing nodes can change).
+                    names.AddRange(ComBridge.UserTabNames(item));
+                }
+                else if (choice.Kind == ModelDataKind.Tab)
                 {
                     foreach (var category in item.PropertyCategories)
                     {

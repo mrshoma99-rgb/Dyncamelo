@@ -36,7 +36,7 @@ To take the colour back, use `Appearance.Reset` on the same items, or `Appearanc
 This colours, for example, every item by its level.
 
 1. Add two `String` nodes (*Input*). Rename them `Property tab` and `Property`, and type `Element` and `Level` into them. Both searches below use the same two texts, so you change them in one place.
-2. Add `Search.HasProperty` (*Navisworks ▸ Search*). Wire `Property tab` into its `categoryName` and `Property` into its `propertyName`. It finds every item that carries the property.
+2. Add `Search.ByProperty` (*Navisworks ▸ Search*) and choose `exists` in `mode`. Wire `Property tab` into its `categoryName` and `Property` into its `propertyName`; `value` stays empty. It finds every item that carries the property. (The download uses `Search.HasProperty`, which is retired and does the same.)
 3. Add `Properties.Value` (*Navisworks ▸ Properties*). Wire the search `items` into its `item` input, and wire `Property tab` and `Property` into its two name inputs too. The wire into `item` is dashed: the node runs once per item and gives one value per item.
 4. Add `Appearance.ColorByValues` (*Navisworks ▸ Appearance*). Wire the search `items` into its `items` and the `value` output of `Properties.Value` into its `values`.
 5. Add a `Watch` node (*Display*), rename it `Legend`, and wire the `legend` output into it.

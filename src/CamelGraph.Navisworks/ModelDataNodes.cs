@@ -61,17 +61,22 @@ public static class ModelDataNodes
 
     /// <summary>Reads many properties of many items into a table, one row per item.</summary>
     /// <param name="items">The model items, one table row each.</param>
-    /// <param name="properties">The columns: "Category.Property" or "Category|Property" (split at the first "|" if there is one, otherwise at the first "."), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid.</param>
-    /// <returns>A table with one column per entry of <paramref name="properties"/>, headed with the text as written.</returns>
+    /// <param name="properties">The columns: "Category.Property" or "Category|Property" (split at the first "|" if there is one, otherwise at the first "."), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid. Leave it unwired (or empty) to get every property the items carry.</param>
+    /// <returns>A table with one column per entry of <paramref name="properties"/>, headed with the text as written; with no properties, one column per category and property found, headed "Category.Property", in the order first met.</returns>
     [NodeName("Properties.ToTable")]
     [NodeCategory("Navisworks.Properties")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("table")]
-    [NodeDescription("Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values.")]
-    [NodeSearchTags("properties", "table", "export", "rows", "columns", "excel", "csv", "dataframe", "report", "schedule", "quantities")]
-    public static CamelGraphTable ToTable([MultiInput] IEnumerable<ModelItem> items, IList<object?> properties)
+    [NodeDescription("Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values. Leave properties unwired to read EVERY property the items carry instead, one \"Category.Property\" column each in the order first met (capped at one million cells; with the Table nodes and Table.ToCsvFile this is the all-properties CSV export). Several wires into properties are joined into one list.")]
+    [NodeSearchTags("properties", "table", "export", "rows", "columns", "excel", "csv", "dataframe", "report", "schedule", "quantities", "all properties", "dump")]
+    public static CamelGraphTable ToTable([MultiInput] IEnumerable<ModelItem> items, [MultiInput] IList<object?>? properties = null)
     {
         var list = NavisValues.NonNullItems(items);
+        if (properties == null || properties.Count == 0)
+        {
+            return ReadEveryProperty(list);
+        }
+
         var specs = PropertySpec.ParseList(properties, "Properties.ToTable");
 
         var headers = new List<string>(specs.Count);
@@ -191,6 +196,26 @@ public static class ModelDataNodes
         }
 
         return stats.ToTable();
+    }
+
+    // Properties.ToTable with no list: one column per category and property found, "Category.Property", in the order first met.
+    private static CamelGraphTable ReadEveryProperty(List<ModelItem> list)
+    {
+        var builder = new WideTableBuilder();
+        foreach (var item in list)
+        {
+            builder.StartRow();
+            foreach (var category in item.PropertyCategories)
+            {
+                var categoryName = category.DisplayName;
+                foreach (var property in category.Properties)
+                {
+                    builder.Set(categoryName + "." + property.DisplayName, NavisValues.ToClrObject(property.Value));
+                }
+            }
+        }
+
+        return builder.Build();
     }
 
     private enum GroupMode

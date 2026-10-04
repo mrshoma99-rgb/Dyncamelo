@@ -328,6 +328,10 @@ internal static class Replicator
             stats.Calls++;
         }
 
+        // The collector opens before the arguments are converted, so a type converter registered by a host (the one that turns a picked
+        // selection back into model items) can report with NodeWarnings.Add too; it closes when the call is over, however it ends.
+        using var warnings = NodeWarnings.Begin(insideReplication);
+
         var call = new object?[args.Length];
         for (int i = 0; i < args.Length; i++)
         {
@@ -396,7 +400,6 @@ internal static class Replicator
         }
 
         object?[]? outputs;
-        using (var warnings = NodeWarnings.Begin(insideReplication))
         {
             if (insideReplication)
             {

@@ -162,6 +162,12 @@ public sealed class NodeTabChoiceAttribute : Attribute
 
     /// <summary>True when the node also looks at the element's parents, so their tabs are offered too.</summary>
     public bool IncludeAncestors { get; set; }
+
+    /// <summary>
+    /// True when only the tabs a person added themselves (user-defined tabs, the ones a property-writing node can change) are offered,
+    /// not the tabs that come from the model's source files. The host's reader decides what "user-defined" means.
+    /// </summary>
+    public bool UserDefinedOnly { get; set; }
 }
 
 /// <summary>
