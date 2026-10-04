@@ -100,8 +100,8 @@ public static class NodeWarnings
 
         private readonly WarningCollector? _previous;
         private readonly object _gate = new object();
-        private readonly List<string> _order = new List<string>();
-        private readonly Dictionary<string, int> _counts = new Dictionary<string, int>(StringComparer.Ordinal);
+        private List<string>? _order;                 // created by the first message: most calls never warn
+        private Dictionary<string, int>? _counts;
         private bool _disposed;
 
         public WarningCollector(WarningCollector? previous)
@@ -122,7 +122,7 @@ public static class NodeWarnings
             {
                 lock (_gate)
                 {
-                    return _order.Count > 0 ? _order[0] : null;
+                    return _order != null && _order.Count > 0 ? _order[0] : null;
                 }
             }
         }
@@ -132,10 +132,13 @@ public static class NodeWarnings
         {
             lock (_gate)
             {
-                var list = new List<KeyValuePair<string, int>>(_order.Count);
-                foreach (var message in _order)
+                var list = new List<KeyValuePair<string, int>>(_order?.Count ?? 0);
+                if (_order != null && _counts != null)
                 {
-                    list.Add(new KeyValuePair<string, int>(message, _counts[message]));
+                    foreach (var message in _order)
+                    {
+                        list.Add(new KeyValuePair<string, int>(message, _counts[message]));
+                    }
                 }
 
                 return list;
@@ -147,6 +150,8 @@ public static class NodeWarnings
             lock (_gate)
             {
                 Total++;
+                _order ??= new List<string>();
+                _counts ??= new Dictionary<string, int>(StringComparer.Ordinal);
                 if (_counts.TryGetValue(message, out var count))
                 {
                     _counts[message] = count + 1;
