@@ -648,7 +648,7 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
             }
         }
 
-        var available = HeaderBar.ActualWidth - 12d - (HeaderLogo.ActualWidth + 8d) - HeaderControls.ActualWidth;
+        var available = HeaderBar.ActualWidth - 12d - (HeaderLogo.ActualWidth + 8d) - HeaderControls.ActualWidth - RunButton.ActualWidth;
         var compact = _menuBarWidth > 0d && available < _menuBarWidth;
         SetMenuCompact(compact);
 
