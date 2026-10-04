@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
 using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks.Internal;
@@ -230,6 +231,99 @@ internal static class ClashHelpers
     internal static void FlattenResultsWithGroups(ClashTest test, List<ClashResult> results, List<string> groupNames)
     {
         CollectResults(test.Children, string.Empty, results, groupNames);
+    }
+
+    /// <summary>
+    /// The shared body of the nodes that edit one result, one result group, or a whole list of them
+    /// (ClashResult.SetStatus, .Assign, .SetDescription). The input is unpacked (a nested list is flattened), every entry must be a
+    /// clash result or a result group, and the edits of one call run inside ONE document transaction, so a list handed over whole
+    /// is one undo step and one Clash Detective refresh instead of one per result.
+    /// </summary>
+    /// <param name="input">The wired result(s), as they came in.</param>
+    /// <param name="document">The document (null = the active document).</param>
+    /// <param name="undoLabel">Label for the undo entry.</param>
+    /// <param name="edit">The edit for one result or group.</param>
+    /// <returns>The input, as it came in (a single result stays a single result, a list stays a list).</returns>
+    internal static object? EditResults(
+        object? input, Document? document, string undoLabel, Action<DocumentClash, IClashResult> edit)
+    {
+        if (input == null)
+        {
+            throw new ArgumentNullException(nameof(input), "No clash result provided.");
+        }
+
+        var unpacked = ClashInputs.Flatten<IClashResult>(input);
+        if (unpacked.FirstWrong != null)
+        {
+            throw new ArgumentException(
+                DescribeValue(unpacked.FirstWrong) + " is not a clash result or a result group. " +
+                "Wire results from ClashTest.Results (or a filter of them) or a group from ClashTest.Groups.", nameof(input));
+        }
+
+        if (unpacked.SkippedNulls > 0)
+        {
+            NodeWarnings.Add(
+                unpacked.SkippedNulls + " empty entr" + (unpacked.SkippedNulls == 1 ? "y" : "ies") + " in the result list " +
+                (unpacked.SkippedNulls == 1 ? "was" : "were") + " skipped.");
+        }
+
+        if (unpacked.Items.Count == 0)
+        {
+            NodeWarnings.Add("No clash results were given, so nothing was changed.");
+            return input;
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var clash = RequireClash(doc);
+        try
+        {
+            using (var transaction = doc.BeginTransaction(undoLabel))
+            {
+                foreach (var item in unpacked.Items)
+                {
+                    edit(clash, item);
+                }
+
+                transaction.Commit();
+            }
+        }
+        catch (Exception ex) when (IsDisposed(ex))
+        {
+            throw StaleInputError("clash results", ex);
+        }
+
+        return input;
+    }
+
+    /// <summary>A wired value in words for an error message: a saved item by its name, a text as it is, anything else by its kind.</summary>
+    private static string DescribeValue(object value)
+    {
+        if (value is SavedItem saved)
+        {
+            return string.IsNullOrEmpty(saved.DisplayName) ? "An unnamed " + saved.GetType().Name : "'" + saved.DisplayName + "'";
+        }
+
+        if (value is string text)
+        {
+            return "'" + text + "'";
+        }
+
+        var name = value.GetType().Name;
+        var tick = name.IndexOf('`');
+        return "A value of type " + (tick > 0 ? name.Substring(0, tick) : name);
+    }
+
+    /// <summary>
+    /// The assignee of a clash result as text, on every Navisworks year: a string through 2025, an Assignee object in 2026
+    /// (its display name). Empty when nobody is assigned.
+    /// </summary>
+    internal static string AssigneeText(IClashResult result)
+    {
+#if NAV2026
+        return result.AssignedTo?.ToString() ?? string.Empty;
+#else
+        return result.AssignedTo ?? string.Empty;
+#endif
     }
 
     /// <summary>Parses a clash result status name (New/Active/Reviewed/Approved/Resolved).</summary>

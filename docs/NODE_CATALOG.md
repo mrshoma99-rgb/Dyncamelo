@@ -474,7 +474,7 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `ClashResult.Angle` | result | degrees | The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal) |
-| `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result to a person or trade |
+| `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result, or a whole result group, to a person or trade |
 | `ClashResult.Center` | result | point | The clash point of a result, in document units |
 | `ClashResult.Documentation` | result | hasViewpoint, hasRedlines, commentCount | How documented a clash already is |
 | `ClashResult.Focus` | results, isolate?, zoom?, select?, paddingFactor?, document? | items | Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and option… |
@@ -483,8 +483,8 @@
 | `ClashResult.Orientation` | result | degrees, shape1, shape2, slope1, slope2 | ClashResult.Angle with world context: the crossing angle PLUS each element's bounding-box shape |
 | `ClashResult.Rename` | result, newName, document? | result | Renames a clash result or result group |
 | `ClashResult.SaveImage` | result, filePath, width?, height?, document? | filePath | Renders a clash snapshot (scene plus clash highlight) to a .png/.jpg/.bmp file |
-| `ClashResult.SetDescription` | result, description, document? | result | Sets a clash result's description text (context for reports and reviews) |
-| `ClashResult.SetStatus` | result, status, document? | result | Sets a clash result's status |
+| `ClashResult.SetDescription` | result, description, document? | result | Sets the description text of a clash result, or of a whole result group (context for reports and reviews) |
+| `ClashResult.SetStatus` | result, status, document? | result | Sets the status of a clash result, or of a whole result group (wire the group from ClashTest.Groups or ClashGroup.ByName) |
 | `ClashResult.Size` | result | volume | The size of the clash overlap region |
 | `ClashResult.Viewpoint` | result, apply?, document? | viewpoint | The camera viewpoint Navisworks generates for a clash result |
 

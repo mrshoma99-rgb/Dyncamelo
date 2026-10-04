@@ -82,7 +82,7 @@ public static class ClashNodes
             ["status"] = clashResult.Status.ToString(),
             ["distance"] = clashResult.Distance,
             ["description"] = clashResult.Description,
-            ["assignedTo"] = clashResult.AssignedTo,
+            ["assignedTo"] = ClashHelpers.AssigneeText(clashResult),
             ["createdTime"] = clashResult.CreatedTime,
         };
     }
@@ -230,13 +230,13 @@ public static class ClashNodes
     [NodeName("Clash.FilterByAngle")]
     [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.")]
+    [NodeDescription("Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. The angle is always between 0 (parallel) and 90 (perpendicular), so the range stops at 90. Results with no measurable direction are dropped.")]
     [NodeSearchTags("clash", "filter", "angle", "perpendicular", "parallel", "crossing", "degrees")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByAngle(
         IEnumerable<ClashResult> results,
-        [NodeRange(0, 180, Unit = "°")] double minDegrees = 0.0,
-        [NodeRange(0, 180, Unit = "°")] double maxDegrees = 90.0)
+        [NodeRange(0, 90, Unit = "°")] double minDegrees = 0.0,
+        [NodeRange(0, 90, Unit = "°")] double maxDegrees = 90.0)
     {
         if (results == null)
         {
@@ -450,24 +450,35 @@ public static class ClashNodes
         return FilterByStatus(Results(test), status);
     }
 
-    /// <summary>Sets the status of a clash result.</summary>
-    /// <param name="result">The clash result.</param>
+    /// <summary>Sets the status of a clash result or of a whole result group.</summary>
+    /// <param name="result">The clash result or result group; or, with list level 2 on this input, a whole list of them.</param>
     /// <param name="status">One of: New, Active, Reviewed, Approved, Resolved.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The result (pass-through). Lace over result lists for bulk triage.</returns>
+    /// <returns>What was wired in (pass-through): the same result, group or list.</returns>
     [NodeName("ClashResult.SetStatus")]
     [NodeCategory("Navisworks.Clash.Results")]
-    [NodeDescription("Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).")]
-    [NodeSearchTags("clash", "result", "status", "set", "resolve", "approve", "triage")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.SetStatus@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Sets the status of a clash result, or of a whole result group (wire the group from ClashTest.Groups or " +
+        "ClashGroup.ByName) — approve a group in one step. A list of results runs the node once per result (lacing), so a " +
+        "list of results and a list of statuses pair up one to one, e.g. the topic statuses from BCF.ImportIssues; each " +
+        "result is its own edit and its own undo step. For a long list (thousands of results) right-click the result socket, " +
+        "choose List Levels and @L2: the node then gets the whole list and edits all of it in one step, one undo step. " +
+        "Works on Navisworks 2024 and 2025; on 2026 the node reports that it is not supported yet.")]
+    [NodeSearchTags("clash", "result", "status", "set", "resolve", "approve", "triage", "group", "bulk")]
     [return: NodeName("result")]
-    public static ClashResult SetStatus(ClashResult result, [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status, Document? document = null)
+    public static object? SetStatus(
+        [ScalarInput][PortKinds("clash")] object result,
+        [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")] string status,
+        Document? document = null)
     {
 #if !NAV2026
-        var clashResult = ClashHelpers.RequireResult(result);
         var wanted = ClashHelpers.ParseResultStatus(status);
-        var doc = NavisworksContext.ResolveDocument(document);
-        ClashHelpers.RequireClash(doc).TestsData.TestsEditResultStatus(clashResult, wanted);
-        return clashResult;
+        return ClashHelpers.EditResults(
+            result, document, "Set clash status",
+            (clash, item) => clash.TestsData.TestsEditResultStatus(item, wanted));
 #else
         // TestsEditResultStatus gained a required Assignee (current-user) argument in
         // Navisworks 2026; pending a port verified on that release.
@@ -477,23 +488,34 @@ public static class ClashNodes
 #endif
     }
 
-    /// <summary>Assigns a clash result to a person or trade.</summary>
-    /// <param name="result">The clash result.</param>
+    /// <summary>Assigns a clash result or a whole result group to a person or trade.</summary>
+    /// <param name="result">The clash result or result group; or, with list level 2 on this input, a whole list of them.</param>
     /// <param name="assignedTo">The assignee (e.g. "MEP", "j.smith").</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The result (pass-through). Lace over result lists for bulk assignment.</returns>
+    /// <returns>What was wired in (pass-through): the same result, group or list.</returns>
     [NodeName("ClashResult.Assign")]
     [NodeCategory("Navisworks.Clash.Results")]
-    [NodeDescription("Assigns a clash result to a person or trade — bulk assignment via lacing.")]
-    [NodeSearchTags("clash", "result", "assign", "trade", "responsible")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.Assign@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Assigns a clash result, or a whole result group, to a person or trade. A list of results runs the node once per " +
+        "result (lacing), so a list of results and a list of assignees pair up one to one; each result is its own edit. " +
+        "For a long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and " +
+        "assigns all of it in one step, one undo step. Works on Navisworks 2024 and 2025; on 2026 the node reports that it " +
+        "is not supported yet.")]
+    [NodeSearchTags("clash", "result", "assign", "trade", "responsible", "group", "bulk")]
     [return: NodeName("result")]
-    public static ClashResult Assign(ClashResult result, string assignedTo, Document? document = null)
+    public static object? Assign(
+        [ScalarInput][PortKinds("clash")] object result,
+        string assignedTo,
+        Document? document = null)
     {
 #if !NAV2026
-        var clashResult = ClashHelpers.RequireResult(result);
-        var doc = NavisworksContext.ResolveDocument(document);
-        ClashHelpers.RequireClash(doc).TestsData.TestsEditResultAssignedTo(clashResult, assignedTo ?? string.Empty);
-        return clashResult;
+        var assignee = assignedTo ?? string.Empty;
+        return ClashHelpers.EditResults(
+            result, document, "Assign clash results",
+            (clash, item) => clash.TestsData.TestsEditResultAssignedTo(item, assignee));
 #else
         // TestsEditResultAssignedTo takes an Assignee (not a string) in Navisworks 2026;
         // pending a port verified on that release.
@@ -503,22 +525,32 @@ public static class ClashNodes
 #endif
     }
 
-    /// <summary>Sets the description of a clash result.</summary>
-    /// <param name="result">The clash result.</param>
+    /// <summary>Sets the description of a clash result or of a whole result group.</summary>
+    /// <param name="result">The clash result or result group; or, with list level 2 on this input, a whole list of them.</param>
     /// <param name="description">The description text.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The result (pass-through).</returns>
+    /// <returns>What was wired in (pass-through): the same result, group or list.</returns>
     [NodeName("ClashResult.SetDescription")]
     [NodeCategory("Navisworks.Clash.Results")]
-    [NodeDescription("Sets a clash result's description text (context for reports and reviews).")]
-    [NodeSearchTags("clash", "result", "description", "set", "note")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.SetDescription@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Sets the description text of a clash result, or of a whole result group (context for reports and reviews). A list " +
+        "of results runs the node once per result (lacing), so a list of results and a list of texts pair up one to one. For a " +
+        "long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and edits " +
+        "all of it in one step, one undo step.")]
+    [NodeSearchTags("clash", "result", "description", "set", "note", "group", "bulk")]
     [return: NodeName("result")]
-    public static ClashResult SetDescription(ClashResult result, string description, Document? document = null)
+    public static object? SetDescription(
+        [ScalarInput][PortKinds("clash")] object result,
+        string description,
+        Document? document = null)
     {
-        var clashResult = ClashHelpers.RequireResult(result);
-        var doc = NavisworksContext.ResolveDocument(document);
-        ClashHelpers.RequireClash(doc).TestsData.TestsEditResultDescription(clashResult, description ?? string.Empty);
-        return clashResult;
+        var text = description ?? string.Empty;
+        return ClashHelpers.EditResults(
+            result, document, "Set clash description",
+            (clash, item) => clash.TestsData.TestsEditResultDescription(item, text));
     }
 
     /// <summary>The auto-generated camera viewpoint of a clash result.</summary>

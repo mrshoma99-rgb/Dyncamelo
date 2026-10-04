@@ -22,10 +22,12 @@ public static class ClashEditNodes
     /// <returns>The stored test (pass-through for chaining).</returns>
     [NodeName("ClashTest.Rename")]
     [NodeCategory("Navisworks.Clash.Tests")]
-    [NodeDescription("Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing: a list of tests (or of names) and a list of new names pair up one to one, one test per name.")]
     [NodeSearchTags("clash", "test", "rename", "name")]
     [return: NodeName("test")]
-    public static ClashTest Rename(object test, string newName, Document? document = null)
+    public static ClashTest Rename([ScalarInput] object test, string newName, Document? document = null)
     {
         RequireName(newName);
         var doc = NavisworksContext.ResolveDocument(document);

@@ -156,11 +156,12 @@ public static class ClashTriageNodes
     [NodeDescription(
         "Finds a clash result group by test name + group name and opens it up: the results inside, the " +
         "group's own status, and the count. The lookup half of group-based triage — feed the results to " +
-        "any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.")]
+        "any filter/report node, or the group to ClashResult.SetStatus/Assign/Rename and SavedItem.AddComment. " +
+        "A list of test names (or tests) with a list of group names runs once per pair, one to one.")]
     [NodeSearchTags("clash", "group", "name", "fetch", "results", "status", "lookup")]
     [MultiReturn("group", "results", "status", "count")]
     [PortKinds("clash", "clash*", "text", "integer")]
-    public static Dictionary<string, object?> GroupByName(object test, string groupName, Document? document = null)
+    public static Dictionary<string, object?> GroupByName([ScalarInput] object test, string groupName, Document? document = null)
     {
         if (string.IsNullOrEmpty(groupName))
         {
@@ -210,7 +211,7 @@ public static class ClashTriageNodes
         "Every result group of every clash test in the document, as ONE flat list — the whole-project " +
         "entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each " +
         "iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups " +
-        "per test (which needs List@Level to iterate). Tests without groups contribute nothing.")]
+        "per test (ClashTest.Groups runs once per test and gives a list of lists). Tests without groups contribute nothing.")]
     [NodeSearchTags("clash", "groups", "all", "project", "every", "tests", "flat", "loop", "batch")]
     [MultiReturn("groups", "names", "testNames", "counts")]
     [PortKinds("clash*", "text*", "text*", "integer*")]
@@ -257,7 +258,7 @@ public static class ClashTriageNodes
         "name and status, and the TEST it belongs to (object and name). This is what makes whole-project " +
         "group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to " +
         "this node, and every iteration knows its results, its group name and its test name without " +
-        "parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.")]
+        "parallel lists. ClashGroup.ByName is the lookup-by-name twin.")]
     [NodeSearchTags("clash", "group", "info", "results", "name", "status", "test", "parent", "loop")]
     [MultiReturn("results", "name", "status", "count", "test", "testName")]
     [PortKinds("clash*", "text", "text", "integer", "clash", "text")]
@@ -305,11 +306,11 @@ public static class ClashTriageNodes
     [NodeName("ClashTest.Groups")]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.")]
+    [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one. Wire a test, its name, or a list of them: with a list the node runs once per test and every output is one list per test (List.Flatten joins them).")]
     [NodeSearchTags("clash", "test", "groups", "list", "names", "statuses", "overview")]
     [MultiReturn("groups", "names", "statuses", "counts")]
     [PortKinds("clash*", "text*", "text*", "integer*")]
-    public static Dictionary<string, object?> Groups(object test, Document? document = null)
+    public static Dictionary<string, object?> Groups([ScalarInput] object test, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);

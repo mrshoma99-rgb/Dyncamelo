@@ -10960,7 +10960,7 @@
    "id": "CamelGraph.Navisworks.ClashNodes.FilterByAngle@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,double,double",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Filter",
-   "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.",
+   "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. The angle is always between 0 (parallel) and 90 (perpendicular), so the range stops at 90. Results with no measurable direction are dropped.",
    "tags": [
     "clash",
     "filter",
@@ -11273,7 +11273,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.AllGroups@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (which needs List@Level to iterate). Tests without groups contribute nothing.",
+   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (ClashTest.Groups runs once per test and gives a list of lists). Tests without groups contribute nothing.",
    "tags": [
     "clash",
     "groups",
@@ -11617,7 +11617,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.GroupByName@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.",
+   "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Assign/Rename and SavedItem.AddComment. A list of test names (or tests) with a list of group names runs once per pair, one to one.",
    "tags": [
     "clash",
     "group",
@@ -11674,7 +11674,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.GroupInfo@Autodesk.Navisworks.Api.Clash.ClashResultGroup",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.",
+   "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists. ClashGroup.ByName is the lookup-by-name twin.",
    "tags": [
     "clash",
     "group",
@@ -11903,22 +11903,24 @@
   },
   {
    "name": "ClashResult.Assign",
-   "id": "CamelGraph.Navisworks.ClashNodes.Assign@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.Assign@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Assigns a clash result to a person or trade — bulk assignment via lacing.",
+   "description": "Assigns a clash result, or a whole result group, to a person or trade. A list of results runs the node once per result (lacing), so a list of results and a list of assignees pair up one to one; each result is its own edit. For a long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and assigns all of it in one step, one undo step. Works on Navisworks 2024 and 2025; on 2026 the node reports that it is not supported yet.",
    "tags": [
     "clash",
     "result",
     "assign",
     "trade",
-    "responsible"
+    "responsible",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "assignedTo",
@@ -11935,8 +11937,8 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through). Lace over result lists for bulk assignment."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
@@ -12313,22 +12315,24 @@
   },
   {
    "name": "ClashResult.SetDescription",
-   "id": "CamelGraph.Navisworks.ClashNodes.SetDescription@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.SetDescription@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Sets a clash result's description text (context for reports and reviews).",
+   "description": "Sets the description text of a clash result, or of a whole result group (context for reports and reviews). A list of results runs the node once per result (lacing), so a list of results and a list of texts pair up one to one. For a long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and edits all of it in one step, one undo step.",
    "tags": [
     "clash",
     "result",
     "description",
     "set",
-    "note"
+    "note",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "description",
@@ -12345,18 +12349,18 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through)."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
   },
   {
    "name": "ClashResult.SetStatus",
-   "id": "CamelGraph.Navisworks.ClashNodes.SetStatus@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.SetStatus@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).",
+   "description": "Sets the status of a clash result, or of a whole result group (wire the group from ClashTest.Groups or ClashGroup.ByName) — approve a group in one step. A list of results runs the node once per result (lacing), so a list of results and a list of statuses pair up one to one, e.g. the topic statuses from BCF.ImportIssues; each result is its own edit and its own undo step. For a long list (thousands of results) right-click the result socket, choose List Levels and @L2: the node then gets the whole list and edits all of it in one step, one undo step. Works on Navisworks 2024 and 2025; on 2026 the node reports that it is not supported yet.",
    "tags": [
     "clash",
     "result",
@@ -12364,13 +12368,15 @@
     "set",
     "resolve",
     "approve",
-    "triage"
+    "triage",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "status",
@@ -12387,8 +12393,8 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through). Lace over result lists for bulk triage."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
@@ -12911,7 +12917,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Groups@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.",
+   "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one. Wire a test, its name, or a list of them: with a list the node runs once per test and every output is one list per test (List.Flatten joins them).",
    "tags": [
     "clash",
     "test",
@@ -13046,7 +13052,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.Rename@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.",
+   "description": "Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing: a list of tests (or of names) and a list of new names pair up one to one, one test per name.",
    "tags": [
     "clash",
     "test",
