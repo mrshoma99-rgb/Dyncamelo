@@ -19,7 +19,7 @@ The same word has two meanings in Navisworks and in CamelGraph, so here is the d
 | **Navisworks nodes** | Everything that touches the open model: search, properties, selection, selection sets, appearance, viewpoints, camera, clash, TimeLiner, export. Grouped under *Navisworks* in the library. |
 | **Input and display nodes** | Sliders, number, text, Boolean, date, choice, file and folder paths, a colour picker; and **Watch** nodes that show a value on the canvas. |
 | **Node groups** | Reusable pieces of graph that you make yourself ([Node groups](node-groups.md)). |
-| **Node packs** | Extra libraries of your own or from others, loaded from a `Packages` folder ([Writing your own nodes](extending.md)). |
+| **Node packs** | Extra libraries of your own or from others, loaded from `%APPDATA%\CamelGraph\Packages` when Navisworks starts ([Writing your own nodes](extending.md); **Help ▸ Node Packs…** opens the folder). |
 
 The [node library](nodes/index.md) lists every built-in node with its inputs and outputs.
 

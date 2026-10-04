@@ -86,6 +86,79 @@ public partial class GraphEditorViewModel
         }
     }
 
+    // ----- node packs -----------------------------------------------------------------------------------------------------
+
+    private ICommand? _showNodePacksCommand;
+
+    /// <summary>Opens a folder in the file manager; the host or a test can replace it. False when it could not be opened.</summary>
+    public Func<string, bool> FolderOpener { get; set; } = OpenFolderInExplorer;
+
+    /// <summary>Help ▸ Node Packs…: says where your own nodes go and what was loaded, and offers to open that folder.</summary>
+    public ICommand ShowNodePacksCommand => _showNodePacksCommand ??= new RelayCommand(ShowNodePacks);
+
+    /// <summary>The folder for your own packs, <c>%APPDATA%\CamelGraph\Packages</c>; a test can point it somewhere else.</summary>
+    public string NodePackFolder { get; set; } = CamelGraph.Core.Loader.NodePacks.UserFolder;
+
+    /// <summary>The text of the Node Packs dialog: the folder, what was loaded, what failed, and that Navisworks must be restarted.</summary>
+    /// <param name="folder">The folder for your own packs.</param>
+    /// <param name="report">What the scan at startup found.</param>
+    public static string DescribeNodePacks(string folder, CamelGraph.Core.Loader.NodePackReport report)
+    {
+        var text = new System.Text.StringBuilder();
+        text.AppendLine("Your own nodes go in a node pack: a .dll with the files it needs, in a folder of its own, put here:");
+        text.AppendLine();
+        text.AppendLine(folder);
+        text.AppendLine();
+        text.AppendLine("Restart Navisworks after adding or changing a pack. Updating CamelGraph leaves this folder alone.");
+        text.AppendLine();
+        text.AppendLine("Loaded when Navisworks started: " + report.Summary());
+        foreach (var line in report.Lines())
+        {
+            text.AppendLine("  " + line);
+        }
+
+        text.AppendLine();
+        text.Append("A pack is code that runs with your rights. Install packs only from authors you trust.");
+        return text.ToString();
+    }
+
+    private void ShowNodePacks()
+    {
+        var folder = NodePackFolder;
+        if (!Dialogs.Confirm(DescribeNodePacks(folder, CamelGraph.Core.Loader.NodePacks.Last) + "\n\nOpen the folder now?", "Node Packs"))
+        {
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(folder);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Could not create " + folder + ": " + ex.Message;
+            return;
+        }
+
+        if (!FolderOpener(folder))
+        {
+            StatusMessage = "Could not open " + folder + ". Open it in File Explorer.";
+        }
+    }
+
+    private static bool OpenFolderInExplorer(string path)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe", "\"" + path + "\"") { UseShellExecute = true });
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     // ----- self-test ------------------------------------------------------------------------------------------------------
 
     private ICommand? _runSelfTestCommand;

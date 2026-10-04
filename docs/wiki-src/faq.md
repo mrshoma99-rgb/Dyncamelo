@@ -246,7 +246,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Are node packs safe?"
-    A node pack is code. CamelGraph loads every `.dll` in a `Packages` folder, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
+    A node pack is code. CamelGraph loads every `.dll` in your node packs folder (`%APPDATA%\CamelGraph\Packages`) when Navisworks starts, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Should I save the model before I run a graph?"
     Yes, when the graph changes the model. A run is not atomic: if it is cancelled or a node fails, nodes that already ran have already changed the model. See [Running a graph](running-graphs.md#changing-the-model-and-undoing-it).
@@ -269,6 +269,9 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 
 ??? question "How do I write my own node?"
     A public static C# method with a couple of attributes is a node. [Writing your own nodes](extending.md) has a tutorial for a zero-touch node pack, including nodes that use the Navisworks API.
+
+??? question "Where do I put a node pack, and how does CamelGraph load it?"
+    Copy the pack (its `.dll` and the files it needs, in a folder of its own) into `%APPDATA%\CamelGraph\Packages` and restart Navisworks. **Help ▸ Node Packs…** opens that folder and lists what was loaded and what was not. Updating CamelGraph leaves the folder alone. There is no button to load a pack while Navisworks runs. See [Writing your own nodes](extending.md#1-how-node-loading-works).
 
 ??? question "Can I contribute nodes?"
     Yes. [Writing your own nodes](extending.md) describes the pack format. Pull requests are welcome; read `CONTRIBUTING.md` in the repository first.

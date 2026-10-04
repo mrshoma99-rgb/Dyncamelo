@@ -391,6 +391,7 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
             case "help.keys": return vm.ToggleHelpCommand;
             case "help.diagnostics": return vm.CopyDiagnosticsCommand;
             case "help.selftest": return vm.RunSelfTestCommand;
+            case "help.nodepacks": return vm.ShowNodePacksCommand;
             case "help.privacy": return _privacyCommand ??= new RelayCommand(() => PrivacyWindow.Show(Window.GetWindow(this)));
             case "view.hud": return _hudCommand;
             case "view.previews": return _previewsCommand ??= new RelayCommand(() => vm.ShowNodePreviews = !vm.ShowNodePreviews);

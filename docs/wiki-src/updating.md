@@ -32,7 +32,7 @@ The request carries your IP address and the name `CamelGraph-UpdateCheck`, as an
     * if you build from source, pull the new source and build again.
 3. Start Navisworks and open CamelGraph. Check the version as above.
 
-Your own work is not touched: your `.dyc` graphs, the scripts folder (`Documents\CamelGraph\Scripts`) and your settings in `%APPDATA%\CamelGraph` all stay.
+Your own work is not touched: your `.dyc` graphs, the scripts folder (`Documents\CamelGraph\Scripts`), your settings in `%APPDATA%\CamelGraph` and your node packs in `%APPDATA%\CamelGraph\Packages` all stay. (A pack you put in the `Packages` folder inside the CamelGraph bundle is deleted by an update, because the installer replaces the whole bundle; move it to `%APPDATA%\CamelGraph\Packages`.)
 
 ## Updating from Dyncamelo (version 0.48 or earlier)
 

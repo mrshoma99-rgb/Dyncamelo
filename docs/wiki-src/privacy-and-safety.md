@@ -58,7 +58,7 @@ A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no progr
 
 Also know that:
 
-* **Node packs are code.** CamelGraph loads every `.dll` it finds in a `Packages` folder next to `CamelGraph.App.dll` when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
+* **Node packs are code.** CamelGraph loads every `.dll` it finds in your node packs folder (`%APPDATA%\CamelGraph\Packages`, and a `Packages` folder next to `CamelGraph.App.dll` for packs installed the old way) when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
 * **The command-line tool does not ask.** `CamelGraph.Cli` (built from source, not part of the installer) runs a graph without any question. It cannot use the Navisworks nodes.
 
 ## Running graphs from other people
