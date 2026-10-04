@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using CamelGraph.Core.Graph;
 using CamelGraph.Core.Nodes;
@@ -464,7 +465,8 @@ public class GraphEngine
     /// Runs one loop region: reads the item boundary's list, then re-executes the
     /// body in topological order once per item — binding the current item and
     /// collecting the collect boundary's 'value' input each pass — and finally
-    /// publishes the collected results on the collect boundary's output.
+    /// publishes the collected results on the collect boundary's output. A source that
+    /// failed or was switched off (Flow.When) stops the whole region the way it stops any other node.
     /// </summary>
     private void ExecuteLoop(GraphModel graph, LoopRegion region, EvaluationContext context, List<NodeModel> executed)
     {
@@ -473,30 +475,19 @@ public class GraphEngine
         item.ClearMessages();
         collect.ClearMessages();
 
-        var items = MaterializeItems(ReadPortValue(graph, item.InPorts[0]));
-        var valuePort = collect.InPorts[1];
-        var results = new List<object?>(items.Count);
-
-        for (int index = 0; index < items.Count; index++)
+        var source = ReadPortValue(graph, item.InPorts[0], out var sourceFailed);
+        if (sourceFailed)
         {
-            // A cancel stops the whole loop: partial results are not published and the region stays dirty.
-            context.Checkpoint();
-
-            item.BindIteration(items[index], index, items.Count);
-            SetOutputs(item, new object?[] { items[index], index, items.Count, item });
-            item.State = NodeState.Executed;
-
-            // Force each body node to re-run this iteration (bypass the dirty cache).
-            foreach (var body in region.Body)
-            {
-                ExecuteNode(graph, body, context);
-            }
-
-            results.Add(ReadPortValue(graph, valuePort));
+            StopRegion(region, failed: true);
         }
-
-        SetOutputs(collect, new object?[] { results });
-        collect.State = NodeState.Executed;
+        else if (source is InactiveValue)
+        {
+            StopRegion(region, failed: false);
+        }
+        else
+        {
+            RunIterations(graph, region, MaterializeItems(source), context);
+        }
 
         foreach (var node in region.AllNodes())
         {
@@ -506,10 +497,148 @@ public class GraphEngine
         }
     }
 
-    /// <summary>Reads one input port's current value: the wired source value, else its default, else null.</summary>
-    private static object? ReadPortValue(GraphModel graph, PortModel port)
+    private void RunIterations(GraphModel graph, LoopRegion region, List<object?> items, EvaluationContext context)
     {
-        var wired = MultiInput.Gather(graph, port, out var wiredValue, out _, out var mutedOnly);
+        var item = region.Item;
+        var collect = region.Collect;
+        var valuePort = collect.InPorts[1];
+        var results = new List<object?>(items.Count);
+
+        // Failures are counted over the whole loop: only the last pass leaves its state on a node, so without this a
+        // bad item in the middle of 200 would be invisible.
+        var failedPasses = 0;
+        string? firstFailure = null;
+        var failedNodes = new Dictionary<NodeModel, LoopFailure>();
+
+        for (int index = 0; index < items.Count; index++)
+        {
+            // A cancel stops the whole loop: partial results are not published and the region stays dirty.
+            context.Checkpoint();
+
+            item.BindIteration(items[index], index, items.Count);
+            SetOutputs(item, new object?[] { items[index], index, items.Count, item });
+            item.FailedUpstream = false;
+            item.State = NodeState.Executed;
+
+            // Force each body node to re-run this iteration (bypass the dirty cache).
+            foreach (var body in region.Body)
+            {
+                ExecuteNode(graph, body, context);
+            }
+
+            var passFailed = false;
+            foreach (var body in region.Body)
+            {
+                if (body.State != NodeState.Error)
+                {
+                    continue;
+                }
+
+                passFailed = true;
+                var text = UpstreamError.Prefixed(body.Name, body.Messages.FirstOrDefault(m => m.Severity >= MessageSeverity.Error)?.Text ?? "it failed");
+                var failure = "item " + (index + 1).ToString(CultureInfo.InvariantCulture) + ": " + text;
+                firstFailure = firstFailure ?? failure;
+                if (failedNodes.TryGetValue(body, out var known))
+                {
+                    known.Count++;
+                }
+                else
+                {
+                    failedNodes[body] = new LoopFailure(failure);
+                }
+            }
+
+            var value = ReadPortValue(graph, valuePort, out var valueFailed);
+            if (valueFailed && !passFailed)
+            {
+                passFailed = true;
+                firstFailure = firstFailure ?? "item " + (index + 1).ToString(CultureInfo.InvariantCulture) + ": " + UpstreamError.Describe(graph, valuePort).Message;
+            }
+
+            if (passFailed)
+            {
+                failedPasses++;
+            }
+
+            // A pass a Flow.When switched off contributes nothing (it is not a value, and not a failure either).
+            if (!(value is InactiveValue))
+            {
+                results.Add(value);
+            }
+        }
+
+        var total = items.Count.ToString(CultureInfo.InvariantCulture);
+        foreach (var pair in failedNodes)
+        {
+            // The node's own state is the last pass's: keep an earlier failure from looking green.
+            if (pair.Key.State != NodeState.Error)
+            {
+                pair.Key.State = NodeState.Warning;
+            }
+
+            pair.Key.AddMessage(
+                MessageSeverity.Warning,
+                "Failed in " + pair.Value.Count.ToString(CultureInfo.InvariantCulture) + " of " + total + " iterations. First: " + pair.Value.First);
+        }
+
+        SetOutputs(collect, new object?[] { results });
+        collect.FailedUpstream = false;
+        collect.State = NodeState.Executed;
+        if (failedPasses > 0)
+        {
+            collect.AddMessage(
+                MessageSeverity.Warning,
+                failedPasses.ToString(CultureInfo.InvariantCulture) + " of " + total + " iterations failed. First: " + firstFailure);
+            collect.State = NodeState.Warning;
+        }
+    }
+
+    /// <summary>How often a body node failed across the passes of a loop, and the first time.</summary>
+    private sealed class LoopFailure
+    {
+        public LoopFailure(string first)
+        {
+            First = first;
+            Count = 1;
+        }
+
+        public string First { get; }
+
+        public int Count { get; set; }
+    }
+
+    /// <summary>
+    /// The loop did not run: its source failed (nothing may run on it, exactly like a node after a failure) or it was switched
+    /// off by a Flow.When (idle, passing the "nothing here" on). Every node of the region says so and hands the same state on.
+    /// </summary>
+    private static void StopRegion(LoopRegion region, bool failed)
+    {
+        foreach (var node in region.AllNodes())
+        {
+            node.ClearMessages();
+            if (failed)
+            {
+                SetOutputs(node, null);
+                node.FailedUpstream = true;
+                node.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
+                node.State = NodeState.Warning;
+            }
+            else
+            {
+                SetOutputs(node, Enumerable.Repeat<object?>(InactiveValue.Instance, node.OutPorts.Count).ToArray());
+                node.FailedUpstream = false;
+                node.AddMessage(MessageSeverity.Info, "Skipped: an input comes from a branch that was switched off (Flow.When was false).");
+                node.State = NodeState.Idle;
+            }
+
+            node.OnNotRun();
+        }
+    }
+
+    /// <summary>Reads one input port's current value: the wired source value, else its default, else null.</summary>
+    private static object? ReadPortValue(GraphModel graph, PortModel port, out bool upstreamFailed)
+    {
+        var wired = MultiInput.Gather(graph, port, out var wiredValue, out upstreamFailed, out var mutedOnly);
         if (wired)
         {
             return wiredValue;

@@ -87,7 +87,7 @@ A graph is a picture of **data** dependencies. When two nodes change the model a
 * Wire the **output** of the first node into the second. Nodes that change the model pass their items through for exactly this reason.
 * Or use **`Flow.Then`**, which hands a value on only after other nodes have run: "set the section box, *then* save the viewpoint".
 * **Conditions.** `Flow.When` runs the nodes after it only when a condition is true; when false they are skipped and shown idle, not red. `Flow.Try` carries on after a failure and gives your fallback plus the error text.
-* **Loops.** Put nodes between `Loop.Item` and `Loop.Collect` and they run once per item, in order. This suits stateful jobs such as "isolate, zoom, save a viewpoint, next item". `Workflow.ForEach` does the same with a list of ready-made actions.
+* **Loops.** Put nodes between `Loop.Item` and `Loop.Collect` and they run once per item, in order. This suits stateful jobs such as "isolate, zoom, save a viewpoint, next item". `Workflow.ForEach` does the same with a list of ready-made actions. A pass that fails does not stop the loop: its place in the results is empty, and `Loop.Collect` shows an amber warning with the number of failed passes and the first failure ("2 of 200 iterations failed. First: item 3: ..."). An item that a `Flow.When` inside the loop switches off adds nothing to the results. If the list itself comes from a node that failed, the loop does not run at all.
 
 ## What a node changes
 

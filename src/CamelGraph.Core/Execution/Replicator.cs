@@ -428,6 +428,13 @@ internal static class Replicator
         for (int j = 0; j < outCount; j++)
         {
             normalized[j] = j < outputs.Length ? TypeCoercion.MaterializeLists(outputs[j]) : null;
+
+            // One element of a laced result that a Flow.When switched off is an empty position in the list, not a marker object
+            // hidden inside it (nothing downstream could tell, and it would print as "(skipped)").
+            if (insideReplication && normalized[j] is InactiveValue)
+            {
+                normalized[j] = null;
+            }
         }
 
         return normalized;
