@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 582,
  "categories": [
   {
    "name": "Annotation",
@@ -20,7 +20,7 @@
   },
   {
    "name": "Dictionary",
-   "count": 13
+   "count": 17
   },
   {
    "name": "Display",
@@ -44,7 +44,7 @@
   },
   {
    "name": "List",
-   "count": 51
+   "count": 50
   },
   {
    "name": "List.Statistics",
@@ -966,10 +966,10 @@
   },
   {
    "name": "XML.Parse",
-   "id": "CamelGraph.Nodes.XmlNodes.Parse@string",
+   "id": "CamelGraph.Nodes.XmlNodes.Parse@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Data",
-   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").",
+   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\"). An element that occurs once is a dictionary or a text, the same element occurring twice is a list, so a graph tried on a file with several items can break on a file with one: name such elements in listElements (for example Task, Resource; or * for all) and they always come as a list. Dictionary.ValueAtPath reads nested results either way. DOCTYPE declarations are accepted but an external entity is never read from disk or the network.",
    "tags": [
     "xml",
     "parse",
@@ -985,6 +985,12 @@
      "name": "xml",
      "type": "string",
      "description": "The XML text to parse."
+    },
+    {
+     "name": "listElements",
+     "type": "string",
+     "description": "Names of elements that must always come as a list, even when the file holds only one of them; separated by commas or semicolons, or * for every element. Empty (default) keeps the rule that only repeated elements are lists.",
+     "default": "\"\""
     }
    ],
    "outputs": [
@@ -1785,7 +1791,7 @@
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.ContainsKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Tests whether a dictionary has the given key (case-sensitive).",
+   "description": "Tests whether a dictionary has the given key (case-sensitive). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.",
    "tags": [
     "has",
     "exists",
@@ -1969,7 +1975,7 @@
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.RemoveKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns a copy of the dictionary without the given key (a missing key is fine).",
+   "description": "Returns a copy of the dictionary without the given key (a missing key is fine). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To leave out several keys of one dictionary use Dictionary.RemoveKeys.",
    "tags": [
     "delete",
     "drop",
@@ -2000,11 +2006,84 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.RemoveKeys",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.RemoveKeys@System.Collections.IDictionary,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary without any of the listed keys (a key it does not have is fine). A list of keys gives one dictionary without all of them, unlike Dictionary.RemoveKey, which pairs a list of keys with a list of dictionaries. A list of dictionaries gives one result each; the key list applies to every one of them.",
+   "tags": [
+    "delete",
+    "drop",
+    "remove",
+    "omit",
+    "without",
+    "many",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to leave out (a single key works too). A key the dictionary does not have is fine."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary without those keys."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.SelectKeys",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.SelectKeys@System.Collections.IDictionary,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary with only the listed keys, in the order they are listed (trim a property bag to the few keys a report needs). A key the dictionary does not have is left out. A list of dictionaries gives one trimmed dictionary each; the key list applies to every one of them.",
+   "tags": [
+    "pick",
+    "keep",
+    "filter",
+    "subset",
+    "only",
+    "columns",
+    "fields",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy from."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to keep (a single key works too). A key the dictionary does not have is left out; a key listed twice is kept once."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary with only those keys."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.SetValueAtKey",
    "id": "CamelGraph.Nodes.DictionaryNodes.SetValueAtKey@System.Collections.IDictionary,string,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns a copy of the dictionary with the given key set or updated.",
+   "description": "Returns a copy of the dictionary with the given key set or updated; the input dictionary is not changed. A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To set several keys at once use Dictionary.SetValues.",
    "tags": [
     "set",
     "update",
@@ -2034,6 +2113,47 @@
      "name": "dictionary",
      "type": "dict",
      "description": "A new dictionary with the key set."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.SetValues",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.SetValues@System.Collections.IDictionary,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary with several keys set or updated at once, from a list of keys and a list of values of the same length (the several-key version of Dictionary.SetValueAtKey). For a key listed twice the last value wins; the input dictionary is not changed. A list of dictionaries gives one result each; the keys and values apply to every one of them.",
+   "tags": [
+    "set",
+    "update",
+    "insert",
+    "put",
+    "many",
+    "multiple",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to set or update (converted to text)."
+    },
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "One value per key, in the same order."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary with all the keys set; for a key listed twice the last value wins."
     }
    ],
    "returns": ""
@@ -2074,7 +2194,7 @@
    "id": "CamelGraph.Nodes.DictionaryNodes.ValueAtKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns the value stored under the given key.",
+   "description": "Returns the value stored under the given key; a missing key is an error (Dictionary.ValueOrDefault gives a fallback instead, Dictionary.ValueAtPath follows a path into nested data). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To read several keys of one dictionary use Dictionary.SelectKeys.",
    "tags": [
     "lookup",
     "get",
@@ -2102,11 +2222,56 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.ValueAtPath",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.ValueAtPath@object,string,object",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Follows a path into nested data (the result of JSON.Parse or XML.Parse) and returns what it finds there, or a default value when any step is missing. The steps are separated by / (or by . when the path has no /): a key (Project/Name), a position in a list (Tasks/Task/0/Name; -1 is the last item) or * for every item of a list (Tasks/Task/*/Name gives a list of names). A position of 0 or -1 also works on a value that is not a list, so the same path reads a file with one <Task> and a file with many. A list of paths gives one result per path.",
+   "tags": [
+    "path",
+    "nested",
+    "deep",
+    "json",
+    "xml",
+    "get",
+    "lookup",
+    "navigate",
+    "drill",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The dictionary (or list) to read from."
+    },
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The steps to follow, separated by / (or by . when the path has no /): a key such as Project/Name, a list position such as Tasks/Task/0/Name (negative counts from the end), or * for every item of a list."
+    },
+    {
+     "name": "defaultValue",
+     "type": "any",
+     "description": "Returned when any step of the path is missing (null when left unwired).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value at the path, a list of the results when the path has a *, or the default."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.ValueOrDefault",
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.ValueOrDefault@System.Collections.IDictionary,string,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns the value stored under a key, or a default value when the key is missing.",
+   "description": "Returns the value stored under a key, or a default value when the key is missing. A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.",
    "tags": [
     "get",
     "lookup",
@@ -5481,7 +5646,7 @@
    "id": "CamelGraph.Nodes.ListNodes.AllIndicesOf@System.Collections.Generic.IList<object>,object",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.",
+   "description": "Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Values compare as in List.IndexOf. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.",
    "tags": [
     "indices",
     "index",
@@ -5517,7 +5682,7 @@
    "id": "CamelGraph.Nodes.ListNodes.AllTrue@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "True when EVERY element of the list is true — collapse a mask into one verdict (an empty list gives false; nulls count as not-true).",
+   "description": "True when EVERY element of the list is true — collapse a mask into one verdict. Only the booleans true and false (or the text \"true\" and \"false\") count: an empty list gives false, null items count as not true, and any other value (a number, other text) counts as not true and adds a warning. A list inside the list is an error: set the input to @L2 for one verdict per sublist, or flatten it first. A wire that delivers nothing at all is ignored.",
    "tags": [
     "all",
     "true",
@@ -5530,7 +5695,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to test (nulls and non-booleans count as not-true).",
+     "description": "The booleans to test: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.",
      "multiInput": true
     }
    ],
@@ -5548,7 +5713,7 @@
    "id": "CamelGraph.Nodes.ListNodes.AnyTrue@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node (nulls count as not-true).",
+   "description": "True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node. Only the booleans true and false (or the text \"true\" and \"false\") count: an empty list gives false, null items count as not true, and any other value (a number, other text) counts as not true and adds a warning. A list inside the list is an error: set the input to @L2 for one answer per sublist, or flatten it first. A wire that delivers nothing at all is ignored.",
    "tags": [
     "any",
     "true",
@@ -5561,7 +5726,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to test (nulls and non-booleans count as not-true).",
+     "description": "The booleans to test: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.",
      "multiInput": true
     }
    ],
@@ -5579,7 +5744,7 @@
    "id": "CamelGraph.Nodes.ListNodes.Chop@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).",
+   "description": "Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior). Every length must be a whole number of at least 1.",
    "tags": [
     "chop",
     "split",
@@ -5652,7 +5817,7 @@
    "id": "CamelGraph.Nodes.ListNodes.Contains@System.Collections.Generic.IList<object>,object",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Tests whether a list contains a value (numbers compare by value regardless of numeric type).",
+   "description": "Tests whether a list contains a value. Numbers compare by value regardless of numeric type, text with its case, and a list or dictionary by its content, so a [level, type] pair can be looked up too.",
    "tags": [
     "membership",
     "includes",
@@ -5711,7 +5876,7 @@
    "id": "CamelGraph.Nodes.ListNodes.CountTrue@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).",
+   "description": "Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first. Only the booleans true and false (or the text \"true\" and \"false\") count as true or false: null items and any other value (a number, other text) go into the not-true count, and a value that is not a boolean adds a warning. A list inside the list is an error: set the input to @L2 for one count per sublist, or flatten it first. A wire that delivers nothing at all is ignored.",
    "tags": [
     "count",
     "true",
@@ -5724,7 +5889,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The booleans to count (nulls and non-booleans count as not-true).",
+     "description": "The booleans to count: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.",
      "multiInput": true
     }
    ],
@@ -5746,7 +5911,7 @@
    "name": "List.Create",
    "id": "ListCreate",
    "category": "List",
-   "description": "Builds a list from the wired item inputs.",
+   "description": "Builds a list from the wired item inputs, in order. A wired list is kept whole as ONE item of the new list (a list of lists); List.Merge joins lists into one list instead.",
    "tags": [
     "array",
     "collection",
@@ -5777,7 +5942,7 @@
    "id": "CamelGraph.Nodes.ListNodes.Cycle@System.Collections.Generic.IList<object>,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]).",
+   "description": "Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]). The result may hold at most 1,000,000 items; more is an error.",
    "tags": [
     "cycle",
     "repeat",
@@ -5794,7 +5959,7 @@
     {
      "name": "amount",
      "type": "integer",
-     "description": "How many copies to chain (≥ 0)."
+     "description": "How many copies to chain (≥ 0); the result may hold at most one million items."
     }
    ],
    "outputs": [
@@ -5846,7 +6011,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.DropWhile@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Drops items from the start of the list for as long as the mask is true; keeps everything from the first false.",
+   "description": "Drops items from the start of the list for as long as the mask is true; keeps everything from the first false. The mask is read as in List.FilterByBoolMask: one true or false per item, a null counts as false, and a list or a value that is not true or false is an error.",
    "tags": [
     "skip",
     "leading",
@@ -5879,7 +6044,7 @@
    "id": "CamelGraph.Nodes.ListNodes.FilterByBoolMask@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\").",
+   "description": "Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\"). The mask must have one entry per element: true or false, the text \"true\" or \"false\", or a number (0 is false, any other number true); an empty entry (null) counts as false, so the element goes to \"out\". A list or dictionary in the mask is an error: set both inputs to @L2 (right-click, List Levels) to filter each pair of sublists, or flatten them first.",
    "tags": [
     "filter",
     "mask",
@@ -5917,7 +6082,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.FilterByValue@System.Collections.Generic.IList<object>,string,object,System.Collections.Generic.IList<object>,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Keeps the items that pass a test such as > 100, contains \"wall\" or matches \"A-*\" — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask.",
+   "description": "Keeps the items that pass a test such as > 100, contains \"wall\", matches \"A-*\" or in [\"L01\", \"L02\"] — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask. The tests > >= < <= never pass an item that has no value (null or blank text) or one that cannot be compared with the value (text against a number; the node then warns and names the first). The test in keeps the items equal to any of the values in a list (or in a text with the values separated by commas or semicolons); notIn keeps the others. Text tests ignore case unless ignoreCase is off; regex needs a pattern of its own and stops after 2 seconds.",
    "tags": [
     "filter",
     "where",
@@ -5926,7 +6091,11 @@
     "compare",
     "mask",
     "search",
-    "query"
+    "query",
+    "in",
+    "any of",
+    "one of",
+    "membership"
    ],
    "inputs": [
     {
@@ -5937,13 +6106,13 @@
     {
      "name": "test",
      "type": "string",
-     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.",
+     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty, in, notIn.",
      "default": "\"==\""
     },
     {
      "name": "value",
      "type": "any",
-     "description": "What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests).",
+     "description": "What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests). For in and notIn a list of values, or a text with the values separated by commas or semicolons.",
      "default": "null"
     },
     {
@@ -5983,7 +6152,7 @@
    "id": "CamelGraph.Nodes.ListNodes.FirstItem@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns the first element of a list.",
+   "description": "Returns the first element of a list. An empty list is an error: there is no first element (check List.Count first, or use List.Slice, which gives an empty list).",
    "tags": [
     "head",
     "front"
@@ -6074,7 +6243,7 @@
    "id": "CamelGraph.Nodes.ListNodes.GroupByKey@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Groups list elements by a parallel key list; returns the groups and their unique keys.",
+   "description": "Groups list elements by a parallel key list of the same length; returns the groups (in the order each key first appears) and their unique keys. A key can be a list, such as [level, type], and two keys with the same content make one group; text keys keep their case.",
    "tags": [
     "group",
     "bucket",
@@ -6112,7 +6281,7 @@
    "id": "CamelGraph.Nodes.ListNodes.IndexOf@System.Collections.Generic.IList<object>,object",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns the index of the first occurrence of a value in a list (-1 when absent).",
+   "description": "Returns the index of the first occurrence of a value in a list (-1 when absent). Numbers compare by value, text with its case, and lists and dictionaries by their content.",
    "tags": [
     "find",
     "position",
@@ -6145,7 +6314,7 @@
    "id": "CamelGraph.Nodes.ListNodes.Insert@System.Collections.Generic.IList<object>,object,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns a new list with the value inserted at the index (0 = front; the list's length = append; negative counts from the end).",
+   "description": "Returns a new list with the value inserted at the index (0 = front; the list's length = append; negative counts from the end). A list of indices makes one new list per index; the list itself is always taken whole.",
    "tags": [
     "insert",
     "add",
@@ -6183,7 +6352,7 @@
    "id": "CamelGraph.Nodes.ListNodes.LastIndexOf@System.Collections.Generic.IList<object>,object",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf.",
+   "description": "The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf, with the same rules for comparing values.",
    "tags": [
     "index",
     "last",
@@ -6217,7 +6386,7 @@
    "id": "CamelGraph.Nodes.ListNodes.LastItem@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns the last element of a list.",
+   "description": "Returns the last element of a list. An empty list is an error: there is no last element (check List.Count first, or use List.Slice, which gives an empty list).",
    "tags": [
     "tail",
     "end",
@@ -6244,7 +6413,7 @@
    "id": "CamelGraph.Nodes.ListNodes.MaximumItem@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The largest element of a list (numbers, texts or dates; nulls are ignored).",
+   "description": "The largest element of a list (numbers, texts or dates). Items are compared as in List.Sort: numbers by value, text ignoring case (\"10\" and \"9\" are text, so \"9\" is the larger; List.Statistics reads such text as numbers); nulls and empty text are ignored. A list with nothing to compare gives an empty result and a warning, not an error.",
    "tags": [
     "maximum",
     "max",
@@ -6256,7 +6425,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The list to scan (must not be empty; nulls are ignored)."
+     "description": "The list to scan (nulls and empty text are ignored); with none left the result is empty and the node warns.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -6304,7 +6474,7 @@
    "id": "CamelGraph.Nodes.ListNodes.MinimumItem@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The smallest element of a list (numbers, texts or dates; nulls are ignored).",
+   "description": "The smallest element of a list (numbers, texts or dates). Items are compared as in List.Sort: numbers by value, text ignoring case (\"10\" and \"9\" are text, so \"10\" is the smaller; List.Statistics reads such text as numbers); nulls and empty text are ignored. A list with nothing to compare gives an empty result and a warning, not an error.",
    "tags": [
     "minimum",
     "min",
@@ -6315,7 +6485,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The list to scan (must not be empty; nulls are ignored)."
+     "description": "The list to scan (nulls and empty text are ignored); with none left the result is empty and the node warns.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -6332,7 +6503,7 @@
    "id": "CamelGraph.Nodes.ListNodes.OfRepeatedItem@object,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing.",
+   "description": "A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing. At most 1,000,000 copies; more is an error.",
    "tags": [
     "repeat",
     "repeated",
@@ -6349,7 +6520,7 @@
     {
      "name": "amount",
      "type": "integer",
-     "description": "How many copies (≥ 0)."
+     "description": "How many copies (≥ 0, at most one million)."
     }
    ],
    "outputs": [
@@ -6401,7 +6572,7 @@
    "id": "CamelGraph.Nodes.ListNodes.Range@double,double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Creates a sequence of numbers from start to end using the given step.",
+   "description": "Creates a sequence of numbers from start to end (both included) using the given step; a negative step counts down, a step that moves away from end gives an empty list. Each number is start + n x step, so 0.1 steps do not drift. At most 1,000,000 numbers: a larger sequence is an error, so a slip of a zero cannot use up the memory of Navisworks.",
    "tags": [
     "sequence",
     "series",
@@ -6436,10 +6607,10 @@
   },
   {
    "name": "List.RemoveItemAtIndex",
-   "id": "CamelGraph.Nodes.ListNodes.RemoveItemAtIndex@System.Collections.Generic.IList<object>,int",
+   "id": "CamelGraph.Nodes.ListNodes.RemoveItemAtIndex@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<int>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Removes the element at the given index (negative indexes count from the end).",
+   "description": "Removes the elements at the given indices and returns one new list (negative indexes count from the end). Wire a single number to remove one element, or a list of numbers, for example from List.AllIndicesOf, to remove them all in one go. Indices count in the original list; an index outside the list is an error.",
    "tags": [
     "delete",
     "drop",
@@ -6452,16 +6623,16 @@
      "description": "The list to remove from."
     },
     {
-     "name": "index",
-     "type": "integer",
-     "description": "Zero-based index; negative values count from the end."
+     "name": "indices",
+     "type": "integer[]",
+     "description": "Zero-based indices of the elements to remove; negative values count from the end. A single number works too. The same index twice removes the element once."
     }
    ],
    "outputs": [
     {
      "name": "list",
      "type": "any[]",
-     "description": "A new list without the element."
+     "description": "A new list without the elements."
     }
    ],
    "returns": ""
@@ -6471,7 +6642,7 @@
    "id": "CamelGraph.Nodes.ListNodes.ReplaceItemAtIndex@System.Collections.Generic.IList<object>,int,object",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns a new list with the element at the index replaced (negative indexes count from the end).",
+   "description": "Returns a new list with the element at the index replaced (negative indexes count from the end). A list of indices makes one new list per index (the first index with the first item, and so on); the list itself is always taken whole.",
    "tags": [
     "replace",
     "item",
@@ -6546,7 +6717,7 @@
    "id": "CamelGraph.Nodes.ListNodes.RestOfItems@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Everything but the first element — pairs with List.FirstItem for head/tail processing.",
+   "description": "Everything but the first element — pairs with List.FirstItem for head/tail processing. An empty list is an error: there is no first element to leave out.",
    "tags": [
     "rest",
     "tail",
@@ -6589,7 +6760,7 @@
    ],
    "outputs": [
     {
-     "name": "reversed",
+     "name": "list",
      "type": "any[]",
      "description": "A new list in reverse order."
     }
@@ -6601,7 +6772,7 @@
    "id": "CamelGraph.Nodes.ListNodes.SetDifference@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The distinct elements of the FIRST list that are NOT in the second (value equality) — subtract an ignore-list from a result set.",
+   "description": "The distinct elements of the FIRST list that are NOT in the second — subtract an ignore-list from a result set. Values compare as in List.UniqueItems, lists and dictionaries by content.",
    "tags": [
     "difference",
     "set",
@@ -6636,7 +6807,7 @@
    "id": "CamelGraph.Nodes.ListNodes.SetIntersection@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The distinct elements present in BOTH lists (value equality, ordered as in the first) — what two searches/sets have in common.",
+   "description": "The distinct elements present in BOTH lists (ordered as in the first) — what two searches/sets have in common. Values compare as in List.UniqueItems, lists and dictionaries by content.",
    "tags": [
     "intersection",
     "set",
@@ -6671,7 +6842,7 @@
    "id": "CamelGraph.Nodes.ListNodes.SetUnion@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "The distinct elements present in EITHER list (value equality, first-seen order) — combine two item sets without duplicates.",
+   "description": "The distinct elements present in EITHER list (first-seen order) — combine two item sets without duplicates. Values compare as in List.UniqueItems, lists and dictionaries by content.",
    "tags": [
     "union",
     "set",
@@ -6771,17 +6942,19 @@
   },
   {
    "name": "List.Slice",
-   "id": "CamelGraph.Nodes.ListNodes.Slice@System.Collections.Generic.IList<object>,int,int,int",
+   "id": "CamelGraph.Nodes.ListNodes.Slice@System.Collections.Generic.IList<object>,int,int?,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element. Negative start/end count from the end, Python-style.",
+   "description": "A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element; leave end empty to go to the end of the list. Negative start/end count from the end, Python-style. Start 0 with a step of 3 keeps the 1st, 4th, 7th ... item, which is how to thin a list out.",
    "tags": [
     "slice",
     "range",
     "sub",
     "subset",
     "portion",
-    "between"
+    "between",
+    "thin",
+    "to the end"
    ],
    "inputs": [
     {
@@ -6797,7 +6970,8 @@
     {
      "name": "end",
      "type": "integer",
-     "description": "End of the range (exclusive; negative counts from the end)."
+     "description": "End of the range (exclusive; negative counts from the end); leave it unset to go to the end of the list.",
+     "default": "null"
     },
     {
      "name": "step",
@@ -6817,20 +6991,31 @@
   },
   {
    "name": "List.Sort",
-   "id": "CamelGraph.Nodes.ListNodes.Sort@System.Collections.Generic.IList<object>",
+   "id": "CamelGraph.Nodes.ListNodes.Sort@System.Collections.Generic.IList<object>,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Returns the list sorted ascending (numbers numerically, strings alphabetically).",
+   "description": "Returns the list sorted ascending, or largest first with descending. Numbers sort by value; text alphabetically, ignoring upper and lower case (\"apple\" comes before \"Zebra\", and \"10\" before \"9\" because both are text); text that reads as a number counts as a number against a number; empty items (null or empty text) always go last, in either direction. Equal items keep their order. A list inside the list cannot be put in order: set the input to @L2 to sort each sublist.",
    "tags": [
     "order",
     "ascending",
-    "arrange"
+    "arrange",
+    "descending",
+    "reverse",
+    "biggest first",
+    "top",
+    "sortdescending"
    ],
    "inputs": [
     {
      "name": "list",
      "type": "any[]",
      "description": "The list to sort."
+    },
+    {
+     "name": "descending",
+     "type": "boolean",
+     "description": "True sorts largest first; empty items stay last.",
+     "default": "false"
     }
    ],
    "outputs": [
@@ -6844,15 +7029,16 @@
   },
   {
    "name": "List.SortByKey",
-   "id": "CamelGraph.Nodes.ListNodes.SortByKey@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
+   "id": "CamelGraph.Nodes.ListNodes.SortByKey@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Sorts list elements by a parallel key list; returns the sorted elements and keys.",
+   "description": "Sorts list elements by a parallel key list of the same length, smallest key first or largest first with descending; returns the sorted elements and keys. Keys are put in order as in List.Sort (numbers by value, text ignoring case, empty keys last); elements with equal keys keep their order.",
    "tags": [
     "order",
     "arrange",
     "rank",
-    "key"
+    "key",
+    "descending"
    ],
    "inputs": [
     {
@@ -6864,6 +7050,12 @@
      "name": "keys",
      "type": "any[]",
      "description": "One sort key per element."
+    },
+    {
+     "name": "descending",
+     "type": "boolean",
+     "description": "True sorts the largest key first; elements with an empty key stay last.",
+     "default": "false"
     }
    ],
    "outputs": [
@@ -6881,40 +7073,11 @@
    "returns": "Dictionary with \"sorted\" elements and the \"sortedKeys\"."
   },
   {
-   "name": "List.SortDescending",
-   "id": "CamelGraph.Nodes.ListStatsNodes.SortDescending@System.Collections.Generic.IList<object>",
-   "assembly": "CamelGraph.Nodes",
-   "category": "List",
-   "description": "Returns the list sorted descending (largest first; text alphabetically from Z).",
-   "tags": [
-    "order",
-    "descending",
-    "reverse",
-    "biggest first",
-    "top"
-   ],
-   "inputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "The list to sort."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "list",
-     "type": "any[]",
-     "description": "A new list, descending (numbers numerically, text alphabetically)."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "List.TakeEveryNthItem",
    "id": "CamelGraph.Nodes.ListNodes.TakeEveryNthItem@System.Collections.Generic.IList<object>,int,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).",
+   "description": "Takes the n-th, 2n-th, 3n-th ... element, optionally after skipping offset elements (n = 3 takes the 3rd, 6th and 9th, which are the indices 2, 5 and 8). To keep the 1st, 4th, 7th ... instead, use List.Slice with a step.",
    "tags": [
     "every",
     "nth",
@@ -6937,7 +7100,7 @@
     {
      "name": "offset",
      "type": "integer",
-     "description": "Elements to skip before the first take.",
+     "description": "Elements to skip before counting starts.",
      "default": "0"
     }
    ],
@@ -6990,7 +7153,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.TakeWhile@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Takes items from the start of the list for as long as the mask is true (stops at the first false).",
+   "description": "Takes items from the start of the list for as long as the mask is true (stops at the first false). The mask is read as in List.FilterByBoolMask: one true or false per item, a null counts as false, and a list or a value that is not true or false is an error.",
    "tags": [
     "head",
     "until",
@@ -7054,7 +7217,7 @@
    "id": "CamelGraph.Nodes.ListNodes.UniqueItems@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Removes duplicate elements from a list, preserving the original order.",
+   "description": "Removes duplicate elements from a list, keeping the first of each and the original order. Numbers compare by value, text with its case, and lists and dictionaries by their content, so repeated pairs from List.Zip are removed too.",
    "tags": [
     "distinct",
     "deduplicate",
@@ -7110,7 +7273,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Zip@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List",
-   "description": "Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list.",
+   "description": "Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list. When the lists differ in length the extra items of the longer one are left out and the node shows a warning that says how many.",
    "tags": [
     "pair",
     "combine",
@@ -7144,7 +7307,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Average@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).",
+   "description": "The arithmetic mean of the numbers of a list. Nulls and blank text are skipped; with no numbers at all (an empty list) the result is empty and the node shows a warning instead of an error. A list inside the list is an error: set the input to @L2 for one average per sublist.",
    "tags": [
     "mean",
     "aggregate",
@@ -7155,7 +7318,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required.",
+     "description": "The numbers (nulls and blank text are skipped).",
      "multiInput": true
     }
    ],
@@ -7163,24 +7326,26 @@
     {
      "name": "average",
      "type": "number",
-     "description": "The arithmetic mean."
+     "description": "The arithmetic mean; empty (with a warning) when the list has no numbers."
     }
    ],
    "returns": ""
   },
   {
-   "name": "List.CountBy",
+   "name": "List.CountValues",
    "id": "CamelGraph.Nodes.ListStatsNodes.CountBy@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs.",
+   "description": "Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs. Numbers compare by value, text with its case, and lists and dictionaries by their content. (It tallies the values themselves; List.GroupByKey groups items by a separate list of keys.)",
    "tags": [
     "tally",
     "frequency",
     "distribution",
     "group",
     "count",
-    "how many of each"
+    "how many of each",
+    "countby",
+    "count by"
    ],
    "inputs": [
     {
@@ -7208,7 +7373,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.CumulativeSum@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "A running total: each item is the sum of the list up to and including that position.",
+   "description": "A running total: each item is the sum of the list up to and including that position. An empty item (null or blank text) is an error, so the totals stay lined up with the list; remove or fill empty items first (List.FilterByValue with the notEmpty test, or List.ReplaceNulls). A list inside the list is an error: set the input to @L2 for one running total per sublist.",
    "tags": [
     "running",
     "accumulate",
@@ -7219,7 +7384,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are an error here, so positions stay aligned)."
+     "description": "The numbers (an empty item, null or blank text, is an error here, so positions stay aligned)."
     }
    ],
    "outputs": [
@@ -7236,7 +7401,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Duplicates@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names.",
+   "description": "The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names. Values compare as in List.CountValues (text with its case); nulls are not duplicates.",
    "tags": [
     "duplicate",
     "repeated",
@@ -7271,7 +7436,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Histogram@System.Collections.Generic.IList<object>,int",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.",
+   "description": "Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart. Nulls and blank text are skipped; with no numbers at all the four lists are empty and the node shows a warning instead of an error.",
    "tags": [
     "distribution",
     "bins",
@@ -7284,7 +7449,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
+     "description": "The numbers (nulls and blank text are skipped).",
+     "multiInput": true
     },
     {
      "name": "bins",
@@ -7315,14 +7481,14 @@
      "description": ""
     }
    ],
-   "returns": "For each bin: its lower edge, upper edge, count and a text label."
+   "returns": "For each bin: its lower edge, upper edge, count and a text label; empty lists (with a warning) when there are no numbers."
   },
   {
    "name": "List.Median",
    "id": "CamelGraph.Nodes.ListStatsNodes.Median@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The middle value of the numbers of a list (the mean of the two middle ones when the count is even).",
+   "description": "The middle value of the numbers of a list (the mean of the two middle ones when the count is even); the same as List.Percentile at 50. Nulls and blank text are skipped; with no numbers at all the result is empty and the node shows a warning instead of an error.",
    "tags": [
     "middle",
     "aggregate",
@@ -7332,14 +7498,15 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
+     "description": "The numbers (nulls and blank text are skipped).",
+     "multiInput": true
     }
    ],
    "outputs": [
     {
      "name": "median",
      "type": "number",
-     "description": "The median; the mean of the two middle values when the count is even."
+     "description": "The median (the mean of the two middle values when the count is even); empty (with a warning) when the list has no numbers."
     }
    ],
    "returns": ""
@@ -7349,7 +7516,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.MostCommon@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The value that occurs most often in a list (the earliest wins a tie) and how many times.",
+   "description": "The value that occurs most often in a list (the earliest wins a tie) and how many times. Values compare as in List.CountValues (text with its case); nulls are not counted. A list with nothing but nulls is an error.",
    "tags": [
     "mode",
     "frequent",
@@ -7382,18 +7549,20 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Percentile@System.Collections.Generic.IList<object>,double",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).",
+   "description": "The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC); 50 is the median, 0 the smallest and 100 the largest number. Nulls and blank text are skipped; with no numbers at all the result is empty and the node shows a warning instead of an error.",
    "tags": [
     "quantile",
     "quartile",
     "aggregate",
-    "percent"
+    "percent",
+    "median"
    ],
    "inputs": [
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one is required."
+     "description": "The numbers (nulls and blank text are skipped).",
+     "multiInput": true
     },
     {
      "name": "percent",
@@ -7406,7 +7575,7 @@
     {
      "name": "value",
      "type": "number",
-     "description": "The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC)."
+     "description": "The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC); empty (with a warning) when the list has no numbers."
     }
    ],
    "returns": ""
@@ -7416,7 +7585,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Product@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).",
+   "description": "Multiplies the numbers of a list. Nulls and blank text are skipped and an empty list gives 1. A list inside the list is an error: set the input to @L2 for one product per sublist.",
    "tags": [
     "multiply",
     "aggregate",
@@ -7426,7 +7595,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped)."
+     "description": "The numbers (nulls and blank text are skipped).",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -7443,7 +7613,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.StandardDeviation@System.Collections.Generic.IList<object>,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).",
+   "description": "The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1, which needs at least two numbers). Nulls and blank text are skipped; with too few numbers the result is empty and the node shows a warning instead of an error.",
    "tags": [
     "spread",
     "variance",
@@ -7455,7 +7625,8 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped); at least one (two for a sample) is required."
+     "description": "The numbers (nulls and blank text are skipped); two are needed for a sample.",
+     "multiInput": true
     },
     {
      "name": "sample",
@@ -7468,7 +7639,7 @@
     {
      "name": "standardDeviation",
      "type": "number",
-     "description": "The standard deviation."
+     "description": "The standard deviation; empty (with a warning) when there are not enough numbers."
     }
    ],
    "returns": ""
@@ -7478,7 +7649,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Statistics@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.",
+   "description": "Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node. Nulls and blank text are skipped and not counted; with no numbers at all the count is 0, the sum is 0, the rest is empty and the node shows a warning. Text that reads as a number is compared as a number here (List.MaximumItem compares text as text).",
    "tags": [
     "summary",
     "describe",
@@ -7493,7 +7664,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped).",
+     "description": "The numbers (nulls and blank text are skipped).",
      "multiInput": true
     }
    ],
@@ -7541,7 +7712,7 @@
    "id": "CamelGraph.Nodes.ListStatsNodes.Sum@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "List.Statistics",
-   "description": "Adds up the numbers of a list (nulls are skipped, an empty list gives 0).",
+   "description": "Adds up the numbers of a list. Nulls and blank text (an empty cell) are skipped, text such as \"12.5\" is read as a number, and an empty list gives 0. A list inside the list is an error: set the input to @L2 for one total per sublist.",
    "tags": [
     "total",
     "add",
@@ -7554,7 +7725,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The numbers (nulls are skipped; text such as \"12.5\" is read as a number).",
+     "description": "The numbers (nulls and blank text are skipped; text such as \"12.5\" is read as a number).",
      "multiInput": true
     }
    ],

@@ -124,10 +124,16 @@ public class ListNodesTests
     }
 
     [Fact]
-    public void Sort_MixedIncomparableTypes_ThrowsWithClearMessage()
+    public void Sort_MixedNumbersAndText_FollowsTheOneOrderingRule_AndAListHasNoOrder()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => ListNodes.Sort(L(1, "a")).ToList());
-        Assert.Contains("compare", ex.Message, StringComparison.OrdinalIgnoreCase);
+        // Wave D (COL-12): one rule for every ordering in the library. A number and text that is not a number no longer throw: the
+        // number is compared as the text it is shown as ("1" before "a").
+        Assert.Equal(new object?[] { 1, "a" }, ListNodes.Sort(L("a", 1)).ToArray());
+
+        // A list inside the list has no order, and the message says what to do.
+        var ex = Assert.Throws<ArgumentException>(() => ListNodes.Sort(L(1, L(2))).ToList());
+        Assert.Contains("List.Sort", ex.Message);
+        Assert.Contains("@L2", ex.Message);
     }
 
     [Fact]
@@ -205,15 +211,15 @@ public class ListNodesTests
     public void RemoveItemAtIndex_RemovesElement_SupportsNegativeIndex()
     {
         var input = L("a", "b", "c");
-        Assert.Equal(new object?[] { "a", "c" }, ListNodes.RemoveItemAtIndex(input, 1));
-        Assert.Equal(new object?[] { "a", "b" }, ListNodes.RemoveItemAtIndex(input, -1));
+        Assert.Equal(new object?[] { "a", "c" }, ListNodes.RemoveItemAtIndex(input, new[] { 1 }));
+        Assert.Equal(new object?[] { "a", "b" }, ListNodes.RemoveItemAtIndex(input, new[] { -1 }));
         Assert.Equal(new object?[] { "a", "b", "c" }, input);
     }
 
     [Fact]
     public void RemoveItemAtIndex_OutOfRange_ThrowsWithClearMessage()
     {
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => ListNodes.RemoveItemAtIndex(L("a"), 5));
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => ListNodes.RemoveItemAtIndex(L("a"), new[] { 5 }));
         Assert.Contains("5", ex.Message);
         Assert.Contains("1 element", ex.Message);
     }

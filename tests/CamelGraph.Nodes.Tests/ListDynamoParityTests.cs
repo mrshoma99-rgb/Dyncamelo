@@ -145,7 +145,7 @@ public class ListDynamoParityTests
     {
         Assert.Equal(9.0, ListNodes.MaximumItem(L(3.0, null, 9.0, 1.0)));
         Assert.Equal(1.0, ListNodes.MinimumItem(L(3.0, null, 9.0, 1.0)));
-        Assert.Throws<InvalidOperationException>(() => ListNodes.MaximumItem(L((object?)null)));
+        Assert.Null(ListNodes.MaximumItem(L((object?)null)));        // wave D (COL-14): nothing to compare is an empty result and a warning, not an error
     }
 
     [Fact]

@@ -68,6 +68,8 @@ Whether an input wants one value or a list is shown by its socket shape and by i
 
 ![The three lacing modes with their results: Shortest, Longest and Cross-Product.](../images/wiki-lacing-modes.png)
 
+With the default **Shortest**, two lists of different lengths are paired only as far as the shorter one reaches: the extra items of the longer list are left out without a message, so check the counts (`List.Count`) when two lists should match. `List.Zip` is the exception and warns.
+
 Rules of thumb: parallel lists that belong together, such as names and item lists, use **Shortest**. One list against one fixed value uses **Longest** (or just wire the single value; it is repeated by itself). "Try everything against everything", such as all colours against all searches, uses **Cross-Product**.
 
 **List levels (`@L`).** With nested lists you can tell an input which depth to work at. Right-click an input socket and choose **List Levels**. Levels count from the innermost: `@L1` is the individual items, `@L2` the lists of items, and so on. An active port shows an `@L2` badge. *Keep list structure* decides whether the result keeps the incoming nesting or flattens the outer levels. Many Navisworks item inputs swallow a whole list by default; `@L2` on such an input gives one result per group without a loop.

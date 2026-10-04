@@ -26,15 +26,19 @@ public static class XmlNodes
     /// element with only text becomes that text (string); an empty element
     /// becomes null; text mixed with attributes/children is stored under
     /// "#text". All values stay strings — XML carries no type information.
-    /// Comments and processing instructions are ignored.
+    /// Comments and processing instructions are ignored. An element that occurs once
+    /// is a dictionary or a string and the same element occurring twice is a list, so
+    /// the names listed in <paramref name="listElements"/> are always wrapped in a list.
     /// </summary>
     /// <param name="xml">The XML text to parse.</param>
+    /// <param name="listElements">Names of elements that must always come as a list, even when the file holds only one of them; separated by commas or semicolons, or * for every element. Empty (default) keeps the rule that only repeated elements are lists.</param>
     /// <returns>The parsed value (dictionary of dictionaries/lists/strings).</returns>
     [NodeName("XML.Parse")]
+    [NodeAliases("CamelGraph.Nodes.XmlNodes.Parse@string")]
     [return: NodeName("value")]
-    [NodeDescription("Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").")]
+    [NodeDescription("Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\"). An element that occurs once is a dictionary or a text, the same element occurring twice is a list, so a graph tried on a file with several items can break on a file with one: name such elements in listElements (for example Task, Resource; or * for all) and they always come as a list. Dictionary.ValueAtPath reads nested results either way. DOCTYPE declarations are accepted but an external entity is never read from disk or the network.")]
     [NodeSearchTags("xml", "parse", "deserialize", "decode", "markup", "schedule", "msp", "p6")]
-    public static object? Parse(string xml)
+    public static object? Parse(string xml, string listElements = "")
     {
         if (string.IsNullOrWhiteSpace(xml))
         {
@@ -52,10 +56,11 @@ public static class XmlNodes
             throw new FormatException("XML.Parse: the input is not valid XML. " + ex.Message, ex);
         }
 
+        var listNames = ListNames(listElements);
         var root = document.Root!;
         return new Dictionary<string, object?>(StringComparer.Ordinal)
         {
-            [NameOf(root)] = ConvertElement(root),
+            [NameOf(root)] = ConvertElement(root, listNames),
         };
     }
 
@@ -63,7 +68,28 @@ public static class XmlNodes
     // Helpers (not imported as nodes: non-public).
     // ------------------------------------------------------------------
 
-    private static object? ConvertElement(XElement element)
+    // The element names the user wants as lists even when they occur once; null = none, an empty-named "*" entry = all.
+    private static HashSet<string>? ListNames(string? listElements)
+    {
+        if (string.IsNullOrWhiteSpace(listElements))
+        {
+            return null;
+        }
+
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var piece in listElements!.Split(',', ';', '\n', '\r'))
+        {
+            var trimmed = piece.Trim();
+            if (trimmed.Length > 0)
+            {
+                names.Add(trimmed);
+            }
+        }
+
+        return names.Count == 0 ? null : names;
+    }
+
+    private static object? ConvertElement(XElement element, HashSet<string>? listNames)
     {
         var attributes = element.Attributes().ToList();
         var children = element.Elements().ToList();
@@ -84,8 +110,13 @@ public static class XmlNodes
         foreach (var child in children)
         {
             var name = NameOf(child);
-            var value = ConvertElement(child);
-            if (result.TryGetValue(name, out var existing))
+            var value = ConvertElement(child, listNames);
+            if (listNames != null && !result.ContainsKey(name) &&
+                (listNames.Contains("*") || listNames.Contains(name) || listNames.Contains(child.Name.LocalName)))
+            {
+                result[name] = new List<object?> { value };
+            }
+            else if (result.TryGetValue(name, out var existing))
             {
                 if (existing is List<object?> siblings)
                 {

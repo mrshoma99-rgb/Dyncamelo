@@ -119,7 +119,7 @@ public class DisplayNodesTests
         // List.Sort's parameter is documented as "The list to sort." and its
         // IList<object> parameter exercises the generic doc-id encoding.
         var sort = registry.Definitions.Single(d => d.Name == "List.Sort");
-        var input = Assert.Single(sort.Inputs);
+        var input = sort.Inputs.Single(i => i.Name == "list");
         Assert.Equal("The list to sort.", input.Description);
 
         // The single output picks up the <returns> text.

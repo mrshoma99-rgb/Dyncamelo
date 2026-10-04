@@ -62,7 +62,8 @@ public static class DictionaryNodes
     /// <returns>The value stored under the key.</returns>
     [NodeName("Dictionary.ValueAtKey")]
     [return: NodeName("value")]
-    [NodeDescription("Returns the value stored under the given key.")]
+    [NodeDescription("Returns the value stored under the given key; a missing key is an error (Dictionary.ValueOrDefault gives a fallback instead, Dictionary.ValueAtPath follows a path into nested data)."
+        + " A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To read several keys of one dictionary use Dictionary.SelectKeys.")]
     [NodeSearchTags("lookup", "get", "map")]
     public static object? ValueAtKey(IDictionary dictionary, string key)
     {
@@ -140,7 +141,8 @@ public static class DictionaryNodes
     /// <returns>A new dictionary with the key set.</returns>
     [NodeName("Dictionary.SetValueAtKey")]
     [return: NodeName("dictionary")]
-    [NodeDescription("Returns a copy of the dictionary with the given key set or updated.")]
+    [NodeDescription("Returns a copy of the dictionary with the given key set or updated; the input dictionary is not changed."
+        + " A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To set several keys at once use Dictionary.SetValues.")]
     [NodeSearchTags("set", "update", "insert", "put", "map")]
     public static Dictionary<string, object?> SetValueAtKey(IDictionary dictionary, string key, object? value)
     {

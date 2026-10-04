@@ -152,20 +152,20 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | List.RestOfItems | List | list | list | Everything but the first element (pairs with List.FirstItem). | copy + drop head | Implemented (v0.31) |
 | List.DropItems | List | list, amount: int (negative = from end) | list | Drop N elements from the start — or the end when negative (Dynamo behavior). | RemoveRange | Implemented (v0.31) |
 | List.TakeItems | List | list, amount: int (negative = from end) | list | Take N elements from the start — or the end when negative (Dynamo behavior). | ranged copy | Implemented (v0.31) |
-| List.Slice | List | list, start: int, end: int (exclusive; negatives from end), step: int = 1 | list | Python-style sub-range with step. | indexed loop | Implemented (v0.31) |
+| List.Slice | List | list, start: int, end: int? (exclusive; negatives from end; empty = to the end), step: int = 1 | list | Python-style sub-range with step. | indexed loop | Implemented (v0.31) |
 | List.Chop | List | list, lengths: int or List&lt;int&gt; | lists | Consecutive sublists: one length chops evenly; a list of lengths cycles (Dynamo behavior). | cycling cursor | Implemented (v0.31) |
 | List.Transpose | List | list: List&lt;List&gt; | lists | Swap rows and columns (tables!); ragged rows pad with nulls so the result stays rectangular (Dynamo behavior). | column loop | Implemented (v0.31) |
 | List.Cycle | List | list, amount: int | list | The whole list repeated N times end-to-end. | AddRange loop | Implemented (v0.31) |
 | List.OfRepeatedItem | List | item: object, amount: int | list | One value repeated N times — constant table columns. | fill loop | Implemented (v0.31) |
-| List.MaximumItem / List.MinimumItem | List | list | item | Largest / smallest element (numbers, texts, dates; nulls ignored). | `ValueComparison.Compare` scan | Implemented (v0.31) |
+| List.MaximumItem / List.MinimumItem | List | list | item | Largest / smallest element (numbers, texts, dates; nulls and empty text ignored; ordered as List.Sort; nothing to compare gives an empty result and a warning). | `CellSortKey` scan | Implemented (v0.31) |
 | List.SetUnion / SetIntersection / SetDifference | List | list1, list2 | list | Distinct elements in either / both / first-only (value equality, first-seen order) — combine result sets, find overlaps, subtract ignore-lists. | `HashSet` with node value equality | Implemented (v0.31) |
 | List.TakeEveryNthItem | List | list, n: int, offset: int = 0 | list | Every n-th element after an offset — thin out dense lists. | stride loop | Implemented (v0.31) |
 | List.ShiftIndices | List | list, amount: int | list | Rotate with wrap-around (+1: last element to the front). | modular copy | Implemented (v0.31) |
-| List.AllTrue / List.AnyTrue | List | list | bool | Collapse a mask to one verdict: every / at least one element true (nulls count as not-true; empty list → AllTrue false). | bool scan | Implemented (v0.31) |
+| List.AllTrue / List.AnyTrue | List | list | bool | Collapse a mask to one verdict: every / at least one element true (only true/false and the text "true"/"false" count; nulls count as not-true, other values count as not-true with a warning; empty list → AllTrue false). | bool scan | Implemented (v0.31) |
 | List.CountTrue | List | list | trueCount: int, falseCount: int | Count a mask's true and not-true entries — "37 of 340 matched" without filtering. | tally / [MultiReturn] | Implemented (v0.31) |
 | List.FilterByBoolMask | List | list: List&lt;object&gt;, mask: List&lt;bool&gt; | in: List&lt;object&gt;, out: List&lt;object&gt; | Split list by a parallel true/false mask — the core filter idiom. | LINQ / [MultiReturn] | MVP |
-| List.Range | List | start: double, end: double, step: double = 1 | list: List&lt;double&gt; | Numeric range (inclusive start, ≤ end). | iterator C# | MVP |
-| List.Sort | List | list: List&lt;object&gt; | sorted: List&lt;object&gt; | Sort ascending (numeric or ordinal-string comparison). | List.Sort + Comparer | MVP |
+| List.Range | List | start: double, end: double, step: double = 1 | list: List&lt;double&gt; | Numeric range (inclusive start and end; each value is start + n × step; at most 1,000,000 numbers). | iterator C# | MVP |
+| List.Sort | List | list: List&lt;object&gt;, descending: bool = false | list: List&lt;object&gt; | Sort ascending or descending: numbers by value, text ignoring case, empty items last; the one ordering rule of the library (replaces List.SortDescending). | OrderBy + `CellSortKey` | MVP |
 | List.UniqueItems | List | list: List&lt;object&gt; | unique: List&lt;object&gt; | Remove duplicates, keep first occurrence order. | LINQ Distinct | MVP |
 | List.LastItem | List | list: List&lt;object&gt; | item: object | Last item. | LINQ LastOrDefault | Implemented (v0.2) |
 | List.Contains | List | list: List&lt;object&gt;, item: object | contains: bool | Membership test with coercing equality. | LINQ Any | Implemented (v0.2) |
@@ -173,9 +173,9 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | List.Reverse | List | list: List&lt;object&gt; | reversed: List&lt;object&gt; | Reverse order. | LINQ Reverse | Implemented (v0.2) |
 | List.AddItemToEnd | List | list: List&lt;object&gt;, item: object | list: List&lt;object&gt; | Append (returns new list; inputs immutable). | copy + Add | Implemented (v0.2) |
 | List.Join | List | listA: List&lt;object&gt;, listB: List&lt;object&gt; | list: List&lt;object&gt; | Concatenate two lists. | LINQ Concat | Implemented (v0.2) |
-| List.RemoveItemAtIndex | List | list: List&lt;object&gt;, index: int | list: List&lt;object&gt; | Remove item(s) at index(es). | copy + RemoveAt | Implemented (v0.2) |
+| List.RemoveItemAtIndex | List | list: List&lt;object&gt;, indices: List&lt;int&gt; | list: List&lt;object&gt; | Remove the item(s) at one or several indices in one list. | copy + skip set | Implemented (v0.2) |
 | List.GroupByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | groups: List&lt;List&lt;object&gt;&gt;, uniqueKeys: List&lt;object&gt; | Group items by parallel key list (QTO by-system grouping). | LINQ GroupBy / [MultiReturn] | Implemented (v0.2) |
-| List.SortByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | sorted: List&lt;object&gt;, sortedKeys: List&lt;object&gt; | Sort items by parallel key list. | LINQ OrderBy / [MultiReturn] | Implemented (v0.2) |
+| List.SortByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt;, descending: bool = false | sorted: List&lt;object&gt;, sortedKeys: List&lt;object&gt; | Sort items by parallel key list, ascending or descending. | LINQ OrderBy / [MultiReturn] | Implemented (v0.2) |
 | Table.JoinByKey (retired: use Table.Join and Table.Unmatched) | List | rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt;, keys: List&lt;object&gt;, keyColumn: string | matchedRows: List&lt;List&lt;object&gt;&gt; (parallel to keys; null when unmatched), unmatchedKeys: List&lt;object&gt; | Join spreadsheet rows to a key list (element GUIDs / mark values) — the CSV/Excel→element link in one node. Keys compared as invariant text (42 matches "42"); first row wins on duplicate keys. | pure .NET dictionary join / [MultiReturn] | Implemented (v0.3) |
 
 ## Dictionary
@@ -187,6 +187,10 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Dictionary.Keys | Dictionary | dictionary: Dictionary&lt;string,object&gt; | keys: List&lt;string&gt; | All keys. | Dictionary.Keys | Implemented (v0.2) |
 | Dictionary.Values | Dictionary | dictionary: Dictionary&lt;string,object&gt; | values: List&lt;object&gt; | All values. | Dictionary.Values | Implemented (v0.2) |
 | Dictionary.SetValueAtKey | Dictionary | dictionary: Dictionary&lt;string,object&gt;, key: string, value: object | dictionary: Dictionary&lt;string,object&gt; | Returns a copy with key set/updated. | copy + indexer | Implemented (v0.2) |
+| Dictionary.SetValues | Dictionary | dictionary, keys: List&lt;object&gt;, values: List&lt;object&gt; | dictionary | Returns a copy with several keys set/updated at once. | copy + indexer | Implemented (node audit) |
+| Dictionary.SelectKeys | Dictionary | dictionary, keys: List&lt;object&gt; | dictionary | Keeps only the listed keys (in the listed order). | copy | Implemented (node audit) |
+| Dictionary.RemoveKeys | Dictionary | dictionary, keys: List&lt;object&gt; | dictionary | Returns a copy without any of the listed keys. | copy | Implemented (node audit) |
+| Dictionary.ValueAtPath | Dictionary | value: object, path: string, defaultValue: object = null | value: object | Follows a path (`Project/Tasks/Task/0/Name`, `*` for every item of a list) into nested JSON/XML data; the default when a step is missing. | path walk | Implemented (node audit) |
 
 ## Color
 
@@ -234,7 +238,7 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Path.Combine | File | directory: string, fileName: string | path: string | Join path segments safely. | System.IO.Path.Combine | Implemented (v0.2) |
 | Excel.ReadFromFile | File | path: string, sheet: string = "" (first), hasHeaders: bool = true | rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt;, sheetNames: List&lt;string&gt; | Read an .xlsx worksheet into rows + headers. Dates arrive as Excel serial numbers (documented); .xls (legacy BIFF) is rejected with a clear error. | built-in XlsxLite reader: `ZipArchive` + `XmlReader` over the OPC parts — zero new dependencies / [MultiReturn] | Implemented (v0.3) |
 | Excel.WriteToFile | File | path: string, rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt; = null, sheet: string = "Sheet1", append: bool = false | path: string | Write rows (+ optional headers) to an .xlsx worksheet; `append` adds/replaces a sheet in an existing workbook (foreign styles/formulas are not preserved). Creates missing directories. | XlsxLite writer (5-part OPC zip, inline strings) | Implemented (v0.3) |
-| XML.Parse | File | xml: string | value: object | Parse XML into the same dict/list shape `JSON.Parse` produces: attributes as "@name", repeated elements → lists, mixed text as "#text". All values remain strings (XML is untyped). | `System.Xml.Linq` — in-box | Implemented (v0.3) |
+| XML.Parse | File | xml: string, listElements: string = "" | value: object | Parse XML into the same dict/list shape `JSON.Parse` produces: attributes as "@name", repeated elements → lists, mixed text as "#text". All values remain strings (XML is untyped). | `System.Xml.Linq` — in-box | Implemented (v0.3) |
 | Snapshot.Diff | File | oldValue: Dictionary, newValue: Dictionary | addedKeys: List&lt;string&gt;, removedKeys: List&lt;string&gt;, changedKeys: List&lt;string&gt; | Diff two GUID-keyed dictionaries (values compared by canonical JSON; nested key order ignored) — the engine behind model-version compare and clash deltas. | pure .NET + Newtonsoft / [MultiReturn] | Implemented (v0.3) |
 
 ## Geometry

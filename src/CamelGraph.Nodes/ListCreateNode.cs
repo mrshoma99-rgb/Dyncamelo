@@ -24,7 +24,7 @@ public class ListCreateNode : NodeModel
     {
         Name = "List.Create";
         Category = "List";
-        Description = "Builds a list from the wired item inputs.";
+        Description = "Builds a list from the wired item inputs, in order. A wired list is kept whole as ONE item of the new list (a list of lists); List.Merge joins lists into one list instead.";
         AddOutput("list", typeof(IList<object>), "The created list.");
         AddItemPort();
     }
