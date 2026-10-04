@@ -20,8 +20,9 @@ public static class SelectionExtraNodes
     [NodeName("Selection.Invert")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("items")]
-    [NodeDescription("The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each); it does not change the selection — wire it into Selection.SetCurrent to select them.")]
+    [NodeDescription("The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each); it does not change the selection — wire it into Selection.SetCurrent to select them. Read again on every run, so it follows the selection as it is now.")]
     [NodeSearchTags("selection", "invert", "inverse", "opposite", "except", "everything else", "not selected", "complement")]
+    [LiveState]
     public static List<ModelItem> Invert(Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
@@ -74,7 +75,7 @@ public static class SelectionExtraNodes
     [NodeSearchTags("search", "find", "guid", "uuid", "id", "instance", "lookup", "ifc", "globalid", "missing")]
     [MultiReturn("items", "missing")]
     [PortKinds("item*", "text*")]
-    public static Dictionary<string, object?> ByGuid(IList<object?> guids, Document? document = null)
+    public static Dictionary<string, object?> ByGuid([MultiInput] IList<object?> guids, Document? document = null)
     {
         var requests = GuidLookup.ParseRequests(guids, "Search.ByGuid");
         var doc = NavisworksContext.ResolveDocument(document);
@@ -116,16 +117,20 @@ public static class SelectionExtraNodes
 
     /// <summary>The name, kind, size and folder of a saved selection or search set.</summary>
     /// <param name="selectionSet">The selection or search set.</param>
+    /// <param name="includeCount">True (default) counts the items the set selects, which evaluates a search set against the model; false leaves itemCount empty and skips that work, so reading only the name, kind or folder of many sets is fast.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The set's name, its kind ("selection" or "search"), how many items it selects and its folder path.</returns>
+    /// <returns>The set's name, its kind ("selection" or "search"), how many items it selects (empty when includeCount is off) and its folder path.</returns>
     [NodeName("SelectionSet.Info")]
     [NodeCategory("Navisworks.SelectionSets")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("What a saved set is: its name, whether it is a fixed \"selection\" or a live \"search\" set, how many items it selects right now (a search set is evaluated once to count) and its folder path (\"\" at the top level).")]
+    [NodeDescription("What a saved set is: its name, whether it is a fixed \"selection\" or a live \"search\" set, how many items it selects right now (a search set is evaluated once to count; turn includeCount off when you only need the name, kind or folder of many sets) and its folder path (\"\" at the top level). Read again on every run.")]
     [NodeSearchTags("selection", "set", "info", "kind", "count", "size", "folder", "search set", "audit")]
+    [LiveState]
+    // Before includeCount was added: (selectionSet, document).
+    [NodeAliases("CamelGraph.Navisworks.SelectionExtraNodes.Info@Autodesk.Navisworks.Api.SelectionSet,Autodesk.Navisworks.Api.Document")]
     [MultiReturn("name", "kind", "itemCount", "folder")]
     [PortKinds("text", "text", "integer", "text")]
-    public static Dictionary<string, object?> Info(SelectionSet selectionSet, Document? document = null)
+    public static Dictionary<string, object?> Info(SelectionSet selectionSet, bool includeCount = true, Document? document = null)
     {
         if (selectionSet == null)
         {
@@ -135,8 +140,10 @@ public static class SelectionExtraNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var root = doc.SelectionSets.RootItem;
 
-        // Prefer the stored instance (it knows its folder); an unsaved set is read as it is, at the top level.
-        var stored = SavedItemTreeHelpers.FindStoredEquivalent(root, selectionSet);
+        // Prefer the stored instance (it knows its folder); an unsaved set is read as it is, at the top level. A set that came from
+        // SelectionSets.All, SelectionSet.ByName or SelectionSets.InFolder IS the stored instance, which its parent chain shows without
+        // walking the whole tree for every set of a long list.
+        var stored = IsStored(root, selectionSet) ? selectionSet : SavedItemTreeHelpers.FindStoredEquivalent(root, selectionSet);
         var folderPath = string.Empty;
         if (stored != null)
         {
@@ -148,9 +155,23 @@ public static class SelectionExtraNodes
         {
             ["name"] = set.DisplayName ?? string.Empty,
             ["kind"] = set.HasSearch ? "search" : "selection",
-            ["itemCount"] = set.GetSelectedItems(doc).Count,
+            ["itemCount"] = includeCount ? (object)set.GetSelectedItems(doc).Count : null,
             ["folder"] = folderPath,
         };
+    }
+
+    // True when the set hangs under this document's Sets window root (a stored set); a copy has no parent.
+    private static bool IsStored(FolderItem root, SelectionSet set)
+    {
+        for (var parent = set.Parent; parent != null; parent = parent.Parent)
+        {
+            if (ReferenceEquals(parent, root))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>Duplicates a saved selection or search set next to the original.</summary>
@@ -161,6 +182,7 @@ public static class SelectionExtraNodes
     [NodeName("SelectionSet.Duplicate")]
     [NodeCategory("Navisworks.SelectionSets")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("selectionSet")]
     [NodeDescription("Duplicates a saved selection or search set in its folder (a search set stays a live search); the copy is named \"<name> copy\" unless newName is given. Running it again adds another copy.")]
     [NodeSearchTags("selection", "set", "duplicate", "copy", "clone", "backup")]

@@ -427,10 +427,11 @@ public static class SelectionSetTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The renamed stored set (pass-through for chaining).</returns>
     [NodeName("SelectionSet.Rename")]
-    [NodeDescription("Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename via lacing.")]
+    [NodeDescription("Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename by wiring a list of sets and a list of new names: they are paired one by one.")]
     [NodeSearchTags("selection", "set", "rename", "name", "batch")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("selectionSet")]
-    public static SelectionSet Rename(object selectionSet, string newName, Document? document = null)
+    public static SelectionSet Rename([ScalarInput][PortKinds("selection")] object selectionSet, string newName, Document? document = null)
     {
         if (string.IsNullOrEmpty(newName))
         {
@@ -456,8 +457,9 @@ public static class SelectionSetTreeNodes
     /// was removed from SelectionSetNodes.cs during v0.3 integration.
     /// </remarks>
     [NodeName("SelectionSets.CreateFolder")]
-    [NodeDescription("Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.")]
+    [NodeDescription("Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean. Inside a node group every instance uses the same name unless you wire it in, so two instances share one folder.")]
     [NodeSearchTags("selection", "sets", "folder", "create", "organize", "nested")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("folder")]
     public static FolderItem CreateFolder(string name, FolderItem? parentFolder = null, Document? document = null)
     {
@@ -487,10 +489,11 @@ public static class SelectionSetTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The moved stored set (pass-through for chaining).</returns>
     [NodeName("SelectionSet.MoveToFolder")]
-    [NodeDescription("Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean.")]
+    [NodeDescription("Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean. A list of sets moves each of them; a list of sets with a list of folders pairs them one by one.")]
     [NodeSearchTags("selection", "set", "move", "folder", "organize")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("selectionSet")]
-    public static SelectionSet MoveToFolder(object selectionSet, object folder, Document? document = null)
+    public static SelectionSet MoveToFolder([ScalarInput][PortKinds("selection")] object selectionSet, [ScalarInput][PortKinds("selection")] object folder, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var sets = doc.SelectionSets;

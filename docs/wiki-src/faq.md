@@ -119,13 +119,13 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Use the magnifier, or send a few selected items through `Properties.Discover` into a `Watch Table` to list everything they carry. See [Find the name of a tab or property](howto/find-property-names.md).
 
 ??? question "How do I search for numbers, such as pipes with a diameter over 100?"
-    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. Wire a `Number` node into the `value` input; the number is in document units. The other modes are `equals`, `contains` and `wildcard` (`*` matches any text, `?` one character). See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
+    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. Wire a `Number` node into the `value` input; the number is in document units. The other modes are `equals`, `contains`, `wildcard` (`*` matches any text, `?` one character) and `exists` (the item carries the property, whatever its value). Wire a list into `value` to match any of its entries in one pass over the model. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Is the text search case sensitive?"
     The documentation of the contains search says it is case sensitive, like Find Items, so type the capitals as Navisworks shows them. If a search finds less than you expect, wire the result into a `Watch List` and try `wildcard`. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Can I search on two properties?"
-    Yes. Chain searches: wire the `items` of a `Search.ByProperty` into a `Search.InItems`, which looks only inside the items it is given. See [Search nodes](nodes/navisworks-search.md#node-search-initems).
+    Yes. Chain searches: wire the `items` of a `Search.ByProperty` into the `within` input of a second `Search.ByProperty`, which then looks only inside the items it is given (and their descendants). The second search can use any mode. `Search.InItems` does the same for equals and is retired. See [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "What is the difference between a selection set and a search set?"
     `SelectionSet.Create` keeps the items it was given. A search set keeps a rule and follows the model when it changes. See [Save selection sets](howto/save-selection-sets.md).

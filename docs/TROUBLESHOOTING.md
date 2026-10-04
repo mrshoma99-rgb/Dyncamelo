@@ -122,7 +122,7 @@ Select the node and press `I` to see which of these applies.
 
 **The magnifier shows no names.** The magnifier next to a tab or property input lists names of **one element only**, and says why when it has nothing to show:
 
-* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
+* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
 * "Pick an element on 'x' (or wire one in), then search its tabs." Nodes such as `Properties.Value` read the element on their own element input. Pick an element on that input, or wire one in.
 * "The element wired to 'x' has not been computed yet. Run the graph (or pick the element on the node itself), then search." The wire needs a value first: press **Run**.
 * "Choose the tab first (the 'x' input), then search its properties." Fill the tab input, then use the magnifier on the property input.

@@ -15,12 +15,13 @@ public static class SelectionNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>A snapshot of the currently selected items.</returns>
     [NodeName("Selection.Current")]
-    [NodeDescription("The model items currently selected in Navisworks.")]
+    [NodeDescription("The model items currently selected in Navisworks, read again on every run (press Run after selecting something else and the new selection comes through). The nodes after it run again only when the selection is different from the previous run.")]
     [NodeSearchTags("selection", "selected", "current", "picked", "resolution")]
+    [LiveState]
     // Pre-0.4 id (before the optional resolveTo parameter was prepended).
     [NodeAliases("CamelGraph.Navisworks.SelectionNodes.Current@Autodesk.Navisworks.Api.Document")]
     [return: NodeName("items")]
-    public static List<ModelItem> Current([NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")] string resolveTo = "Self", Document? document = null)
+    public static List<ModelItem> Current([NodePanel("Advanced")][NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")] string resolveTo = "Self", Document? document = null)
     {
         var level = SelectionLevels.Parse(resolveTo);
         var doc = NavisworksContext.ResolveDocument(document);

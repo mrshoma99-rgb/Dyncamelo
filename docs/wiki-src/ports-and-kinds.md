@@ -92,7 +92,7 @@ On nodes that read a property of an element, the **tab** (category) and **proper
 * Nothing is read until you press the magnifier.
 * Only that element is read, at most the first 100 if the input carries a longer list. The model is never searched to fill the list.
 * Pick an element on the node, or wire one in and run the graph, before you search.
-* On `Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch` and `SelectionSets.BulkByPropertyValues` there is no element input, so the magnifier lists the tabs and properties of the **elements selected in Navisworks right now**.
+* On `Search.ByProperty`, `SelectionSet.CreateFromSearch` and `SelectionSets.BulkByPropertyValues` there is no element input, so the magnifier lists the tabs and properties of the **elements selected in Navisworks right now**.
 
 ![The magnifier popup on Properties.Value, listing tab names.](../images/wiki-magnifier.png)
 
