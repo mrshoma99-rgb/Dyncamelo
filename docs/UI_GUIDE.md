@@ -291,7 +291,7 @@ The **colour palette** of the whole editor is chosen here too.
 |---|---|---|---|
 | Node density | Compact / Normal / Comfortable | Normal | Row height of nodes. Compact fits more on screen, comfortable is easier to click. |
 | Type letters in sockets | On / Off | Off | Draw a short letter naming the type inside every socket, so types do not rely on colour alone. |
-| Node library panel | On / Off | On | Show the node library on the left of the canvas. It can also be hidden with the arrow in its header and brought back with the tab at the canvas edge. |
+| Node library panel | On / Off | On | Show the node library on the left of the canvas. It can also be hidden with the HIDE tab on its right edge and brought back with the NODES tab at the left edge of the canvas. |
 | Descriptions in the library | On / Off | On | Show a description line under each node in the library panel. |
 | Value previews under nodes | On / Off | On | Show a preview bubble with the result under each node after a run. |
 | Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Make everything in the CamelGraph window smaller or larger, for high-resolution screens or a small pane. |

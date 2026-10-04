@@ -6,16 +6,16 @@ For the full list of nodes with their inputs and outputs, see the [node library]
 
 ## The library panel
 
-The panel sits on the left of the canvas. Drag the thin bar between the panel and the canvas to change its width.
+The panel is a rounded card that floats on the left of the canvas. Drag the gap between the card and the canvas to change its width.
 
 ![The node library panel with "clash" typed in the search box, a flat list of matches and the category icons.](../images/wiki-library-search.png)
 
 | Control | What it does |
 |---|---|
-| Search box | Type to search all nodes (see below). The ✕ at the right of the box clears it. |
-| Down-arrow button | **Expand all categories.** |
-| Up-arrow button | **Collapse all categories.** |
-| `‹` button at the left of the search row | **Hides the whole panel.** A small tab at the left edge of the canvas brings it back. |
+| Search box | The full-width box at the top of the card. Type to search all nodes (see below). The ✕ at the right of the box clears it, and so does ++esc++. |
+| Down-arrow round button (under the search box) | **Expand all categories.** |
+| Up-arrow round button (under the search box) | **Collapse all categories.** |
+| **HIDE** tab on the right edge of the card | **Hides the whole panel.** A **NODES** tab at the left edge of the canvas brings it back. |
 
 You can also hide or show the panel with ++ctrl+b++ or **View ▸ Node Library Panel**, and **Settings ▸ Appearance ▸ Node library panel** controls whether it is shown. **Settings ▸ Appearance ▸ Descriptions in the library** adds or removes the grey description line under each node name (see [Settings](settings.md)).
 
