@@ -35,7 +35,7 @@ public static class TransformExtraNodes
     [return: NodeName("items")]
     public static List<ModelItem> Scale(
         [MultiInput] IEnumerable<ModelItem> items,
-        [NodeRange(0, 1000000, SoftMin = 0.1, SoftMax = 10, Step = 0.1)] double factor,
+        [NodeRange(0.001, 1000000, SoftMin = 0.1, SoftMax = 10, Step = 0.1)] double factor,
         [PortKinds("geometry")] object? about = null,
         Document? document = null)
     {

@@ -54,7 +54,7 @@ public static class TransformNodes
         [MultiInput] IEnumerable<ModelItem> items,
         object origin,
         object axis,
-        double degrees,
+        [NodeRange(-360, 360, SoftMin = -180, SoftMax = 180, Step = 1, Unit = "°")] double degrees,
         Document? document = null)
     {
         var list = NavisValues.RequireItems(items);
@@ -93,7 +93,7 @@ public static class TransformNodes
     [NodeSearchTags("item", "transform", "reset", "restore", "original", "undo", "position")]
     [return: NodeName("items")]
     public static List<ModelItem> ResetTransform(
-        IEnumerable<ModelItem>? items = null,
+        [MultiInput] IEnumerable<ModelItem>? items = null,
         bool resetAll = false,
         Document? document = null)
     {

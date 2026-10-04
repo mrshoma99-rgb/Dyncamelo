@@ -53,7 +53,7 @@ public static class DocumentLifecycleNodes
     [NodeSearchTags("document", "append", "files", "add", "batch", "federate", "combine")]
     [MultiReturn("document", "models")]
     [PortKinds("document", "item*")]
-    public static Dictionary<string, object?> AppendFiles(IEnumerable<string> filePaths, Document? document = null)
+    public static Dictionary<string, object?> AppendFiles([MultiInput] IEnumerable<string> filePaths, Document? document = null)
     {
         var paths = MaterializePaths(filePaths);
         // allowClear: appending the first files into a fresh (empty) session is

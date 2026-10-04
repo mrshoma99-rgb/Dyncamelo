@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -66,11 +67,16 @@ public static class GridNodes
     [NodeSearchTags("grid", "intersection", "intersections", "gridline", "axis", "lattice")]
     [MultiReturn("names", "points", "levelNames")]
     [PortKinds("text*", "geometry*", "text*")]
-    public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 10000, SoftMin = 2, SoftMax = 100)] int samples = 20)
+    public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 100, SoftMin = 2, SoftMax = 100, Step = 1)] int samples = 20)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var system = ResolveActiveSystem(doc);
         var density = Math.Max(2, Math.Min(100, samples));
+        if (density != samples)
+        {
+            // A wired value is not held to the field's range, so say so instead of silently running with another number.
+            NodeWarnings.Add("samples was " + samples.ToString(System.Globalization.CultureInfo.InvariantCulture) + "; it is limited to 2-100, so " + density.ToString(System.Globalization.CultureInfo.InvariantCulture) + " was used.");
+        }
 
         var bounds = doc.GetBoundingBox(false);
         if (bounds == null || bounds.IsEmpty)

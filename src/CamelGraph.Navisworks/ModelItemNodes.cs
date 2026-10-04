@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -65,14 +66,23 @@ public static class ModelItemNodes
     /// <summary>The axis-aligned bounding box of a model item.</summary>
     /// <param name="item">The model item.</param>
     /// <param name="ignoreHidden">True to exclude hidden geometry from the box.</param>
-    /// <returns>The item's bounding box, in document units.</returns>
+    /// <returns>The item's bounding box, in document units; null (with a warning) when the item carries no geometry.</returns>
     [NodeName("ModelItem.BoundingBox")]
-    [NodeDescription("The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox.")]
+    [NodeDescription("The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox. An item with no geometry of its own below it (an empty layer or group) has no box: the result is null and the node shows a warning, so List.Clean drops it and BoundingBox.Center / Size are not fed an empty box.")]
     [NodeSearchTags("item", "boundingbox", "bounds", "extents", "bbox")]
     [return: NodeName("boundingBox")]
-    public static BoundingBox3D BoundingBox(ModelItem item, bool ignoreHidden = false)
+    public static BoundingBox3D? BoundingBox(ModelItem item, bool ignoreHidden = false)
     {
-        return NavisValues.RequireItem(item).BoundingBox(ignoreHidden);
+        var modelItem = NavisValues.RequireItem(item);
+        var box = modelItem.BoundingBox(ignoreHidden);
+        if (box == null || box.IsEmpty)
+        {
+            // An empty box is a value that looks like a box: it would flow on into Center and Size as a box at the origin.
+            NodeWarnings.Add("'" + DisplayName(modelItem) + "' has no geometry, so it has no bounding box (the result is empty). Selection.Resolve with level Geometry gives the items that do.");
+            return null;
+        }
+
+        return box;
     }
 
     /// <summary>

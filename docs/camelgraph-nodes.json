@@ -13330,7 +13330,8 @@
     {
      "name": "filePaths",
      "type": "string[]",
-     "description": "The files to append, in order (e.g. from Directory.GetFiles)."
+     "description": "The files to append, in order (e.g. from Directory.GetFiles).",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -15025,7 +15026,8 @@
     {
      "name": "properties",
      "type": "any[]",
-     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid."
+     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -15042,7 +15044,7 @@
    "id": "CamelGraph.Navisworks.ModelDataNodes.Statistics@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item.",
+   "description": "Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item. A wired list that is empty, such as a search that found nothing, counts nothing: you get an empty table (headers only) and a warning, never the whole document by accident.",
    "tags": [
     "model",
     "statistics",
@@ -15062,7 +15064,7 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The items to count; leave empty (or unwired) to count every item of the document.",
+     "description": "The items to count. Leave it unwired to count every item of the document; a wired list that is empty (a search that found nothing) counts nothing and gives an empty table.",
      "default": "null",
      "multiInput": true
     },
@@ -15306,7 +15308,7 @@
    "id": "CamelGraph.Navisworks.ModelItemNodes.BoundingBox@Autodesk.Navisworks.Api.ModelItem,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox.",
+   "description": "The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox. An item with no geometry of its own below it (an empty layer or group) has no box: the result is null and the node shows a warning, so List.Clean drops it and BoundingBox.Center / Size are not fed an empty box.",
    "tags": [
     "item",
     "boundingbox",
@@ -15331,7 +15333,7 @@
     {
      "name": "boundingBox",
      "type": "BoundingBox3D",
-     "description": "The item's bounding box, in document units."
+     "description": "The item's bounding box, in document units; null (with a warning) when the item carries no geometry."
     }
    ],
    "returns": ""
@@ -18001,7 +18003,8 @@
      "name": "items",
      "type": "ModelItem[]",
      "description": "The model items to reset.",
-     "default": "null"
+     "default": "null",
+     "multiInput": true
     },
     {
      "name": "resetAll",

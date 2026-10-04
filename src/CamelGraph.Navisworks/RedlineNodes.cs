@@ -41,8 +41,8 @@ public static class RedlineNodes
     public static SavedViewpoint AddText(
         object viewpoint,
         string text,
-        double x,
-        double y,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -75,10 +75,10 @@ public static class RedlineNodes
         object viewpoint,
         [NodeChoices("line", "arrow", "ellipse")]
         string shape,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -113,10 +113,10 @@ public static class RedlineNodes
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddLine(
         object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -142,10 +142,10 @@ public static class RedlineNodes
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddArrow(
         object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -171,10 +171,10 @@ public static class RedlineNodes
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddEllipse(
         object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -242,9 +242,9 @@ public static class RedlineNodes
     public static SavedViewpoint AddNumberTag(
         object viewpoint,
         int number,
-        double x,
-        double y,
-        double radius = 0.08,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y,
+        [NodeRange(0.01, 1, SoftMin = 0.01, SoftMax = 0.5, Step = 0.01)] double radius = 0.08,
         string comment = "",
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
