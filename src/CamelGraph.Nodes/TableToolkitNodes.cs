@@ -197,7 +197,7 @@ public static class TableToolkitNodes
     [NodeName("Table.Column")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("values")]
-    [NodeDescription("The cells of one column, top to bottom — wire it into List.Sum, List.CountBy, Search or a property writer.")]
+    [NodeDescription("The cells of one column, top to bottom — wire it into List.Sum, List.CountValues, Search or a property writer.")]
     [NodeSearchTags("column", "field", "values", "extract", "pick")]
     public static IList<object?> Column(CamelGraphTable table, string column)
     {

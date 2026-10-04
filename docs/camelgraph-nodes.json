@@ -22449,7 +22449,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.Column@CamelGraph.Nodes.CamelGraphTable,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "The cells of one column, top to bottom — wire it into List.Sum, List.CountBy, Search or a property writer.",
+   "description": "The cells of one column, top to bottom — wire it into List.Sum, List.CountValues, Search or a property writer.",
    "tags": [
     "column",
     "field",
