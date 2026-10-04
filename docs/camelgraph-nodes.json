@@ -19521,7 +19521,7 @@
    "id": "CamelGraph.Nodes.StringNodes.Concat@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Joins two strings into one.",
+   "description": "Joins two strings into one. A missing value counts as empty text, also a gap in a list (a column with blank cells keeps every row).",
    "tags": [
     "concatenate",
     "join",
@@ -19532,12 +19532,12 @@
     {
      "name": "a",
      "type": "string",
-     "description": "First string."
+     "description": "First string. A missing (null) value counts as empty text, also for the gaps of a list."
     },
     {
      "name": "b",
      "type": "string",
-     "description": "Second string."
+     "description": "Second string. A missing (null) value counts as empty text, also for the gaps of a list."
     }
    ],
    "outputs": [
@@ -19554,7 +19554,7 @@
    "id": "CamelGraph.Nodes.StringNodes.Contains@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Tests whether a string contains the given substring. Case-sensitive unless ignoreCase is on.",
+   "description": "Tests whether a string contains the given substring. Ignores case unless ignoreCase is switched off.",
    "tags": [
     "substring",
     "search",
@@ -19574,8 +19574,8 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to compare case-insensitively.",
-     "default": "false"
+     "description": "True (default) to compare case-insensitively.",
+     "default": "true"
     }
    ],
    "outputs": [
@@ -19630,7 +19630,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.Format@string,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces).",
+   "description": "Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces). It makes one text: all the wired values, and the items of a list wired to 'values', fill {0}, {1}, ... of that one text, and a missing value becomes empty text. For one text per row, wire the rows (a list of lists, for example Table.Rows) to 'values' and set its List Levels to @L2, or use String.Template with Table.ToDictionaries.",
    "tags": [
     "sprintf",
     "interpolate",
@@ -19648,7 +19648,7 @@
     {
      "name": "values",
      "type": "any[]",
-     "description": "The values for {0}, {1}, ... in the order they are wired.",
+     "description": "The values for {0}, {1}, ... in the order they are wired. For one text per row, wire a list of rows (a list of lists, for example from Table.Rows) and set this input's List Levels to @L2.",
      "multiInput": true
     }
    ],
@@ -19693,7 +19693,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.IndexOf@string,string,bool,int",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Returns the zero-based index of the first occurrence of a text (-1 when absent).",
+   "description": "Returns the zero-based index of the first occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.",
    "tags": [
     "find",
     "position",
@@ -19715,8 +19715,8 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
-     "default": "false"
+     "description": "True (default) to ignore upper/lower case.",
+     "default": "true"
     },
     {
      "name": "startIndex",
@@ -19739,7 +19739,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.IsBlank@string",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Tests whether a text is null, empty or only whitespace.",
+   "description": "Tests whether a text is null, empty or only whitespace. With a list it tests every item and a gap in the list counts as blank, so a column of cells gives one true or false per cell.",
    "tags": [
     "empty",
     "null",
@@ -19752,7 +19752,7 @@
     {
      "name": "text",
      "type": "string",
-     "description": "The text to test."
+     "description": "The text to test. A list is tested item by item, and a gap in the list (a blank spreadsheet cell) counts as blank."
     }
    ],
    "outputs": [
@@ -19769,7 +19769,7 @@
    "id": "CamelGraph.Nodes.StringNodes.Join@string,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Joins the elements of a list into a single string with a separator.",
+   "description": "Joins the elements of a list into a single string with a separator. A missing value becomes empty text (\"a,,c\"), as in String.Concat.",
    "tags": [
     "concatenate",
     "combine",
@@ -19784,7 +19784,7 @@
     {
      "name": "list",
      "type": "any[]",
-     "description": "The values to join; non-strings are formatted invariantly.",
+     "description": "The values to join; non-strings are formatted invariantly and a missing (null) value becomes empty text, as in String.Concat.",
      "multiInput": true
     }
    ],
@@ -19802,7 +19802,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.LastIndexOf@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Returns the zero-based index of the last occurrence of a text (-1 when absent).",
+   "description": "Returns the zero-based index of the last occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.",
    "tags": [
     "find",
     "position",
@@ -19825,8 +19825,8 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
-     "default": "false"
+     "description": "True (default) to ignore upper/lower case.",
+     "default": "true"
     }
    ],
    "outputs": [
@@ -20022,7 +20022,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.RegexIsMatch@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text).",
+   "description": "Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text). Case-sensitive unless ignoreCase is switched on (String.Contains and String.IndexOf ignore case by default).",
    "tags": [
     "regex",
     "regexp",
@@ -20046,7 +20046,7 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
+     "description": "True to ignore upper/lower case (off by default: regular expressions are case-sensitive).",
      "default": "false"
     }
    ],
@@ -20064,7 +20064,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.RegexMatch@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n.",
+   "description": "Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n. Case-sensitive unless ignoreCase is switched on.",
    "tags": [
     "regex",
     "regexp",
@@ -20089,7 +20089,7 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
+     "description": "True to ignore upper/lower case (off by default: regular expressions are case-sensitive).",
      "default": "false"
     }
    ],
@@ -20117,7 +20117,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.RegexMatches@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Returns the text of every match of a regular expression as a list (empty when nothing matches).",
+   "description": "Returns the text of every match of a regular expression as a list (empty when nothing matches). Case-sensitive unless ignoreCase is switched on.",
    "tags": [
     "regex",
     "regexp",
@@ -20141,7 +20141,7 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
+     "description": "True to ignore upper/lower case (off by default: regular expressions are case-sensitive).",
      "default": "false"
     }
    ],
@@ -20159,7 +20159,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.RegexReplace@string,string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups.",
+   "description": "Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups. Case-sensitive unless ignoreCase is switched on.",
    "tags": [
     "regex",
     "regexp",
@@ -20188,7 +20188,7 @@
     {
      "name": "ignoreCase",
      "type": "boolean",
-     "description": "True to ignore upper/lower case.",
+     "description": "True to ignore upper/lower case (off by default: regular expressions are case-sensitive).",
      "default": "false"
     }
    ],
@@ -20206,7 +20206,7 @@
    "id": "CamelGraph.Nodes.StringExtraNodes.RegexSplit@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Splits a text into a list of parts wherever a regular expression matches.",
+   "description": "Splits a text into a list of parts wherever a regular expression matches. Case-sensitive; start the pattern with (?i) to ignore case.",
    "tags": [
     "regex",
     "regexp",

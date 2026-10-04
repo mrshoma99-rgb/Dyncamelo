@@ -51,13 +51,13 @@ public static class StringNodes
     /// <summary>Tests whether a string contains a substring.</summary>
     /// <param name="text">The string to search in.</param>
     /// <param name="searchFor">The substring to look for.</param>
-    /// <param name="ignoreCase">True to compare case-insensitively.</param>
+    /// <param name="ignoreCase">True (default) to compare case-insensitively.</param>
     /// <returns>True when the substring occurs in the string.</returns>
     [NodeName("String.Contains")]
     [PortAlias("str", "text")]
-    [NodeDescription("Tests whether a string contains the given substring. Case-sensitive unless ignoreCase is on.")]
+    [NodeDescription("Tests whether a string contains the given substring. Ignores case unless ignoreCase is switched off.")]
     [NodeSearchTags("substring", "search", "find")]
-    public static bool Contains(string text, string searchFor, bool ignoreCase = false)
+    public static bool Contains(string text, string searchFor, bool ignoreCase = true)
     {
         if (text == null)
         {

@@ -27,11 +27,13 @@ public class StringNodesTests
     }
 
     [Fact]
-    public void Contains_IsOrdinal_WithOptionalIgnoreCase()
+    public void Contains_IgnoresCaseByDefault_AndIsOrdinalWhenSwitchedOff()
     {
+        // VAL-19: one house default (ignore case) for String.Contains, IndexOf, LastIndexOf, StartsWith and EndsWith.
         Assert.True(StringNodes.Contains("Hello World", "World"));
-        Assert.False(StringNodes.Contains("Hello World", "world"));
+        Assert.True(StringNodes.Contains("Hello World", "world"));
         Assert.True(StringNodes.Contains("Hello World", "world", ignoreCase: true));
+        Assert.False(StringNodes.Contains("Hello World", "world", ignoreCase: false));
     }
 
     [Fact]

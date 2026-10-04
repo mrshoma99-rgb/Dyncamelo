@@ -222,12 +222,12 @@ public static class StringExtraNodes
     /// <summary>Tests whether a regular expression matches anywhere in a text.</summary>
     /// <param name="text">The text to test.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "^[A-Z]{2}-\d+$".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>True when the pattern matches somewhere in the text.</returns>
     [NodeName("String.RegexIsMatch")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("isMatch")]
-    [NodeDescription("Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text).")]
+    [NodeDescription("Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text). Case-sensitive unless ignoreCase is switched on (String.Contains and String.IndexOf ignore case by default).")]
     [NodeSearchTags("regex", "regexp", "pattern", "match", "test", "validate", "wildcard")]
     public static bool RegexIsMatch(string text, string pattern, bool ignoreCase = false)
     {
@@ -243,12 +243,12 @@ public static class StringExtraNodes
     /// </summary>
     /// <param name="text">The text to search.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "(\d+)-(\w+)".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>Dictionary with "found", "match" and "groups".</returns>
     [NodeName("String.RegexMatch")]
     [MultiReturn("found", "match", "groups")]
     [PortKinds("boolean", "text", "text*")]
-    [NodeDescription("Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n.")]
+    [NodeDescription("Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n. Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "capture", "group", "extract", "parse", "find")]
     public static Dictionary<string, object> RegexMatch(string text, string pattern, bool ignoreCase = false)
     {
@@ -276,11 +276,11 @@ public static class StringExtraNodes
     /// <summary>Finds every non-overlapping match of a regular expression.</summary>
     /// <param name="text">The text to search.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "\d+".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>The text of every match, in order (empty when nothing matches).</returns>
     [NodeName("String.RegexMatches")]
     [return: NodeName("matches")]
-    [NodeDescription("Returns the text of every match of a regular expression as a list (empty when nothing matches).")]
+    [NodeDescription("Returns the text of every match of a regular expression as a list (empty when nothing matches). Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "findall", "extract", "all", "numbers")]
     public static IList<string> RegexMatches(string text, string pattern, bool ignoreCase = false)
     {
@@ -305,11 +305,11 @@ public static class StringExtraNodes
     /// <param name="text">The text to change.</param>
     /// <param name="pattern">The .NET regular expression to replace.</param>
     /// <param name="replacement">The replacement text; $1, $2, ... insert capture groups.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>The text with every match replaced.</returns>
     [NodeName("String.RegexReplace")]
     [return: NodeName("text")]
-    [NodeDescription("Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups.")]
+    [NodeDescription("Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups. Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "substitute", "rename", "clean", "sub")]
     public static string RegexReplace(string text, string pattern, string replacement, bool ignoreCase = false)
     {
@@ -327,7 +327,7 @@ public static class StringExtraNodes
     /// <returns>The parts between the matches.</returns>
     [NodeName("String.RegexSplit")]
     [return: NodeName("list")]
-    [NodeDescription("Splits a text into a list of parts wherever a regular expression matches.")]
+    [NodeDescription("Splits a text into a list of parts wherever a regular expression matches. Case-sensitive; start the pattern with (?i) to ignore case.")]
     [NodeSearchTags("regex", "regexp", "pattern", "tokenize", "divide", "delimiter", "separator")]
     public static IList<string> RegexSplit(string text, string pattern)
     {
@@ -367,20 +367,20 @@ public static class StringExtraNodes
     }
 
     /// <summary>
-    /// Finds the first occurrence of a text, starting at an index. Case-sensitive (ordinal) unless ignoreCase is on.
-    /// An empty search text is found at the start index.
+    /// Finds the first occurrence of a text, starting at an index. Ignores upper/lower case (ordinal comparison) unless
+    /// ignoreCase is switched off. An empty search text is found at the start index.
     /// </summary>
     /// <param name="text">The text to search in.</param>
     /// <param name="search">The text to look for.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True (default) to ignore upper/lower case.</param>
     /// <param name="startIndex">Zero-based index to start searching at (0 to the text's length).</param>
     /// <returns>The zero-based index of the first occurrence, or -1 when it is absent.</returns>
     [NodeName("String.IndexOf")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("index")]
-    [NodeDescription("Returns the zero-based index of the first occurrence of a text (-1 when absent).")]
+    [NodeDescription("Returns the zero-based index of the first occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.")]
     [NodeSearchTags("find", "position", "locate", "search", "first")]
-    public static int IndexOf(string text, string search, bool ignoreCase = false, int startIndex = 0)
+    public static int IndexOf(string text, string search, bool ignoreCase = true, int startIndex = 0)
     {
         RequireText("String.IndexOf", text);
         RequireSearch("String.IndexOf", search);
@@ -401,19 +401,19 @@ public static class StringExtraNodes
     }
 
     /// <summary>
-    /// Finds the last occurrence of a text. Case-sensitive (ordinal) unless ignoreCase is on. An empty search text
-    /// is found at the end of the text.
+    /// Finds the last occurrence of a text. Ignores upper/lower case (ordinal comparison) unless ignoreCase is switched
+    /// off. An empty search text is found at the end of the text.
     /// </summary>
     /// <param name="text">The text to search in.</param>
     /// <param name="search">The text to look for.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True (default) to ignore upper/lower case.</param>
     /// <returns>The zero-based index of the last occurrence, or -1 when it is absent.</returns>
     [NodeName("String.LastIndexOf")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("index")]
-    [NodeDescription("Returns the zero-based index of the last occurrence of a text (-1 when absent).")]
+    [NodeDescription("Returns the zero-based index of the last occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.")]
     [NodeSearchTags("find", "position", "locate", "search", "last", "extension")]
-    public static int LastIndexOf(string text, string search, bool ignoreCase = false)
+    public static int LastIndexOf(string text, string search, bool ignoreCase = true)
     {
         RequireText("String.LastIndexOf", text);
         RequireSearch("String.LastIndexOf", search);

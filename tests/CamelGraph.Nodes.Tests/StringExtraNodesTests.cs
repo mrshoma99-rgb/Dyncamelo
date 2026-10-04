@@ -458,10 +458,11 @@ public class StringExtraNodesTests
     }
 
     [Fact]
-    public void IndexOf_IsOrdinalWithOptionalIgnoreCase()
+    public void IndexOf_IgnoresCaseByDefault_AndIsOrdinalWhenSwitchedOff()
     {
-        Assert.Equal(-1, StringExtraNodes.IndexOf("HELLO", "l"));
+        Assert.Equal(2, StringExtraNodes.IndexOf("HELLO", "l"));
         Assert.Equal(2, StringExtraNodes.IndexOf("HELLO", "l", true));
+        Assert.Equal(-1, StringExtraNodes.IndexOf("HELLO", "l", false));
     }
 
     [Fact]
@@ -489,7 +490,8 @@ public class StringExtraNodesTests
         Assert.Equal(3, StringExtraNodes.LastIndexOf("a.b.c", "."));
         Assert.Equal(-1, StringExtraNodes.LastIndexOf("abc", "."));
         Assert.Equal(4, StringExtraNodes.LastIndexOf("a.b.C", "c", true));
-        Assert.Equal(-1, StringExtraNodes.LastIndexOf("a.b.C", "c"));
+        Assert.Equal(4, StringExtraNodes.LastIndexOf("a.b.C", "c"));
+        Assert.Equal(-1, StringExtraNodes.LastIndexOf("a.b.C", "c", false));
     }
 
     [Fact]
