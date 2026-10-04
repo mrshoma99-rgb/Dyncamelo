@@ -85,7 +85,7 @@ public sealed class CamelGraphTable
 
         throw new ArgumentException(
             nodeName + ": the table has no column named '" + column + "'. Columns: " +
-            (_headers.Length == 0 ? "(none)" : string.Join(", ", _headers)) + ".", "column");
+            (_headers.Length == 0 ? "(none)" : string.Join(", ", _headers)) + ".");
     }
 
     /// <summary>Like <see cref="IndexOf"/> but returns -1 when there is no such column.</summary>

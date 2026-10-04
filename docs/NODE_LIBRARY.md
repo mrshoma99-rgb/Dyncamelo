@@ -176,7 +176,7 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | List.RemoveItemAtIndex | List | list: List&lt;object&gt;, index: int | list: List&lt;object&gt; | Remove item(s) at index(es). | copy + RemoveAt | Implemented (v0.2) |
 | List.GroupByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | groups: List&lt;List&lt;object&gt;&gt;, uniqueKeys: List&lt;object&gt; | Group items by parallel key list (QTO by-system grouping). | LINQ GroupBy / [MultiReturn] | Implemented (v0.2) |
 | List.SortByKey | List | list: List&lt;object&gt;, keys: List&lt;object&gt; | sorted: List&lt;object&gt;, sortedKeys: List&lt;object&gt; | Sort items by parallel key list. | LINQ OrderBy / [MultiReturn] | Implemented (v0.2) |
-| Table.JoinByKey | List | rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt;, keys: List&lt;object&gt;, keyColumn: string | matchedRows: List&lt;List&lt;object&gt;&gt; (parallel to keys; null when unmatched), unmatchedKeys: List&lt;object&gt; | Join spreadsheet rows to a key list (element GUIDs / mark values) — the CSV/Excel→element link in one node. Keys compared as invariant text (42 matches "42"); first row wins on duplicate keys. | pure .NET dictionary join / [MultiReturn] | Implemented (v0.3) |
+| Table.JoinByKey (retired: use Table.Join and Table.Unmatched) | List | rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt;, keys: List&lt;object&gt;, keyColumn: string | matchedRows: List&lt;List&lt;object&gt;&gt; (parallel to keys; null when unmatched), unmatchedKeys: List&lt;object&gt; | Join spreadsheet rows to a key list (element GUIDs / mark values) — the CSV/Excel→element link in one node. Keys compared as invariant text (42 matches "42"); first row wins on duplicate keys. | pure .NET dictionary join / [MultiReturn] | Implemented (v0.3) |
 
 ## Dictionary
 
@@ -605,7 +605,7 @@ Two v0.3 workflows ship as **documented reference graphs** rather than nodes: **
 5. **Viewpoint batch generation** — names list → `Viewpoint.SaveCurrent` / `SavedViewpoint.Apply` loops; the v0.2 camera nodes aim views automatically.
 6. **Model QA audit** — `Properties.HasProperty` mask → `List.FilterByBoolMask` → count + `SelectionSet.Create("Missing <prop>")` + `Appearance.OverrideColor` red.
 7. **TimeLiner 4D linking (v0.2)** — `CSV.ReadFromFile → TimeLiner.AddTask → TimelinerTask.AttachSet` by selection-set name.
-8. **Custom properties / SmartProperties (v0.3)** — `Search.ByPropertyValue → String nodes → Properties.SetCustom` writes searchable, schedulable user tabs; `Excel.ReadFromFile → Table.JoinByKey → Properties.SetCustom` is the spreadsheet→model round trip.
+8. **Custom properties / SmartProperties (v0.3)** — `Search.ByPropertyValue → String nodes → Properties.SetCustom` writes searchable, schedulable user tabs; `Excel.ReadFromFile → Table.JoinByKey → Properties.SetCustom` is the spreadsheet→model round trip (today `Table.FromExcelFile → Table.Join`; `Table.JoinByKey` is retired and still runs).
 9. **Clash delta + BCF exchange (v0.3)** — weekly `Clash.RunAllTests → Clash.SnapshotToFile`; next week `Clash.CompareSnapshots` → new/resolved/persisting → `BCF.ExportIssues` into BIMcollab/Konekt/Revizto/ACC; `BCF.ImportIssues → ClashResult.SetStatus` closes the loop.
 10. **Batch model processing (v0.3)** — `Directory.GetFiles → Document.AppendFiles → Export.NWD`, headless via `camelgraph run`.
 
