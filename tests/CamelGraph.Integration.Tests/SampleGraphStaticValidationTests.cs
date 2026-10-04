@@ -236,7 +236,17 @@ public class SampleGraphStaticValidationTests
         }
 
         Assert.True(registry.TryGetDefinition(definitionId, out var definition), "definition '" + definitionId + "' is not registered.");
-        return definition!.Inputs.Select(i => i.HasDefault).ToList();
+        if (!string.Equals(definition!.Id, definitionId, StringComparison.Ordinal))
+        {
+            // Saved under an earlier id ([NodeAliases]): the file lists the ports of that earlier signature, so answer for those.
+            return ((JArray)node["InputPorts"]!).OfType<JObject>()
+                .Select(p => p.Value<string>("Name"))
+                .Select(name => definition.Inputs.Any(i => i.Name == name || i.Aliases.Contains(name))
+                    && definition.Inputs.First(i => i.Name == name || i.Aliases.Contains(name)).HasDefault)
+                .ToList();
+        }
+
+        return definition.Inputs.Select(i => i.HasDefault).ToList();
     }
 
     private static void ValidateZeroTouchNode(
@@ -275,7 +285,29 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 registry.TryGetDefinition(definitionId, out var definition),
                 label + ": definition id '" + definitionId + "' is not registered.");
-            Assert.Equal(definition!.Inputs.Select(i => i.Name), inputNames);
+            if (!string.Equals(definition!.Id, definitionId, StringComparison.Ordinal))
+            {
+                // The sample was saved under an earlier id of this node (a [NodeAliases] entry: its signature grew or changed
+                // since). The loader finds each saved wire and value by port name or earlier port name, so that is what is
+                // pinned here: every saved port still resolves to a port of the node as it is now.
+                foreach (var name in inputNames)
+                {
+                    Assert.True(
+                        definition.Inputs.Any(i => i.Name == name || i.Aliases.Contains(name)),
+                        label + ": saved input '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                }
+
+                foreach (var name in outputNames)
+                {
+                    Assert.True(
+                        definition.Outputs.Any(o => o.Name == name || o.Aliases.Contains(name)),
+                        label + ": saved output '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                }
+
+                return;
+            }
+
+            Assert.Equal(definition.Inputs.Select(i => i.Name), inputNames);
             Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
             for (int i = 0; i < inputPorts.Count; i++)
             {

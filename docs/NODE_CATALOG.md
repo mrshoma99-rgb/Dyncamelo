@@ -750,11 +750,11 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Number.Format` | number, decimals?, thousandsSeparator?, prefix?, suffix? | text | Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture) |
 | `String.Concat` | a, b | result | Joins two strings into one |
 | `String.Contains` | text, searchFor, ignoreCase? | result | Tests whether a string contains the given substring |
 | `String.EndsWith` | text, searchFor, ignoreCase? | result | Tests whether a string ends with the given suffix |
 | `String.Format` | format, values | text | Fills a .NET composite format such as "{0} is {1:0.00} m" with the wired values (invariant culture, "{{" and "}}" are literal braces) |
+| `String.FromNumber` | number, decimals?, thousandsSeparator?, prefix?, suffix? | text | Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture) |
 | `String.FromObject` | obj | result | Converts any value (including whole lists) to its display string |
 | `String.IndexOf` | text, search, ignoreCase?, startIndex? | index | Returns the zero-based index of the first occurrence of a text (-1 when absent) |
 | `String.IsBlank` | text | isBlank | Tests whether a text is null, empty or only whitespace |
@@ -780,7 +780,7 @@
 | `String.Substring` | text, startIndex, length? | result | Extracts part of a string from a start index (-1 length = to the end) |
 | `String.Template` | template, dictionary, onMissing? | text | Replaces {name} placeholders in a text with the values of a dictionary ("{{" and "}}" are literal braces) |
 | `String.ToLower` | text | result | Converts a string to lowercase |
-| `String.ToNumber` | text | result | Converts a numeric string (invariant culture, e.g |
+| `String.ToNumber` | text, decimalSeparator?, ignoreUnits? | result | Converts a numeric string to a number |
 | `String.ToTitleCase` | text | text | Capitalises the first letter of every word and lowercases the rest ("bim COORDINATION" becomes "Bim Coordination") |
 | `String.ToUpper` | text | result | Converts a string to uppercase |
 | `String.Trim` | text, chars? | result | Removes whitespace (or the given characters) from both ends of a string |

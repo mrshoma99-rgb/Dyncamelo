@@ -123,7 +123,7 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | String.Split | String | text: string, separator: string = ",", removeEmpty: bool = false, trim: bool = false | parts: List&lt;string&gt; | Split into a list; optionally drop empty parts and trim every part. | String.Split | MVP |
 | String.Replace | String | text: string, searchFor: string, replaceWith: string, ignoreCase: bool = false | text: string | Replace all occurrences (case-sensitive unless ignoreCase). | String.Replace | MVP |
 | String.Length | String | text: string | length: int | Character count. | String.Length | MVP |
-| String.ToNumber | String | text: string | number: double | Parse a number (invariant + current culture fallback); warns and returns null on failure. | Double.TryParse | MVP |
+| String.ToNumber | String | text: string, decimalSeparator: string = ".", ignoreUnits: bool = false | number: double | Parse a number (invariant; "," as decimal separator on request; ignoreUnits reads the first number of a text such as "12.5 mm"); warns and returns null on failure. | Double.TryParse | MVP |
 | String.FromObject | String | object: object | text: string | Convert any value to its display string (invariant). | Convert.ToString | MVP |
 | String.Join | String | list: List&lt;object&gt;, separator: string = ", " | text: string | Join list items into one string. | String.Join | Implemented (v0.1) |
 | String.StartsWith | String | text: string, searchFor: string, ignoreCase: bool = true | result: bool | Prefix test. | String.StartsWith | Implemented (v0.2) |

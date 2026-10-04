@@ -19461,62 +19461,6 @@
    "returns": ""
   },
   {
-   "name": "Number.Format",
-   "id": "CamelGraph.Nodes.StringExtraNodes.NumberFormat@double,int,bool,string,string",
-   "assembly": "CamelGraph.Nodes",
-   "category": "String",
-   "description": "Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture).",
-   "tags": [
-    "round",
-    "decimals",
-    "currency",
-    "unit",
-    "thousands",
-    "tostring",
-    "display",
-    "format"
-   ],
-   "inputs": [
-    {
-     "name": "number",
-     "type": "number",
-     "description": "The number to format."
-    },
-    {
-     "name": "decimals",
-     "type": "integer",
-     "description": "Digits after the decimal point, 0 to 15 (the number is rounded).",
-     "default": "2"
-    },
-    {
-     "name": "thousandsSeparator",
-     "type": "boolean",
-     "description": "True to group the digits in thousands with \",\".",
-     "default": "false"
-    },
-    {
-     "name": "prefix",
-     "type": "string",
-     "description": "Text placed before the number (and its sign), e.g. \"EUR \".",
-     "default": "\"\""
-    },
-    {
-     "name": "suffix",
-     "type": "string",
-     "description": "Text placed after the number, e.g. \" m2\".",
-     "default": "\"\""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "text",
-     "type": "string",
-     "description": "The formatted text."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "String.Concat",
    "id": "CamelGraph.Nodes.StringNodes.Concat@string,string",
    "assembly": "CamelGraph.Nodes",
@@ -19650,6 +19594,66 @@
      "type": "any[]",
      "description": "The values for {0}, {1}, ... in the order they are wired. For one text per row, wire a list of rows (a list of lists, for example from Table.Rows) and set this input's List Levels to @L2.",
      "multiInput": true
+    }
+   ],
+   "outputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The formatted text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "String.FromNumber",
+   "id": "CamelGraph.Nodes.StringExtraNodes.FromNumber@double,int,bool,string,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "String",
+   "description": "Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture). Formerly called Number.Format; String.ToNumber is the way back.",
+   "tags": [
+    "number.format",
+    "number format",
+    "format number",
+    "number to text",
+    "round",
+    "decimals",
+    "currency",
+    "unit",
+    "thousands",
+    "tostring",
+    "display",
+    "format"
+   ],
+   "inputs": [
+    {
+     "name": "number",
+     "type": "number",
+     "description": "The number to format."
+    },
+    {
+     "name": "decimals",
+     "type": "integer",
+     "description": "Digits after the decimal point, 0 to 15 (the number is rounded).",
+     "default": "2"
+    },
+    {
+     "name": "thousandsSeparator",
+     "type": "boolean",
+     "description": "True to group the digits in thousands with \",\".",
+     "default": "false"
+    },
+    {
+     "name": "prefix",
+     "type": "string",
+     "description": "Text placed before the number (and its sign), e.g. \"EUR \".",
+     "default": "\"\""
+    },
+    {
+     "name": "suffix",
+     "type": "string",
+     "description": "Text placed after the number, e.g. \" m2\".",
+     "default": "\"\""
     }
    ],
    "outputs": [
@@ -20608,20 +20612,35 @@
   },
   {
    "name": "String.ToNumber",
-   "id": "CamelGraph.Nodes.StringNodes.ToNumber@string",
+   "id": "CamelGraph.Nodes.StringNodes.ToNumber@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "String",
-   "description": "Converts a numeric string (invariant culture, e.g. \"3.14\") to a number.",
+   "description": "Converts a numeric string to a number. By default the whole text must be a plain number with a decimal point (\"3.14\", \"-2\", \"1.5e3\"). Set decimalSeparator to \",\" for a decimal comma (\"1,5\"). Switch ignoreUnits on to take the first number out of a text with a unit or a label (\"12.5 mm\" gives 12.5, \"approx. 1,234.5 m\" gives 1234.5; thousands separators are read only in this mode). A text without a number still fails; the row shows a warning.",
    "tags": [
     "parse",
     "convert",
-    "double"
+    "double",
+    "extract number",
+    "decimal comma",
+    "units"
    ],
    "inputs": [
     {
      "name": "text",
      "type": "string",
      "description": "The text to parse, e.g. \"3.14\"."
+    },
+    {
+     "name": "decimalSeparator",
+     "type": "string",
+     "description": "The decimal separator of the text: \".\" (default, \"3.14\") or \",\" (\"1,5\").",
+     "default": "\".\""
+    },
+    {
+     "name": "ignoreUnits",
+     "type": "boolean",
+     "description": "True to read the first number in the text and ignore the rest, so \"12.5 mm\" gives 12.5 (off by default: the whole text must be the number). Thousands separators (\"1,234.5 m\") are read only in this mode.",
+     "default": "false"
     }
    ],
    "outputs": [

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using CamelGraph.Core.Loader;
 using CamelGraph.Core.Types;
 
@@ -175,28 +176,113 @@ public static class StringNodes
     }
 
     /// <summary>
-    /// Parses a string as a number using the invariant culture (decimal point,
-    /// no thousands separators). Whitespace around the number is ignored.
+    /// Parses a string as a number. By default the text must be a plain invariant number (decimal point, no thousands
+    /// separators; whitespace around it is ignored). A decimal comma and the first number of a text with a unit are
+    /// opt-in.
     /// </summary>
     /// <param name="text">The text to parse, e.g. "3.14".</param>
+    /// <param name="decimalSeparator">The decimal separator of the text: "." (default, "3.14") or "," ("1,5").</param>
+    /// <param name="ignoreUnits">True to read the first number in the text and ignore the rest, so "12.5 mm" gives 12.5 (off by default: the whole text must be the number). Thousands separators ("1,234.5 m") are read only in this mode.</param>
     /// <returns>The parsed number.</returns>
     [NodeName("String.ToNumber")]
     [PortAlias("str", "text")]
-    [NodeDescription("Converts a numeric string (invariant culture, e.g. \"3.14\") to a number.")]
-    [NodeSearchTags("parse", "convert", "double")]
-    public static double ToNumber(string text)
+    [NodeAliases("CamelGraph.Nodes.StringNodes.ToNumber@string")]
+    [NodeDescription("Converts a numeric string to a number. By default the whole text must be a plain number with a decimal point (\"3.14\", \"-2\", \"1.5e3\"). " +
+        "Set decimalSeparator to \",\" for a decimal comma (\"1,5\"). Switch ignoreUnits on to take the first number out of a text with a unit or a label (\"12.5 mm\" gives 12.5, \"approx. 1,234.5 m\" gives 1234.5; " +
+        "thousands separators are read only in this mode). A text without a number still fails; the row shows a warning.")]
+    [NodeSearchTags("parse", "convert", "double", "extract number", "decimal comma", "units")]
+    public static double ToNumber(string text, [NodeChoices(".", ",")] string decimalSeparator = ".", bool ignoreUnits = false)
     {
         if (text == null)
         {
             throw new ArgumentNullException(nameof(text), "String.ToNumber requires a string.");
         }
 
-        if (double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        var comma = IsDecimalComma(decimalSeparator);
+        if (!comma && !ignoreUnits)
         {
-            return value;
+            if (double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            {
+                return value;
+            }
+
+            // This text is pinned by the Wiki scene graphs (tests/Shared/Wiki/SceneGraphs.cs) and shown in the wiki pictures.
+            throw new FormatException("Cannot convert '" + text + "' to a number. Expected an invariant-culture numeric string such as \"3.14\".");
         }
 
-        throw new FormatException("Cannot convert '" + text + "' to a number. Expected an invariant-culture numeric string such as \"3.14\".");
+        if (!ignoreUnits)
+        {
+            var trimmed = text.Trim();
+            if (StrictCommaNumber.IsMatch(trimmed) &&
+                double.TryParse(trimmed.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var commaValue))
+            {
+                return commaValue;
+            }
+
+            throw new FormatException(
+                "Cannot convert '" + text + "' to a number. With decimalSeparator \",\" the text must be a number with a decimal comma such as \"1,5\" " +
+                "(no decimal point, no thousands separators). To read the number out of a text with a unit (\"12,5 mm\") switch ignoreUnits on.");
+        }
+
+        var match = (comma ? FirstNumberComma : FirstNumberDot).Match(text);
+        if (!match.Success)
+        {
+            throw new FormatException("Cannot find a number in '" + text + "'. Text without digits cannot be converted; check the text or test it first (String.RegexIsMatch).");
+        }
+
+        var other = comma ? '.' : ',';
+        var after = match.Index + match.Length;
+        if (after + 1 < text.Length && text[after] == other && char.IsDigit(text[after + 1]))
+        {
+            throw new FormatException(
+                "Cannot tell what the number in '" + text + "' means: after '" + match.Value + "' the text goes on with '" + other + "' and a digit. " +
+                "Set decimalSeparator to \"" + other + "\" if that is the decimal separator of the text.");
+        }
+
+        var digits = comma ? match.Value.Replace(".", string.Empty).Replace(',', '.') : match.Value.Replace(",", string.Empty);
+        if (double.TryParse(digits, NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
+        {
+            return number;
+        }
+
+        throw new FormatException("Cannot convert '" + match.Value + "' (found in '" + text + "') to a number.");
+    }
+
+    // The first number in a text: an optional sign (only when nothing letter-like sits in front of it, so "A-12" is 12), digits with
+    // correct thousands grouping or plain digits, an optional fraction and an optional exponent. ".5" counts when no letter or digit
+    // is in front of the point ("Rev.2" is 2).
+    private static readonly Regex FirstNumberDot = new Regex(
+        @"(?:(?<![\p{L}\p{N}])[+-])?(?:\d{1,3}(?:,\d{3})+(?!\d)(?:\.\d+)?|\d+(?:\.\d+)?|(?<![\p{L}\p{N}])\.\d+)(?:[eE][+-]?\d+)?",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(2));
+
+    private static readonly Regex FirstNumberComma = new Regex(
+        @"(?:(?<![\p{L}\p{N}])[+-])?(?:\d{1,3}(?:\.\d{3})+(?!\d)(?:,\d+)?|\d+(?:,\d+)?|(?<![\p{L}\p{N}]),\d+)(?:[eE][+-]?\d+)?",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(2));
+
+    // A whole number written with a decimal comma: "1,5", "-2", ",5", "1,5e3".
+    private static readonly Regex StrictCommaNumber = new Regex(
+        @"^[+-]?(?:\d+(?:,\d*)?|,\d+)(?:[eE][+-]?\d+)?$",
+        RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(2));
+
+    private static bool IsDecimalComma(string? decimalSeparator)
+    {
+        var separator = decimalSeparator == null ? string.Empty : decimalSeparator.Trim();
+        if (separator.Length == 0 || separator == ".")
+        {
+            return false;
+        }
+
+        if (separator == ",")
+        {
+            return true;
+        }
+
+        throw new ArgumentException(
+            "String.ToNumber: decimalSeparator must be \".\" or \",\" (got '" + decimalSeparator + "'). Pick one from the list.",
+            nameof(decimalSeparator));
     }
 
     /// <summary>

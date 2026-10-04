@@ -189,11 +189,12 @@ public static class StringExtraNodes
     /// <param name="prefix">Text placed before the number (and its sign), e.g. "EUR ".</param>
     /// <param name="suffix">Text placed after the number, e.g. " m2".</param>
     /// <returns>The formatted text.</returns>
-    [NodeName("Number.Format")]
+    [NodeName("String.FromNumber")]
+    [NodeAliases("CamelGraph.Nodes.StringExtraNodes.NumberFormat@double,int,bool,string,string")]
     [return: NodeName("text")]
-    [NodeDescription("Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture).")]
-    [NodeSearchTags("round", "decimals", "currency", "unit", "thousands", "tostring", "display", "format")]
-    public static string NumberFormat(
+    [NodeDescription("Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture). Formerly called Number.Format; String.ToNumber is the way back.")]
+    [NodeSearchTags("number.format", "number format", "format number", "number to text", "round", "decimals", "currency", "unit", "thousands", "tostring", "display", "format")]
+    public static string FromNumber(
         double number,
         [NodeRange(0, 15)] int decimals = 2,
         bool thousandsSeparator = false,
@@ -204,7 +205,7 @@ public static class StringExtraNodes
         {
             throw new ArgumentOutOfRangeException(
                 nameof(decimals),
-                "Number.Format: decimals must be between 0 and 15 (got " + decimals.ToString(CultureInfo.InvariantCulture) + ").");
+                "String.FromNumber: decimals must be between 0 and 15 (got " + decimals.ToString(CultureInfo.InvariantCulture) + ").");
         }
 
         var text = number.ToString((thousandsSeparator ? "N" : "F") + decimals.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
