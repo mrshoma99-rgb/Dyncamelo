@@ -44,8 +44,8 @@ public static class ClashFilterNodes
     [return: NodeName("results")]
     public static List<ClashResult> FilterByItemProperty(
         IEnumerable<ClashResult> results,
-        string category,
-        string property,
+        [NodeTabChoice(NodeDataSource.Selection, IncludeAncestors = true)] string category,
+        [NodePropertyChoice(NodeDataSource.Selection, "category", IncludeAncestors = true)] string property,
         string value1,
         string value2 = "",
         [NodeChoices("contains", "equals", "starts with", "ends with")]
@@ -180,7 +180,7 @@ public static class ClashFilterNodes
         IEnumerable<ClashResult> results,
         double minDepth = 0.0,
         double maxDepth = double.PositiveInfinity,
-        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        [NodeChoicesFromEnum(typeof(Units), "document")]
         string units = "document",
         Document? document = null)
     {

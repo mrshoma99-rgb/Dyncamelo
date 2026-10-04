@@ -24,6 +24,17 @@ public class ClashAuditSourceTests
         return source.Substring(start, end - start + 7);
     }
 
+    /// <summary>The attributes of a node: from its [NodeName("...")] line to the signature of the method.</summary>
+    private static string Header(string file, string nodeName)
+    {
+        var source = Source(file);
+        var start = source.IndexOf("[NodeName(\"" + nodeName + "\")]", System.StringComparison.Ordinal);
+        Assert.True(start >= 0, nodeName + " not found in " + file);
+        var end = source.IndexOf("    public static", start, System.StringComparison.Ordinal);
+        Assert.True(end > start, "no method after " + nodeName);
+        return source.Substring(start, end - start);
+    }
+
     // ----------------------------------------------------------------------------------------------- NVC-01
 
     [Fact]
@@ -135,5 +146,97 @@ public class ClashAuditSourceTests
         var helper = Method(Source("Internal", "ClashHelpers.cs"), "internal static string AssigneeText(");
         Assert.Contains("#if NAV2026", helper);
         Assert.Contains("AssignedTo?.ToString()", helper);
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-14
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "ClashTest.Create")]
+    [InlineData("ClashNodes.cs", "ClashTest.Run")]
+    [InlineData("ClashNodes.cs", "Clash.RunAllTests")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsBySameItem")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByProximity")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByLevel")]
+    [InlineData("ClashNodes.cs", "ClashResult.SetStatus")]
+    [InlineData("ClashNodes.cs", "ClashResult.Assign")]
+    [InlineData("ClashNodes.cs", "ClashResult.SetDescription")]
+    [InlineData("ClashEditNodes.cs", "ClashTest.Rename")]
+    [InlineData("ClashEditNodes.cs", "ClashResult.Rename")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByStatus")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByGridIntersection")]
+    [InlineData("ClashTriageNodes.cs", "Clash.GroupResults")]
+    [InlineData("ClashTriageNodes.cs", "ClashResult.Focus")]
+    [InlineData("ClashTestMaintenanceNodes.cs", "ClashTest.Edit")]
+    [InlineData("ClashTestMaintenanceNodes.cs", "ClashTest.Delete")]
+    [InlineData("ClashTestMaintenanceNodes.cs", "ClashTest.Duplicate")]
+    [InlineData("ClashTestMaintenanceNodes.cs", "ClashTest.ClearResults")]
+    public void EveryClashNodeThatWritesToTheDocumentSaysSo(string file, string nodeName)
+    {
+        Assert.Contains("NodeEffects.ChangesModel", Header(file, nodeName));
+    }
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsBySameItem")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByProximity")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByLevel")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByStatus")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByGridIntersection")]
+    [InlineData("ClashTriageNodes.cs", "Clash.GroupResults")]
+    public void TheGroupingNodesAreModifyNodesSoTheScriptPlayerListsThem(string file, string nodeName)
+    {
+        // Without the attribute the loader guesses Info from the name "GroupResults...".
+        Assert.Contains("NodeFunction.Modify", Header(file, nodeName));
+    }
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "ClashResult.SaveImage")]
+    [InlineData("ClashDeltaNodes.cs", "Clash.SnapshotToFile")]
+    public void TheClashFileWritersSayTheyWriteAFileAndPickASaveDialog(string file, string nodeName)
+    {
+        var source = Source(file);
+        Assert.Contains("NodeEffects.WritesFiles", Header(file, nodeName));
+        Assert.Contains("[NodePath(NodePathMode.Save", source);
+        Assert.Contains("PathResolver.Resolve(filePath)", source);
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-12
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "Clash.Tests")]
+    [InlineData("ClashNodes.cs", "ClashTest.ByName")]
+    [InlineData("ClashTriageNodes.cs", "Clash.AllGroups")]
+    [InlineData("ClashTriageNodes.cs", "ClashGroup.ByName")]
+    [InlineData("ClashTriageNodes.cs", "ClashTest.Groups")]
+    public void TheNodesThatHandOutLiveClashWrappersRunOnEveryRun(string file, string nodeName)
+    {
+        // The engine keeps a clean node's output; a regroup or replace disposes the wrappers inside it.
+        Assert.Contains("[LiveState]", Header(file, nodeName));
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-31 (units list), NVC-33, NVC-25
+
+    [Fact]
+    public void TheDepthFilterOffersEveryNavisworksUnitNotAShortenedList()
+    {
+        var body = Method(Source("ClashFilterNodes.cs"), "public static List<ClashResult> FilterByDepth(");
+
+        Assert.Contains("[NodeChoicesFromEnum(typeof(Units), \"document\")]", body);
+        Assert.DoesNotContain("\"Meters\", \"Millimeters\"", body);
+    }
+
+    [Fact]
+    public void ThePropertyFilterOffersTheTabsAndPropertiesOfTheSelection()
+    {
+        var body = Method(Source("ClashFilterNodes.cs"), "public static List<ClashResult> FilterByItemProperty(");
+
+        Assert.Contains("[NodeTabChoice(NodeDataSource.Selection, IncludeAncestors = true)] string category", body);
+        Assert.Contains("[NodePropertyChoice(NodeDataSource.Selection, \"category\", IncludeAncestors = true)] string property", body);
+    }
+
+    [Fact]
+    public void TheStatusNodesNoLongerPointAtTheRetiredResultsByStatus()
+    {
+        var header = Header("ClashTriageNodes.cs", "Clash.Status") + Header("ClashTriageNodes.cs", "Clash.Statuses");
+        Assert.DoesNotContain("ResultsByStatus", header);
     }
 }

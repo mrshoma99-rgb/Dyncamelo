@@ -29,6 +29,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The edited stored test.</returns>
     [NodeName("ClashTest.Edit")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; " +
@@ -140,6 +141,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the test was removed; false when it was not in the document.</returns>
     [NodeName("ClashTest.Delete")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Deletes a clash test and all of its results from the document. Returns false (and changes nothing) when the test is " +
@@ -194,6 +196,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The new stored test, placed in the same folder as the original.</returns>
     [NodeName("ClashTest.Duplicate")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Duplicates a clash test — type, tolerance, rules and both selections — as a new test named \"<name> copy\" (or newName) " +
@@ -253,6 +256,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored test, now without results.</returns>
     [NodeName("ClashTest.ClearResults")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Removes every result (and result group) of a clash test and leaves the test and its settings in place — " +

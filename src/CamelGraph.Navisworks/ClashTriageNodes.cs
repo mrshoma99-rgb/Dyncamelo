@@ -28,6 +28,8 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The test, the stored group, and how many results were added, moved and skipped.</returns>
     [NodeName("Clash.GroupResults")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription(
         "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping " +
@@ -151,6 +153,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The group, the results inside it, the group's own status, and the result count.</returns>
     [NodeName("ClashGroup.ByName")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
@@ -205,6 +208,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>One flat list of every group, with each group's name, its test's name and its result count (index-aligned).</returns>
     [NodeName("Clash.AllGroups")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
@@ -304,6 +308,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The groups with their names, statuses and result counts, index-aligned.</returns>
     [NodeName("ClashTest.Groups")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one. Wire a test, its name, or a list of them: with a list the node runs once per test and every output is one list per test (List.Flatten joins them).")]
@@ -447,7 +452,7 @@ public static class ClashTriageNodes
     [NodeName("Clash.Status")]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
-    [NodeDescription("A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.")]
+    [NodeDescription("A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus or Clash.FilterByStatus instead of typing the text.")]
     [NodeSearchTags("clash", "status", "dropdown", "choice", "new", "active", "reviewed", "approved", "resolved")]
     [return: NodeName("status")]
     public static string Status(
@@ -468,8 +473,8 @@ public static class ClashTriageNodes
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription(
-        "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and " +
-        "ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. " +
+        "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus: " +
+        "switch on New and Active to work everything not yet reviewed. " +
         "Outputs comma-separated text (\"New,Active\"), which every status input accepts.")]
     [NodeSearchTags("clash", "status", "statuses", "multiple", "select", "toggle", "new", "active", "reviewed", "approved", "resolved")]
     [return: NodeName("statuses")]
@@ -524,6 +529,7 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The clashing model items (pass-through for chaining, e.g. into Flow.Then or a viewpoint save).</returns>
     [NodeName("ClashResult.Focus")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription(
         "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides " +

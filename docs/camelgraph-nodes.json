@@ -12507,7 +12507,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Status@string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.",
+   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus or Clash.FilterByStatus instead of typing the text.",
    "tags": [
     "clash",
     "status",
@@ -12541,7 +12541,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Statuses@bool,bool,bool,bool,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
+   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
    "tags": [
     "clash",
     "status",

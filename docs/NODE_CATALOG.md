@@ -868,7 +868,6 @@ These still load and run in saved graphs, but are no longer offered in the libra
 
 | Retired node | Use instead |
 |---|---|
-| `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
 | `List.Join` | List.Merge |

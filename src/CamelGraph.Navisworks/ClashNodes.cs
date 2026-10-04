@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Spatial;
@@ -16,6 +17,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Every clash test, including those nested in folders.</returns>
     [NodeName("Clash.Tests")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("All Clash Detective tests in a document, including those inside folders.")]
     [NodeSearchTags("clash", "tests", "detective", "all")]
@@ -312,6 +314,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored clash test.</returns>
     [NodeName("ClashTest.ByName")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Finds a clash test by its display name (searches folders too).")]
     [NodeSearchTags("clash", "test", "byname", "find")]
@@ -339,6 +342,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored clash test, ready for ClashTest.Run.</returns>
     [NodeName("ClashTest.Create")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.")]
     [NodeSearchTags("clash", "test", "create", "new", "setup", "matrix")]
@@ -401,6 +405,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The test (pass-through) and its result count after the run.</returns>
     [NodeName("ClashTest.Run")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Runs one clash test now and reports the result count.")]
     [NodeSearchTags("clash", "test", "run", "execute", "detect")]
@@ -424,6 +429,7 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>All tests after the run.</returns>
     [NodeName("Clash.RunAllTests")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeDescription("Runs every Clash Detective test in the document — the weekly coordination re-run in one node.")]
     [NodeSearchTags("clash", "run", "all", "tests", "batch")]
@@ -585,22 +591,25 @@ public static class ClashNodes
     /// <returns>The written file path. Lace over result lists for a snapshot folder.</returns>
     [NodeName("ClashResult.SaveImage")]
     [NodeCategory("Navisworks.Clash.Results")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeDescription("Renders a clash snapshot (scene plus clash highlight) to a .png/.jpg/.bmp file — the picture half of every clash report.")]
     [NodeSearchTags("clash", "result", "image", "snapshot", "screenshot", "report")]
     [return: NodeName("filePath")]
     public static string SaveImage(
         ClashResult result,
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "Pictures (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp")] string filePath,
         [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int width = 1280,
         [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int height = 720,
         Document? document = null)
     {
         var clashResult = ClashHelpers.RequireResult(result);
-        if (string.IsNullOrEmpty(filePath))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        // A relative path means next to the graph; quotes pasted from Explorer are dropped.
+        filePath = PathResolver.Resolve(filePath);
         if (width <= 0 || height <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width), "Image width and height must be positive.");
@@ -631,6 +640,8 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsBySameItem")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.")]
     [NodeSearchTags("clash", "group", "same", "item", "element", "triage")]
@@ -650,6 +661,8 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByProximity")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.")]
     [NodeSearchTags("clash", "group", "proximity", "cluster", "radius", "triage")]
@@ -675,6 +688,8 @@ public static class ClashNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByLevel")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.")]
     [NodeSearchTags("clash", "group", "level", "floor", "storey", "elevation", "triage")]

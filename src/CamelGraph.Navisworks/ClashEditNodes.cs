@@ -43,6 +43,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over results + String nodes for Smart-Results-style batch naming (e.g. "Pipe vs Duct L02-B3").</returns>
     [NodeName("ClashResult.Rename")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Renames a clash result or result group — with lacing and String nodes this is batch renaming (\"Clash1\" → \"Pipe vs Duct L02-B3\").")]
     [NodeSearchTags("clash", "result", "rename", "name", "smart", "batch")]
@@ -76,6 +77,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over result lists for review notes in bulk.</returns>
     [NodeName("ClashResult.AddComment")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDeprecated("SavedItem.AddComment")]
     [NodeDescription("Appends a comment to a clash result or group — review notes in bulk, and the sync-back half of BCF round trips.")]
     [NodeSearchTags("clash", "result", "comment", "add", "note", "review", "bcf")]
@@ -151,6 +153,8 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByStatus")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.")]
     [NodeSearchTags("clash", "group", "status", "triage", "bucket")]
@@ -167,6 +171,8 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByGridIntersection")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription("Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).")]
     [NodeSearchTags("clash", "group", "grid", "intersection", "level", "location", "triage")]

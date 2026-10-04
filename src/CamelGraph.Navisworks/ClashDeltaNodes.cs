@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -23,20 +24,23 @@ public static class ClashDeltaNodes
     /// <returns>The written path and the number of results captured.</returns>
     [NodeName("Clash.SnapshotToFile")]
     [NodeCategory("Navisworks.Clash.Report")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeDescription("Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.")]
     [NodeSearchTags("clash", "snapshot", "save", "history", "delta", "baseline", "json")]
     [MultiReturn("filePath", "resultCount")]
     [PortKinds("file", "integer")]
     public static Dictionary<string, object?> SnapshotToFile(
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "Clash snapshots (*.json)|*.json")] string filePath,
         IEnumerable<ClashTest>? tests = null,
         Document? document = null)
     {
-        if (string.IsNullOrEmpty(filePath))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        // A relative path means next to the graph; quotes pasted from Explorer are dropped.
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
@@ -112,8 +116,12 @@ public static class ClashDeltaNodes
     [NodeSearchTags("clash", "compare", "delta", "diff", "new", "resolved", "persisting", "report")]
     [MultiReturn("newResults", "resolved", "persisting", "counts")]
     [PortKinds("data*", "data*", "data*", "data")]
-    public static Dictionary<string, object?> CompareSnapshots(string oldPath, string newPath)
+    public static Dictionary<string, object?> CompareSnapshots(
+        [NodePath(NodePathMode.Open, Filter = "Clash snapshots (*.json)|*.json")] string oldPath,
+        [NodePath(NodePathMode.Open, Filter = "Clash snapshots (*.json)|*.json")] string newPath)
     {
+        oldPath = PathResolver.Resolve(oldPath);
+        newPath = PathResolver.Resolve(newPath);
         var oldRoot = ClashSnapshotFile.Read(oldPath);
         var newRoot = ClashSnapshotFile.Read(newPath);
 
