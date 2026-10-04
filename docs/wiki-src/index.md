@@ -1,3 +1,8 @@
+---
+title: CamelGraph (previously Dyncamelo) for Navisworks
+description: CamelGraph, previously called Dyncamelo, brings Dynamo-style visual programming to Autodesk Navisworks 2024, 2025 and 2026. Install it, build a first script and look up every node.
+---
+
 # CamelGraph for Navisworks
 
 *Previously called **Dyncamelo**: the same program, with the same files and the same free personal-use copy. Version 0.48 still shows the old name on screen; the next release uses the new one.*
