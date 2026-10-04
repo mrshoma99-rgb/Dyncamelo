@@ -157,7 +157,29 @@ You do **not** write loops. Declare the rank you actually need and the engine's 
 The contract (see [ARCHITECTURE.md §9](ARCHITECTURE.md#9-error-handling-philosophy)):
 
 - **Throw for real failures.** Any exception is caught by the engine and shown as that node's `Error` state with your message. Throw `ArgumentException` and friends with messages an end user can act on ("Bar mark must look like '16-B-250', got 'x'"). The run continues; Navisworks never crashes.
-- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value; `CamelGraph.Core` provides a warning-reporting mechanism for zero-touch nodes so the node shows a yellow `Warning` badge instead of a hard error — see the `CamelGraph.Core` XML documentation for the exact API. Under replication, warnings aggregate rather than spam.
+- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value and call `NodeWarnings.Add("…")` (namespace `CamelGraph.Core.Execution`) so the node shows the amber `Warning` badge with your sentence instead of a hard error. The node still delivers its result to the nodes after it.
+  - Call it from inside the node method (or any helper it calls); the engine collects the messages **per call** of your method. The same text reported several times in one call is shown once with a count, and at most five different texts are listed.
+  - Under replication the messages of all calls are summarised in one line, `3 of 40 calls: <first message>`, so a thousand bad elements cannot flood the badge.
+  - Outside a run (a unit test that calls your method directly) `NodeWarnings.Add` does nothing and never throws, so a node stays testable on its own.
+  - `NodeWarnings.IsLaced` is true while the call that is running is one of several the engine makes for one run of the node (an input held a list the node is mapped over). A node that must change the model once per intent can refuse a list in a scalar input with it (`Document.Open` throws "opens one file" instead of opening each path in turn and replacing the contents every time); a node whose edits add up can warn that they will.
+  - `NodeWarnings.WarnIfNotFinite(value, "The result")` is a one-line check for a node whose arithmetic can quietly produce `NaN` or `Infinity`: it reports "The result is not a finite number (NaN)." and returns true when it did.
+  - Write the message for the person at the keyboard: what was wrong and what the node did about it ("2 of 10 values were not numbers and were skipped"), not an exception dump.
+
+```csharp
+using CamelGraph.Core.Execution;
+
+public static double SafeRatio(double part, double total)
+{
+    if (total == 0)
+    {
+        NodeWarnings.Add("The total is 0, so the ratio is 0.");
+        return 0;
+    }
+
+    return part / total;
+}
+```
+- **Long jobs: checkpoint between the steps.** The engine runs on the host's UI thread, so a node that works through many steps in one call (a batch of viewpoints, a long wait) would freeze the window and could not be stopped. Call `EvaluationContext.Current?.Checkpoint()` (namespace `CamelGraph.Core.Execution`) before each step: it lets the host repaint and poll for Stop, and throws `OperationCanceledException` when the user stopped the run. Let that exception through (do not catch it as a failure of the step); the node keeps its previous outputs and stays dirty, so the next run starts it again. `EvaluationContext.Current` is the context of the run that is calling your method, and `null` outside a run (a unit test), so the call is safe everywhere. `EvaluationContext.Current.CancellationToken` is the token itself, for code that wants to pass it on.
 - **Never** show message boxes, write to the console, or swallow exceptions silently from library nodes.
 
 ## 6. Navisworks node packs
@@ -184,7 +206,7 @@ Rules for Navisworks nodes (the built-in library follows the same ones):
 1. **Threading is solved for you** — nodes execute on the Navisworks main thread by construction ([plan §7](IMPLEMENTATION_PLAN.md#7-threading-model)). Do not spawn threads or use `Task.Run`/`async` inside a node.
 2. Emit and accept **flat `List<ModelItem>`** so your nodes compose with search, sets, clash, and appearance nodes — it is the lingua franca of the Navisworks library.
 3. Take a `Document` parameter (it defaults to the active document when unconnected) rather than reading `Application.ActiveDocument` mid-method — it keeps nodes testable and multi-doc-ready.
-4. Mutate the document only through the documented `Document*` edit APIs (`DocumentClashTests`, `DocumentTimeliner`, `Document.Models.Override...`) so the Navisworks UI stays in sync and the host transaction scoping gives users one undo step per run.
+4. Mutate the document only through the documented `Document*` edit APIs (`DocumentClashTests`, `DocumentTimeliner`, `Document.Models.Override...`) so the Navisworks UI stays in sync. Do not promise users one undo step per run: the node host opens no transaction around a run, so Navisworks records one step per modifying call where it records one at all (a node mapped over a list makes one call per element). If your node makes several edits that belong together, open a transaction around them yourself, as the clash nodes do (`doc.BeginTransaction`).
 5. Convert at the boundary: accept/return `CamelGraph.Core` geometry (`Point`, `BoundingBox`, `Color`) instead of `Point3D`/`BoundingBox3D`/`Api.Color`, so downstream pure nodes can consume your outputs.
 
 ## 7. Custom interactive nodes (NodeModel + WPF view)
@@ -231,6 +253,8 @@ Two halves, strictly separated:
 
 Keep custom UI minimal (a slider, a text box, a swatch). Anything heavier belongs in a dialog opened from the node, not on the canvas.
 
+Give the node search words, as `[NodeSearchTags]` does for a zero-touch method, by overriding `SearchTags`: `public override IReadOnlyList<string> SearchTags { get; } = new[] { "rebar", "bar", "diameter" };`. The library and the quick search match them besides the name, folder and description, so people find the node by what they call it (the built-in Choice node answers to `dropdown`, `select` and `pick`; Watch to `preview`, `inspect` and `debug`). A test fails for a `NodeModel` in this repository without them.
+
 ## 8. Conventions checklist
 
 Before publishing a pack:
@@ -257,24 +281,64 @@ The editor builds a node's rows from your method signature, so most nodes need n
 | `double width = 200` | A draggable number field with the default remembered; a dot marks it when changed. |
 | `[NodeRange(0, 100, SoftMin = 0, SoftMax = 10, Step = 0.5, Unit = "mm")] double gap` | The field clamps to 0–100, its drag range is 0–10, it steps by 0.5 and prints `mm` after the value. |
 | `[NodeChoices("Model", "Object", "Face")] string level` | A dropdown instead of a free text box — or a segmented switcher when there are two or three short values (24 characters in all). |
-| `[NodeTabChoice("item")] string categoryName` and `[NodePropertyChoice("item", "categoryName")] string propertyName` | The text box stays (typing always works) and gets a small magnifier button. Pressed, it lists the property tabs — or the properties of the tab named by `categoryName` — of the element carried by the node's `item` input, in a drop-down. It reads only that element (a picked one, or what the wire delivered in the last run), only when pressed, and never searches the model; add `IncludeAncestors = true` when the node also looks at the element's parents. A node that searches the whole model has no element input; pass `NodeDataSource.Selection` as the source (`[NodeTabChoice(NodeDataSource.Selection)]`) and the button lists what the elements selected in the host right now carry. Only on `string` parameters; the host supplies the reader through `ModelPropertyHost.Current` (CamelGraph does for Navisworks). |
-| `[NodePanel("Advanced")] double tolerance = 0.01` | The input sits in a foldable *Advanced* panel (`DefaultOpen = true` starts it expanded). |
+| `[NodeTabChoice("item")] string categoryName` and `[NodePropertyChoice("item", "categoryName")] string propertyName` | The text box stays (typing always works) and gets a small magnifier button. Pressed, it lists the property tabs — or the properties of the tab named by `categoryName` — of the element carried by the node's `item` input, in a drop-down. It reads only that element (a picked one, or what the wire delivered in the last run), only when pressed, and never searches the model; add `IncludeAncestors = true` when the node also looks at the element's parents, and `UserDefinedOnly = true` on a tab input when the node can only change the tabs a person added (the button then lists those and not the tabs that come from the model's source files). A node that searches the whole model has no element input; pass `NodeDataSource.Selection` as the source (`[NodeTabChoice(NodeDataSource.Selection)]`) and the button lists what the elements selected in the host right now carry. Only on `string` parameters; the host supplies the reader through `ModelPropertyHost.Current` (CamelGraph does for Navisworks). |
+| `[NodePanel("Advanced")] double tolerance = 0.01` | The input sits in a foldable *Advanced* panel (`DefaultOpen = true` starts it expanded). All inputs with the same panel name share one header, which starts collapsed and says "(2 set)" when values typed into it differ from the defaults. A collapsed panel only hides the rows: a typed value still reaches the node, and a wired input keeps its socket. Which panels the user opened is saved with the graph. |
 | `[MultiInput] IEnumerable<ModelItem> items` (any list-typed parameter) | A **multi-input** pill: any number of wires connect to it. One wire arrives untouched — so adding the attribute to an existing parameter never changes a saved graph — and two or more arrive combined into one list, in the order the wires were made (list-valued wires contribute their elements, other values themselves, nulls nothing). Ignored on parameters that are not list-typed. |
 | `[PortKinds("viewpoint*")]` on an `object` parameter, or `[PortKinds("text*", "integer")]` on a `[MultiReturn]` method | The socket takes the colour and shape of that kind: a family name (`number`, `integer`, `boolean`, `text`, `datetime`, `colour`, `geometry`, `item`, `selection`, `viewpoint`, `clash`, `document`, `data`, `file`, `action`), then `*` for a list or `**` for a list of lists. |
 | `ModelItem`, `List<ModelItem>` or `ModelItemCollection` parameter | A **model-element picker**: *Use selection* takes the current Navisworks selection, clicking the value re-selects it, ✕ clears it. |
 | `bool`, `Color`, `DateTime`, enums | A checkbox, a colour swatch, a text field holding an ISO date, and a dropdown (or segmented switcher) of the enum's names. |
-| a `string` parameter whose name ends in `path`, `file`, `filename`, `folder` or `directory` | A file field with a `…` button; names ending in `folder`, `directory` or `dir` open a folder chooser instead. |
+| `[NodePath(NodePathMode.Save, Filter = "Excel workbooks (*.xlsx)\|*.xlsx")] string path` | A file field whose `…` button opens the dialog you name: `Open` (the file must exist; a file the node reads), `Save` (a **save** dialog, a file that does not exist yet can be chosen; a file the node writes or creates) or `Folder` (a folder chooser). `Filter` is a Windows file dialog filter (`"Text (*.txt)\|*.txt\|All files (*.*)\|*.*"`); a save dialog adds the first extension when the user types a name without one. Only on `string` parameters. **Put it on every path parameter of a file node**: it also gives the button to a parameter whose name does not look like a path. |
+| a `string` parameter whose name ends in `path`, `file`, `filename`, `folder`, `directory` or `dir`, or is `executable` (or `source` / `destination` on a `File.*`, `Directory.*` or `Zip.*` node), with no `[NodePath]` | A file field with a `…` button. The dialog is guessed: names ending in `folder`, `directory` or `dir` (and the `path` of a `Directory.*` node) open a folder chooser; a name that says output, save, export, target or destination, or a node whose operation starts with Write, Save, Export, Append, Snapshot or Create (or reads `To…File`, or is `Export.*`), opens a save dialog; everything else an open dialog. A string that merely *sounds* like a path but is not one on disk (a viewpoint folder name, say) takes `[PortKinds("text")]` to lose the button. |
 
 Guidelines:
 
 - Give every number a `[NodeRange]` when a sensible range exists — it turns a blind text box into a slider-like field and stops absurd values.
 - Prefer `[NodeChoices]` to documenting "one of A, B, C" in the description.
 - A node that takes an element plus the *name* of one of its tabs or properties should mark those parameters with `[NodeTabChoice]` / `[NodePropertyChoice]`, pointing at the element input; a node that searches the whole model should not (there is no element to read).
+- Mark every file or folder parameter with `[NodePath]` instead of leaning on its name: a writer that opens an *Open* dialog cannot be pointed at a file that does not exist yet. A **File Path** input node wired into a writer opens a save dialog by itself.
 - Keep the *main* inputs unpaneled and move rare options into one `[NodePanel("Advanced")]`; the node stays short and the panel is one click away.
 - Use `[PortKinds]` whenever you return `object` from a `[MultiReturn]` method, so the wires downstream are coloured correctly and the editor can filter the node search when a wire is dropped on the canvas.
 - Mark a list parameter `[MultiInput]` when a caller would reasonably want to feed it from several places — "these items, and those, and the current selection". Do not use it on a list whose *nesting* matters (a list of lists that should replicate the node once per sublist): with several wires the outer level is concatenated, so each wire's sublists merge into one list of sublists.
 - In a hand-written `NodeModel`, declare the port with `AddMultiInput(name, typeof(IList<object>))` in the constructor.
 - Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).
+
+### Nodes that read or write files: resolve the path
+
+A node that opens, writes, lists, copies or deletes a file passes the path it is given through `PathResolver.Resolve` (namespace `CamelGraph.Core.Files`) before it touches the disk:
+
+```csharp
+using CamelGraph.Core.Files;
+
+public static string ReadAll([NodePath(NodePathMode.Open)] string path)
+    => System.IO.File.ReadAllText(PathResolver.Resolve(path));
+```
+
+`Resolve` removes the spaces and quotes around a path pasted from Explorer's "Copy as path", and turns a **relative** path into one next to the graph: the host sets `GraphContext.Folder` before it runs a graph (the editor: the folder of the open graph file, or `Documents\CamelGraph` for a graph that has not been saved; the Script Player and `CamelGraph.Cli`: the folder of the script file). Without a host folder it falls back to the process's current directory, which inside Navisworks is the program folder, so never rely on that. A blank path comes back as it is and `Resolve` never throws, so the node reports a missing path in its own words. A host that runs graphs itself wraps the run in `using (GraphContext.Use(GraphContext.FolderFor(graphFilePath))) { ... }`, which puts the previous folder back afterwards. Also declare what the node does to the disk with `[NodeEffects(NodeEffects.WritesFiles)]` (it creates, replaces or appends to a file) or `ChangesFiles` (it deletes, moves or copies over files), and `ChangesModel` for a node that edits the open Navisworks model: the editor and the Script Player list such nodes before they run a graph that came from a file.
+
+### Attributes that change how a node runs
+
+Some attributes say nothing about how the node looks; they tell the engine how to treat a port or the whole node. They are advisory in the same sense as the ones above: none of them changes the definition id, so adding one to a shipped node never breaks a saved graph.
+
+- **`[AcceptsNull]` on a parameter** — by default a `null` element of a list the node is mapped over never reaches the node: that position gets a `null` result and the node shows one warning ("1 of 3 laced calls received a null element"). Mark the parameter when the node's job is to answer the empty case itself — a test for "is this blank?", a join that treats a missing cell as empty text. The null is then passed to the method and its answer is used. Only the marked parameter changes; a single call with a null, and every other parameter, behave as before. The parameter must be able to hold null (a reference or nullable type): on a plain `double` the engine still says "Null value passed to input".
+
+```csharp
+// ["a", null, ""] gives [false, true, true]; without [AcceptsNull] it gave [false, null, true] plus a warning.
+public static bool IsBlank([AcceptsNull] string text) => string.IsNullOrWhiteSpace(text);
+```
+
+- **`[ScalarInput]` on an `object` parameter** — an `object` port means "anything", so a list wired to it arrives whole and the node runs once. When the parameter semantically takes **one thing** (a name, a point, a vector, a viewpoint, a value to compare), mark it: the port then counts as rank 0, like a `double`, and a list maps the node over its elements (lacing), so "batch it by wiring a list" is true. Nested lists map level by level. A node that really wants the whole list should not use it, and the port's *List Levels* setting can still hand a whole list over. It is ignored on parameters that are not declared `object`. The socket is drawn as a single item.
+
+```csharp
+// A list of names wired to 'name' renames once per name; a single name still works.
+public static object Rename(object item, [ScalarInput] object name) { /* ... */ }
+```
+
+- **`[LiveState]` on a method** — the engine only runs nodes whose inputs changed and serves the stored output of the rest. A node that reads live host state (the current selection, the open document, the list of selection sets) has no input that changes when that state does, so without help it shows the state of its first run for ever. Mark it and the engine runs it on every run. The nodes wired after it run again only when what it produced is different from the previous run (lists are compared item by item), so a second **Run** with the same selection does not repeat the edits further down. A node group with such a node inside runs on every run too. Auto-run is not set off by it (nothing in the graph was edited), and a frozen or muted node is left alone.
+
+```csharp
+[LiveState]
+public static List<ModelItem> Current() => /* read the host's selection now */;
+```
 
 ## 10. Changing a node that is already shipped
 

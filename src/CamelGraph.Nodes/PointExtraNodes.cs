@@ -37,15 +37,19 @@ public static class PointExtraNodes
     /// </summary>
     /// <param name="a">The point at t = 0.</param>
     /// <param name="b">The point at t = 1.</param>
-    /// <param name="t">The interpolation parameter (not clamped).</param>
+    /// <param name="t">The interpolation parameter (not clamped): 0 to 1 lies between the points, other values extend the line.</param>
     /// <returns>The interpolated point.</returns>
     [NodeName("Point.Lerp")]
     [return: NodeName("point")]
     [NodeDescription("Interpolates between two points: t = 0 is the first, t = 1 the second; t is not clamped, so other values extend the line beyond them.")]
     [NodeSearchTags("interpolate", "blend", "between", "fraction", "along", "mix", "extrapolate")]
-    public static CamelGraphPoint Lerp(CamelGraphPoint a, CamelGraphPoint b, double t)
+    public static CamelGraphPoint Lerp(
+        CamelGraphPoint a,
+        CamelGraphPoint b,
+        [NodeRange(-1000000000, 1000000000, SoftMin = 0, SoftMax = 1, Step = 0.05)] double t)
     {
         RequireTwo(a, b, "Point.Lerp");
+        GeometryWarnings.NotFinite("Point.Lerp", "the point", ("t", t));
 
         // a*(1-t) + b*t is exact at both ends (t = 0 -> a, t = 1 -> b), unlike a + (b-a)*t.
         var s = 1d - t;
@@ -53,13 +57,13 @@ public static class PointExtraNodes
     }
 
     /// <summary>The centroid (coordinate-wise mean) of a list of points.</summary>
-    /// <param name="points">The points to average; at least one, and every item must be a point.</param>
+    /// <param name="points">The points to average (several wires can feed this one input); at least one, and every item must be a point.</param>
     /// <returns>The mean point.</returns>
     [NodeName("Point.Centroid")]
     [return: NodeName("point")]
-    [NodeDescription("The centroid (average position) of a list of points; an empty list, a null or a non-point item is an error naming the item.")]
+    [NodeDescription("The centroid (average position) of a list of points; several wires can feed the one input. An empty list, a null or a non-point item is an error naming the item.")]
     [NodeSearchTags("average", "mean", "center", "centre", "middle", "barycenter", "cluster", "list")]
-    public static CamelGraphPoint Centroid(IList<object?> points)
+    public static CamelGraphPoint Centroid([MultiInput] IList<object?> points)
     {
         var list = ReadPoints(points, "Point.Centroid", nameof(points));
 

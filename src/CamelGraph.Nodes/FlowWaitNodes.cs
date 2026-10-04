@@ -16,26 +16,29 @@ public static class FlowWaitNodes
     /// <summary>The longest single sleep, so a long wait is a series of short ones.</summary>
     private const int SliceMilliseconds = 100;
 
+    /// <summary>The longest wait, in seconds: the engine cannot stop a node, so a very long wait would freeze the host.</summary>
+    private const int MaxSeconds = 600;
+
     /// <summary>
     /// Pauses the graph for a number of seconds and then passes <paramref name="value"/> through unchanged. Wire a node's
     /// output into <paramref name="value"/> to make everything downstream wait, e.g. to give an external program time to
     /// finish writing a file.
     /// </summary>
     /// <param name="value">The value to pass through after the pause (it is also what makes the pause happen in the right place).</param>
-    /// <param name="seconds">How long to wait, 0 to 3600 seconds (fractions allowed).</param>
+    /// <param name="seconds">How long to wait, 0 to 600 seconds (fractions allowed). Nothing can stop the wait before it is over, so it is kept short.</param>
     /// <returns>The <paramref name="value"/> input, unchanged.</returns>
     [NodeName("Flow.Wait")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("value")]
-    [NodeDescription("Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow.")]
+    [NodeDescription("Waits the given number of seconds (at most 600; nothing can stop the wait early, so Navisworks looks frozen meanwhile), then passes the value through unchanged - use it to pause between steps of a workflow. In a loop, wire the loop item (or something made from it) into value: a Flow.Wait with only fixed inputs belongs to no loop and waits once.")]
     [NodeSearchTags("wait", "sleep", "pause", "delay", "timer", "throttle", "seconds")]
-    public static object? Wait(object? value, [NodeRange(0, 3600)] double seconds = 1)
+    public static object? Wait(object? value, [NodeRange(0, MaxSeconds, SoftMax = 60, Step = 0.5)] double seconds = 1)
     {
-        if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0 || seconds > 3600)
+        if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0 || seconds > MaxSeconds)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(seconds),
-                "Flow.Wait: 'seconds' must be a number between 0 and 3600, not " + seconds.ToString(CultureInfo.InvariantCulture) + ".");
+                "Flow.Wait: 'seconds' must be a number between 0 and 600, not " + seconds.ToString(CultureInfo.InvariantCulture) + ".");
         }
 
         // The engine does not hand its cancellation token to static nodes, so the wait cannot be cut short from here;

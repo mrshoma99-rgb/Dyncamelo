@@ -26,6 +26,9 @@ public class RerouteNode : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "wire", "knot", "waypoint", "junction", "pass through" };
+
+    /// <inheritdoc />
     public override bool ShowInLibrary => false;
 
     /// <inheritdoc />

@@ -57,15 +57,19 @@ public class LogicNodesTests
     public void EqualTo_ComparesStringsAndNulls()
     {
         Assert.True(LogicNodes.EqualTo("abc", "abc"));
-        Assert.False(LogicNodes.EqualTo("abc", "ABC"));
+        // Wave D (VAL-18): Equals ignores case like Logic.Compare ==, Logic.Switch and the other equality tests (it was exact).
+        Assert.True(LogicNodes.EqualTo("abc", "ABC"));
+        Assert.False(LogicNodes.EqualTo("abc", "abd"));
         Assert.True(LogicNodes.EqualTo(null, null));
         Assert.False(LogicNodes.EqualTo(null, "x"));
     }
 
     [Fact]
-    public void EqualTo_NumberAndStringAreNotEqual()
+    public void EqualTo_TextThatReadsAsTheNumberEqualsTheNumber()
     {
-        Assert.False(LogicNodes.EqualTo(2.0, "2"));
+        // Wave D (VAL-18): the same as Logic.Compare ==; it used to say 2.0 and "2" are different.
+        Assert.True(LogicNodes.EqualTo(2.0, "2"));
+        Assert.False(LogicNodes.EqualTo(2.0, "two"));
     }
 
     [Fact]

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Portable;
@@ -26,7 +28,7 @@ public static class BcfNodes
     private const int SnapshotHeight = 720;
 
     /// <summary>Exports clash results and/or saved viewpoints as a BCF 2.1 package.</summary>
-    /// <param name="filePath">Destination .bcfzip (or .bcf) path; the directory is created when missing.</param>
+    /// <param name="filePath">Destination .bcfzip (or .bcf) path; the directory is created when missing. A relative path is next to the graph file.</param>
     /// <param name="results">Clash results or result groups to export as topics (from ClashTest.Results).</param>
     /// <param name="viewpoints">Saved viewpoints to export as topics (instead of, or besides, results).</param>
     /// <param name="includeSnapshots">True to render a snapshot.png per topic (slower on big result lists).</param>
@@ -37,12 +39,17 @@ public static class BcfNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written path and the number of topics exported.</returns>
     [NodeName("BCF.ExportIssues")]
-    [NodeDescription("Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription(
+        "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. " +
+        "Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention. " +
+        "Navisworks numbers clash results per test (Clash1 in every test), so when the results come from more than one test each issue title gets its test in front (\"Test - Clash1\"), and titles that would " +
+        "still repeat are numbered (2), (3) with a warning.")]
     [NodeSearchTags("bcf", "export", "issues", "bcfzip", "bimcollab", "revizto", "konekt", "acc", "exchange")]
     [MultiReturn("filePath", "topicCount")]
     [PortKinds("file", "integer")]
     public static Dictionary<string, object?> ExportIssues(
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "BCF packages (*.bcfzip;*.bcf)|*.bcfzip;*.bcf|All files (*.*)|*.*")] string filePath,
         IEnumerable<SavedItem>? results = null,
         IEnumerable<SavedViewpoint>? viewpoints = null,
         bool includeSnapshots = true,
@@ -54,10 +61,12 @@ public static class BcfNodes
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var toMeters = UnitConversion.ScaleFactor(doc.Units, Units.Meters);
 
         var topics = new List<BcfTopic>();
+        var topicTests = new List<string?>(); // the clash test of each topic, to tell same-named results of different tests apart
         var usedGuids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         if (results != null)
@@ -77,6 +86,7 @@ public static class BcfNodes
                         nameof(results));
                 topics.Add(TopicFromClashResult(doc, clash, item, clashResult, toMeters, includeSnapshots,
                     statusMap, usedGuids));
+                topicTests.Add(ClashNaming.TestNameOf(item));
             }
         }
 
@@ -87,6 +97,7 @@ public static class BcfNodes
                 if (savedViewpoint != null)
                 {
                     topics.Add(TopicFromSavedViewpoint(doc, savedViewpoint, toMeters, includeSnapshots, usedGuids));
+                    topicTests.Add(null);
                 }
             }
         }
@@ -98,6 +109,25 @@ public static class BcfNodes
                 nameof(results));
         }
 
+        var titles = new List<string>(topics.Count);
+        foreach (var topic in topics)
+        {
+            titles.Add(topic.Title);
+        }
+
+        var unique = NameDisambiguator.Make(titles, topicTests);
+        for (int i = 0; i < topics.Count; i++)
+        {
+            topics[i].Title = unique.Names[i];
+        }
+
+        if (unique.Renumbered > 0)
+        {
+            NodeWarnings.Add(
+                unique.Renumbered + " issue title(s) would have been the same as another one and were numbered (2), (3) ... " +
+                "Rename the clash results or the viewpoints to give them distinct names.");
+        }
+
         BcfFile.Write(filePath, topics);
         return new Dictionary<string, object?>
         {
@@ -107,22 +137,23 @@ public static class BcfNodes
     }
 
     /// <summary>Reads a BCF package back into topic data and matched model items.</summary>
-    /// <param name="filePath">The .bcfzip (or .bcf) file to read.</param>
+    /// <param name="filePath">The .bcfzip (or .bcf) file to read. A relative path is next to the graph file.</param>
     /// <param name="applyCameraTopicIndex">
     /// Index of a topic whose camera should be applied to the current view (-1 = leave the camera alone).
     /// </param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>Topic dictionaries and, per topic, the model items its component GUIDs resolve to.</returns>
+    /// <returns>Topic dictionaries and, per topic, the list of model items its component GUIDs resolve to (a list of lists).</returns>
     [NodeName("BCF.ImportIssues")]
     [NodeDescription("Reads a BCF 2.0/2.1 package: per topic title/status/description/comments/component GUIDs/camera, plus the model items each topic's components resolve to (matched by IFC GlobalId, then InstanceGuid). Optionally applies one topic's camera to the current view — feeds ClashResult.SetStatus and Selection.SetCurrent for the issue-sync return leg.")]
     [NodeSearchTags("bcf", "import", "issues", "bcfzip", "read", "roundtrip", "exchange")]
     [MultiReturn("topics", "modelItems")]
-    [PortKinds("data*", "item*")]
+    [PortKinds("data*", "item**")]
     public static Dictionary<string, object?> ImportIssues(
-        string filePath,
+        [NodePath(NodePathMode.Open, Filter = "BCF packages (*.bcfzip;*.bcf)|*.bcfzip;*.bcf|All files (*.*)|*.*")] string filePath,
         int applyCameraTopicIndex = -1,
         Document? document = null)
     {
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var bcfTopics = BcfFile.Read(filePath);
         if (bcfTopics.Count == 0)

@@ -51,6 +51,8 @@ public sealed class ModifyingTestNode : NodeModel
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context) => new[] { inputs[0] };
 }
 
+// Running a script sets the process-wide graph folder for the run, as GraphContextTests do: they must not overlap.
+[Xunit.Collection("GraphContext")]
 public sealed class PlayerTests : IDisposable
 {
     private readonly string _folder = Path.Combine(Path.GetTempPath(), "dyc-player-" + Guid.NewGuid().ToString("N"));
@@ -487,6 +489,51 @@ public sealed class PlayerTests : IDisposable
         var session = Load(Save(graph));
 
         Assert.Equal(new[] { "Fetch Page" }, session.ModifyingNodes.ToArray());
+    }
+
+    [Fact]
+    public void AScriptThatWritesFilesOrChangesTheModelSaysSoInTheConsentTexts()
+    {
+        var definitions = AssemblyNodeLoader.LoadType(typeof(EffectFixtures));
+        var graph = new GraphModel();
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "WriteFile")));
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "ChangeModel")));
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "Harmless")));
+
+        var session = Load(Save(graph));
+
+        Assert.Equal(2, session.ModifyingNodes.Count);
+        Assert.Contains(session.ModifyingNodes, n => n.Contains("WriteFile"));
+        Assert.Contains(session.ModifyingNodes, n => n.Contains("ChangeModel"));
+        Assert.Contains(session.EffectLines, l => l.StartsWith("writes files: ", StringComparison.Ordinal) && l.Contains("WriteFile"));
+        Assert.Contains(session.EffectLines, l => l.StartsWith("changes the model: ", StringComparison.Ordinal) && l.Contains("ChangeModel"));
+        Assert.Contains("Writes files: ", session.EffectSummary);
+        Assert.Contains("changes the model: ", session.EffectSummary);
+    }
+
+    [Fact]
+    public void TheBuiltInPlumbingNodesAreNotCountedAsChangingTheModelJustForTheirDefaultRole()
+    {
+        // Loop.Item and Loop.Collect never chose a role, so they carry the catch-all default (Modify): that must not make every
+        // script with a loop ask "changes the model".
+        var graph = new GraphModel();
+        graph.AddNode(new LoopItemNode());
+        graph.AddNode(new LoopCollectNode());
+        graph.AddNode(new WatchNode());
+
+        var session = Load(Save(graph));
+
+        Assert.Empty(session.ModifyingNodes);
+        Assert.Empty(session.EffectLines);
+    }
+
+    [Fact]
+    public void AScriptThatOnlyReadsHasNoEffectLines()
+    {
+        var session = Load(Save(Sample(out _, out _)));
+
+        Assert.Empty(session.EffectLines);
+        Assert.Equal(string.Empty, session.EffectSummary);
     }
 
     [Fact]

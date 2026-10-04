@@ -38,6 +38,9 @@ Goal: let a graph carry on when one step can fail, for example reading a file th
 !!! note "Failures inside a list"
     When a node runs once per item of a list and some items fail, you do not need `Flow.Try`. The failed items give an empty result, the others still compute, and the node shows one amber warning that counts the failures. `List.Clean` removes the empty results.
 
+!!! note "Inside a node group"
+    `Flow.Try` and `Flow.When` work across the edge of a [node group](../node-groups.md). A `Flow.Try` inside the group can catch a failure that arrives from outside, and a failure that a `Flow.Try` inside recovered does not turn the group red. A branch that `Flow.When` switched off leaves the group switched off, output by output, while the other outputs keep their values.
+
 ## If it does not work
 
 * Everything after `Flow.Try` is still red: the node wired into `value` is not the one that failed, or a second failing node feeds the same branch. Press ++i++ on a red node and read the status bar.

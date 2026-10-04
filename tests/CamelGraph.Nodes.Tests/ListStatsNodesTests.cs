@@ -49,8 +49,9 @@ public class ListStatsNodesTests
     {
         Assert.Equal(2.5, ListStatsNodes.Average(L(1, 2, 3, 4)));
         Assert.Equal(2d, ListStatsNodes.Average(L(1, null, 3)));
-        Assert.Throws<InvalidOperationException>(() => ListStatsNodes.Average(L()));
-        Assert.Throws<InvalidOperationException>(() => ListStatsNodes.Average(L(null, null)));
+        // Wave D (COL-14): no numbers is an empty result and a warning, not an error.
+        Assert.Null(ListStatsNodes.Average(L()));
+        Assert.Null(ListStatsNodes.Average(L(null, null)));
     }
 
     [Fact]
@@ -70,7 +71,7 @@ public class ListStatsNodesTests
     [InlineData(10, 1.4)]
     public void Percentile_InterpolatesLikeExcel(double percent, double expected)
     {
-        Assert.Equal(expected, ListStatsNodes.Percentile(L(5, 3, 1, 4, 2), percent), 9);
+        Assert.Equal(expected, ListStatsNodes.Percentile(L(5, 3, 1, 4, 2), percent)!.Value, 9);
     }
 
     [Fact]
@@ -84,10 +85,10 @@ public class ListStatsNodesTests
     public void StandardDeviation_PopulationAndSample()
     {
         var data = L(2, 4, 4, 4, 5, 5, 7, 9);
-        Assert.Equal(2d, ListStatsNodes.StandardDeviation(data), 9);
-        Assert.Equal(2.138089935, ListStatsNodes.StandardDeviation(data, sample: true), 8);
+        Assert.Equal(2d, ListStatsNodes.StandardDeviation(data)!.Value, 9);
+        Assert.Equal(2.138089935, ListStatsNodes.StandardDeviation(data, sample: true)!.Value, 8);
         Assert.Equal(0d, ListStatsNodes.StandardDeviation(L(5)));
-        Assert.Throws<InvalidOperationException>(() => ListStatsNodes.StandardDeviation(L(5), sample: true));
+        Assert.Null(ListStatsNodes.StandardDeviation(L(5), sample: true));      // wave D (COL-14): empty result and a warning
     }
 
     [Fact]
@@ -192,7 +193,9 @@ public class ListStatsNodesTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => ListStatsNodes.Histogram(L(1, 2), 0));
         Assert.Throws<ArgumentOutOfRangeException>(() => ListStatsNodes.Histogram(L(1, 2), 1001));
-        Assert.Throws<InvalidOperationException>(() => ListStatsNodes.Histogram(L(), 3));
+        var empty = ListStatsNodes.Histogram(L(), 3);                           // wave D (COL-14): empty lists and a warning
+        Assert.Empty((List<object?>)empty["counts"]);
+        Assert.Empty((List<object?>)empty["labels"]);
     }
 
     [Fact]
@@ -313,9 +316,10 @@ public class ListStatsNodesTests
     }
 
     [Fact]
-    public void SortDescending_ExplainsIncomparableTypes()
+    public void SortDescending_ExplainsAListInTheList()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => ListStatsNodes.SortDescending(L(1, "a")));
+        // Wave D (COL-12): a number and text no longer fail (one ordering rule); a list inside the list has no order.
+        var ex = Assert.Throws<ArgumentException>(() => ListStatsNodes.SortDescending(L(1, L(2))));
         Assert.Contains("List.SortDescending", ex.Message);
     }
 

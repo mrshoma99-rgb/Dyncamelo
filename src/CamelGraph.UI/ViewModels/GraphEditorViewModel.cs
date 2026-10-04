@@ -1083,6 +1083,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
                 var context = EvaluationContextFactory != null ? EvaluationContextFactory() : new EvaluationContext();
                 ConfigureRunContext(context, cancellation);
                 using (_undo.Suspend())
+                using (CamelGraph.Core.Files.GraphContext.Use(CamelGraph.Core.Files.GraphContext.FolderFor(CurrentFilePath)))
                 {
                     result = upTo == null ? _engine.Run(DocumentGraph, context) : _engine.RunUpTo(DocumentGraph, upTo, context);
                 }

@@ -41,18 +41,18 @@ CamelGraph keeps nothing on any server. Close Navisworks and delete the folder `
 ## What a graph can do
 
 !!! danger "A graph is a program. Only run graphs you trust."
-    A `.dyc` file has no program code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. Read the table below before you run a graph from someone else.
+    A `.dyc` file has no program code of its own, but its nodes can run programs, call web addresses, and write, delete or overwrite files. Read the table below before you run a graph from someone else.
 
 A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no program code of its own, and there is no node that runs Python or C# code you type in. (`Math.Formula` and `Table.AddFormulaColumn` use a small arithmetic parser.) But the **nodes** do real work when the graph runs, and a graph can use any of them:
 
 | A graph can… | Through these nodes |
 |---|---|
 | **Run programs** | `System.Run` starts any program with any arguments and returns what it prints. `System.OpenPath` opens a file or folder with its default application, which can start a program. |
-| **Call web addresses** | `Web.Get` downloads from an http or https address. `Web.Post` sends data to one, for example a web hook. |
-| **Delete, move and overwrite files** | `File.Delete`, `File.Move`, `File.Copy`, `Directory.Delete`, `Directory.Create`, `Zip.Extract`, `Zip.Create` |
-| **Write files** | `Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Excel.WriteToFile`, `Table.ToCsvFile`, `Table.ToExcelFile`, `Log.Write` |
-| **Read files and facts about your computer** | `Text.ReadFromFile`, `CSV.ReadFromFile`, `Excel.ReadFromFile`, `JSON.ReadFromFile`, `Directory.FindFiles`, `System.Environment` (user name, computer name, well-known folders). A graph can read a file and send it away with `Web.Post`. |
-| **Change the open model, or the files Navisworks writes** | The Navisworks nodes that change the document, for example `Appearance.OverrideColor`, `Appearance.Hide`, `SelectionSet.Create`, `Properties.SetCustom`, `ModelItem.Translate`, `Document.Open`, `Document.Save`, `Model.Remove`, `Export.NWD`, `Export.ToIfc`, `BCF.ExportIssues`. |
+| **Call web addresses** | `Web.Get` downloads text from an http or https address. `Web.Download` saves a file from one. `Web.Post` sends data to one, for example a web hook. |
+| **Delete, move and overwrite files** | `File.Delete`, `File.Move`, `File.Copy`, `Directory.Delete`, `Directory.Copy`, `Directory.Move`, `Zip.Extract` |
+| **Write files** | `Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Excel.WriteToFile`, `Table.ToCsvFile`, `Table.ToExcelFile`, `Log.Write`, `Directory.Create`, `Zip.Create`, `Web.Download` (and the delete, move and overwrite nodes above) |
+| **Read files and facts about your computer** | `Text.ReadFromFile`, `CSV.ReadFromFile`, `Excel.ReadFromFile`, `JSON.ReadFromFile`, `XML.ReadFromFile`, `Directory.Find`, `System.Environment` (user name, computer name, well-known folders). A graph can read a file and send it away with `Web.Post`. |
+| **Change the open model, or the files Navisworks writes** | The Navisworks nodes that change the document, for example `Appearance.OverrideColor`, `Appearance.Hide`, `SelectionSet.Create`, `Properties.SetCustom`, `ModelItem.Translate`, `Document.Open`, `Document.Save`, `Model.Remove`, `Export.ToIfc`, `BCF.ExportIssues`. |
 
 `Zip.Extract` refuses archive entries that would land outside the target folder.
 
@@ -65,8 +65,8 @@ Also know that:
 
 CamelGraph asks before it runs a graph that can do real harm:
 
-* **Editor.** When you run a graph that was **opened from a file** and contains nodes that run programs, use the network, or delete, move or overwrite files, the editor lists those nodes and asks first. You are asked once per file, and again only if the file changes. A graph saved with run mode *Auto* is **not** run when you open it: the status bar says so, and you press **Run** to review it first. Graphs you make in the editor and the built-in samples never ask. Switch this off with **Settings ▸ Editing ▸ Ask before running graphs from files**.
-* **Script Player.** A script that contains nodes that change things or reach outside the model is listed by name above its form, and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. `CamelGraph.Run.DYNC` (the Automation API and the Batch Utility) asks the same question.
+* **Editor.** When you run a graph that was **opened from a file** and contains nodes that run programs, use the network, write, delete, move or overwrite files, or change the Navisworks model, the editor lists those nodes, says what each one does ("writes files: Text.WriteToFile", "changes the model: Clash.GroupResults") and asks first. You are asked once per file, and again only if the file changes. A graph saved with run mode *Auto* is **not** run when you open it: the status bar says so, and you press **Run** to review it first. Graphs you make in the editor and the built-in samples never ask. Switch this off with **Settings ▸ Editing ▸ Ask before running graphs from files**.
+* **Script Player.** A script that contains nodes that change the model, write or change files, run programs or use the network is listed above its form, with what its nodes do ("Changes the model: Isolate Walls; writes files: Log.Write"), and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. `CamelGraph.Run.DYNC` (the Automation API and the Batch Utility) asks the same question.
 * Muted and frozen nodes do not count.
 
 Advice:

@@ -230,13 +230,31 @@ public class SampleGraphStaticValidationTests
         if (node.Value<string>("Assembly") == NavisworksAssemblyName)
         {
             var inputNames = ((JArray)node["InputPorts"]!).OfType<JObject>().Select(p => p.Value<string>("Name")).ToList();
+            // A graph saved under an earlier id (a recorded [NodeAliases] id) has the ports the node had then: the optional flag of
+            // each is the one of the parameter now called that (or the port's [PortAlias] target).
+            var earlier = navisworksMethods.FirstOrDefault(m => m.IsEarlierId(definitionId) && m.AcceptsSavedPorts(inputNames!, PortNames(node, "OutputPorts").ToList()!));
+            if (earlier != null)
+            {
+                return inputNames.Select(name => earlier.IsOptionalSavedInput(name!)).ToList();
+            }
+
             var method = navisworksMethods.First(m =>
                 m.MatchesDefinitionId(definitionId) && m.ParameterNames.SequenceEqual(inputNames));
             return method.ParameterIsOptional.ToList();
         }
 
         Assert.True(registry.TryGetDefinition(definitionId, out var definition), "definition '" + definitionId + "' is not registered.");
-        return definition!.Inputs.Select(i => i.HasDefault).ToList();
+        if (!string.Equals(definition!.Id, definitionId, StringComparison.Ordinal))
+        {
+            // Saved under an earlier id ([NodeAliases]): the file lists the ports of that earlier signature, so answer for those.
+            return ((JArray)node["InputPorts"]!).OfType<JObject>()
+                .Select(p => p.Value<string>("Name"))
+                .Select(name => definition.Inputs.Any(i => i.Name == name || i.Aliases.Contains(name))
+                    && definition.Inputs.First(i => i.Name == name || i.Aliases.Contains(name)).HasDefault)
+                .ToList();
+        }
+
+        return definition.Inputs.Select(i => i.HasDefault).ToList();
     }
 
     private static void ValidateZeroTouchNode(
@@ -261,10 +279,24 @@ public class SampleGraphStaticValidationTests
                 label + ": definition id '" + definitionId +
                 "' matches no public static method in the CamelGraph.Navisworks source.");
 
+            // An id that is only a recorded earlier id of a method ([NodeAliases]) is a graph saved before the node gained inputs: it
+            // loads, and every port it saved must still be a port of the node (under its name now, or through a [PortAlias]).
+            var earlierOnly = candidates.Where(m => m.IsEarlierId(definitionId) && !m.IsCurrentId(definitionId)).ToList();
+            if (earlierOnly.Count > 0)
+            {
+                Assert.True(
+                    earlierOnly.Any(m => m.AcceptsSavedPorts(inputNames!, outputNames!) && m.SavedDefaultsAreConsistent(inputPorts)),
+                    label + ": the ports saved under the earlier id '" + definitionId + "' [" + string.Join(", ", inputNames) + "] -> [" +
+                    string.Join(", ", outputNames) + "] are not ports of the node any more and have no [PortAlias].");
+                return;
+            }
+
             Assert.True(
                 candidates.Any(m =>
                     m.ParameterNames.SequenceEqual(inputNames) &&
-                    m.OutputNames.SequenceEqual(outputNames) &&
+                    // A node may gain outputs at the end (a new output never breaks a wire saved without it); a saved
+                    // output that was renamed or removed still fails here.
+                    m.OutputNames.Take(outputNames.Count).SequenceEqual(outputNames) &&
                     InputDefaultsAreConsistent(m, inputPorts)),
                 label + ": serialized ports [" + string.Join(", ", inputNames) + "] -> [" +
                 string.Join(", ", outputNames) + "] do not match the source signature of '" +
@@ -275,16 +307,42 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 registry.TryGetDefinition(definitionId, out var definition),
                 label + ": definition id '" + definitionId + "' is not registered.");
-            Assert.Equal(definition!.Inputs.Select(i => i.Name), inputNames);
-            Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
+            // A sample may have been saved under an earlier id of the node (a [NodeAliases] entry) or under earlier port names
+            // (a [PortAlias] entry). The loader finds each saved wire and value by port name or earlier port name, so that is
+            // what is pinned: every saved port still resolves to a port of the node as it is now. A node that kept its id and
+            // its port names must still match the sample exactly.
+            var renamed = !string.Equals(definition!.Id, definitionId, StringComparison.Ordinal);
             for (int i = 0; i < inputPorts.Count; i++)
             {
-                if (inputPorts[i].Value<bool?>("UsingDefaultValue") == true)
+                var name = inputNames[i]!;
+                var resolved = definition.Inputs.FirstOrDefault(p => p.Name == name || p.Aliases.Contains(name));
+                Assert.True(
+                    resolved != null,
+                    label + ": saved input '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                renamed |= resolved!.Name != name;
+                var foldedIntoMultiInput = resolved.MultiInput && resolved.Name != name;
+                if (inputPorts[i].Value<bool?>("UsingDefaultValue") == true && !foldedIntoMultiInput)
                 {
                     Assert.True(
-                        definition.Inputs[i].HasDefault,
-                        label + ": port '" + inputNames[i] + "' claims a default the definition lacks.");
+                        resolved.HasDefault,
+                        label + ": port '" + name + "' claims a default the definition lacks.");
                 }
+            }
+
+            for (int i = 0; i < outputNames.Count; i++)
+            {
+                var name = outputNames[i];
+                var resolved = definition.Outputs.FirstOrDefault(o => o.Name == name || o.Aliases.Contains(name));
+                Assert.True(
+                    resolved != null,
+                    label + ": saved output '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                renamed |= resolved!.Name != name;
+            }
+
+            if (!renamed)
+            {
+                Assert.Equal(definition.Inputs.Select(i => i.Name), inputNames);
+                Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
             }
         }
     }
@@ -396,10 +454,23 @@ public class SampleGraphStaticValidationTests
                 outputs = new List<string> { returnName.Success ? returnName.Groups[1].Value : "result" };
             }
 
+            var aliasIds = new List<string>();
+            foreach (Match alias in Regex.Matches(attrs, @"\[NodeAliases\((?<args>(?:[^\)""]|""[^""]*"")*)\)\]"))
+            {
+                aliasIds.AddRange(Regex.Matches(alias.Groups["args"].Value, "\"([^\"]*)\"").Cast<Match>().Select(m => m.Groups[1].Value));
+            }
+
+            var portAliases = Regex.Matches(attrs, @"\[PortAlias\(\s*""([^""]*)""\s*,\s*""([^""]*)""\s*\)\]")
+                .Cast<Match>()
+                .Select(m => (m.Groups[1].Value, m.Groups[2].Value))
+                .ToList();
+
             yield return new SourceMethod(
                 ns + "." + owner.Groups[1].Value + "." + method.Groups["name"].Value,
                 parameters,
-                outputs);
+                outputs,
+                aliasIds,
+                portAliases);
         }
     }
 
@@ -591,12 +662,48 @@ public class SampleGraphStaticValidationTests
     {
         private readonly List<SourceParameter> _parameters;
 
-        public SourceMethod(string fullPath, List<SourceParameter> parameters, List<string> outputs)
+        private readonly List<string> _aliasIds;
+        private readonly List<(string Old, string Current)> _portAliases;
+
+        public SourceMethod(
+            string fullPath,
+            List<SourceParameter> parameters,
+            List<string> outputs,
+            List<string>? aliasIds = null,
+            List<(string, string)>? portAliases = null)
         {
             FullPath = fullPath;
             _parameters = parameters;
             OutputNames = outputs;
+            _aliasIds = aliasIds ?? new List<string>();
+            _portAliases = portAliases ?? new List<(string, string)>();
         }
+
+        /// <summary>Whether the id is one the method had before ([NodeAliases]).</summary>
+        public bool IsEarlierId(string definitionId) => _aliasIds.Contains(definitionId, StringComparer.Ordinal);
+
+        /// <summary>Whether the id is the method's current signature.</summary>
+        public bool IsCurrentId(string definitionId) => MatchesCurrentSignature(definitionId);
+
+        private string CurrentName(string savedName) =>
+            _parameters.Any(p => p.Name == savedName) || OutputNames.Contains(savedName)
+                ? savedName
+                : _portAliases.Where(a => a.Old == savedName).Select(a => a.Current).FirstOrDefault() ?? string.Empty;
+
+        /// <summary>Whether every port a graph saved is still a port of the method, under its name now or through a [PortAlias].</summary>
+        public bool AcceptsSavedPorts(IEnumerable<string> inputNames, IEnumerable<string> outputNames)
+        {
+            return inputNames.All(n => _parameters.Any(p => p.Name == CurrentName(n))) &&
+                   outputNames.All(n => OutputNames.Contains(CurrentName(n)));
+        }
+
+        /// <summary>Whether the parameter a saved input now maps to is optional.</summary>
+        public bool IsOptionalSavedInput(string savedName) =>
+            _parameters.First(p => p.Name == CurrentName(savedName)).Optional;
+
+        /// <summary>A serialized default is only usable when the parameter is optional.</summary>
+        public bool SavedDefaultsAreConsistent(List<JObject> inputPorts) =>
+            inputPorts.All(port => port.Value<bool?>("UsingDefaultValue") != true || IsOptionalSavedInput(port.Value<string>("Name")!));
 
         /// <summary>Namespace.Class.Method.</summary>
         public string FullPath { get; }
@@ -615,7 +722,9 @@ public class SampleGraphStaticValidationTests
         /// keywords, simple-name comparison for everything else, since the source
         /// uses short type names resolved through usings).
         /// </summary>
-        public bool MatchesDefinitionId(string definitionId)
+        public bool MatchesDefinitionId(string definitionId) => MatchesCurrentSignature(definitionId) || IsEarlierId(definitionId);
+
+        private bool MatchesCurrentSignature(string definitionId)
         {
             var at = definitionId.IndexOf('@');
             var path = at < 0 ? definitionId : definitionId.Substring(0, at);

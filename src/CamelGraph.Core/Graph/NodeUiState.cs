@@ -49,7 +49,7 @@ public sealed class NodeUiState : INotifyPropertyChanged
     public void NotifyPanelsChanged() => OnPropertyChanged(nameof(OpenPanels));
 
     /// <summary>True when every field is at its default (nothing needs saving).</summary>
-    public bool IsDefault => !_collapsed && _width == null && _hideUnused == null && OpenPanels.Count == 0;
+    public bool IsDefault => !_collapsed && _width == null && _hideUnused == null && OpenPanels.Count == 0 && ClosedPanels.Count == 0;
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {

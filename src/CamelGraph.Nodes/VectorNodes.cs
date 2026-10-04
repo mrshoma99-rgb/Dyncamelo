@@ -73,11 +73,12 @@ public static class VectorNodes
     /// <returns>The scaled vector.</returns>
     [NodeName("Vector.Scale")]
     [return: NodeName("vector")]
-    [NodeDescription("Multiplies a vector by a number (2 doubles its length, -1 reverses it).")]
+    [NodeDescription("Multiplies a vector by a number (2 doubles its length, -1 reverses it). A factor that is not a finite number gives a warning.")]
     [NodeSearchTags("multiply", "stretch", "factor", "times", "resize")]
     public static CamelGraphVector Scale(CamelGraphVector vector, double factor)
     {
         Require(vector, "Vector.Scale", nameof(vector), "a vector");
+        GeometryWarnings.NotFinite("Vector.Scale", "the vector", ("factor", factor));
 
         return new CamelGraphVector(vector.X * factor, vector.Y * factor, vector.Z * factor);
     }
@@ -260,7 +261,7 @@ public static class VectorNodes
     [return: NodeName("isParallel")]
     [NodeDescription("True when two vectors lie along the same line (same or opposite direction) within a length-independent tolerance; zero-length vectors are an error.")]
     [NodeSearchTags("parallel", "collinear", "same direction", "aligned", "test")]
-    public static bool IsParallel(CamelGraphVector a, CamelGraphVector b, double tolerance = 1e-9)
+    public static bool IsParallel(CamelGraphVector a, CamelGraphVector b, [NodeRange(0, 1, SoftMin = 0, SoftMax = 0.1, Step = 0.001)] double tolerance = 1e-9)
     {
         Require(a, "Vector.IsParallel", nameof(a), "two vectors");
         Require(b, "Vector.IsParallel", nameof(b), "two vectors");
@@ -284,7 +285,7 @@ public static class VectorNodes
     [return: NodeName("isPerpendicular")]
     [NodeDescription("True when two vectors meet at a right angle within a length-independent tolerance; zero-length vectors are an error.")]
     [NodeSearchTags("perpendicular", "orthogonal", "right angle", "normal", "square", "test")]
-    public static bool IsPerpendicular(CamelGraphVector a, CamelGraphVector b, double tolerance = 1e-9)
+    public static bool IsPerpendicular(CamelGraphVector a, CamelGraphVector b, [NodeRange(0, 1, SoftMin = 0, SoftMax = 0.1, Step = 0.001)] double tolerance = 1e-9)
     {
         Require(a, "Vector.IsPerpendicular", nameof(a), "two vectors");
         Require(b, "Vector.IsPerpendicular", nameof(b), "two vectors");

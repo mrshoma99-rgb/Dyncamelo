@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 
 namespace CamelGraph.Nodes;
@@ -72,6 +73,72 @@ public static class PathNodes
         return Guarded("Path.GetDirectory", path, p => Path.GetDirectoryName(p) ?? string.Empty);
     }
 
+    /// <summary>Joins any number of folder and file name parts into one path.</summary>
+    /// <param name="parts">The parts, in order: folders and a last file name. Several wires, lists and lists of lists are joined in order; blank parts are skipped.</param>
+    /// <returns>The joined path, with the separator of this operating system.</returns>
+    [NodeName("Path.Join")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
+    [return: NodeName("path")]
+    [NodeDescription("Joins any number of folder and file name parts into one path with the correct separator, for example C:\\Projects + North + HVAC + model.nwd. Blank parts are skipped, and several wires, lists and lists of lists are joined in order. Unlike Path.Combine, a part that starts with a backslash or slash does not throw away what came before it, and a part with its own drive (D:\\x) is an error instead of silently replacing the folder.")]
+    [NodeSearchTags("join", "combine", "concat", "folder", "filename", "append", "segments", "path")]
+    public static string Join([MultiInput] IList<object?> parts)
+    {
+        if (parts == null)
+        {
+            throw new ArgumentNullException(nameof(parts), "Path.Join requires the parts of the path. Wire folder and file name texts into the 'parts' input.");
+        }
+
+        var result = string.Empty;
+        var index = 0;
+        foreach (var item in FileExtraNodes.Flatten(parts))
+        {
+            index++;
+            var text = PathResolver.Clean(item as string ?? CellText.Format(item));
+            if (text.Length == 0)
+            {
+                continue;
+            }
+
+            if (result.Length == 0)
+            {
+                result = text;
+                continue;
+            }
+
+            if (IsWindows && text.Length >= 2 && IsAsciiLetter(text[0]) && text[1] == ':')
+            {
+                throw new ArgumentException(
+                    "Path.Join: part #" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ('" + text +
+                    "') has a drive of its own and would replace the folder before it. Remove the drive from it, or use Path.Combine if replacing is what you want.",
+                    nameof(parts));
+            }
+
+            var relative = text.TrimStart('\\', '/');
+            if (relative.Length > 0)
+            {
+                try
+                {
+                    result = Path.Combine(result, relative);
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new ArgumentException(
+                        "Path.Join: part #" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + " ('" + text +
+                        "') has characters that cannot be in a path (such as < > | \" ? *).",
+                        nameof(parts),
+                        ex);
+                }
+            }
+        }
+
+        if (result.Length == 0)
+        {
+            throw new ArgumentException("Path.Join has no parts to join. Wire folder and file name texts into the 'parts' input.", nameof(parts));
+        }
+
+        return result;
+    }
+
     /// <summary>Replaces (or removes) the extension of a path.</summary>
     /// <param name="path">The path to change.</param>
     /// <param name="extension">The new extension, with or without the leading dot; empty text removes the extension.</param>
@@ -101,27 +168,27 @@ public static class PathNodes
         return Guarded("Path.ChangeExtension", path, p => Path.ChangeExtension(p, replacement));
     }
 
-    /// <summary>Resolves a path to an absolute path, using the current folder for relative paths.</summary>
+    /// <summary>Resolves a path to an absolute path, using the graph's folder for relative paths.</summary>
     /// <param name="path">The (possibly relative) path.</param>
     /// <returns>The absolute path with "." and ".." resolved.</returns>
     [NodeName("Path.GetFullPath")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("path")]
-    [NodeDescription("Resolves a path to an absolute path (relative paths start from the current folder); the file does not have to exist.")]
+    [NodeDescription("Resolves a path to an absolute path the way the file nodes do: a relative path starts in the graph's folder (the folder of the saved graph file; Documents\\CamelGraph for a graph that was never saved), and the quotes of a path pasted from Explorer are removed. The file does not have to exist.")]
     [NodeSearchTags("absolute", "resolve", "full", "expand", "path")]
     public static string GetFullPath(string path)
     {
-        return Guarded("Path.GetFullPath", path, Path.GetFullPath);
+        return Guarded("Path.GetFullPath", path, p => Path.GetFullPath(PathResolver.Resolve(p)));
     }
 
     /// <summary>Expresses a path relative to a base folder.</summary>
-    /// <param name="path">The path to express (absolute, or relative to the current folder).</param>
+    /// <param name="path">The path to express (absolute, or relative to the graph's folder).</param>
     /// <param name="baseDirectory">The folder the result is relative to.</param>
     /// <returns>The relative path ("..\other\a.nwd"), "." when both are the same folder, or the full path when they have different roots (e.g. different drives).</returns>
     [NodeName("Path.GetRelativePath")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("path")]
-    [NodeDescription("Expresses a path relative to a base folder; returns the full path when they are on different drives.")]
+    [NodeDescription("Expresses a path relative to a base folder; returns the full path when they are on different drives. Relative inputs start in the graph's folder.")]
     [NodeSearchTags("relative", "base", "make relative", "path")]
     public static string GetRelativePath(string path, string baseDirectory)
     {
@@ -132,8 +199,8 @@ public static class PathNodes
         string fullBase;
         try
         {
-            fullPath = Path.GetFullPath(path);
-            fullBase = Path.GetFullPath(baseDirectory);
+            fullPath = Path.GetFullPath(PathResolver.Resolve(path));
+            fullBase = Path.GetFullPath(PathResolver.Resolve(baseDirectory));
         }
         catch (Exception ex) when (IsInvalidPath(ex))
         {

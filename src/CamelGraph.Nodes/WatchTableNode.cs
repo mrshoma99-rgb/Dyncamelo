@@ -27,7 +27,7 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
     private IReadOnlyList<string> _headers = new List<string>();
     private IReadOnlyList<WatchTableRow> _rows = new List<WatchTableRow>();
     private string _summary = string.Empty;
-    private string _playerText = string.Empty;
+    private CamelGraphTable? _playerTable;
     private double _viewWidth;
     private double _viewHeight;
 
@@ -36,7 +36,7 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
     {
         Name = "Watch Table";
         Category = "Display";
-        Description = "Displays a table as a grid: column names on top, one line per row.";
+        Description = "Displays a table as a grid: column names on top, one line per row. The grid draws the first 2,000 rows (the summary says how many there are); the value itself passes through whole. When the node does not run the display is cleared.";
         AddInput("table", typeof(object), "The table (or rows, or dictionaries) to display.");
         AddOutput("table", typeof(object), "The incoming value, passed through.");
     }
@@ -74,8 +74,31 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
         }
     }
 
-    /// <inheritdoc />
-    public string PlayerText => _playerText;
+    /// <summary>
+    /// What the Script Player shows: the table as text, built when asked and only as far as the Player keeps lines, with a last line
+    /// that counts the rows left out. Empty when the node did not run.
+    /// </summary>
+    public string PlayerText
+    {
+        get
+        {
+            var table = _playerTable;
+            if (table == null)
+            {
+                return string.Empty;
+            }
+
+            // Two header lines, then rows, then one line for the rest: ScriptSession.MaxOutputLines in all.
+            var rows = CamelGraph.Core.Player.ScriptSession.MaxOutputLines - 3;
+            if (table.RowCount <= rows)
+            {
+                return TableText.Markdown(table);
+            }
+
+            var head = new CamelGraphTable(table.Headers, table.Rows.Take(rows).Select(r => (IReadOnlyList<object?>)r).ToList());
+            return TableText.Markdown(head) + "… " + CamelGraph.Core.Types.ValueText.Count(table.RowCount - rows) + " more rows";
+        }
+    }
 
     /// <summary>User-chosen width of the display area (0 = automatic). View state only: never dirties the node.</summary>
     public double ViewWidth
@@ -95,7 +118,20 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "preview", "inspect", "debug", "grid", "rows", "columns", "show", "output", "result", "view" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
+
+    /// <summary>The display is cleared: an old table is never shown as the current result.</summary>
+    public override void OnNotRun()
+    {
+        _playerTable = null;
+        OnPropertyChanged(nameof(PlayerText));
+        Headers = new List<string>();
+        Rows = new List<WatchTableRow>();
+        Summary = string.Empty;
+    }
 
     /// <summary>Turns whatever arrives into a table to draw.</summary>
     /// <param name="value">A table, a list of rows, a list of dictionaries, or any other value.</param>
@@ -146,7 +182,8 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
             summary += " — first " + shown.ToString(CultureInfo.InvariantCulture) + " shown";
         }
 
-        _playerText = TableText.Markdown(table);
+        _playerTable = table;
+        OnPropertyChanged(nameof(PlayerText));
         Headers = table.Headers.ToList();
         Rows = rows;
         Summary = summary;

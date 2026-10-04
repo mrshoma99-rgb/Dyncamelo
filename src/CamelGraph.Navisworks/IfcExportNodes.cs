@@ -7,6 +7,7 @@ using BIMCamel.Collect;
 using BIMCamel.Data;
 using BIMCamel.Geometry;
 using BIMCamel.Ifc;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -25,7 +26,7 @@ public static class IfcExportNodes
 {
     /// <summary>Exports model items to an IFC file via the BIMCamel exporter engine.</summary>
     /// <param name="items">The model items to export (resolved to leaf geometry, like the exporter's scope).</param>
-    /// <param name="filePath">Destination .ifc path; the directory is created when missing.</param>
+    /// <param name="filePath">Destination .ifc path; the directory is created when missing. A relative path is next to the graph file.</param>
     /// <param name="schema">"IFC4" (default) or "IFC2x3".</param>
     /// <param name="instancing">Reuse repeated geometry as IfcMappedItem (smaller files); off writes every mesh in full.</param>
     /// <param name="properties">Write Navisworks properties as IfcPropertySets.</param>
@@ -42,33 +43,38 @@ public static class IfcExportNodes
     /// <param name="splitMegabytes">Split the output into parts near this size (0 = single file).</param>
     /// <param name="validate">Run the built-in structural validator on each written file.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The written path(s) and export statistics.</returns>
+    /// <returns>The first written path, how many files were written, the exported element and triangle counts, the size, and every written path.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeName("Export.ToIfc")]
-    [NodeDescription("Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing.")]
+    [NodeDescription(
+        "Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing. " +
+        "The main inputs are the items, the file and the schema and units; the options of the Advanced panel (instancing, property sets, materials, quantities, quality, " +
+        "splitting, validation and the Export.Ifc* option nodes) have sensible defaults. filePath always comes out as ONE text, the first file written; files lists every " +
+        "file (more than one only when splitMegabytes splits the export), so a node after it sees the same kind of value whatever the split.")]
     [NodeSearchTags("export", "ifc", "openbim", "bim", "qto", "ifc4", "ifc2x3", "bimcamel")]
-    [MultiReturn("filePath", "fileCount", "elementCount", "triangleCount", "fileSizeKb")]
-    [PortKinds("file", "integer", "integer", "integer", "number")]
+    [MultiReturn("filePath", "fileCount", "elementCount", "triangleCount", "fileSizeKb", "files")]
+    [PortKinds("file", "integer", "integer", "integer", "number", "file*")]
     public static Dictionary<string, object?> ToIfc(
         [MultiInput] IEnumerable<ModelItem> items,
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "IFC files (*.ifc)|*.ifc")] string filePath,
         [NodeChoices("IFC4", "IFC2X3")]
         string schema = "IFC4",
-        bool instancing = true,
-        bool properties = true,
-        bool materials = true,
-        bool quantities = true,
+        [NodePanel("Advanced")] bool instancing = true,
+        [NodePanel("Advanced")] bool properties = true,
+        [NodePanel("Advanced")] bool materials = true,
+        [NodePanel("Advanced")] bool quantities = true,
         [NodeChoicesFromEnum(typeof(Units), "Auto")]
         string units = "Auto",
-        string quality = "Balanced",
-        CoordOptions? coordinates = null,
-        SpatialNames? spatialNames = null,
-        PropertyRoles? roles = null,
-        IEnumerable<ParamMapRule>? parameterRules = null,
-        IEnumerable<string>? categoryFilter = null,
-        Dictionary<string, string>? classMap = null,
-        [NodeRange(0, 100000)] double splitMegabytes = 0,
-        bool validate = false,
+        [NodePanel("Advanced")] [NodeChoices("Balanced", "Small file", "High detail")] string quality = "Balanced",
+        [NodePanel("Advanced")] CoordOptions? coordinates = null,
+        [NodePanel("Advanced")] SpatialNames? spatialNames = null,
+        [NodePanel("Advanced")] PropertyRoles? roles = null,
+        [NodePanel("Advanced")] IEnumerable<ParamMapRule>? parameterRules = null,
+        [NodePanel("Advanced")] IEnumerable<string>? categoryFilter = null,
+        [NodePanel("Advanced")] Dictionary<string, string>? classMap = null,
+        [NodePanel("Advanced")] [NodeRange(0, 100000)] double splitMegabytes = 0,
+        [NodePanel("Advanced")] bool validate = false,
         Document? document = null)
     {
         if (items == null)
@@ -81,6 +87,7 @@ public static class IfcExportNodes
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        filePath = PathResolver.Resolve(filePath);
         if (!string.Equals(Path.GetExtension(filePath), ".ifc", StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException("'" + filePath + "' must end in .ifc.", nameof(filePath));
@@ -155,32 +162,33 @@ public static class IfcExportNodes
 
         return new Dictionary<string, object?>
         {
-            ["filePath"] = summary.Files.Count == 1 ? summary.Files[0] : summary.Files.Cast<object?>().ToList(),
+            ["filePath"] = summary.Files.Count > 0 ? summary.Files[0] : filePath,
             ["fileCount"] = summary.FileCount,
             ["elementCount"] = summary.ElementCount,
             ["triangleCount"] = summary.TriangleCount,
             ["fileSizeKb"] = Math.Round(summary.FileSizeBytes / 1024.0, 1),
+            ["files"] = new List<string>(summary.Files),
         };
     }
 
     /// <summary>Builds coordinate / georeferencing options for Export.ToIfc.</summary>
     /// <param name="basePoint">"GeometryOrigin" (default), "ModelOrigin" or "Custom".</param>
-    /// <param name="eastings">Custom base-point easting in metres (Custom mode).</param>
-    /// <param name="northings">Custom base-point northing in metres (Custom mode).</param>
-    /// <param name="elevation">Custom base-point elevation in metres (Custom mode).</param>
+    /// <param name="eastings">Custom base-point easting in metres; used only when basePoint is Custom.</param>
+    /// <param name="northings">Custom base-point northing in metres; used only when basePoint is Custom.</param>
+    /// <param name="elevation">Custom base-point elevation in metres; used only when basePoint is Custom.</param>
     /// <param name="rotationDegrees">Grid/true-north rotation, recorded in IFC4 georeferencing.</param>
     /// <param name="writeGeoref">Write IfcMapConversion/IfcProjectedCRS (IFC4 only).</param>
     /// <returns>A coordinate-options object to wire into Export.ToIfc.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcCoordinates")]
-    [NodeDescription("Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing.")]
+    [NodeDescription("Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing. eastings, northings and elevation are in metres and are used only when basePoint is Custom.")]
     [NodeSearchTags("ifc", "export", "coordinates", "base point", "georeferencing", "origin", "rotation")]
     [return: NodeName("coordinates")]
     public static CoordOptions IfcCoordinates(
-        string basePoint = "GeometryOrigin",
-        double eastings = 0,
-        double northings = 0,
-        double elevation = 0,
+        [NodeChoices("GeometryOrigin", "ModelOrigin", "Custom")] string basePoint = "GeometryOrigin",
+        [NodePanel("Custom base point")] double eastings = 0,
+        [NodePanel("Custom base point")] double northings = 0,
+        [NodePanel("Custom base point")] double elevation = 0,
         [NodeRange(-360, 360, Unit = "°")] double rotationDegrees = 0,
         bool writeGeoref = true)
     {
@@ -233,18 +241,18 @@ public static class IfcExportNodes
     /// <returns>A property-roles object to wire into Export.ToIfc.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcRoles")]
-    [NodeDescription("Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc.")]
+    [NodeDescription("Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc. The search button next to a name lists the tabs and properties of the elements selected in Navisworks right now.")]
     [NodeSearchTags("ifc", "export", "roles", "type", "level", "storey", "material", "classification", "mapping")]
     [return: NodeName("roles")]
     public static PropertyRoles IfcRoles(
-        string typeProperty = "",
-        string typeCategory = "",
-        string levelProperty = "",
-        string levelCategory = "",
-        string materialProperty = "",
-        string materialCategory = "",
-        string classificationProperty = "",
-        string classificationCategory = "")
+        [NodePropertyChoice(NodeDataSource.Selection, "typeCategory")] string typeProperty = "",
+        [NodeTabChoice(NodeDataSource.Selection)] string typeCategory = "",
+        [NodePropertyChoice(NodeDataSource.Selection, "levelCategory")] string levelProperty = "",
+        [NodeTabChoice(NodeDataSource.Selection)] string levelCategory = "",
+        [NodePropertyChoice(NodeDataSource.Selection, "materialCategory")] string materialProperty = "",
+        [NodeTabChoice(NodeDataSource.Selection)] string materialCategory = "",
+        [NodePropertyChoice(NodeDataSource.Selection, "classificationCategory")] string classificationProperty = "",
+        [NodeTabChoice(NodeDataSource.Selection)] string classificationCategory = "")
     {
         return new PropertyRoles
         {
@@ -263,14 +271,14 @@ public static class IfcExportNodes
     /// <returns>A parameter-map rule; collect several into a list for Export.ToIfc.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeName("Export.IfcParameterRule")]
-    [NodeDescription("One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export.")]
+    [NodeDescription("One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export. The search button next to source and sourceCategory lists what the elements selected in Navisworks right now carry.")]
     [NodeSearchTags("ifc", "export", "parameter", "property", "pset", "rename", "map", "rule")]
     [return: NodeName("rule")]
     public static ParamMapRule IfcParameterRule(
-        string source,
+        [NodePropertyChoice(NodeDataSource.Selection, "sourceCategory")] string source,
         string targetPset = "",
         string targetName = "",
-        string sourceCategory = "")
+        [NodeTabChoice(NodeDataSource.Selection)] string sourceCategory = "")
     {
         if (string.IsNullOrWhiteSpace(source))
         {

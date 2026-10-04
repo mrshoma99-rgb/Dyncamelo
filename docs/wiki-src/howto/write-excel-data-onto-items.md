@@ -23,7 +23,7 @@ Goal: take columns such as `Cost` and `Supplier` from an Excel sheet, match each
 2. Add `Search.ByProperty` (*Navisworks ▸ Search*). Type `Element` into `categoryName` and `Category` into `propertyName`. Wire the `String` into `value`, which has no box of its own.
 3. Add `Properties.ToTable` (*Navisworks ▸ Properties*). Wire the search `items` into its `items`. Its `properties` input has no box either: add a `String.Split` (*String*) with the text `@Guid,@Name` and the separator `,`, and wire its `list` into it. `@Guid` is the item's instance GUID.
 4. Add a `File Path` node (*Input*), rename it `Workbook` and type the full path, for example `C:\Data\walls.xlsx`. Add `Table.FromExcelFile` (*Table*) and wire `path` into its `path`.
-5. Add `Table.Join` (*Table*). Wire the `Properties.ToTable` table into `left` and the Excel table into `right`. Type `@Guid` into `leftKey` and `GUID` into `rightKey`, and choose `left` in `kind`. A left join keeps every item, in search order.
+5. Add `Table.Join` (*Table*). Wire the `Properties.ToTable` table into `left` and the Excel table into `right`. Type `@Guid` into `leftKey` and `GUID` into `rightKey`, and choose `left` in `kind`. A left join keeps every item, in search order. A GUID matches whatever its capitals and small letters, and an item or row with a blank GUID is never matched. To join on two columns, give both names (`Level, Mark`) in `leftKey` and in `rightKey`. `Table.Unmatched` (same inputs) lists the items that found no row in the sheet.
 6. Add a `Watch Table` (*Display*), rename it `Joined table`, wire the joined table into it and press ++f5++. Check that `Cost` and `Supplier` are filled. An empty cell means the sheet has no row for that item.
 7. Add a `String` node with the text `Cost,Supplier`, rename it `Columns to write`, and wire it into `columns` of `Table.SelectColumns` (*Table*). Wire the joined table into its `table`.
 8. Add `Table.Rows` (*Table*) and wire the selected table into it. `rows` holds one list of cells for each item.
@@ -41,12 +41,16 @@ Why step 10: `Properties.SetCustom` writes one list of names and values to **all
 
 Running again with `merge` on (the default) keeps other properties in the tab and lets the new values win. `Properties.RemoveCustomTab` removes the tab.
 
+!!! tip "A shorter way: Properties.SetCustomFromTable"
+    Steps 7 to 10 can be one node. Add `Properties.SetCustomFromTable` (*Navisworks ▸ Properties*), wire the joined table into `table`, type `Spreadsheet` into `tabName` and `@Guid` into `keyColumn`, and leave `items` and `columns` empty. Every row finds its item by the GUID in the `@Guid` column, in one pass over the model, and every column except `@Guid` and the other `@` columns becomes a property named after its header. No list levels are needed, rows that match no item are skipped and listed in `missing`, and the node checks every value before it writes to the first item. Without `keyColumn`, row 1 goes to item 1, row 2 to item 2 and so on, and the node refuses a table with a different number of rows than items.
+
 !!! warning "One row for each GUID"
     If the sheet holds a GUID twice, the join adds a second row for that item and items and rows no longer line up. Remove duplicates first.
 
 ## If it does not work
 
 * The `Cost` and `Supplier` cells in the Watch Table are empty: the keys do not match. Compare one `@Guid` value with the sheet.
+* `Properties.SetCustom` is red and says the value for a property "is a list of 2 values": the `values` socket lacks its `@L2` badge, so a whole row reached one property. The node refuses it instead of writing the list into every item.
 * Items get the wrong values: a socket lacks its `@L1` or `@L2` badge, or the sheet has duplicate GUIDs ([Concepts](../concepts.md#lists-replication-and-lacing)).
 * A node is red: see [Read errors and warnings](read-errors-and-warnings.md).
 

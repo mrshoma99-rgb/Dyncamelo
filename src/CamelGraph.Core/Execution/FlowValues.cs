@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CamelGraph.Core.Graph;
@@ -55,10 +56,26 @@ public sealed class UpstreamError
             : graph.FindConnectionInto(port) is ConnectionModel single ? new List<ConnectionModel> { single } : new List<ConnectionModel>();
         foreach (var wire in wires.Where(w => !w.IsMuted))
         {
-            Collect(graph, wire.SourceNode, visited, lines);
+            CollectWire(graph, wire, visited, lines);
         }
 
         return new UpstreamError(lines.Count == 0 ? "An upstream node failed." : string.Join(" | ", lines));
+    }
+
+    // A wire out of a node group socket that carries a failure already holds the reason (it crossed the group's border as a value).
+    private static void CollectWire(GraphModel graph, ConnectionModel wire, HashSet<NodeModel> visited, List<string> lines)
+    {
+        if (wire.Source.Value is UpstreamError carried && wire.SourceNode.IsOutputFailed(wire.Source))
+        {
+            if (!lines.Contains(carried.Message))
+            {
+                lines.Add(carried.Message);
+            }
+
+            return;
+        }
+
+        Collect(graph, wire.SourceNode, visited, lines);
     }
 
     private static void Collect(GraphModel graph, NodeModel node, HashSet<NodeModel> visited, List<string> lines)
@@ -72,7 +89,7 @@ public sealed class UpstreamError
         {
             var text = node.Messages.Where(m => m.Severity >= MessageSeverity.Error).Select(m => m.Text).FirstOrDefault()
                        ?? node.StateMessage;
-            lines.Add(node.Name + ": " + text);
+            lines.Add(Prefixed(node.Name, text));
         }
         else if (node.FailedUpstream)
         {
@@ -83,9 +100,13 @@ public sealed class UpstreamError
                     : graph.FindConnectionInto(input) is ConnectionModel single ? new List<ConnectionModel> { single } : new List<ConnectionModel>();
                 foreach (var wire in wires.Where(w => !w.IsMuted))
                 {
-                    Collect(graph, wire.SourceNode, visited, lines);
+                    CollectWire(graph, wire, visited, lines);
                 }
             }
         }
     }
+
+    /// <summary>"Node name: text", without repeating the name when the text already starts with it (most library messages do).</summary>
+    internal static string Prefixed(string name, string text) =>
+        text.StartsWith(name + ":", StringComparison.Ordinal) ? text : name + ": " + text;
 }

@@ -93,7 +93,11 @@ public static class ColorExtraNodes
     [return: NodeName("color")]
     [NodeDescription("Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped).")]
     [NodeSearchTags("hsv", "hsb", "hue", "saturation", "brightness", "create")]
-    public static CamelGraphColor ByHsv(double hue, double saturation, double value, [NodeRange(0, 255)] int alpha = 255)
+    public static CamelGraphColor ByHsv(
+        [NodeRange(0, 360, Step = 5, Unit = "°")] double hue = 0d,
+        [NodeRange(0, 1, Step = 0.05)] double saturation = 1d,
+        [NodeRange(0, 1, Step = 0.05)] double value = 1d,
+        [NodeRange(0, 255)] int alpha = 255)
     {
         RequireFinite(hue, "Color.ByHSV", nameof(hue));
         RequireNumber(saturation, "Color.ByHSV", nameof(saturation));
@@ -138,7 +142,7 @@ public static class ColorExtraNodes
     [return: NodeName("color")]
     [NodeDescription("Makes a color lighter by shifting its HSL lightness up by amount (0-1, clamped); alpha is kept.")]
     [NodeSearchTags("lighter", "brighten", "tint", "pale", "lightness", "hsl")]
-    public static CamelGraphColor Lighten(CamelGraphColor color, double amount = 0.2)
+    public static CamelGraphColor Lighten(CamelGraphColor color, [NodeRange(0, 1, Step = 0.05)] double amount = 0.2)
     {
         RequireColor(color, "Color.Lighten", nameof(color));
         RequireNumber(amount, "Color.Lighten", nameof(amount));
@@ -157,7 +161,7 @@ public static class ColorExtraNodes
     [return: NodeName("color")]
     [NodeDescription("Makes a color darker by shifting its HSL lightness down by amount (0-1, clamped); alpha is kept.")]
     [NodeSearchTags("darker", "shade", "dim", "lightness", "hsl")]
-    public static CamelGraphColor Darken(CamelGraphColor color, double amount = 0.2)
+    public static CamelGraphColor Darken(CamelGraphColor color, [NodeRange(0, 1, Step = 0.05)] double amount = 0.2)
     {
         RequireColor(color, "Color.Darken", nameof(color));
         RequireNumber(amount, "Color.Darken", nameof(amount));
@@ -173,7 +177,7 @@ public static class ColorExtraNodes
     [return: NodeName("color")]
     [NodeDescription("Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque; red, green and blue are unchanged.")]
     [NodeSearchTags("alpha", "opacity", "transparency", "transparent", "set")]
-    public static CamelGraphColor WithAlpha(CamelGraphColor color, [NodeRange(0, 255)] int alpha)
+    public static CamelGraphColor WithAlpha(CamelGraphColor color, [NodeRange(0, 255)] int alpha = 255)
     {
         RequireColor(color, "Color.WithAlpha", nameof(color));
 

@@ -8,7 +8,7 @@ This page covers the File menu, how CamelGraph protects unsaved work, where to k
 
 A `.dyc` file is plain text (JSON) with a version number. It stores the script itself: the nodes and their positions, the wires, the values you typed into inputs, notes, frames, lacing settings, mute and freeze marks, bookmarks, the script's name and description, whether it is set to run automatically, and which nodes and inputs the Script Player shows. If the script uses [node groups](node-groups.md), the groups are stored in the file too.
 
-It does **not** store results, and it does not contain your model. A script works on whichever Navisworks model is open when you run it, so one script serves every project. When you open a script, every node starts "not run yet" and calculates when you press **Run**. If you switch to a different document in Navisworks, CamelGraph marks every node out of date, so the next run recalculates the whole script against the new document.
+It does **not** store results, and it does not contain your model. A script works on whichever Navisworks model is open when you run it, so one script serves every project. The exception is elements you pinned on a node input with *Use selection* and the **Captured Selection** node: they are stored with their position in the model tree and their GUID, and when the model is another project they are looked up by GUID; the ones that are not found are reported as a warning on the node ("3 of 10 picked elements were not found") and left out, so pick or capture again for each project. When you open a script, every node starts "not run yet" and calculates when you press **Run**. If you switch to a different document in Navisworks, CamelGraph marks every node out of date, so the next run recalculates the whole script against the new document.
 
 ## The File menu
 
@@ -72,9 +72,9 @@ A `.dyc` file is small and can be emailed, put on a shared drive or kept in vers
 
 ### What happens when someone opens your script
 
-A script is a small program, and CamelGraph treats a file that came from somewhere else with care. When you **run** a script opened from a file, and it contains nodes that **start other programs, use the network, or delete, move or overwrite files**, CamelGraph lists those nodes and asks whether to go ahead. You are asked once per file, and again only if the file changes. Scripts you build in the editor and the built-in samples never ask. A script saved with **Auto** on starts running as soon as it opens, but if it came from a file and contains such nodes, CamelGraph waits for you to press **Run** and say so in the status bar.
+A script is a small program, and CamelGraph treats a file that came from somewhere else with care. When you **run** a script opened from a file, and it contains nodes that **start other programs, use the network, write, delete, move or overwrite files, or change the Navisworks model**, CamelGraph lists those nodes, says what each one does and asks whether to go ahead. You are asked once per file, and again only if the file changes. Scripts you build in the editor and the built-in samples never ask. A script saved with **Auto** on starts running as soon as it opens, but if it came from a file and contains such nodes, CamelGraph waits for you to press **Run** and say so in the status bar.
 
-You can turn the question off in **Settings ▸ Editing ▸ Ask before running graphs from files**, but the safer choice is to leave it on. The Script Player asks a similar question for scripts that change the model. See [Privacy and safety](privacy-and-safety.md).
+You can turn the question off in **Settings ▸ Editing ▸ Ask before running graphs from files**, but the safer choice is to leave it on. The Script Player asks a similar question for scripts that change the model or write files. See [Privacy and safety](privacy-and-safety.md).
 
 ### Missing nodes
 

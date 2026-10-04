@@ -1001,8 +1001,10 @@ public class SystemNodesTests : IDisposable
         var expected = new (string Name, GraphFunction Role, string[]? Keys, string[]? Kinds)[]
         {
             ("System.Environment", GraphFunction.Info, new[] { "userName", "machineName", "osVersion", "currentDirectory", "tempPath", "documentsPath", "appDataPath" }, new[] { "text", "text", "text", "file", "file", "file", "file" }),
+            ("Graph.Folder", GraphFunction.Info, null, null),
             ("System.OpenPath", GraphFunction.Modify, null, null),
             ("System.Run", GraphFunction.Modify, new[] { "exitCode", "output", "error" }, new[] { "integer", "text", "text" }),
+            ("Web.Download", GraphFunction.Modify, new[] { "path", "status", "ok", "sizeBytes" }, new[] { "file", "integer", "boolean", "number" }),
             ("Web.Get", GraphFunction.Info, new[] { "status", "body", "ok" }, new[] { "integer", "text", "boolean" }),
             ("Web.Post", GraphFunction.Modify, new[] { "status", "body", "ok" }, new[] { "integer", "text", "boolean" }),
         };

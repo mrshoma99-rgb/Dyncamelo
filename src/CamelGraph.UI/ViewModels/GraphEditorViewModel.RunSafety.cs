@@ -5,7 +5,7 @@ using CamelGraph.Core.Editing;
 namespace CamelGraph.UI.ViewModels;
 
 /// <summary>
-/// Asks before a graph that came from a file runs nodes that start programs, use the network or change existing files. A graph file can
+/// Asks before a graph that came from a file runs nodes that start programs, use the network, write or change files, or change the model. A graph file can
 /// come from anybody; running it is running their instructions on this computer. A graph made in the editor, a built-in sample, or a
 /// file the user has already agreed to run (remembered with the file's hash, so a changed file asks again) runs without asking.
 /// </summary>
@@ -20,8 +20,8 @@ public partial class GraphEditorViewModel
     private string? _fileHash;
 
     /// <summary>
-    /// True (the default) to ask before running a graph opened from a file that holds nodes which start programs, use the network or
-    /// change existing files.
+    /// True (the default) to ask before running a graph opened from a file that holds nodes which start programs, use the network, write or
+    /// change files, or change the model.
     /// </summary>
     public bool ConfirmUntrustedRuns
     {

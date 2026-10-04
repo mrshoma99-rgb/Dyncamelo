@@ -255,14 +255,16 @@ public class FileNodesTests : IDisposable
     }
 
     [Fact]
-    public void FileExists_EmptyPath_ThrowsHelpfulMessage()
+    public void FileExists_BlankPath_IsFalse_NotAnError()
     {
-        var ex = Assert.Throws<ArgumentException>(() => FileNodes.FileExists(" "));
-        Assert.Contains("File Path", ex.Message);
+        // Wave D (SYS-32): a blank path answers false, so the node can sit in front of Flow.When without turning red.
+        Assert.False(FileNodes.FileExists(" "));
+        Assert.False(FileNodes.FileExists(""));
+        Assert.False(FileNodes.FileExists(null!));
     }
 
     [Fact]
-    public void GetFiles_ListsFilesSorted_IncludingExtensionless()
+    public void GetFiles_ListsFilesSortedByName_IncludingExtensionless()
     {
         File.WriteAllText(PathFor("b.txt"), "");
         File.WriteAllText(PathFor("a.txt"), "");
@@ -271,8 +273,9 @@ public class FileNodesTests : IDisposable
 
         var files = FileNodes.GetFiles(_directory);
 
+        // Names sort ignoring case (SYS-16): README comes after b.txt, as in Explorer.
         Assert.Equal(
-            new[] { PathFor("README"), PathFor("a.txt"), PathFor("b.txt") },
+            new[] { PathFor("a.txt"), PathFor("b.txt"), PathFor("README") },
             files);
     }
 

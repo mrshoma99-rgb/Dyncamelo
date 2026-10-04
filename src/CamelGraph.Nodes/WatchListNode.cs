@@ -18,6 +18,9 @@ public class WatchListNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNode
     /// <summary>Serialized type tag.</summary>
     public const string TypeName = "WatchList";
 
+    /// <summary>The most entries drawn; a last line says how many more there are.</summary>
+    public const int MaxEntries = 2000;
+
     private IReadOnlyList<string> _lines = new List<string>();
     private IReadOnlyList<WatchListEntry> _entries = new List<WatchListEntry>();
     private double _viewWidth;
@@ -28,7 +31,7 @@ public class WatchListNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNode
     {
         Name = "Watch List";
         Category = "Display";
-        Description = "Displays the elements of a list, one per line.";
+        Description = "Displays the elements of a list, one per line. A very long list shows its first 2,000 elements and a count of the rest; the value itself passes through whole. When the node does not run the display is cleared.";
         AddInput("list", typeof(object), "The list (or value) to display.");
         AddOutput("list", typeof(object), "The incoming value, passed through.");
     }
@@ -89,7 +92,17 @@ public class WatchListNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "preview", "inspect", "debug", "print", "show", "output", "result", "view" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
+
+    /// <summary>The display is cleared: an old list is never shown as the current result.</summary>
+    public override void OnNotRun()
+    {
+        Entries = new List<WatchListEntry>();
+        Lines = new List<string>();
+    }
 
     /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
@@ -99,17 +112,25 @@ public class WatchListNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNode
         var entries = new List<WatchListEntry>();
         if (value is IList list && !(value is string))
         {
-            for (int i = 0; i < list.Count; i++)
+            var shown = System.Math.Min(list.Count, MaxEntries);
+            for (int i = 0; i < shown; i++)
             {
                 var index = i.ToString(CultureInfo.InvariantCulture);
-                var text = TypeCoercion.FormatValue(list[i]);
+                var text = ValueText.Format(list[i], 200);
                 lines.Add(index + " : " + text);
                 entries.Add(new WatchListEntry(index, text));
+            }
+
+            if (shown < list.Count)
+            {
+                var more = "… " + ValueText.Count(list.Count - shown) + " more items (" + ValueText.Count(list.Count) + " in all)";
+                lines.Add(more);
+                entries.Add(new WatchListEntry(string.Empty, more));
             }
         }
         else
         {
-            var text = TypeCoercion.FormatValue(value);
+            var text = ValueText.Format(value, 200);
             lines.Add(text);
             entries.Add(new WatchListEntry(string.Empty, text));
         }

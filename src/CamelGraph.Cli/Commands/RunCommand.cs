@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using CamelGraph.Core.Execution;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Graph;
 using CamelGraph.Core.Nodes;
 using CamelGraph.Core.Types;
@@ -29,7 +30,12 @@ internal static class RunCommand
         output.WriteLine();
 
         var engine = new GraphEngine();
-        var result = engine.Run(graph);
+        RunResult result;
+        using (GraphContext.Use(GraphContext.FolderFor(graphPath)))
+        {
+            // Relative paths in file nodes mean "next to the graph file".
+            result = engine.Run(graph);
+        }
 
         // Accurate per-node evaluation time from the engine, summed across loop
         // iterations (the old NodeExecuted-gap heuristic mis-attributed loop time).

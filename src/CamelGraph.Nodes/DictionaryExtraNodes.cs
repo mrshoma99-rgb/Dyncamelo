@@ -24,7 +24,8 @@ public static class DictionaryExtraNodes
     [NodeName("Dictionary.ContainsKey")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("hasKey")]
-    [NodeDescription("Tests whether a dictionary has the given key (case-sensitive).")]
+    [NodeDescription("Tests whether a dictionary has the given key (case-sensitive)."
+        + " A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.")]
     [NodeSearchTags("has", "exists", "key", "lookup", "contains", "map")]
     public static bool ContainsKey(IDictionary dictionary, string key)
     {
@@ -39,7 +40,8 @@ public static class DictionaryExtraNodes
     /// <returns>A new dictionary without the key.</returns>
     [NodeName("Dictionary.RemoveKey")]
     [return: NodeName("dictionary")]
-    [NodeDescription("Returns a copy of the dictionary without the given key (a missing key is fine).")]
+    [NodeDescription("Returns a copy of the dictionary without the given key (a missing key is fine)."
+        + " A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To leave out several keys of one dictionary use Dictionary.RemoveKeys.")]
     [NodeSearchTags("delete", "drop", "remove", "omit", "without", "map")]
     public static Dictionary<string, object?> RemoveKey(IDictionary dictionary, string key)
     {
@@ -177,7 +179,8 @@ public static class DictionaryExtraNodes
     /// <returns>The stored value, or the default.</returns>
     [NodeName("Dictionary.ValueOrDefault")]
     [return: NodeName("value")]
-    [NodeDescription("Returns the value stored under a key, or a default value when the key is missing.")]
+    [NodeDescription("Returns the value stored under a key, or a default value when the key is missing."
+        + " A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.")]
     [NodeSearchTags("get", "lookup", "fallback", "safe", "optional", "missing", "map")]
     public static object? ValueOrDefault(IDictionary dictionary, string key, object? defaultValue = null)
     {
@@ -209,7 +212,203 @@ public static class DictionaryExtraNodes
         return inverted;
     }
 
+    /// <summary>Keeps only some keys of a dictionary, in the order the keys are listed.</summary>
+    /// <param name="dictionary">The dictionary to copy from.</param>
+    /// <param name="keys">The keys to keep (a single key works too). A key the dictionary does not have is left out; a key listed twice is kept once.</param>
+    /// <returns>A new dictionary with only those keys.</returns>
+    [NodeName("Dictionary.SelectKeys")]
+    [return: NodeName("dictionary")]
+    [NodeDescription("Returns a copy of the dictionary with only the listed keys, in the order they are listed (trim a property bag to the few keys a report needs). A key the dictionary does not have is left out. A list of dictionaries gives one trimmed dictionary each; the key list applies to every one of them.")]
+    [NodeSearchTags("pick", "keep", "filter", "subset", "only", "columns", "fields", "map")]
+    public static Dictionary<string, object?> SelectKeys(IDictionary dictionary, IList<object?> keys)
+    {
+        RequireDictionary("Dictionary.SelectKeys", dictionary);
+        RequireKeys("Dictionary.SelectKeys", keys);
+
+        var selected = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var item in keys)
+        {
+            if (item == null)
+            {
+                continue;
+            }
+
+            var key = TypeCoercion.FormatValue(item);
+            if (!selected.ContainsKey(key) && TryGetValue(dictionary, key, out var value))
+            {
+                selected[key] = value;
+            }
+        }
+
+        return selected;
+    }
+
+    /// <summary>Copies a dictionary without several keys.</summary>
+    /// <param name="dictionary">The dictionary to copy.</param>
+    /// <param name="keys">The keys to leave out (a single key works too). A key the dictionary does not have is fine.</param>
+    /// <returns>A new dictionary without those keys.</returns>
+    [NodeName("Dictionary.RemoveKeys")]
+    [return: NodeName("dictionary")]
+    [NodeDescription("Returns a copy of the dictionary without any of the listed keys (a key it does not have is fine). A list of keys gives one dictionary without all of them, unlike Dictionary.RemoveKey, which pairs a list of keys with a list of dictionaries. A list of dictionaries gives one result each; the key list applies to every one of them.")]
+    [NodeSearchTags("delete", "drop", "remove", "omit", "without", "many", "map")]
+    public static Dictionary<string, object?> RemoveKeys(IDictionary dictionary, IList<object?> keys)
+    {
+        RequireDictionary("Dictionary.RemoveKeys", dictionary);
+        RequireKeys("Dictionary.RemoveKeys", keys);
+
+        var drop = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var item in keys)
+        {
+            if (item != null)
+            {
+                drop.Add(TypeCoercion.FormatValue(item));
+            }
+        }
+
+        var copy = new Dictionary<string, object?>(dictionary.Count, StringComparer.Ordinal);
+        foreach (DictionaryEntry entry in dictionary)
+        {
+            var entryKey = TypeCoercion.FormatValue(entry.Key);
+            if (!drop.Contains(entryKey))
+            {
+                copy[entryKey] = entry.Value;
+            }
+        }
+
+        return copy;
+    }
+
+    /// <summary>Sets several keys of a dictionary at once.</summary>
+    /// <param name="dictionary">The dictionary to copy.</param>
+    /// <param name="keys">The keys to set or update (converted to text).</param>
+    /// <param name="values">One value per key, in the same order.</param>
+    /// <returns>A new dictionary with all the keys set; for a key listed twice the last value wins.</returns>
+    [NodeName("Dictionary.SetValues")]
+    [return: NodeName("dictionary")]
+    [NodeDescription("Returns a copy of the dictionary with several keys set or updated at once, from a list of keys and a list of values of the same length (the several-key version of Dictionary.SetValueAtKey). For a key listed twice the last value wins; the input dictionary is not changed. A list of dictionaries gives one result each; the keys and values apply to every one of them.")]
+    [NodeSearchTags("set", "update", "insert", "put", "many", "multiple", "map")]
+    public static Dictionary<string, object?> SetValues(IDictionary dictionary, IList<object?> keys, IList<object?> values)
+    {
+        RequireDictionary("Dictionary.SetValues", dictionary);
+        RequireKeys("Dictionary.SetValues", keys);
+        if (values == null)
+        {
+            throw new ArgumentNullException(nameof(values), "Dictionary.SetValues requires a list of values, one per key. Wire them into the 'values' input.");
+        }
+
+        if (keys.Count != values.Count)
+        {
+            throw new ArgumentException(
+                "Dictionary.SetValues requires the same number of keys (" + keys.Count.ToString(CultureInfo.InvariantCulture) +
+                ") and values (" + values.Count.ToString(CultureInfo.InvariantCulture) + ").");
+        }
+
+        var copy = new Dictionary<string, object?>(dictionary.Count + keys.Count, StringComparer.Ordinal);
+        foreach (DictionaryEntry entry in dictionary)
+        {
+            copy[TypeCoercion.FormatValue(entry.Key)] = entry.Value;
+        }
+
+        for (var i = 0; i < keys.Count; i++)
+        {
+            if (keys[i] == null)
+            {
+                throw new ArgumentException("Dictionary.SetValues: key " + (i + 1).ToString(CultureInfo.InvariantCulture) + " is empty; every value needs a key.");
+            }
+
+            copy[TypeCoercion.FormatValue(keys[i])] = values[i];
+        }
+
+        return copy;
+    }
+
+    /// <summary>Reads a value deep inside nested dictionaries and lists, such as the result of JSON.Parse or XML.Parse.</summary>
+    /// <param name="value">The dictionary (or list) to read from.</param>
+    /// <param name="path">The steps to follow, separated by / (or by . when the path has no /): a key such as Project/Name, a list position such as Tasks/Task/0/Name (negative counts from the end), or * for every item of a list.</param>
+    /// <param name="defaultValue">Returned when any step of the path is missing (null when left unwired).</param>
+    /// <returns>The value at the path, a list of the results when the path has a *, or the default.</returns>
+    [NodeName("Dictionary.ValueAtPath")]
+    [return: NodeName("value")]
+    [NodeDescription("Follows a path into nested data (the result of JSON.Parse or XML.Parse) and returns what it finds there, or a default value when any step is missing. The steps are separated by / (or by . when the path has no /): a key (Project/Name), a position in a list (Tasks/Task/0/Name; -1 is the last item) or * for every item of a list (Tasks/Task/*/Name gives a list of names). A position of 0 or -1 also works on a value that is not a list, so the same path reads a file with one <Task> and a file with many. A list of paths gives one result per path.")]
+    [NodeSearchTags("path", "nested", "deep", "json", "xml", "get", "lookup", "navigate", "drill", "map")]
+    public static object? ValueAtPath(object? value, string path, object? defaultValue = null)
+    {
+        if (path == null)
+        {
+            throw new ArgumentNullException(nameof(path), "Dictionary.ValueAtPath requires a path such as Project/Tasks/Task/0/Name. Wire text into the 'path' input.");
+        }
+
+        var separator = path.IndexOf('/') >= 0 ? '/' : '.';
+        var steps = new List<string>();
+        foreach (var step in path.Split(separator))
+        {
+            var trimmed = step.Trim();
+            if (trimmed.Length > 0)
+            {
+                steps.Add(trimmed);
+            }
+        }
+
+        var found = Follow(value, steps, 0, out var result);
+        return found ? result : defaultValue;
+    }
+
+    // Walks one step at a time. A step is a key (of a dictionary), a position (of a list; 0 and -1 also read a value that is not a
+    // list, as a one-item list), or * (every item of a list, the rest of the path applied to each).
+    private static bool Follow(object? current, List<string> steps, int index, out object? result)
+    {
+        if (index == steps.Count)
+        {
+            result = current;
+            return true;
+        }
+
+        var step = steps[index];
+        if (step == "*")
+        {
+            var items = current is IList all && !(current is string) ? all : new List<object?> { current };
+            var results = new List<object?>(items.Count);
+            foreach (var item in items)
+            {
+                results.Add(Follow(item, steps, index + 1, out var each) ? each : null);
+            }
+
+            result = results;
+            return true;
+        }
+
+        var isPosition = int.TryParse(step, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var position);
+        if (current is IDictionary dictionary && TryGetValue(dictionary, step, out var inner))
+        {
+            return Follow(inner, steps, index + 1, out result);
+        }
+
+        if (current is IList list && !(current is string))
+        {
+            var effective = position < 0 ? list.Count + position : position;
+            if (isPosition && effective >= 0 && effective < list.Count)
+            {
+                return Follow(list[effective], steps, index + 1, out result);
+            }
+        }
+        else if (isPosition && (position == 0 || position == -1) && current != null)
+        {
+            return Follow(current, steps, index + 1, out result);
+        }
+
+        result = null;
+        return false;
+    }
+
     // ── Helpers (private, so the loader does not import them) ───────────────
+
+    private static void RequireKeys(string node, IList<object?> keys)
+    {
+        if (keys == null)
+        {
+            throw new ArgumentNullException(nameof(keys), node + " requires a list of keys. Wire a key (or a list of keys) into the 'keys' input.");
+        }
+    }
 
     private static void RequireDictionary(string node, IDictionary dictionary)
     {
@@ -262,7 +461,7 @@ public static class DictionaryExtraNodes
     // other key type by its invariant text. A miss is the normal answer of ContainsKey and ValueOrDefault, so it has to be cheap: the
     // search for a key that is not a string looks at every entry, which is pointless (and was the whole cost of a miss) in a
     // dictionary that cannot hold anything but string keys, so only a dictionary that can hold other keys is searched.
-    private static bool TryGetValue(IDictionary dictionary, string key, out object? value)
+    internal static bool TryGetValue(IDictionary dictionary, string key, out object? value)
     {
         if (dictionary.Contains(key))
         {

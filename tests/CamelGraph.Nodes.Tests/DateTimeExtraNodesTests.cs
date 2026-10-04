@@ -389,7 +389,7 @@ public class DateTimeExtraNodesTests
     public void Range_StepMustBePositive(double step)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => DateTimeExtraNodes.Range(new DateTime(2026, 1, 1), new DateTime(2026, 1, 5), step));
-        Assert.Contains("stepDays must be a number greater than 0", ex.Message);
+        Assert.Contains("step must be a number greater than 0", ex.Message);
     }
 
     [Fact]

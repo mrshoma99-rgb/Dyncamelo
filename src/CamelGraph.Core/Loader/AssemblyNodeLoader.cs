@@ -276,6 +276,7 @@ public static class AssemblyNodeLoader
         definition.Outputs = CreateOutputDescriptors(method, definition.MultiReturnKeys, docs);
 
         definition.CatchesUpstreamErrors = method.GetCustomAttribute<CatchesUpstreamErrorsAttribute>() != null;
+        definition.IsLiveState = method.GetCustomAttribute<LiveStateAttribute>() != null;
 
         var deprecated = method.GetCustomAttribute<NodeDeprecatedAttribute>();
         if (deprecated != null)
@@ -458,13 +459,21 @@ public static class AssemblyNodeLoader
             if (tabChoice != null)
             {
                 descriptor.DataChoice = new CamelGraph.Core.Editing.ModelDataChoice(
-                    CamelGraph.Core.Editing.ModelDataKind.Tab, tabChoice.From, null, tabChoice.IncludeAncestors);
+                    CamelGraph.Core.Editing.ModelDataKind.Tab, tabChoice.From, null, tabChoice.IncludeAncestors, tabChoice.UserDefinedOnly);
             }
             else if (propertyChoice != null)
             {
                 descriptor.DataChoice = new CamelGraph.Core.Editing.ModelDataChoice(
                     CamelGraph.Core.Editing.ModelDataKind.Property, propertyChoice.From, propertyChoice.Tab, propertyChoice.IncludeAncestors);
             }
+        }
+
+        // A path chooser: only on a string parameter (it stays a plain text input otherwise).
+        var path = parameter.GetCustomAttribute<NodePathAttribute>();
+        if (path != null && parameter.ParameterType == typeof(string))
+        {
+            descriptor.PathMode = path.Mode;
+            descriptor.PathFilter = path.Filter ?? string.Empty;
         }
 
         descriptor.Range = parameter.GetCustomAttribute<NodeRangeAttribute>();
@@ -484,6 +493,11 @@ public static class AssemblyNodeLoader
         // Only a list-typed parameter can take several wires; on anything else the attribute is ignored.
         descriptor.MultiInput = parameter.GetCustomAttribute<MultiInputAttribute>() != null &&
                                 TypeCoercion.IsListType(parameter.ParameterType);
+
+        // Run-time behaviours of the port (never part of the definition id).
+        descriptor.AcceptsNull = parameter.GetCustomAttribute<AcceptsNullAttribute>() != null;
+        descriptor.ScalarInput = parameter.GetCustomAttribute<ScalarInputAttribute>() != null &&
+                                 parameter.ParameterType == typeof(object);
 
         if (parameter.IsOptional)
         {

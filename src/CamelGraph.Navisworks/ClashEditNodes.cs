@@ -4,6 +4,8 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes;
+using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks;
 
@@ -22,10 +24,12 @@ public static class ClashEditNodes
     /// <returns>The stored test (pass-through for chaining).</returns>
     [NodeName("ClashTest.Rename")]
     [NodeCategory("Navisworks.Clash.Tests")]
-    [NodeDescription("Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing: a list of tests (or of names) and a list of new names pair up one to one, one test per name.")]
     [NodeSearchTags("clash", "test", "rename", "name")]
     [return: NodeName("test")]
-    public static ClashTest Rename(object test, string newName, Document? document = null)
+    public static ClashTest Rename([ScalarInput] object test, string newName, Document? document = null)
     {
         RequireName(newName);
         var doc = NavisworksContext.ResolveDocument(document);
@@ -41,6 +45,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over results + String nodes for Smart-Results-style batch naming (e.g. "Pipe vs Duct L02-B3").</returns>
     [NodeName("ClashResult.Rename")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription("Renames a clash result or result group — with lacing and String nodes this is batch renaming (\"Clash1\" → \"Pipe vs Duct L02-B3\").")]
     [NodeSearchTags("clash", "result", "rename", "name", "smart", "batch")]
@@ -74,6 +79,7 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The result (pass-through). Lace over result lists for review notes in bulk.</returns>
     [NodeName("ClashResult.AddComment")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDeprecated("SavedItem.AddComment")]
     [NodeDescription("Appends a comment to a clash result or group — review notes in bulk, and the sync-back half of BCF round trips.")]
     [NodeSearchTags("clash", "result", "comment", "add", "note", "review", "bcf")]
@@ -149,8 +155,10 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByStatus")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
-    [NodeDescription("Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.")]
+    [NodeDescription("Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.")]
     [NodeSearchTags("clash", "group", "status", "triage", "bucket")]
     [MultiReturn("test", "groupCount")]
     [PortKinds("clash", "integer")]
@@ -165,8 +173,10 @@ public static class ClashEditNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByGridIntersection")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
-    [NodeDescription("Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).")]
+    [NodeDescription("Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources). Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.")]
     [NodeSearchTags("clash", "group", "grid", "intersection", "level", "location", "triage")]
     [MultiReturn("test", "groupCount")]
     [PortKinds("clash", "integer")]
@@ -192,69 +202,50 @@ public static class ClashEditNodes
     }
 
     /// <summary>Per-test result counts by status.</summary>
-    /// <param name="tests">The tests to summarize (empty/unwired = every test in the document).</param>
+    /// <param name="tests">The tests to summarize. Leave unwired for every test in the document; a wired list means exactly those tests, and an empty list gives a table without rows.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile.</returns>
+    /// <returns>Rows (one per test), headers, and the same as one table — wire the table straight into Table, CSV or Excel nodes.</returns>
     [NodeName("Clash.SummaryTable")]
     [NodeCategory("Navisworks.Clash.Report")]
-    [NodeDescription("Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.")]
+    [NodeDescription(
+        "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix. " +
+        "The table output goes straight into the Table nodes, Table.ToCsvFile and Excel.WriteTable; rows and headers are the " +
+        "same data as plain lists. Leave tests unwired for every test in the document; a wired list means exactly those tests, " +
+        "so an empty list (a filter that found no test) gives a table with the headers and no rows, not a report on everything.")]
     [NodeSearchTags("clash", "summary", "table", "matrix", "counts", "report", "excel")]
-    [MultiReturn("rows", "headers")]
-    [PortKinds("", "text*")]
+    [MultiReturn("rows", "headers", "table")]
+    [PortKinds("", "text*", "data")]
     public static Dictionary<string, object?> SummaryTable(
-        IEnumerable<ClashTest>? tests = null,
+        [MultiInput] IEnumerable<ClashTest>? tests = null,
         Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
-        var testList = new List<ClashTest>();
-        if (tests != null)
-        {
-            foreach (var test in tests)
-            {
-                if (test != null)
-                {
-                    testList.Add(test);
-                }
-            }
-        }
-
-        if (testList.Count == 0)
-        {
-            testList = NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests);
-        }
+        var testList = ClashInputs.SelectedOrAll<ClashTest>(
+            tests, () => NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests));
 
         var statusNames = Enum.GetNames(typeof(ClashResultStatus));
-        var headers = new List<string> { "Test", "Total" };
-        headers.AddRange(statusNames);
+        var headers = ClashSummary.Headers(statusNames);
 
         var rows = new List<List<object?>>();
         foreach (var test in testList)
         {
             var results = ClashHelpers.FlattenResults(test);
-            var countsByStatus = new Dictionary<string, int>(StringComparer.Ordinal);
+            var statuses = new List<string>(results.Count);
             foreach (var result in results)
             {
-                var status = result.Status.ToString();
-                countsByStatus.TryGetValue(status, out var count);
-                countsByStatus[status] = count + 1;
+                statuses.Add(result.Status.ToString());
             }
 
-            var row = new List<object?> { test.DisplayName, results.Count };
-            foreach (var statusName in statusNames)
-            {
-                countsByStatus.TryGetValue(statusName, out var count);
-                row.Add(count);
-            }
-
-            rows.Add(row);
+            rows.Add(ClashSummary.Row(test.DisplayName, statuses, statusNames));
         }
 
         return new Dictionary<string, object?>
         {
             ["rows"] = rows,
             ["headers"] = headers,
+            ["table"] = new CamelGraphTable(headers, rows),
         };
     }
 

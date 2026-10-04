@@ -21,7 +21,7 @@ public sealed class LoopCollectNode : NodeModel
     {
         Name = "Loop.Collect";
         Category = "Workflow";
-        Description = "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once.";
+        Description = "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once. An iteration that a Flow.When switched off adds nothing to 'results'. When some iterations fail, their place in 'results' is empty and this node shows a warning that counts them and names the first failure.";
         AddInput("loop", typeof(object), "Loop handle from Loop.Item.");
         AddInput("value", typeof(object), "The value to collect this iteration.");
         AddOutput("results", typeof(IList<object>), "One collected value per item.");
@@ -29,6 +29,9 @@ public sealed class LoopCollectNode : NodeModel
 
     /// <inheritdoc />
     public override string NodeType => TypeName;
+
+    /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "for each", "foreach", "iterate", "repeat", "per item", "batch", "collect", "gather", "end" };
 
     /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)

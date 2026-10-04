@@ -32,6 +32,10 @@ public class TableSortOrderTests
 
     private static object?[] Column(CamelGraphTable table, int column) => table.Rows.Select(r => r[column]).ToArray();
 
+    // The columns input takes a list of names; one text (with commas, " desc", "-") is a one-item list.
+    private static CamelGraphTable Sort(CamelGraphTable table, string spec, bool descending = false) =>
+        TableToolkitNodes.Sort(table, new List<object?> { spec }, descending);
+
     // ── What the current order is, case by case ─────────────────────────────
 
     [Fact]
@@ -40,12 +44,12 @@ public class TableSortOrderTests
         var table = SingleColumn(10, "b", 2, "a", 3.5, "B", 7L);
 
         // 2, 3.5, 7, 10 numerically; every number text ("2") sorts before a letter; "b" and "B" are equal, so they keep their order.
-        Assert.Equal(new object?[] { 2, 3.5, 7L, 10, "a", "b", "B" }, Column(TableToolkitNodes.Sort(table, "A"), 0));
+        Assert.Equal(new object?[] { 2, 3.5, 7L, 10, "a", "b", "B" }, Column(Sort(table, "A"), 0));
 
         // Descending reverses every comparison, but the tie of "b" and "B" is still decided by the original order.
-        Assert.Equal(new object?[] { "b", "B", "a", 10, 7L, 3.5, 2 }, Column(TableToolkitNodes.Sort(table, "-A"), 0));
-        Assert.Equal(new object?[] { "b", "B", "a", 10, 7L, 3.5, 2 }, Column(TableToolkitNodes.Sort(table, "A", descending: true), 0));
-        Assert.Equal(new object?[] { 2, 3.5, 7L, 10, "a", "b", "B" }, Column(TableToolkitNodes.Sort(table, "A asc", descending: true), 0));
+        Assert.Equal(new object?[] { "b", "B", "a", 10, 7L, 3.5, 2 }, Column(Sort(table, "-A"), 0));
+        Assert.Equal(new object?[] { "b", "B", "a", 10, 7L, 3.5, 2 }, Column(Sort(table, "A", descending: true), 0));
+        Assert.Equal(new object?[] { 2, 3.5, 7L, 10, "a", "b", "B" }, Column(Sort(table, "A asc", descending: true), 0));
     }
 
     [Fact]
@@ -54,12 +58,12 @@ public class TableSortOrderTests
         var table = SingleColumn(null, 3, "", "x", null, 1, " ", "");
 
         // A blank " " is text, not empty: it sorts as the text " " (before "x", but after the numbers since "1" < " " is false: '1' 0x31 > ' ' 0x20).
-        Assert.Equal(new object?[] { " ", 1, 3, "x", null, "", null, "" }, Column(TableToolkitNodes.Sort(table, "A"), 0));
-        Assert.Equal(new object?[] { "x", 3, 1, " ", null, "", null, "" }, Column(TableToolkitNodes.Sort(table, "A desc"), 0));
+        Assert.Equal(new object?[] { " ", 1, 3, "x", null, "", null, "" }, Column(Sort(table, "A"), 0));
+        Assert.Equal(new object?[] { "x", 3, 1, " ", null, "", null, "" }, Column(Sort(table, "A desc"), 0));
 
         // The empty cells (rows 0, 2, 4 and 7) keep their order after the others, whichever way the rest is sorted.
-        Assert.Equal(new object?[] { 6, 5, 1, 3, 0, 2, 4, 7 }, Column(TableToolkitNodes.Sort(table, "A"), 1));
-        Assert.Equal(new object?[] { 3, 1, 5, 6, 0, 2, 4, 7 }, Column(TableToolkitNodes.Sort(table, "A desc"), 1));
+        Assert.Equal(new object?[] { 6, 5, 1, 3, 0, 2, 4, 7 }, Column(Sort(table, "A"), 1));
+        Assert.Equal(new object?[] { 3, 1, 5, 6, 0, 2, 4, 7 }, Column(Sort(table, "A desc"), 1));
     }
 
     [Fact]
@@ -69,8 +73,8 @@ public class TableSortOrderTests
         var table = SingleColumn("12", 5, "9", "abc", 40);
 
         // 5 < "12" < "9" < 40 < "abc": numbers and numeric text meet only as numbers, text and text only as text.
-        Assert.Equal(new object?[] { 1, 0, 2, 4, 3 }, Column(TableToolkitNodes.Sort(table, "A"), 1));
-        Assert.Equal(new object?[] { 3, 4, 2, 0, 1 }, Column(TableToolkitNodes.Sort(table, "-A"), 1));
+        Assert.Equal(new object?[] { 1, 0, 2, 4, 3 }, Column(Sort(table, "A"), 1));
+        Assert.Equal(new object?[] { 3, 4, 2, 0, 1 }, Column(Sort(table, "-A"), 1));
     }
 
     [Fact]
@@ -94,7 +98,7 @@ public class TableSortOrderTests
         }
 
         // Pinned on the current runtime: for "x", "12", 9, "9", 10 the result is not the order the rules suggest.
-        Assert.Equal(new object?[] { 2, 1, 3, 4, 0 }, Column(TableToolkitNodes.Sort(SingleColumn(arrangements[1]), "A"), 1));
+        Assert.Equal(new object?[] { 2, 1, 3, 4, 0 }, Column(Sort(SingleColumn(arrangements[1]), "A"), 1));
     }
 
     [Fact]
@@ -102,7 +106,7 @@ public class TableSortOrderTests
     {
         // No number in the column: "10" < "9" like text.
         var table = SingleColumn("9", "10", "1", "100", "2");
-        Assert.Equal(new object?[] { "1", "10", "100", "2", "9" }, Column(TableToolkitNodes.Sort(table, "A"), 0));
+        Assert.Equal(new object?[] { "1", "10", "100", "2", "9" }, Column(Sort(table, "A"), 0));
     }
 
     [Fact]
@@ -110,7 +114,7 @@ public class TableSortOrderTests
     {
         var table = SingleColumn(2.5, 2, 2L, 2.0f, 2m, (byte)1, double.NaN, double.PositiveInfinity, double.NegativeInfinity, -0.0, 0.0);
 
-        var sorted = Column(TableToolkitNodes.Sort(table, "A"), 1);
+        var sorted = Column(Sort(table, "A"), 1);
         // NaN sorts below everything, then -inf, then -0 and 0 (equal, so in their original order), then 1, then 2, 2L, 2f and 2m
         // (one value, in their original order), 2.5 and +inf.
         Assert.Equal(new object?[] { 6, 8, 9, 10, 5, 1, 2, 3, 4, 0, 7 }, sorted);
@@ -125,7 +129,7 @@ public class TableSortOrderTests
 
         // Two booleans or two dates compare by value (false < true, earlier < later); every other pair compares the text of the two
         // cells ignoring case: "01/01/2024 00:00:00" < "06/01/2025 00:00:00" < "5" < "False" < "text" < "True" < "[1, 2]" < "[1]".
-        var order = Column(TableToolkitNodes.Sort(table, "A"), 1);
+        var order = Column(Sort(table, "A"), 1);
         Assert.Equal(new object?[] { 3, 1, 5, 2, 4, 0, 6, 7 }, order);
     }
 
@@ -144,17 +148,17 @@ public class TableSortOrderTests
         var table = Table(rows);
 
         // "L1" and "l1" are the same group; inside it "x" is above 12 (text), 12 and 12L are equal (so the original order decides).
-        Assert.Equal(new object?[] { 1, 3, 4, 5, 0, 2 }, Column(TableToolkitNodes.Sort(table, "A, -B"), 3));
+        Assert.Equal(new object?[] { 1, 3, 4, 5, 0, 2 }, Column(Sort(table, "A, -B"), 3));
         // 5 and 5.0 tie on B, then C decides (2 before the empty cell).
-        Assert.Equal(new object?[] { 3, 4, 1, 2, 0, 5 }, Column(TableToolkitNodes.Sort(table, "A, B, C"), 3));
-        Assert.Equal(new object?[] { 2, 0, 5, 1, 3, 4 }, Column(TableToolkitNodes.Sort(table, "-A, C desc"), 3));
+        Assert.Equal(new object?[] { 3, 4, 1, 2, 0, 5 }, Column(Sort(table, "A, B, C"), 3));
+        Assert.Equal(new object?[] { 2, 0, 5, 1, 3, 4 }, Column(Sort(table, "-A, C desc"), 3));
     }
 
     [Fact]
     public void AnEmptyOrOneRowTableSortsToItself()
     {
-        Assert.Equal(0, TableToolkitNodes.Sort(SingleColumn(), "A").RowCount);
-        Assert.Equal(new object?[] { "only" }, Column(TableToolkitNodes.Sort(SingleColumn("only"), "A"), 0));
+        Assert.Equal(0, Sort(SingleColumn(), "A").RowCount);
+        Assert.Equal(new object?[] { "only" }, Column(Sort(SingleColumn("only"), "A"), 0));
     }
 
     // ── The first implementation as the oracle ──────────────────────────────
@@ -217,7 +221,7 @@ public class TableSortOrderTests
         var spec = string.Join(", ", keys.Select(k => (k.Descending ? "-" : string.Empty) + table.Headers[k.Index]));
         try
         {
-            return string.Join(",", TableToolkitNodes.Sort(table, spec).Rows.Select(r => r[table.ColumnCount - 1]));
+            return string.Join(",", Sort(table, spec).Rows.Select(r => r[table.ColumnCount - 1]));
         }
         catch (Exception ex)
         {
@@ -369,8 +373,8 @@ public class TableSortOrderTests
         AppDomain.CurrentDomain.FirstChanceException += count;
         try
         {
-            TableToolkitNodes.Sort(table, "A");
-            TableToolkitNodes.Sort(table, "-A");
+            Sort(table, "A");
+            Sort(table, "-A");
         }
         finally
         {

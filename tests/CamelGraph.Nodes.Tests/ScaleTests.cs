@@ -474,14 +474,14 @@ public class ScaleTests
         Timed("Table.Filter (matches)", () => TableToolkitNodes.Filter(table, "Id", "matches", "ID-1*9"));
         Timed("Table.Filter (regex)", () => TableToolkitNodes.Filter(table, "Name", "regex", "Element [0-9]*7$"));
 
-        var sorted = Timed("Table.Sort (one column)", () => TableToolkitNodes.Sort(table, "Length"));
+        var sorted = Timed("Table.Sort (one column)", () => TableToolkitNodes.Sort(table, L("Length")));
         Assert.Equal(N, sorted.RowCount);
-        Timed("Table.Sort (three columns)", () => TableToolkitNodes.Sort(table, "Level, -Length, Name"));
-        Timed("Table.Sort (text column)", () => TableToolkitNodes.Sort(table, "Name", true));
+        Timed("Table.Sort (three columns)", () => TableToolkitNodes.Sort(table, L("Level, -Length, Name")));
+        Timed("Table.Sort (text column)", () => TableToolkitNodes.Sort(table, L("Name"), true));
 
         var distinct = Timed("Table.Distinct (whole rows)", () => TableToolkitNodes.Distinct(table));
         Assert.Equal(N, distinct.RowCount);
-        var levels = Timed("Table.Distinct (one column)", () => TableToolkitNodes.Distinct(table, "Level"));
+        var levels = Timed("Table.Distinct (one column)", () => TableToolkitNodes.Distinct(table, L("Level")));
         Assert.Equal(40, levels.RowCount);
 
         var chunks = new List<object?>();
@@ -502,18 +502,22 @@ public class ScaleTests
         var table = Elements(N);
 
         var groups = Timed("Table.GroupBy (150 groups)", () => TableToolkitNodes.GroupBy(
-            table, "Category", L("count", "sum:Length", "average:Length as Avg", "max:Length", "median:Length")));
+            table, L("Category"), L("count", "sum:Length", "average:Length as Avg", "max:Length", "median:Length")));
         Assert.Equal(150, groups.RowCount);
-        var byTwo = Timed("Table.GroupBy (two columns)", () => TableToolkitNodes.GroupBy(table, "Level, Category", L("count", "sum:Length")));
+        var byTwo = Timed("Table.GroupBy (two columns)", () => TableToolkitNodes.GroupBy(table, L("Level, Category"), L("count", "sum:Length")));
         Assert.True(byTwo.RowCount > 150);
-        var everyRow = Timed("Table.GroupBy (every row a group)", () => TableToolkitNodes.GroupBy(table, "Id", L("count", "first:Name")));
+        var everyRow = Timed("Table.GroupBy (every row a group)", () => TableToolkitNodes.GroupBy(table, L("Id"), L("count", "first:Name")));
         Assert.Equal(N, everyRow.RowCount);
-        Timed("Table.GroupBy (list and distinct)", () => TableToolkitNodes.GroupBy(table, "Level", L("list:Name", "distinct:Category")));
-        Timed("Table.GroupBy (totals only)", () => TableToolkitNodes.GroupBy(table, string.Empty, L("count", "sum:Length")));
+        Timed("Table.GroupBy (list and distinct)", () => TableToolkitNodes.GroupBy(table, L("Level"), L("list:Name", "distinct:Category")));
+        Timed("Table.GroupBy (totals only)", () => TableToolkitNodes.GroupBy(table, L(string.Empty), L("count", "sum:Length")));
 
         var withFormula = Timed("Table.AddFormulaColumn", () => TableToolkitNodes.AddFormulaColumn(table, "Metres", "Length / 1000 * 2 + 1"));
         Assert.Equal(N, withFormula.RowCount);
     }
+
+    // The key columns are a list of names.
+    private static CamelGraphTable JoinTable(CamelGraphTable left, CamelGraphTable right, string key, string kind = "inner") =>
+        TableToolkitNodes.Join(left, right, L(key), null, kind);
 
     [Fact]
     public void Table_PivotAndJoin()
@@ -532,11 +536,11 @@ public class ScaleTests
         var other = TableToolkitNodes.FromRows(
             Enumerable.Range(0, J).Select(i => (object?)new List<object?> { "ID-" + (J - 1 - i).ToString(CultureInfo.InvariantCulture), i % 7 }).ToList(),
             L("Id", "Priority"));
-        var inner = Timed("Table.Join (inner)", () => TableToolkitNodes.Join(table, other, "Id"));
+        var inner = Timed("Table.Join (inner)", () => JoinTable(table, other, "Id"));
         Assert.Equal(J, inner.RowCount);
-        Timed("Table.Join (left)", () => TableToolkitNodes.Join(table, other, "Id", string.Empty, "left"));
-        Timed("Table.Join (outer)", () => TableToolkitNodes.Join(table, other, "Id", string.Empty, "outer"));
-        var byLevel = Timed("Table.Join (many matches per key)", () => TableToolkitNodes.Join(
+        Timed("Table.Join (left)", () => JoinTable(table, other, "Id", "left"));
+        Timed("Table.Join (outer)", () => JoinTable(table, other, "Id", "outer"));
+        var byLevel = Timed("Table.Join (many matches per key)", () => JoinTable(
             TableToolkitNodes.Slice(table, 0, 2_000), TableToolkitNodes.Slice(table, 0, 2_000), "Level"));
         Assert.True(byLevel.RowCount > 2_000);
 
@@ -842,7 +846,8 @@ public class ScaleTests
 
         var result = Timed("replication: run (200 000 items, 160 000 pairs)", () => new GraphEngine().Run(graph), 20);
         Assert.True(result.Success);
-        Assert.Equal(N, watch.Entries.Count);
+        // Watch List draws at most MaxEntries entries plus one line that counts the rest (the value itself passes through whole).
+        Assert.Equal(WatchListNode.MaxEntries + 1, watch.Entries.Count);
         Assert.Equal(N, ((System.Collections.IList)shortest.OutPorts[0].Value!).Count);
         Assert.Equal(N, ((System.Collections.IList)longest.OutPorts[0].Value!).Count);
         Assert.Equal(400, ((System.Collections.IList)cross.OutPorts[0].Value!).Count);

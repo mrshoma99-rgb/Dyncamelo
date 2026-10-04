@@ -65,6 +65,9 @@ public class NodeDefinition
     /// <summary>True when the node runs on failed inputs, receiving them as <see cref="CamelGraph.Core.Execution.UpstreamError"/> values.</summary>
     public bool CatchesUpstreamErrors { get; set; }
 
+    /// <summary>True when the node reads live host state and so runs on every run (see <see cref="LiveStateAttribute"/>).</summary>
+    public bool IsLiveState { get; set; }
+
     /// <summary>What to use instead of a deprecated node, or empty.</summary>
     public string Replacement { get; set; } = string.Empty;
 

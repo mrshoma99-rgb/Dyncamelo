@@ -17,6 +17,12 @@ public static class EffectFixtures
     [NodeEffects(NodeEffects.UsesNetwork | NodeEffects.ChangesFiles)]
     public static double Sync(double a) => a;
 
+    [NodeEffects(NodeEffects.WritesFiles)]
+    public static double WriteFile(double a) => a;
+
+    [NodeEffects(NodeEffects.ChangesModel)]
+    public static double ChangeModel(double a) => a;
+
     public static double Harmless(double a) => a;
 }
 
@@ -26,6 +32,42 @@ public class GraphEffectsTests
     private static readonly System.Collections.Generic.List<NodeDefinition> Definitions = AssemblyNodeLoader.LoadType(typeof(EffectFixtures));
 
     private static ZeroTouchNodeModel Node(string method) => new ZeroTouchNodeModel(Definitions.Single(d => d.Method.Name == method));
+
+    [Fact]
+    public void ANodeThatWritesFilesOrChangesTheModelIsReportedAndDescribedAsSuch()
+    {
+        Assert.Equal(NodeEffects.WritesFiles, Node("WriteFile").Effects);
+        Assert.Equal(NodeEffects.ChangesModel, Node("ChangeModel").Effects);
+        var graph = new GraphModel();
+        graph.AddNode(Node("WriteFile"));
+        graph.AddNode(Node("ChangeModel"));
+        graph.AddNode(Node("Harmless"));
+
+        var findings = GraphEffects.Survey(graph);
+
+        Assert.Equal(2, findings.Count);
+        Assert.Contains(findings, f => f.Effect == NodeEffects.WritesFiles && f.NodeName.Contains("WriteFile"));
+        Assert.Contains(findings, f => f.Effect == NodeEffects.ChangesModel && f.NodeName.Contains("ChangeModel"));
+        var lines = GraphEffects.Describe(findings);
+        Assert.Contains(lines, l => l.StartsWith("writes files: ", System.StringComparison.Ordinal));
+        Assert.Contains(lines, l => l.StartsWith("changes the model: ", System.StringComparison.Ordinal));
+        Assert.StartsWith("Writes files: ", GraphEffects.Summarize(findings), System.StringComparison.Ordinal);
+        Assert.Equal(string.Empty, GraphEffects.Summarize(GraphEffects.Survey(new GraphModel())));
+    }
+
+    [Fact]
+    public void TheEditorSurveyAsksOnlyAboutDeclaredEffectsButThePlayerSurveyAlsoCountsModifyNodes()
+    {
+        var graph = new GraphModel();
+        graph.AddNode(new ModifyingTestNode { Name = "Isolate Walls" });
+
+        Assert.Empty(GraphEffects.Survey(graph));
+        var wider = GraphEffects.Survey(graph, true);
+
+        var finding = Assert.Single(wider);
+        Assert.Equal(NodeEffects.ChangesModel, finding.Effect);
+        Assert.Equal("Isolate Walls", finding.NodeName);
+    }
 
     [Fact]
     public void TheLoaderReadsTheAttributeAndDefaultsToNone()

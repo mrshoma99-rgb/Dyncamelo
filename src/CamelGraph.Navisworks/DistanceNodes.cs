@@ -24,7 +24,7 @@ public static class DistanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The distance (document units; 0 when touching/intersecting) and the closest point on each selection.</returns>
     [NodeName("Distance.BetweenItems")]
-    [NodeDescription("Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.")]
+    [NodeDescription("Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert. The bbox tier measures between the combined box of each side, a coarser answer than Proximity.NearestDistance, which measures to each target on its own. The default is mesh here and bbox on Proximity.NearestDistance.")]
     [NodeSearchTags("distance", "clearance", "closest", "shortest", "measure", "between", "gap")]
     [MultiReturn("distance", "pointA", "pointB")]
     [PortKinds("number", "geometry", "geometry")]
@@ -61,7 +61,7 @@ public static class DistanceNodes
     /// <returns>One distance per item (document units); +∞ when there are no targets.</returns>
     [NodeName("Proximity.NearestDistance")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" = fast, \"mesh\" = exact surfaces (slower on big sets).")]
+    [NodeDescription("For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" (the default here; Distance.BetweenItems defaults to mesh) = fast, \"mesh\" = exact surfaces (slower on big sets).")]
     [NodeSearchTags("proximity", "nearest", "closest", "distance", "neighbour", "near", "far", "within", "handrail")]
     [return: NodeName("distances")]
     public static List<double> NearestDistance(

@@ -15,8 +15,8 @@ Goal: turn "find the items on a level and colour them" into one node you can dro
 
 ## Steps
 
-1. Build the example. Add a `String` node (*Input*) for the level name. Add `Search.ByProperty` (*Navisworks ▸ Search*) with `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into its `value`. Add `Appearance.OverrideColor` (*Navisworks ▸ Appearance*), wire the search `items` into it, and wire a `Color Picker` (*Color*) into its `color`. Add a `Watch List` (*Display*) on the `items` output.
-2. Select **only** the search and the colour override. Leave the `String`, the `Color Picker` and the `Watch List` outside.
+1. Build the example. Add a `String` node (*Input*) for the level name. Add `Search.ByProperty` (*Navisworks ▸ Search*) with `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into its `value`. Add `Appearance.OverrideColor` (*Navisworks ▸ Appearance*), wire the search `items` into it, and wire a `Color Picker` (*Input*) into its `color`. Add a `Watch List` (*Display*) on the `items` output.
+2. Select the search and the colour override. Leave the `String`, the `Color Picker` and the `Watch List` outside. (If you select them too, CamelGraph keeps input and Watch nodes outside the group on its own, because the Script Player only sees the top level, and tells you which ones it kept out.)
 3. Choose **Node Groups ▸ Make Node Group** or press ++ctrl+alt+g++. An instance replaces your selection and keeps the same wires. The wires that crossed the edge of the selection became its sockets: two inputs and one output. The graph computes what it did before.
 4. Select the instance and press ++tab++. You see the group's nodes between a **Group Input** and a **Group Output** node, and a bar above the canvas such as `My script ▸ Node Group`.
 5. Right-click a socket on Group Input or Group Output and choose **Rename Socket…**. Use `Level`, `Colour` and `Painted items`. Choose **Socket Type** to set `Text` or `Colour`; the socket then takes that colour and an editor on the instance.
@@ -42,7 +42,7 @@ To add a socket quickly while a group is open, drag a wire onto the Group Output
     * A group can hold other groups, but never itself.
 
 !!! warning "Sharing and the Player"
-    Older versions of CamelGraph refuse a file that contains node groups, so tell the other person to update ([Saving and opening](../saving-opening.md#sharing-a-script)). The Script Player does not offer inputs that sit inside a group. Keep input nodes at the top level and wire them into the group.
+    Older versions of CamelGraph refuse a file that contains node groups, so tell the other person to update ([Saving and opening](../saving-opening.md#sharing-a-script)). The Script Player does not offer inputs that sit inside a group, and does not show a Watch inside one. Make Node Group keeps those nodes at the top level for you; if you move one in by hand, move it out again and wire it to the group.
 
 ## If it does not work
 

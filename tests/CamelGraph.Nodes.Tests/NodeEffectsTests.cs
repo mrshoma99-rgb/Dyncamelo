@@ -21,11 +21,25 @@ public class NodeEffectsTests
         ["System.OpenPath"] = NodeEffects.RunsPrograms,
         ["Web.Get"] = NodeEffects.UsesNetwork,
         ["Web.Post"] = NodeEffects.UsesNetwork,
-        ["File.Delete"] = NodeEffects.ChangesFiles,
-        ["File.Move"] = NodeEffects.ChangesFiles,
-        ["File.Copy"] = NodeEffects.ChangesFiles,
-        ["Directory.Delete"] = NodeEffects.ChangesFiles,
-        ["Zip.Extract"] = NodeEffects.ChangesFiles,
+        ["Web.Download"] = NodeEffects.UsesNetwork | NodeEffects.WritesFiles,
+        ["File.Delete"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["File.Move"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["File.Copy"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["Directory.Delete"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["Directory.Copy"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["Directory.Move"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["Directory.Create"] = NodeEffects.WritesFiles,
+        ["Zip.Extract"] = NodeEffects.ChangesFiles | NodeEffects.WritesFiles,
+        ["Zip.Create"] = NodeEffects.WritesFiles,
+        ["Text.WriteToFile"] = NodeEffects.WritesFiles,
+        ["Text.AppendToFile"] = NodeEffects.WritesFiles,
+        ["CSV.WriteToFile"] = NodeEffects.WritesFiles,
+        ["CSV.AppendToFile"] = NodeEffects.WritesFiles,
+        ["JSON.WriteToFile"] = NodeEffects.WritesFiles,
+        ["Excel.WriteToFile"] = NodeEffects.WritesFiles,
+        ["Log.Write"] = NodeEffects.WritesFiles,
+        ["Table.ToCsvFile"] = NodeEffects.WritesFiles,
+        ["Table.ToExcelFile"] = NodeEffects.WritesFiles,
     };
 
     [Fact]
@@ -85,10 +99,13 @@ public class NodeEffectsTests
     [Fact]
     public void TheShippedSamplesAskNothingWhenOpened()
     {
-        // Samples open as trusted, so none may hold a node that runs programs, uses the network or changes files.
+        // Samples open as trusted, so none may hold a node that runs programs, uses the network or deletes, moves or overwrites files.
+        // (Writing a new file, WritesFiles, and changing the model, ChangesModel, are what a sample such as "Export Properties to Excel"
+        // is for: they are listed to the user when a graph comes from a file, but a built-in sample may do them.)
+        const NodeEffects dangerous = NodeEffects.RunsPrograms | NodeEffects.UsesNetwork | NodeEffects.ChangesFiles;
         var registry = NodeRegistry.CreateDefault();
         NodeLibrary.RegisterAll(registry);
-        var flagged = new HashSet<string>(registry.Definitions.Where(d => d.Effects != NodeEffects.None).Select(d => d.Id), StringComparer.Ordinal);
+        var flagged = new HashSet<string>(registry.Definitions.Where(d => (d.Effects & dangerous) != NodeEffects.None).Select(d => d.Id), StringComparer.Ordinal);
 
         var bad = new List<string>();
         foreach (var file in Directory.GetFiles(Path.Combine(RepositoryRoot(), "samples"), "*.dyc"))

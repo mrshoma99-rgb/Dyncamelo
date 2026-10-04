@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -66,11 +67,16 @@ public static class GridNodes
     [NodeSearchTags("grid", "intersection", "intersections", "gridline", "axis", "lattice")]
     [MultiReturn("names", "points", "levelNames")]
     [PortKinds("text*", "geometry*", "text*")]
-    public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 10000, SoftMin = 2, SoftMax = 100)] int samples = 20)
+    public static Dictionary<string, object?> Intersections(Document? document = null, [NodeRange(2, 100, SoftMin = 2, SoftMax = 100, Step = 1)] int samples = 20)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var system = ResolveActiveSystem(doc);
         var density = Math.Max(2, Math.Min(100, samples));
+        if (density != samples)
+        {
+            // A wired value is not held to the field's range, so say so instead of silently running with another number.
+            NodeWarnings.Add("samples was " + samples.ToString(System.Globalization.CultureInfo.InvariantCulture) + "; it is limited to 2-100, so " + density.ToString(System.Globalization.CultureInfo.InvariantCulture) + " was used.");
+        }
 
         var bounds = doc.GetBoundingBox(false);
         if (bounds == null || bounds.IsEmpty)
@@ -107,11 +113,11 @@ public static class GridNodes
     }
 
     /// <summary>The grid intersection and level nearest to a point.</summary>
-    /// <param name="point">The query point (document units) — e.g. a ClashResult center or a bounding-box center.</param>
+    /// <param name="point">The query point (document units) — e.g. a ClashResult center or a bounding-box center. One point per run; for a list of points set List Levels L1 on this input.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The intersection name (e.g. "B-3"), its position, the level name, and a combined "B-3 : Level 2" label.</returns>
     [NodeName("Grids.ClosestIntersection")]
-    [NodeDescription("The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.")]
+    [NodeDescription("The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units. One point per run (a list of three numbers is one point): to label many points, such as the centres of many clashes, right-click the point input, choose List Levels and set L1 (L2 for a list of [x, y, z] lists), and you get one label per point.")]
     [NodeSearchTags("grid", "intersection", "closest", "nearest", "location", "label", "level")]
     [MultiReturn("name", "position", "levelName", "label")]
     [PortKinds("text", "geometry", "text", "text")]

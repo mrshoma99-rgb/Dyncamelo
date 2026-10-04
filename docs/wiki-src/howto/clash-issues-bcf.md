@@ -62,6 +62,6 @@ To jump the view to one issue, set `applyCameraTopicIndex` to its position, coun
 
 ## Next
 
-* `ClashResult.SetStatus` (*Navisworks ▸ Clash ▸ Results*) can update clash statuses from the topic statuses.
+* `ClashResult.SetStatus` (*Navisworks ▸ Clash ▸ Results*) can update clash statuses from the topic statuses. `ClashResult.ByGuid` finds the live results again from the topic GUIDs (the `guid` output of `BCF.ImportIssues`), and a result group can be set in one step too.
 * [IFC, BCF, Excel and CSV](../exchange-formats.md#bcf-issues) describes every BCF input.
 * [Export items to IFC](export-to-ifc.md).

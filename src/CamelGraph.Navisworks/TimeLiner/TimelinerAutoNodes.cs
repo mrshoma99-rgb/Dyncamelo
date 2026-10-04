@@ -23,16 +23,23 @@ public static class TimelinerAutoNodes
     /// <summary>Attaches items to every task whose name equals the items' property value.</summary>
     /// <param name="category">Property category display name (e.g. "Element" or a Properties.SetCustom tab). Internal names do not match.</param>
     /// <param name="property">Property display name (e.g. "Task Name"). Internal names do not match.</param>
+    /// <param name="matchOn">What the property value is compared with: the task's "Name" (default) or its "Display id" (the Activity ID column of an imported schedule).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>How many tasks received attachments, and the names of tasks with no matching items.</returns>
     [NodeName("TimeLiner.AutoAttachByProperty")]
-    [NodeDescription("For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks.")]
-    [NodeSearchTags("timeliner", "auto", "attach", "rules", "4d", "link", "schedule", "property")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name (or, with matchOn \"Display id\", the task's display id) " +
+        "and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left " +
+        "untouched and reported in unmatchedTasks. The search buttons next to category and property list what the elements selected in Navisworks right now carry.")]
+    [NodeSearchTags("timeliner", "auto", "attach", "rules", "4d", "link", "schedule", "property", "timelinertask", "activity id")]
     [MultiReturn("attachedCount", "unmatchedTasks")]
     [PortKinds("integer", "")]
     public static Dictionary<string, object?> AutoAttachByProperty(
-        string category,
-        string property,
+        [NodeTabChoice(NodeDataSource.Selection)] string category,
+        [NodePropertyChoice(NodeDataSource.Selection, "category")] string property,
+        [NodeChoices("Name", "Display id")] string matchOn = "Name",
         Document? document = null)
     {
         if (string.IsNullOrEmpty(category))
@@ -45,6 +52,7 @@ public static class TimelinerAutoNodes
             throw new ArgumentException("No property name provided.", nameof(property));
         }
 
+        var byDisplayId = ParseMatchOn(matchOn);
         var doc = NavisworksContext.ResolveDocument(document);
         var timeliner = doc.GetTimeliner()
             ?? throw new InvalidOperationException("TimeLiner is not available in this Navisworks edition.");
@@ -74,17 +82,17 @@ public static class TimelinerAutoNodes
                 continue;
             }
 
-            var taskName = stored.DisplayName;
+            var taskName = byDisplayId ? stored.DisplayId : stored.DisplayName;
             if (string.IsNullOrEmpty(taskName))
             {
-                unmatched.Add(string.Empty);
+                unmatched.Add(byDisplayId ? stored.DisplayName ?? string.Empty : string.Empty);
                 continue;
             }
 
             var items = SearchNodes.ByPropertyValue(category, property, taskName, document: doc);
             if (items.Count == 0)
             {
-                unmatched.Add(taskName);
+                unmatched.Add(byDisplayId ? stored.DisplayName ?? taskName : taskName);
                 continue;
             }
 
@@ -99,6 +107,22 @@ public static class TimelinerAutoNodes
             ["attachedCount"] = attached,
             ["unmatchedTasks"] = unmatched,
         };
+    }
+
+    private static bool ParseMatchOn(string? matchOn)
+    {
+        var text = (matchOn ?? string.Empty).Trim();
+        if (text.Length == 0 || string.Equals(text, "Name", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (string.Equals(text, "Display id", StringComparison.OrdinalIgnoreCase) || string.Equals(text, "DisplayId", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        throw new ArgumentException("Unknown matchOn '" + matchOn + "'. Use \"Name\" or \"Display id\".", nameof(matchOn));
     }
 
     /// <summary>

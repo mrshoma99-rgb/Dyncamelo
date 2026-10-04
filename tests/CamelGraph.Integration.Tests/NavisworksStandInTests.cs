@@ -143,7 +143,7 @@ public class NavisworksStandInTests
     public void TheSearchDropDownsOfTheRealNodesAreThere()
     {
         var search = Registry.Definitions.Single(d => d.Name == "Search.ByProperty");
-        Assert.Equal(new[] { "equals", "contains", "wildcard", ">", ">=", "<", "<=" }, search.Inputs.Single(i => i.Name == "mode").Choices);
+        Assert.Equal(new[] { "equals", "contains", "wildcard", ">", ">=", "<", "<=", "exists" }, search.Inputs.Single(i => i.Name == "mode").Choices);
         Assert.Equal(new[] { "Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry" }, search.Inputs.Single(i => i.Name == "resolveTo").Choices);
         Assert.Null(search.Inputs.Single(i => i.Name == "value").Choices);
     }
@@ -210,9 +210,9 @@ public class NavisworksStandInTests
     [InlineData("Clash.GroupResultsByStatus", "test,document", "test,groupCount")]
     [InlineData("Clash.GroupResultsByGridIntersection", "test,document", "test,groupCount")]
     [InlineData("Clash.GroupResultsBySameItem", "test,useItem1,document", "test,groupCount")]
-    [InlineData("Clash.GroupResultsByProximity", "test,radius,document", "test,groupCount")]
-    [InlineData("Clash.GroupResultsByLevel", "test,levelNames,levelElevations,document", "test,groupCount")]
-    [InlineData("Viewpoints.FromClashResults", "results,folderName,document", "viewpoints")]
+    [InlineData("Clash.GroupResultsByProximity", "test,radius,units,document", "test,groupCount")]
+    [InlineData("Clash.GroupResultsByLevel", "test,levelNames,levelElevations,units,document", "test,groupCount")]
+    [InlineData("Viewpoints.FromClashResults", "results,folderName,nameFormat,document", "viewpoints")]
     [InlineData("SelectionSets.BulkByPropertyValues", "categoryName,propertyName,folderName,document", "selectionSets,values")]
     public void TheClashGroupingAndFolderFillingNodesKeepTheirSockets(string name, string inputs, string outputs)
     {

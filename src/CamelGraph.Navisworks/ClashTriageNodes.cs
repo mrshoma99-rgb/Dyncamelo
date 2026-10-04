@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Coordination;
@@ -28,17 +29,20 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The test, the stored group, and how many results were added, moved and skipped.</returns>
     [NodeName("Clash.GroupResults")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeDescription(
         "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping " +
         "rule, not a built-in one: filter results any way you like, then group what came out. Results " +
         "already in other groups are left alone (skipped) unless moveExisting is true, which pulls them " +
-        "into this group. An existing same-named group is extended; re-runs are clean.")]
+        "into this group. An existing same-named group is extended; re-runs are clean. An empty list (a filter that found " +
+        "nothing) changes nothing and says so; several wires are merged into one list.")]
     [NodeSearchTags("clash", "group", "results", "move", "triage", "bucket", "organize")]
     [MultiReturn("test", "group", "added", "moved", "skipped")]
     [PortKinds("clash", "clash", "integer", "integer", "integer")]
     public static Dictionary<string, object?> GroupResults(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         string groupName,
         bool moveExisting = false,
         Document? document = null)
@@ -49,6 +53,20 @@ public static class ClashTriageNodes
         }
 
         var resultList = MaterializeResults(results);
+        if (resultList.Count == 0)
+        {
+            // A filter that found nothing is an answer, not a mistake: nothing to group.
+            NodeWarnings.Add("No clash results were given, so no group '" + groupName + "' was made or changed.");
+            return new Dictionary<string, object?>
+            {
+                ["test"] = null,
+                ["group"] = null,
+                ["added"] = 0,
+                ["moved"] = 0,
+                ["skipped"] = 0,
+            };
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
@@ -151,16 +169,18 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The group, the results inside it, the group's own status, and the result count.</returns>
     [NodeName("ClashGroup.ByName")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Finds a clash result group by test name + group name and opens it up: the results inside, the " +
         "group's own status, and the count. The lookup half of group-based triage — feed the results to " +
-        "any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.")]
+        "any filter/report node, or the group to ClashResult.SetStatus/Assign/Rename and SavedItem.AddComment. " +
+        "A list of test names (or tests) with a list of group names runs once per pair, one to one.")]
     [NodeSearchTags("clash", "group", "name", "fetch", "results", "status", "lookup")]
     [MultiReturn("group", "results", "status", "count")]
     [PortKinds("clash", "clash*", "text", "integer")]
-    public static Dictionary<string, object?> GroupByName(object test, string groupName, Document? document = null)
+    public static Dictionary<string, object?> GroupByName([ScalarInput] object test, string groupName, Document? document = null)
     {
         if (string.IsNullOrEmpty(groupName))
         {
@@ -204,13 +224,14 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>One flat list of every group, with each group's name, its test's name and its result count (index-aligned).</returns>
     [NodeName("Clash.AllGroups")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Group")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [NodeDescription(
         "Every result group of every clash test in the document, as ONE flat list — the whole-project " +
         "entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each " +
         "iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups " +
-        "per test (which needs List@Level to iterate). Tests without groups contribute nothing.")]
+        "per test (ClashTest.Groups runs once per test and gives a list of lists). Tests without groups contribute nothing.")]
     [NodeSearchTags("clash", "groups", "all", "project", "every", "tests", "flat", "loop", "batch")]
     [MultiReturn("groups", "names", "testNames", "counts")]
     [PortKinds("clash*", "text*", "text*", "integer*")]
@@ -257,7 +278,7 @@ public static class ClashTriageNodes
         "name and status, and the TEST it belongs to (object and name). This is what makes whole-project " +
         "group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to " +
         "this node, and every iteration knows its results, its group name and its test name without " +
-        "parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.")]
+        "parallel lists. ClashGroup.ByName is the lookup-by-name twin.")]
     [NodeSearchTags("clash", "group", "info", "results", "name", "status", "test", "parent", "loop")]
     [MultiReturn("results", "name", "status", "count", "test", "testName")]
     [PortKinds("clash*", "text", "text", "integer", "clash", "text")]
@@ -303,13 +324,14 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The groups with their names, statuses and result counts, index-aligned.</returns>
     [NodeName("ClashTest.Groups")]
+    [LiveState]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.")]
+    [NodeDescription("All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one. Wire a test, its name, or a list of them: with a list the node runs once per test and every output is one list per test (List.Flatten joins them).")]
     [NodeSearchTags("clash", "test", "groups", "list", "names", "statuses", "overview")]
     [MultiReturn("groups", "names", "statuses", "counts")]
     [PortKinds("clash*", "text*", "text*", "integer*")]
-    public static Dictionary<string, object?> Groups(object test, Document? document = null)
+    public static Dictionary<string, object?> Groups([ScalarInput] object test, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
@@ -389,7 +411,7 @@ public static class ClashTriageNodes
     [NodeSearchTags("clash", "filter", "orientation", "wall", "floor", "slab", "pipe", "shape", "crossing")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByOrientation(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         [NodeChoices("any", "slab", "wall", "riser", "run", "block")]
         string shape1 = "any",
         [NodeChoices("any", "slab", "wall", "riser", "run", "block")]
@@ -446,7 +468,7 @@ public static class ClashTriageNodes
     [NodeName("Clash.Status")]
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
-    [NodeDescription("A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.")]
+    [NodeDescription("A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus or Clash.FilterByStatus instead of typing the text.")]
     [NodeSearchTags("clash", "status", "dropdown", "choice", "new", "active", "reviewed", "approved", "resolved")]
     [return: NodeName("status")]
     public static string Status(
@@ -467,8 +489,8 @@ public static class ClashTriageNodes
     [NodeCategory("Navisworks.Clash.Tests")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription(
-        "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and " +
-        "ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. " +
+        "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus: " +
+        "switch on New and Active to work everything not yet reviewed. " +
         "Outputs comma-separated text (\"New,Active\"), which every status input accepts.")]
     [NodeSearchTags("clash", "status", "statuses", "multiple", "select", "toggle", "new", "active", "reviewed", "approved", "resolved")]
     [return: NodeName("statuses")]
@@ -523,16 +545,18 @@ public static class ClashTriageNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The clashing model items (pass-through for chaining, e.g. into Flow.Then or a viewpoint save).</returns>
     [NodeName("ClashResult.Focus")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Results")]
     [NodeDescription(
         "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides " +
         "everything else (isolate), zooms the camera to the clashing pair, and optionally selects the " +
         "elements. Wire one result, or a list to frame a whole group together. Follow with " +
-        "Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back.")]
+        "Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back. An empty list leaves the view " +
+        "as it is and says so.")]
     [NodeSearchTags("clash", "focus", "isolate", "zoom", "view", "show", "frame", "select")]
     [return: NodeName("items")]
     public static List<ModelItem> Focus(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         bool isolate = true,
         bool zoom = true,
         bool select = false,
@@ -540,9 +564,16 @@ public static class ClashTriageNodes
         Document? document = null)
     {
         var resultList = MaterializeResults(results);
+        if (resultList.Count == 0)
+        {
+            // Nothing to focus on: leave the view as it is (isolating "nothing" would hide the whole model).
+            NodeWarnings.Add("No clash results were given, so the view was left as it is.");
+            return new List<ModelItem>();
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
         var items = new List<ModelItem>();
-        var seen = new HashSet<ModelItem>();
+        var seen = new HashSet<ModelItem>(ModelItemIdentityComparer.Instance);
         foreach (var result in resultList)
         {
             AddItem(result.Item1, items, seen);
@@ -611,7 +642,7 @@ public static class ClashTriageNodes
     private static List<ModelItem> ResolveGeometry(List<ModelItem> items)
     {
         var resolved = new List<ModelItem>(items.Count);
-        var seen = new HashSet<ModelItem>();
+        var seen = new HashSet<ModelItem>(ModelItemIdentityComparer.Instance);
         foreach (var item in items)
         {
             if (item.HasGeometry)
@@ -662,11 +693,6 @@ public static class ClashTriageNodes
             {
                 list.Add(result);
             }
-        }
-
-        if (list.Count == 0)
-        {
-            throw new ArgumentException("The clash results list is empty.", nameof(results));
         }
 
         return list;

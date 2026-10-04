@@ -71,6 +71,10 @@ internal sealed class CellSortKey
             : new CellSortKey(Kind.Other, cell, 0, null);
     }
 
+    /// <summary>True for a cell that holds no value to put in order: null or empty text. These go last in a sort and are left out of a maximum or minimum.</summary>
+    /// <param name="cell">The cell value.</param>
+    internal static bool IsEmpty(object? cell) => cell == null || (cell is string text && text.Length == 0);
+
     /// <summary>Compares two cells the way the old Table.Sort comparer did.</summary>
     /// <param name="x">The first key.</param>
     /// <param name="y">The second key.</param>

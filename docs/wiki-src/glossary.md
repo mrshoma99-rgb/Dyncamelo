@@ -98,7 +98,7 @@ Instance (node group)
 :   One use of a node group on the canvas. It looks like a normal node whose sockets are the group's interface. Editing the group changes every instance. See [Node groups](node-groups.md#the-pieces).
 
 Instance GUID
-:   The stable GUID of a model item, read by `ModelItem.InstanceGuid` and matched by `Search.ByGuid`. See [Find elements from a list of GUIDs](howto/find-elements-from-guids.md).
+:   The stable GUID of a model item, read by `ModelItem.Info` (its `guid` output) and matched by `Search.ByGuid`. See [Find elements from a list of GUIDs](howto/find-elements-from-guids.md).
 
 Interface (node group)
 :   The list of inputs and outputs of a node group. See [Node groups](node-groups.md#the-pieces).
@@ -196,7 +196,7 @@ Run up to a node
 ## S to T
 
 Saved viewpoint
-:   A named view in the Navisworks Saved Viewpoints window: a camera, and optionally the overrides. `Viewpoint.SaveCurrent` and `Viewpoint.SaveWithOverrides` make them. See [Save one viewpoint for every item](howto/viewpoint-per-item.md).
+:   A named view in the Navisworks Saved Viewpoints window: a camera, and optionally the overrides. `Viewpoint.Save` makes them (with or without the overrides). See [Save one viewpoint for every item](howto/viewpoint-per-item.md).
 
 Script
 :   A graph kept in a folder the Script Player knows. See [Saving and opening](saving-opening.md#script-description-and-the-scripts-folder).

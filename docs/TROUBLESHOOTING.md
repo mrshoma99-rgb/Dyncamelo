@@ -105,7 +105,7 @@ More in the [editor guide](UI_GUIDE.md#finding-your-way).
 
 Work down this list.
 
-1. **Run only runs what changed.** `F5` executes the nodes that changed since the last run and reuses the rest. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". This includes nodes that read Navisworks: nothing in the source marks `Selection.Current` as changed when you change the selection in Navisworks, so a plain Run does not read it again (not yet confirmed in Navisworks). Change one of the node's inputs (or its value) to make it run again. A change of the active document, or models added or removed, marks every node as changed.
+1. **Run only runs what changed.** `F5` executes the nodes that changed since the last run and reuses the rest. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". The exception is the nodes that read the live Navisworks state (`Selection.Current`, `Selection.Invert`, `SelectionSets.All`, `SelectionSet.Items`, `SelectionSet.ByName`, `SelectionSet.Info`, `SelectionSets.InFolder`, `Document.Info`, `Models.RootItems`): they are marked as live and read Navisworks again on every Run, and the nodes after them run again only when what they read is different. (This has not yet been confirmed in a running Navisworks; if a second Run still shows the old selection, change one of the node's inputs to make it run again and tell us.) A change of the active document, or models added or removed, marks every node as changed.
 2. **A frozen node holds back everything after it.** Frozen nodes (`Shift+M`, badge *FROZEN*) and everything downstream are skipped and keep their old results. Unfreeze with `Shift+M`.
 3. **A muted node passes data through** instead of running (`M`, badge *MUTED*). Downstream nodes still run, on the passed-through data.
 4. **A `Flow.When` is false.** The nodes after it are skipped and shown idle, not red, with the message "Skipped: ... (Flow.When was false)".
@@ -122,7 +122,7 @@ Select the node and press `I` to see which of these applies.
 
 **The magnifier shows no names.** The magnifier next to a tab or property input lists names of **one element only**, and says why when it has nothing to show:
 
-* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
+* "Nothing is selected in Navisworks. Select an element, then search." The nodes that search the whole model (`Search.ByProperty`, `SelectionSet.CreateFromSearch`, `SelectionSets.BulkByPropertyValues`) list the names of the elements **selected in Navisworks right now**.
 * "Pick an element on 'x' (or wire one in), then search its tabs." Nodes such as `Properties.Value` read the element on their own element input. Pick an element on that input, or wire one in.
 * "The element wired to 'x' has not been computed yet. Run the graph (or pick the element on the node itself), then search." The wire needs a value first: press **Run**.
 * "Choose the tab first (the 'x' input), then search its properties." Fill the tab input, then use the magnifier on the property input.
@@ -138,7 +138,7 @@ The start screen (cards for a new script, recent scripts and examples, the versi
 
 ## A run is slow on a large model
 
-Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)").
+Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.Save 71,200 ms (17×)").
 
 ![The progress overlay during a run: the working node and the hint that Esc cancels.](images/wiki-run-progress.png)
 
@@ -163,9 +163,11 @@ If you measure a slow case, please add the model size, the node and the time to 
 
 ## A file node fails with "access denied" or writes to the wrong place
 
-**Cause.** The source (in the viewpoint package code, written after a field report) notes that the working folder of the Navisworks process is the Navisworks install folder under `Program Files`, which ordinary users cannot write to. A **relative path** in a file node therefore points somewhere you cannot write. Windows also reports a folder given in place of a file as "access denied", and **Controlled folder access** can block writes to Documents or Desktop.
+**Where a relative path goes.** A **relative path** in a file node (`report.xlsx`, `out\rooms.csv`) means *next to the graph*: CamelGraph puts it in the folder of the graph file you have open, or in `Documents\CamelGraph` when the graph has not been saved yet. A script run in the Script Player, and a graph run with `CamelGraph.Cli`, use the folder of the script file. Spaces and the quotes that Explorer's "Copy as path" adds around a pasted path are removed. (Older versions resolved a relative path against the working folder of the Navisworks process, which is its install folder under `Program Files`, a place ordinary users cannot write to.)
 
-**Fix.** Give a **full path** for every file a graph writes, for example `C:\Users\you\Documents\report.xlsx`. Paste it without the quotes that Explorer's "Copy as path" adds; only the viewpoint package nodes are known to remove them for you. If Controlled folder access is on, allow Navisworks or write to another folder. The *csv-roundtrip* developer sample writes a relative path and is not shipped in the installer for that reason.
+**Cause.** When a file node still fails with "access denied", the folder is one you cannot write to: a graph saved under `Program Files`, a path that names a folder where a file is expected (Windows reports that as "access denied" too), or **Controlled folder access** blocking writes to Documents or Desktop.
+
+**Fix.** Save the graph in a folder you can write to, or give a **full path** for the file, for example `C:\Users\you\Documents\report.xlsx`. If Controlled folder access is on, allow Navisworks or write to another folder.
 
 ## Navisworks closed while I was working
 

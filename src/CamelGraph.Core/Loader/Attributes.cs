@@ -162,6 +162,12 @@ public sealed class NodeTabChoiceAttribute : Attribute
 
     /// <summary>True when the node also looks at the element's parents, so their tabs are offered too.</summary>
     public bool IncludeAncestors { get; set; }
+
+    /// <summary>
+    /// True when only the tabs a person added themselves (user-defined tabs, the ones a property-writing node can change) are offered,
+    /// not the tabs that come from the model's source files. The host's reader decides what "user-defined" means.
+    /// </summary>
+    public bool UserDefinedOnly { get; set; }
 }
 
 /// <summary>
@@ -262,6 +268,44 @@ public sealed class NodeDeprecatedAttribute : Attribute
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public sealed class CatchesUpstreamErrorsAttribute : Attribute
+{
+}
+
+/// <summary>
+/// The node wants to see the empty elements of a list it is mapped over. Normally a null element of a laced list never reaches the
+/// node: that position gets a null result and one warning ("1 of 3 laced calls received a null element"). With this attribute the
+/// null is passed to the parameter and the node answers it itself, so <c>IsNull</c> can say <c>true</c> and <c>String.IsBlank</c>
+/// can treat a missing cell as blank. The parameter must be able to hold null (a reference or nullable type; on a plain value type
+/// such as <c>double</c> the engine still reports "Null value passed to input"). Calls with a single value are not affected,
+/// and neither is any other parameter. Purely a run-time behaviour: it never changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class AcceptsNullAttribute : Attribute
+{
+}
+
+/// <summary>
+/// An <c>object</c>-typed parameter that takes exactly one thing per call (a name, a point, a vector, a viewpoint, a value to
+/// compare). Without it an <c>object</c> port means "anything" and receives a list whole; with it the port counts as rank 0, like a
+/// <c>double</c>, so a list wired to it maps the node over the list (lacing) and the node is called once per element. Ignored
+/// on parameters that are not declared <c>object</c>. The node must therefore not expect a list on this parameter; a graph can
+/// still hand the whole list to the node by choosing a list level on the port. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class ScalarInputAttribute : Attribute
+{
+}
+
+/// <summary>
+/// The node reads live host state (the current selection, the open document, the list of selection sets) instead of only its
+/// inputs, so its output can differ between two runs although nothing in the graph changed. The engine therefore runs it on
+/// every run instead of serving its cached output; the nodes after it run again only when what it produced is different
+/// from the previous run. A node group with such a node inside behaves the same way. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class LiveStateAttribute : Attribute
 {
 }
 
@@ -376,6 +420,47 @@ public sealed class NodeRangeAttribute : Attribute
 
     /// <summary>Unit suffix shown after the value ("mm", "deg", "%").</summary>
     public string Unit { get; set; } = string.Empty;
+}
+
+/// <summary>What the browse button of a path parameter opens.</summary>
+public enum NodePathMode
+{
+    /// <summary>An open-file dialog: the file must exist (a file the node reads).</summary>
+    Open = 0,
+
+    /// <summary>A save-file dialog: the file may not exist yet (a file the node writes or creates).</summary>
+    Save = 1,
+
+    /// <summary>A folder chooser (a directory the node reads from, writes into or lists).</summary>
+    Folder = 2,
+}
+
+/// <summary>
+/// Tells the editor what a <c>string</c> parameter that holds a path is, so its browse button opens the right dialog: an open
+/// dialog for a file the node reads, a SAVE dialog (a file that does not exist yet can be chosen) for a file the node writes, a
+/// folder chooser for a directory. A parameter with this attribute always gets the browse button, whatever it is called. Without
+/// it the editor guesses from the parameter's name and the node's name (see <c>PathPicker</c>), which is right for most nodes but
+/// not for all. Purely advisory — the parameter stays a string, so saved graphs and definition ids are unchanged.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodePathAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="mode">Which dialog the browse button opens.</param>
+    public NodePathAttribute(NodePathMode mode)
+    {
+        Mode = mode;
+    }
+
+    /// <summary>Which dialog the browse button opens.</summary>
+    public NodePathMode Mode { get; }
+
+    /// <summary>
+    /// The file types offered, as a Windows file dialog filter: <c>"Excel workbooks (*.xlsx)|*.xlsx|All files (*.*)|*.*"</c>.
+    /// Empty offers all files. Ignored for <see cref="NodePathMode.Folder"/>. A save dialog adds the first listed extension when
+    /// the user types a name without one.
+    /// </summary>
+    public string Filter { get; set; } = string.Empty;
 }
 
 /// <summary>

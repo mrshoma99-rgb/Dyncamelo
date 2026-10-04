@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.DocumentParts;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
@@ -22,10 +24,11 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The renamed stored viewpoint (pass-through for chaining).</returns>
     [NodeName("SavedViewpoint.Rename")]
-    [NodeDescription("Renames a saved viewpoint (accepts the viewpoint or its current name; searches folders too). Batch-rename via lacing.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Renames a saved viewpoint (accepts the viewpoint, its current name or a folder path and name such as \"Reviews/Week 12/Level 1\"; searches folders too). Batch-rename by wiring a list of viewpoints and a list of new names: each viewpoint gets the new name at the same position.")]
     [NodeSearchTags("viewpoint", "view", "rename", "name", "batch")]
     [return: NodeName("viewpoint")]
-    public static SavedViewpoint Rename(object viewpoint, string newName, Document? document = null)
+    public static SavedViewpoint Rename([ScalarInput] object viewpoint, string newName, Document? document = null)
     {
         if (string.IsNullOrEmpty(newName))
         {
@@ -47,6 +50,7 @@ public static class ViewpointTreeNodes
     /// <returns>The stored folder (an existing same-named folder in that location is reused).</returns>
     [NodeName("Viewpoints.CreateFolder")]
     [NodeCategory("Navisworks.Viewpoints.Folders")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.")]
     [NodeSearchTags("viewpoints", "folder", "create", "organize", "nested")]
     [return: NodeName("folder")]
@@ -78,10 +82,11 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The moved stored viewpoint (pass-through for chaining).</returns>
     [NodeName("SavedViewpoint.MoveToFolder")]
-    [NodeDescription("Moves a saved viewpoint into a folder (appended at the end). A viewpoint already in the folder is left alone, so re-runs are clean.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Moves a saved viewpoint into a folder (appended at the end). A viewpoint already in the folder is left alone, so re-runs are clean. A list of viewpoints moves each one into the folder; a list of folders pairs with the viewpoints one to one.")]
     [NodeSearchTags("viewpoint", "view", "move", "folder", "organize")]
     [return: NodeName("viewpoint")]
-    public static SavedViewpoint MoveToFolder(object viewpoint, object folder, Document? document = null)
+    public static SavedViewpoint MoveToFolder([ScalarInput] object viewpoint, [ScalarInput] object folder, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var viewpoints = doc.SavedViewpoints;
@@ -103,11 +108,12 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The folder path ("A/B"; "" at the top level) and the immediate folder (null at the top level).</returns>
     [NodeName("SavedViewpoint.Folder")]
-    [NodeDescription("The folder containing a saved viewpoint: its path as \"A/B\" (\"\" for top-level viewpoints) and the folder itself — drives folder-based status workflows.")]
+    [LiveState]
+    [NodeDescription("The folder containing a saved viewpoint: its path as \"A/B\" (\"\" for top-level viewpoints) and the folder itself — drives folder-based status workflows. A list of viewpoints gives one path and one folder per viewpoint. Read again on every run.")]
     [NodeSearchTags("viewpoint", "view", "folder", "path", "parent", "location")]
     [MultiReturn("folderPath", "folder")]
     [PortKinds("text", "")]
-    public static Dictionary<string, object?> Folder(object viewpoint, Document? document = null)
+    public static Dictionary<string, object?> Folder([ScalarInput] object viewpoint, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var viewpoints = doc.SavedViewpoints;
@@ -130,17 +136,19 @@ public static class ViewpointTreeNodes
     [NodeName("Viewpoints.InFolder")]
     [NodeCategory("Navisworks.Viewpoints.Folders")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [LiveState]
     [NodeDescription(
         "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object " +
         "(Viewpoints.CreateFolder / SavedViewpoint.Folder), a folder NAME, or a path like \"Reviews/Week 12\" " +
         "to pick between same-named folders; leave it empty for the top level. Nested subfolders are included " +
-        "unless recursive is off. Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage, " +
-        "Viewpoints.ExportFile or a Loop.Item.")]
+        "unless recursive is off. A list of folders gives one list of viewpoints per folder. Read again on every run. " +
+        "Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage (wire the viewpoints to its own viewpoint input " +
+        "for a picture of each), Viewpoints.ExportFile or a Loop.Item.")]
     [NodeSearchTags("viewpoints", "folder", "contents", "children", "list", "inside", "views", "all")]
     [MultiReturn("viewpoints", "names", "subfolders", "count")]
     [PortKinds("viewpoint*", "text*", "", "integer")]
     public static Dictionary<string, object?> InFolder(
-        object? folder = null,
+        [ScalarInput] object? folder = null,
         bool recursive = true,
         Document? document = null)
     {
@@ -241,10 +249,11 @@ public static class ViewpointTreeNodes
     /// <returns>The renamed stored folder (pass-through for chaining).</returns>
     [NodeName("Viewpoints.RenameFolder")]
     [NodeCategory("Navisworks.Viewpoints.Folders")]
-    [NodeDescription("Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Renames a Saved Viewpoints folder (accepts the folder, its current name or a path such as \"Reviews/Week 12\"; searches nested folders too). A list of folders and a list of new names rename one folder per name.")]
     [NodeSearchTags("viewpoints", "folder", "rename", "name", "organize")]
     [return: NodeName("folder")]
-    public static FolderItem RenameFolder(object folder, string newName, Document? document = null)
+    public static FolderItem RenameFolder([ScalarInput] object folder, string newName, Document? document = null)
     {
         if (string.IsNullOrEmpty(newName))
         {
@@ -264,10 +273,11 @@ public static class ViewpointTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The new stored viewpoint copy.</returns>
     [NodeName("SavedViewpoint.Duplicate")]
-    [NodeDescription("Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given. A list of viewpoints makes one copy of each.")]
     [NodeSearchTags("viewpoint", "view", "duplicate", "copy", "clone")]
     [return: NodeName("viewpoint")]
-    public static SavedViewpoint Duplicate(object viewpoint, string? newName = null, Document? document = null)
+    public static SavedViewpoint Duplicate([ScalarInput] object viewpoint, string? newName = null, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var viewpoints = doc.SavedViewpoints;
@@ -303,10 +313,11 @@ public static class ViewpointTreeNodes
     /// <returns>The new stored folder.</returns>
     [NodeName("Viewpoints.DuplicateFolder")]
     [NodeCategory("Navisworks.Viewpoints.Folders")]
-    [NodeDescription("Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused and topped up: a viewpoint that is already in it under the same name is replaced by the copy, a missing one is added, so re-runs do not pile up. The new name must differ from the source folder's own name. A list of folders and a list of new names duplicate one folder per name.")]
     [NodeSearchTags("viewpoints", "folder", "duplicate", "copy", "clone", "organize")]
     [return: NodeName("folder")]
-    public static FolderItem DuplicateFolder(object folder, string newName, Document? document = null)
+    public static FolderItem DuplicateFolder([ScalarInput] object folder, string newName, Document? document = null)
     {
         if (string.IsNullOrEmpty(newName))
         {
@@ -328,21 +339,112 @@ public static class ViewpointTreeNodes
             (parent, item) => viewpoints.AddCopy(parent, item),
             "viewpoint");
 
+        // A new name equal to the source's own name finds the source itself, and copying a folder into itself would add to the
+        // list it is reading from: refuse before anything is copied.
+        if (ReferenceEquals(target, source) || (source.Guid != Guid.Empty && target.Guid == source.Guid))
+        {
+            throw new InvalidOperationException(
+                "The new name '" + newName + "' is the name of the folder being duplicated. Give the copy a different name.");
+        }
+
         CopyFolderContents(viewpoints, source, target);
         return target;
+    }
+
+    /// <summary>Deletes a folder of saved viewpoints, or just empties it.</summary>
+    /// <param name="folder">The folder (for example from Viewpoints.CreateFolder), its name, or a path such as "Reviews/Week 12".</param>
+    /// <param name="contentsOnly">True removes everything inside the folder and keeps the folder; false removes the folder with everything in it.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>Whether anything was deleted, and how many saved viewpoints were inside (nested folders included).</returns>
+    [NodeName("Viewpoints.DeleteFolder")]
+    [NodeCategory("Navisworks.Viewpoints.Folders")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Deletes a Saved Viewpoints folder together with every viewpoint and sub-folder in it, or with contentsOnly on empties the folder and keeps it — the clean-up before Viewpoints.FromClashResults fills \"Clash Views\" again. Accepts the folder, its name or a path such as \"Reviews/Week 12\". Returns deleted = false when there is no such folder (or it is already empty), so a clean-up step can run twice. A list of folders deletes one folder per entry. This cannot be undone from the graph.")]
+    [NodeSearchTags("viewpoints", "folder", "delete", "remove", "clean", "empty", "clear", "organize")]
+    [MultiReturn("deleted", "viewpointCount")]
+    [PortKinds("boolean", "integer")]
+    public static Dictionary<string, object?> DeleteFolder(
+        [ScalarInput] object folder,
+        bool contentsOnly = false,
+        Document? document = null)
+    {
+        if (folder == null)
+        {
+            throw new ArgumentNullException(nameof(folder), "No viewpoint folder provided.");
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var viewpoints = doc.SavedViewpoints;
+
+        FolderItem? stored;
+        switch (folder)
+        {
+            case string text:
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    throw new ArgumentException("No folder name provided.", nameof(folder));
+                }
+
+                stored = SavedItemTreeHelpers.FindByNameOrPath<FolderItem>(viewpoints.RootItem, text, "viewpoint folder");
+                break;
+            case FolderItem item:
+                try
+                {
+                    stored = SavedItemTreeHelpers.FindStoredEquivalent(viewpoints.RootItem, item);
+                }
+                catch (Exception ex) when (ClashHelpers.IsDisposed(ex))
+                {
+                    NodeWarnings.Add("A folder wired to Viewpoints.DeleteFolder was already removed or replaced by an earlier edit, so nothing was deleted.");
+                    stored = null;
+                }
+
+                break;
+            default:
+                throw new ArgumentException(
+                    "Cannot interpret a value of type '" + folder.GetType().Name +
+                    "' as a viewpoint folder. Wire the folder itself, its name or its path.", nameof(folder));
+        }
+
+        if (stored == null)
+        {
+            return new Dictionary<string, object?> { ["deleted"] = false, ["viewpointCount"] = 0 };
+        }
+
+        var count = NavisValues.FlattenSavedItems<SavedViewpoint>(stored.Children).Count;
+        if (contentsOnly)
+        {
+            var childCount = stored.Children.Count;
+            for (int i = childCount - 1; i >= 0; i--)
+            {
+                viewpoints.RemoveAt(stored, i);
+            }
+
+            return new Dictionary<string, object?> { ["deleted"] = childCount > 0, ["viewpointCount"] = count };
+        }
+
+        var parent = stored.Parent;
+        var removed = parent == null ? viewpoints.Remove(stored) : viewpoints.Remove(parent, stored);
+        return new Dictionary<string, object?> { ["deleted"] = removed, ["viewpointCount"] = count };
     }
 
     /// <summary>Sorts a folder's contents alphabetically (A→Z) by name.</summary>
     /// <param name="folder">The folder to sort, or its name; null/empty sorts the top level.</param>
     /// <param name="recursive">True to also sort every nested folder.</param>
+    /// <param name="numeric">True sorts runs of digits by their number (Clash2 before Clash10); false sorts letter by letter (Clash10 before Clash2).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The sorted folder (null when the top level was sorted).</returns>
     [NodeName("Viewpoints.SortFolder")]
     [NodeCategory("Navisworks.Viewpoints.Folders")]
-    [NodeDescription("Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.")]
-    [NodeSearchTags("viewpoints", "folder", "sort", "alphabetical", "order", "organize", "arrange")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ViewpointTreeNodes.SortFolder@object,bool,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription("Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z), ignoring case — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort among the viewpoints by name. Turn numeric on to put Clash2 before Clash10 (letter by letter, \"Clash10\" comes first).")]
+    [NodeSearchTags("viewpoints", "folder", "sort", "alphabetical", "order", "organize", "arrange", "numeric", "natural")]
     [return: NodeName("folder")]
-    public static FolderItem? SortFolder(object? folder = null, bool recursive = false, Document? document = null)
+    public static FolderItem? SortFolder(
+        [ScalarInput] object? folder = null,
+        bool recursive = false,
+        bool numeric = false,
+        Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var viewpoints = doc.SavedViewpoints;
@@ -351,15 +453,39 @@ public static class ViewpointTreeNodes
             ? viewpoints.RootItem
             : SavedItemTreeHelpers.ResolveStored<FolderItem>(viewpoints.RootItem, folder, "viewpoint folder");
 
-        SortFolderContents(viewpoints, parent, recursive);
+        IComparer<string?> comparer = numeric
+            ? NaturalNameComparer.Instance
+            : StringComparer.OrdinalIgnoreCase;
+        SortFolderContents(viewpoints, parent, recursive, comparer);
         return ReferenceEquals(parent, viewpoints.RootItem) ? null : parent;
     }
 
-    // Recursively copies a source folder's children into a target folder: viewpoints
-    // (and animations) are AddCopy'd; sub-folders are recreated and descended into.
+    // Recursively copies a source folder's children into a target folder. Sub-folders are recreated and descended into. A
+    // viewpoint (or animation) whose name is already in the target is REPLACED by the copy, anything else is added, so running the
+    // node again tops the target up instead of doubling it.
     private static void CopyFolderContents(DocumentSavedViewpoints viewpoints, FolderItem source, FolderItem target)
     {
+        // What the target already holds, by name and kind, read once; the source's own list is copied first so adding to the
+        // target can never change the list being walked.
+        var existing = new Dictionary<string, int>(StringComparer.Ordinal);
+        var position = 0;
+        foreach (var child in target.Children)
+        {
+            if (!(child is FolderItem) && !existing.ContainsKey(child.DisplayName))
+            {
+                existing[child.DisplayName] = position;
+            }
+
+            position++;
+        }
+
+        var items = new List<SavedItem>();
         foreach (var child in source.Children)
+        {
+            items.Add(child);
+        }
+
+        foreach (var child in items)
         {
             if (child is FolderItem subFolder)
             {
@@ -372,16 +498,24 @@ public static class ViewpointTreeNodes
                     "viewpoint");
                 CopyFolderContents(viewpoints, subFolder, newSub);
             }
+            else if (existing.TryGetValue(child.DisplayName, out var index) &&
+                     index < target.Children.Count &&
+                     target.Children[index].GetType() == child.GetType())
+            {
+                viewpoints.ReplaceWithCopy(target, index, child);
+            }
             else
             {
                 viewpoints.AddCopy(target, child);
+                existing[child.DisplayName] = target.Children.Count - 1;
             }
         }
     }
 
-    // Reorders one folder's children alphabetically by moving each item, in reverse
+    // Reorders one folder's children by name by moving each item, in reverse
     // sorted order, to the front (index 0 — the one unambiguous Move target).
-    private static void SortFolderContents(DocumentSavedViewpoints viewpoints, FolderItem parent, bool recursive)
+    private static void SortFolderContents(
+        DocumentSavedViewpoints viewpoints, FolderItem parent, bool recursive, IComparer<string?> comparer)
     {
         var desired = new List<SavedItem>();
         foreach (var child in parent.Children)
@@ -389,7 +523,7 @@ public static class ViewpointTreeNodes
             desired.Add(child);
         }
 
-        desired.Sort((a, b) => string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase));
+        desired.Sort((a, b) => comparer.Compare(a.DisplayName, b.DisplayName));
 
         for (int i = desired.Count - 1; i >= 0; i--)
         {
@@ -406,7 +540,7 @@ public static class ViewpointTreeNodes
             {
                 if (child is FolderItem subFolder)
                 {
-                    SortFolderContents(viewpoints, subFolder, true);
+                    SortFolderContents(viewpoints, subFolder, true, comparer);
                 }
             }
         }
@@ -427,10 +561,11 @@ public static class SelectionSetTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The renamed stored set (pass-through for chaining).</returns>
     [NodeName("SelectionSet.Rename")]
-    [NodeDescription("Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename via lacing.")]
+    [NodeDescription("Renames a saved selection or search set (accepts the set or its current name; searches folders too). Batch-rename by wiring a list of sets and a list of new names: they are paired one by one.")]
     [NodeSearchTags("selection", "set", "rename", "name", "batch")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("selectionSet")]
-    public static SelectionSet Rename(object selectionSet, string newName, Document? document = null)
+    public static SelectionSet Rename([ScalarInput][PortKinds("selection")] object selectionSet, string newName, Document? document = null)
     {
         if (string.IsNullOrEmpty(newName))
         {
@@ -456,8 +591,9 @@ public static class SelectionSetTreeNodes
     /// was removed from SelectionSetNodes.cs during v0.3 integration.
     /// </remarks>
     [NodeName("SelectionSets.CreateFolder")]
-    [NodeDescription("Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean.")]
+    [NodeDescription("Creates a folder in the Sets window, optionally nested under a parent folder. An existing same-named folder in that location is reused, so re-runs are clean. Inside a node group every instance uses the same name unless you wire it in, so two instances share one folder.")]
     [NodeSearchTags("selection", "sets", "folder", "create", "organize", "nested")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("folder")]
     public static FolderItem CreateFolder(string name, FolderItem? parentFolder = null, Document? document = null)
     {
@@ -487,10 +623,11 @@ public static class SelectionSetTreeNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The moved stored set (pass-through for chaining).</returns>
     [NodeName("SelectionSet.MoveToFolder")]
-    [NodeDescription("Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean.")]
+    [NodeDescription("Moves a saved selection or search set into a folder (appended at the end). A set already in the folder is left alone, so re-runs are clean. A list of sets moves each of them; a list of sets with a list of folders pairs them one by one.")]
     [NodeSearchTags("selection", "set", "move", "folder", "organize")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("selectionSet")]
-    public static SelectionSet MoveToFolder(object selectionSet, object folder, Document? document = null)
+    public static SelectionSet MoveToFolder([ScalarInput][PortKinds("selection")] object selectionSet, [ScalarInput][PortKinds("selection")] object folder, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var sets = doc.SelectionSets;

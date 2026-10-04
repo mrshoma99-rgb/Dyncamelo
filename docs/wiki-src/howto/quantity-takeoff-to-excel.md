@@ -37,8 +37,8 @@ Goal: count items and total a quantity for each category, and save the result as
 
 A workbook with one worksheet named `Quantities`. The first row holds the column names and each row below it is one category.
 
-!!! warning "Always use a full path"
-    A relative path points into the Navisworks install folder, which ordinary users cannot write to. The write fails with "access denied". Paste the path without the quotes that Explorer's *Copy as path* adds.
+!!! tip "Where the workbook goes"
+    A relative path such as `Quantities.xlsx` goes next to the graph file (or into `Documents\CamelGraph` if the graph has not been saved). A full path always works. Quotes that Explorer's *Copy as path* adds around a pasted path are removed.
 
 !!! tip "Other aggregations"
     `Table.GroupBy` also works out `average`, `min`, `max`, `median`, `first`, `last`, `list` and `distinct`. Add `as Name` to name a result, as step 7 does.
