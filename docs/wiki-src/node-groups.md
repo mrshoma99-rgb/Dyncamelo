@@ -28,9 +28,11 @@ All of the commands below are in the **Node Groups** menu, and several are also 
 
 The wires that crossed the edge of your selection become the group's sockets: one **input** for every outside source feeding the selection, and one **output** for every output socket that leaves it. An instance takes the place of your selection and is wired to the same neighbours, so the script computes exactly what it did before. The new group is called "Node Group" (with a number if that name is taken).
 
+**Nodes the Script Player uses stay outside.** The Player shows only the top level of a script, so an input node (`Number`, a slider, `String`, `Boolean` and so on), a Watch node, a node you marked **Show in Player**, and a node with an input you offered as a field are not moved into the group even when they are selected. They keep their place and are wired to the group through its sockets (an input node feeds a new Group Input socket). The status bar says which nodes stayed out: "Kept outside the group because the Player uses them: Gap, Result." This applies to groups made at the top level of the script; inside an open group everything selected goes in. A Player node that sits *between* the nodes that go in cannot stay out without a loop, so the group is refused and the message names it: hide that node from the Player or leave out the nodes after it.
+
 CamelGraph will not make a group in a few cases, and the status bar says why:
 
-* nothing is selected;
+* nothing is selected, or everything selected is used by the Player (and so stays outside);
 * a node that sits **between** the selected nodes is not selected (it would have to be both inside and outside), so select it too;
 * a loop is split: `Loop.Item` and `Loop.Collect` must go into the same group, together with the nodes between them;
 * the selection includes a group's own Group Input or Group Output.
