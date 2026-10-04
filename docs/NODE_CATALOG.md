@@ -524,12 +524,12 @@
 | `Application.Version` | — | product, apiVersion | The running Navisworks product name and API version (report headers, compatibility checks) |
 | `Document.AppendFiles` | filePaths, document? | document, models | Appends design files to the document |
 | `Document.Current` | — | document | The active Navisworks document |
-| `Document.Info` | document? | fileName, title, units, modelCount | File name, title, display units and model count of a document |
+| `Document.Info` | document? | fileName, title, units, modelCount | File name, title, display units and model count of a document, read again on every run |
 | `Document.Merge` | filePath, document? | document | Merges another Navisworks file into the document with duplicate resolution |
-| `Document.Models` | document? | models | The models (appended source files) loaded in a document |
-| `Document.Open` | filePath, document? | document | Opens a file into the document, REPLACING its current contents (the headless batch driver) |
+| `Document.Models` | document? | models | The models (appended source files) loaded in a document, read again on every run |
+| `Document.Open` | filePath, document? | document | Opens ONE file into the document, REPLACING its current contents (the headless batch driver) |
 | `Document.Refresh` | document? | updated | Refreshes every linked/appended file from disk |
-| `Document.Save` | filePath, document? | filePath | Saves the document as .nwf (references) or .nwd (published snapshot) to the given path |
+| `Document.Save` | filePath, document? | filePath | Saves the document as .nwf (references to the source files) or .nwd (a published snapshot with the appearance overrides baked in) to the given path |
 
 ## Navisworks.Export
 
@@ -577,7 +577,7 @@
 | `Model.Remove` | model, document? | removed | Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name) |
 | `Model.Snapshot` | items, properties | snapshot | Captures the named properties of the given items as a dictionary keyed by each item's instance GUID (items without one are keyed "path:" plus their tree path) |
 | `Model.Statistics` | items?, by?, document? | table | Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items |
-| `Models.RootItems` | document? | rootItems | The root model items of every model loaded in a document |
+| `Models.RootItems` | document? | rootItems | The root model items of every model loaded in a document, read again on every run |
 
 ## Navisworks.ModelItem
 
@@ -696,9 +696,9 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Units.All` | — | names | Every unit name accepted by Units.Convert and Units.ScaleFactor |
-| `Units.Convert` | value, fromUnits, toUnits | value | Converts a length value from one unit to another (e.g |
-| `Units.Current` | document? | units | The display units of a document (all API lengths, areas and volumes use them) |
-| `Units.ScaleFactor` | fromUnits, toUnits | factor | The multiplier that converts a length from one unit to another |
+| `Units.Convert` | value, fromUnits, toUnits, dimension? | value | Converts a length, an area or a volume from one unit to another (e.g |
+| `Units.Current` | document? | units | The display units of a document (all API lengths, areas and volumes use them), read again on every run |
+| `Units.ScaleFactor` | fromUnits, toUnits, dimension? | factor | The multiplier that converts a length, an area or a volume from one unit to another |
 
 ## Navisworks.Viewpoints
 

@@ -13316,7 +13316,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.AppendFiles@System.Collections.Generic.IEnumerable<string>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Appends design files to the document — Directory.GetFiles → Document.AppendFiles → Export.NWD is the Navisworks Batch Utility in three nodes. Cached model items from earlier runs are invalidated.",
+   "description": "Appends design files to the document — Directory.FindFiles → Document.AppendFiles → Document.Save is the Navisworks Batch Utility in three nodes. Takes the whole list of paths (several wires are joined); relative paths mean next to the graph. Cached model items from earlier runs are invalidated.",
    "tags": [
     "document",
     "append",
@@ -13381,7 +13381,7 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Info@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "File name, title, display units and model count of a document.",
+   "description": "File name, title, display units and model count of a document, read again on every run. The units output is the same text as Units.Current.",
    "tags": [
     "document",
     "info",
@@ -13426,7 +13426,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.Merge@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. Cached model items from earlier runs are invalidated.",
+   "description": "Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. A list of files merges them one after the other. A relative path means next to the graph. Cached model items from earlier runs are invalidated.",
    "tags": [
     "document",
     "merge",
@@ -13462,7 +13462,7 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Models@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "The models (appended source files) loaded in a document.",
+   "description": "The models (appended source files) loaded in a document, read again on every run.",
    "tags": [
     "document",
     "models",
@@ -13491,7 +13491,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.Open@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Opens a file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node.",
+   "description": "Opens ONE file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node. A list of paths is an error, because each file would replace the one before; to add several files use Document.AppendFiles. A relative path means next to the graph.",
    "tags": [
     "document",
     "open",
@@ -13505,7 +13505,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The file to open (.nwd/.nwf/.nwc or any appendable design format)."
+     "description": "The file to open (.nwd/.nwf/.nwc or any appendable design format). One path only; a relative path means next to the graph."
     },
     {
      "name": "document",
@@ -13559,20 +13559,23 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Save@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Saves the document as .nwf (references) or .nwd (published snapshot) to the given path.",
+   "description": "Saves the document as .nwf (references to the source files) or .nwd (a published snapshot with the appearance overrides baked in) to the given path; the extension decides. This is the node for publishing an NWD (it replaces Export.NWD). An existing file is replaced. A relative path means next to the graph, and the folder is created when missing. Inside a node group that is used twice, a fixed path is written twice: the second save replaces the first.",
    "tags": [
     "document",
     "save",
     "nwf",
     "nwd",
     "publish",
-    "write"
+    "write",
+    "export",
+    "snapshot",
+    "batch"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination path ending in .nwf or .nwd; the directory is created when missing."
+     "description": "Destination path ending in .nwf or .nwd (a relative path means next to the graph); the directory is created when missing, an existing file is replaced."
     },
     {
      "name": "document",
@@ -15095,7 +15098,7 @@
    "id": "CamelGraph.Navisworks.ModelNodes.RootItems@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "The root model items of every model loaded in a document.",
+   "description": "The root model items of every model loaded in a document, read again on every run.",
    "tags": [
     "models",
     "roots",
@@ -18260,15 +18263,19 @@
   },
   {
    "name": "Units.Convert",
-   "id": "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units",
+   "id": "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "Converts a length value from one unit to another (e.g. Feet to Millimeters).",
+   "description": "Converts a length, an area or a volume from one unit to another (e.g. Feet to Millimeters). Set dimension to Area for square units (square feet to square meters) or Volume for cubic units; the default, Length, converts a length as before.",
    "tags": [
     "units",
     "convert",
     "length",
-    "conversion"
+    "conversion",
+    "area",
+    "volume",
+    "square",
+    "cubic"
    ],
    "inputs": [
     {
@@ -18285,6 +18292,12 @@
      "name": "toUnits",
      "type": "Units",
      "description": "Target units (e.g. \"Millimeters\")."
+    },
+    {
+     "name": "dimension",
+     "type": "string",
+     "description": "Length (default), Area or Volume: what the value measures. An area is converted with the length factor squared, a volume with it cubed.",
+     "default": "\"Length\""
     }
    ],
    "outputs": [
@@ -18301,7 +18314,7 @@
    "id": "CamelGraph.Navisworks.UnitNodes.Current@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "The display units of a document (all API lengths, areas and volumes use them).",
+   "description": "The display units of a document (all API lengths, areas and volumes use them), read again on every run. The same text is the units output of Document.Info.",
    "tags": [
     "units",
     "current",
@@ -18328,15 +18341,19 @@
   },
   {
    "name": "Units.ScaleFactor",
-   "id": "CamelGraph.Navisworks.UnitNodes.ScaleFactor@Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units",
+   "id": "CamelGraph.Navisworks.UnitNodes.ScaleFactor@Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "The multiplier that converts a length from one unit to another.",
+   "description": "The multiplier that converts a length, an area or a volume from one unit to another. With dimension Length (the default) it is the factor for lengths; Area gives that factor squared and Volume cubed, which is what quantities such as the areas and volumes from Model.Statistics or takeoffs need (square feet to square meters is the length factor squared).",
    "tags": [
     "units",
     "scale",
     "factor",
-    "conversion"
+    "conversion",
+    "area",
+    "volume",
+    "square",
+    "cubic"
    ],
    "inputs": [
     {
@@ -18348,6 +18365,12 @@
      "name": "toUnits",
      "type": "Units",
      "description": "Target units (e.g. \"Millimeters\")."
+    },
+    {
+     "name": "dimension",
+     "type": "string",
+     "description": "Length (default), Area or Volume: an area factor is the length factor squared, a volume factor is it cubed.",
+     "default": "\"Length\""
     }
    ],
    "outputs": [

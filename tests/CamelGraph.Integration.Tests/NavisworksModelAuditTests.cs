@@ -310,6 +310,87 @@ public class NavisworksModelAuditTests
         Assert.Contains("SeveralValues.Describe(\"matrix\", list)", FileText(Path.Combine("Internal", "TransformHelpers.cs")));
     }
 
+    // ================================================================= NVM-16, NVM-08, NVM-10, NVM-32: document and units
+
+    [Fact]
+    public void DocumentSaveIsTheNodeThatPublishesAnNwd()
+    {
+        var save = Def("Document.Save");
+
+        Assert.Contains("replaces Export.NWD", save.Description);
+        foreach (var tag in new[] { "export", "nwd", "publish", "snapshot" })
+        {
+            Assert.Contains(tag, save.SearchTags);
+        }
+
+        var path = Parameter("Document.Save", "filePath").Attribute("NodePath");
+        Assert.NotNull(path);
+        Assert.Contains("NodePathMode.Save", path!.Positional[0]);
+        Assert.Contains("*.nwd", path.NamedString("Filter"));
+        Assert.Contains("WritesFiles", Method("Document.Save").Attribute("NodeEffects")!.Positional[0]);
+    }
+
+    [Theory]
+    [InlineData("Document.Open", "filePath")]
+    [InlineData("Document.Merge", "filePath")]
+    public void TheFilePathsOfTheDocumentNodesHaveTheRightDialogAndAreResolvedAgainstTheGraphFolder(string node, string port)
+    {
+        var path = Parameter(node, port).Attribute("NodePath");
+        Assert.NotNull(path);
+        Assert.Contains("NodePathMode.Open", path!.Positional[0]);
+
+        var file = FileText("DocumentLifecycleNodes.cs");
+        Assert.Contains("filePath = PathResolver.Resolve(filePath);", file);
+        Assert.Contains("paths.Add(PathResolver.Resolve(path));", file);
+        Assert.Contains("filePath = PathResolver.Resolve(filePath);", FileText("DocumentNodes.cs"));
+    }
+
+    [Fact]
+    public void DocumentOpenRefusesAListOfPaths()
+    {
+        var body = Body(FileText("DocumentLifecycleNodes.cs"), "public static Document Open(");
+
+        Assert.True(body.IndexOf("NodeWarnings.IsLaced", StringComparison.Ordinal) < body.IndexOf("TryOpenFile", StringComparison.Ordinal));
+        Assert.Contains("Document.AppendFiles", body);
+        Assert.Contains("A list of paths is an error", Def("Document.Open").Description);
+    }
+
+    [Theory]
+    [InlineData("Document.Open")]
+    [InlineData("Document.AppendFiles")]
+    [InlineData("Document.Refresh")]
+    [InlineData("Document.Merge")]
+    public void NodesThatChangeTheDocumentContentsSayTheyChangeTheModel(string node)
+    {
+        Assert.Contains("ChangesModel", Method(node).Attribute("NodeEffects")!.Positional[0]);
+    }
+
+    [Theory]
+    [InlineData("Document.Current")]
+    [InlineData("Document.Info")]
+    [InlineData("Document.Models")]
+    [InlineData("Models.RootItems")]
+    [InlineData("Units.Current")]
+    public void NodesThatReadTheLiveDocumentRunOnEveryRun(string node)
+    {
+        Assert.NotNull(Method(node).Attribute("LiveState"));
+    }
+
+    [Fact]
+    public void TheUnitNodesTakeAnOptionalDimensionAndTheOldIdsStillOpen()
+    {
+        foreach (var node in new[] { "Units.ScaleFactor", "Units.Convert" })
+        {
+            var dimension = Input(node, "dimension");
+            Assert.True(dimension.HasDefault);
+            Assert.Equal("Length", dimension.DefaultValue);
+            Assert.Equal(new[] { "Length", "Area", "Volume" }, dimension.Choices);
+        }
+
+        AssertOldIdOpensAs("Units.ScaleFactor", "CamelGraph.Navisworks.UnitNodes.ScaleFactor@Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units");
+        AssertOldIdOpensAs("Units.Convert", "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units");
+    }
+
     // ----------------------------------------------------------------- helpers
 
     /// <summary>The text of a method from the line with its signature to its closing brace.</summary>
