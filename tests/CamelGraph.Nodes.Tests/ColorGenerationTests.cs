@@ -34,9 +34,11 @@ public class ColorGenerationTests
     }
 
     [Fact]
-    public void RandomList_RejectsNonPositiveCount()
+    public void RandomList_ZeroOrLessIsAnEmptyList_NotAnError()
     {
-        Assert.Throws<ArgumentException>(() => ColorNodes.RandomList(0));
+        // Wave A (VAL-12): "no groups" is a normal result, it used to make the whole colouring chain red.
+        Assert.Empty(ColorNodes.RandomList(0));
+        Assert.Empty(ColorNodes.RandomList(-3));
     }
 
     // -------------------------------------------------------- Color.Gradient
@@ -63,7 +65,8 @@ public class ColorGenerationTests
         var defaults = ColorNodes.Gradient(3);
         Assert.Equal(3, defaults.Count);
         Assert.NotEqual(defaults[0], defaults[2]);
-        Assert.Throws<ArgumentException>(() => ColorNodes.Gradient(0));
+        Assert.Empty(ColorNodes.Gradient(0));
+        Assert.Empty(ColorNodes.Gradient(-1));
     }
 
     // -------------------------------------------------------- Color.ByValues
@@ -106,9 +109,14 @@ public class ColorGenerationTests
     }
 
     [Fact]
-    public void ByValues_RejectsEmptyValues_AndUnreadablePaletteEntries()
+    public void ByValues_EmptyValuesGiveEmptyLists_AndUnreadablePaletteEntriesAreRejected()
     {
-        Assert.Throws<ArgumentException>(() => ColorNodes.ByValues(new List<object?>()));
+        // Wave A (VAL-12): a search that found nothing gives an empty legend, not a red node.
+        var empty = ColorNodes.ByValues(new List<object?>());
+        Assert.Empty((List<CamelGraphColor>)empty["colors"]!);
+        Assert.Empty((List<object?>)empty["uniqueValues"]!);
+        Assert.Empty((List<CamelGraphColor>)empty["uniqueColors"]!);
+
         Assert.Throws<ArgumentException>(() =>
             ColorNodes.ByValues(new List<object?> { "a" }, new List<object?> { 42 }));
     }

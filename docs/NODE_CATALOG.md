@@ -7,19 +7,19 @@
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
-| [Color](#color) | 18 |
+| [Color](#color) | 17 |
 | [Data](#data) | 4 |
-| [DateTime](#datetime) | 19 |
+| [DateTime](#datetime) | 18 |
 | [Dictionary](#dictionary) | 13 |
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
 | [IFC](#ifc) | 2 |
-| [Input](#input) | 10 |
+| [Input](#input) | 11 |
 | [List](#list) | 51 |
 | [List.Statistics](#liststatistics) | 12 |
 | [Logic](#logic) | 18 |
-| [Math](#math) | 37 |
+| [Math](#math) | 38 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 13 |
 | [Navisworks.Camera](#navisworkscamera) | 7 |
@@ -63,24 +63,23 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Color Picker` *(interactive)* | — | color | A color chosen with a picker |
 | `Color.ByARGB` | a?, r?, g?, b? | color | Creates a color from alpha, red, green and blue values (0-255) |
-| `Color.ByHSV` | hue, saturation, value, alpha? | color | Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped) |
+| `Color.ByHSV` | hue?, saturation?, value?, alpha? | color | Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped) |
 | `Color.ByValues` | values, colors? | colors, uniqueValues, uniqueColors | One color per value, equal values sharing a color |
 | `Color.Components` | color | red, green, blue, alpha | Splits a color into its red, green, blue and alpha channels (0-255) |
 | `Color.ContrastText` | background | color | Black or white, whichever reads better on a background color (WCAG contrast) |
 | `Color.Darken` | color, amount? | color | Makes a color darker by shifting its HSL lightness down by amount (0-1, clamped) |
 | `Color.FromHex` | hex | color | Parses a hex color string ("#RRGGBB" or "#AARRGGBB") |
-| `Color.Gradient` | count, start?, end? | colors | A list of N colors evenly blended between two colors (endpoints included |
+| `Color.Gradient` | count?, start?, end? | colors | A list of N colors evenly blended between two colors (endpoints included |
 | `Color.Invert` | color | color | Inverts a color's red, green and blue channels (the photographic negative) |
 | `Color.Lerp` | start, end, t | color | Interpolates between two colors (t clamped to 0-1) |
 | `Color.Lighten` | color, amount? | color | Makes a color lighter by shifting its HSL lightness up by amount (0-1, clamped) |
 | `Color.Palette` | name?, count? | colors | A named palette as a list of colors: colourblind-safe, tableau, pastel, status (green/amber/red/grey) or the viridis, heat and grey ramps interpolated to count |
 | `Color.Random` | seed? | color | A pseudo-random color, stable per seed: the same seed always gives the same color (re-runs stay consistent) |
-| `Color.RandomList` | count, seed? | colors | A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed |
+| `Color.RandomList` | count?, seed? | colors | A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed |
 | `Color.ToHex` | color, includeAlpha? | hex | Formats a color as hex text, "#RRGGBB" (or "#AARRGGBB" with includeAlpha) |
 | `Color.ToHSV` | color | hue, saturation, value | Splits a color into hue (degrees, 0-360), saturation and value (0-1) |
-| `Color.WithAlpha` | color, alpha | color | Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque |
+| `Color.WithAlpha` | color, alpha? | color | Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque |
 
 ## Data
 
@@ -95,22 +94,21 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `DateTime.AddDays` | dateTime, days | dateTime | Offsets a date/time by a number of days (fractional and negative values allowed) |
-| `DateTime.AddHours` | dateTime, hours | dateTime | Adds hours to a date/time (fractional and negative values allowed) |
-| `DateTime.AddMinutes` | dateTime, minutes | dateTime | Adds minutes to a date/time (fractional and negative values allowed) |
-| `DateTime.AddMonths` | dateTime, months | dateTime | Adds calendar months to a date/time (the day clamps to the end of a shorter month) |
-| `DateTime.AddYears` | dateTime, years | dateTime | Adds calendar years to a date/time (29 February clamps to 28 February in a common year) |
-| `DateTime.AgeInDays` | dateTime, reference | days | Returns how many days old a date/time is at a reference date/time (reference minus date |
+| `DateTime.Add` | dateTime, amount, unit? | dateTime | Adds an amount of time to a date/time in a chosen unit |
+| `DateTime.AddWorkdays` | dateTime, days, weekend? | dateTime | Moves a date/time by a number of working days, skipping the weekend (Saturday and Sunday, or Friday and Saturday): Friday + 1 is Monday, Monday - 1 is Friday, Saturday +… |
 | `DateTime.ByDate` | year, month, day | dateTime | Creates a date from year, month and day numbers |
 | `DateTime.Compare` | a, b | result | Compares two date/times: -1 when the first is earlier, 0 when equal, 1 when it is later |
 | `DateTime.Components` | dateTime | year, month, day, hour, minute, second, weekday, dayOfYear, isoWeek, isoYear, quarter | Splits a date/time into year, month, day, hour, minute, second, English weekday name, day of year, ISO week, ISO year and quarter |
-| `DateTime.DaysBetween` | start, end | days | Returns the signed number of days between two date/times (end minus start) |
+| `DateTime.DaysBetween` | start, end | days | Returns the signed number of days between two date/times (end minus start), with the time of day as a fraction |
+| `DateTime.Difference` | start, end, unit? | difference | How far apart two date/times are in a chosen unit |
 | `DateTime.EndOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns the last millisecond of the day, week, month, quarter or year containing a date/time (start of the next period minus 1 ms) |
-| `DateTime.Format` | dateTime, format? | text | Formats a date/time as text using a .NET format string (invariant culture) |
+| `DateTime.Format` | dateTime, format? | text | Formats a date/time as text using a .NET format string (invariant culture): yyyy-MM-dd gives 2026-07-10, dd/MM/yyyy gives 10/07/2026, HH:mm gives 14:30, MMMM gives the E… |
+| `DateTime.FromExcelSerial` | serial, dateSystem? | dateTime | Converts an Excel date serial number (days since 1899-12-30, the time of day as the fraction |
 | `DateTime.FromUnixSeconds` | seconds | dateTime | Converts Unix seconds since 1970-01-01 UTC to a (UTC) date/time |
+| `DateTime.IsWeekend` | dateTime, weekend? | isWeekend | True when a date falls on the weekend (Saturday and Sunday, or Friday and Saturday) |
 | `DateTime.Now` | — | dateTime | Returns the current local date and time (captured at execution) |
-| `DateTime.Parse` | text, format? | dateTime | Parses text as a date/time, optionally with an exact .NET format string |
-| `DateTime.Range` | start, end, stepDays? | dates | Creates a list of dates from a start to an end (both included) with a step in days |
+| `DateTime.Parse` | text, format?, dayFirst? | dateTime | Parses text as a date/time |
+| `DateTime.Range` | start, end, step?, unit? | dates | Creates a list of dates from a start to an end (both included) with a step in days, weeks, months or years ("every month" lands on the same day of each month, clamped to… |
 | `DateTime.StartOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns midnight at the start of the day, week, month, quarter or year containing a date/time |
 | `DateTime.Today` | — | dateTime | Returns today's local date at midnight (captured at execution) |
 | `DateTime.ToUnixSeconds` | dateTime | seconds | Converts a date/time to Unix seconds since 1970-01-01 UTC (a value without a time zone is taken as UTC) |
@@ -244,6 +242,7 @@
 |---|---|---|---|
 | `Boolean` *(interactive)* | — | value | A true/false toggle |
 | `Choice` *(interactive)* | — | value, index | A pick-list with your own options (one per line) |
+| `Color Picker` *(interactive)* | — | color | A color chosen with a picker |
 | `Date` *(interactive)* | — | value | A date (and optional time), typed as 2026-10-01 or 2026-10-01 14:30 |
 | `Directory Path` *(interactive)* | — | path | A path to a directory |
 | `File Path` *(interactive)* | — | path | A path to a file |
@@ -331,18 +330,18 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `And` | a, b | result | Returns true only when both inputs are true |
-| `Equals` | a, b | result | Tests whether two values are equal (numbers compare by value regardless of numeric type) |
+| `Equals` | a, b | result | Tests whether two values are equal, the same way as Logic.Compare with ==: numbers compare by value (2 equals 2.0), text ignores upper and lower case, text that reads as… |
 | `GreaterThan` | a, b | result | Returns true when the first number is greater than the second |
 | `GreaterThanOrEqual` | a, b | result | Returns true when the first number is greater than or equal to the second |
 | `If` | test, trueValue, falseValue | result | Returns one of two values depending on a boolean condition |
-| `IsNull` | value | isNull | True when the value is null |
+| `IsNull` | value | isNull | True when the value is null (nothing came out) |
 | `IsNullOrEmpty` | value | isEmpty | True when the value is null, an empty string, an empty list or an empty dictionary |
 | `LessThan` | a, b | result | Returns true when the first number is less than the second |
 | `LessThanOrEqual` | a, b | result | Returns true when the first number is less than or equal to the second |
 | `Logic.Choose` | index, options | value | Picks one of several options by position (0 = first) |
 | `Logic.Compare` | a, b?, test?, ignoreCase? | result | Compares two values |
 | `Logic.IsBetween` | value, min, max, inclusive? | result | True when a number, text or date lies between a lower and an upper bound (bounds included by default) |
-| `Logic.NotEquals` | a, b | result | True when two values are different (numbers compare by value regardless of numeric type) |
+| `Logic.NotEquals` | a, b | result | True when two values are different |
 | `Logic.Switch` | value, cases, results, fallback? | value | Gives the result that goes with the first case equal to the value, otherwise the fallback |
 | `Logic.TypeOf` | value | type | Names the kind of a value |
 | `Logic.Xor` | a, b | result | True when exactly one of the two inputs is true |
@@ -365,9 +364,10 @@
 | `Math.Cos` | angle, unit? | value | Cosine of an angle (degrees by default) |
 | `Math.Degrees` | radians | degrees | Converts radians to degrees |
 | `Math.Exp` | power | value | e raised to a power (the inverse of the natural logarithm) |
-| `Math.Floor` | number | result | Rounds a number down to the nearest integer |
+| `Math.Floor` | number | result | Rounds a number down to the nearest integer (-2.5 becomes -3 |
 | `Math.Formula` | expression, a?, b?, c?, d?, e?, f? | result | Evaluates a formula such as "a * b + 2" or "if(a > 10, a - 10, 0)" over the inputs a to f |
-| `Math.Lerp` | a, b, t | value | Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited) |
+| `Math.IsClose` | a, b, tolerance? | result | True when two numbers differ by no more than the tolerance (the same unit as the numbers) |
+| `Math.Lerp` | a, b, t | value | Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited, so t = 2 goes past b |
 | `Math.Ln` | value | value | Natural logarithm (base e) of a positive number |
 | `Math.Log` | value, logBase? | value | Logarithm of a positive number to a base (10 by default) |
 | `Math.MapRange` | value, fromLow, fromHigh, toLow, toHigh | result | Linearly remaps a value from one range to another (values outside the range extrapolate) |
@@ -378,7 +378,7 @@
 | `Math.Pi` | — | pi | The constant pi (3.14159…) |
 | `Math.Pow` | @base, exponent | result | Raises the first number to the power of the second |
 | `Math.Radians` | degrees | radians | Converts degrees to radians |
-| `Math.Random` | min?, max?, seed? | result | Returns a random number in a range (seed >= 0 makes it deterministic) |
+| `Math.Random` | min?, max?, seed? | result | Returns a random number in a range |
 | `Math.Round` | number, digits? | result | Rounds a number to the given number of decimal digits (midpoints round away from zero) |
 | `Math.RoundToMultiple` | value, multiple | value | Rounds to the nearest multiple of a step, e.g |
 | `Math.Sequence` | start, count, step? | numbers | A list of count numbers starting at start and growing by step (the count-based sibling of List.Range) |
@@ -871,6 +871,12 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
+| `DateTime.AddDays` | DateTime.Add |
+| `DateTime.AddHours` | DateTime.Add |
+| `DateTime.AddMinutes` | DateTime.Add |
+| `DateTime.AddMonths` | DateTime.Add |
+| `DateTime.AddYears` | DateTime.Add |
+| `DateTime.AgeInDays` | DateTime.DaysBetween |
 | `List.Join` | List.Merge |
 | `Markup.AddArrow` | Markup.AddShape |
 | `Markup.AddEllipse` | Markup.AddShape |

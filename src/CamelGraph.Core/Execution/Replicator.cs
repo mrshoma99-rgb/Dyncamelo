@@ -82,7 +82,7 @@ internal static class Replicator
             node.AddMessage(
                 MessageSeverity.Warning,
                 stats.NullSkipped + " of " + stats.Calls + " laced calls received a null element and returned null. " +
-                "List.Clean strips nulls from the input; IsNull builds a filter mask.");
+                "List.Clean strips nulls from the input; IsNull with @L1 on its input answers true for each null, for a filter mask.");
         }
 
         if (stats.CoercionFailed > 0)

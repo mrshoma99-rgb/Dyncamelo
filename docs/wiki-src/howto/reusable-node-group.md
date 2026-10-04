@@ -15,7 +15,7 @@ Goal: turn "find the items on a level and colour them" into one node you can dro
 
 ## Steps
 
-1. Build the example. Add a `String` node (*Input*) for the level name. Add `Search.ByProperty` (*Navisworks ▸ Search*) with `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into its `value`. Add `Appearance.OverrideColor` (*Navisworks ▸ Appearance*), wire the search `items` into it, and wire a `Color Picker` (*Color*) into its `color`. Add a `Watch List` (*Display*) on the `items` output.
+1. Build the example. Add a `String` node (*Input*) for the level name. Add `Search.ByProperty` (*Navisworks ▸ Search*) with `categoryName` = `Element`, `propertyName` = `Level`, `mode` = `equals`, and wire the `String` into its `value`. Add `Appearance.OverrideColor` (*Navisworks ▸ Appearance*), wire the search `items` into it, and wire a `Color Picker` (*Input*) into its `color`. Add a `Watch List` (*Display*) on the `items` output.
 2. Select the search and the colour override. Leave the `String`, the `Color Picker` and the `Watch List` outside. (If you select them too, CamelGraph keeps input and Watch nodes outside the group on its own, because the Script Player only sees the top level, and tells you which ones it kept out.)
 3. Choose **Node Groups ▸ Make Node Group** or press ++ctrl+alt+g++. An instance replaces your selection and keeps the same wires. The wires that crossed the edge of the selection became its sockets: two inputs and one output. The graph computes what it did before.
 4. Select the instance and press ++tab++. You see the group's nodes between a **Group Input** and a **Group Output** node, and a bar above the canvas such as `My script ▸ Node Group`.
