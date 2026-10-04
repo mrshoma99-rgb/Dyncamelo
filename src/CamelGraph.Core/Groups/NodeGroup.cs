@@ -256,11 +256,11 @@ public sealed class NodeGroup : INotifyPropertyChanged
                     caller?.AddMessage(
                         MessageSeverity.Warning,
                         "A node inside '" + Name + "' is frozen, so the outputs of this group were not updated.");
-                    ReportInnerProblems(caller);
+                    ReportInnerProblems(caller, inputs);
                     return KeptOutputs(caller);
                 }
 
-                ReportInnerProblems(caller);
+                ReportInnerProblems(caller, inputs);
                 return OutputNode.Captured;
             }
         }
@@ -408,7 +408,7 @@ public sealed class NodeGroup : INotifyPropertyChanged
         return kept;
     }
 
-    private void ReportInnerProblems(GroupInstanceNode? caller)
+    private void ReportInnerProblems(GroupInstanceNode? caller, object?[] inputs)
     {
         if (caller == null)
         {
@@ -429,15 +429,22 @@ public sealed class NodeGroup : INotifyPropertyChanged
         }
 
         var captured = OutputNode.Captured;
-        if (failed.Count == 0 && captured.Any(v => v is UpstreamError))
+        if (failed.Count == 0 && (captured.Any(v => v is UpstreamError) || Graph.Nodes.Any(n => n.FailedUpstream)))
         {
-            // The failure came in from outside and reached an output: this instance did not deliver it, like any node stopped upstream.
+            // The failure came in from outside and nothing inside took care of it: the nodes that depend on it waited, and the
+            // outputs they feed (if any) leave as failures. Like any node stopped upstream, the instance says so (the nodes that
+            // did not depend on it ran).
             caller.FailedUpstream = true;
             caller.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
         }
         else if (captured.Length > 0 && captured.All(v => v is InactiveValue))
         {
             caller.AddMessage(MessageSeverity.Info, "Skipped: every output comes from a branch that was switched off (Flow.When was false).");
+        }
+        else if (inputs.Any(v => v is InactiveValue) &&
+                 Graph.Nodes.Any(n => !(n is GroupBoundNode) && n.State == NodeState.Idle && n.OutPorts.Count > 0 && n.OutPorts.All(p => p.Value is InactiveValue)))
+        {
+            caller.AddMessage(MessageSeverity.Info, "Part of this group was skipped: an input comes from a branch that was switched off (Flow.When was false).");
         }
 
         // The Group Input / Output nodes and the nodes stopped by a failure upstream are not warnings of their own.
