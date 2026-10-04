@@ -106,7 +106,9 @@ public static class ClashFilterNodes
         "side) — sets are the coordination scope language: \"only my package\", \"only against the " +
         "existing building\". invert turns it into the classic ignore-list: drop every clash touching " +
         "the \"Accepted penetrations\" set. An item counts as in the set when itself OR any ancestor " +
-        "is a member, matching how Navisworks selections include descendants.")]
+        "is a member, matching how Navisworks selections include descendants. The set input takes a set, its name, or a list " +
+        "of model items or sets, and a list is read as ONE combined set; to filter once per set, right-click the set socket, " +
+        "choose List Levels and @L1.")]
     [NodeSearchTags("clash", "filter", "set", "selection", "search", "scope", "ignore", "exclude", "membership")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterBySet(
