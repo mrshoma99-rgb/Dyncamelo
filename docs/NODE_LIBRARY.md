@@ -210,9 +210,13 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 |---|---|---|---|---|---|---|
 | DateTime.Now | DateTime | — | now: DateTime | Current local date-time (re-evaluates each run; timestamping reports). | System.DateTime.Now | MVP |
 | DateTime.Format | DateTime | dateTime: DateTime, format: string = "yyyy-MM-dd HH:mm" | text: string | Format as string (invariant culture). | DateTime.ToString(fmt) | MVP |
-| DateTime.Parse | DateTime | text: string, format: string = "" | dateTime: DateTime | Parse from string (exact format optional). | DateTime.TryParse(Exact) | Implemented (v0.2) |
+| DateTime.Parse | DateTime | text: string, format: string = "", dayFirst: bool = false | dateTime: DateTime | Parse from string (exact format optional; numeric dates read month first unless dayFirst, with a warning when ambiguous). | DateTime.TryParse(Exact) | Implemented (v0.2) |
 | DateTime.ByDate | DateTime | year: int, month: int, day: int | dateTime: DateTime | Construct a date. | DateTime ctor | Implemented (v0.2) |
-| DateTime.AddDays | DateTime | dateTime: DateTime, days: double | dateTime: DateTime | Offset a date (4D schedule shifting). | DateTime.AddDays | Implemented (v0.2) |
+| DateTime.AddDays | DateTime | dateTime: DateTime, days: double | dateTime: DateTime | Offset a date (4D schedule shifting). Retired: use DateTime.Add (also AddHours, AddMinutes, AddMonths, AddYears); old graphs keep running. | DateTime.AddDays | Retired |
+| DateTime.Add | DateTime | dateTime: DateTime, amount: double, unit: string = "days" | dateTime: DateTime | Add seconds, minutes, hours, days, weeks, months or years; month and year steps clamp to the month end. | DateTime.Add* | Implemented |
+| DateTime.Difference | DateTime | start: DateTime, end: DateTime, unit: string = "days" | difference: double | Signed distance in a chosen unit; months and years count calendar months. | TimeSpan | Implemented |
+| DateTime.AddWorkdays / IsWeekend | DateTime | dateTime: DateTime, days: int / weekend: string | dateTime / isWeekend | Skip the weekend (Saturday and Sunday, or Friday and Saturday); no public holidays. | DayOfWeek | Implemented |
+| DateTime.FromExcelSerial | DateTime | serial: double, dateSystem: string = "1900" | dateTime: DateTime | Excel date serial number to a date (what Excel.ReadFromFile gives for a date cell). | DateTime.FromOADate | Implemented |
 | DateTime.DaysBetween | DateTime | start: DateTime, end: DateTime | days: double | Signed day difference. | TimeSpan.TotalDays | Implemented (v0.2) |
 
 ## File

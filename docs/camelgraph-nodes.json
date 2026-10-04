@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 580,
+ "count": 579,
  "categories": [
   {
    "name": "Annotation",
@@ -16,7 +16,7 @@
   },
   {
    "name": "DateTime",
-   "count": 19
+   "count": 18
   },
   {
    "name": "Dictionary",
@@ -1014,212 +1014,105 @@
    "returns": ""
   },
   {
-   "name": "DateTime.AddDays",
-   "id": "CamelGraph.Nodes.DateTimeNodes.AddDays@System.DateTime,double",
+   "name": "DateTime.Add",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.Add@System.DateTime,double,string",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Offsets a date/time by a number of days (fractional and negative values allowed).",
+   "description": "Adds an amount of time to a date/time in a chosen unit — seconds, minutes, hours, days, weeks, months or years (negative values go back). Days, hours and the smaller units take fractions (0.5 days = 12 hours); months and years are calendar steps that clamp to the end of a shorter month (31 January + 1 month = 28 February) and take whole numbers. For working days use DateTime.AddWorkdays.",
    "tags": [
     "offset",
     "shift",
     "schedule",
-    "date"
-   ],
-   "inputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The date/time to offset."
-    },
-    {
-     "name": "days",
-     "type": "number",
-     "description": "Days to add (fractional and negative values allowed)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The offset date/time."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "DateTime.AddHours",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AddHours@System.DateTime,double",
-   "assembly": "CamelGraph.Nodes",
-   "category": "DateTime",
-   "description": "Adds hours to a date/time (fractional and negative values allowed).",
-   "tags": [
-    "offset",
-    "shift",
-    "schedule",
-    "hour",
+    "date",
     "later",
     "earlier",
-    "time"
-   ],
-   "inputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The date/time to offset."
-    },
-    {
-     "name": "hours",
-     "type": "number",
-     "description": "Hours to add (fractional and negative values allowed)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The offset date/time."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "DateTime.AddMinutes",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AddMinutes@System.DateTime,double",
-   "assembly": "CamelGraph.Nodes",
-   "category": "DateTime",
-   "description": "Adds minutes to a date/time (fractional and negative values allowed).",
-   "tags": [
-    "offset",
-    "shift",
-    "schedule",
-    "minute",
-    "later",
-    "earlier",
-    "time"
-   ],
-   "inputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The date/time to offset."
-    },
-    {
-     "name": "minutes",
-     "type": "number",
-     "description": "Minutes to add (fractional and negative values allowed)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The offset date/time."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "DateTime.AddMonths",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AddMonths@System.DateTime,int",
-   "assembly": "CamelGraph.Nodes",
-   "category": "DateTime",
-   "description": "Adds calendar months to a date/time (the day clamps to the end of a shorter month).",
-   "tags": [
-    "offset",
-    "shift",
-    "schedule",
-    "month",
-    "later",
-    "earlier"
-   ],
-   "inputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The date/time to offset."
-    },
-    {
-     "name": "months",
-     "type": "integer",
-     "description": "Months to add (negative values allowed)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The offset date/time."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "DateTime.AddYears",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AddYears@System.DateTime,int",
-   "assembly": "CamelGraph.Nodes",
-   "category": "DateTime",
-   "description": "Adds calendar years to a date/time (29 February clamps to 28 February in a common year).",
-   "tags": [
-    "offset",
-    "shift",
-    "schedule",
-    "year",
-    "later",
-    "earlier"
-   ],
-   "inputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The date/time to offset."
-    },
-    {
-     "name": "years",
-     "type": "integer",
-     "description": "Years to add (negative values allowed)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "dateTime",
-     "type": "datetime",
-     "description": "The offset date/time."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "DateTime.AgeInDays",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AgeInDays@System.DateTime,System.DateTime",
-   "assembly": "CamelGraph.Nodes",
-   "category": "DateTime",
-   "description": "Returns how many days old a date/time is at a reference date/time (reference minus date; fractional days included).",
-   "tags": [
-    "age",
-    "old",
-    "elapsed",
-    "since",
-    "overdue",
+    "time",
+    "plus",
+    "minus",
+    "move",
+    "delay",
     "duration",
-    "days"
+    "AddDays",
+    "AddHours",
+    "AddMinutes",
+    "AddMonths",
+    "AddYears",
+    "month",
+    "year",
+    "hour",
+    "minute",
+    "day",
+    "week"
    ],
    "inputs": [
     {
      "name": "dateTime",
      "type": "datetime",
-     "description": "The date/time to measure the age of, e.g. when a clash was created."
+     "description": "The date/time to offset."
     },
     {
-     "name": "reference",
-     "type": "datetime",
-     "description": "The date/time to measure up to, e.g. DateTime.Now."
+     "name": "amount",
+     "type": "number",
+     "description": "How much to add, in the chosen unit (negative values go back)."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "\"seconds\", \"minutes\", \"hours\", \"days\" (default), \"weeks\", \"months\" or \"years\" (any case).",
+     "default": "\"days\""
     }
    ],
    "outputs": [
     {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The offset date/time."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.AddWorkdays",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.AddWorkdays@System.DateTime,int,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "DateTime",
+   "description": "Moves a date/time by a number of working days, skipping the weekend (Saturday and Sunday, or Friday and Saturday): Friday + 1 is Monday, Monday - 1 is Friday, Saturday + 1 is Monday. The time of day is kept. Public holidays are not known: move the result on by hand when one falls in between.",
+   "tags": [
+    "workday",
+    "working day",
+    "business day",
+    "weekday",
+    "skip weekend",
+    "schedule",
+    "offset",
+    "shift",
+    "later",
+    "earlier",
+    "4d"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to move."
+    },
+    {
      "name": "days",
-     "type": "number",
-     "description": "The age in days (reference minus dateTime)."
+     "type": "integer",
+     "description": "Working days to add (whole number, negative goes back)."
+    },
+    {
+     "name": "weekend",
+     "type": "string",
+     "description": "Which two days are not working days: \"Saturday and Sunday\" (default) or \"Friday and Saturday\".",
+     "default": "\"Saturday and Sunday\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time that many working days later (or earlier)."
     }
    ],
    "returns": ""
@@ -1385,12 +1278,17 @@
    "id": "CamelGraph.Nodes.DateTimeNodes.DaysBetween@System.DateTime,System.DateTime",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Returns the signed number of days between two date/times (end minus start).",
+   "description": "Returns the signed number of days between two date/times (end minus start), with the time of day as a fraction. For how old something is, wire the date into start and DateTime.Now into end; a date in the future then gives a negative number. DateTime.Difference gives the same in hours, weeks, months and so on.",
    "tags": [
     "difference",
     "duration",
     "span",
-    "elapsed"
+    "elapsed",
+    "age",
+    "old",
+    "overdue",
+    "since",
+    "AgeInDays"
    ],
    "inputs": [
     {
@@ -1409,6 +1307,54 @@
      "name": "days",
      "type": "number",
      "description": "The signed day difference."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.Difference",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.Difference@System.DateTime,System.DateTime,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "DateTime",
+   "description": "How far apart two date/times are in a chosen unit — seconds, minutes, hours, days, weeks, months or years (end minus start, so a negative number means the end is earlier). Months and years count calendar months (10 January to 10 March is exactly 2) with the rest as a fraction; the other units are elapsed time with fractions. For how old something is, wire DateTime.Now into end.",
+   "tags": [
+    "difference",
+    "between",
+    "duration",
+    "span",
+    "elapsed",
+    "age",
+    "old",
+    "since",
+    "overdue",
+    "interval",
+    "how long",
+    "DaysBetween",
+    "AgeInDays"
+   ],
+   "inputs": [
+    {
+     "name": "start",
+     "type": "datetime",
+     "description": "The starting date/time."
+    },
+    {
+     "name": "end",
+     "type": "datetime",
+     "description": "The ending date/time."
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "\"seconds\", \"minutes\", \"hours\", \"days\" (default), \"weeks\", \"months\" or \"years\" (any case).",
+     "default": "\"days\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "difference",
+     "type": "number",
+     "description": "The signed difference in that unit."
     }
    ],
    "returns": ""
@@ -1463,7 +1409,7 @@
    "id": "CamelGraph.Nodes.DateTimeNodes.Format@System.DateTime,string",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Formats a date/time as text using a .NET format string (invariant culture).",
+   "description": "Formats a date/time as text using a .NET format string (invariant culture): yyyy-MM-dd gives 2026-07-10, dd/MM/yyyy gives 10/07/2026, HH:mm gives 14:30, MMMM gives the English month name.",
    "tags": [
     "tostring",
     "date",
@@ -1488,6 +1434,45 @@
      "name": "text",
      "type": "string",
      "description": "The formatted text."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "DateTime.FromExcelSerial",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.FromExcelSerial@double,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "DateTime",
+   "description": "Converts an Excel date serial number (days since 1899-12-30, the time of day as the fraction; 46000.5 is noon) to a date/time — what Excel.ReadFromFile and Table.FromExcelFile hand over for a date cell. Wire the column in and the whole column converts. Use dateSystem 1904 for workbooks that use the 1904 date system. Dates before March 1900 come out one day later than Excel shows them, because Excel counts a 29 February 1900 that never existed.",
+   "tags": [
+    "excel",
+    "xlsx",
+    "serial",
+    "date",
+    "spreadsheet",
+    "oadate",
+    "convert",
+    "import",
+    "column"
+   ],
+   "inputs": [
+    {
+     "name": "serial",
+     "type": "number",
+     "description": "The Excel serial number (days, with the time of day as a fraction)."
+    },
+    {
+     "name": "dateSystem",
+     "type": "string",
+     "description": "\"1900\" (default, Excel for Windows and current Excel for Mac) or \"1904\" (workbooks from old Excel for Mac).",
+     "default": "\"1900\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time (kind not specified)."
     }
    ],
    "returns": ""
@@ -1523,16 +1508,55 @@
    "returns": ""
   },
   {
+   "name": "DateTime.IsWeekend",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.IsWeekend@System.DateTime,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "DateTime",
+   "description": "True when a date falls on the weekend (Saturday and Sunday, or Friday and Saturday) — a mask for filtering a schedule down to working days.",
+   "tags": [
+    "weekday",
+    "workday",
+    "working day",
+    "business day",
+    "saturday",
+    "sunday",
+    "schedule",
+    "filter"
+   ],
+   "inputs": [
+    {
+     "name": "dateTime",
+     "type": "datetime",
+     "description": "The date/time to test."
+    },
+    {
+     "name": "weekend",
+     "type": "string",
+     "description": "Which two days are the weekend: \"Saturday and Sunday\" (default) or \"Friday and Saturday\".",
+     "default": "\"Saturday and Sunday\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isWeekend",
+     "type": "boolean",
+     "description": "True on a weekend day."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "DateTime.Now",
    "id": "CamelGraph.Nodes.DateTimeNodes.Now",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Returns the current local date and time (captured at execution).",
+   "description": "Returns the current local date and time (captured at execution). At the top level the value is kept until you run the node again; inside a node group every call asks the clock again, so for one timestamp shared by a whole report make it outside the group and pass it in through a Group Input.",
    "tags": [
     "today",
     "current",
     "clock",
-    "time"
+    "time",
+    "timestamp"
    ],
    "inputs": [],
    "outputs": [
@@ -1546,15 +1570,20 @@
   },
   {
    "name": "DateTime.Parse",
-   "id": "CamelGraph.Nodes.DateTimeNodes.Parse@string,string",
+   "id": "CamelGraph.Nodes.DateTimeNodes.Parse@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Parses text as a date/time, optionally with an exact .NET format string.",
+   "description": "Parses text as a date/time. ISO dates (2026-07-10, 2026-07-10 14:30) always work. Numeric dates with slashes, dots or dashes are ambiguous: 10/07/2026 is 7 October month first (the default) and 10 July with dayFirst on. When a date could be read either way and dayFirst is off, the node says which reading it took. An exact .NET format (dd/MM/yyyy, dd.MM.yyyy HH:mm) overrides both and refuses anything else.",
    "tags": [
     "fromstring",
     "convert",
     "date",
-    "time"
+    "time",
+    "dayfirst",
+    "day first",
+    "dd/mm/yyyy",
+    "european",
+    "ambiguous"
    ],
    "inputs": [
     {
@@ -1565,8 +1594,14 @@
     {
      "name": "format",
      "type": "string",
-     "description": "Optional exact .NET date format string.",
+     "description": "Optional exact .NET date format string; when given, dayFirst is not used.",
      "default": "\"\""
+    },
+    {
+     "name": "dayFirst",
+     "type": "boolean",
+     "description": "True to read numeric dates such as 10/07/2026, 10.07.2026 or 10-07-2026 as day, month, year (10 July); false (default) reads them month first (7 October). ISO dates (2026-07-10) are never ambiguous.",
+     "default": "false"
     }
    ],
    "outputs": [
@@ -1580,10 +1615,10 @@
   },
   {
    "name": "DateTime.Range",
-   "id": "CamelGraph.Nodes.DateTimeExtraNodes.Range@System.DateTime,System.DateTime,double",
+   "id": "CamelGraph.Nodes.DateTimeExtraNodes.Range@System.DateTime,System.DateTime,double,string",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Creates a list of dates from a start to an end (both included) with a step in days; at most 100000 items.",
+   "description": "Creates a list of dates from a start to an end (both included) with a step in days, weeks, months or years (\"every month\" lands on the same day of each month, clamped to the month's end); at most 100000 items.",
    "tags": [
     "sequence",
     "series",
@@ -1591,7 +1626,13 @@
     "schedule",
     "every",
     "days",
-    "timeline"
+    "timeline",
+    "monthly",
+    "weekly",
+    "yearly",
+    "month",
+    "week",
+    "year"
    ],
    "inputs": [
     {
@@ -1605,10 +1646,16 @@
      "description": "The last date (included when the step lands on it)."
     },
     {
-     "name": "stepDays",
+     "name": "step",
      "type": "number",
-     "description": "Days between two items; must be greater than 0.",
+     "description": "How many units between two items; must be greater than 0 (a whole number for months and years).",
      "default": "1"
+    },
+    {
+     "name": "unit",
+     "type": "string",
+     "description": "\"days\" (default), \"weeks\", \"months\" or \"years\" (any case).",
+     "default": "\"days\""
     }
    ],
    "outputs": [
@@ -1670,7 +1717,7 @@
    "id": "CamelGraph.Nodes.DateTimeExtraNodes.Today",
    "assembly": "CamelGraph.Nodes",
    "category": "DateTime",
-   "description": "Returns today's local date at midnight (captured at execution).",
+   "description": "Returns today's local date at midnight (captured at execution). At the top level the value is kept until you run the node again; inside a node group every call asks the clock again, so for one date shared by a whole report make it outside the group and pass it in through a Group Input.",
    "tags": [
     "current",
     "date",
@@ -9047,7 +9094,7 @@
    "id": "CamelGraph.Nodes.MathNodes.Random@double,double,int",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Returns a random number in a range (seed >= 0 makes it deterministic).",
+   "description": "Returns a random number in a range. With a seed of 0 or more the same seed always gives the same number; without one (-1) every run gives a new number. Inside a node group every call draws again, so for one sample shared by a whole report make the number outside the group and pass it in through a Group Input.",
    "tags": [
     "rand",
     "noise",

@@ -2,14 +2,14 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**580 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
 | [Color](#color) | 18 |
 | [Data](#data) | 4 |
-| [DateTime](#datetime) | 19 |
+| [DateTime](#datetime) | 18 |
 | [Dictionary](#dictionary) | 13 |
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
@@ -95,22 +95,21 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `DateTime.AddDays` | dateTime, days | dateTime | Offsets a date/time by a number of days (fractional and negative values allowed) |
-| `DateTime.AddHours` | dateTime, hours | dateTime | Adds hours to a date/time (fractional and negative values allowed) |
-| `DateTime.AddMinutes` | dateTime, minutes | dateTime | Adds minutes to a date/time (fractional and negative values allowed) |
-| `DateTime.AddMonths` | dateTime, months | dateTime | Adds calendar months to a date/time (the day clamps to the end of a shorter month) |
-| `DateTime.AddYears` | dateTime, years | dateTime | Adds calendar years to a date/time (29 February clamps to 28 February in a common year) |
-| `DateTime.AgeInDays` | dateTime, reference | days | Returns how many days old a date/time is at a reference date/time (reference minus date |
+| `DateTime.Add` | dateTime, amount, unit? | dateTime | Adds an amount of time to a date/time in a chosen unit |
+| `DateTime.AddWorkdays` | dateTime, days, weekend? | dateTime | Moves a date/time by a number of working days, skipping the weekend (Saturday and Sunday, or Friday and Saturday): Friday + 1 is Monday, Monday - 1 is Friday, Saturday +… |
 | `DateTime.ByDate` | year, month, day | dateTime | Creates a date from year, month and day numbers |
 | `DateTime.Compare` | a, b | result | Compares two date/times: -1 when the first is earlier, 0 when equal, 1 when it is later |
 | `DateTime.Components` | dateTime | year, month, day, hour, minute, second, weekday, dayOfYear, isoWeek, isoYear, quarter | Splits a date/time into year, month, day, hour, minute, second, English weekday name, day of year, ISO week, ISO year and quarter |
-| `DateTime.DaysBetween` | start, end | days | Returns the signed number of days between two date/times (end minus start) |
+| `DateTime.DaysBetween` | start, end | days | Returns the signed number of days between two date/times (end minus start), with the time of day as a fraction |
+| `DateTime.Difference` | start, end, unit? | difference | How far apart two date/times are in a chosen unit |
 | `DateTime.EndOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns the last millisecond of the day, week, month, quarter or year containing a date/time (start of the next period minus 1 ms) |
-| `DateTime.Format` | dateTime, format? | text | Formats a date/time as text using a .NET format string (invariant culture) |
+| `DateTime.Format` | dateTime, format? | text | Formats a date/time as text using a .NET format string (invariant culture): yyyy-MM-dd gives 2026-07-10, dd/MM/yyyy gives 10/07/2026, HH:mm gives 14:30, MMMM gives the E… |
+| `DateTime.FromExcelSerial` | serial, dateSystem? | dateTime | Converts an Excel date serial number (days since 1899-12-30, the time of day as the fraction |
 | `DateTime.FromUnixSeconds` | seconds | dateTime | Converts Unix seconds since 1970-01-01 UTC to a (UTC) date/time |
+| `DateTime.IsWeekend` | dateTime, weekend? | isWeekend | True when a date falls on the weekend (Saturday and Sunday, or Friday and Saturday) |
 | `DateTime.Now` | — | dateTime | Returns the current local date and time (captured at execution) |
-| `DateTime.Parse` | text, format? | dateTime | Parses text as a date/time, optionally with an exact .NET format string |
-| `DateTime.Range` | start, end, stepDays? | dates | Creates a list of dates from a start to an end (both included) with a step in days |
+| `DateTime.Parse` | text, format?, dayFirst? | dateTime | Parses text as a date/time |
+| `DateTime.Range` | start, end, step?, unit? | dates | Creates a list of dates from a start to an end (both included) with a step in days, weeks, months or years ("every month" lands on the same day of each month, clamped to… |
 | `DateTime.StartOf` | dateTime, unit?, firstDayOfWeek? | dateTime | Returns midnight at the start of the day, week, month, quarter or year containing a date/time |
 | `DateTime.Today` | — | dateTime | Returns today's local date at midnight (captured at execution) |
 | `DateTime.ToUnixSeconds` | dateTime | seconds | Converts a date/time to Unix seconds since 1970-01-01 UTC (a value without a time zone is taken as UTC) |
@@ -379,7 +378,7 @@
 | `Math.Pi` | — | pi | The constant pi (3.14159…) |
 | `Math.Pow` | @base, exponent | result | Raises the first number to the power of the second |
 | `Math.Radians` | degrees | radians | Converts degrees to radians |
-| `Math.Random` | min?, max?, seed? | result | Returns a random number in a range (seed >= 0 makes it deterministic) |
+| `Math.Random` | min?, max?, seed? | result | Returns a random number in a range |
 | `Math.Round` | number, digits? | result | Rounds a number to the given number of decimal digits (midpoints round away from zero) |
 | `Math.RoundToMultiple` | value, multiple | value | Rounds to the nearest multiple of a step, e.g |
 | `Math.Sequence` | start, count, step? | numbers | A list of count numbers starting at start and growing by step (the count-based sibling of List.Range) |
@@ -872,6 +871,12 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
+| `DateTime.AddDays` | DateTime.Add |
+| `DateTime.AddHours` | DateTime.Add |
+| `DateTime.AddMinutes` | DateTime.Add |
+| `DateTime.AddMonths` | DateTime.Add |
+| `DateTime.AddYears` | DateTime.Add |
+| `DateTime.AgeInDays` | DateTime.DaysBetween |
 | `List.Join` | List.Merge |
 | `Markup.AddArrow` | Markup.AddShape |
 | `Markup.AddEllipse` | Markup.AddShape |

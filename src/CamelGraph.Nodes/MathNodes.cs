@@ -246,7 +246,10 @@ public static class MathNodes
     /// <param name="seed">-1 for non-deterministic; 0 or greater for a repeatable value.</param>
     /// <returns>A random number in [min, max).</returns>
     [NodeName("Math.Random")]
-    [NodeDescription("Returns a random number in a range (seed >= 0 makes it deterministic).")]
+    [NodeDescription(
+        "Returns a random number in a range. With a seed of 0 or more the same seed always gives the same number; without one " +
+        "(-1) every run gives a new number. Inside a node group every call draws again, so for one sample shared by a whole " +
+        "report make the number outside the group and pass it in through a Group Input.")]
     [NodeSearchTags("rand", "noise", "seed", "dice")]
     public static double Random(double min = 0d, double max = 1d, int seed = -1)
     {
