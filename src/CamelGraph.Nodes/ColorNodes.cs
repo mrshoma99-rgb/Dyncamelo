@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 
 namespace CamelGraph.Nodes;
@@ -13,6 +14,9 @@ namespace CamelGraph.Nodes;
 [NodeCategory("Color")]
 public static class ColorNodes
 {
+    // One million colours is already 16 MB of references; more than that is a wrong number, not a wish.
+    private const int MaxColors = 1_000_000;
+
     /// <summary>
     /// Builds a color from alpha, red, green and blue channels. Channel values
     /// outside 0–255 are clamped.
@@ -104,11 +108,11 @@ public static class ColorNodes
     /// </summary>
     /// <param name="start">Color at t = 0.</param>
     /// <param name="end">Color at t = 1.</param>
-    /// <param name="t">Interpolation parameter (clamped to 0–1).</param>
+    /// <param name="t">Interpolation parameter (clamped to 0–1; NaN counts as 0, with a warning).</param>
     /// <returns>The interpolated color.</returns>
     [NodeName("Color.Lerp")]
     [return: NodeName("color")]
-    [NodeDescription("Interpolates between two colors (t clamped to 0-1).")]
+    [NodeDescription("Interpolates between two colors (t clamped to 0-1). A t that is not a number (NaN) gives the start color and a warning.")]
     [NodeSearchTags("interpolate", "blend", "gradient", "mix")]
     public static CamelGraphColor Lerp(CamelGraphColor start, CamelGraphColor end, [NodeRange(0, 1, Step = 0.05)] double t)
     {
@@ -120,6 +124,12 @@ public static class ColorNodes
         if (end == null)
         {
             throw new ArgumentNullException(nameof(end), "Color.Lerp requires an end color.");
+        }
+
+        if (double.IsNaN(t))
+        {
+            NodeWarnings.Add("The value t is not a number (NaN), so the start color is used. Check the input 't'.");
+            t = 0d;
         }
 
         var clamped = t < 0d ? 0d : (t > 1d ? 1d : t);
@@ -149,23 +159,22 @@ public static class ColorNodes
     /// <summary>
     /// A list of visually distinct pseudo-random colors. Hues advance by the
     /// golden angle, so neighbours in the list never look alike; the same seed
-    /// always yields the same list.
+    /// always yields the same list. A count of 0 or less gives an empty list; the most it makes is 1,000,000.
     /// </summary>
-    /// <param name="count">How many colors to generate (at least 1).</param>
+    /// <param name="count">How many colors to generate (0 gives an empty list; at most 1,000,000).</param>
     /// <param name="seed">Any number; each seed yields one fixed sequence.</param>
     /// <returns>The colors.</returns>
     [NodeName("Color.RandomList")]
     [return: NodeName("colors")]
-    [NodeDescription("A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed — ideal for coloring N groups apart.")]
+    [NodeDescription(
+        "A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed — ideal for coloring N groups apart. " +
+        "A count of 0 gives an empty list (no groups, no colors); the most it makes is 1,000,000.")]
     [NodeSearchTags("random", "list", "palette", "distinct", "generate", "series")]
-    public static List<CamelGraphColor> RandomList(int count, int seed = 0)
+    public static List<CamelGraphColor> RandomList([NodeRange(0, 1000000, SoftMin = 1, SoftMax = 50)] int count = 5, int seed = 0)
     {
-        if (count < 1)
-        {
-            throw new ArgumentException("Color.RandomList needs a count of at least 1.", nameof(count));
-        }
+        RequireCount(count, "Color.RandomList");
 
-        var colors = new List<CamelGraphColor>(count);
+        var colors = new List<CamelGraphColor>(Math.Max(count, 0));
         for (int i = 0; i < count; i++)
         {
             colors.Add(CategoricalColor(i, seed));
@@ -177,27 +186,29 @@ public static class ColorNodes
     /// <summary>
     /// A list of colors evenly blended from a start color to an end color
     /// (both included). One color returns the start; two return exactly the
-    /// endpoints.
+    /// endpoints. A count of 0 or less gives an empty list; the most it makes is 1,000,000.
     /// </summary>
-    /// <param name="count">How many colors to generate (at least 1).</param>
+    /// <param name="count">How many colors to generate (0 gives an empty list; at most 1,000,000).</param>
     /// <param name="start">First color of the gradient (empty = blue).</param>
     /// <param name="end">Last color of the gradient (empty = red).</param>
     /// <returns>The gradient colors, start to end.</returns>
     [NodeName("Color.Gradient")]
     [return: NodeName("colors")]
-    [NodeDescription("A list of N colors evenly blended between two colors (endpoints included; defaults blue to red) — for heat-map style legends and value ramps.")]
+    [NodeDescription(
+        "A list of N colors evenly blended between two colors (endpoints included; defaults blue to red) — for heat-map style " +
+        "legends and value ramps. A count of 0 gives an empty list; the most it makes is 1,000,000.")]
     [NodeSearchTags("gradient", "ramp", "blend", "range", "between", "interpolate", "list", "series")]
-    public static List<CamelGraphColor> Gradient(int count, CamelGraphColor? start = null, CamelGraphColor? end = null)
+    public static List<CamelGraphColor> Gradient(
+        [NodeRange(0, 1000000, SoftMin = 1, SoftMax = 50)] int count = 5,
+        CamelGraphColor? start = null,
+        CamelGraphColor? end = null)
     {
-        if (count < 1)
-        {
-            throw new ArgumentException("Color.Gradient needs a count of at least 1.", nameof(count));
-        }
+        RequireCount(count, "Color.Gradient");
 
         var from = start ?? new CamelGraphColor(255, 29, 78, 216);  // blue
         var to = end ?? new CamelGraphColor(255, 220, 38, 38);      // red
 
-        var colors = new List<CamelGraphColor>(count);
+        var colors = new List<CamelGraphColor>(Math.Max(count, 0));
         for (int i = 0; i < count; i++)
         {
             var t = count == 1 ? 0d : (double)i / (count - 1);
@@ -205,6 +216,18 @@ public static class ColorNodes
         }
 
         return colors;
+    }
+
+    // A wrong count (billions) must not take the memory of the whole session; 0 or less is simply an empty list.
+    private static void RequireCount(int count, string node)
+    {
+        if (count > MaxColors)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(count),
+                node + " makes at most 1,000,000 colors; got " + count.ToString(CultureInfo.InvariantCulture) +
+                ". A list that long would use too much memory: use a smaller count.");
+        }
     }
 
     /// <summary>
@@ -216,25 +239,28 @@ public static class ColorNodes
     /// </summary>
     /// <param name="values">One value per element (property values, numbers, names, ...).</param>
     /// <param name="colors">Optional palette: colors or "#RRGGBB" strings, used in order and cycled.</param>
-    /// <returns>A color per input value, and the distinct values with their colors (index-aligned legend).</returns>
+    /// <returns>A color per input value, and the distinct values with their colors (index-aligned legend); all three are empty for an empty list.</returns>
     [NodeName("Color.ByValues")]
     [MultiReturn("colors", "uniqueValues", "uniqueColors")]
     [PortKinds("colour*", "", "colour*")]
-    [NodeDescription("One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled).")]
+    [NodeDescription(
+        "One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, " +
+        "and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled). An empty list of values (a search " +
+        "that found nothing) gives empty lists, not an error.")]
     [NodeSearchTags("color", "by", "value", "parameter", "property", "categorical", "legend", "map", "group")]
     public static Dictionary<string, object?> ByValues(IList<object?> values, IList<object?>? colors = null)
     {
-        if (values == null || values.Count == 0)
+        if (values == null)
         {
-            throw new ArgumentException("Color.ByValues needs at least one value.", nameof(values));
+            throw new ArgumentNullException(nameof(values), "Color.ByValues needs a list of values. Wire the values to color into the 'values' input.");
         }
 
         var palette = new List<CamelGraphColor>();
         if (colors != null)
         {
-            foreach (var entry in colors)
+            for (var i = 0; i < colors.Count; i++)
             {
-                palette.Add(CoerceColor(entry));
+                palette.Add(CoerceColor(colors[i], i));
             }
         }
 
@@ -308,18 +334,36 @@ public static class ColorNodes
     }
 
     /// <summary>A palette entry as a color: a CamelGraphColor or a hex string.</summary>
-    private static CamelGraphColor CoerceColor(object? entry)
+    private static CamelGraphColor CoerceColor(object? entry, int index)
     {
         switch (entry)
         {
             case CamelGraphColor color:
                 return color;
             case string hex when hex.Trim().Length > 0:
-                return FromHex(hex);
+                try
+                {
+                    return FromHex(hex);
+                }
+                catch (FormatException)
+                {
+                    throw new ArgumentException(
+                        "Color.ByValues: item " + (index + 1).ToString(CultureInfo.InvariantCulture) + " of 'colors' ('" + Shown(hex) +
+                        "') is not a hex color. Use \"#RRGGBB\" or \"#AARRGGBB\" text, or wire colors.");
+                }
+
             default:
                 throw new ArgumentException(
-                    "Cannot read '" + (entry ?? "null") + "' as a color — wire colors or \"#RRGGBB\" strings.");
+                    "Color.ByValues: item " + (index + 1).ToString(CultureInfo.InvariantCulture) + " of 'colors' (" + Shown(entry) +
+                    ") is not a color. Wire colors or \"#RRGGBB\" text; a list inside the list is not a color.");
         }
+    }
+
+    // The offending value for a message, short enough to read.
+    private static string Shown(object? value)
+    {
+        var text = CamelGraph.Core.Types.TypeCoercion.FormatValue(value);
+        return text.Length <= 40 ? text : text.Substring(0, 37) + "...";
     }
 
     private static int LerpChannel(byte from, byte to, double t)

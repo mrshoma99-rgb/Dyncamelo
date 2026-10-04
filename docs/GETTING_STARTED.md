@@ -109,7 +109,7 @@ The Watch List fills with every matching item. If it is empty, re-check the cate
 
 ### Step 3 — color the results
 
-1. Add **Color Picker** (under *Color*) and pick red.
+1. Add **Color Picker** (under *Input*) and pick red.
 2. Add **Appearance.OverrideColor** (under *Navisworks → Appearance*).
 3. Wire `Search.ByProperty → items` into `items`, and the Color Picker into `color` (or just click the colour swatch on the node's own `color` input).
 4. Press **Run** — every concrete item in the viewport turns red.

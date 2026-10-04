@@ -8,7 +8,7 @@
   },
   {
    "name": "Color",
-   "count": 18
+   "count": 17
   },
   {
    "name": "Data",
@@ -40,7 +40,7 @@
   },
   {
    "name": "Input",
-   "count": 10
+   "count": 11
   },
   {
    "name": "List",
@@ -204,29 +204,6 @@
    "interactive": true
   },
   {
-   "name": "Color Picker",
-   "id": "ColorPicker",
-   "category": "Color",
-   "description": "A color chosen with a picker.",
-   "tags": [
-    "colour",
-    "swatch",
-    "palette",
-    "hue",
-    "paint"
-   ],
-   "inputs": [],
-   "outputs": [
-    {
-     "name": "color",
-     "type": "Color",
-     "description": "The chosen color."
-    }
-   ],
-   "returns": "",
-   "interactive": true
-  },
-  {
    "name": "Color.ByARGB",
    "id": "CamelGraph.Nodes.ColorNodes.ByArgb@int,int,int,int",
    "assembly": "CamelGraph.Nodes",
@@ -290,17 +267,20 @@
     {
      "name": "hue",
      "type": "number",
-     "description": "Hue in degrees (0 = red, 120 = green, 240 = blue); wraps around."
+     "description": "Hue in degrees (0 = red, 120 = green, 240 = blue); wraps around.",
+     "default": "0"
     },
     {
      "name": "saturation",
      "type": "number",
-     "description": "Saturation, 0 (grey) to 1 (vivid); clamped."
+     "description": "Saturation, 0 (grey) to 1 (vivid); clamped.",
+     "default": "1"
     },
     {
      "name": "value",
      "type": "number",
-     "description": "Value (brightness), 0 (black) to 1 (full); clamped."
+     "description": "Value (brightness), 0 (black) to 1 (full); clamped.",
+     "default": "1"
     },
     {
      "name": "alpha",
@@ -323,7 +303,7 @@
    "id": "CamelGraph.Nodes.ColorNodes.ByValues@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Color",
-   "description": "One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled).",
+   "description": "One color per value, equal values sharing a color — feed parameter values in, feed the colors to Appearance.OverrideColor per group, and use the uniqueValues/uniqueColors legend for reports. Optional own palette (cycled). An empty list of values (a search that found nothing) gives empty lists, not an error.",
    "tags": [
     "color",
     "by",
@@ -365,7 +345,7 @@
      "description": ""
     }
    ],
-   "returns": "A color per input value, and the distinct values with their colors (index-aligned legend)."
+   "returns": "A color per input value, and the distinct values with their colors (index-aligned legend); all three are empty for an empty list."
   },
   {
    "name": "Color.Components",
@@ -511,7 +491,7 @@
    "id": "CamelGraph.Nodes.ColorNodes.Gradient@int,CamelGraph.Nodes.CamelGraphColor,CamelGraph.Nodes.CamelGraphColor",
    "assembly": "CamelGraph.Nodes",
    "category": "Color",
-   "description": "A list of N colors evenly blended between two colors (endpoints included; defaults blue to red) — for heat-map style legends and value ramps.",
+   "description": "A list of N colors evenly blended between two colors (endpoints included; defaults blue to red) — for heat-map style legends and value ramps. A count of 0 gives an empty list; the most it makes is 1,000,000.",
    "tags": [
     "gradient",
     "ramp",
@@ -526,7 +506,8 @@
     {
      "name": "count",
      "type": "integer",
-     "description": "How many colors to generate (at least 1)."
+     "description": "How many colors to generate (0 gives an empty list; at most 1,000,000).",
+     "default": "5"
     },
     {
      "name": "start",
@@ -584,7 +565,7 @@
    "id": "CamelGraph.Nodes.ColorNodes.Lerp@CamelGraph.Nodes.CamelGraphColor,CamelGraph.Nodes.CamelGraphColor,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Color",
-   "description": "Interpolates between two colors (t clamped to 0-1).",
+   "description": "Interpolates between two colors (t clamped to 0-1). A t that is not a number (NaN) gives the start color and a warning.",
    "tags": [
     "interpolate",
     "blend",
@@ -605,7 +586,7 @@
     {
      "name": "t",
      "type": "number",
-     "description": "Interpolation parameter (clamped to 0–1)."
+     "description": "Interpolation parameter (clamped to 0–1; NaN counts as 0, with a warning)."
     }
    ],
    "outputs": [
@@ -732,7 +713,7 @@
    "id": "CamelGraph.Nodes.ColorNodes.RandomList@int,int",
    "assembly": "CamelGraph.Nodes",
    "category": "Color",
-   "description": "A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed — ideal for coloring N groups apart.",
+   "description": "A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed — ideal for coloring N groups apart. A count of 0 gives an empty list (no groups, no colors); the most it makes is 1,000,000.",
    "tags": [
     "random",
     "list",
@@ -745,7 +726,8 @@
     {
      "name": "count",
      "type": "integer",
-     "description": "How many colors to generate (at least 1)."
+     "description": "How many colors to generate (0 gives an empty list; at most 1,000,000).",
+     "default": "5"
     },
     {
      "name": "seed",
@@ -863,7 +845,8 @@
     {
      "name": "alpha",
      "type": "integer",
-     "description": "The new alpha, 0 (transparent) to 255 (opaque); clamped."
+     "description": "The new alpha, 0 (transparent) to 255 (opaque); clamped.",
+     "default": "255"
     }
    ],
    "outputs": [
@@ -5213,6 +5196,29 @@
      "name": "index",
      "type": "integer",
      "description": ""
+    }
+   ],
+   "returns": "",
+   "interactive": true
+  },
+  {
+   "name": "Color Picker",
+   "id": "ColorPicker",
+   "category": "Input",
+   "description": "A color chosen with a picker.",
+   "tags": [
+    "colour",
+    "swatch",
+    "palette",
+    "hue",
+    "paint"
+   ],
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "color",
+     "type": "Color",
+     "description": "The chosen color."
     }
    ],
    "returns": "",

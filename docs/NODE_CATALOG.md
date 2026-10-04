@@ -7,7 +7,7 @@
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
-| [Color](#color) | 18 |
+| [Color](#color) | 17 |
 | [Data](#data) | 4 |
 | [DateTime](#datetime) | 18 |
 | [Dictionary](#dictionary) | 13 |
@@ -15,7 +15,7 @@
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
 | [IFC](#ifc) | 2 |
-| [Input](#input) | 10 |
+| [Input](#input) | 11 |
 | [List](#list) | 51 |
 | [List.Statistics](#liststatistics) | 12 |
 | [Logic](#logic) | 18 |
@@ -63,24 +63,23 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Color Picker` *(interactive)* | — | color | A color chosen with a picker |
 | `Color.ByARGB` | a?, r?, g?, b? | color | Creates a color from alpha, red, green and blue values (0-255) |
-| `Color.ByHSV` | hue, saturation, value, alpha? | color | Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped) |
+| `Color.ByHSV` | hue?, saturation?, value?, alpha? | color | Creates a color from hue (degrees, wraps around), saturation and value (0-1, clamped) |
 | `Color.ByValues` | values, colors? | colors, uniqueValues, uniqueColors | One color per value, equal values sharing a color |
 | `Color.Components` | color | red, green, blue, alpha | Splits a color into its red, green, blue and alpha channels (0-255) |
 | `Color.ContrastText` | background | color | Black or white, whichever reads better on a background color (WCAG contrast) |
 | `Color.Darken` | color, amount? | color | Makes a color darker by shifting its HSL lightness down by amount (0-1, clamped) |
 | `Color.FromHex` | hex | color | Parses a hex color string ("#RRGGBB" or "#AARRGGBB") |
-| `Color.Gradient` | count, start?, end? | colors | A list of N colors evenly blended between two colors (endpoints included |
+| `Color.Gradient` | count?, start?, end? | colors | A list of N colors evenly blended between two colors (endpoints included |
 | `Color.Invert` | color | color | Inverts a color's red, green and blue channels (the photographic negative) |
 | `Color.Lerp` | start, end, t | color | Interpolates between two colors (t clamped to 0-1) |
 | `Color.Lighten` | color, amount? | color | Makes a color lighter by shifting its HSL lightness up by amount (0-1, clamped) |
 | `Color.Palette` | name?, count? | colors | A named palette as a list of colors: colourblind-safe, tableau, pastel, status (green/amber/red/grey) or the viridis, heat and grey ramps interpolated to count |
 | `Color.Random` | seed? | color | A pseudo-random color, stable per seed: the same seed always gives the same color (re-runs stay consistent) |
-| `Color.RandomList` | count, seed? | colors | A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed |
+| `Color.RandomList` | count?, seed? | colors | A list of visually distinct pseudo-random colors (golden-angle hues), stable per seed |
 | `Color.ToHex` | color, includeAlpha? | hex | Formats a color as hex text, "#RRGGBB" (or "#AARRGGBB" with includeAlpha) |
 | `Color.ToHSV` | color | hue, saturation, value | Splits a color into hue (degrees, 0-360), saturation and value (0-1) |
-| `Color.WithAlpha` | color, alpha | color | Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque |
+| `Color.WithAlpha` | color, alpha? | color | Returns a color with its alpha (opacity) replaced, 0 = transparent to 255 = opaque |
 
 ## Data
 
@@ -243,6 +242,7 @@
 |---|---|---|---|
 | `Boolean` *(interactive)* | — | value | A true/false toggle |
 | `Choice` *(interactive)* | — | value, index | A pick-list with your own options (one per line) |
+| `Color Picker` *(interactive)* | — | color | A color chosen with a picker |
 | `Date` *(interactive)* | — | value | A date (and optional time), typed as 2026-10-01 or 2026-10-01 14:30 |
 | `Directory Path` *(interactive)* | — | path | A path to a directory |
 | `File Path` *(interactive)* | — | path | A path to a file |

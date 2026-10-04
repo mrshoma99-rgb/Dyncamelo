@@ -25,7 +25,7 @@ public class ColorPickerNode : NodeModel, IPlayerInputNode
     public ColorPickerNode()
     {
         Name = "Color Picker";
-        Category = "Color";
+        Category = "Input";
         Description = "A color chosen with a picker.";
         AddOutput("color", typeof(CamelGraphColor), "The chosen color.");
     }
