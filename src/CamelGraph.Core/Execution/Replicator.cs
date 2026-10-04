@@ -396,7 +396,7 @@ internal static class Replicator
         }
 
         object?[]? outputs;
-        using (var warnings = NodeWarnings.Begin())
+        using (var warnings = NodeWarnings.Begin(insideReplication))
         {
             if (insideReplication)
             {
