@@ -240,5 +240,6 @@ Designed-in seams, in increasing order of effort:
 ## 9. Error-handling philosophy
 
 - A node that **throws** → `Error` state with the exception message; run continues; downstream of a failed node does not execute with garbage (missing upstream values behave like unconnected required inputs).
+- A node that **runs out of memory** (a list of billions of items) is an `Error` on that node like any other failure ("Ran out of memory…"); the engine gives the memory back and the rest of the graph runs. A node that can be asked for an absurd size should still check it and say so in its own words.
 - A **recoverable issue** (property not found, parse failure, divide by zero, empty list in Longest lacing) → `Warning` state, `null` (or documented sentinel like `NaN`) result, run continues. A zero-touch node raises it with `NodeWarnings.Add("…")`; the engine collects the messages per call. During replication, warnings aggregate ("3 of 40 calls: first message") instead of spamming.
 - The graph run **never crashes the host**. Anything that escapes these rules is a CamelGraph bug by definition and a release blocker.

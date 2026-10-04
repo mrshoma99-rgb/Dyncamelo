@@ -33,6 +33,26 @@ public static class NodeWarnings
         Active.Value?.Add(message.Trim());
     }
 
+    /// <summary>
+    /// Reports "<paramref name="what"/> is not a finite number (NaN)." (or Infinity) when <paramref name="value"/> is not a finite
+    /// number, and does nothing otherwise. For nodes whose arithmetic can quietly produce NaN or Infinity (a division by zero, a
+    /// scale by NaN): call it on the result or on the input that caused it, and return the value as usual.
+    /// </summary>
+    /// <param name="value">The number to check.</param>
+    /// <param name="what">What the number is, as the user knows it ("The result", "The factor").</param>
+    /// <returns>True when the value is NaN or infinite.</returns>
+    public static bool WarnIfNotFinite(double value, string what)
+    {
+        if (!double.IsNaN(value) && !double.IsInfinity(value))
+        {
+            return false;
+        }
+
+        var kind = double.IsNaN(value) ? "NaN" : value > 0 ? "Infinity" : "-Infinity";
+        Add((string.IsNullOrWhiteSpace(what) ? "The value" : what.Trim()) + " is not a finite number (" + kind + ").");
+        return true;
+    }
+
     /// <summary>True while a node call is collecting warnings.</summary>
     internal static bool IsCollecting => Active.Value != null;
 

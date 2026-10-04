@@ -438,7 +438,19 @@ public class GraphEngine
             node.State = NodeState.Idle;
             throw;
         }
-        catch (Exception ex) when (!(ex is OutOfMemoryException) && !(ex is StackOverflowException))
+        catch (OutOfMemoryException)
+        {
+            // A node asked for more memory than there is (a list of billions of items). It is that node's failure, not the
+            // run's: whatever it held is unreachable now, so give the memory back and let the rest of the graph run.
+            SetOutputs(node, null);
+            node.AddMessage(
+                MessageSeverity.Error,
+                "Ran out of memory. The result would be too large for the memory that is available; use a smaller size, count or step, or fewer items, and run again.");
+            node.State = NodeState.Error;
+            node.OnNotRun();
+            GC.Collect();
+        }
+        catch (Exception ex) when (!(ex is StackOverflowException))
         {
             // The single place where node exceptions are absorbed (§4).
             SetOutputs(node, null);
