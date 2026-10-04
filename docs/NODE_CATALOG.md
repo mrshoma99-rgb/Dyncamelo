@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**581 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -14,7 +14,7 @@
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 42 |
-| [IFC](#ifc) | 2 |
+| [IFC](#ifc) | 4 |
 | [Input](#input) | 10 |
 | [List](#list) | 51 |
 | [List.Statistics](#liststatistics) | 12 |
@@ -236,6 +236,8 @@
 |---|---|---|---|
 | `IFC.GuidDecode` | globalId | guid | Converts a 22-character IFC GlobalId such as "0$WU4A9R19$vKWO$AdOnKA" back to a standard lower-case hyphenated GUID |
 | `IFC.GuidEncode` | guid | globalId | Converts a standard GUID such as "3f81e10a-25b0-49ff-9520-63f2a763150a" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) |
+| `IFC.IsGlobalId` | text | isGlobalId | True when a text is a 22-character IFC GlobalId (alphabet 0-9 A-Z a-z _ $, first character 0 to 3) and false for a plain GUID, any other text or an empty cell, so a colu… |
+| `IFC.Normalize` | id, form? | id | Writes an id in one form whichever form it comes in: a 22-character IFC GlobalId or a standard GUID (with hyphens, without, or in braces) becomes the form you choose, a… |
 
 ## Input
 

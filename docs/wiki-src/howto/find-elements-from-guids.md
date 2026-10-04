@@ -35,7 +35,7 @@ Goal: take a column of element GUIDs from an Excel sheet, select those elements 
 `Search.ByGuid` makes **one pass** over the whole model for the whole list, so give it all the GUIDs at once. Do not run it once per GUID.
 
 !!! note "Which GUID does it match?"
-    The node matches an item's **instance GUID**. If your sheet holds IFC GlobalIds from an IFC export, the 22-character form is accepted. To convert by hand, use `IFC.GuidDecode` and `IFC.GuidEncode`, and `ModelItem.IfcGuid` to read the GlobalId of an item ([IFC, BCF, Excel and CSV](../exchange-formats.md#ifc-identity-globalids)).
+    The node matches an item's **instance GUID**. If your sheet holds IFC GlobalIds from an IFC export, the 22-character form is accepted. To convert by hand, use `IFC.GuidDecode` and `IFC.GuidEncode` (or `IFC.Normalize` for a column that mixes both forms, and `IFC.IsGlobalId` to tell them apart), and `ModelItem.IfcGuid` to read the GlobalId of an item ([IFC, BCF, Excel and CSV](../exchange-formats.md#ifc-identity-globalids)).
 
 ## If it does not work
 

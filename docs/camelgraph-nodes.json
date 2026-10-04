@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 581,
  "categories": [
   {
    "name": "Annotation",
@@ -36,7 +36,7 @@
   },
   {
    "name": "IFC",
-   "count": 2
+   "count": 4
   },
   {
    "name": "Input",
@@ -5030,7 +5030,7 @@
    "id": "CamelGraph.Nodes.IfcGuidNodes.GuidDecode@string",
    "assembly": "CamelGraph.Nodes",
    "category": "IFC",
-   "description": "Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID.",
+   "description": "Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID. A plain GUID is refused here; for a column that mixes both forms use IFC.Normalize.",
    "tags": [
     "ifc",
     "guid",
@@ -5062,7 +5062,7 @@
    "id": "CamelGraph.Nodes.IfcGuidNodes.GuidEncode@string",
    "assembly": "CamelGraph.Nodes",
    "category": "IFC",
-   "description": "Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references.",
+   "description": "Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references. A GlobalId is refused here; for a column that mixes both forms use IFC.Normalize.",
    "tags": [
     "ifc",
     "guid",
@@ -5085,6 +5085,84 @@
      "name": "globalId",
      "type": "string",
      "description": "The IFC GlobalId, e.g. \"0$WU4A9R19$vKWO$AdOnKA\"."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.IsGlobalId",
+   "id": "CamelGraph.Nodes.IfcGuidNodes.IsGlobalId@string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "IFC",
+   "description": "True when a text is a 22-character IFC GlobalId (alphabet 0-9 A-Z a-z _ $, first character 0 to 3) and false for a plain GUID, any other text or an empty cell, so a column that mixes both forms can be split before IFC.GuidDecode or IFC.GuidEncode. A list gives one answer per item, empty cells included.",
+   "tags": [
+    "ifc",
+    "globalid",
+    "guid",
+    "uuid",
+    "is",
+    "check",
+    "validate",
+    "22",
+    "test",
+    "format",
+    "which"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to test; a blank or missing text is simply not a GlobalId. Spaces around it are ignored."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isGlobalId",
+     "type": "boolean",
+     "description": "True for a valid 22-character IFC GlobalId; false for a plain GUID, any other text, or nothing."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.Normalize",
+   "id": "CamelGraph.Nodes.IfcGuidNodes.Normalize@string,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "IFC",
+   "description": "Writes an id in one form whichever form it comes in: a 22-character IFC GlobalId or a standard GUID (with hyphens, without, or in braces) becomes the form you choose, a GlobalId (default) or a lower-case hyphenated GUID. Use it on a column that mixes both forms, where IFC.GuidEncode and IFC.GuidDecode would each refuse the other form. A text that is neither is an error naming the text (in a list: an empty result and one warning).",
+   "tags": [
+    "ifc",
+    "guid",
+    "globalid",
+    "uuid",
+    "normalize",
+    "normalise",
+    "convert",
+    "either",
+    "mixed",
+    "tolerant",
+    "clean",
+    "canonical",
+    "22"
+   ],
+   "inputs": [
+    {
+     "name": "id",
+     "type": "string",
+     "description": "The id, in either form. Spaces around it are ignored."
+    },
+    {
+     "name": "form",
+     "type": "string",
+     "description": "The form to write: \"globalId\" (22 characters, the default) or \"guid\" (lower-case, hyphenated).",
+     "default": "\"globalId\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "id",
+     "type": "string",
+     "description": "The id in the requested form."
     }
    ],
    "returns": ""

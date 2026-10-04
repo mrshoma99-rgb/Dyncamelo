@@ -4,7 +4,7 @@ How data gets into and out of a CamelGraph graph. Every node named here is in th
 
 | Format | Read | Write |
 |---|---|---|
-| **IFC** | Navisworks reads IFC itself; `Document.AppendFiles` adds files to the model. IFC identity (GlobalIds) is handled by `ModelItem.IfcGuid`, `IFC.GuidDecode`, `IFC.GuidEncode` and `Search.ByGuid`. | `Export.ToIfc` and its option nodes |
+| **IFC** | Navisworks reads IFC itself; `Document.AppendFiles` adds files to the model. IFC identity (GlobalIds) is handled by `ModelItem.IfcGuid`, `IFC.GuidDecode`, `IFC.GuidEncode`, `IFC.IsGlobalId`, `IFC.Normalize` and `Search.ByGuid`. | `Export.ToIfc` and its option nodes |
 | **BCF** (issues) | `BCF.ImportIssues` (BCF 2.0 and 2.1) | `BCF.ExportIssues` (BCF 2.1) |
 | **Excel** (`.xlsx`) | `Table.FromExcelFile`, `Excel.ReadFromFile` | `Table.ToExcelFile`, `Excel.WriteToFile` |
 | **CSV** | `Table.FromCsvFile`, `CSV.ReadFromFile` | `Table.ToCsvFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `Export.ToCsv` |
@@ -30,6 +30,8 @@ IFC elements are identified by a 22-character **GlobalId** (`0$WU4A9R19$vKWO$AdO
 | `ModelItem.IfcGuid` | The 22-character GlobalId of an item (from its GlobalId / IfcGUID / IFC GUID / Guid property, otherwise its InstanceGuid encoded the same way); `null` when it has neither. A list of items gives a list of ids. |
 | `IFC.GuidDecode` | 22-character GlobalId to a lower-case hyphenated GUID. |
 | `IFC.GuidEncode` | Standard GUID to the 22-character GlobalId. |
+| `IFC.IsGlobalId` | True for a 22-character GlobalId, false for a GUID, other text or an empty cell. Splits a column that mixes both forms. |
+| `IFC.Normalize` | Either form to the form you choose (`globalId` or `guid`), so a mixed column becomes uniform. |
 | `Search.ByGuid` | Finds the items for a list of GUIDs (text, 22-character GlobalIds or GUID values) in **one pass** over the model, and gives the ids it could not find on a second output, `missing`. It walks every item once, so give it the whole list at once, not one id at a time. |
 
 ### Writing IFC: `Export.ToIfc`
