@@ -2144,7 +2144,7 @@
    "name": "Watch",
    "id": "Watch",
    "category": "Display",
-   "description": "Displays the incoming value.",
+   "description": "Displays the incoming value. A long list shows its first 1,000 items and a count of the rest; the value itself passes through whole. When the node does not run (an input failed, was switched off or is not connected) the display is cleared.",
    "tags": [
     "preview",
     "inspect",
@@ -2176,7 +2176,7 @@
    "name": "Watch Image",
    "id": "WatchImage",
    "category": "Display",
-   "description": "Displays the image file at the incoming path (PNG, JPG, BMP).",
+   "description": "Displays the image file at the incoming path (PNG, JPG, BMP). Given a list of paths it shows the first image and says how many there are. When the node does not run the picture is cleared.",
    "tags": [
     "picture",
     "png",
@@ -2192,7 +2192,7 @@
     {
      "name": "imagePath",
      "type": "any",
-     "description": "Path of the image file to display."
+     "description": "Path of the image file to display, or a list of paths (the first is shown)."
     }
    ],
    "outputs": [
@@ -2209,7 +2209,7 @@
    "name": "Watch List",
    "id": "WatchList",
    "category": "Display",
-   "description": "Displays the elements of a list, one per line.",
+   "description": "Displays the elements of a list, one per line. A very long list shows its first 2,000 elements and a count of the rest; the value itself passes through whole. When the node does not run the display is cleared.",
    "tags": [
     "preview",
     "inspect",
@@ -2241,7 +2241,7 @@
    "name": "Watch Table",
    "id": "WatchTable",
    "category": "Display",
-   "description": "Displays a table as a grid: column names on top, one line per row.",
+   "description": "Displays a table as a grid: column names on top, one line per row. The grid draws the first 2,000 rows (the summary says how many there are); the value itself passes through whole. When the node does not run the display is cleared.",
    "tags": [
     "preview",
     "inspect",
@@ -22358,7 +22358,7 @@
    "name": "Loop.Collect",
    "id": "LoopCollect",
    "category": "Workflow",
-   "description": "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once.",
+   "description": "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once. An iteration that a Flow.When switched off adds nothing to 'results'. When some iterations fail, their place in 'results' is empty and this node shows a warning that counts them and names the first failure.",
    "tags": [
     "for each",
     "foreach",
@@ -22396,7 +22396,7 @@
    "name": "Loop.Item",
    "id": "LoopItem",
    "category": "Workflow",
-   "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order.",
+   "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order. If the list comes from a node that failed, or from a Flow.When that is false, the loop does not run and the nodes after it wait, like after any failed or switched-off node.",
    "tags": [
     "for each",
     "foreach",

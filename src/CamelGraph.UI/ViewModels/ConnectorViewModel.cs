@@ -392,6 +392,13 @@ public class ConnectorViewModel : ObservableObject
             return;
         }
 
+        if (Port.IsScalarInput)
+        {
+            // One value per call (a list wired here maps the node): take the colour of what feeds it, but stay a single item.
+            SetKind(upstream.Family == PortFamily.Any ? _declaredKind : new PortKind(upstream.Family, PortDepth.Item));
+            return;
+        }
+
         SetKind(upstream.Family == PortFamily.Any && upstream.Depth == PortDepth.Unknown ? _declaredKind : upstream);
     }
 

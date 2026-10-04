@@ -64,4 +64,10 @@ public class PortDescriptor
 
     /// <summary>True when the parameter is marked <see cref="MultiInputAttribute"/> (and is list-typed): it accepts many wires.</summary>
     public bool MultiInput { get; set; }
+
+    /// <summary>True when the parameter is marked <see cref="AcceptsNullAttribute"/>: null elements of a laced list reach the node.</summary>
+    public bool AcceptsNull { get; set; }
+
+    /// <summary>True when the parameter is an <c>object</c> marked <see cref="ScalarInputAttribute"/>: it counts as one value, so a list maps the node.</summary>
+    public bool ScalarInput { get; set; }
 }

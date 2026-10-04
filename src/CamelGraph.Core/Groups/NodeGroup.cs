@@ -189,6 +189,37 @@ public sealed class NodeGroup : INotifyPropertyChanged
     public bool Uses(NodeGroup other) => Uses(other, new HashSet<NodeGroup>());
 
     /// <summary>
+    /// True when the body (or a group used inside it) holds a node that reads live host state, so its instances must run on every
+    /// run instead of serving their cached outputs.
+    /// </summary>
+    public bool ContainsLiveState => HasLiveNode(new HashSet<NodeGroup>());
+
+    private bool HasLiveNode(HashSet<NodeGroup> seen)
+    {
+        if (!seen.Add(this))
+        {
+            return false;
+        }
+
+        foreach (var node in Graph.Nodes)
+        {
+            if (node is GroupInstanceNode instance)
+            {
+                if (instance.Definition != null && instance.Definition.HasLiveNode(seen))
+                {
+                    return true;
+                }
+            }
+            else if (node.IsLiveState && !node.IsMuted)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Runs the body for one set of inputs with a fresh engine on the caller's thread: every body node is marked to run, the
     /// Group Input node supplies <paramref name="inputs"/>, and what reaches the Group Output node is returned.
     /// Cancelling the run, progress reports and the group path all pass through <paramref name="context"/>.
@@ -216,6 +247,17 @@ public sealed class NodeGroup : INotifyPropertyChanged
                 if (result.Cancelled)
                 {
                     throw new OperationCanceledException(context.CancellationToken);
+                }
+
+                if (!result.ExecutedNodes.Contains(OutputNode))
+                {
+                    // The Group Output sits behind a frozen node, so nothing new reached it. Like a frozen node on the canvas,
+                    // the instance keeps the results it had and says why (instead of delivering empty outputs as if all was well).
+                    caller?.AddMessage(
+                        MessageSeverity.Warning,
+                        "A node inside '" + Name + "' is frozen, so the outputs of this group were not updated.");
+                    ReportInnerProblems(caller);
+                    return KeptOutputs(caller);
                 }
 
                 ReportInnerProblems(caller);
@@ -351,6 +393,21 @@ public sealed class NodeGroup : INotifyPropertyChanged
         }
     }
 
+    // What the instance showed before: the values to hand out again when the body did not deliver new ones.
+    private object?[] KeptOutputs(GroupInstanceNode? caller)
+    {
+        var kept = new object?[_outputs.Count];
+        if (caller != null)
+        {
+            for (var i = 0; i < kept.Length && i < caller.OutPorts.Count; i++)
+            {
+                kept[i] = caller.OutPorts[i].Value;
+            }
+        }
+
+        return kept;
+    }
+
     private void ReportInnerProblems(GroupInstanceNode? caller)
     {
         if (caller == null)
@@ -358,11 +415,12 @@ public sealed class NodeGroup : INotifyPropertyChanged
             return;
         }
 
-        var failed = Graph.Nodes.Where(n => n.State == NodeState.Error).ToList();
+        // A failure that a Flow.Try (or another node that catches errors) took care of is not a problem of the group.
+        var failed = Graph.Nodes.Where(n => n.State == NodeState.Error && !IsRecovered(n)).ToList();
         foreach (var node in failed.Take(3))
         {
             var why = node.Messages.FirstOrDefault(m => m.Severity >= MessageSeverity.Error)?.Text ?? "it failed";
-            caller.AddMessage(MessageSeverity.Error, "Inside '" + Name + "', " + node.Name + ": " + why);
+            caller.AddMessage(MessageSeverity.Error, "Inside '" + Name + "', " + UpstreamError.Prefixed(node.Name, why));
         }
 
         if (failed.Count > 3)
@@ -370,11 +428,33 @@ public sealed class NodeGroup : INotifyPropertyChanged
             caller.AddMessage(MessageSeverity.Error, "… and " + (failed.Count - 3).ToString(System.Globalization.CultureInfo.InvariantCulture) + " more node(s) failed inside '" + Name + "'.");
         }
 
-        var warned = Graph.Nodes.Count(n => n.State == NodeState.Warning);
+        var captured = OutputNode.Captured;
+        if (failed.Count == 0 && captured.Any(v => v is UpstreamError))
+        {
+            // The failure came in from outside and reached an output: this instance did not deliver it, like any node stopped upstream.
+            caller.FailedUpstream = true;
+            caller.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
+        }
+        else if (captured.Length > 0 && captured.All(v => v is InactiveValue))
+        {
+            caller.AddMessage(MessageSeverity.Info, "Skipped: every output comes from a branch that was switched off (Flow.When was false).");
+        }
+
+        // The Group Input / Output nodes and the nodes stopped by a failure upstream are not warnings of their own.
+        var warned = Graph.Nodes.Count(n => n.State == NodeState.Warning && !n.FailedUpstream && !(n is GroupBoundNode));
         if (warned > 0)
         {
             caller.AddMessage(MessageSeverity.Warning, warned.ToString(System.Globalization.CultureInfo.InvariantCulture) + " node(s) inside '" + Name + "' have warnings.");
         }
+    }
+
+    // A failed body node is recovered when it feeds something and everything it feeds catches the failure (Flow.Try).
+    // The Group Output also "catches" so that the failure can cross the border, and so does a group used inside this one; neither
+    // makes the failure recovered unless the failure stopped there (a nested group that passes it on has FailedUpstream set).
+    private bool IsRecovered(NodeModel node)
+    {
+        var consumers = Graph.Connections.Where(c => c.SourceNode == node && !c.IsMuted).Select(c => c.TargetNode).ToList();
+        return consumers.Count > 0 && consumers.All(c => c.CatchesUpstreamErrors && !(c is GroupOutputNode) && !c.FailedUpstream);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null)

@@ -49,11 +49,12 @@ public sealed class PlayerField
 /// <summary>One result shown after a run.</summary>
 public sealed class ScriptOutput
 {
-    internal ScriptOutput(string label, string text, NodeState state)
+    internal ScriptOutput(string label, string text, NodeState state, bool hasValue = true)
     {
         Label = label;
         Text = text;
         State = state;
+        HasValue = hasValue;
     }
 
     /// <summary>The node's name.</summary>
@@ -64,6 +65,12 @@ public sealed class ScriptOutput
 
     /// <summary>Whether the node ran cleanly.</summary>
     public NodeState State { get; }
+
+    /// <summary>
+    /// False when the node did not produce a value this run (it failed, an input failed or was switched off, an input is not
+    /// connected): <see cref="Text"/> then says why instead of showing an old value as the result.
+    /// </summary>
+    public bool HasValue { get; }
 }
 
 /// <summary>What a run of a script produced.</summary>
@@ -421,6 +428,15 @@ public sealed class ScriptSession
 
     private static ScriptOutput Describe(NodeModel node)
     {
+        // A node that did not run has nothing to show; whatever it still holds is from an earlier run.
+        if (node.State == NodeState.Error || node.State == NodeState.Idle || node.FailedUpstream)
+        {
+            var message = node.Messages.FirstOrDefault(m => m.Severity >= MessageSeverity.Error)
+                          ?? node.Messages.FirstOrDefault(m => m.Severity >= MessageSeverity.Warning)
+                          ?? node.Messages.FirstOrDefault();
+            return new ScriptOutput(node.Name, "(no value: " + (message?.Text ?? "the node did not run") + ")", node.State, hasValue: false);
+        }
+
         string text;
         if (node is IPlayerOutputNode watch)
         {

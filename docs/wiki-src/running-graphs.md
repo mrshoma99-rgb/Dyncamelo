@@ -9,7 +9,7 @@ The run bar at the bottom of the editor has the **Run** button, a **Manual / Aut
 | **Manual** | Edits only mark nodes as changed. Press **Run** (++f5++) when you are ready. Best on large models. |
 | **Auto** | A run starts after every edit. A burst of edits, such as dragging a slider, gives one trailing run. The same switch is **Graph ▸ Auto-Run**. |
 
-**A run executes only what changed.** CamelGraph marks the node you edited and everything after it as changed, and a run executes those nodes and serves the stored results of all the others. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". A change of the active document, or models added or removed, marks every node as changed.
+**A run executes only what changed.** CamelGraph marks the node you edited and everything after it as changed, and a run executes those nodes and serves the stored results of all the others. If nothing changed, nothing runs, and the status bar says "Run finished: 0 node(s) executed". A change of the active document, or models added or removed, marks every node as changed. The one exception is a node that reads the live state of Navisworks, such as the current selection: it runs on every **Run**, and the nodes after it run again only when what it read is different from last time.
 
 A graph saved with run mode Auto is **not** run when you open it from a file. The status bar says so, and you press **Run**. That gives you the chance to look at what a graph from someone else will do first ([Privacy and safety](privacy-and-safety.md#running-graphs-from-other-people)).
 

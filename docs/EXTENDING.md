@@ -157,7 +157,27 @@ You do **not** write loops. Declare the rank you actually need and the engine's 
 The contract (see [ARCHITECTURE.md §9](ARCHITECTURE.md#9-error-handling-philosophy)):
 
 - **Throw for real failures.** Any exception is caught by the engine and shown as that node's `Error` state with your message. Throw `ArgumentException` and friends with messages an end user can act on ("Bar mark must look like '16-B-250', got 'x'"). The run continues; Navisworks never crashes.
-- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value; `CamelGraph.Core` provides a warning-reporting mechanism for zero-touch nodes so the node shows a yellow `Warning` badge instead of a hard error — see the `CamelGraph.Core` XML documentation for the exact API. Under replication, warnings aggregate rather than spam.
+- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value and call `NodeWarnings.Add("…")` (namespace `CamelGraph.Core.Execution`) so the node shows the amber `Warning` badge with your sentence instead of a hard error. The node still delivers its result to the nodes after it.
+  - Call it from inside the node method (or any helper it calls); the engine collects the messages **per call** of your method. The same text reported several times in one call is shown once with a count, and at most five different texts are listed.
+  - Under replication the messages of all calls are summarised in one line, `3 of 40 calls: <first message>`, so a thousand bad elements cannot flood the badge.
+  - Outside a run (a unit test that calls your method directly) `NodeWarnings.Add` does nothing and never throws, so a node stays testable on its own.
+  - `NodeWarnings.WarnIfNotFinite(value, "The result")` is a one-line check for a node whose arithmetic can quietly produce `NaN` or `Infinity`: it reports "The result is not a finite number (NaN)." and returns true when it did.
+  - Write the message for the person at the keyboard: what was wrong and what the node did about it ("2 of 10 values were not numbers and were skipped"), not an exception dump.
+
+```csharp
+using CamelGraph.Core.Execution;
+
+public static double SafeRatio(double part, double total)
+{
+    if (total == 0)
+    {
+        NodeWarnings.Add("The total is 0, so the ratio is 0.");
+        return 0;
+    }
+
+    return part / total;
+}
+```
 - **Never** show message boxes, write to the console, or swallow exceptions silently from library nodes.
 
 ## 6. Navisworks node packs
@@ -292,6 +312,31 @@ public static string ReadAll([NodePath(NodePathMode.Open)] string path)
 ```
 
 `Resolve` removes the spaces and quotes around a path pasted from Explorer's "Copy as path", and turns a **relative** path into one next to the graph: the host sets `GraphContext.Folder` before it runs a graph (the editor: the folder of the open graph file, or `Documents\CamelGraph` for a graph that has not been saved; the Script Player and `CamelGraph.Cli`: the folder of the script file). Without a host folder it falls back to the process's current directory, which inside Navisworks is the program folder, so never rely on that. A blank path comes back as it is and `Resolve` never throws, so the node reports a missing path in its own words. A host that runs graphs itself wraps the run in `using (GraphContext.Use(GraphContext.FolderFor(graphFilePath))) { ... }`, which puts the previous folder back afterwards. Also declare what the node does to the disk with `[NodeEffects(NodeEffects.WritesFiles)]` (it creates, replaces or appends to a file) or `ChangesFiles` (it deletes, moves or copies over files), and `ChangesModel` for a node that edits the open Navisworks model: the editor and the Script Player list such nodes before they run a graph that came from a file.
+
+### Attributes that change how a node runs
+
+Some attributes say nothing about how the node looks; they tell the engine how to treat a port or the whole node. They are advisory in the same sense as the ones above: none of them changes the definition id, so adding one to a shipped node never breaks a saved graph.
+
+- **`[AcceptsNull]` on a parameter** — by default a `null` element of a list the node is mapped over never reaches the node: that position gets a `null` result and the node shows one warning ("1 of 3 laced calls received a null element"). Mark the parameter when the node's job is to answer the empty case itself — a test for "is this blank?", a join that treats a missing cell as empty text. The null is then passed to the method and its answer is used. Only the marked parameter changes; a single call with a null, and every other parameter, behave as before. The parameter must be able to hold null (a reference or nullable type): on a plain `double` the engine still says "Null value passed to input".
+
+```csharp
+// ["a", null, ""] gives [false, true, true]; without [AcceptsNull] it gave [false, null, true] plus a warning.
+public static bool IsBlank([AcceptsNull] string text) => string.IsNullOrWhiteSpace(text);
+```
+
+- **`[ScalarInput]` on an `object` parameter** — an `object` port means "anything", so a list wired to it arrives whole and the node runs once. When the parameter semantically takes **one thing** (a name, a point, a vector, a viewpoint, a value to compare), mark it: the port then counts as rank 0, like a `double`, and a list maps the node over its elements (lacing), so "batch it by wiring a list" is true. Nested lists map level by level. A node that really wants the whole list should not use it, and the port's *List Levels* setting can still hand a whole list over. It is ignored on parameters that are not declared `object`. The socket is drawn as a single item.
+
+```csharp
+// A list of names wired to 'name' renames once per name; a single name still works.
+public static object Rename(object item, [ScalarInput] object name) { /* ... */ }
+```
+
+- **`[LiveState]` on a method** — the engine only runs nodes whose inputs changed and serves the stored output of the rest. A node that reads live host state (the current selection, the open document, the list of selection sets) has no input that changes when that state does, so without help it shows the state of its first run for ever. Mark it and the engine runs it on every run. The nodes wired after it run again only when what it produced is different from the previous run (lists are compared item by item), so a second **Run** with the same selection does not repeat the edits further down. A node group with such a node inside runs on every run too. Auto-run is not set off by it (nothing in the graph was edited), and a frozen or muted node is left alone.
+
+```csharp
+[LiveState]
+public static List<ModelItem> Current() => /* read the host's selection now */;
+```
 
 ## 10. Changing a node that is already shipped
 

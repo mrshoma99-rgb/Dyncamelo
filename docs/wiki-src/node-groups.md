@@ -28,9 +28,11 @@ All of the commands below are in the **Node Groups** menu, and several are also 
 
 The wires that crossed the edge of your selection become the group's sockets: one **input** for every outside source feeding the selection, and one **output** for every output socket that leaves it. An instance takes the place of your selection and is wired to the same neighbours, so the script computes exactly what it did before. The new group is called "Node Group" (with a number if that name is taken).
 
+**Nodes the Script Player uses stay outside.** The Player shows only the top level of a script, so an input node (`Number`, a slider, `String`, `Boolean` and so on), a Watch node, a node you marked **Show in Player**, and a node with an input you offered as a field are not moved into the group even when they are selected. They keep their place and are wired to the group through its sockets (an input node feeds a new Group Input socket). The status bar says which nodes stayed out: "Kept outside the group because the Player uses them: Gap, Result." This applies to groups made at the top level of the script; inside an open group everything selected goes in. A Player node that sits *between* the nodes that go in cannot stay out without a loop, so the group is refused and the message names it: hide that node from the Player or leave out the nodes after it.
+
 CamelGraph will not make a group in a few cases, and the status bar says why:
 
-* nothing is selected;
+* nothing is selected, or everything selected is used by the Player (and so stays outside);
 * a node that sits **between** the selected nodes is not selected (it would have to be both inside and outside), so select it too;
 * a loop is split: `Loop.Item` and `Loop.Collect` must go into the same group, together with the nodes between them;
 * the selection includes a group's own Group Input or Group Output.
@@ -78,10 +80,14 @@ Copying an instance and pasting it into another script brings its group along.
 
 ## Good to know
 
-* **Errors inside a group** are reported on the instance, for example "Inside 'Level colours', Appearance.OverrideColor: …", for up to three nodes, followed by a count of the rest. Warnings inside are summarised as a count.
+* **Errors inside a group** are reported on the instance, for example "Inside 'Level colours', Appearance.OverrideColor: …", for up to three nodes, followed by a count of the rest. A failure that a `Flow.Try` inside the group took care of is not reported on the instance. Warnings inside are summarised as a count; the Group Input and Group Output nodes, and nodes that only waited for a failed one, are not counted.
+* **A switched-off or failed input stops only what depends on it.** A `Flow.When` that is false inside a group, or an input that comes from a node that is switched off or failed, crosses the edge of the group **socket by socket**: the outputs that depend on it leave the group switched off (idle) or as a failure, and every other output delivers its value. Inside the group only the nodes downstream of the bad input wait, so independent chains still run. If every output is switched off, the instance is idle ("Skipped"). A `Flow.Try` inside a group can catch a failure that arrives from outside.
+* **A frozen node inside a group** freezes everything after it in the group. The instance then keeps the outputs it had and shows an amber warning that says so.
 * **Everything inside runs each time.** Whenever an instance runs, all the nodes inside it run again.
+* **A Watch inside a group shows the last run.** All instances share one group, so a Watch (or Watch List, Watch Table, Watch Image) inside it shows what the instance that ran last sent through it. To see the result of one instance, wire that instance's output to a Watch outside the group.
+* **An input node inside a group is one value for all instances.** A `Number`, `String` or slider inside the group cannot differ between instances. To give each instance its own value, add a socket to the group's inputs and wire an input node into it from outside.
 * **Older versions refuse files with groups.** A script that contains node groups needs a CamelGraph that knows about them; older versions say so instead of silently dropping the groups. Keep this in mind when you [share a script](saving-opening.md#sharing-a-script).
-* **The Script Player** does not offer inputs that sit inside a group in its form. If you want a value to appear as a field, put that input node at the top level of the script, outside any group, and wire it into the group's input. See [The Script Player](player.md).
+* **The Script Player** shows only the top level of the script: it does not offer inputs that sit inside a group in its form, and it does not show a Watch inside a group as a result. If you want a value to appear as a field or a result, put that node at the top level of the script, outside any group, and wire it into (or out of) the group. See [The Script Player](player.md). **Show in Player** is switched off while a group is open for the same reason.
 * **Undo** treats each group operation (make, ungroup, add or remove a socket, rename, single user, delete) as one step.
 
 ## Commands at a glance

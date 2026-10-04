@@ -129,6 +129,18 @@ public class PortModel : INotifyPropertyChanged
     /// </summary>
     public bool IsMultiInput { get; internal set; }
 
+    /// <summary>
+    /// True when null elements of a laced list are passed to the node instead of producing a null result without a call
+    /// (<c>[AcceptsNull]</c>). Static (not serialized).
+    /// </summary>
+    public bool AcceptsNull { get; internal set; }
+
+    /// <summary>
+    /// True for an <c>object</c>-typed input that takes one value per call (<c>[ScalarInput]</c>): its declared rank is 0, so a
+    /// list wired to it maps the node. Static (not serialized).
+    /// </summary>
+    public bool IsScalarInput { get; internal set; }
+
     /// <summary>Explicit kind string ("viewpoint*"), or empty. Static; see <c>PortKinds</c>.</summary>
     public string KindHint
     {

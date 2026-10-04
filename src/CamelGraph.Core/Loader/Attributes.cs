@@ -266,6 +266,44 @@ public sealed class CatchesUpstreamErrorsAttribute : Attribute
 }
 
 /// <summary>
+/// The node wants to see the empty elements of a list it is mapped over. Normally a null element of a laced list never reaches the
+/// node: that position gets a null result and one warning ("1 of 3 laced calls received a null element"). With this attribute the
+/// null is passed to the parameter and the node answers it itself, so <c>IsNull</c> can say <c>true</c> and <c>String.IsBlank</c>
+/// can treat a missing cell as blank. The parameter must be able to hold null (a reference or nullable type; on a plain value type
+/// such as <c>double</c> the engine still reports "Null value passed to input"). Calls with a single value are not affected,
+/// and neither is any other parameter. Purely a run-time behaviour: it never changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class AcceptsNullAttribute : Attribute
+{
+}
+
+/// <summary>
+/// An <c>object</c>-typed parameter that takes exactly one thing per call (a name, a point, a vector, a viewpoint, a value to
+/// compare). Without it an <c>object</c> port means "anything" and receives a list whole; with it the port counts as rank 0, like a
+/// <c>double</c>, so a list wired to it maps the node over the list (lacing) and the node is called once per element. Ignored
+/// on parameters that are not declared <c>object</c>. The node must therefore not expect a list on this parameter; a graph can
+/// still hand the whole list to the node by choosing a list level on the port. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class ScalarInputAttribute : Attribute
+{
+}
+
+/// <summary>
+/// The node reads live host state (the current selection, the open document, the list of selection sets) instead of only its
+/// inputs, so its output can differ between two runs although nothing in the graph changed. The engine therefore runs it on
+/// every run instead of serving its cached output; the nodes after it run again only when what it produced is different
+/// from the previous run. A node group with such a node inside behaves the same way. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class LiveStateAttribute : Attribute
+{
+}
+
+/// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
 /// renaming a port would silently drop them; with this attribute a graph that still says the old name finds the
 /// port now called the current name. Repeat the attribute for several ports.

@@ -45,6 +45,8 @@ public class ZeroTouchNodeModel : NodeModel
             port.PanelDefaultOpen = input.PanelDefaultOpen;
             port.KindHint = input.Kind;
             port.IsMultiInput = input.MultiInput;
+            port.AcceptsNull = input.AcceptsNull;
+            port.IsScalarInput = input.ScalarInput;
             port.Aliases = input.Aliases;
         }
 
@@ -75,7 +77,25 @@ public class ZeroTouchNodeModel : NodeModel
     public override bool CatchesUpstreamErrors => Definition.CatchesUpstreamErrors;
 
     /// <inheritdoc />
+    public override bool IsLiveState => Definition.IsLiveState;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
+    {
+        // Inside a run the replicator already collects per call. Evaluated on its own (a test, another tool), the node still
+        // collects what it reports with NodeWarnings.Add and shows it as warnings of this node.
+        var ownCollector = NodeWarnings.IsCollecting ? null : NodeWarnings.Begin();
+        try
+        {
+            return EvaluateCore(inputs, ownCollector);
+        }
+        finally
+        {
+            ownCollector?.Dispose();
+        }
+    }
+
+    private object?[] EvaluateCore(object?[] inputs, NodeWarnings.WarningCollector? ownCollector)
     {
         object? returned;
         try
@@ -87,6 +107,11 @@ public class ZeroTouchNodeModel : NodeModel
             // Surface the node author's exception, not the reflection wrapper.
             ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
             throw; // unreachable
+        }
+
+        if (ownCollector != null && ownCollector.Total > 0)
+        {
+            NodeWarnings.Report(this, ownCollector);
         }
 
         if (Definition.IsVoid)

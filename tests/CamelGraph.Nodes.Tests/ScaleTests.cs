@@ -842,7 +842,8 @@ public class ScaleTests
 
         var result = Timed("replication: run (200 000 items, 160 000 pairs)", () => new GraphEngine().Run(graph), 20);
         Assert.True(result.Success);
-        Assert.Equal(N, watch.Entries.Count);
+        // Watch List draws at most MaxEntries entries plus one line that counts the rest (the value itself passes through whole).
+        Assert.Equal(WatchListNode.MaxEntries + 1, watch.Entries.Count);
         Assert.Equal(N, ((System.Collections.IList)shortest.OutPorts[0].Value!).Count);
         Assert.Equal(N, ((System.Collections.IList)longest.OutPorts[0].Value!).Count);
         Assert.Equal(400, ((System.Collections.IList)cross.OutPorts[0].Value!).Count);
