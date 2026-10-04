@@ -22671,7 +22671,7 @@
    "id": "CamelGraph.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Workflow.Actions",
-   "description": "Per item: saves the current view as a saved viewpoint named from the item. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.",
+   "description": "Per item: saves the current view as a saved viewpoint named from the item. The name is a template: {name} (or {item}) is the item's name, {index} its position from 0, {index1} (or {n}) its position from 1 and {count} the number of items, so 'View {index1} of {count}: {name}' numbers the views; an empty name uses the item's name, and a viewpoint with the same name in the same folder is replaced. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.",
    "tags": [
     "action",
     "viewpoint",
@@ -22686,7 +22686,7 @@
     {
      "name": "name",
      "type": "string",
-     "description": "Viewpoint name; supports {name}, {index1}, {count} templating (default {name} = the item's name).",
+     "description": "Viewpoint name. Tokens: {name} or {item} = the item's name, {index} = its position counting from 0, {index1} or {n} = counting from 1, {count} = how many items there are. An empty name uses the item's name. Default {name}.",
      "default": "\"{name}\""
     },
     {
