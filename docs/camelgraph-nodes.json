@@ -21147,7 +21147,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.AddFormulaColumn@CamelGraph.Nodes.CamelGraphTable,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Adds a column calculated per row from the others, e.g. \"Width * Height * Length / 1000000000\" (same formula language as Math.Formula; [Names with spaces] in brackets).",
+   "description": "Adds a column calculated per row from the others, e.g. \"Width * Height * Length / 1000000000\" (same formula language as Math.Formula; [Names with spaces] in brackets). A blank or text cell is never counted as 0: a row where a column the formula uses is blank or not a number gets an empty cell, and so does a result that is not a finite number (a division by zero). The node turns amber and says how many rows were left empty.",
    "tags": [
     "formula",
     "calculated",
@@ -21178,7 +21178,7 @@
     {
      "name": "table",
      "type": "CamelGraphTable",
-     "description": "The table with the calculated column added at the end."
+     "description": "The table with the calculated column added at the end; a row where a column the formula uses is blank or not a number, and a result that is not a finite number, get an empty cell."
     }
    ],
    "returns": ""
@@ -21250,10 +21250,10 @@
   },
   {
    "name": "Table.Distinct",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.Distinct@CamelGraph.Nodes.CamelGraphTable,string",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.Distinct@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Keeps only the first row for each distinct value (of the given columns, or of the whole row).",
+   "description": "Keeps only the first row for each distinct value of the given columns (a list of names or one text with commas), or of the whole row when none are given.",
    "tags": [
     "unique",
     "duplicates",
@@ -21269,9 +21269,9 @@
     },
     {
      "name": "columns",
-     "type": "string",
-     "description": "Columns that must differ (separated by commas); leave empty to compare whole rows.",
-     "default": "\"\""
+     "type": "any[]",
+     "description": "Columns that must differ: a list of names, or one text with names separated by commas; leave empty to compare whole rows.",
+     "default": "null"
     }
    ],
    "outputs": [
@@ -21288,14 +21288,18 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.Filter@CamelGraph.Nodes.CamelGraphTable,string,string,object,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Splits a table by a test on one column — Level == \"L02\", Length > 3000, Name matches \"W-*\" — into the rows that pass and the rows that do not.",
+   "description": "Splits a table by a test on one column — Level == \"L02\", Length > 3000, Name matches \"W-*\", Level in \"L01, L02\" — into the rows that pass and the rows that do not. A blank cell never passes > >= < <=, and neither does text that is not a number when you compare with a number (the node turns amber and counts them); they land in the rejected table. in and notIn take a list of values, or one text with the values separated by commas; an empty cell is in no list. Regex tests are case sensitive unless ignoreCase is ticked.",
    "tags": [
     "filter",
     "where",
     "query",
     "select rows",
     "search",
-    "keep"
+    "keep",
+    "in list",
+    "is one of",
+    "member of",
+    "not in"
    ],
    "inputs": [
     {
@@ -21311,13 +21315,13 @@
     {
      "name": "test",
      "type": "string",
-     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.",
+     "description": "The test: ==, !=, >, >=, <, <=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, in, notIn, isNull, notNull, isEmpty, notEmpty.",
      "default": "\"==\""
     },
     {
      "name": "value",
      "type": "any",
-     "description": "What to test against (unused by the null / empty tests).",
+     "description": "What to test against (unused by the null / empty tests). For in and notIn: the values to look for, as a list or as one text with the values separated by commas.",
      "default": "null"
     },
     {
@@ -21381,13 +21385,16 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.FromCsvFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Reads a CSV file straight into a table (numbers become numbers, everything else stays text).",
+   "description": "Reads a CSV file straight into a table (numbers become numbers, everything else stays text). The delimiter is a comma, a semicolon (European Excel), a bar or a tab.",
    "tags": [
     "csv",
     "read",
     "import",
     "load",
-    "file"
+    "file",
+    "tsv",
+    "tab",
+    "semicolon"
    ],
    "inputs": [
     {
@@ -21398,7 +21405,7 @@
     {
      "name": "delimiter",
      "type": "string",
-     "description": "The cell separator (default a comma).",
+     "description": "The cell separator: a comma (default), a semicolon, a bar or tab.",
      "default": "\",\""
     },
     {
@@ -21452,7 +21459,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Reads an Excel worksheet straight into a table.",
+   "description": "Reads an Excel worksheet straight into a table. Dates arrive as Excel serial numbers; DateTime.FromExcelSerial turns one into a date.",
    "tags": [
     "excel",
     "xlsx",
@@ -21534,10 +21541,10 @@
   },
   {
    "name": "Table.GroupBy",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.GroupBy@CamelGraph.Nodes.CamelGraphTable,string,System.Collections.Generic.IList<object>",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.GroupBy@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group — \"sum:Volume\", \"count\" — the pivot-table core for quantities.",
+   "description": "Groups rows by one or more columns (a list of names or one text with commas) and works out count, sum, average, min, max, median, first, last, list or distinct per group — \"sum:Volume\", \"count\" — the pivot-table core for quantities. Blank cells are skipped by sum, average and median; text in a number column is an error that names it.",
    "tags": [
     "group",
     "aggregate",
@@ -21558,8 +21565,8 @@
     },
     {
      "name": "by",
-     "type": "string",
-     "description": "The column(s) to group by, separated by commas; leave empty for one total row."
+     "type": "any[]",
+     "description": "The column(s) to group by: a list of names, or one text with names separated by commas; leave empty for one total row."
     },
     {
      "name": "aggregations",
@@ -21577,45 +21584,23 @@
    "returns": ""
   },
   {
-   "name": "Table.Headers",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.Headers@CamelGraph.Nodes.CamelGraphTable",
-   "assembly": "CamelGraph.Nodes",
-   "category": "Table",
-   "description": "The column names of a table, in order.",
-   "tags": [
-    "columns",
-    "names",
-    "header",
-    "fields"
-   ],
-   "inputs": [
-    {
-     "name": "table",
-     "type": "CamelGraphTable",
-     "description": "The table."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "headers",
-     "type": "string[]",
-     "description": "The names, in column order."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Table.Info",
    "id": "CamelGraph.Nodes.TableToolkitNodes.Info@CamelGraph.Nodes.CamelGraphTable",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "How many rows and columns a table has, and its column names.",
+   "description": "How many rows and columns a table has, and its column names (the headers output is the list of names, in column order).",
    "tags": [
     "size",
     "count",
     "shape",
     "dimensions",
-    "length"
+    "length",
+    "columns",
+    "names",
+    "header",
+    "headers",
+    "fields",
+    "column names"
    ],
    "inputs": [
     {
@@ -21645,10 +21630,10 @@
   },
   {
    "name": "Table.Join",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.Join@CamelGraph.Nodes.CamelGraphTable,CamelGraph.Nodes.CamelGraphTable,string,string,string",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.Join@CamelGraph.Nodes.CamelGraphTable,CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Joins two tables on a key column (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and \"42\" are the same.",
+   "description": "Joins two tables on one or more key columns (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and \"42\" are the same, and a key that looks like a GUID matches whatever its capitals and small letters (other text keys must match exactly). An empty key never matches anything, not even another empty key. leftKey and rightKey take one column name, several separated by commas (or a list) to join on Level and Mark together; leave rightKey empty when both tables use the same names. Table.Unmatched lists the left rows that found no partner (it replaces Table.JoinByKey's unmatchedKeys).",
    "tags": [
     "join",
     "merge",
@@ -21656,7 +21641,11 @@
     "vlookup",
     "combine",
     "match",
-    "relate"
+    "relate",
+    "joinbykey",
+    "by key",
+    "guid",
+    "mark"
    ],
    "inputs": [
     {
@@ -21671,14 +21660,14 @@
     },
     {
      "name": "leftKey",
-     "type": "string",
-     "description": "The key column of the left table."
+     "type": "any[]",
+     "description": "The key column(s) of the left table: one name, several names separated by commas, or a list of names."
     },
     {
      "name": "rightKey",
-     "type": "string",
-     "description": "The key column of the right table (leave empty to use the same name as leftKey).",
-     "default": "\"\""
+     "type": "any[]",
+     "description": "The key column(s) of the right table, as many as in leftKey and in the same order (leave empty to use the same names as leftKey).",
+     "default": "null"
     },
     {
      "name": "kind",
@@ -21695,58 +21684,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "Table.JoinByKey",
-   "id": "CamelGraph.Nodes.TableNodes.JoinByKey@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string",
-   "assembly": "CamelGraph.Nodes",
-   "category": "Table",
-   "description": "Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.",
-   "tags": [
-    "join",
-    "lookup",
-    "vlookup",
-    "merge",
-    "link",
-    "table",
-    "excel",
-    "csv"
-   ],
-   "inputs": [
-    {
-     "name": "rows",
-     "type": "any[]",
-     "description": "Table rows; each row a list of cells (e.g. from Excel.ReadFromFile)."
-    },
-    {
-     "name": "headers",
-     "type": "any[]",
-     "description": "Column headers, one per cell column."
-    },
-    {
-     "name": "keys",
-     "type": "any[]",
-     "description": "Keys to look up, e.g. element GUIDs or mark values."
-    },
-    {
-     "name": "keyColumn",
-     "type": "string",
-     "description": "Name of the header column holding the keys."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "matchedRows",
-     "type": "any",
-     "description": ""
-    },
-    {
-     "name": "unmatchedKeys",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Dictionary with \"matchedRows\" (parallel to keys; null when unmatched) and \"unmatchedKeys\"."
   },
   {
    "name": "Table.Pivot",
@@ -21787,7 +21724,7 @@
     {
      "name": "aggregation",
      "type": "string",
-     "description": "How to combine: sum (default), count, average, min, max, first, last.",
+     "description": "How to combine: sum (default), count, average, min, max, median, first, last, list or distinct.",
      "default": "\"sum\""
     }
    ],
@@ -21805,7 +21742,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.RemoveColumns@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Drops the listed columns and keeps the rest.",
+   "description": "Drops the listed columns and keeps the rest. Names come as a list or as one text separated by commas; a column whose name has a comma in it (\"Area, gross\") is found by its whole name. An empty list removes nothing and says so.",
    "tags": [
     "drop",
     "delete",
@@ -21822,7 +21759,7 @@
     {
      "name": "columns",
      "type": "any[]",
-     "description": "The names to remove (a list, or one text with names separated by commas)."
+     "description": "The names to remove: a list, or one text with names separated by commas. A column whose own name contains a comma works when you type or wire that name whole."
     }
    ],
    "outputs": [
@@ -21938,7 +21875,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.SelectColumns@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Keeps only the listed columns, in that order (names as a list or one comma-separated text).",
+   "description": "Keeps only the listed columns, in that order. Names come as a list or as one text separated by commas; a column whose name has a comma in it (\"Area, gross\") is found by its whole name. At least one name is needed.",
    "tags": [
     "keep",
     "columns",
@@ -21956,7 +21893,7 @@
     {
      "name": "columns",
      "type": "any[]",
-     "description": "The names to keep (a list, or one text with names separated by commas)."
+     "description": "The names to keep: a list, or one text with names separated by commas. A column whose own name contains a comma (\"Area, gross\") works when you type or wire that name whole."
     }
    ],
    "outputs": [
@@ -21964,6 +21901,48 @@
      "name": "table",
      "type": "CamelGraphTable",
      "description": "The narrower table."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.SetColumn",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.SetColumn@CamelGraph.Nodes.CamelGraphTable,string,object",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Table",
+   "description": "Replaces the cells of a column in place, keeping its position and name, or adds the column at the end when there is none of that name. Give a list with one value per row, or a single value repeated on every row — take a column out with Table.Column, clean it with String or List nodes, and put it back here.",
+   "tags": [
+    "replace column",
+    "overwrite",
+    "update column",
+    "set",
+    "clean",
+    "modify column",
+    "column",
+    "fill"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "The table."
+    },
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The column to replace (found like every other column name: exactly, then ignoring case and spaces). A name the table does not have adds a new column at the end."
+    },
+    {
+     "name": "values",
+     "type": "any",
+     "description": "A list with one value per row, or a single value repeated on every row."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "The table with that column's cells replaced, in the same position (the column keeps its name)."
     }
    ],
    "returns": ""
@@ -21992,13 +21971,13 @@
     {
      "name": "start",
      "type": "integer",
-     "description": "The first row to take, counting from 0.",
+     "description": "The first row to take, counting from 0 (not below 0).",
      "default": "0"
     },
     {
      "name": "count",
      "type": "integer",
-     "description": "How many rows (-1 takes all the rest).",
+     "description": "How many rows (-1 takes all the rest; not below -1).",
      "default": "-1"
     }
    ],
@@ -22013,10 +21992,10 @@
   },
   {
    "name": "Table.Sort",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.Sort@CamelGraph.Nodes.CamelGraphTable,string,bool",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.Sort@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Sorts the rows by one or more columns (\"Level, -Length\" sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last.",
+   "description": "Sorts the rows by one or more columns, as a list of names or one text (\"Level, -Length\" sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last. A list of names sorts once by all of them, in that order.",
    "tags": [
     "sort",
     "order",
@@ -22033,8 +22012,8 @@
     },
     {
      "name": "columns",
-     "type": "string",
-     "description": "Columns to sort by, separated by commas; add \" desc\" or a leading \"-\" for largest first: Level, -Length."
+     "type": "any[]",
+     "description": "Columns to sort by: a list of names, or one text with names separated by commas; add \" desc\" or a leading \"-\" for largest first: Level, -Length. A list sorts by its first name, then the next."
     },
     {
      "name": "descending",
@@ -22054,32 +22033,35 @@
   },
   {
    "name": "Table.ToCsvFile",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@CamelGraph.Nodes.CamelGraphTable,string,string",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@object,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Writes a table, with its column names, to a CSV file.",
+   "description": "Writes one table, with its column names, to a CSV file; a file that is already there is replaced. The delimiter is a comma, a semicolon, a bar or a tab. A list of tables is an error (they would overwrite each other): stack them with Table.Concat first.",
    "tags": [
     "csv",
     "write",
     "export",
     "save",
-    "file"
+    "file",
+    "tsv",
+    "tab",
+    "semicolon"
    ],
    "inputs": [
     {
      "name": "table",
-     "type": "CamelGraphTable",
-     "description": "The table."
+     "type": "any",
+     "description": "The table to write: one table, not a list of them."
     },
     {
      "name": "path",
      "type": "string",
-     "description": "The file to write (overwritten; folders are created)."
+     "description": "The file to write (replaced when it exists; folders are created)."
     },
     {
      "name": "delimiter",
      "type": "string",
-     "description": "The cell separator (default a comma).",
+     "description": "The cell separator: a comma (default), a semicolon, a bar or tab.",
      "default": "\",\""
     }
    ],
@@ -22122,10 +22104,10 @@
   },
   {
    "name": "Table.ToExcelFile",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@CamelGraph.Nodes.CamelGraphTable,string,string,bool",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@object,string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook).",
+   "description": "Writes one table, with its column names, to an Excel worksheet. With append ticked the sheet is added to the workbook that is already there; without it the whole file is replaced, other sheets included. For several sheets in one workbook use one node per table, each with its own sheet name and append ticked, and wire the path of one into the next so they run in order. A list of tables is an error (they would overwrite each other).",
    "tags": [
     "excel",
     "xlsx",
@@ -22138,8 +22120,8 @@
    "inputs": [
     {
      "name": "table",
-     "type": "CamelGraphTable",
-     "description": "The table."
+     "type": "any",
+     "description": "The table to write: one table, not a list of them."
     },
     {
      "name": "path",
@@ -22201,6 +22183,57 @@
      "name": "text",
      "type": "string",
      "description": "The table rendered in that format, ready for Text.WriteToFile, an e-mail or Log.Write."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Table.Unmatched",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.Unmatched@CamelGraph.Nodes.CamelGraphTable,CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Table",
+   "description": "The rows of the left table that find no partner in the right table, using the same keys and the same matching as Table.Join (GUIDs match whatever their case, a blank key never matches) — which model elements have no row in the Excel list, which GUIDs were not found.",
+   "tags": [
+    "unmatched",
+    "anti join",
+    "missing",
+    "not found",
+    "no match",
+    "difference",
+    "left only",
+    "joinbykey",
+    "unmatchedkeys",
+    "guid",
+    "mark"
+   ],
+   "inputs": [
+    {
+     "name": "left",
+     "type": "CamelGraphTable",
+     "description": "The main table."
+    },
+    {
+     "name": "right",
+     "type": "CamelGraphTable",
+     "description": "The table to look the keys up in."
+    },
+    {
+     "name": "leftKey",
+     "type": "any[]",
+     "description": "The key column(s) of the left table: one name, several names separated by commas, or a list of names."
+    },
+    {
+     "name": "rightKey",
+     "type": "any[]",
+     "description": "The key column(s) of the right table, as many as in leftKey and in the same order (leave empty to use the same names as leftKey).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "The left rows with no partner, with the left columns only (rows with a blank key are always among them)."
     }
    ],
    "returns": ""

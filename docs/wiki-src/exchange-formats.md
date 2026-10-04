@@ -131,8 +131,8 @@ CamelGraph reads and writes `.xlsx` files itself, so **Excel does not have to be
 
 | Node | Notes |
 |---|---|
-| `Table.ToExcelFile` | Writes a table with its column names. `sheet` names the worksheet; `append` adds a sheet to an existing workbook. |
-| `Table.FromExcelFile` | Reads a worksheet into a table. `firstRowIsHeader` controls the column names. |
+| `Table.ToExcelFile` | Writes one table with its column names. `sheet` names the worksheet; `append` adds a sheet to an existing workbook, and without it the whole file is replaced. A list of tables is an error (they would overwrite each other): stack them with `Table.Concat`, or use one node per table with its own `sheet` and `append` ticked. |
+| `Table.FromExcelFile` | Reads a worksheet into a table. `firstRowIsHeader` controls the column names. Dates arrive as Excel serial numbers; `DateTime.FromExcelSerial` turns one into a date. |
 | `Excel.WriteToFile` | Writes rows (and optional headers). `append` adds a sheet to an existing workbook; **styles and formulas that were not written by CamelGraph are not preserved**. |
 | `Excel.ReadFromFile` | Gives `rows`, `headers` and `sheetNames`. **Dates arrive as Excel serial numbers.** |
 
@@ -150,13 +150,13 @@ Search.ByProperty ─▶ Properties.ToTable ─▶ Table.GroupBy ─▶ Table.So
 
 [Take quantities out to Excel](howto/quantity-takeoff-to-excel.md) builds this graph step by step.
 
-To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join`, and write each row onto the items with `Properties.SetCustom`. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified. [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md) shows the wiring.
+To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join` (a GUID matches whatever its capitals and small letters, and a blank key never matches), and write each row onto the items with `Properties.SetCustom`. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified. [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md) shows the wiring.
 
 ## CSV
 
 | Node | Notes |
 |---|---|
-| `Table.ToCsvFile`, `Table.FromCsvFile` | Tables in and out. Numbers become numbers; everything else stays text. `delimiter` is a comma unless you change it. |
+| `Table.ToCsvFile`, `Table.FromCsvFile` | Tables in and out. Numbers become numbers; everything else stays text. `delimiter` is a dropdown: comma (the default), semicolon (European Excel), bar or tab. `Table.ToCsvFile` writes one table; a list of tables is an error. |
 | `CSV.WriteToFile` | Writes a list of rows. Overwrites; creates missing folders. |
 | `CSV.AppendToFile` | Adds rows to a file, writing the optional headers only when the file is new or empty: one row of totals per run. |
 | `CSV.ReadFromFile` | Reads rows (numeric cells become numbers). |
