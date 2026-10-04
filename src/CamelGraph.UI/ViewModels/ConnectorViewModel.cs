@@ -617,22 +617,8 @@ public class ConnectorViewModel : ObservableObject
 
     private void BrowsePath()
     {
-        var dialogs = Host.Dialogs;
-        string? chosen;
-        if (PortEditors.IsFolder(Port))
-        {
-            chosen = dialogs.PickFolder("Choose folder for '" + Port.Name + "'", PortEditors.GetText(Port));
-        }
-        else
-        {
-            var name = Port.Name.ToLowerInvariant();
-            var isOutput = name.Contains("output") || name.Contains("save") || name.Contains("export") ||
-                           name.Contains("target") || name.Contains("destination");
-            chosen = isOutput
-                ? dialogs.ShowSaveFile("All files (*.*)|*.*", "Choose file for '" + Port.Name + "'", PortEditors.GetText(Port))
-                : dialogs.ShowOpenFile("All files (*.*)|*.*", "Choose file for '" + Port.Name + "'");
-        }
-
+        // Which dialog (open, save or folder) and which file types: PathPicker decides, from [NodePath] or the names.
+        var chosen = Host.Dialogs.PickPath(PathPicker.Resolve(Port), PortEditors.GetText(Port));
         if (!string.IsNullOrEmpty(chosen))
         {
             PortEditors.SetText(Port, chosen);

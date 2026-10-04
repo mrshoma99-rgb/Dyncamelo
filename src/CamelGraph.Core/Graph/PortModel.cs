@@ -106,6 +106,15 @@ public class PortModel : INotifyPropertyChanged
     /// <summary>Numeric range/step metadata for the inline scrub field, or null. Static (not serialized).</summary>
     public CamelGraph.Core.Loader.NodeRangeAttribute? Range { get; internal set; }
 
+    /// <summary>
+    /// What the browse button of a path input opens (from <c>[NodePath]</c>), or null when the editor should guess from the names
+    /// (see <c>PathPicker</c>). Static (not serialized).
+    /// </summary>
+    public CamelGraph.Core.Loader.NodePathMode? PathMode { get; internal set; }
+
+    /// <summary>File dialog filter of a path input (from <c>[NodePath]</c>), or empty for all files. Static (not serialized).</summary>
+    public string PathFilter { get; internal set; } = string.Empty;
+
     /// <summary>Panel this port belongs to ("" = main list). Static (not serialized).</summary>
     public string Panel { get; internal set; } = string.Empty;
 

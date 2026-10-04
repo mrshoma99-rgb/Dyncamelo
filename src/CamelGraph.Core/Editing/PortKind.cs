@@ -154,7 +154,7 @@ public static class PortKinds
         }
 
         var kind = FromType(port.DeclaredType);
-        if (kind.Family == PortFamily.Text && LooksLikePath(port.Name))
+        if (kind.Family == PortFamily.Text && PathPicker.SuggestsPath(port))
         {
             return new PortKind(PortFamily.File, kind.Depth);
         }
@@ -386,14 +386,6 @@ public static class PortKinds
     }
 
     private static bool IsNumeric(PortFamily family) => family == PortFamily.Number || family == PortFamily.Integer;
-
-    private static bool LooksLikePath(string name)
-    {
-        var n = name.ToLowerInvariant();
-        return n.EndsWith("path", StringComparison.Ordinal) || n.EndsWith("file", StringComparison.Ordinal) ||
-               n.EndsWith("folder", StringComparison.Ordinal) || n.EndsWith("directory", StringComparison.Ordinal) ||
-               n.EndsWith("filename", StringComparison.Ordinal);
-    }
 
     private static bool TryGetElementType(Type type, out Type element)
     {

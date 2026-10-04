@@ -54,7 +54,7 @@ public static class WorkflowActionNodes
     [return: NodeName("action")]
     public static IWorkflowAction SaveViewpoint(
         string name = "{name}",
-        string? folder = "CamelGraph Views",
+        [PortKinds("text")] string? folder = "CamelGraph Views",
         bool bakeOverrides = true)
         => new SaveViewpointAction(name, folder, bakeOverrides);
 

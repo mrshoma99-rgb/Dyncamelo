@@ -378,6 +378,47 @@ public sealed class NodeRangeAttribute : Attribute
     public string Unit { get; set; } = string.Empty;
 }
 
+/// <summary>What the browse button of a path parameter opens.</summary>
+public enum NodePathMode
+{
+    /// <summary>An open-file dialog: the file must exist (a file the node reads).</summary>
+    Open = 0,
+
+    /// <summary>A save-file dialog: the file may not exist yet (a file the node writes or creates).</summary>
+    Save = 1,
+
+    /// <summary>A folder chooser (a directory the node reads from, writes into or lists).</summary>
+    Folder = 2,
+}
+
+/// <summary>
+/// Tells the editor what a <c>string</c> parameter that holds a path is, so its browse button opens the right dialog: an open
+/// dialog for a file the node reads, a SAVE dialog (a file that does not exist yet can be chosen) for a file the node writes, a
+/// folder chooser for a directory. A parameter with this attribute always gets the browse button, whatever it is called. Without
+/// it the editor guesses from the parameter's name and the node's name (see <c>PathPicker</c>), which is right for most nodes but
+/// not for all. Purely advisory — the parameter stays a string, so saved graphs and definition ids are unchanged.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class NodePathAttribute : Attribute
+{
+    /// <summary>Creates the attribute.</summary>
+    /// <param name="mode">Which dialog the browse button opens.</param>
+    public NodePathAttribute(NodePathMode mode)
+    {
+        Mode = mode;
+    }
+
+    /// <summary>Which dialog the browse button opens.</summary>
+    public NodePathMode Mode { get; }
+
+    /// <summary>
+    /// The file types offered, as a Windows file dialog filter: <c>"Excel workbooks (*.xlsx)|*.xlsx|All files (*.*)|*.*"</c>.
+    /// Empty offers all files. Ignored for <see cref="NodePathMode.Folder"/>. A save dialog adds the first listed extension when
+    /// the user types a name without one.
+    /// </summary>
+    public string Filter { get; set; } = string.Empty;
+}
+
 /// <summary>
 /// Groups a parameter into a named, collapsible panel on the node ("Advanced").
 /// Ports without a panel render in the main list.

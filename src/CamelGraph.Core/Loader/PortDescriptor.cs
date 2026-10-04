@@ -47,6 +47,12 @@ public class PortDescriptor
     /// <summary>Numeric range metadata from <see cref="NodeRangeAttribute"/>, or null.</summary>
     public NodeRangeAttribute? Range { get; set; }
 
+    /// <summary>What the browse button opens (from <see cref="NodePathAttribute"/>), or null to guess from the names.</summary>
+    public NodePathMode? PathMode { get; set; }
+
+    /// <summary>File dialog filter from <see cref="NodePathAttribute"/>, or empty for all files.</summary>
+    public string PathFilter { get; set; } = string.Empty;
+
     /// <summary>Panel title from <see cref="NodePanelAttribute"/>, or empty for the main list.</summary>
     public string Panel { get; set; } = string.Empty;
 

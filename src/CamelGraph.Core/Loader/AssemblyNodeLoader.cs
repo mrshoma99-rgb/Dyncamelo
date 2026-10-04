@@ -467,6 +467,14 @@ public static class AssemblyNodeLoader
             }
         }
 
+        // A path chooser: only on a string parameter (it stays a plain text input otherwise).
+        var path = parameter.GetCustomAttribute<NodePathAttribute>();
+        if (path != null && parameter.ParameterType == typeof(string))
+        {
+            descriptor.PathMode = path.Mode;
+            descriptor.PathFilter = path.Filter ?? string.Empty;
+        }
+
         descriptor.Range = parameter.GetCustomAttribute<NodeRangeAttribute>();
         var panel = parameter.GetCustomAttribute<NodePanelAttribute>();
         if (panel != null)
