@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**580 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -19,7 +19,7 @@
 | [List](#list) | 51 |
 | [List.Statistics](#liststatistics) | 12 |
 | [Logic](#logic) | 18 |
-| [Math](#math) | 37 |
+| [Math](#math) | 38 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 13 |
 | [Navisworks.Camera](#navisworkscamera) | 7 |
@@ -331,18 +331,18 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `And` | a, b | result | Returns true only when both inputs are true |
-| `Equals` | a, b | result | Tests whether two values are equal (numbers compare by value regardless of numeric type) |
+| `Equals` | a, b | result | Tests whether two values are equal, the same way as Logic.Compare with ==: numbers compare by value (2 equals 2.0), text ignores upper and lower case, text that reads as… |
 | `GreaterThan` | a, b | result | Returns true when the first number is greater than the second |
 | `GreaterThanOrEqual` | a, b | result | Returns true when the first number is greater than or equal to the second |
 | `If` | test, trueValue, falseValue | result | Returns one of two values depending on a boolean condition |
-| `IsNull` | value | isNull | True when the value is null |
+| `IsNull` | value | isNull | True when the value is null (nothing came out) |
 | `IsNullOrEmpty` | value | isEmpty | True when the value is null, an empty string, an empty list or an empty dictionary |
 | `LessThan` | a, b | result | Returns true when the first number is less than the second |
 | `LessThanOrEqual` | a, b | result | Returns true when the first number is less than or equal to the second |
 | `Logic.Choose` | index, options | value | Picks one of several options by position (0 = first) |
 | `Logic.Compare` | a, b?, test?, ignoreCase? | result | Compares two values |
 | `Logic.IsBetween` | value, min, max, inclusive? | result | True when a number, text or date lies between a lower and an upper bound (bounds included by default) |
-| `Logic.NotEquals` | a, b | result | True when two values are different (numbers compare by value regardless of numeric type) |
+| `Logic.NotEquals` | a, b | result | True when two values are different |
 | `Logic.Switch` | value, cases, results, fallback? | value | Gives the result that goes with the first case equal to the value, otherwise the fallback |
 | `Logic.TypeOf` | value | type | Names the kind of a value |
 | `Logic.Xor` | a, b | result | True when exactly one of the two inputs is true |
@@ -365,9 +365,10 @@
 | `Math.Cos` | angle, unit? | value | Cosine of an angle (degrees by default) |
 | `Math.Degrees` | radians | degrees | Converts radians to degrees |
 | `Math.Exp` | power | value | e raised to a power (the inverse of the natural logarithm) |
-| `Math.Floor` | number | result | Rounds a number down to the nearest integer |
+| `Math.Floor` | number | result | Rounds a number down to the nearest integer (-2.5 becomes -3 |
 | `Math.Formula` | expression, a?, b?, c?, d?, e?, f? | result | Evaluates a formula such as "a * b + 2" or "if(a > 10, a - 10, 0)" over the inputs a to f |
-| `Math.Lerp` | a, b, t | value | Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited) |
+| `Math.IsClose` | a, b, tolerance? | result | True when two numbers differ by no more than the tolerance (the same unit as the numbers) |
+| `Math.Lerp` | a, b, t | value | Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited, so t = 2 goes past b |
 | `Math.Ln` | value | value | Natural logarithm (base e) of a positive number |
 | `Math.Log` | value, logBase? | value | Logarithm of a positive number to a base (10 by default) |
 | `Math.MapRange` | value, fromLow, fromHigh, toLow, toHigh | result | Linearly remaps a value from one range to another (values outside the range extrapolate) |

@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 
 namespace CamelGraph.Nodes;
@@ -18,7 +19,7 @@ public static class MathNodes
     /// <returns>The sum a + b.</returns>
     [NodeName("Add")]
     [NodeDescription("Adds two numbers.")]
-    [NodeSearchTags("+", "plus", "sum", "addition")]
+    [NodeSearchTags("+", "plus", "sum", "addition", "Math.Add")]
     public static double Add(double a, double b)
     {
         return a + b;
@@ -30,7 +31,7 @@ public static class MathNodes
     /// <returns>The difference a - b.</returns>
     [NodeName("Subtract")]
     [NodeDescription("Subtracts the second number from the first.")]
-    [NodeSearchTags("-", "minus", "difference", "subtraction")]
+    [NodeSearchTags("-", "minus", "difference", "subtraction", "Math.Subtract")]
     public static double Subtract(double a, double b)
     {
         return a - b;
@@ -42,7 +43,7 @@ public static class MathNodes
     /// <returns>The product a * b.</returns>
     [NodeName("Multiply")]
     [NodeDescription("Multiplies two numbers.")]
-    [NodeSearchTags("*", "times", "product", "multiplication")]
+    [NodeSearchTags("*", "times", "product", "multiplication", "Math.Multiply")]
     public static double Multiply(double a, double b)
     {
         return a * b;
@@ -50,32 +51,41 @@ public static class MathNodes
 
     /// <summary>
     /// Divides one number by another using IEEE 754 semantics: dividing by zero
-    /// yields Infinity (or NaN for 0 / 0) rather than throwing.
+    /// yields Infinity (or NaN for 0 / 0) rather than throwing, and the node says so with a warning.
     /// </summary>
     /// <param name="a">Dividend.</param>
     /// <param name="b">Divisor.</param>
     /// <returns>The quotient a / b.</returns>
     [NodeName("Divide")]
-    [NodeDescription("Divides the first number by the second.")]
-    [NodeSearchTags("/", "quotient", "division")]
+    [NodeDescription(
+        "Divides the first number by the second. Dividing by zero does not stop the graph: the result is Infinity " +
+        "(NaN for 0 / 0) and the node shows a warning, so check the divisor before using the result.")]
+    [NodeSearchTags("/", "quotient", "division", "Math.Divide")]
     public static double Divide(double a, double b)
     {
-        return a / b;
+        var result = a / b;
+        WarnIfCreated(result, a, b, "Dividing by zero gives " + (double.IsNaN(result) ? "NaN" : "Infinity") + ". Check the divisor (input 'b').");
+        return result;
     }
 
     /// <summary>
     /// Remainder of a division (C# <c>%</c> semantics: the result carries the
-    /// sign of the dividend; a zero divisor yields NaN).
+    /// sign of the dividend; a zero divisor yields NaN, with a warning).
     /// </summary>
     /// <param name="a">Dividend.</param>
     /// <param name="b">Divisor.</param>
     /// <returns>The remainder of a / b.</returns>
     [NodeName("Modulo")]
-    [NodeDescription("Returns the remainder of dividing the first number by the second.")]
-    [NodeSearchTags("%", "mod", "remainder")]
+    [NodeDescription(
+        "Returns the remainder of dividing the first number by the second. The sign of the answer follows the first number, " +
+        "so Modulo(-1, 3) is -1, not 2: for a wrap-around (an angle, a cyclic index) use Math.Formula with " +
+        "\"a - b * floor(a / b)\". A zero divisor gives NaN and a warning.")]
+    [NodeSearchTags("%", "mod", "remainder", "wrap", "Math.Modulo")]
     public static double Modulo(double a, double b)
     {
-        return a % b;
+        var result = a % b;
+        WarnIfCreated(result, a, b, "The remainder by zero is NaN. Check the divisor (input 'b').");
+        return result;
     }
 
     /// <summary>
@@ -133,11 +143,21 @@ public static class MathNodes
     /// <param name="exponent">The exponent.</param>
     /// <returns>base raised to exponent.</returns>
     [NodeName("Math.Pow")]
-    [NodeDescription("Raises the first number to the power of the second.")]
+    [NodeDescription(
+        "Raises the first number to the power of the second. A result that is not a real number (a negative base with a " +
+        "fractional exponent is NaN) or too large to hold (Infinity) is still returned, with a warning.")]
     [NodeSearchTags("power", "exponent", "^", "raise")]
     public static double Pow(double @base, double exponent)
     {
-        return Math.Pow(@base, exponent);
+        var result = Math.Pow(@base, exponent);
+        WarnIfCreated(
+            result,
+            @base,
+            exponent,
+            double.IsNaN(result)
+                ? "The power is not a real number (NaN): a negative base needs a whole exponent. Check inputs 'base' and 'exponent'."
+                : "The power is too large to hold (Infinity). Check inputs 'base' and 'exponent'.");
+        return result;
     }
 
     /// <summary>
@@ -165,8 +185,8 @@ public static class MathNodes
     /// <param name="number">The number.</param>
     /// <returns>The largest integer less than or equal to the number.</returns>
     [NodeName("Math.Floor")]
-    [NodeDescription("Rounds a number down to the nearest integer.")]
-    [NodeSearchTags("round", "down", "truncate")]
+    [NodeDescription("Rounds a number down to the nearest integer (-2.5 becomes -3; Math.Truncate drops the decimals towards zero instead).")]
+    [NodeSearchTags("round", "down", "integer")]
     public static double Floor(double number)
     {
         return Math.Floor(number);
@@ -207,7 +227,13 @@ public static class MathNodes
                 nameof(fromHigh));
         }
 
-        return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+        var mapped = toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+        if (AllFinite(value, fromLow, fromHigh, toLow, toHigh))
+        {
+            NodeWarnings.WarnIfNotFinite(mapped, "The mapped value");
+        }
+
+        return mapped;
     }
 
     /// <summary>
@@ -249,6 +275,29 @@ public static class MathNodes
         }
 
         return min + sample * (max - min);
+    }
+
+    // A warning when the arithmetic itself made the result NaN or Infinity from two finite inputs. When an input was already
+    // not finite the node that made it has said so, and this one would only repeat it.
+    private static void WarnIfCreated(double result, double first, double second, string message)
+    {
+        if ((double.IsNaN(result) || double.IsInfinity(result)) && AllFinite(first, second))
+        {
+            NodeWarnings.Add(message);
+        }
+    }
+
+    private static bool AllFinite(params double[] numbers)
+    {
+        foreach (var number in numbers)
+        {
+            if (double.IsNaN(number) || double.IsInfinity(number))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static readonly Random SharedRandom = new Random();

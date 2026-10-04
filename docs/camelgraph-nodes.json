@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 580,
  "categories": [
   {
    "name": "Annotation",
@@ -56,7 +56,7 @@
   },
   {
    "name": "Math",
-   "count": 37
+   "count": 38
   },
   {
    "name": "Navisworks.Analysis",
@@ -7523,7 +7523,8 @@
    "tags": [
     "&&",
     "conjunction",
-    "boolean"
+    "boolean",
+    "Logic.And"
    ],
    "inputs": [
     {
@@ -7551,18 +7552,19 @@
    "id": "CamelGraph.Nodes.LogicNodes.EqualTo@object,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "Tests whether two values are equal (numbers compare by value regardless of numeric type).",
+   "description": "Tests whether two values are equal, the same way as Logic.Compare with ==: numbers compare by value (2 equals 2.0), text ignores upper and lower case, text that reads as a number equals that number (\"5\" equals 5), text that reads as a date equals that date, and two lists are equal when they have the same items in the same order. A list is compared as ONE value; to test every element of a list set List Levels to @L1 on a (an empty element is equal only to another empty one). For a case-sensitive text test use Logic.Compare with ignoreCase off, and for numbers within a tolerance use Math.IsClose.",
    "tags": [
     "==",
     "equal",
     "same",
-    "compare"
+    "compare",
+    "Logic.Equals"
    ],
    "inputs": [
     {
      "name": "a",
      "type": "any",
-     "description": "First value."
+     "description": "First value. A list is compared as one value; set List Levels to @L1 to compare every element instead."
     },
     {
      "name": "b",
@@ -7588,7 +7590,8 @@
    "tags": [
     ">",
     "compare",
-    "larger"
+    "larger",
+    "Logic.GreaterThan"
    ],
    "inputs": [
     {
@@ -7620,7 +7623,8 @@
    "tags": [
     ">=",
     "compare",
-    "atleast"
+    "atleast",
+    "Logic.GreaterThanOrEqual"
    ],
    "inputs": [
     {
@@ -7648,12 +7652,15 @@
    "id": "CamelGraph.Nodes.LogicNodes.If@bool,object,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "Returns one of two values depending on a boolean condition.",
+   "description": "Returns one of two values depending on a boolean condition. Both branches are always computed, so a node wired into the unused branch still runs: to skip nodes (a modifying node, a slow search) use Flow.When instead. A list of booleans on test gives a list of choices.",
    "tags": [
     "condition",
     "branch",
     "ternary",
-    "switch"
+    "switch",
+    "flow",
+    "when",
+    "Logic.If"
    ],
    "inputs": [
     {
@@ -7686,7 +7693,7 @@
    "id": "CamelGraph.Nodes.LogicNodes.IsNull@object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "True when the value is null — with @L1 on the input it tests a whole list element-wise, giving the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). The input port is untyped, so a list arrives whole unless levels are set.",
+   "description": "True when the value is null (nothing came out). Wired to a list it tests the LIST, which is never null; set the input's List Levels to @L1 to test every element instead, and each empty element gives true. That gives the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). Text that is empty or blank is not null: use IsNullOrEmpty or String.IsBlank for that.",
    "tags": [
     "null",
     "is",
@@ -7694,13 +7701,14 @@
     "missing",
     "empty",
     "mask",
-    "test"
+    "test",
+    "Logic.IsNull"
    ],
    "inputs": [
     {
      "name": "value",
      "type": "any",
-     "description": "The value to test. To test each element of a list, set this input's List Levels to @L1."
+     "description": "The value to test. A list is tested as a whole (a list is never null). To test each element of a list, set this input's List Levels to @L1: an empty element then gives true."
     }
    ],
    "outputs": [
@@ -7717,22 +7725,22 @@
    "id": "CamelGraph.Nodes.LogicNodes.IsNullOrEmpty@object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "True when the value is null, an empty string, an empty list or an empty dictionary — the guard for \"did anything come out?\" checks before If branches. NOTE: wired to a list directly it tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead.",
+   "description": "True when the value is null, an empty string, an empty list or an empty dictionary — the guard for \"did anything come out?\" checks before If branches. NOTE: wired to a list directly it tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead, and each empty element gives true. Text of only spaces is not empty here: String.IsBlank counts it as blank.",
    "tags": [
     "null",
     "empty",
     "is",
     "check",
-    "blank",
     "missing",
     "guard",
-    "test"
+    "test",
+    "Logic.IsNullOrEmpty"
    ],
    "inputs": [
     {
      "name": "value",
      "type": "any",
-     "description": "The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1."
+     "description": "The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1: an empty element then gives true."
     }
    ],
    "outputs": [
@@ -7753,7 +7761,8 @@
    "tags": [
     "<",
     "compare",
-    "smaller"
+    "smaller",
+    "Logic.LessThan"
    ],
    "inputs": [
     {
@@ -7785,7 +7794,8 @@
    "tags": [
     "<=",
     "compare",
-    "atmost"
+    "atmost",
+    "Logic.LessThanOrEqual"
    ],
    "inputs": [
     {
@@ -7813,14 +7823,16 @@
    "id": "CamelGraph.Nodes.LogicExtraNodes.Choose@int,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "Picks one of several options by position (0 = first) — a multi-way If.",
+   "description": "Picks one of several options by position (0 = first) — a multi-way If. All options are always computed, so a node wired into an option that is not picked still runs: to skip nodes use Flow.When.",
    "tags": [
     "select",
     "pick",
     "switch",
     "index",
     "option",
-    "multiplexer"
+    "multiplexer",
+    "flow",
+    "when"
    ],
    "inputs": [
     {
@@ -7849,7 +7861,7 @@
    "id": "CamelGraph.Nodes.LogicExtraNodes.Compare@object,object,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "Compares two values — numbers, text or dates — with a test chosen from a list (==, >, contains, matches, regex …). Text that reads as a number is compared as a number.",
+   "description": "Compares two values — numbers, text or dates — with a test chosen from a list (==, >, contains, matches, regex …). Text that reads as a number is compared as a number, and text that reads as a date (2026-10-01) is compared as a date when the other side is a date. Text ignores upper and lower case unless ignoreCase is off (the regex test is the same). A missing value (empty or blank) is never greater or less than anything, so it does not pass > >= < <=; use isNull or isEmpty to find it. Equals and Logic.NotEquals follow the same rules for == and !=. A list on a is tested as ONE value: to test every element set List Levels to @L1 on a (or use List.FilterByValue to split a list). For numbers within a tolerance use Math.IsClose.",
    "tags": [
     "compare",
     "greater",
@@ -7860,13 +7872,14 @@
     "contains",
     "wildcard",
     "regex",
-    "test"
+    "test",
+    "tolerance"
    ],
    "inputs": [
     {
      "name": "a",
      "type": "any",
-     "description": "The value to test."
+     "description": "The value to test. A list is tested as one value; set List Levels to @L1 on this input to test every element instead."
     },
     {
      "name": "b",
@@ -7901,7 +7914,7 @@
    "id": "CamelGraph.Nodes.LogicExtraNodes.IsBetween@object,object,object,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "True when a number, text or date lies between a lower and an upper bound (bounds included by default).",
+   "description": "True when a number, text or date lies between a lower and an upper bound (bounds included by default). Text that reads as a number or, next to a date, as a date is compared as one. A list on value (or on a bound) gives a list of answers, one per element, so a whole column can be tested at once. A missing value, or text that is not a number next to numbers, is not between; an empty bound is an error. To test a number against a target within a tolerance use Math.IsClose.",
    "tags": [
     "range",
     "within",
@@ -7914,17 +7927,17 @@
     {
      "name": "value",
      "type": "any",
-     "description": "The value to test (number, text or date)."
+     "description": "The value to test (number, text or date). A list tests every element and gives a list of results. A missing value (empty or blank) is never between."
     },
     {
      "name": "min",
      "type": "any",
-     "description": "The lower bound."
+     "description": "The lower bound. A list pairs with the values."
     },
     {
      "name": "max",
      "type": "any",
-     "description": "The upper bound."
+     "description": "The upper bound. A list pairs with the values."
     },
     {
      "name": "inclusive",
@@ -7947,7 +7960,7 @@
    "id": "CamelGraph.Nodes.LogicExtraNodes.NotEquals@object,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "True when two values are different (numbers compare by value regardless of numeric type).",
+   "description": "True when two values are different — the opposite of Equals, with the same rules: numbers compare by value, text ignores upper and lower case, text that reads as a number or a date is compared as one, and two lists are equal when they have the same items in the same order. A list is compared as ONE value; to test every element of a list set List Levels to @L1 on a.",
    "tags": [
     "!=",
     "different",
@@ -7958,7 +7971,7 @@
     {
      "name": "a",
      "type": "any",
-     "description": "First value."
+     "description": "First value. A list is compared as one value; set List Levels to @L1 to compare every element instead."
     },
     {
      "name": "b",
@@ -7980,7 +7993,7 @@
    "id": "CamelGraph.Nodes.LogicExtraNodes.Switch@object,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Logic",
-   "description": "Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or code-to-name mapping.",
+   "description": "Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or code-to-name mapping. Matching follows Equals: text ignores upper and lower case and text that reads as a number matches that number. A list on value is looked up element by element and gives a list of results. All results are computed whether or not they are picked; to skip nodes use Flow.When.",
    "tags": [
     "case",
     "match",
@@ -7988,13 +8001,15 @@
     "lookup",
     "translate",
     "switch",
-    "select"
+    "select",
+    "flow",
+    "when"
    ],
    "inputs": [
     {
      "name": "value",
      "type": "any",
-     "description": "The value to look for."
+     "description": "The value to look for. A list looks every element up and gives a list of results (a status column becomes a colour column)."
     },
     {
      "name": "cases",
@@ -8094,7 +8109,8 @@
     "!",
     "negate",
     "invert",
-    "boolean"
+    "boolean",
+    "Logic.Not"
    ],
    "inputs": [
     {
@@ -8121,7 +8137,8 @@
    "tags": [
     "||",
     "disjunction",
-    "boolean"
+    "boolean",
+    "Logic.Or"
    ],
    "inputs": [
     {
@@ -8154,7 +8171,8 @@
     "+",
     "plus",
     "sum",
-    "addition"
+    "addition",
+    "Math.Add"
    ],
    "inputs": [
     {
@@ -8182,11 +8200,12 @@
    "id": "CamelGraph.Nodes.MathNodes.Divide@double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Divides the first number by the second.",
+   "description": "Divides the first number by the second. Dividing by zero does not stop the graph: the result is Infinity (NaN for 0 / 0) and the node shows a warning, so check the divisor before using the result.",
    "tags": [
     "/",
     "quotient",
-    "division"
+    "division",
+    "Math.Divide"
    ],
    "inputs": [
     {
@@ -8534,11 +8553,11 @@
    "id": "CamelGraph.Nodes.MathNodes.Floor@double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Rounds a number down to the nearest integer.",
+   "description": "Rounds a number down to the nearest integer (-2.5 becomes -3; Math.Truncate drops the decimals towards zero instead).",
    "tags": [
     "round",
     "down",
-    "truncate"
+    "integer"
    ],
    "inputs": [
     {
@@ -8624,11 +8643,56 @@
    "returns": ""
   },
   {
+   "name": "Math.IsClose",
+   "id": "CamelGraph.Nodes.MathExtraNodes.IsClose@double,double,double",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Math",
+   "description": "True when two numbers differ by no more than the tolerance (the same unit as the numbers) — the safe way to ask \"are these equal?\" for lengths and levels read from a model, where 0.1 + 0.2 is not exactly 0.3. Equals compares exactly. A number that is not a finite number is close only to an identical one. A list on a or b gives a list of answers.",
+   "tags": [
+    "equal",
+    "tolerance",
+    "approximately",
+    "almost",
+    "near",
+    "epsilon",
+    "within",
+    "float",
+    "compare",
+    "isclose"
+   ],
+   "inputs": [
+    {
+     "name": "a",
+     "type": "number",
+     "description": "The first number."
+    },
+    {
+     "name": "b",
+     "type": "number",
+     "description": "The second number."
+    },
+    {
+     "name": "tolerance",
+     "type": "number",
+     "description": "The largest difference still counted as equal, in the same unit as the numbers (0 or more; 0 means exactly equal).",
+     "default": "0.001"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "result",
+     "type": "boolean",
+     "description": "True when the two numbers differ by no more than the tolerance."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Math.Lerp",
    "id": "CamelGraph.Nodes.MathExtraNodes.Lerp@double,double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited).",
+   "description": "Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited, so t = 2 goes past b; Math.Clamp keeps t in 0 to 1).",
    "tags": [
     "interpolate",
     "blend",
@@ -8867,7 +8931,7 @@
    "id": "CamelGraph.Nodes.MathExtraNodes.Percent@double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "What percentage the part is of the total (37 of 340 gives 10.88); 0 when the total is 0, so an empty model reads 0 %.",
+   "description": "What percentage the part is of the total (37 of 340 gives 10.88); 0 when the total is 0, so an empty model reads 0 % (Divide, in contrast, gives Infinity for a zero divisor).",
    "tags": [
     "percentage",
     "ratio",
@@ -8923,7 +8987,7 @@
    "id": "CamelGraph.Nodes.MathNodes.Pow@double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Raises the first number to the power of the second.",
+   "description": "Raises the first number to the power of the second. A result that is not a real number (a negative base with a fractional exponent is NaN) or too large to hold (Infinity) is still returned, with a warning.",
    "tags": [
     "power",
     "exponent",
@@ -9130,7 +9194,7 @@
    "id": "CamelGraph.Nodes.MathExtraNodes.Sign@double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "-1 for a negative number, 0 for zero, 1 for a positive number.",
+   "description": "-1 for a negative number, 0 for zero, 1 for a positive number. A value that is not a number (NaN) gives 0 and a warning.",
    "tags": [
     "positive",
     "negative",
@@ -9279,11 +9343,13 @@
    "id": "CamelGraph.Nodes.MathNodes.Modulo@double,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Math",
-   "description": "Returns the remainder of dividing the first number by the second.",
+   "description": "Returns the remainder of dividing the first number by the second. The sign of the answer follows the first number, so Modulo(-1, 3) is -1, not 2: for a wrap-around (an angle, a cyclic index) use Math.Formula with \"a - b * floor(a / b)\". A zero divisor gives NaN and a warning.",
    "tags": [
     "%",
     "mod",
-    "remainder"
+    "remainder",
+    "wrap",
+    "Math.Modulo"
    ],
    "inputs": [
     {
@@ -9316,7 +9382,8 @@
     "*",
     "times",
     "product",
-    "multiplication"
+    "multiplication",
+    "Math.Multiply"
    ],
    "inputs": [
     {
@@ -9349,7 +9416,8 @@
     "-",
     "minus",
     "difference",
-    "subtraction"
+    "subtraction",
+    "Math.Subtract"
    ],
    "inputs": [
     {
