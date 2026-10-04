@@ -141,7 +141,7 @@ public class LogicSemanticsTests
     public void ARunawayRegularExpressionSaysSoInTheWordsOfTheStringNodes()
     {
         var text = new string('a', 40) + "!";
-        var ex = Assert.Throws<InvalidOperationException>(() => LogicExtraNodes.Compare(text, "^(a+)+$", "regex"));
+        var ex = Assert.ThrowsAny<InvalidOperationException>(() => LogicExtraNodes.Compare(text, "^(a+)+$", "regex"));
         Assert.Contains("Logic.Compare", ex.Message);
         Assert.Contains("longer than 2 seconds", ex.Message);
         Assert.Contains("Simplify the pattern", ex.Message);

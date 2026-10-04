@@ -15,6 +15,15 @@ namespace CamelGraph.Nodes.Internal;
 /// anything, so it does not pass <c>&gt;</c>, <c>&gt;=</c>, <c>&lt;</c> or <c>&lt;=</c>; <c>isNull</c> / <c>isEmpty</c> are the tests that
 /// select it. Everything else follows <see cref="ValueComparison"/>.
 /// </summary>
+/// <summary>A pattern ran past its time limit on one text. A filter node catches this to say which item or row it was.</summary>
+internal sealed class PatternTimedOutException : InvalidOperationException
+{
+    public PatternTimedOutException(string message, Exception inner)
+        : base(message, inner)
+    {
+    }
+}
+
 internal static class ValueTests
 {
     /// <summary>The operators offered in the dropdowns, in display order.</summary>
@@ -270,6 +279,21 @@ internal static class ValueTests
         return true;
     }
 
+    /// <summary>
+    /// True when both sides have a value but cannot be ordered: a number set against text that is not a number. <see cref="TryOrder"/>
+    /// lets such a pair fail the test silently; a filter that wants to tell the user how many items it left out asks this first.
+    /// </summary>
+    internal static bool CannotBeOrdered(object? a, object? b)
+    {
+        if (IsNoValue(a) || IsNoValue(b))
+        {
+            return false;
+        }
+
+        return !TryNumbers(a, b, out _, out _) &&
+               ((ValueComparison.IsNumeric(a!) && b is string) || (ValueComparison.IsNumeric(b!) && a is string));
+    }
+
     /// <summary>True for null and for text that is empty or only white space: a missing value, which is never greater or less.</summary>
     internal static bool IsNoValue(object? value)
     {
@@ -395,10 +419,10 @@ internal static class ValueTests
         {
             return regex.IsMatch(text);
         }
-        catch (RegexMatchTimeoutException)
+        catch (RegexMatchTimeoutException ex)
         {
-            throw new InvalidOperationException(
-                nodeName + ": the pattern took longer than 2 seconds on one of the texts and was stopped. Simplify the pattern.");
+            throw new PatternTimedOutException(
+                nodeName + ": the pattern took longer than 2 seconds on one of the texts and was stopped. Simplify the pattern.", ex);
         }
     }
 

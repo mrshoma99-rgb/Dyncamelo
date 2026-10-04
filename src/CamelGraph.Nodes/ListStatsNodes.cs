@@ -450,6 +450,15 @@ public static class ListStatsNodes
                 // No value is not smaller or larger than anything.
                 passed = false;
             }
+            else if (ordering && ValueTests.CannotBeOrdered(subject, value))
+            {
+                // Text against a number: they have no order, so the item does not pass, and the node says how many it left out.
+                passed = false;
+                if (uncomparable++ == 0)
+                {
+                    firstUncomparable = i;
+                }
+            }
             else
             {
                 try
@@ -465,7 +474,7 @@ public static class ListStatsNodes
                         firstUncomparable = i;
                     }
                 }
-                catch (RegexMatchTimeoutException ex)
+                catch (PatternTimedOutException ex)
                 {
                     throw new InvalidOperationException(
                         "List.FilterByValue: matching the pattern '" + TypeCoercion.FormatValue(value) + "' on item " + i.ToString(CultureInfo.InvariantCulture) +

@@ -511,6 +511,12 @@ public static class TableToolkitNodes
                     // No value is not smaller than anything, and not larger either: it is left out of every ordering test.
                     passes = false;
                 }
+                else if (ValueTests.CannotBeOrdered(cell, value))
+                {
+                    passes = false;
+                    incomparable++;
+                    firstIncomparable ??= "'" + CamelGraphTable.CellText(cell) + "' in row " + (r + 1).ToString(CultureInfo.InvariantCulture);
+                }
                 else
                 {
                     try
@@ -531,7 +537,7 @@ public static class TableToolkitNodes
                 {
                     passes = ValueTests.Test(op!, cell, value, ignoreCase, "Table.Filter");
                 }
-                catch (RegexMatchTimeoutException)
+                catch (PatternTimedOutException)
                 {
                     throw new InvalidOperationException(
                         "Table.Filter: the regular expression took longer than 2 seconds on row " + (r + 1).ToString(CultureInfo.InvariantCulture) +
