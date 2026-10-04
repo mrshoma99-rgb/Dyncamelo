@@ -176,7 +176,7 @@ Nodes never crash a run — they report on themselves, per node:
 Quick fixes for common cases:
 
 - **Search returns nothing** — category/property names must match the Properties window exactly (localized names included). Try `mode` set to `contains` on `Search.ByProperty` before `equals`, and verify with a Watch List.
-- **`Properties.Value` warns "property not found"** — not all items carry all properties; filter first (e.g. `ModelItem.HasGeometry → List.FilterByBoolMask`) or accept the nulls.
+- **`Properties.Value` warns "property not found"** — not all items carry all properties; filter first (e.g. the `hasGeometry` output of `ModelItem.Info` into `List.FilterByBoolMask`) or accept the nulls.
 - **Everything is Idle after loading** — that is normal; press Run once.
 - **A run takes long** — press the cancel button in the run bar; already-computed nodes keep their results and the next run resumes where it stopped. Right-click any node and **Freeze** it to exclude an expensive branch (it and its downstream ghost out) while you work on the rest.
 

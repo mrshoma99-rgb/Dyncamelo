@@ -22,7 +22,7 @@ Goal: for every item a search finds, isolate it, frame it in the view and save a
 2. Add `Loop.Item` (*Workflow*). Wire the search `items` into its `items`. Everything you wire between `Loop.Item` and `Loop.Collect` runs once for each item, in order.
 3. Add `Appearance.Isolate` (*Navisworks ▸ Appearance*). Wire the `item` output of `Loop.Item` into its `items`.
 4. Add `Camera.ZoomToItems` (*Navisworks ▸ Camera*). Wire the `items` output of `Appearance.Isolate` into its `items`. Passing the items on makes the zoom wait for the isolate.
-5. Add `ModelItem.DisplayName` (*Navisworks ▸ ModelItem*). Wire `item` from `Loop.Item` into its `item`. This is the name for the viewpoint.
+5. Add `ModelItem.Info` (*Navisworks ▸ ModelItem*). Wire `item` from `Loop.Item` into its `item`. Its `name` output is the name for the viewpoint.
 6. Add `Flow.Then` (*Workflow*). Wire `name` into its `value` and the `done` output of `Camera.ZoomToItems` into its `after`. The name now reaches the next node only after the zoom is done.
 7. Add `Viewpoint.SaveWithOverrides` (*Navisworks ▸ Viewpoints*). Wire the `value` output of `Flow.Then` into its `name`. Type `CamelGraph Views` into `folderName`.
 8. Add `Loop.Collect` (*Workflow*). Wire `loop` from `Loop.Item` into its `loop` and `viewpoint` into its `value`.

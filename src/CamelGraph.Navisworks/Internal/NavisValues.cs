@@ -327,7 +327,7 @@ internal static class NavisValues
     /// "file.nwc &gt; Level 1 &gt; Walls &gt; Basic Wall". Unnamed nodes fall back to
     /// their class display name; still-empty segments are skipped.
     /// </summary>
-    internal static string ItemPath(ModelItem? item)
+    internal static string ItemPath(ModelItem? item, string separator = " > ")
     {
         if (item == null)
         {
@@ -350,7 +350,7 @@ internal static class NavisValues
         }
 
         segments.Reverse();
-        return string.Join(" > ", segments);
+        return string.Join(separator ?? " > ", segments);
     }
 
     private static NwColor ParseHexColor(string text)

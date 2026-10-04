@@ -11,6 +11,44 @@ namespace CamelGraph.Navisworks;
 [NodeCategory("Navisworks.ModelItem")]
 public static class ModelItemNodes
 {
+    /// <summary>What a model item is called and what it is: name, class, GUID, geometry and hidden flags in one node.</summary>
+    /// <param name="item">The model item. Wire a list and lacing gives one result per item (each output becomes a list).</param>
+    /// <returns>The display name (the class name when unnamed), the internal and localized class names, the instance GUID text ("" when absent), whether the item carries geometry and whether it is hidden.</returns>
+    [NodeName("ModelItem.Info")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("Everything quick to know about a model item in one node: its display name (the class name when it has none), class name and localized class name (layer/group/geometry detection), instance GUID (\"\" when absent, a stable cross-run identity for reports), whether it carries geometry and whether it is hidden right now. Use the outputs you need; replaces the single-property nodes ModelItem.DisplayName, ClassInfo, HasGeometry, IsHidden and InstanceGuid. The IFC GlobalId (ModelItem.IfcGuid), the source file (ModelItem.SourceInfo) and the tree path (ModelItem.Path) are separate nodes because they read more.")]
+    [NodeSearchTags("item", "info", "name", "displayname", "label", "class", "classname", "type", "kind", "geometry", "solid", "mesh", "hidden", "visible", "state", "guid", "id", "identity", "instance")]
+    [MultiReturn("name", "className", "classDisplayName", "guid", "hasGeometry", "isHidden")]
+    [PortKinds("text", "text", "text", "text", "boolean", "boolean")]
+    public static Dictionary<string, object?> Info(ModelItem item)
+    {
+        var modelItem = NavisValues.RequireItem(item);
+        var guid = modelItem.InstanceGuid;
+        return new Dictionary<string, object?>
+        {
+            ["name"] = DisplayName(modelItem),
+            ["className"] = modelItem.ClassName,
+            ["classDisplayName"] = modelItem.ClassDisplayName,
+            ["guid"] = guid == Guid.Empty ? string.Empty : guid.ToString(),
+            ["hasGeometry"] = modelItem.HasGeometry,
+            ["isHidden"] = modelItem.IsHidden,
+        };
+    }
+
+    /// <summary>The selection-tree path of a model item as text, e.g. "Structure.nwc &gt; Level 1 &gt; Walls &gt; Basic Wall".</summary>
+    /// <param name="item">The model item. Wire a list and lacing gives one path per item.</param>
+    /// <param name="separator">The text between the names (default " &gt; ").</param>
+    /// <returns>The names from the model file down to the item, joined by the separator; an unnamed level shows its class name and a level with neither is left out.</returns>
+    [NodeName("ModelItem.Path")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeDescription("The selection-tree path of an item as one text, from its model file down to the item (\"Structure.nwc > Level 1 > Walls > Basic Wall\") — a label for BCF titles, clash names and reports. The same text is the @Path column of Properties.ToTable. ModelItem.Info gives only the item's own name.")]
+    [NodeSearchTags("item", "path", "breadcrumb", "tree", "hierarchy", "location", "label", "full name")]
+    [return: NodeName("path")]
+    public static string Path(ModelItem item, string separator = " > ")
+    {
+        return NavisValues.ItemPath(NavisValues.RequireItem(item), separator);
+    }
+
     /// <summary>The direct children of a model item.</summary>
     /// <param name="item">The model item.</param>
     /// <returns>The item's direct children.</returns>
@@ -39,6 +77,7 @@ public static class ModelItemNodes
     /// <param name="item">The model item.</param>
     /// <returns>The item's display name; falls back to its class display name when unnamed.</returns>
     [NodeName("ModelItem.DisplayName")]
+    [NodeDeprecated("ModelItem.Info")]
     [NodeDescription("The display name of a model item (falls back to its class name when unnamed).")]
     [NodeSearchTags("item", "name", "displayname", "label")]
     [return: NodeName("name")]
@@ -55,6 +94,7 @@ public static class ModelItemNodes
     /// <param name="item">The model item.</param>
     /// <returns>True when the item has geometry.</returns>
     [NodeName("ModelItem.HasGeometry")]
+    [NodeDeprecated("ModelItem.Info")]
     [NodeDescription("True when the model item carries geometry.")]
     [NodeSearchTags("item", "geometry", "solid", "mesh")]
     [return: NodeName("hasGeometry")]
@@ -140,7 +180,7 @@ public static class ModelItemNodes
     /// <returns>The root ancestor's display name, e.g. "Structure.nwc".</returns>
     [NodeName("ModelItem.ModelName")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
-    [NodeDescription("The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model.")]
+    [NodeDescription("The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model. ModelItem.SourceInfo answers the same question with more detail (the source file name, the item type and the owning model); Model.Statistics labels a model without a name by its file name, this node gives an empty text.")]
     [NodeSearchTags("item", "model", "file", "source", "discipline", "root", "origin")]
     [return: NodeName("modelName")]
     public static string ModelName(ModelItem item)
@@ -232,8 +272,8 @@ public static class ModelItemNodes
 
     /// <summary>Tests a property of an item's ancestors against a text condition.</summary>
     /// <param name="item">The model item whose ancestor chain to test.</param>
-    /// <param name="category">The property category (tab) name, as the Properties window shows it (e.g. "Element", "Item").</param>
-    /// <param name="property">The property name inside that category (e.g. "Name", "Type", "Source File").</param>
+    /// <param name="categoryName">The property category (tab) name, as the Properties window shows it (e.g. "Element", "Item").</param>
+    /// <param name="propertyName">The property name inside that category (e.g. "Name", "Type", "Source File").</param>
     /// <param name="text">The text to look for in the ancestors' property values.</param>
     /// <param name="mode">contains, doesn't contain, starts with, doesn't start with, ends with or doesn't end with. The "doesn't" modes are true when NO ancestor matches.</param>
     /// <param name="includeSelf">True also tests the item's own property, not just its ancestors'.</param>
@@ -241,6 +281,8 @@ public static class ModelItemNodes
     /// <returns>Whether the condition holds, plus the nearest matching ancestor and its property value (null/"" when nothing matched — always so for the "doesn't" modes when they hold).</returns>
     [NodeName("ModelItem.AncestorPropertyMatches")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [PortAlias("category", "categoryName")]
+    [PortAlias("property", "propertyName")]
     [NodeDescription(
         "The general form of ModelItem.AncestorNameMatches: walks an item's ancestor chain (nearest " +
         "first) and tests ANY property you name — category + property as the Properties window shows " +
@@ -253,8 +295,8 @@ public static class ModelItemNodes
     [PortKinds("boolean", "item", "")]
     public static Dictionary<string, object?> AncestorPropertyMatches(
         ModelItem item,
-        [NodeTabChoice("item", IncludeAncestors = true)] string category,
-        [NodePropertyChoice("item", "category", IncludeAncestors = true)] string property,
+        [NodeTabChoice("item", IncludeAncestors = true)] string categoryName,
+        [NodePropertyChoice("item", "categoryName", IncludeAncestors = true)] string propertyName,
         string text,
         [NodeChoices("contains", "doesn't contain", "starts with", "doesn't start with", "ends with", "doesn't end with")]
         string mode = "contains",
@@ -262,14 +304,14 @@ public static class ModelItemNodes
         bool caseSensitive = false)
     {
         var modelItem = NavisValues.RequireItem(item);
-        if (string.IsNullOrEmpty(category))
+        if (string.IsNullOrEmpty(categoryName))
         {
-            throw new ArgumentException("No property category name provided.", nameof(category));
+            throw new ArgumentException("No property category name provided.", nameof(categoryName));
         }
 
-        if (string.IsNullOrEmpty(property))
+        if (string.IsNullOrEmpty(propertyName))
         {
-            throw new ArgumentException("No property name provided.", nameof(property));
+            throw new ArgumentException("No property name provided.", nameof(propertyName));
         }
 
         if (string.IsNullOrEmpty(text))
@@ -285,8 +327,8 @@ public static class ModelItemNodes
         var start = includeSelf ? modelItem : modelItem.Parent;
         for (var current = start; current != null; current = current.Parent)
         {
-            var found = current.PropertyCategories.FindPropertyByDisplayName(category, property)
-                ?? current.PropertyCategories.FindPropertyByName(category, property);
+            var found = current.PropertyCategories.FindPropertyByDisplayName(categoryName, propertyName)
+                ?? current.PropertyCategories.FindPropertyByName(categoryName, propertyName);
             if (found == null)
             {
                 continue; // this ancestor has no such property — it cannot match
@@ -356,13 +398,17 @@ public static class ModelItemNodes
     /// <param name="item">The model item (often a geometry leaf deep in the tree).</param>
     /// <returns>The nearest ancestor flagged as a composite object (the "element" in the tree); the item itself when it is already an object.</returns>
     [NodeName("ModelItem.ObjectAncestor")]
+    [NodeDeprecated("Selection.Resolve")]
     [NodeDescription("Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) — the item you usually want to name, colour or tag. Returns the item itself when it is already an object.")]
     [NodeSearchTags("item", "object", "element", "ancestor", "parent", "composite", "tree", "up")]
     [return: NodeName("object")]
     public static ModelItem ObjectAncestor(ModelItem item)
     {
         var modelItem = NavisValues.RequireItem(item);
-        return modelItem.FindFirstObjectAncestor() ?? modelItem;
+
+        // The same rule as Selection.Resolve with level LastObject (the composite or insert object closest to the item).
+        var resolved = SelectionLevels.Resolve(new[] { modelItem }, SelectionLevel.LastObject);
+        return resolved.Count > 0 ? resolved[0] : modelItem;
     }
 
     /// <summary>The deepest ancestor shared by all the given items.</summary>
@@ -425,6 +471,7 @@ public static class ModelItemNodes
     /// <param name="item">The model item.</param>
     /// <returns>The internal and localized class names (layer/group/geometry detection).</returns>
     [NodeName("ModelItem.ClassInfo")]
+    [NodeDeprecated("ModelItem.Info")]
     [NodeDescription("The internal and localized class names of a model item (layer/group/geometry detection).")]
     [NodeSearchTags("item", "class", "classname", "type", "kind")]
     [MultiReturn("className", "classDisplayName")]
@@ -443,6 +490,7 @@ public static class ModelItemNodes
     /// <param name="item">The model item.</param>
     /// <returns>True when the item is hidden.</returns>
     [NodeName("ModelItem.IsHidden")]
+    [NodeDeprecated("ModelItem.Info")]
     [NodeDescription("True when the model item is currently hidden in the viewport.")]
     [NodeSearchTags("item", "hidden", "visible", "state")]
     [return: NodeName("isHidden")]
@@ -455,6 +503,7 @@ public static class ModelItemNodes
     /// <param name="item">The model item.</param>
     /// <returns>The GUID string, or "" when the item has none — cross-run identity for reports.</returns>
     [NodeName("ModelItem.InstanceGuid")]
+    [NodeDeprecated("ModelItem.Info")]
     [NodeDescription("The stable instance GUID of a model item (\"\" when absent) — cross-run identity for reports.")]
     [NodeSearchTags("item", "guid", "id", "identity", "instance")]
     [return: NodeName("guid")]
@@ -468,6 +517,7 @@ public static class ModelItemNodes
     /// <param name="items">The model items to flatten.</param>
     /// <returns>The unique geometry leaves — the items QTO, coloring and clash selections actually want.</returns>
     [NodeName("ModelItem.GeometryLeaves")]
+    [NodeDeprecated("Selection.Resolve")]
     [NodeDescription("Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want).")]
     [NodeSearchTags("item", "geometry", "leaves", "flatten", "descendants")]
     [return: NodeName("leaves")]
@@ -478,24 +528,7 @@ public static class ModelItemNodes
             throw new ArgumentNullException(nameof(items), "No model items provided.");
         }
 
-        var leaves = new List<ModelItem>();
-        var seen = new ModelItemSet();
-        foreach (var item in items)
-        {
-            if (item == null)
-            {
-                continue;
-            }
-
-            foreach (var descendant in item.DescendantsAndSelf)
-            {
-                if (descendant.HasGeometry && seen.Add(descendant))
-                {
-                    leaves.Add(descendant);
-                }
-            }
-        }
-
-        return leaves;
+        // The same loop as Selection.Resolve with level Geometry: one implementation, so the two cannot disagree.
+        return SelectionLevels.Resolve(items, SelectionLevel.Geometry);
     }
 }

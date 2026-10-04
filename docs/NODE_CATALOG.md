@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**574 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -34,7 +34,7 @@
 | [Navisworks.Grids](#navisworksgrids) | 3 |
 | [Navisworks.Markup](#navisworksmarkup) | 6 |
 | [Navisworks.Model](#navisworksmodel) | 5 |
-| [Navisworks.ModelItem](#navisworksmodelitem) | 20 |
+| [Navisworks.ModelItem](#navisworksmodelitem) | 15 |
 | [Navisworks.Properties](#navisworksproperties) | 13 |
 | [Navisworks.Search](#navisworkssearch) | 5 |
 | [Navisworks.Selection](#navisworksselection) | 9 |
@@ -584,23 +584,18 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `ModelItem.AncestorNameMatches` | item, text, mode?, includeSelf?, caseSensitive? | matches, ancestor, ancestorName | Walks an item's ancestor chain (nearest first) and tests each name against the text: contains / starts with / ends with, or their "doesn't" negations |
-| `ModelItem.AncestorPropertyMatches` | item, category, property, text, mode?, includeSelf?, caseSensitive? | matches, ancestor, value | The general form of ModelItem.AncestorNameMatches: walks an item's ancestor chain (nearest first) and tests ANY property you name |
+| `ModelItem.AncestorPropertyMatches` | item, categoryName, propertyName, text, mode?, includeSelf?, caseSensitive? | matches, ancestor, value | The general form of ModelItem.AncestorNameMatches: walks an item's ancestor chain (nearest first) and tests ANY property you name |
 | `ModelItem.Ancestors` | item, includeSelf? | ancestors | The chain of parents of a model item, up to its model root |
 | `ModelItem.BoundingBox` | item, ignoreHidden? | boundingBox | The axis-aligned bounding box of a model item, in document units |
 | `ModelItem.Children` | item | children | The direct children of a model item |
-| `ModelItem.ClassInfo` | item | className, classDisplayName | The internal and localized class names of a model item (layer/group/geometry detection) |
 | `ModelItem.CombinedBoundingBox` | items, ignoreHidden? | boundingBox | ONE bounding box fitting all the given items together (per-group when wired a list of groups) |
 | `ModelItem.CommonAncestor` | items | ancestor | The deepest common ancestor of the given items in the selection tree |
 | `ModelItem.Descendants` | item | descendants | All descendants of a model item (the whole subtree below it) |
-| `ModelItem.DisplayName` | item | name | The display name of a model item (falls back to its class name when unnamed) |
-| `ModelItem.GeometryLeaves` | items | leaves | Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want) |
-| `ModelItem.HasGeometry` | item | hasGeometry | True when the model item carries geometry |
 | `ModelItem.IfcGuid` | item | ifcGuid | The 22-character IFC GlobalId of an item: the value of its GlobalId / IfcGUID / IFC GUID / Guid property when it has one (as the Navisworks IFC import creates it), other… |
-| `ModelItem.InstanceGuid` | item | guid | The stable instance GUID of a model item ("" when absent) |
-| `ModelItem.IsHidden` | item | isHidden | True when the model item is currently hidden in the viewport |
+| `ModelItem.Info` | item | name, className, classDisplayName, guid, hasGeometry, isHidden | Everything quick to know about a model item in one node: its display name (the class name when it has none), class name and localized class name (layer/group/geometry de… |
 | `ModelItem.ModelName` | item | modelName | The name of the model/file an item comes from (the root of its selection tree, e.g |
-| `ModelItem.ObjectAncestor` | item | object | Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) |
 | `ModelItem.Parent` | item | parent | The parent of a model item (null for a model root) |
+| `ModelItem.Path` | item, separator? | path | The selection-tree path of an item as one text, from its model file down to the item ("Structure.nwc > Level 1 > Walls > Basic Wall") |
 | `ModelItem.ReferencePoints` | item | bboxCenter, bboxMin, localOrigin | Candidate base/reference points of an item, in world document units |
 | `ModelItem.SourceInfo` | item | sourceFileName, itemType, model | One-node answer to "which file did this element come from and what is it": the source file name, the Item-tab Type (falling back to the item's class name), and the ownin… |
 
@@ -642,7 +637,7 @@
 | `Selection.Current` | resolveTo?, document? | items | The model items currently selected in Navisworks |
 | `Selection.Invert` | document? | items | The items that are NOT in the current selection (Navisworks' own invert, so whole untouched branches come back as one item each) |
 | `Selection.Remove` | items, document? | items | Takes the given items out of the current Navisworks selection and returns what is still selected |
-| `Selection.Resolve` | modelItems, level? | items | Re-selects items at another selection-tree level |
+| `Selection.Resolve` | items, level? | items | Re-selects items at another selection-tree level |
 | `Selection.SelectAll` | document? | items | Selects everything in the Navisworks UI and returns the selected items |
 | `Selection.SetCurrent` | items, document? | items | Replaces the interactive Navisworks selection with the given items |
 
@@ -878,6 +873,13 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Model.FileName` | Model.Info |
 | `Model.RootItem` | Model.Info |
 | `Model.Units` | Model.Info |
+| `ModelItem.ClassInfo` | ModelItem.Info |
+| `ModelItem.DisplayName` | ModelItem.Info |
+| `ModelItem.GeometryLeaves` | Selection.Resolve |
+| `ModelItem.HasGeometry` | ModelItem.Info |
+| `ModelItem.InstanceGuid` | ModelItem.Info |
+| `ModelItem.IsHidden` | ModelItem.Info |
+| `ModelItem.ObjectAncestor` | Selection.Resolve |
 | `Search.ByPropertyCompare` | Search.ByProperty |
 | `Search.ByPropertyContains` | Search.ByProperty |
 | `Search.ByPropertyValue` | Search.ByProperty |

@@ -391,6 +391,121 @@ public class NavisworksModelAuditTests
         AssertOldIdOpensAs("Units.Convert", "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units");
     }
 
+    // ================================================================= NVM-17, NVM-19, NVM-22, NVM-33, NVM-38: item nodes merged
+
+    private const string ItemType = "Autodesk.Navisworks.Api.ModelItem";
+
+    [Fact]
+    public void ModelItemInfoAnswersWhatTheFiveSinglePropertyNodesDid()
+    {
+        var info = Def("ModelItem.Info");
+
+        Assert.Equal(new[] { "name", "className", "classDisplayName", "guid", "hasGeometry", "isHidden" }, info.Outputs.Select(o => o.Name));
+        Assert.Equal(NodeFunction.Info, info.Function);
+        Assert.Equal(new[] { "item" }, info.Inputs.Select(i => i.Name));
+        foreach (var tag in new[] { "displayname", "label", "solid", "mesh", "hidden", "visible", "guid", "identity", "instance", "classname", "kind" })
+        {
+            Assert.Contains(tag, info.SearchTags);
+        }
+
+        Assert.Equal(new[] { "text", "text", "text", "text", "boolean", "boolean" }, Method("ModelItem.Info").Attribute("PortKinds")!.Strings());
+    }
+
+    [Theory]
+    [InlineData("DisplayName", "ModelItem.DisplayName", "ModelItem.Info")]
+    [InlineData("HasGeometry", "ModelItem.HasGeometry", "ModelItem.Info")]
+    [InlineData("ClassInfo", "ModelItem.ClassInfo", "ModelItem.Info")]
+    [InlineData("IsHidden", "ModelItem.IsHidden", "ModelItem.Info")]
+    [InlineData("InstanceGuid", "ModelItem.InstanceGuid", "ModelItem.Info")]
+    [InlineData("GeometryLeaves", "ModelItem.GeometryLeaves", "Selection.Resolve")]
+    [InlineData("ObjectAncestor", "ModelItem.ObjectAncestor", "Selection.Resolve")]
+    public void TheRetiredItemNodesStillLoadAndSayWhatToUse(string method, string name, string replacement)
+    {
+        var parameter = method == "GeometryLeaves" ? "System.Collections.Generic.IEnumerable<" + ItemType + ">" : ItemType;
+        var oldId = "CamelGraph.Navisworks.ModelItemNodes." + method + "@" + parameter;
+
+        Assert.True(Registry.TryGetDefinition(oldId, out var definition), name + " no longer loads from its saved id " + oldId);
+        Assert.True(definition!.IsDeprecated);
+        Assert.Equal(name, definition.Name);
+        Assert.Equal(replacement, Method(name).Attribute("NodeDeprecated")!.Strings().Single());
+        Assert.Contains(replacement, Registry.Definitions.Where(d => !d.IsDeprecated).Select(d => d.Name));
+
+        var graph = new GraphModel();
+        graph.AddNode(new ZeroTouchNodeModel(definition));
+        var serializer = new GraphSerializer(Registry);
+        var loaded = serializer.Deserialize(serializer.Serialize(graph));
+        Assert.Empty(serializer.LoadWarnings);
+        Assert.Equal(oldId, Assert.IsType<ZeroTouchNodeModel>(Assert.Single(loaded.Nodes)).Definition.Id);
+    }
+
+    [Fact]
+    public void GeometryLeavesAndObjectAncestorAnswerThroughTheSameCodeAsSelectionResolve()
+    {
+        var text = FileText("ModelItemNodes.cs");
+
+        Assert.Contains("SelectionLevels.Resolve(items, SelectionLevel.Geometry)", Body(text, "public static List<ModelItem> GeometryLeaves("));
+        Assert.Contains("SelectionLevel.LastObject", Body(text, "public static ModelItem ObjectAncestor("));
+        Assert.DoesNotContain("FindFirstObjectAncestor", Body(text, "public static ModelItem ObjectAncestor("));
+    }
+
+    [Fact]
+    public void SelectionResolveCarriesTheWordsPeopleSearchedTheOldNodesBy()
+    {
+        var resolve = Def("Selection.Resolve");
+
+        foreach (var tag in new[] { "leaves", "flatten", "descendants", "element", "composite", "whole object", "object ancestor" })
+        {
+            Assert.Contains(tag, resolve.SearchTags);
+        }
+
+        Assert.Contains("ModelItem.GeometryLeaves", resolve.Description);
+        Assert.Contains("ModelItem.ObjectAncestor", resolve.Description);
+    }
+
+    [Fact]
+    public void ThePortsOfSelectionResolveAndAncestorPropertyMatchesAreNamedLikeTheirSiblingsAndKeepTheOldNames()
+    {
+        Assert.Equal(new[] { "items", "level" }, Def("Selection.Resolve").Inputs.Select(i => i.Name));
+        AssertPortAlias("Selection.Resolve", "modelItems", "items");
+
+        var matches = Def("ModelItem.AncestorPropertyMatches");
+        Assert.Contains("categoryName", matches.Inputs.Select(i => i.Name));
+        Assert.Contains("propertyName", matches.Inputs.Select(i => i.Name));
+        AssertPortAlias("ModelItem.AncestorPropertyMatches", "category", "categoryName");
+        AssertPortAlias("ModelItem.AncestorPropertyMatches", "property", "propertyName");
+
+        // The property chooser names the category port it reads: it must follow the rename.
+        var choice = Parameter("ModelItem.AncestorPropertyMatches", "propertyName").Attribute("NodePropertyChoice")!;
+        Assert.Equal(new[] { "item", "categoryName" }, choice.Strings());
+    }
+
+    private static void AssertPortAlias(string node, string oldName, string currentName)
+    {
+        var alias = Method(node).Attributes.Where(a => a.Name == "PortAlias" && a.Target == null).Select(a => a.Strings()).SingleOrDefault(v => v[0] == oldName);
+        Assert.True(alias != null && alias[1] == currentName, node + ": no [PortAlias(\"" + oldName + "\", \"" + currentName + "\")]");
+    }
+
+    [Fact]
+    public void ModelItemPathGivesTheTreePathWithAChoosableSeparator()
+    {
+        var path = Def("ModelItem.Path");
+
+        Assert.Equal(NodeFunction.Info, path.Function);
+        Assert.Equal(new[] { "item", "separator" }, path.Inputs.Select(i => i.Name));
+        Assert.Equal(" > ", path.Inputs[1].DefaultValue);
+        Assert.Equal("path", path.Outputs.Single().Name);
+        Assert.Contains("breadcrumb", path.SearchTags);
+        Assert.Contains("NavisValues.ItemPath(NavisValues.RequireItem(item), separator)", FileText("ModelItemNodes.cs"));
+    }
+
+    [Fact]
+    public void TheModelNameAndSourceInfoDescriptionsPointAtEachOther()
+    {
+        Assert.Contains("ModelItem.SourceInfo", Def("ModelItem.ModelName").Description);
+        Assert.Contains("ModelItem.ModelName", Def("ModelItem.SourceInfo").Description);
+        Assert.Contains("ModelItem.GetTransform.origin", Def("ModelItem.ReferencePoints").Description);
+    }
+
     // ----------------------------------------------------------------- helpers
 
     /// <summary>The text of a method from the line with its signature to its closing brace.</summary>

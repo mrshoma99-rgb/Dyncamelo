@@ -39,7 +39,7 @@ Goal: take a column of element GUIDs from an Excel sheet, select those elements 
 
 ## If it does not work
 
-* Every GUID is in `missing`: the sheet and the model use different kinds of identity, or the cells are not plain text. Compare one GUID in the sheet with `ModelItem.InstanceGuid` and `ModelItem.IfcGuid` of an item you picked in Navisworks.
+* Every GUID is in `missing`: the sheet and the model use different kinds of identity, or the cells are not plain text. Compare one GUID in the sheet with the `guid` output of `ModelItem.Info` and with `ModelItem.IfcGuid` of an item you picked in Navisworks.
 * `Table.Column` is red: the column name does not match a header in the sheet. Check the spelling with a `Watch Table` on the table.
 * The run is slow: the node walks every item once. See [Speed up a slow graph](speed-up-slow-graph.md).
 

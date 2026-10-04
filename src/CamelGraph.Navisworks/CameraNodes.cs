@@ -97,7 +97,7 @@ public static class CameraNodes
 
         throw new InvalidOperationException(
             "The items carry no geometry to zoom to — they are container/grouping nodes. " +
-            "Wire geometry-bearing items (ModelItem.GeometryLeaves resolves containers to theirs).");
+            "Wire geometry-bearing items (Selection.Resolve with level Geometry resolves containers to theirs).");
     }
 
     /// <summary>Switches the camera between perspective and orthographic projection.</summary>

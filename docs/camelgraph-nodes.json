@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 574,
  "categories": [
   {
    "name": "Annotation",
@@ -116,7 +116,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 20
+   "count": 15
   },
   {
    "name": "Navisworks.Properties",
@@ -15219,12 +15219,12 @@
      "description": "The model item whose ancestor chain to test."
     },
     {
-     "name": "category",
+     "name": "categoryName",
      "type": "string",
      "description": "The property category (tab) name, as the Properties window shows it (e.g. \"Element\", \"Item\")."
     },
     {
-     "name": "property",
+     "name": "propertyName",
      "type": "string",
      "description": "The property name inside that category (e.g. \"Name\", \"Type\", \"Source File\")."
     },
@@ -15370,40 +15370,6 @@
    "returns": ""
   },
   {
-   "name": "ModelItem.ClassInfo",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.ClassInfo@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "The internal and localized class names of a model item (layer/group/geometry detection).",
-   "tags": [
-    "item",
-    "class",
-    "classname",
-    "type",
-    "kind"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "className",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "classDisplayName",
-     "type": "string",
-     "description": ""
-    }
-   ],
-   "returns": "The internal and localized class names (layer/group/geometry detection)."
-  },
-  {
    "name": "ModelItem.CombinedBoundingBox",
    "id": "CamelGraph.Navisworks.ModelItemNodes.CombinedBoundingBox@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,bool",
    "assembly": "CamelGraph.Navisworks",
@@ -15507,92 +15473,6 @@
    "returns": ""
   },
   {
-   "name": "ModelItem.DisplayName",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.DisplayName@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "The display name of a model item (falls back to its class name when unnamed).",
-   "tags": [
-    "item",
-    "name",
-    "displayname",
-    "label"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "name",
-     "type": "string",
-     "description": "The item's display name; falls back to its class display name when unnamed."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.GeometryLeaves",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.GeometryLeaves@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want).",
-   "tags": [
-    "item",
-    "geometry",
-    "leaves",
-    "flatten",
-    "descendants"
-   ],
-   "inputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The model items to flatten.",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "leaves",
-     "type": "ModelItem[]",
-     "description": "The unique geometry leaves — the items QTO, coloring and clash selections actually want."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.HasGeometry",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.HasGeometry@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "True when the model item carries geometry.",
-   "tags": [
-    "item",
-    "geometry",
-    "solid",
-    "mesh"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "hasGeometry",
-     "type": "boolean",
-     "description": "True when the item has geometry."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "ModelItem.IfcGuid",
    "id": "CamelGraph.Navisworks.ModelItemIfcNodes.IfcGuid@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
@@ -15625,13 +15505,27 @@
    "returns": ""
   },
   {
-   "name": "ModelItem.InstanceGuid",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.InstanceGuid@Autodesk.Navisworks.Api.ModelItem",
+   "name": "ModelItem.Info",
+   "id": "CamelGraph.Navisworks.ModelItemNodes.Info@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The stable instance GUID of a model item (\"\" when absent) — cross-run identity for reports.",
+   "description": "Everything quick to know about a model item in one node: its display name (the class name when it has none), class name and localized class name (layer/group/geometry detection), instance GUID (\"\" when absent, a stable cross-run identity for reports), whether it carries geometry and whether it is hidden right now. Use the outputs you need; replaces the single-property nodes ModelItem.DisplayName, ClassInfo, HasGeometry, IsHidden and InstanceGuid. The IFC GlobalId (ModelItem.IfcGuid), the source file (ModelItem.SourceInfo) and the tree path (ModelItem.Path) are separate nodes because they read more.",
    "tags": [
     "item",
+    "info",
+    "name",
+    "displayname",
+    "label",
+    "class",
+    "classname",
+    "type",
+    "kind",
+    "geometry",
+    "solid",
+    "mesh",
+    "hidden",
+    "visible",
+    "state",
     "guid",
     "id",
     "identity",
@@ -15641,52 +15535,49 @@
     {
      "name": "item",
      "type": "ModelItem",
-     "description": "The model item."
+     "description": "The model item. Wire a list and lacing gives one result per item (each output becomes a list)."
     }
    ],
    "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "className",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "classDisplayName",
+     "type": "string",
+     "description": ""
+    },
     {
      "name": "guid",
      "type": "string",
-     "description": "The GUID string, or \"\" when the item has none — cross-run identity for reports."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.IsHidden",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.IsHidden@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "True when the model item is currently hidden in the viewport.",
-   "tags": [
-    "item",
-    "hidden",
-    "visible",
-    "state"
-   ],
-   "inputs": [
+     "description": ""
+    },
     {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
+     "name": "hasGeometry",
+     "type": "boolean",
+     "description": ""
+    },
     {
      "name": "isHidden",
      "type": "boolean",
-     "description": "True when the item is hidden."
+     "description": ""
     }
    ],
-   "returns": ""
+   "returns": "The display name (the class name when unnamed), the internal and localized class names, the instance GUID text (\"\" when absent), whether the item carries geometry and whether it is hidden."
   },
   {
    "name": "ModelItem.ModelName",
    "id": "CamelGraph.Navisworks.ModelItemNodes.ModelName@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model.",
+   "description": "The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model. ModelItem.SourceInfo answers the same question with more detail (the source file name, the item type and the owning model); Model.Statistics labels a model without a name by its file name, this node gives an empty text.",
    "tags": [
     "item",
     "model",
@@ -15708,38 +15599,6 @@
      "name": "modelName",
      "type": "string",
      "description": "The root ancestor's display name, e.g. \"Structure.nwc\"."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.ObjectAncestor",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.ObjectAncestor@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) — the item you usually want to name, colour or tag. Returns the item itself when it is already an object.",
-   "tags": [
-    "item",
-    "object",
-    "element",
-    "ancestor",
-    "parent",
-    "composite",
-    "tree",
-    "up"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item (often a geometry leaf deep in the tree)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "object",
-     "type": "ModelItem",
-     "description": "The nearest ancestor flagged as a composite object (the \"element\" in the tree); the item itself when it is already an object."
     }
    ],
    "returns": ""
@@ -15774,11 +15633,49 @@
    "returns": ""
   },
   {
+   "name": "ModelItem.Path",
+   "id": "CamelGraph.Navisworks.ModelItemNodes.Path@Autodesk.Navisworks.Api.ModelItem,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.ModelItem",
+   "description": "The selection-tree path of an item as one text, from its model file down to the item (\"Structure.nwc > Level 1 > Walls > Basic Wall\") — a label for BCF titles, clash names and reports. The same text is the @Path column of Properties.ToTable. ModelItem.Info gives only the item's own name.",
+   "tags": [
+    "item",
+    "path",
+    "breadcrumb",
+    "tree",
+    "hierarchy",
+    "location",
+    "label",
+    "full name"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item. Wire a list and lacing gives one path per item."
+    },
+    {
+     "name": "separator",
+     "type": "string",
+     "description": "The text between the names (default \" > \").",
+     "default": "\" > \""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The names from the model file down to the item, joined by the separator; an unnamed level shows its class name and a level with neither is left out."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ModelItem.ReferencePoints",
    "id": "CamelGraph.Navisworks.ModelItemInfoNodes.ReferencePoints@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value.",
+   "description": "Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value. ModelItem.GetTransform.origin is a third base point: the translation of the item's active transform, which follows ModelItem.Translate and the other transform nodes.",
    "tags": [
     "item",
     "reference",
@@ -15820,7 +15717,7 @@
    "id": "CamelGraph.Navisworks.ModelItemInfoNodes.SourceInfo@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model.",
+   "description": "One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model. ModelItem.ModelName is the short form (the model root's name only).",
    "tags": [
     "item",
     "source",
@@ -16821,7 +16718,7 @@
    "id": "CamelGraph.Navisworks.SelectionLevelNodes.Resolve@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Selection",
-   "description": "Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection).",
+   "description": "Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection). Level Geometry flattens items to their unique geometry-bearing descendants (the items QTO, colouring and clash selections want; it was ModelItem.GeometryLeaves). Level LastObject walks up from a geometry leaf to the whole object it belongs to, the item you usually want to name, colour or tag (it was ModelItem.ObjectAncestor). The result has no duplicates and keeps the input order; wire a list of groups and lacing gives one resolved list per group.",
    "tags": [
     "selection",
     "resolve",
@@ -16834,11 +16731,19 @@
     "last unique",
     "geometry",
     "parent",
-    "ancestor"
+    "ancestor",
+    "leaves",
+    "flatten",
+    "descendants",
+    "object ancestor",
+    "element",
+    "composite",
+    "whole object",
+    "geometry leaves"
    ],
    "inputs": [
     {
-     "name": "modelItems",
+     "name": "items",
      "type": "ModelItem[]",
      "description": "The model items to resolve.",
      "multiInput": true
