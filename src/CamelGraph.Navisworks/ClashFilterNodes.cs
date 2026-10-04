@@ -6,6 +6,7 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Coordination;
 using CamelGraph.Nodes.Text;
 
 namespace CamelGraph.Navisworks;
@@ -43,7 +44,7 @@ public static class ClashFilterNodes
     [NodeSearchTags("clash", "filter", "property", "category", "discipline", "pair", "pipe", "wall", "rule", "semantic")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByItemProperty(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         [NodeTabChoice(NodeDataSource.Selection, IncludeAncestors = true)] string category,
         [NodePropertyChoice(NodeDataSource.Selection, "category", IncludeAncestors = true)] string property,
         string value1,
@@ -109,7 +110,7 @@ public static class ClashFilterNodes
     [NodeSearchTags("clash", "filter", "set", "selection", "search", "scope", "ignore", "exclude", "membership")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterBySet(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         object set,
         [NodeChoices("either", "both", "item1", "item2")]
         string which = "either",
@@ -177,7 +178,7 @@ public static class ClashFilterNodes
     [NodeSearchTags("clash", "filter", "depth", "penetration", "distance", "grazing", "significant", "units", "tolerance")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByDepth(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         double minDepth = 0.0,
         double maxDepth = double.PositiveInfinity,
         [NodeChoicesFromEnum(typeof(Units), "document")]
@@ -211,34 +212,46 @@ public static class ClashFilterNodes
     }
 
     /// <summary>Removes duplicate clashes: one representative per unique item pair.</summary>
-    /// <param name="results">The clash results — from one test, or several (mirrored A-vs-B / B-vs-A test pairs dedupe too).</param>
-    /// <returns>The first result of each unique unordered item pair, and the duplicates that were dropped.</returns>
+    /// <param name="results">The clash results — from one test, or from several tests at once (a list of lists is flattened, and several wires are merged): mirrored A-vs-B / B-vs-A test pairs dedupe across the tests.</param>
+    /// <returns>The first result of each unique unordered item pair, and the duplicates that were dropped (both flat lists).</returns>
     [NodeName("Clash.Deduplicate")]
     [NodeCategory("Navisworks.Clash.Filter")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeAliases("CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>")]
     [NodeDescription(
         "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or " +
-        "mirrored across an A-vs-B and B-vs-A test matrix, count once. Pairs are unordered and matched " +
-        "by stable item identity (InstanceGuid, else tree path); the first result in input order is the " +
-        "representative, the rest come out on duplicates. 400 raw results, 60 real issues.")]
+        "mirrored across an A-vs-B and B-vs-A test matrix, count once. Wire the results of ONE test, or of several tests at " +
+        "once (the list of lists from Clash.Tests and ClashTest.Results, or several wires): everything is flattened first, so " +
+        "the pair is recognised across tests and both outputs are flat lists. Pairs are unordered; an element is recognised by " +
+        "its InstanceGuid, or, when the source file has none (DWG, NWC), by the scene node itself, so two sibling elements with " +
+        "the same name are never taken for one. The first result in input order is the representative, the rest come out on " +
+        "duplicates. 400 raw results, 60 real issues.")]
     [NodeSearchTags("clash", "deduplicate", "duplicates", "unique", "pair", "mirror", "matrix", "noise", "merge")]
     [MultiReturn("results", "duplicates")]
     [PortKinds("clash*", "clash*")]
-    public static Dictionary<string, object?> Deduplicate(IEnumerable<ClashResult> results)
+    public static Dictionary<string, object?> Deduplicate([MultiInput][PortKinds("clash*")] IEnumerable<object> results)
     {
-        RequireResults(results);
+        if (results == null)
+        {
+            throw new ArgumentNullException(nameof(results), "No clash results provided.");
+        }
+
+        var unpacked = ClashInputs.Flatten<ClashResult>(results);
+        if (unpacked.FirstWrong != null)
+        {
+            throw new ArgumentException(
+                "Clash.Deduplicate takes clash results, and the list holds something else. Wire results from " +
+                "ClashTest.Results (or a filter of them).", nameof(results));
+        }
+
+        var keyer = new ModelItemKeyer();
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var kept = new List<ClashResult>();
         var duplicates = new List<ClashResult>();
-        foreach (var result in results)
+        foreach (var result in unpacked.Items)
         {
-            if (result == null)
-            {
-                continue;
-            }
-
-            var id1 = NavisValues.ItemIdentity(result.Item1);
-            var id2 = NavisValues.ItemIdentity(result.Item2);
+            var id1 = keyer.Key(result.Item1);
+            var id2 = keyer.Key(result.Item2);
             if (id1.Length == 0 && id2.Length == 0)
             {
                 kept.Add(result); // unidentifiable items — never merge blindly

@@ -239,4 +239,87 @@ public class ClashAuditSourceTests
         var header = Header("ClashTriageNodes.cs", "Clash.Status") + Header("ClashTriageNodes.cs", "Clash.Statuses");
         Assert.DoesNotContain("ResultsByStatus", header);
     }
+
+    // ----------------------------------------------------------------------------------------------- NVC-15, NVC-17
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "public static List<ClashResult> FilterByStatus(")]
+    [InlineData("ClashNodes.cs", "public static List<ClashResult> FilterByAngle(")]
+    [InlineData("ClashFilterNodes.cs", "public static List<ClashResult> FilterByItemProperty(")]
+    [InlineData("ClashFilterNodes.cs", "public static List<ClashResult> FilterBySet(")]
+    [InlineData("ClashFilterNodes.cs", "public static List<ClashResult> FilterByDepth(")]
+    [InlineData("ClashTriageNodes.cs", "public static List<ClashResult> FilterByOrientation(")]
+    [InlineData("ClashTriageNodes.cs", "public static Dictionary<string, object?> GroupResults(")]
+    [InlineData("ClashTriageNodes.cs", "public static List<ModelItem> Focus(")]
+    public void TheResultListNodesTakeSeveralWires(string file, string signature)
+    {
+        Assert.Contains("[MultiInput] IEnumerable<ClashResult> results", Method(Source(file), signature));
+    }
+
+    [Fact]
+    public void DeduplicateWorksAcrossTestsAndKeepsOldGraphsLoading()
+    {
+        var source = Source("ClashFilterNodes.cs");
+        var body = Method(source, "public static Dictionary<string, object?> Deduplicate(");
+
+        // One flat list whatever the nesting: the mirrored pair of two tests is seen together.
+        Assert.Contains("[MultiInput][PortKinds(\"clash*\")] IEnumerable<object> results", body);
+        Assert.Contains("ClashInputs.Flatten<ClashResult>(results)", body);
+
+        // An element is recognised by guid or by the scene node, not by the display-name path two siblings can share.
+        Assert.Contains("new ModelItemKeyer()", body);
+        Assert.DoesNotContain("NavisValues.ItemIdentity", body);
+        var keyer = Source("Internal", "ModelItemKeyer.cs");
+        Assert.Contains("IsSameInstance(", keyer);
+        Assert.Contains("InstanceGuid", keyer);
+
+        var header = source.Substring(source.LastIndexOf("[NodeName(\"Clash.Deduplicate\")]", System.StringComparison.Ordinal));
+        header = header.Substring(0, header.IndexOf("public static", System.StringComparison.Ordinal));
+        Assert.Contains(
+            "[NodeAliases(\"CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>\")]",
+            header);
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-16, NVC-34
+
+    [Fact]
+    public void OnlyAnUnwiredTestsInputMeansEveryTest()
+    {
+        var summary = Method(Source("ClashEditNodes.cs"), "public static Dictionary<string, object?> SummaryTable(");
+        var snapshot = Method(Source("ClashDeltaNodes.cs"), "public static Dictionary<string, object?> SnapshotToFile(");
+
+        Assert.Contains("ClashInputs.SelectedOrAll<ClashTest>(", summary);
+        Assert.Contains("ClashInputs.SelectedOrAll<ClashTest>(", snapshot);
+
+        // The old "an empty list also means every test" fallback is gone from both.
+        Assert.DoesNotContain("testList.Count == 0)\n        {\n            testList = NavisValues", summary);
+        Assert.DoesNotContain("testList = NavisValues.FlattenSavedItems", snapshot.Replace("tests, () => NavisValues.FlattenSavedItems", string.Empty));
+    }
+
+    [Fact]
+    public void TheSummaryAlsoComesOutAsATable()
+    {
+        var source = Source("ClashEditNodes.cs");
+        var body = Method(source, "public static Dictionary<string, object?> SummaryTable(");
+
+        Assert.Contains("[MultiReturn(\"rows\", \"headers\", \"table\")]", source);
+        Assert.Contains("[\"table\"] = new CamelGraphTable(headers, rows)", body);
+        Assert.Contains("[\"rows\"] = rows", body);
+        Assert.Contains("[\"headers\"] = headers", body);
+    }
+
+    [Fact]
+    public void AnEmptyResultListIsAnEmptyAnswerForGroupingAndFocus()
+    {
+        var triage = Source("ClashTriageNodes.cs");
+
+        Assert.DoesNotContain("The clash results list is empty", triage);
+        var group = Method(triage, "public static Dictionary<string, object?> GroupResults(");
+        Assert.Contains("NodeWarnings.Add(\"No clash results were given", group);
+        Assert.Contains("[\"added\"] = 0", group);
+
+        var focus = Method(triage, "public static List<ModelItem> Focus(");
+        Assert.Contains("NodeWarnings.Add(\"No clash results were given, so the view was left as it is.\")", focus);
+        Assert.Contains("return new List<ModelItem>();", focus);
+    }
 }

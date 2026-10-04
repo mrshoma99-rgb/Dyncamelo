@@ -264,7 +264,9 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 candidates.Any(m =>
                     m.ParameterNames.SequenceEqual(inputNames) &&
-                    m.OutputNames.SequenceEqual(outputNames) &&
+                    // A node may gain outputs at the end (a new output never breaks a wire saved without it); a saved
+                    // output that was renamed or removed still fails here.
+                    m.OutputNames.Take(outputNames.Count).SequenceEqual(outputNames) &&
                     InputDefaultsAreConsistent(m, inputPorts)),
                 label + ": serialized ports [" + string.Join(", ", inputNames) + "] -> [" +
                 string.Join(", ", outputNames) + "] do not match the source signature of '" +

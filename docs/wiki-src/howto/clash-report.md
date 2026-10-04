@@ -19,7 +19,7 @@ Goal: write an HTML page that shows, for each clash test, how many results are N
 ## Steps
 
 1. Add `Clash.Tests` (*Navisworks ▸ Clash ▸ Tests*). It gives every clash test in the document, including those inside folders.
-2. Add `Clash.SummaryTable` (*Navisworks ▸ Clash ▸ Report*). Wire `tests` from `Clash.Tests` into its `tests`. It makes one row for each test with the columns Test, Total and one for each status (New, Active, Reviewed, Approved, Resolved). Leave `tests` unwired to cover every test without `Clash.Tests`.
+2. Add `Clash.SummaryTable` (*Navisworks ▸ Clash ▸ Report*). Wire `tests` from `Clash.Tests` into its `tests`. It makes one row for each test with the columns Test, Total and one for each status (New, Active, Reviewed, Approved, Resolved). Leave `tests` unwired to cover every test without `Clash.Tests`. An empty list wired into `tests` (a filter that found no test) gives a table with the headers and no rows, not a report on every test. The node also has a `table` output that goes straight into the Table, CSV and Excel nodes, so `Table.FromRows` is only needed when you start from `rows` and `headers`.
 3. Add `Table.FromRows` (*Table*). Wire `rows` into `rows` and `headers` into `headers`. The summary node gives rows and headers separately, and this node joins them into one table.
 4. Add `Report.Html` (*Report*). Wire the table into `sections`. Type a title, such as `Clash summary`, into `title`, and a line such as the model name and date into `subtitle`.
 5. Add `Text.WriteToFile` (*File*). Wire `html` into `text`. Type a **full path** into `path`, for example `C:\Reports\clash-summary.html`.

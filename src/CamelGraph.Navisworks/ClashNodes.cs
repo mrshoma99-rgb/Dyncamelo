@@ -202,7 +202,7 @@ public static class ClashNodes
     [NodeSearchTags("clash", "filter", "status", "statuses", "new", "active", "approved", "resolved", "triage", "multiple")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByStatus(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         [NodeChoices("New", "Active", "Reviewed", "Approved", "Resolved")]
         string status)
     {
@@ -236,7 +236,7 @@ public static class ClashNodes
     [NodeSearchTags("clash", "filter", "angle", "perpendicular", "parallel", "crossing", "degrees")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByAngle(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         [NodeRange(0, 90, Unit = "°")] double minDegrees = 0.0,
         [NodeRange(0, 90, Unit = "°")] double maxDegrees = 90.0)
     {

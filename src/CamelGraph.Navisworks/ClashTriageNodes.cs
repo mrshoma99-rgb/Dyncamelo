@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Coordination;
@@ -35,12 +36,13 @@ public static class ClashTriageNodes
         "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping " +
         "rule, not a built-in one: filter results any way you like, then group what came out. Results " +
         "already in other groups are left alone (skipped) unless moveExisting is true, which pulls them " +
-        "into this group. An existing same-named group is extended; re-runs are clean.")]
+        "into this group. An existing same-named group is extended; re-runs are clean. An empty list (a filter that found " +
+        "nothing) changes nothing and says so; several wires are merged into one list.")]
     [NodeSearchTags("clash", "group", "results", "move", "triage", "bucket", "organize")]
     [MultiReturn("test", "group", "added", "moved", "skipped")]
     [PortKinds("clash", "clash", "integer", "integer", "integer")]
     public static Dictionary<string, object?> GroupResults(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         string groupName,
         bool moveExisting = false,
         Document? document = null)
@@ -51,6 +53,20 @@ public static class ClashTriageNodes
         }
 
         var resultList = MaterializeResults(results);
+        if (resultList.Count == 0)
+        {
+            // A filter that found nothing is an answer, not a mistake: nothing to group.
+            NodeWarnings.Add("No clash results were given, so no group '" + groupName + "' was made or changed.");
+            return new Dictionary<string, object?>
+            {
+                ["test"] = null,
+                ["group"] = null,
+                ["added"] = 0,
+                ["moved"] = 0,
+                ["skipped"] = 0,
+            };
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
@@ -395,7 +411,7 @@ public static class ClashTriageNodes
     [NodeSearchTags("clash", "filter", "orientation", "wall", "floor", "slab", "pipe", "shape", "crossing")]
     [return: NodeName("results")]
     public static List<ClashResult> FilterByOrientation(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         [NodeChoices("any", "slab", "wall", "riser", "run", "block")]
         string shape1 = "any",
         [NodeChoices("any", "slab", "wall", "riser", "run", "block")]
@@ -535,11 +551,12 @@ public static class ClashTriageNodes
         "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides " +
         "everything else (isolate), zooms the camera to the clashing pair, and optionally selects the " +
         "elements. Wire one result, or a list to frame a whole group together. Follow with " +
-        "Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back.")]
+        "Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back. An empty list leaves the view " +
+        "as it is and says so.")]
     [NodeSearchTags("clash", "focus", "isolate", "zoom", "view", "show", "frame", "select")]
     [return: NodeName("items")]
     public static List<ModelItem> Focus(
-        IEnumerable<ClashResult> results,
+        [MultiInput] IEnumerable<ClashResult> results,
         bool isolate = true,
         bool zoom = true,
         bool select = false,
@@ -547,6 +564,13 @@ public static class ClashTriageNodes
         Document? document = null)
     {
         var resultList = MaterializeResults(results);
+        if (resultList.Count == 0)
+        {
+            // Nothing to focus on: leave the view as it is (isolating "nothing" would hide the whole model).
+            NodeWarnings.Add("No clash results were given, so the view was left as it is.");
+            return new List<ModelItem>();
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
         var items = new List<ModelItem>();
         var seen = new HashSet<ModelItem>(ModelItemIdentityComparer.Instance);
@@ -669,11 +693,6 @@ public static class ClashTriageNodes
             {
                 list.Add(result);
             }
-        }
-
-        if (list.Count == 0)
-        {
-            throw new ArgumentException("The clash results list is empty.", nameof(results));
         }
 
         return list;

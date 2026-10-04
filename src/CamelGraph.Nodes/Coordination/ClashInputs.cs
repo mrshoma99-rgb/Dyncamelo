@@ -59,6 +59,41 @@ public static class ClashInputs
         return new ClashInputList<T>(items, wasSequence, nulls, firstWrong);
     }
 
+    /// <summary>
+    /// The tests (or other things) a node works on when it has an optional list input meaning "these, or all of them":
+    /// an input nobody wired (null) means all of them; a wired list means exactly what is in it, so a filter that found nothing
+    /// ("no New clashes this week") gives an empty list and the node reports on nothing, not on everything. Empty entries are left out.
+    /// </summary>
+    /// <typeparam name="T">The kind of thing (clash test).</typeparam>
+    /// <param name="wired">The wired list; null when the input is unwired.</param>
+    /// <param name="all">Reads every one, called only when nothing is wired.</param>
+    /// <returns>The things to work on.</returns>
+    public static List<T> SelectedOrAll<T>(IEnumerable<T?>? wired, Func<IEnumerable<T>> all)
+        where T : class
+    {
+        if (all == null)
+        {
+            throw new ArgumentNullException(nameof(all));
+        }
+
+        var picked = new List<T>();
+        if (wired == null)
+        {
+            picked.AddRange(all());
+            return picked;
+        }
+
+        foreach (var item in wired)
+        {
+            if (item != null)
+            {
+                picked.Add(item);
+            }
+        }
+
+        return picked;
+    }
+
     private static void Collect<T>(object? value, List<T> items, ref int nulls, ref object? firstWrong)
         where T : class
     {

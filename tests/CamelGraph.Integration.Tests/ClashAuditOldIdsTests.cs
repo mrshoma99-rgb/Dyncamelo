@@ -35,6 +35,7 @@ public class ClashAuditOldIdsTests
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.SetStatus@" + Result + ",string," + Doc, "ClashResult.SetStatus", "status", "Approved" };
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.Assign@" + Result + ",string," + Doc, "ClashResult.Assign", "assignedTo", "MEP" };
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.SetDescription@" + Result + ",string," + Doc, "ClashResult.SetDescription", "description", "Check with the structural engineer" };
+        yield return new object[] { "CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<" + Result + ">", "Clash.Deduplicate", "", "" };
     }
 
     [Theory]
@@ -49,7 +50,10 @@ public class ClashAuditOldIdsTests
         // Write the graph with the current node, then change its id to the earlier one, the way an older version wrote it.
         var graph = new GraphModel();
         var node = Pipeline.ZeroTouch(registry, name);
-        node.InPorts.Single(p => p.Name == port).SetUserValue(value);
+        if (port.Length > 0)
+        {
+            node.InPorts.Single(p => p.Name == port).SetUserValue(value);
+        }
         graph.AddNode(node);
         var serializer = new GraphSerializer(registry);
         var json = serializer.Serialize(graph).Replace(definition.Id, oldId);
@@ -61,6 +65,32 @@ public class ClashAuditOldIdsTests
         var back = Assert.Single(loaded.Nodes);
         Assert.IsNotType<MissingNodeModel>(back);
         Assert.Equal(definition.Id, Assert.IsType<ZeroTouchNodeModel>(back).Definition.Id);
-        Assert.Equal(value, back.InPorts.Single(p => p.Name == port).UserValue);
+        if (port.Length > 0)
+        {
+            Assert.Equal(value, back.InPorts.Single(p => p.Name == port).UserValue);
+        }
+    }
+
+    [Fact]
+    public void AGraphSavedBeforeTheSummaryGainedItsTableOutputStillLoadsWithAllThreeOutputs()
+    {
+        var registry = Rig.Value;
+        var graph = new GraphModel();
+        graph.AddNode(Pipeline.ZeroTouch(registry, "Clash.SummaryTable"));
+        var serializer = new GraphSerializer(registry);
+
+        // The file as an older version wrote it: outputs rows and headers only.
+        var file = Newtonsoft.Json.Linq.JObject.Parse(serializer.Serialize(graph));
+        var outputs = (Newtonsoft.Json.Linq.JArray)file["Nodes"]![0]!["OutputPorts"]!;
+        var table = outputs.Single(o => (string?)o["Name"] == "table");
+        table.Remove();
+        Assert.Equal(new[] { "rows", "headers" }, outputs.Select(o => (string?)o["Name"]));
+
+        var loaded = serializer.Deserialize(file.ToString());
+
+        Assert.Empty(serializer.LoadWarnings);
+        var back = Assert.Single(loaded.Nodes);
+        Assert.IsNotType<MissingNodeModel>(back);
+        Assert.Equal(new[] { "rows", "headers", "table" }, back.OutPorts.Select(p => p.Name));
     }
 }

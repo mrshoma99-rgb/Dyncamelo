@@ -467,7 +467,7 @@
 |---|---|---|---|
 | `Clash.CompareSnapshots` | oldPath, newPath | newResults, resolved, persisting, counts | Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) |
 | `Clash.SnapshotToFile` | filePath, tests?, document? | filePath, resultCount | Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON |
-| `Clash.SummaryTable` | tests?, document? | rows, headers | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
+| `Clash.SummaryTable` | tests?, document? | rows, headers, table | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
 
 ## Navisworks.Clash.Results
 

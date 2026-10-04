@@ -4,6 +4,8 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes;
+using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks;
 
@@ -200,69 +202,50 @@ public static class ClashEditNodes
     }
 
     /// <summary>Per-test result counts by status.</summary>
-    /// <param name="tests">The tests to summarize (empty/unwired = every test in the document).</param>
+    /// <param name="tests">The tests to summarize. Leave unwired for every test in the document; a wired list means exactly those tests, and an empty list gives a table without rows.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile.</returns>
+    /// <returns>Rows (one per test), headers, and the same as one table — wire the table straight into Table, CSV or Excel nodes.</returns>
     [NodeName("Clash.SummaryTable")]
     [NodeCategory("Navisworks.Clash.Report")]
-    [NodeDescription("Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.")]
+    [NodeDescription(
+        "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix. " +
+        "The table output goes straight into the Table nodes, Table.ToCsvFile and Excel.WriteTable; rows and headers are the " +
+        "same data as plain lists. Leave tests unwired for every test in the document; a wired list means exactly those tests, " +
+        "so an empty list (a filter that found no test) gives a table with the headers and no rows, not a report on everything.")]
     [NodeSearchTags("clash", "summary", "table", "matrix", "counts", "report", "excel")]
-    [MultiReturn("rows", "headers")]
-    [PortKinds("", "text*")]
+    [MultiReturn("rows", "headers", "table")]
+    [PortKinds("", "text*", "data")]
     public static Dictionary<string, object?> SummaryTable(
-        IEnumerable<ClashTest>? tests = null,
+        [MultiInput] IEnumerable<ClashTest>? tests = null,
         Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
-        var testList = new List<ClashTest>();
-        if (tests != null)
-        {
-            foreach (var test in tests)
-            {
-                if (test != null)
-                {
-                    testList.Add(test);
-                }
-            }
-        }
-
-        if (testList.Count == 0)
-        {
-            testList = NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests);
-        }
+        var testList = ClashInputs.SelectedOrAll<ClashTest>(
+            tests, () => NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests));
 
         var statusNames = Enum.GetNames(typeof(ClashResultStatus));
-        var headers = new List<string> { "Test", "Total" };
-        headers.AddRange(statusNames);
+        var headers = ClashSummary.Headers(statusNames);
 
         var rows = new List<List<object?>>();
         foreach (var test in testList)
         {
             var results = ClashHelpers.FlattenResults(test);
-            var countsByStatus = new Dictionary<string, int>(StringComparer.Ordinal);
+            var statuses = new List<string>(results.Count);
             foreach (var result in results)
             {
-                var status = result.Status.ToString();
-                countsByStatus.TryGetValue(status, out var count);
-                countsByStatus[status] = count + 1;
+                statuses.Add(result.Status.ToString());
             }
 
-            var row = new List<object?> { test.DisplayName, results.Count };
-            foreach (var statusName in statusNames)
-            {
-                countsByStatus.TryGetValue(statusName, out var count);
-                row.Add(count);
-            }
-
-            rows.Add(row);
+            rows.Add(ClashSummary.Row(test.DisplayName, statuses, statusNames));
         }
 
         return new Dictionary<string, object?>
         {
             ["rows"] = rows,
             ["headers"] = headers,
+            ["table"] = new CamelGraphTable(headers, rows),
         };
     }
 

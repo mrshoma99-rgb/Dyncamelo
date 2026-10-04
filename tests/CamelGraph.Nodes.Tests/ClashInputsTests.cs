@@ -112,4 +112,42 @@ public class ClashInputsTests
         Assert.Same(a, Assert.Single(unpacked.Items));
         Assert.Equal(42, unpacked.FirstWrong);
     }
+
+    // ------------------------------------------------------------------------ SelectedOrAll (NVC-16)
+
+    [Fact]
+    public void AnUnwiredTestsInputMeansEveryTest()
+    {
+        var all = new[] { new Result("A"), new Result("B") };
+
+        var picked = ClashInputs.SelectedOrAll<Result>(null, () => all);
+
+        Assert.Equal(all, picked);
+    }
+
+    [Fact]
+    public void AnEmptyWiredListMeansNoTestsNotEveryTest()
+    {
+        var called = false;
+
+        var picked = ClashInputs.SelectedOrAll<Result>(new List<Result?>(), () =>
+        {
+            called = true;
+            return new[] { new Result("A") };
+        });
+
+        Assert.Empty(picked);
+        Assert.False(called);
+    }
+
+    [Fact]
+    public void AWiredListMeansExactlyThoseTestsWithoutTheEmptyEntries()
+    {
+        var a = new Result("A");
+        var c = new Result("C");
+
+        var picked = ClashInputs.SelectedOrAll<Result>(new List<Result?> { a, null, c }, () => new[] { new Result("Z") });
+
+        Assert.Equal(new[] { a, c }, picked);
+    }
 }

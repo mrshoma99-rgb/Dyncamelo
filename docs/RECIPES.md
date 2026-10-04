@@ -11,7 +11,7 @@ Two ideas make most of these short:
 
 **Clash matrix from selection sets.** `SelectionSets.All` (twice, filtered by name with `List.FilterByValue`) → `ClashTest.Create` with *cross product* lacing: one test per pair of sets.
 
-**Triage and report.** `Clash.Tests` → `Clash.SummaryTable` (clash counts per test and status, as `rows` and `headers`) → `Table.FromRows` → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the test with the most clashes first. For one test floor by floor, take it with `List.GetItemAtIndex` and use `Clash.GroupResultsByLevel` (it takes the test, your level names and their elevations); `ClashTest.Results` and `Clash.FilterByStatus` work on the results of a test.
+**Triage and report.** `Clash.Tests` → `Clash.SummaryTable` (clash counts per test and status, as `rows` and `headers`, or as one `table`) → `Table.FromRows` (not needed with the `table` output) → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the test with the most clashes first. For one test floor by floor, take it with `List.GetItemAtIndex` and use `Clash.GroupResultsByLevel` (it takes the test, your level names and their elevations); `ClashTest.Results` and `Clash.FilterByStatus` work on the results of a test.
 
 **Keep a history.** `DateTime.Now` → `DateTime.Format` for the file name; `Clash.SnapshotToFile` each week, `Clash.CompareSnapshots` against last week's file; `CSV.AppendToFile` adds one row of totals per run instead of overwriting.
 
