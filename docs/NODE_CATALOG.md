@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**578 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**582 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -10,7 +10,7 @@
 | [Color](#color) | 18 |
 | [Data](#data) | 4 |
 | [DateTime](#datetime) | 19 |
-| [Dictionary](#dictionary) | 13 |
+| [Dictionary](#dictionary) | 17 |
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
 | [Geometry](#geometry) | 43 |
@@ -89,7 +89,7 @@
 | `JSON.Parse` | json | value | Parses a JSON string into dictionaries, lists and values |
 | `JSON.Stringify` | value, indented? | json | Serializes any value to a JSON string |
 | `Snapshot.Diff` | oldValue, newValue | addedKeys, removedKeys, changedKeys | Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality |
-| `XML.Parse` | xml | value | Parses XML into dictionaries, lists and strings (attributes as "@name", repeated elements as lists, mixed text as "#text") |
+| `XML.Parse` | xml, listElements? | value | Parses XML into dictionaries, lists and strings (attributes as "@name", repeated elements as lists, mixed text as "#text") |
 
 ## DateTime
 
@@ -127,9 +127,13 @@
 | `Dictionary.Keys` | dictionary | keys | Returns all keys of a dictionary as a list |
 | `Dictionary.Merge` | dictionaries | dictionary | Combines several dictionaries into a new one |
 | `Dictionary.RemoveKey` | dictionary, key | dictionary | Returns a copy of the dictionary without the given key (a missing key is fine) |
+| `Dictionary.RemoveKeys` | dictionary, keys | dictionary | Returns a copy of the dictionary without any of the listed keys (a key it does not have is fine) |
+| `Dictionary.SelectKeys` | dictionary, keys | dictionary | Returns a copy of the dictionary with only the listed keys, in the order they are listed (trim a property bag to the few keys a report needs) |
 | `Dictionary.SetValueAtKey` | dictionary, key, value | dictionary | Returns a copy of the dictionary with the given key set or updated |
+| `Dictionary.SetValues` | dictionary, keys, values | dictionary | Returns a copy of the dictionary with several keys set or updated at once, from a list of keys and a list of values of the same length (the several-key version of Dictio… |
 | `Dictionary.ToRows` | dictionary | rows | Converts a dictionary to a list of [key, value] rows |
 | `Dictionary.ValueAtKey` | dictionary, key | value | Returns the value stored under the given key |
+| `Dictionary.ValueAtPath` | value, path, defaultValue? | value | Follows a path into nested data (the result of JSON.Parse or XML.Parse) and returns what it finds there, or a default value when any step is missing |
 | `Dictionary.ValueOrDefault` | dictionary, key, defaultValue? | value | Returns the value stored under a key, or a default value when the key is missing |
 | `Dictionary.Values` | dictionary | values | Returns all values of a dictionary as a list |
 
@@ -267,7 +271,7 @@
 | `List.Contains` | list, item | contains | Tests whether a list contains a value |
 | `List.Count` | list | count | Returns the number of elements in a list |
 | `List.CountTrue` | list | trueCount, falseCount | Counts the true and not-true elements of a mask |
-| `List.Create` *(interactive)* | item0 … itemN | list | Builds a list from the wired item inputs |
+| `List.Create` *(interactive)* | item0 … itemN | list | Builds a list from the wired item inputs, in order |
 | `List.Cycle` | list, amount | list | Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]) |
 | `List.DropItems` | list, amount | list | Drops elements from the start of the list |
 | `List.DropWhile` | list, mask | list | Drops items from the start of the list for as long as the mask is true |

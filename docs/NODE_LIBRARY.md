@@ -187,6 +187,10 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Dictionary.Keys | Dictionary | dictionary: Dictionary&lt;string,object&gt; | keys: List&lt;string&gt; | All keys. | Dictionary.Keys | Implemented (v0.2) |
 | Dictionary.Values | Dictionary | dictionary: Dictionary&lt;string,object&gt; | values: List&lt;object&gt; | All values. | Dictionary.Values | Implemented (v0.2) |
 | Dictionary.SetValueAtKey | Dictionary | dictionary: Dictionary&lt;string,object&gt;, key: string, value: object | dictionary: Dictionary&lt;string,object&gt; | Returns a copy with key set/updated. | copy + indexer | Implemented (v0.2) |
+| Dictionary.SetValues | Dictionary | dictionary, keys: List&lt;object&gt;, values: List&lt;object&gt; | dictionary | Returns a copy with several keys set/updated at once. | copy + indexer | Implemented (node audit) |
+| Dictionary.SelectKeys | Dictionary | dictionary, keys: List&lt;object&gt; | dictionary | Keeps only the listed keys (in the listed order). | copy | Implemented (node audit) |
+| Dictionary.RemoveKeys | Dictionary | dictionary, keys: List&lt;object&gt; | dictionary | Returns a copy without any of the listed keys. | copy | Implemented (node audit) |
+| Dictionary.ValueAtPath | Dictionary | value: object, path: string, defaultValue: object = null | value: object | Follows a path (`Project/Tasks/Task/0/Name`, `*` for every item of a list) into nested JSON/XML data; the default when a step is missing. | path walk | Implemented (node audit) |
 
 ## Color
 
@@ -230,7 +234,7 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 | Path.Combine | File | directory: string, fileName: string | path: string | Join path segments safely. | System.IO.Path.Combine | Implemented (v0.2) |
 | Excel.ReadFromFile | File | path: string, sheet: string = "" (first), hasHeaders: bool = true | rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt;, sheetNames: List&lt;string&gt; | Read an .xlsx worksheet into rows + headers. Dates arrive as Excel serial numbers (documented); .xls (legacy BIFF) is rejected with a clear error. | built-in XlsxLite reader: `ZipArchive` + `XmlReader` over the OPC parts — zero new dependencies / [MultiReturn] | Implemented (v0.3) |
 | Excel.WriteToFile | File | path: string, rows: List&lt;List&lt;object&gt;&gt;, headers: List&lt;string&gt; = null, sheet: string = "Sheet1", append: bool = false | path: string | Write rows (+ optional headers) to an .xlsx worksheet; `append` adds/replaces a sheet in an existing workbook (foreign styles/formulas are not preserved). Creates missing directories. | XlsxLite writer (5-part OPC zip, inline strings) | Implemented (v0.3) |
-| XML.Parse | File | xml: string | value: object | Parse XML into the same dict/list shape `JSON.Parse` produces: attributes as "@name", repeated elements → lists, mixed text as "#text". All values remain strings (XML is untyped). | `System.Xml.Linq` — in-box | Implemented (v0.3) |
+| XML.Parse | File | xml: string, listElements: string = "" | value: object | Parse XML into the same dict/list shape `JSON.Parse` produces: attributes as "@name", repeated elements → lists, mixed text as "#text". All values remain strings (XML is untyped). | `System.Xml.Linq` — in-box | Implemented (v0.3) |
 | Snapshot.Diff | File | oldValue: Dictionary, newValue: Dictionary | addedKeys: List&lt;string&gt;, removedKeys: List&lt;string&gt;, changedKeys: List&lt;string&gt; | Diff two GUID-keyed dictionaries (values compared by canonical JSON; nested key order ignored) — the engine behind model-version compare and clash deltas. | pure .NET + Newtonsoft / [MultiReturn] | Implemented (v0.3) |
 
 ## Geometry

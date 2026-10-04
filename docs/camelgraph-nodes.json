@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 578,
+ "count": 582,
  "categories": [
   {
    "name": "Annotation",
@@ -20,7 +20,7 @@
   },
   {
    "name": "Dictionary",
-   "count": 13
+   "count": 17
   },
   {
    "name": "Display",
@@ -983,10 +983,10 @@
   },
   {
    "name": "XML.Parse",
-   "id": "CamelGraph.Nodes.XmlNodes.Parse@string",
+   "id": "CamelGraph.Nodes.XmlNodes.Parse@string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Data",
-   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\").",
+   "description": "Parses XML into dictionaries, lists and strings (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\"). An element that occurs once is a dictionary or a text, the same element occurring twice is a list, so a graph tried on a file with several items can break on a file with one: name such elements in listElements (for example Task, Resource; or * for all) and they always come as a list. Dictionary.ValueAtPath reads nested results either way. DOCTYPE declarations are accepted but an external entity is never read from disk or the network.",
    "tags": [
     "xml",
     "parse",
@@ -1002,6 +1002,12 @@
      "name": "xml",
      "type": "string",
      "description": "The XML text to parse."
+    },
+    {
+     "name": "listElements",
+     "type": "string",
+     "description": "Names of elements that must always come as a list, even when the file holds only one of them; separated by commas or semicolons, or * for every element. Empty (default) keeps the rule that only repeated elements are lists.",
+     "default": "\"\""
     }
    ],
    "outputs": [
@@ -1755,7 +1761,7 @@
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.ContainsKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Tests whether a dictionary has the given key (case-sensitive).",
+   "description": "Tests whether a dictionary has the given key (case-sensitive). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.",
    "tags": [
     "has",
     "exists",
@@ -1939,7 +1945,7 @@
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.RemoveKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns a copy of the dictionary without the given key (a missing key is fine).",
+   "description": "Returns a copy of the dictionary without the given key (a missing key is fine). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To leave out several keys of one dictionary use Dictionary.RemoveKeys.",
    "tags": [
     "delete",
     "drop",
@@ -1970,11 +1976,84 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.RemoveKeys",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.RemoveKeys@System.Collections.IDictionary,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary without any of the listed keys (a key it does not have is fine). A list of keys gives one dictionary without all of them, unlike Dictionary.RemoveKey, which pairs a list of keys with a list of dictionaries. A list of dictionaries gives one result each; the key list applies to every one of them.",
+   "tags": [
+    "delete",
+    "drop",
+    "remove",
+    "omit",
+    "without",
+    "many",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to leave out (a single key works too). A key the dictionary does not have is fine."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary without those keys."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.SelectKeys",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.SelectKeys@System.Collections.IDictionary,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary with only the listed keys, in the order they are listed (trim a property bag to the few keys a report needs). A key the dictionary does not have is left out. A list of dictionaries gives one trimmed dictionary each; the key list applies to every one of them.",
+   "tags": [
+    "pick",
+    "keep",
+    "filter",
+    "subset",
+    "only",
+    "columns",
+    "fields",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy from."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to keep (a single key works too). A key the dictionary does not have is left out; a key listed twice is kept once."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary with only those keys."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.SetValueAtKey",
    "id": "CamelGraph.Nodes.DictionaryNodes.SetValueAtKey@System.Collections.IDictionary,string,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns a copy of the dictionary with the given key set or updated.",
+   "description": "Returns a copy of the dictionary with the given key set or updated; the input dictionary is not changed. A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To set several keys at once use Dictionary.SetValues.",
    "tags": [
     "set",
     "update",
@@ -2004,6 +2083,47 @@
      "name": "dictionary",
      "type": "dict",
      "description": "A new dictionary with the key set."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Dictionary.SetValues",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.SetValues@System.Collections.IDictionary,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Returns a copy of the dictionary with several keys set or updated at once, from a list of keys and a list of values of the same length (the several-key version of Dictionary.SetValueAtKey). For a key listed twice the last value wins; the input dictionary is not changed. A list of dictionaries gives one result each; the keys and values apply to every one of them.",
+   "tags": [
+    "set",
+    "update",
+    "insert",
+    "put",
+    "many",
+    "multiple",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "dictionary",
+     "type": "IDictionary",
+     "description": "The dictionary to copy."
+    },
+    {
+     "name": "keys",
+     "type": "any[]",
+     "description": "The keys to set or update (converted to text)."
+    },
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "One value per key, in the same order."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "dictionary",
+     "type": "dict",
+     "description": "A new dictionary with all the keys set; for a key listed twice the last value wins."
     }
    ],
    "returns": ""
@@ -2044,7 +2164,7 @@
    "id": "CamelGraph.Nodes.DictionaryNodes.ValueAtKey@System.Collections.IDictionary,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns the value stored under the given key.",
+   "description": "Returns the value stored under the given key; a missing key is an error (Dictionary.ValueOrDefault gives a fallback instead, Dictionary.ValueAtPath follows a path into nested data). A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary. To read several keys of one dictionary use Dictionary.SelectKeys.",
    "tags": [
     "lookup",
     "get",
@@ -2072,11 +2192,56 @@
    "returns": ""
   },
   {
+   "name": "Dictionary.ValueAtPath",
+   "id": "CamelGraph.Nodes.DictionaryExtraNodes.ValueAtPath@object,string,object",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Dictionary",
+   "description": "Follows a path into nested data (the result of JSON.Parse or XML.Parse) and returns what it finds there, or a default value when any step is missing. The steps are separated by / (or by . when the path has no /): a key (Project/Name), a position in a list (Tasks/Task/0/Name; -1 is the last item) or * for every item of a list (Tasks/Task/*/Name gives a list of names). A position of 0 or -1 also works on a value that is not a list, so the same path reads a file with one <Task> and a file with many. A list of paths gives one result per path.",
+   "tags": [
+    "path",
+    "nested",
+    "deep",
+    "json",
+    "xml",
+    "get",
+    "lookup",
+    "navigate",
+    "drill",
+    "map"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The dictionary (or list) to read from."
+    },
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The steps to follow, separated by / (or by . when the path has no /): a key such as Project/Name, a list position such as Tasks/Task/0/Name (negative counts from the end), or * for every item of a list."
+    },
+    {
+     "name": "defaultValue",
+     "type": "any",
+     "description": "Returned when any step of the path is missing (null when left unwired).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value at the path, a list of the results when the path has a *, or the default."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Dictionary.ValueOrDefault",
    "id": "CamelGraph.Nodes.DictionaryExtraNodes.ValueOrDefault@System.Collections.IDictionary,string,object",
    "assembly": "CamelGraph.Nodes",
    "category": "Dictionary",
-   "description": "Returns the value stored under a key, or a default value when the key is missing.",
+   "description": "Returns the value stored under a key, or a default value when the key is missing. A list of dictionaries and a list of keys on separate inputs pair up item by item and stop at the shorter list (the default Shortest lacing); set Cross-Product lacing (right-click the node) to use every key with every dictionary.",
    "tags": [
     "get",
     "lookup",
@@ -5693,7 +5858,7 @@
    "name": "List.Create",
    "id": "ListCreate",
    "category": "List",
-   "description": "Builds a list from the wired item inputs.",
+   "description": "Builds a list from the wired item inputs, in order. A wired list is kept whole as ONE item of the new list (a list of lists); List.Merge joins lists into one list instead.",
    "tags": [
     "array",
     "collection",
