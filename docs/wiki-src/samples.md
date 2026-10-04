@@ -1,6 +1,6 @@
 # Sample scripts
 
-Dyncamelo ships with example graphs. Open them from the **start screen** (the cards on an empty canvas), from **File ▸ Sample Graphs**, or from the `Samples` folder inside each year folder of the installed bundle. Each one explains its editable inputs in notes on the canvas. Press **Run** to see what it does; read the nodes to learn how.
+CamelGraph ships with example graphs. Open them from the **start screen** (the cards on an empty canvas), from **File ▸ Sample Graphs**, or from the `Samples` folder inside each year folder of the installed bundle. Each one explains its editable inputs in notes on the canvas. Press **Run** to see what it does; read the nodes to learn how.
 
 Except for the first two, the samples need Navisworks with a **model open**. They are saved so that you decide when they run: a graph opened from a file is not run until you press Run.
 

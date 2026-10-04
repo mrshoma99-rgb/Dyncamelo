@@ -1,20 +1,20 @@
 # Requirements
 
-## To run Dyncamelo
+## To run CamelGraph
 
 | You need | Details |
 |---|---|
 | **Windows** | 64-bit Windows 10 or 11. Navisworks itself only runs on Windows. |
 | **Autodesk Navisworks** | **Manage** or **Simulate**, release **2024, 2025 or 2026**. The install package lists exactly these six products and no others. |
 | **Rights to install** | None beyond your own user account. The installer works per user. A copy for all users needs write access to `C:\ProgramData\Autodesk\ApplicationPlugins\`. |
-| **A model** | Dyncamelo works against the active Navisworks document. Open a model first (`.nwd`, `.nwf`, or an appended `.rvt`, `.ifc`, `.dwg`…). A few nodes, such as the maths and text nodes, run without one. |
+| **A model** | CamelGraph works against the active Navisworks document. Open a model first (`.nwd`, `.nwf`, or an appended `.rvt`, `.ifc`, `.dwg`…). A few nodes, such as the maths and text nodes, run without one. |
 | **A licence that fits your use** | The copy from GitHub or bimcamel.com is free for personal use. For work at a company or in a paid project, the professional copy is coming soon to the Autodesk App Store ([Licence](licence.md#which-copy-do-i-need)). |
-| **Internet** | Not needed. The only network request Dyncamelo makes by itself is the once-a-day look for a newer version, and you can switch that off ([Privacy and safety](privacy-and-safety.md)). |
+| **Internet** | Not needed. The only network request CamelGraph makes by itself is the once-a-day look for a newer version, and you can switch that off ([Privacy and safety](privacy-and-safety.md)). |
 
 !!! warning "Clash nodes need Manage"
     Nodes that use **Clash Detective** need Navisworks **Manage**, because Simulate does not include Clash Detective. The clash nodes report "Clash Detective is not available in this Navisworks edition." in Simulate.
 
-No other Autodesk product, runtime or licence is needed. The IFC export engine ships inside Dyncamelo, so the IFC nodes need no extra plug-in ([IFC, BCF, Excel and CSV](exchange-formats.md)).
+No other Autodesk product, runtime or licence is needed. The IFC export engine ships inside CamelGraph, so the IFC nodes need no extra plug-in ([IFC, BCF, Excel and CSV](exchange-formats.md)).
 
 ## What has been tested
 
@@ -31,14 +31,14 @@ The [known issues](troubleshooting.md#known-issues) list what is still open. The
 
 ## To build it yourself
 
-Only needed if you build Dyncamelo from source ([Installation](installation.md#build-it-from-source)).
+Only needed if you build CamelGraph from source ([Installation](installation.md#build-it-from-source)).
 
 * Windows 10 or 11 with **Visual Studio 2022** (the ".NET desktop development" workload) or the **.NET 8 SDK**.
-* A Navisworks installation is **not** needed to build. The Navisworks API is referenced at compile time through NuGet packages and is never redistributed with Dyncamelo; at run time your own Navisworks provides it.
+* A Navisworks installation is **not** needed to build. The Navisworks API is referenced at compile time through NuGet packages and is never redistributed with CamelGraph; at run time your own Navisworks provides it.
 * On Linux or macOS the engine, the general node library, the Navisworks node library and the tests build and run; the WPF editor does not.
 
 ## Next steps
 
 * [Installation](installation.md) once the requirements are met.
-* [Your first script](first-steps.md) after Dyncamelo is installed.
+* [Your first script](first-steps.md) after CamelGraph is installed.
 * [Licence](licence.md#which-copy-do-i-need) if you are not sure which copy fits your use.

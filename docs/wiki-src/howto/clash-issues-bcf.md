@@ -11,7 +11,7 @@ Goal: hand clash results to a BCF tool such as BIMcollab, Konekt, Revizto or Aut
 ## Before you start
 
 * To export clash results, use **Navisworks Manage**: Simulate does not include Clash Detective. Run the clash tests first. Importing a BCF file does not need Clash Detective.
-* Open a model and the Dyncamelo editor.
+* Open a model and the CamelGraph editor.
 * BCF is the vendor-neutral issue format: a `.bcfzip` file of topics, each with a title, status, comments, a camera and the elements involved.
 
 ## Part A: export

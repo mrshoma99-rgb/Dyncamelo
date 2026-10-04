@@ -86,7 +86,7 @@ The Settings option **Ask before running graphs from files** belongs to the edit
 
 ## Remembered values
 
-When you press **Run**, the Player remembers the values in the form **for that script**, and puts them back the next time you choose it. Reset a single field with ↺, or all of them with **Reset**, to return to the values saved in the script. Values are kept in your Dyncamelo settings on your computer, not in the script file.
+When you press **Run**, the Player remembers the values in the form **for that script**, and puts them back the next time you choose it. Reset a single field with ↺, or all of them with **Reset**, to return to the values saved in the script. Values are kept in your CamelGraph settings on your computer, not in the script file.
 
 ## Preparing a script for the Player (for script authors)
 

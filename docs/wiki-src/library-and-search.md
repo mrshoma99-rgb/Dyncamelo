@@ -1,6 +1,6 @@
 # Node library and search
 
-The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press ++space++, and the search that opens when you drop a wire on empty canvas.
+The node library is the list of every node you can add to a script, and CamelGraph gives you three quick ways to find one: the library panel, the quick search that opens when you press ++space++, and the search that opens when you drop a wire on empty canvas.
 
 For the full list of nodes with their inputs and outputs, see the [node library](nodes/index.md).
 
@@ -67,13 +67,13 @@ Press ++space++ while the pointer is over the canvas and a small search box open
 
 Hover a result for a tooltip with the node's description and its inputs and outputs.
 
-**Starred and recent nodes.** Before you type anything, the list shows your **starred nodes first, then the nodes you added most recently** (Dyncamelo remembers the last 12). While you type, starred and recent nodes come first among equally good matches. With no stars, pressing ++space++ then ++enter++ simply adds the node you added last.
+**Starred and recent nodes.** Before you type anything, the list shows your **starred nodes first, then the nodes you added most recently** (CamelGraph remembers the last 12). While you type, starred and recent nodes come first among equally good matches. With no stars, pressing ++space++ then ++enter++ simply adds the node you added last.
 
 You can also open the quick search from the menu with **Graph ▸ Add Node…**, which inserts the node in the middle of the view.
 
 ## Search when you drop a wire
 
-If you drag a wire from a socket and let go on empty canvas, the same search box opens, with a line under it such as "Nodes that accept a Number from …" or "Nodes that produce … for …". It shows only nodes that can connect to that wire, with exact and convertible fits first and looser fits after them. Pick one and Dyncamelo adds it and connects its best matching socket in a single step (one undo). If you type nothing, you see starred and recent nodes first.
+If you drag a wire from a socket and let go on empty canvas, the same search box opens, with a line under it such as "Nodes that accept a Number from …" or "Nodes that produce … for …". It shows only nodes that can connect to that wire, with exact and convertible fits first and looser fits after them. Pick one and CamelGraph adds it and connects its best matching socket in a single step (one undo). If you type nothing, you see starred and recent nodes first.
 
 ## Finding a node that is already on the canvas
 

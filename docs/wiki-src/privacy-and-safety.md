@@ -4,20 +4,20 @@ Two questions come up before a tool like this goes onto a work computer: *what d
 
 ## Privacy in short
 
-Dyncamelo does not collect your data. It has **no account, no sign-in, no licence server, no analytics and no crash reporting** that leaves your computer. Your models and graphs stay on your computer unless a graph you run sends them somewhere ([see below](#what-a-graph-can-do)).
+CamelGraph does not collect your data. It has **no account, no sign-in, no licence server, no analytics and no crash reporting** that leaves your computer. Your models and graphs stay on your computer unless a graph you run sends them somewhere ([see below](#what-a-graph-can-do)).
 
 ### What it keeps on your computer
 
-All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\AppData\Roaming\Dyncamelo`). None of it is sent anywhere by Dyncamelo.
+All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\AppData\Roaming\Dyncamelo`). None of it is sent anywhere by CamelGraph.
 
 | File | What is in it |
 |---|---|
 | `ui-settings.json` | Your preferences: theme, shortcuts, recent files, favourite nodes, Script Player folders, the last values you typed into scripts, and which graph files you agreed to run. |
-| `errors.log` | The technical details of a failure Dyncamelo caught: the error, the place in the code, the XAML file involved. An error message can name a node or a file. Model contents are not written to it. |
+| `errors.log` | The technical details of a failure CamelGraph caught: the error, the place in the code, the XAML file involved. An error message can name a node or a file. Model contents are not written to it. |
 | `update-check.txt` | The date of the last update check and the last version offered. |
 | `recovery\` | Copies of graphs with unsaved changes, so they can be offered back after a crash. Deleted when you save. |
 
-**Help ▸ Copy Diagnostics** and **Help ▸ Run Self-Test** put a text report on the clipboard when you ask. Your user name, computer name and profile folder are replaced in it, and no model or graph names are included. Dyncamelo does not send the report anywhere; you decide whether to paste it into a bug report.
+**Help ▸ Copy Diagnostics** and **Help ▸ Run Self-Test** put a text report on the clipboard when you ask. Your user name, computer name and profile folder are replaced in it, and no model or graph names are included. CamelGraph does not send the report anywhere; you decide whether to paste it into a bug report.
 
 ![The Privacy page of Settings, with the once-a-day update check switched on.](../images/wiki-settings-privacy.png)
 
@@ -25,8 +25,8 @@ All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\Ap
 
 One thing, and you can switch it off.
 
-* **The update check.** When the editor opens, at most once a day, Dyncamelo asks GitHub (`api.github.com`) for the number of the newest release. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. If a newer version exists, the start screen says so and Dyncamelo asks before it opens the download page.
-* **Switch it off:** **Settings ▸ Privacy ▸ Check for a newer version once a day**. With it off, Dyncamelo makes no network request of its own. A copy installed from the Autodesk App Store never makes the check, because the store delivers its updates.
+* **The update check.** When the editor opens, at most once a day, CamelGraph asks GitHub (`api.github.com`) for the number of the newest release. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. If a newer version exists, the start screen says so and CamelGraph asks before it opens the download page.
+* **Switch it off:** **Settings ▸ Privacy ▸ Check for a newer version once a day**. With it off, CamelGraph makes no network request of its own. A copy installed from the Autodesk App Store never makes the check, because the store delivers its updates.
 
 Opening the website, the user guide or a download page from a menu or a link opens your browser at your request; that is then between you and that website.
 
@@ -36,7 +36,7 @@ No advertising, analytics or tracking libraries, and nothing shared with anyone.
 
 ### Removing what it stored
 
-Dyncamelo keeps nothing on any server. Close Navisworks and delete the folder `%APPDATA%\Dyncamelo`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone ([Uninstalling](uninstall.md)).
+CamelGraph keeps nothing on any server. Close Navisworks and delete the folder `%APPDATA%\Dyncamelo`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone ([Uninstalling](uninstall.md)).
 
 ## What a graph can do
 
@@ -58,12 +58,12 @@ A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no progr
 
 Also know that:
 
-* **Node packs are code.** Dyncamelo loads every `.dll` it finds in a `Packages` folder next to `Dyncamelo.App.dll` when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
+* **Node packs are code.** CamelGraph loads every `.dll` it finds in a `Packages` folder next to `Dyncamelo.App.dll` when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
 * **The command-line tool does not ask.** `Dyncamelo.Cli` (built from source, not part of the installer) runs a graph without any question. It cannot use the Navisworks nodes.
 
 ## Running graphs from other people
 
-Dyncamelo asks before it runs a graph that can do real harm:
+CamelGraph asks before it runs a graph that can do real harm:
 
 * **Editor.** When you run a graph that was **opened from a file** and contains nodes that run programs, use the network, or delete, move or overwrite files, the editor lists those nodes and asks first. You are asked once per file, and again only if the file changes. A graph saved with run mode *Auto* is **not** run when you open it: the status bar says so, and you press **Run** to review it first. Graphs you make in the editor and the built-in samples never ask. Switch this off with **Settings ▸ Editing ▸ Ask before running graphs from files**.
 * **Script Player.** A script that contains nodes that change things or reach outside the model is listed by name above its form, and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. `Dyncamelo.Run.DYNC` (the Automation API and the Batch Utility) asks the same question.
@@ -78,15 +78,15 @@ Advice:
 
 ## Downloads
 
-* Download Dyncamelo only from the [releases page](https://github.com/mrshoma99-rgb/dyncamelo/releases) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). The professional copy will come from the Autodesk App Store, which is coming soon.
+* Download CamelGraph only from the [releases page](https://github.com/mrshoma99-rgb/dyncamelo/releases) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). The professional copy will come from the Autodesk App Store, which is coming soon.
 * The installer is **not code-signed** unless the publisher configured a certificate, so Windows SmartScreen may warn about it (**More info ▸ Run anyway**). Each release publishes a SHA-256 checksum next to every download; compare it with `Get-FileHash .\DyncameloSetup.exe -Algorithm SHA256`.
 * The installer works per user, in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle`, and needs no administrator rights.
 
 ## Reporting a security problem
 
-Please report a vulnerability **privately**, with GitHub's private security advisories: open the repository's **Security** tab, then **Report a vulnerability** (direct link: <https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new>). Say which Dyncamelo version and Navisworks year it affects and how to reproduce it; a small `.dyc` file that shows the problem helps a lot. Please do not open a public issue or post details before it is fixed.
+Please report a vulnerability **privately**, with GitHub's private security advisories: open the repository's **Security** tab, then **Report a vulnerability** (direct link: <https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new>). Say which CamelGraph version and Navisworks year it affects and how to reproduce it; a small `.dyc` file that shows the problem helps a lot. Please do not open a public issue or post details before it is fixed.
 
-What counts: a `.dyc` file that makes Dyncamelo do something harmful *without* any of the nodes in the table above, a way round the questions it asks, or the installer writing outside its own folder or running a file it should not. What does not count: a graph doing what its nodes say after you chose to run it. Only the latest release gets security fixes.
+What counts: a `.dyc` file that makes CamelGraph do something harmful *without* any of the nodes in the table above, a way round the questions it asks, or the installer writing outside its own folder or running a file it should not. What does not count: a graph doing what its nodes say after you chose to run it. Only the latest release gets security fixes.
 
 ## Next steps
 

@@ -10,7 +10,7 @@ Goal: take columns such as `Cost` and `Supplier` from an Excel sheet, match each
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Have an `.xlsx` file with one row for each item. One column, here with the header `GUID`, holds the item's instance GUID as text. The other columns, here `Cost` and `Supplier`, hold the data. The first row holds the headers.
 * Keys match as exact text: capitals and lower case differ.
 * Save the model first. The values are written into the open document. The source files are never changed.

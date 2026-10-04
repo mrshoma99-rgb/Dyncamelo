@@ -36,7 +36,7 @@ Goal: find out what went wrong in a run, which node caused it, and what to chang
 | "Upstream failure: one or more input nodes are in an error state." | A node before this one failed. | Fix that node first. |
 | "N of M laced calls received a null element and returned null." | A list had empty items, so the node gave empty results for them. | Put `List.Clean` before the node. |
 | "Cannot convert value of type … to … for input 'x'." | The value on the wire is the wrong kind. | Compare the kinds at both ends of the wire. |
-| "Unresolved zero-touch definition …" or "Unknown node type …" | The node is not installed. | Install the pack or update Dyncamelo. |
+| "Unresolved zero-touch definition …" or "Unknown node type …" | The node is not installed. | Install the pack or update CamelGraph. |
 
 A list wired into a one-value input runs the node once per item. If some items fail, those items give an empty result, the others still compute, and the node shows **one** amber warning that counts the failures.
 

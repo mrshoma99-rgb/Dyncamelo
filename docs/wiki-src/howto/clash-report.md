@@ -12,7 +12,7 @@ Goal: write an HTML page that shows, for each clash test, how many results are N
 
 * Use **Navisworks Manage**. Simulate does not include Clash Detective, so the clash nodes cannot work there.
 * Open a model that already has clash tests, and **run them** in Clash Detective. A test that has not run has no results to count.
-* Open the Dyncamelo editor.
+* Open the CamelGraph editor.
 
 [Download the graph](../graphs/clash-report.dyc)
 

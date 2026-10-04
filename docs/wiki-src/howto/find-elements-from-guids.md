@@ -10,7 +10,7 @@ Goal: take a column of element GUIDs from an Excel sheet, select those elements 
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Have an `.xlsx` file with the GUIDs in one column, with a header in the first row, for example `GUID`. Write the cells as text. `Search.ByGuid` accepts a GUID such as `3f81e10a-25b0-49ff-9520-63f2a763150a` or a 22-character IFC GlobalId.
 * This graph replaces the current Navisworks selection.
 

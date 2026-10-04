@@ -451,10 +451,11 @@ def changelog_page(stage, site):
     lines = read_text(ROOT / "CHANGELOG.md").split("\n")
     # drop the file's own '# Changelog' line and its intro paragraphs about how it was made; keep from the first '## ' on
     start = next((i for i, line in enumerate(lines) if line.startswith("## ")), 0)
-    intro = ("# What's new\n\nEvery release of Dyncamelo and what changed in it, newest first. "
+    intro = ("# What's new\n\nEvery release of CamelGraph (previously Dyncamelo) and what changed in it, newest first. "
+             "Entries use the name the program had at the time. "
              "The newest section, *Unreleased*, lists what is already in the source and not yet in a numbered release.\n\n")
     page = Page(CHANGELOG_KEY, intro + "\n".join(lines[start:]), "What's new",
-                description="Every release of Dyncamelo and what changed in it.")
+                description="Every release of CamelGraph (previously Dyncamelo) and what changed in it.")
     base = site["repo_url"].rstrip("/") + "/blob/main/"
 
     def to_github(target):
@@ -723,7 +724,7 @@ def mkdocs_config(site, nav, stage_dir, site_dir):
         "site_dir": posix(site_dir),
         "hooks": [posix(TOOLS / "hooks.py")],
         "theme": {"custom_dir": posix(TOOLS / "overrides")},
-        "copyright": "Dyncamelo v%s by BIMCamel. Licensed under the PolyForm Noncommercial License 1.0.0." % read_version(),
+        "copyright": "CamelGraph (previously Dyncamelo) v%s by BIMCamel. Licensed under the PolyForm Noncommercial License 1.0.0." % read_version(),
         "extra": {key: site[key] for key in SITE_KEYS},
         "nav": nav,
     }
@@ -855,7 +856,7 @@ def serve(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build the Dyncamelo wiki with MkDocs (Material theme).")
+    parser = argparse.ArgumentParser(description="Build the CamelGraph wiki with MkDocs (Material theme).")
     parser.add_argument("--out", type=Path, default=SITE_DEFAULT, help="folder for the finished site (default build/wiki-site)")
     parser.add_argument("--stage", type=Path, default=STAGE_DEFAULT, help="staging folder for the pages (default build/wiki-docs)")
     parser.add_argument("--serve", action="store_true", help="serve the wiki with live reload instead of building the site")

@@ -87,7 +87,7 @@ Optional inputs that are unconnected can be hidden: **Hide / Show Unused Sockets
 
 ### Choosing a tab or a property name
 
-On nodes that read a property of an element, the **tab** (category) and **property** inputs are ordinary text boxes. Type the name and it works. Next to each is a small **magnifier**. Press it and Dyncamelo lists the tabs, or the properties of the chosen tab, **of the element on that node's own element input**; click one to fill the box. What you have typed narrows the list.
+On nodes that read a property of an element, the **tab** (category) and **property** inputs are ordinary text boxes. Type the name and it works. Next to each is a small **magnifier**. Press it and CamelGraph lists the tabs, or the properties of the chosen tab, **of the element on that node's own element input**; click one to fill the box. What you have typed narrows the list.
 
 * Nothing is read until you press the magnifier.
 * Only that element is read, at most the first 100 if the input carries a longer list. The model is never searched to fill the list.
@@ -105,7 +105,7 @@ An input of kind **Document** that has nothing wired to it uses the **active Nav
 
 ## How values are converted
 
-When a wire joins two different kinds, Dyncamelo converts the value if it can:
+When a wire joins two different kinds, CamelGraph converts the value if it can:
 
 * numbers widen (an integer is accepted where a number is expected);
 * values with a standard conversion are converted (a number can become text, text such as `"12"` can become a number);

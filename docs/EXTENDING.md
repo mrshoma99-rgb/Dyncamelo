@@ -1,6 +1,6 @@
 # Extending Dyncamelo — Write Your Own Nodes
 
-Dyncamelo is designed so that adding a node is a five-minute job: **a public static C# method with a couple of attributes is a node.** This guide walks through building a complete node pack, from an empty project to nodes showing up in the editor, and then covers the advanced path — interactive `NodeModel` nodes with custom WPF UI.
+CamelGraph is designed so that adding a node is a five-minute job: **a public static C# method with a couple of attributes is a node.** This guide walks through building a complete node pack, from an empty project to nodes showing up in the editor, and then covers the advanced path — interactive `NodeModel` nodes with custom WPF UI.
 
 > Packs are loaded from a `Packages` folder next to `Dyncamelo.App.dll`, the first time the editor or the Script Player opens in a session. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
 
@@ -21,7 +21,7 @@ Dyncamelo is designed so that adding a node is a five-minute job: **a public sta
 
 ## 1. How node loading works
 
-At startup, Dyncamelo's zero-touch loader (in `Dyncamelo.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
+At startup, CamelGraph's zero-touch loader (in `Dyncamelo.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
 
 The loader also scans the `Packages` folder next to `Dyncamelo.App.dll` (subfolders included):
 
@@ -30,7 +30,7 @@ The loader also scans the `Packages` folder next to `Dyncamelo.App.dll` (subfold
     YourPack.dll            (plus any private dependencies)
 ```
 
-Each pack folder is loaded in isolation: a pack that fails to load is reported in the editor and skipped — it can never take down Dyncamelo or Navisworks.
+Each pack folder is loaded in isolation: a pack that fails to load is reported in the editor and skipped — it can never take down CamelGraph or Navisworks.
 
 ## 2. Tutorial: a zero-touch node pack
 
@@ -58,7 +58,7 @@ A general-purpose pack (no Navisworks API) targets `netstandard2.0` and referenc
 </Project>
 ```
 
-`Private=false` matters: Dyncamelo already provides `Dyncamelo.Core` at runtime — your pack must not ship its own copy.
+`Private=false` matters: CamelGraph already provides `Dyncamelo.Core` at runtime — your pack must not ship its own copy.
 
 ### Step 2 — write a node
 
@@ -255,7 +255,7 @@ The editor builds a node's rows from your method signature, so most nodes need n
 | `double width = 200` | A draggable number field with the default remembered; a dot marks it when changed. |
 | `[NodeRange(0, 100, SoftMin = 0, SoftMax = 10, Step = 0.5, Unit = "mm")] double gap` | The field clamps to 0–100, its drag range is 0–10, it steps by 0.5 and prints `mm` after the value. |
 | `[NodeChoices("Model", "Object", "Face")] string level` | A dropdown instead of a free text box — or a segmented switcher when there are two or three short values (24 characters in all). |
-| `[NodeTabChoice("item")] string categoryName` and `[NodePropertyChoice("item", "categoryName")] string propertyName` | The text box stays (typing always works) and gets a small magnifier button. Pressed, it lists the property tabs — or the properties of the tab named by `categoryName` — of the element carried by the node's `item` input, in a drop-down. It reads only that element (a picked one, or what the wire delivered in the last run), only when pressed, and never searches the model; add `IncludeAncestors = true` when the node also looks at the element's parents. A node that searches the whole model has no element input; pass `NodeDataSource.Selection` as the source (`[NodeTabChoice(NodeDataSource.Selection)]`) and the button lists what the elements selected in the host right now carry. Only on `string` parameters; the host supplies the reader through `ModelPropertyHost.Current` (Dyncamelo does for Navisworks). |
+| `[NodeTabChoice("item")] string categoryName` and `[NodePropertyChoice("item", "categoryName")] string propertyName` | The text box stays (typing always works) and gets a small magnifier button. Pressed, it lists the property tabs — or the properties of the tab named by `categoryName` — of the element carried by the node's `item` input, in a drop-down. It reads only that element (a picked one, or what the wire delivered in the last run), only when pressed, and never searches the model; add `IncludeAncestors = true` when the node also looks at the element's parents. A node that searches the whole model has no element input; pass `NodeDataSource.Selection` as the source (`[NodeTabChoice(NodeDataSource.Selection)]`) and the button lists what the elements selected in the host right now carry. Only on `string` parameters; the host supplies the reader through `ModelPropertyHost.Current` (CamelGraph does for Navisworks). |
 | `[NodePanel("Advanced")] double tolerance = 0.01` | The input sits in a foldable *Advanced* panel (`DefaultOpen = true` starts it expanded). |
 | `[MultiInput] IEnumerable<ModelItem> items` (any list-typed parameter) | A **multi-input** pill: any number of wires connect to it. One wire arrives untouched — so adding the attribute to an existing parameter never changes a saved graph — and two or more arrive combined into one list, in the order the wires were made (list-valued wires contribute their elements, other values themselves, nulls nothing). Ignored on parameters that are not list-typed. |
 | `[PortKinds("viewpoint*")]` on an `object` parameter, or `[PortKinds("text*", "integer")]` on a `[MultiReturn]` method | The socket takes the colour and shape of that kind: a family name (`number`, `integer`, `boolean`, `text`, `datetime`, `colour`, `geometry`, `item`, `selection`, `viewpoint`, `clash`, `document`, `data`, `file`, `action`), then `*` for a list or `**` for a list of lists. |

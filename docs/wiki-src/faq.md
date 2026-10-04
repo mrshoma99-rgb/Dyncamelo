@@ -4,7 +4,7 @@ Short answers, grouped by theme. Click a question to open it. Every answer links
 
 ## Which copy do I need?
 
-Dyncamelo comes in two copies: the same program with the same features, and a different licence.
+CamelGraph comes in two copies: the same program with the same features, and a different licence.
 
 | Are you using it for work or in a paid project or product? | Get |
 |---|---|
@@ -15,7 +15,7 @@ Dyncamelo comes in two copies: the same program with the same features, and a di
 
 | Personal use (free) | Professional use |
 |---|---|
-| A student learning Dyncamelo | A contractor's BIM coordinator running checks on a live project |
+| A student learning CamelGraph | A contractor's BIM coordinator running checks on a live project |
 | A hobbyist trying it on their own models | A consultancy producing deliverables for clients |
 | A university research group | An in-house team at a company |
 
@@ -23,10 +23,13 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 
 ## The basics
 
-??? question "What is Dyncamelo?"
+??? question "What is CamelGraph?"
     A visual programming add-in for Autodesk Navisworks. You build a graph of nodes on a canvas and run it against the open model, instead of clicking through the same steps by hand or writing code. It follows the ideas Dynamo made familiar in Revit. See [Concepts](concepts.md).
 
-    ![The Dyncamelo editor with a graph that has just run.](../images/wiki-editor-overview.png)
+    ![The CamelGraph editor with a graph that has just run.](../images/wiki-editor-overview.png)
+
+??? question "Is CamelGraph the same as Dyncamelo?"
+    Yes. CamelGraph is the new name of Dyncamelo: the same program, the same node library, the same `.dyc` graph files and the same free personal-use copy. Version 0.48 and earlier still carry the old name on screen and in file names (the installer is `DyncameloSetup.exe`, the ribbon button and the window say **Dyncamelo**, and Windows lists it as *Dyncamelo for Navisworks*), so where this guide says CamelGraph and your screen says Dyncamelo, they are the same thing. The next release uses CamelGraph throughout. Your saved graphs open as before.
 
 ??? question "Is it free?"
     The copy from GitHub or bimcamel.com is free for personal use: learning, hobby projects, research, charities, schools and universities, public research bodies and government institutions. Using it for your job at a company, or in a paid project or product, needs the professional copy, which is coming soon to the Autodesk App Store. Until it is there, get in touch through bimcamel.com. See [Licence](licence.md).
@@ -41,7 +44,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     No. A graph is built by dragging and wiring nodes. If you want a node that does not exist, you can write one as a single C# method ([Writing your own nodes](extending.md)).
 
 ??? question "Can it open my Dynamo graphs?"
-    No. Dyncamelo has its own graph format (`.dyc`) and its own node library, built for Navisworks. It does not run Dynamo graphs or Revit nodes.
+    No. CamelGraph has its own graph format (`.dyc`) and its own node library, built for Navisworks. It does not run Dynamo graphs or Revit nodes.
 
 ??? question "How many nodes are there?"
     More than 570, in about 46 categories, from maths and text to clash triage. Browse them in the [node library](nodes/index.md), or press ++space++ in the editor to search.
@@ -81,7 +84,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     [Your first script](first-steps.md) takes about ten minutes. The [sample scripts](samples.md) are on the start screen of an empty canvas.
 
 ??? question "Do I need a model open?"
-    For most nodes, yes. Dyncamelo works against the active Navisworks document. A few nodes, such as the maths and text nodes, run without one, and the sample *Getting Started - Math and Watch* needs no model. See [Requirements](requirements.md).
+    For most nodes, yes. CamelGraph works against the active Navisworks document. A few nodes, such as the maths and text nodes, run without one, and the sample *Getting Started - Math and Watch* needs no model. See [Requirements](requirements.md).
 
 ??? question "How do I add a node?"
     Press ++space++ over the canvas, type part of its name and press ++enter++. You can also double-click it in the library on the left, or drag it onto the canvas. See [Node library and search](library-and-search.md).
@@ -179,7 +182,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Graphs are `.dyc` files where you saved them. Settings, the error log and autosaved copies are in `%APPDATA%\Dyncamelo`. See [Privacy and safety](privacy-and-safety.md#what-it-keeps-on-your-computer).
 
 ??? question "My graph was lost when Navisworks closed."
-    If **Autosave** was on (it is by default), Dyncamelo offers the autosaved copy the next time the editor opens on an empty canvas. See [Troubleshooting](troubleshooting.md#navisworks-closed-while-i-was-working).
+    If **Autosave** was on (it is by default), CamelGraph offers the autosaved copy the next time the editor opens on an empty canvas. See [Troubleshooting](troubleshooting.md#navisworks-closed-while-i-was-working).
 
 ## Clash and BCF
 
@@ -198,10 +201,10 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ## IFC, Excel and CSV
 
 ??? question "Do I need Excel installed?"
-    No. Dyncamelo reads and writes `.xlsx` files itself. The old `.xls` format is not supported. See [IFC, BCF, Excel and CSV](exchange-formats.md#excel).
+    No. CamelGraph reads and writes `.xlsx` files itself. The old `.xls` format is not supported. See [IFC, BCF, Excel and CSV](exchange-formats.md#excel).
 
 ??? question "Does the IFC export need another plug-in?"
-    No. The export engine ships inside Dyncamelo. See [Export model items to IFC](howto/export-to-ifc.md).
+    No. The export engine ships inside CamelGraph. See [Export model items to IFC](howto/export-to-ifc.md).
 
 ??? question "Which IFC versions can it write?"
     `IFC4` (the default) and `IFC2x3`, set with the `schema` input of `Export.ToIfc`. See [Export model items to IFC](howto/export-to-ifc.md).
@@ -213,7 +216,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     `Excel.ReadFromFile` gives dates as Excel serial numbers. See [IFC, BCF, Excel and CSV](exchange-formats.md#excel).
 
 ??? question "Will writing to an existing workbook keep my formulas and styles?"
-    No. `append` adds a sheet to an existing workbook, but styles and formulas that were not written by Dyncamelo are not preserved. Write to a new file when the formatting matters.
+    No. `append` adds a sheet to an existing workbook, but styles and formulas that were not written by CamelGraph are not preserved. Write to a new file when the formatting matters.
 
 ??? question "How do I put spreadsheet data back into the model?"
     Join the sheet to the model's items by GUID and write the columns with `Properties.SetCustom`. See [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md).
@@ -232,18 +235,18 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     The script contains nodes that change the model, write files, run programs or use the network. The Player lists them and asks the first time, and again whenever the file changes. See [Troubleshooting](troubleshooting.md#the-script-player-asks-me-to-confirm-a-script).
 
 ??? question "Does the Player remember what I typed?"
-    Yes, for each script, in your Dyncamelo settings on your computer, not in the script file. ↺ puts a field back to the saved value. See [The Script Player](player.md#remembered-values).
+    Yes, for each script, in your CamelGraph settings on your computer, not in the script file. ↺ puts a field back to the saved value. See [The Script Player](player.md#remembered-values).
 
 ## Safety and privacy
 
-??? question "Does Dyncamelo send my model or data anywhere?"
+??? question "Does CamelGraph send my model or data anywhere?"
     No. It has no account, analytics or licence server. Its one network request is a once-a-day look for a newer version, which you can switch off. See [Privacy and safety](privacy-and-safety.md).
 
 ??? question "Is it safe to run a graph someone sent me?"
-    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. Dyncamelo lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
+    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Are node packs safe?"
-    A node pack is code. Dyncamelo loads every `.dll` in a `Packages` folder, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
+    A node pack is code. CamelGraph loads every `.dll` in a `Packages` folder, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Should I save the model before I run a graph?"
     Yes, when the graph changes the model. A run is not atomic: if it is cancelled or a node fails, nodes that already ran have already changed the model. See [Running a graph](running-graphs.md#changing-the-model-and-undoing-it).
@@ -251,13 +254,13 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ## Troubleshooting
 
 ??? question "The editor says 'Something went wrong'."
-    Dyncamelo's crash guard caught a failure in its own code. Save your graph, then look at `%APPDATA%\Dyncamelo\errors.log`. See [Troubleshooting](troubleshooting.md#the-editor-says-something-went-wrong).
+    CamelGraph's crash guard caught a failure in its own code. Save your graph, then look at `%APPDATA%\Dyncamelo\errors.log`. See [Troubleshooting](troubleshooting.md#the-editor-says-something-went-wrong).
 
 ??? question "A graph opens with a warning or with missing nodes."
     The file was saved by another version or needs a node pack you do not have. The missing node is kept as a placeholder, so saving loses nothing. See [Troubleshooting](troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes).
 
 ??? question "How do I report a bug or ask for a feature?"
-    On GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the Dyncamelo and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
+    On GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the CamelGraph and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
 
 ??? question "Is there a quick check that the Navisworks nodes work on my model?"
     Yes. **Help ▸ Run Self-Test…** runs a set of read-only Navisworks nodes on the open model and shows pass or fail for each. Run it once after installing, especially on 2025 or 2026. See [Requirements](requirements.md#what-has-been-tested).
@@ -276,5 +279,5 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ??? question "Can another add-in or the Batch Utility run a script?"
     Yes, through the plug-in `Dyncamelo.Run.DYNC`: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and asks the same confirmation as the Player. See [The Script Player](player.md#running-a-script-from-other-tools).
 
-??? question "Is Dyncamelo connected to Autodesk?"
+??? question "Is CamelGraph connected to Autodesk?"
     No. It is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. See [Licence](licence.md#trademarks).

@@ -1,6 +1,6 @@
 # Installation
 
-Dyncamelo installs as an Autodesk **application bundle**: a folder that Navisworks finds by itself at start-up and that gives you a **BIMCamel** ribbon tab. It works per user and needs no administrator rights.
+CamelGraph installs as an Autodesk **application bundle**: a folder that Navisworks finds by itself at start-up and that gives you a **BIMCamel** ribbon tab. It works per user and needs no administrator rights.
 
 Before you begin, check the [requirements](requirements.md), and close Navisworks.
 
@@ -9,15 +9,15 @@ Before you begin, check the [requirements](requirements.md), and close Naviswork
 
 ## Where to get it
 
-Dyncamelo comes from three places, one of them not open yet. It is the same program in all of them.
+CamelGraph comes from three places, one of them not open yet. It is the same program in all of them.
 
 | Source | For | What you get | Updates |
 |---|---|---|---|
 | [GitHub releases](https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest) | **Personal use**, free | The files of a release (below) and the source code. Licence: PolyForm Noncommercial 1.0.0. | The start screen shows a notice when a newer version exists, and **Get it** opens the GitHub page. |
-| [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo) | **Personal use**, free | The Dyncamelo page, with the same personal-use copy. | The same notice and **Get it** button. |
+| [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo) | **Personal use**, free | The CamelGraph page, with the same personal-use copy. | The same notice and **Get it** button. |
 | Autodesk App Store | **Professional use**. **Coming soon.** | The copy with the commercial licence from BIMCamel. The store listing will show the price and terms. | Updated by the store. This copy will not make the update check. |
 
-The installer, the About window and the start screen of the free copies are marked *Personal use*. See [Licence](licence.md#which-copy-do-i-need) if you are not sure which copy you need. Download Dyncamelo only from these places. Until the App Store copy is there, get in touch through [bimcamel.com](https://www.bimcamel.com) about professional use.
+The installer, the About window and the start screen of the free copies are marked *Personal use*. See [Licence](licence.md#which-copy-do-i-need) if you are not sure which copy you need. Download CamelGraph only from these places. Until the App Store copy is there, get in touch through [bimcamel.com](https://www.bimcamel.com) about professional use.
 
 A release on GitHub that carries the ready-to-install files has these downloads next to its source code:
 
@@ -92,7 +92,7 @@ Pick one. Tabs A to D are the four ways to put the bundle in place.
 
     1. Close Navisworks.
     2. Create a folder named exactly like the plug-in DLL inside the Navisworks `Plugins` folder, for example `C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\` (use the Simulate and year folder that matches your product). This needs administrator rights.
-    3. Copy the Dyncamelo files into it: `Dyncamelo.App.dll`, `Dyncamelo.UI.dll`, `Dyncamelo.Navisworks.dll`, `Dyncamelo.Nodes.dll`, `Dyncamelo.Core.dll`, `Nodify.dll`, `Newtonsoft.Json.dll`, `AutomaticGraphLayout.dll`, `en-US\Dyncamelo.xaml` and the `Resources\*.png` files.
+    3. Copy the CamelGraph files into it: `Dyncamelo.App.dll`, `Dyncamelo.UI.dll`, `Dyncamelo.Navisworks.dll`, `Dyncamelo.Nodes.dll`, `Dyncamelo.Core.dll`, `Nodify.dll`, `Newtonsoft.Json.dll`, `AutomaticGraphLayout.dll`, `en-US\Dyncamelo.xaml` and the `Resources\*.png` files.
     4. Unblock the files as in tab C.
     5. Start Navisworks.
 
@@ -112,7 +112,7 @@ You can also run graphs that use only the general nodes, with no Navisworks, fro
 
 ## Check that it works
 
-1. Start Navisworks and **open a model**. Dyncamelo works against the active document.
+1. Start Navisworks and **open a model**. CamelGraph works against the active document.
 2. Look for the **BIMCamel** ribbon tab, panel **Visual Programming**. It has three buttons:
     * **Dyncamelo** opens the node editor as a dockable pane.
     * **Player** opens the [Script Player](player.md).

@@ -4,7 +4,7 @@ Find the symptom, read the cause, try the fix. If nothing here helps, [collect d
 
 `DyncameloSetup.exe` is the installer attached to a release that carries one (v0.47.0 and newer do; some earlier releases carry the source code only). A Debug build of the solution also puts the bundle in the right folder for you.
 
-Everything below comes from the Dyncamelo source and docs. Where a behaviour has **not** been seen inside a real Navisworks yet, the text says so. See [Known issues](#known-issues).
+Everything below comes from the CamelGraph source and docs. Where a behaviour has **not** been seen inside a real Navisworks yet, the text says so. See [Known issues](#known-issues).
 
 ## Symptoms
 
@@ -28,7 +28,7 @@ Then: [how to collect diagnostics](#how-to-collect-diagnostics), [which version 
 
 ## Navisworks reports `PLUGIN_LOAD_02` or `0x80131515` at start
 
-**Cause.** Windows kept the browser's "downloaded file" mark (Zone.Identifier) on the Dyncamelo DLLs. .NET Framework refuses to load assemblies with that mark. `DyncameloSetup.exe` and `install-dyncamelo.bat` remove the mark. A manual copy of the bundle from the zip does not.
+**Cause.** Windows kept the browser's "downloaded file" mark (Zone.Identifier) on the CamelGraph DLLs. .NET Framework refuses to load assemblies with that mark. `DyncameloSetup.exe` and `install-dyncamelo.bat` remove the mark. A manual copy of the bundle from the zip does not.
 
 **Fix.** In PowerShell:
 
@@ -49,13 +49,13 @@ Check these in order.
 5. **Wrong-year DLL.** A DLL built for one Navisworks year still loads its ribbon button in another, but its dock pane cannot register. The button then shows "The Dyncamelo editor panel is not registered with Navisworks". Reinstall with the installer from the same release, which carries a build for each year.
 6. **Classic Plugins-folder install.** If you copied the files to `...\Navisworks Manage 2024\Plugins\Dyncamelo.App\` instead, there is no ribbon tab. The button is under **Tool add-ins** ([Getting Started](GETTING_STARTED.md)).
 
-The tab is named **BIMCamel** and the panel **Visual Programming**. It holds three buttons: **Dyncamelo**, **Player** and **About**. If you also installed another BIMCamel tool, Dyncamelo merges the duplicate "BIMCamel" tabs into one. If you still see two, please report it.
+The tab is named **BIMCamel** and the panel **Visual Programming**. It holds three buttons: **Dyncamelo**, **Player** and **About**. If you also installed another BIMCamel tool, CamelGraph merges the duplicate "BIMCamel" tabs into one. If you still see two, please report it.
 
 ## The editor says "Something went wrong"
 
 The full text is "Something went wrong (*ExceptionType*: *message*). Details: %APPDATA%\Dyncamelo\errors.log".
 
-**Cause.** Dyncamelo's *crash guard* caught a failure in its own code, for example in a command, or WPF failing to build a visual soon after you clicked. Without the guard, an error like this would close Navisworks. The editor keeps running and the failure is written to the log.
+**Cause.** CamelGraph's *crash guard* caught a failure in its own code, for example in a command, or WPF failing to build a visual soon after you clicked. Without the guard, an error like this would close Navisworks. The editor keeps running and the failure is written to the log.
 
 **Fix.**
 
@@ -90,15 +90,15 @@ More in the [editor guide](UI_GUIDE.md#finding-your-way).
 
 **"Opened *file*.dyc. 3 connections or values could not be restored — ..."** appears in the status bar.
 
-**Cause.** The file was saved with an older version, and a node has changed since: it no longer has an input or output with that name. Dyncamelo drops the wire, or the value typed into that input, and says which one first (`A connection into 'X' was dropped: it no longer has an input 'y'.`, or `'X' no longer has an input 'y'; the value typed into it was dropped.`). Everything else is restored.
+**Cause.** The file was saved with an older version, and a node has changed since: it no longer has an input or output with that name. CamelGraph drops the wire, or the value typed into that input, and says which one first (`A connection into 'X' was dropped: it no longer has an input 'y'.`, or `'X' no longer has an input 'y'; the value typed into it was dropped.`). Everything else is restored.
 
 **Fix.** Find the node named in the message, look at its current inputs (hover a socket), reconnect the wire or type the value again, and save. Renamed inputs normally keep their wires on their own, and retired nodes keep working in old graphs, so this message appears only when a socket is really gone.
 
-**A node is red with "Unresolved zero-touch definition ..." or "Unknown node type ...".** The node is not in your install: the graph needs a node pack you have not installed, or it was made with a newer Dyncamelo. Install the pack or update Dyncamelo. The placeholder keeps the node's original data, so saving the file does not lose it. The Script Player will not run a script that has missing nodes.
+**A node is red with "Unresolved zero-touch definition ..." or "Unknown node type ...".** The node is not in your install: the graph needs a node pack you have not installed, or it was made with a newer CamelGraph. Install the pack or update CamelGraph. The placeholder keeps the node's original data, so saving the file does not lose it. The Script Player will not run a script that has missing nodes.
 
 **The file will not open at all.**
 
-* "The file requires .dyc reader version N but this application supports version M": update Dyncamelo. (A file that contains node groups is refused by older versions rather than opened without them.)
+* "The file requires .dyc reader version N but this application supports version M": update CamelGraph. (A file that contains node groups is refused by older versions rather than opened without them.)
 * "The file is not valid JSON" or "not a Dyncamelo .dyc document": the file is damaged or is not a graph.
 
 ## Nothing happens when I press Run
@@ -169,21 +169,21 @@ If you measure a slow case, please add the model size, the node and the time to 
 
 ## Navisworks closed while I was working
 
-1. Start Navisworks and open the editor. If you had unsaved changes and **Autosave** was on, Dyncamelo offers the autosaved copy when the editor opens on an empty canvas. Saving, or answering *No*, deletes the copy. The copies are in `%APPDATA%\Dyncamelo\recovery`.
+1. Start Navisworks and open the editor. If you had unsaved changes and **Autosave** was on, CamelGraph offers the autosaved copy when the editor opens on an empty canvas. Saving, or answering *No*, deletes the copy. The copies are in `%APPDATA%\Dyncamelo\recovery`.
 2. Open `%APPDATA%\Dyncamelo\errors.log`. If there is an entry marked `a failure that ended the host` from the time of the crash, it holds the full exception. Send it.
 3. Tell us what you clicked last. A crash of Navisworks is the most serious kind of bug for this project.
 
 ## Running next to other add-ins
 
-Dyncamelo ships its own copies of `Nodify.dll`, `Newtonsoft.Json.dll` and `AutomaticGraphLayout.dll` in the folder of `Dyncamelo.App.dll`, and Dyncamelo's own DLLs there too. Navisworks loads all add-ins into **one process**, so if two add-ins use the same library in different versions, the .NET Framework rules decide which copy a request gets.
+CamelGraph ships its own copies of `Nodify.dll`, `Newtonsoft.Json.dll` and `AutomaticGraphLayout.dll` in the folder of `Dyncamelo.App.dll`, and CamelGraph's own DLLs there too. Navisworks loads all add-ins into **one process**, so if two add-ins use the same library in different versions, the .NET Framework rules decide which copy a request gets.
 
 What the code does about it (`src/Dyncamelo.App/DyncameloHost.cs`):
 
 * It redirects the one strong-named Navisworks reference that does not match across years, `Autodesk.Navisworks.Timeliner`, to the copy the running Navisworks has already loaded. Without it the TimeLiner nodes would silently vanish from the library.
 * For any other assembly that the normal lookup cannot find, it loads `<name>.dll` from the add-in folder as a last resort. This is how WPF finds the theme's `Nodify` resources.
-* That is all. Dyncamelo does **not** isolate its copies from other add-ins, and it does not force its own version to win. The fallback only runs when the normal lookup has already failed.
+* That is all. CamelGraph does **not** isolate its copies from other add-ins, and it does not force its own version to win. The fallback only runs when the normal lookup has already failed.
 
-Whether any real combination of add-ins conflicts with Dyncamelo has not been tested. If you suspect one, `errors.log` or a Navisworks message will name the assembly (look for `FileLoadException`, `MissingMethodException` or a version number). To test, move the other add-in's bundle out of `ApplicationPlugins` temporarily and restart Navisworks. Then send the log and the name and version of the other add-in. Dyncamelo and the BIMCamel IFC exporter are built to share the **BIMCamel** tab (see the [README](../README.md)).
+Whether any real combination of add-ins conflicts with CamelGraph has not been tested. If you suspect one, `errors.log` or a Navisworks message will name the assembly (look for `FileLoadException`, `MissingMethodException` or a version number). To test, move the other add-in's bundle out of `ApplicationPlugins` temporarily and restart Navisworks. Then send the log and the name and version of the other add-in. CamelGraph and the BIMCamel IFC exporter are built to share the **BIMCamel** tab (see the [README](../README.md)).
 
 ---
 
@@ -193,7 +193,7 @@ When you report a problem, include:
 
 1. **Dyncamelo version.** On the **BIMCamel** ribbon tab, click **About**. The version is at the bottom of the window.
 2. **Navisworks product and year** (Manage or Simulate, 2024, 2025 or 2026) and your Windows version.
-3. **Help > Copy Diagnostics** in the editor. It copies the Dyncamelo and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`. Paste it into the issue.
+3. **Help > Copy Diagnostics** in the editor. It copies the CamelGraph and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`. Paste it into the issue.
 4. **The end of `%APPDATA%\Dyncamelo\errors.log`**, if the problem produced an error.
 5. **Help > Run Self-Test** with a model open, if a Navisworks node behaves oddly. It runs a set of read-only Navisworks nodes and shows pass or fail for each. The report can be copied.
 6. **The graph** (`.dyc`), if you can share it. Open it in a text editor first: it can hold file paths, names and values.

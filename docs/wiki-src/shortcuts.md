@@ -1,6 +1,6 @@
 # Keyboard and mouse reference
 
-Every keyboard shortcut and mouse gesture of the Dyncamelo editor, grouped by area.
+Every keyboard shortcut and mouse gesture of the CamelGraph editor, grouped by area.
 
 The shortcuts shown here are the **defaults**. You can change any of them in **Settings ▸ Shortcuts** (see [Settings](settings.md#shortcuts)), and the in-app sheet that opens with ++f1++ always shows the keys currently in force. Every command can also be reached from a menu and from the command palette (++ctrl+shift+p++), so you never have to remember a key.
 
@@ -15,10 +15,10 @@ The shortcuts shown here are the **defaults**. You can change any of them in **S
 * **Everywhere** means the shortcut also works while a text box has the focus.
 * *(toggle)* marks a command that switches something on and off.
 * A dash means the command has no shortcut by default. It is still in its menu and the palette, and you can give it one.
-* Keys work when the Dyncamelo pane has the keyboard focus (click the canvas first). While it does, Dyncamelo's keys take priority over Navisworks's own for the same keys.
+* Keys work when the CamelGraph pane has the keyboard focus (click the canvas first). While it does, CamelGraph's keys take priority over Navisworks's own for the same keys.
 
 !!! note "Keys do nothing?"
-    Keys work when the Dyncamelo pane has the keyboard focus. Click the canvas first.
+    Keys work when the CamelGraph pane has the keyboard focus. Click the canvas first.
 
 ## File
 

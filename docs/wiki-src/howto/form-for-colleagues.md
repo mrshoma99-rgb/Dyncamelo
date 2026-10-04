@@ -10,8 +10,8 @@ Goal: build a graph whose inputs appear as a form in the **Script Player**, so a
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
-* You build and test the graph. Your colleague only needs Dyncamelo installed and a model open.
+* Open a model in Navisworks and the CamelGraph editor.
+* You build and test the graph. Your colleague only needs CamelGraph installed and a model open.
 * The example finds items by their volume and writes them to an Excel file. Replace the names with your own.
 
 [Download the graph](../graphs/player-form.dyc)

@@ -10,7 +10,7 @@ Goal: store search results in the Navisworks **Sets** window, either as one set 
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Know the tab and property to search by ([find the names](find-property-names.md)).
 
 ## Part A: one set from a search

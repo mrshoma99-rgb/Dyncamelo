@@ -9,7 +9,7 @@ The words used on this site, and the ideas behind them. If you know Dynamo from 
 * A **wire** carries a value from one node's output into another node's input. Reading a graph is following the wires.
 * **Data flows from left to right.** A node runs only after every node that feeds it has run.
 
-The same word has two meanings in Navisworks and in Dyncamelo, so here is the difference: a Navisworks **item** (a `ModelItem`) is a thing in the model tree, such as a wall or a pipe. A Dyncamelo **node** is a step in your graph. Many nodes take items in and give items out.
+The same word has two meanings in Navisworks and in CamelGraph, so here is the difference: a Navisworks **item** (a `ModelItem`) is a thing in the model tree, such as a wall or a pipe. A CamelGraph **node** is a step in your graph. Many nodes take items in and give items out.
 
 ## Where nodes come from
 
@@ -29,7 +29,7 @@ Every input and output has a **kind** (number, text, item, colour…). A socket 
 
 ## Running
 
-Dyncamelo is a **dataflow** engine. When you press **Run**:
+CamelGraph is a **dataflow** engine. When you press **Run**:
 
 1. Nodes are put in dependency order.
 2. A node that has not changed since the last run is skipped, and its stored outputs are used.
@@ -42,7 +42,7 @@ Because runs happen on the Navisworks main thread, Navisworks is busy while a gr
 
 ## Lists, replication and lacing
 
-A list is an ordinary value in Dyncamelo, and most power comes from lists.
+A list is an ordinary value in CamelGraph, and most power comes from lists.
 
 **Replication.** Wire a list into an input that expects one value, and the node runs **once per item** and gives a list of results. The wire is drawn dashed to show it. No loop node is needed:
 
@@ -91,7 +91,7 @@ A graph is a picture of **data** dependencies. When two nodes change the model a
 
 ## What a node changes
 
-Nodes are of two kinds. **Reading** nodes only look at the model and compute (`Search.*`, `Properties.*`, `Selection.Current`). **Writing** nodes change something: the model (`Appearance.*`, `SelectionSet.Create`, `Properties.SetCustom`), a file on disk (`CSV.WriteToFile`), a program or the web (`System.Run`, `Web.Post`). Dyncamelo marks the second kind, and asks before it runs a graph that came from a file and contains the riskiest ones ([Privacy and safety](privacy-and-safety.md)). The [node library](nodes/index.md) says in each description what a node changes.
+Nodes are of two kinds. **Reading** nodes only look at the model and compute (`Search.*`, `Properties.*`, `Selection.Current`). **Writing** nodes change something: the model (`Appearance.*`, `SelectionSet.Create`, `Properties.SetCustom`), a file on disk (`CSV.WriteToFile`), a program or the web (`System.Run`, `Web.Post`). CamelGraph marks the second kind, and asks before it runs a graph that came from a file and contains the riskiest ones ([Privacy and safety](privacy-and-safety.md)). The [node library](nodes/index.md) says in each description what a node changes.
 
 ## Node states
 

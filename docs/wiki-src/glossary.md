@@ -1,6 +1,6 @@
 # Glossary
 
-The words used in Dyncamelo and in this guide, in alphabetical order. Each entry links to the page that explains it. If a word is about the Navisworks model rather than about Dyncamelo, the entry says so.
+The words used in CamelGraph and in this guide, in alphabetical order. Each entry links to the page that explains it. If a word is about the Navisworks model rather than about CamelGraph, the entry says so.
 
 ## A to B
 
@@ -40,7 +40,7 @@ Choice
 :   An input node that offers a pick-list of your own options, one per line. It gives the chosen text and its position. In the Script Player it is a drop-down. See [Give colleagues a form](howto/form-for-colleagues.md).
 
 Clash test
-:   A Clash Detective test in Navisworks Manage. Dyncamelo reads and runs tests and their results with the `Clash*` nodes. See [Make a clash report](howto/clash-report.md).
+:   A Clash Detective test in Navisworks Manage. CamelGraph reads and runs tests and their results with the `Clash*` nodes. See [Make a clash report](howto/clash-report.md).
 
 Command palette
 :   A search box for every command, setting and canvas node, opened with ++ctrl+shift+p++. See [The editor](canvas-and-nodes.md#the-command-palette).
@@ -161,7 +161,7 @@ Pass-through
 :   Nodes that change the model give back the items they were given on an output with the same name, so you can chain them. See [Inputs, outputs and kinds](ports-and-kinds.md#outputs).
 
 Personal use and Professional copy
-:   The two editions of Dyncamelo. The copy from GitHub or bimcamel.com is free for personal use. The professional copy, for work, is coming soon to the Autodesk App Store. See [Licence](licence.md#which-copy-do-i-need).
+:   The two editions of CamelGraph. The copy from GitHub or bimcamel.com is free for personal use. The professional copy, for work, is coming soon to the Autodesk App Store. See [Licence](licence.md#which-copy-do-i-need).
 
 Pill
 :   See [Multi-input](#l-to-m).

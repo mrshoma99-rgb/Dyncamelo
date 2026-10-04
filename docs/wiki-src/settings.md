@@ -1,6 +1,6 @@
 # Settings
 
-The Settings page lists every option of the Dyncamelo editor, grouped into sections, with a search box, a colour palette picker and a table where you can change keyboard shortcuts.
+The Settings page lists every option of the CamelGraph editor, grouped into sections, with a search box, a colour palette picker and a table where you can change keyboard shortcuts.
 
 ## Opening the Settings page
 
@@ -29,7 +29,7 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 | Node library panel | On / Off | On | Shows the node library on the left of the canvas. It can also be hidden with the arrow in its header (or ++ctrl+b++) and brought back with the tab at the canvas edge. |
 | Descriptions in the library | On / Off | On | Shows a description line under each node in the library panel. |
 | Value previews under nodes | On / Off | On | Shows a bubble with the result under each node after a run. |
-| Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Makes everything in the Dyncamelo window smaller or larger, for high-resolution screens or a small pane. |
+| Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Makes everything in the CamelGraph window smaller or larger, for high-resolution screens or a small pane. |
 | Hints in the status bar | On / Off | On | Shows a line of suggestions at the bottom that follows what you are doing: the keys for the selected nodes, what a dragged wire will do. |
 | Start screen on an empty canvas | On / Off | On | While the canvas is empty, shows the start screen: a New script card, your recent scripts, the examples, the installed version and a link to bimcamel.com. It goes away as soon as you open a script or add a node. |
 
@@ -71,7 +71,7 @@ Notes on a few of these:
 * **Ask before running graphs from files.** Turning it off removes a safety question. See [Privacy and safety](privacy-and-safety.md) before you do.
 
 !!! warning "Leave the safety question on"
-    **Ask before running graphs from files** is how Dyncamelo warns you before a graph from a file starts programs, uses the network, or deletes, moves or overwrites files. Leave it on.
+    **Ask before running graphs from files** is how CamelGraph warns you before a graph from a file starts programs, uses the network, or deletes, moves or overwrites files. Leave it on.
 
 ## Shortcuts
 
@@ -98,9 +98,9 @@ The menus, the key handling, the ++f1++ help sheet and the palette all read the 
 
 | Setting | Values | Default | What it does |
 |---|---|---|---|
-| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is a newer one. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, nothing about you or your models. Off means Dyncamelo makes no network request of its own. |
+| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is a newer one. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, nothing about you or your models. Off means CamelGraph makes no network request of its own. |
 
-This is the only network request Dyncamelo makes by itself. A copy installed from the Autodesk App Store never makes it. The full policy is in **Help ▸ Privacy Policy** and on the [Privacy and safety](privacy-and-safety.md) page.
+This is the only network request CamelGraph makes by itself. A copy installed from the Autodesk App Store never makes it. The full policy is in **Help ▸ Privacy Policy** and on the [Privacy and safety](privacy-and-safety.md) page.
 
 ## Diagnostics
 
@@ -111,8 +111,8 @@ This section has buttons rather than switches. Each one is also available from a
 | Performance HUD | Shows frame rate, node counts and input state on the canvas (++ctrl+shift+f12++). |
 | Keyboard and mouse help | Opens the ++f1++ sheet of shortcuts and gestures. |
 | Open the user guide | Opens the online guide in your browser. |
-| Copy diagnostics | Copies the Dyncamelo and Navisworks versions, installed plug-ins and the end of the error log to the clipboard, with your user name, computer name and profile folder replaced, ready to paste into a bug report. |
-| Privacy policy | Shows what Dyncamelo stores on your computer and the one network request it can make. |
+| Copy diagnostics | Copies the CamelGraph and Navisworks versions, installed plug-ins and the end of the error log to the clipboard, with your user name, computer name and profile folder replaced, ready to paste into a bug report. |
+| Privacy policy | Shows what CamelGraph stores on your computer and the one network request it can make. |
 | Run self-test | Runs read-only Navisworks nodes on the open model and reports which work. It changes nothing. |
 
 **Reset all settings** puts every setting and shortcut back to its default. Your favourite nodes and recent files are kept, and so are your Script Player folders and remembered values. If something behaves strangely, resetting is a quick way to rule settings out. See [Troubleshooting](troubleshooting.md).

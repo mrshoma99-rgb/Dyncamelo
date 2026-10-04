@@ -10,7 +10,7 @@ Goal: turn "find the items on a level and colour them" into one node you can dro
 
 ## Before you start
 
-* Open the Dyncamelo editor. A model is only needed to run the example.
+* Open the CamelGraph editor. A model is only needed to run the example.
 * A node group is not a **frame**. A frame (++ctrl+g++) is a coloured rectangle behind some nodes. A group is a real node with sockets of its own.
 
 ## Steps
@@ -42,7 +42,7 @@ To add a socket quickly while a group is open, drag a wire onto the Group Output
     * A group can hold other groups, but never itself.
 
 !!! warning "Sharing and the Player"
-    Older versions of Dyncamelo refuse a file that contains node groups, so tell the other person to update ([Saving and opening](../saving-opening.md#sharing-a-script)). The Script Player does not offer inputs that sit inside a group. Keep input nodes at the top level and wire them into the group.
+    Older versions of CamelGraph refuse a file that contains node groups, so tell the other person to update ([Saving and opening](../saving-opening.md#sharing-a-script)). The Script Player does not offer inputs that sit inside a group. Keep input nodes at the top level and wire them into the group.
 
 ## If it does not work
 

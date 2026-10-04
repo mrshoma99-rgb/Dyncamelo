@@ -10,7 +10,7 @@
     - {key: first-steps, label: Your first script}
     - {key: updating, label: Updating}
     - {key: uninstall, label: Uninstalling}
-- section: Using Dyncamelo
+- section: Using CamelGraph
   pages:
     - {key: concepts, label: Concepts}
     - {key: ports-and-kinds, label: "Inputs, outputs and kinds"}

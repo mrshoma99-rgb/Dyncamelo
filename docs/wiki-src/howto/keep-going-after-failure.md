@@ -10,7 +10,7 @@ Goal: let a graph carry on when one step can fail, for example reading a file th
 
 ## Before you start
 
-* Open the Dyncamelo editor. No model is needed for this example.
+* Open the CamelGraph editor. No model is needed for this example.
 * Without `Flow.Try`, a node that fails turns red and the nodes after it wait with an amber "Upstream failure" warning. The rest of the graph and Navisworks are not affected.
 * The failing node itself still shows its red error. `Flow.Try` stops that error from stopping the nodes after it.
 

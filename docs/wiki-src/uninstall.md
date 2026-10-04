@@ -46,7 +46,7 @@ Uninstalling removes the program and the Apps entry. It deliberately **leaves yo
 | Your scripts folder | `Documents\Dyncamelo\Scripts` | What the Script Player lists. |
 | Settings and logs | `%APPDATA%\Dyncamelo` | `ui-settings.json` (preferences, shortcuts, recent files, favourite nodes, values typed into scripts), `errors.log`, `update-check.txt` and the `recovery` folder of autosaved graphs. |
 
-For a completely clean start, delete the `%APPDATA%\Dyncamelo` folder yourself (paste that into the Windows Explorer address bar). Dyncamelo keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
+For a completely clean start, delete the `%APPDATA%\Dyncamelo` folder yourself (paste that into the Windows Explorer address bar). CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
 
 ## Check that it is gone
 

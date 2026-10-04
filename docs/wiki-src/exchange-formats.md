@@ -1,6 +1,6 @@
 # IFC, BCF, Excel and CSV
 
-How data gets into and out of a Dyncamelo graph. Every node named here is in the [node library](nodes/index.md) with its inputs and outputs.
+How data gets into and out of a CamelGraph graph. Every node named here is in the [node library](nodes/index.md) with its inputs and outputs.
 
 | Format | Read | Write |
 |---|---|---|
@@ -34,7 +34,7 @@ IFC elements are identified by a 22-character **GlobalId** (`0$WU4A9R19$vKWO$AdO
 
 ### Writing IFC: `Export.ToIfc`
 
-`Export.ToIfc` writes model items to an IFC file with the BIMCamel IFC exporter engine, which ships inside Dyncamelo (nothing else to install). It writes a spatial tree, geometry instancing, property sets, materials, base quantities and georeferencing.
+`Export.ToIfc` writes model items to an IFC file with the BIMCamel IFC exporter engine, which ships inside CamelGraph (nothing else to install). It writes a spatial tree, geometry instancing, property sets, materials, base quantities and georeferencing.
 
 The simplest graph:
 
@@ -127,7 +127,7 @@ BCF.ImportIssues ─ modelItems ─▶ List.GetItemAtIndex (topic number) ─▶
 
 ## Excel
 
-Dyncamelo reads and writes `.xlsx` files itself, so **Excel does not have to be installed**. `.xls` (the old format) is not supported.
+CamelGraph reads and writes `.xlsx` files itself, so **Excel does not have to be installed**. `.xls` (the old format) is not supported.
 
 | Node | Notes |
 |---|---|

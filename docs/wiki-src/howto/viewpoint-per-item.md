@@ -10,7 +10,7 @@ Goal: for every item a search finds, isolate it, frame it in the view and save a
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Save the model. The loop isolates items one after another and leaves the last one isolated.
 * The quickest way to try it is to open the finished sample: **File ▸ Sample Graphs ▸ Isolated Viewpoints (Loop)**, or its card on the start screen.
 

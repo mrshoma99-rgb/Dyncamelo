@@ -1,6 +1,6 @@
 # The editor: canvas and nodes
 
-The Dyncamelo editor is a pane inside Navisworks where you build a script by placing nodes on a canvas and joining them with wires.
+The CamelGraph editor is a pane inside Navisworks where you build a script by placing nodes on a canvas and joining them with wires.
 
 This page tours the editor window and everything you do on the canvas. The node library has its own page ([Node library and search](library-and-search.md)), and every key is listed in the [keyboard and mouse reference](shortcuts.md).
 
@@ -49,10 +49,10 @@ A run blocks Navisworks while it works, so during a run a dark overlay shows whi
 
 While the canvas is empty (when the editor opens, or after you delete every node) the middle of the canvas shows a start screen:
 
-* the Dyncamelo name and the **installed version** (the letter `v` followed by the version number);
-* a **bimcamel.com** button that opens the Dyncamelo page on the BIMCamel website, https://www.bimcamel.com/plugins/dyncamelo;
+* the CamelGraph name and the **installed version** (the letter `v` followed by the version number);
+* a **bimcamel.com** button that opens the CamelGraph page on the BIMCamel website, https://www.bimcamel.com/plugins/dyncamelo;
 * when the once-a-day update check has found a newer release, a notice saying which version is available and which one you have, with a **Get it** button that opens the download page;
-* **cards**. **New script** starts an empty script. Under it come your four newest **recent scripts** (the card shows the file name and its folder). If you have none yet, a line says the scripts you open or save will appear there. Below that, an **Examples** row offers up to six of the sample scripts that ship with Dyncamelo, "Getting Started" first.
+* **cards**. **New script** starts an empty script. Under it come your four newest **recent scripts** (the card shows the file name and its folder). If you have none yet, a line says the scripts you open or save will appear there. Below that, an **Examples** row offers up to six of the sample scripts that ship with CamelGraph, "Getting Started" first.
 
 Click a card to open it. The cards disappear as soon as you add a node or open a script. After you press **New script** only a short hint remains ("an empty canvas" and the ways to add a first node). The same two links also live in the Help menu (**BIMCamel Website** and **Get the Newest Version…**).
 
@@ -129,7 +129,7 @@ Frames are only for tidiness. For a reusable piece of script with its own inputs
 
 ## Copy, paste, duplicate and delete
 
-* ++ctrl+c++, ++ctrl+x++ and ++ctrl+v++ copy, cut and paste the selected nodes together with the wires between them. Dyncamelo keeps its own clipboard inside the editor, so pasting does not use the Windows clipboard. Repeated pastes are offset a little each time.
+* ++ctrl+c++, ++ctrl+x++ and ++ctrl+v++ copy, cut and paste the selected nodes together with the wires between them. CamelGraph keeps its own clipboard inside the editor, so pasting does not use the Windows clipboard. Repeated pastes are offset a little each time.
 * ++ctrl+d++ **duplicates** the selection (with the wires between the copied nodes), placing the copy slightly offset from the original.
 * ++delete++ removes the selection.
 

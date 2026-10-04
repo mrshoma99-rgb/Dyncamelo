@@ -10,7 +10,7 @@ Goal: get a single number that says how many items in a group are missing a prop
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Decide which items to check (a search) and which property each one must carry. Use the names your model shows ([find the names](find-property-names.md)).
 
 [Download the graph](../graphs/data-completeness.dyc)

@@ -28,7 +28,7 @@ All of the commands below are in the **Node Groups** menu, and several are also 
 
 The wires that crossed the edge of your selection become the group's sockets: one **input** for every outside source feeding the selection, and one **output** for every output socket that leaves it. An instance takes the place of your selection and is wired to the same neighbours, so the script computes exactly what it did before. The new group is called "Node Group" (with a number if that name is taken).
 
-Dyncamelo will not make a group in a few cases, and the status bar says why:
+CamelGraph will not make a group in a few cases, and the status bar says why:
 
 * nothing is selected;
 * a node that sits **between** the selected nodes is not selected (it would have to be both inside and outside), so select it too;
@@ -68,7 +68,7 @@ The Group Input and Group Output nodes cannot be deleted, copied or duplicated; 
 * **Ungroup Node Group** (++ctrl+alt+u++) puts a copy of the group's nodes back in place of an instance, wired through the interface to whatever the instance was wired to. The group itself stays in the file for any other instances.
 * **Delete Unused Node Groups** removes the groups that no instance uses any more. Until you do this, a group stays in the file even after its last instance is gone.
 
-A group can hold other groups but never itself. If you try to place a group inside itself, Dyncamelo refuses and says so.
+A group can hold other groups but never itself. If you try to place a group inside itself, CamelGraph refuses and says so.
 
 ## Groups in the library
 
@@ -80,7 +80,7 @@ Copying an instance and pasting it into another script brings its group along.
 
 * **Errors inside a group** are reported on the instance, for example "Inside 'Level colours', Appearance.OverrideColor: …", for up to three nodes, followed by a count of the rest. Warnings inside are summarised as a count.
 * **Everything inside runs each time.** Whenever an instance runs, all the nodes inside it run again.
-* **Older versions refuse files with groups.** A script that contains node groups needs a Dyncamelo that knows about them; older versions say so instead of silently dropping the groups. Keep this in mind when you [share a script](saving-opening.md#sharing-a-script).
+* **Older versions refuse files with groups.** A script that contains node groups needs a CamelGraph that knows about them; older versions say so instead of silently dropping the groups. Keep this in mind when you [share a script](saving-opening.md#sharing-a-script).
 * **The Script Player** does not offer inputs that sit inside a group in its form. If you want a value to appear as a field, put that input node at the top level of the script, outside any group, and wire it into the group's input. See [The Script Player](player.md).
 * **Undo** treats each group operation (make, ungroup, add or remove a socket, rename, single user, delete) as one step.
 

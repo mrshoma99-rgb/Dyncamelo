@@ -10,9 +10,9 @@ Goal: count items and total a quantity for each category, and save the result as
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
+* Open a model in Navisworks and the CamelGraph editor.
 * Know the tab and property to read, for example *Element ▸ Category* and *Element ▸ Volume* in a Revit-sourced model ([find the names](find-property-names.md)). Use the names your model shows.
-* Excel does not have to be installed. Dyncamelo writes `.xlsx` itself.
+* Excel does not have to be installed. CamelGraph writes `.xlsx` itself.
 
 [Download the graph](../graphs/qto-to-excel.dyc)
 

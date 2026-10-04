@@ -1,6 +1,6 @@
 # Recipes by role
 
-Short node chains for the jobs people use Dyncamelo for. Each recipe names the nodes (find them with the library search or `Ctrl+Shift+P`) and says what to wire; the sample graphs in [`samples/`](../samples/README.md) show some of them built. Every node named here is in the [node catalogue](NODE_CATALOG.md); a name that is not there fails the check described at the end of this page.
+Short node chains for the jobs people use CamelGraph for. Each recipe names the nodes (find them with the library search or `Ctrl+Shift+P`) and says what to wire; the sample graphs in [`samples/`](../samples/README.md) show some of them built. Every node named here is in the [node catalogue](NODE_CATALOG.md); a name that is not there fails the check described at the end of this page.
 
 Two ideas make most of these short:
 

@@ -1,8 +1,8 @@
 # Licence
 
-Dyncamelo comes in two copies. Both are the same program with the same features. The difference is the licence and where you get it.
+CamelGraph comes in two copies. Both are the same program with the same features. The difference is the licence and where you get it.
 
-* **Personal use: free.** Download the installer from the [GitHub releases page](https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest) or from the [Dyncamelo page on bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). It is **source-available** under the **[PolyForm Noncommercial License 1.0.0](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/LICENSE)**. The installer, the About window and the start screen of these copies are marked *Personal use*.
+* **Personal use: free.** Download the installer from the [GitHub releases page](https://github.com/mrshoma99-rgb/Dyncamelo/releases/latest) or from the [CamelGraph page on bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). It is **source-available** under the **[PolyForm Noncommercial License 1.0.0](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/LICENSE)**. The installer, the About window and the start screen of these copies are marked *Personal use*.
 * **Professional use: a copy for the Autodesk App Store is coming soon.** It is for work at a company, a consultancy or a design office, or in a paid project or product. The App Store copy will come with the commercial licence from BIMCamel and will be updated by the store. The store listing will show the price and terms. Until it is there, get in touch through [bimcamel.com](https://www.bimcamel.com).
 
 The text of the licence is what counts; this page is a plain-words summary, not legal advice.
@@ -18,7 +18,7 @@ What "personal use" means in practice:
 
 | Personal use (free) | Professional use (Autodesk App Store) |
 |---|---|
-| A student learning Dyncamelo | A contractor's BIM coordinator running checks on a live project |
+| A student learning CamelGraph | A contractor's BIM coordinator running checks on a live project |
 | A hobbyist trying it on their own models | A consultancy producing deliverables for clients |
 | A university research group | An in-house team at a company |
 
@@ -26,7 +26,7 @@ Charities, schools and universities, public research bodies and government insti
 
 ## In plain words
 
-| If you use Dyncamelo… | Then |
+| If you use CamelGraph… | Then |
 |---|---|
 | to learn, for a hobby project, for research or testing | **Free.** Use the copy from GitHub or bimcamel.com. |
 | as a charity, a school or university, a public research body or a government institution | **Free.** Use the copy from GitHub or bimcamel.com. |
@@ -58,11 +58,11 @@ Copies you already have stay under the licence they came with. The texts are in 
 
 ## Third-party components
 
-Dyncamelo uses libraries that keep their own permissive licences, such as Nodify, Newtonsoft.Json and AutomaticGraphLayout. They are listed in [`THIRD-PARTY-NOTICES.md`](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/THIRD-PARTY-NOTICES.md).
+CamelGraph uses libraries that keep their own permissive licences, such as Nodify, Newtonsoft.Json and AutomaticGraphLayout. They are listed in [`THIRD-PARTY-NOTICES.md`](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/THIRD-PARTY-NOTICES.md).
 
 ## Trademarks
 
-Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with Dyncamelo; at run time the API is provided by your licensed Navisworks installation.
+CamelGraph is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. The Autodesk Navisworks API assemblies are referenced at compile time only and are never redistributed with CamelGraph; at run time the API is provided by your licensed Navisworks installation.
 
 ## Next steps
 

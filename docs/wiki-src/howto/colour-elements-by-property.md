@@ -10,7 +10,7 @@ Goal: paint model items by what a property says, first with one colour for a mat
 
 ## Before you start
 
-* Open a model in Navisworks (any product) and open the Dyncamelo editor from the **BIMCamel** ribbon tab.
+* Open a model in Navisworks (any product) and open the CamelGraph editor from the **BIMCamel** ribbon tab.
 * Know the tab and the property you want. If you do not, read [Find the name of a tab or property](find-property-names.md) first.
 * Save the model. A run changes colours in the open document.
 

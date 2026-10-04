@@ -2,7 +2,7 @@
 
 In about ten minutes you will build a real graph: **find every item whose Material contains "Concrete", colour it red, and save it as a selection set**. About six nodes, no code.
 
-You need Dyncamelo [installed](installation.md) and a model open in Navisworks (a Revit, IFC or DWG model appended to a new `.nwd` is fine).
+You need CamelGraph [installed](installation.md) and a model open in Navisworks (a Revit, IFC or DWG model appended to a new `.nwd` is fine).
 
 ## 1. Open the editor and meet the screen
 
@@ -26,7 +26,7 @@ Three habits that save time from day one:
 
 ## 2. Find the names in Navisworks
 
-Click a concrete element in Navisworks and look at the **Properties** window. Find the tab (also called *category*) and the row (the *property*) that holds the material text. In Revit-sourced models this is usually category **Element**, property **Material**; other formats often use **Item** and **Material**. Dyncamelo searches by exactly the names you see, including their language.
+Click a concrete element in Navisworks and look at the **Properties** window. Find the tab (also called *category*) and the row (the *property*) that holds the material text. In Revit-sourced models this is usually category **Element**, property **Material**; other formats often use **Item** and **Material**. CamelGraph searches by exactly the names you see, including their language.
 
 ## 3. The search
 
@@ -92,7 +92,7 @@ Press ++ctrl+s++ and save a `.dyc` file. It stores the nodes, wires and the valu
 
 ## 8. One search for many values
 
-Lists are where Dyncamelo pays off. Add a **String.Split** node (category *String*) with the text `Concrete,Steel,Masonry` and the separator `,`. Its result is a list of three texts.
+Lists are where CamelGraph pays off. Add a **String.Split** node (category *String*) with the text `Concrete,Steel,Masonry` and the separator `,`. Its result is a list of three texts.
 
 1. Wire the result into the `name` input of **SelectionSet.Create**. `name` wants **one** text, so the node runs three times, once for each text. The wire is drawn dashed to show this.
 2. Wire the same result into the `value` input of the search, instead of the single **String** node. This input accepts any kind of value, so it takes a list as one single value unless you ask for more. Right-click the `value` socket, choose **List Levels** and then `@L1 — items`. A small `@L1` badge appears, and the search now runs three times and gives three lists of items.

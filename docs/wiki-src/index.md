@@ -1,6 +1,8 @@
-# Dyncamelo for Navisworks
+# CamelGraph for Navisworks
 
-Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024, 2025 and 2026. You drag **nodes** onto a canvas, wire the output of one into the input of the next and press **Run**. The graph reads and changes the model you have open: no code, no macros, no SDK boilerplate.
+*Previously called **Dyncamelo**: the same program, with the same files and the same free personal-use copy. Version 0.48 still shows the old name on screen; the next release uses the new one.*
+
+CamelGraph brings **Dynamo-style visual programming** to Autodesk Navisworks 2024, 2025 and 2026. You drag **nodes** onto a canvas, wire the output of one into the input of the next and press **Run**. The graph reads and changes the model you have open: no code, no macros, no SDK boilerplate.
 
 > Search a federated model by property, colour-code it by system, create selection sets in bulk, take quantities out to Excel, triage clashes by rule and make a saved viewpoint for each issue, as graphs you can save, share and run again.
 
@@ -8,7 +10,7 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 [Your first script](first-steps.md){ .md-button }
 [Installation](installation.md){ .md-button }
 
-![The Dyncamelo editor with the library open and the Table Summary from Text sample after a run: nodes, wires, the values under each node and a Watch Table.](../images/wiki-editor-overview.png)
+![The CamelGraph editor with the library open and the Table Summary from Text sample after a run: nodes, wires, the values under each node and a Watch Table.](../images/wiki-editor-overview.png)
 
 *It docks inside Navisworks as a pane, and has a light theme too.*
 
@@ -29,7 +31,7 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 | Run a tested script without the node editor | [The Script Player](player.md) |
 | Look up a word | [Glossary](glossary.md) |
 | Fix a problem | [Troubleshooting](troubleshooting.md) and the [FAQ](faq.md) |
-| Update or remove Dyncamelo | [Updating](updating.md), [Uninstalling](uninstall.md) |
+| Update or remove CamelGraph | [Updating](updating.md), [Uninstalling](uninstall.md) |
 | Write my own nodes in C# | [Writing your own nodes](extending.md) |
 
 ## What it can do
@@ -47,10 +49,10 @@ See [Concepts](concepts.md) for the vocabulary, and the [node library](nodes/ind
 
 ## Good to know before you start
 
-* **Personal use is free. A professional copy for the Autodesk App Store is coming soon.** Using Dyncamelo for your job at a company, or in a paid project, needs the professional copy, which will come with a commercial licence. Until it is there, get in touch through bimcamel.com. See [Licence](licence.md).
+* **Personal use is free. A professional copy for the Autodesk App Store is coming soon.** Using CamelGraph for your job at a company, or in a paid project, needs the professional copy, which will come with a commercial licence. Until it is there, get in touch through bimcamel.com. See [Licence](licence.md).
 * It **sends nothing about you or your models anywhere**. It makes one optional request a day to look for a newer version, which you can switch off. See [Privacy and safety](privacy-and-safety.md).
-* **A graph is a program.** Only run graphs you trust. Dyncamelo asks before it runs a graph from a file that can run programs, use the network or change files.
+* **A graph is a program.** Only run graphs you trust. CamelGraph asks before it runs a graph from a file that can run programs, use the network or change files.
 * Only **Navisworks Manage 2024** has been seen running it in the field so far; 2025, 2026 and Simulate are built and installed the same way but not yet confirmed. The [requirements](requirements.md) page says exactly what is and is not verified.
-* Dyncamelo is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.
+* CamelGraph is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc.
 
 This site belongs to the version it was built from (shown at the top of every page). The source code, issues and release notes are on [GitHub](https://github.com/mrshoma99-rgb/dyncamelo).

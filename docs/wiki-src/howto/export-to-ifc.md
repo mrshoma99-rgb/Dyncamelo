@@ -10,8 +10,8 @@ Goal: write a chosen set of model items to an `.ifc` file, with names you set fo
 
 ## Before you start
 
-* Open a model in Navisworks and the Dyncamelo editor.
-* The IFC export engine ships inside Dyncamelo. You do not need another plug-in.
+* Open a model in Navisworks and the CamelGraph editor.
+* The IFC export engine ships inside CamelGraph. You do not need another plug-in.
 * Decide where the file goes and use a **full path** that ends in `.ifc`, for example `C:\Exports\level-02.ifc`. The folder is created if it is missing.
 
 [Download the graph](../graphs/ifc-export.dyc)
