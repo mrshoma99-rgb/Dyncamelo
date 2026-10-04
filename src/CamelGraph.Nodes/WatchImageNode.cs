@@ -91,6 +91,9 @@ public class WatchImageNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "picture", "png", "photo", "jpg", "jpeg", "bmp", "preview", "view", "show" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
 
     /// <inheritdoc />

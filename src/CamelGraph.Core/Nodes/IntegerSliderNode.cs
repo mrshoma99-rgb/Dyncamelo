@@ -85,6 +85,9 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "range", "scrub", "drag", "int", "whole" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

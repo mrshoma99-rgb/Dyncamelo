@@ -69,6 +69,9 @@ public class ZeroTouchNodeModel : NodeModel
     public override NodeEffects Effects => Definition.Effects;
 
     /// <inheritdoc />
+    public override IReadOnlyList<string> SearchTags => Definition.SearchTags;
+
+    /// <inheritdoc />
     public override bool CatchesUpstreamErrors => Definition.CatchesUpstreamErrors;
 
     /// <inheritdoc />

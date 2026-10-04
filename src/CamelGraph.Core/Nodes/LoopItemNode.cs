@@ -41,6 +41,9 @@ public sealed class LoopItemNode : NodeModel
     /// <inheritdoc />
     public override string NodeType => TypeName;
 
+    /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "for each", "foreach", "iterate", "repeat", "per item", "batch", "loop", "each" };
+
     /// <summary>
     /// Binds the node to a specific iteration. Called by the engine's loop
     /// executor before each pass over the body; the outputs then report this item.

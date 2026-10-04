@@ -63,6 +63,12 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// </summary>
     public virtual NodeFunction Function => NodeFunction.Modify;
 
+    /// <summary>
+    /// Extra words the library search matches for this node, besides its name, category and description ("dropdown", "checkbox",
+    /// "for each"). Override in a hand-written node; a zero-touch node takes them from <c>[NodeSearchTags]</c>. Empty by default.
+    /// </summary>
+    public virtual IReadOnlyList<string> SearchTags => Array.Empty<string>();
+
     /// <summary>What the node can do outside the model and the graph (starts programs, uses the network, changes existing files). None by default.</summary>
     public virtual NodeEffects Effects => NodeEffects.None;
 

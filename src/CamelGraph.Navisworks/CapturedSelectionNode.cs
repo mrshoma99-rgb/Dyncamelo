@@ -38,6 +38,9 @@ public class CapturedSelectionNode : NodeModel, ICapturedSelectionNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "snapshot", "freeze", "fixed", "pin", "keep", "capture", "remember" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

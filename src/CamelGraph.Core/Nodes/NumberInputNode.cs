@@ -45,6 +45,9 @@ public class NumberInputNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "numeric", "decimal", "float", "double", "literal", "constant" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

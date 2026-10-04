@@ -63,6 +63,9 @@ public class WatchNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "preview", "inspect", "debug", "print", "show", "output", "result", "view" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
 
     /// <inheritdoc />

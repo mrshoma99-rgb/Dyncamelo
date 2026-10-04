@@ -85,6 +85,9 @@ public class ChoiceInputNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "dropdown", "select", "option", "pick", "choose", "menu", "combo" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

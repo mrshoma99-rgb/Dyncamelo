@@ -231,6 +231,8 @@ Two halves, strictly separated:
 
 Keep custom UI minimal (a slider, a text box, a swatch). Anything heavier belongs in a dialog opened from the node, not on the canvas.
 
+Give the node search words, as `[NodeSearchTags]` does for a zero-touch method, by overriding `SearchTags`: `public override IReadOnlyList<string> SearchTags { get; } = new[] { "rebar", "bar", "diameter" };`. The library and the quick search match them besides the name, folder and description, so people find the node by what they call it (the built-in Choice node answers to `dropdown`, `select` and `pick`; Watch to `preview`, `inspect` and `debug`). A test fails for a `NodeModel` in this repository without them.
+
 ## 8. Conventions checklist
 
 Before publishing a pack:

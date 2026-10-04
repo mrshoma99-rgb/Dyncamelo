@@ -208,7 +208,13 @@
    "id": "ColorPicker",
    "category": "Color",
    "description": "A color chosen with a picker.",
-   "tags": [],
+   "tags": [
+    "colour",
+    "swatch",
+    "palette",
+    "hue",
+    "paint"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -2139,7 +2145,16 @@
    "id": "Watch",
    "category": "Display",
    "description": "Displays the incoming value.",
-   "tags": [],
+   "tags": [
+    "preview",
+    "inspect",
+    "debug",
+    "print",
+    "show",
+    "output",
+    "result",
+    "view"
+   ],
    "inputs": [
     {
      "name": "value",
@@ -2162,7 +2177,17 @@
    "id": "WatchImage",
    "category": "Display",
    "description": "Displays the image file at the incoming path (PNG, JPG, BMP).",
-   "tags": [],
+   "tags": [
+    "picture",
+    "png",
+    "photo",
+    "jpg",
+    "jpeg",
+    "bmp",
+    "preview",
+    "view",
+    "show"
+   ],
    "inputs": [
     {
      "name": "imagePath",
@@ -2185,7 +2210,16 @@
    "id": "WatchList",
    "category": "Display",
    "description": "Displays the elements of a list, one per line.",
-   "tags": [],
+   "tags": [
+    "preview",
+    "inspect",
+    "debug",
+    "print",
+    "show",
+    "output",
+    "result",
+    "view"
+   ],
    "inputs": [
     {
      "name": "list",
@@ -2208,7 +2242,18 @@
    "id": "WatchTable",
    "category": "Display",
    "description": "Displays a table as a grid: column names on top, one line per row.",
-   "tags": [],
+   "tags": [
+    "preview",
+    "inspect",
+    "debug",
+    "grid",
+    "rows",
+    "columns",
+    "show",
+    "output",
+    "result",
+    "view"
+   ],
    "inputs": [
     {
      "name": "table",
@@ -5076,7 +5121,15 @@
    "id": "BooleanToggle",
    "category": "Input",
    "description": "A true/false toggle.",
-   "tags": [],
+   "tags": [
+    "checkbox",
+    "switch",
+    "toggle",
+    "true",
+    "false",
+    "flag",
+    "yes"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5093,7 +5146,15 @@
    "id": "ChoiceInput",
    "category": "Input",
    "description": "A pick-list with your own options (one per line); gives the chosen text and its position.",
-   "tags": [],
+   "tags": [
+    "dropdown",
+    "select",
+    "option",
+    "pick",
+    "choose",
+    "menu",
+    "combo"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5115,7 +5176,15 @@
    "id": "DateInput",
    "category": "Input",
    "description": "A date (and optional time), typed as 2026-10-01 or 2026-10-01 14:30.",
-   "tags": [],
+   "tags": [
+    "calendar",
+    "time",
+    "datetime",
+    "timestamp",
+    "day",
+    "month",
+    "year"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5132,7 +5201,13 @@
    "id": "DirectoryPath",
    "category": "Input",
    "description": "A path to a directory.",
-   "tags": [],
+   "tags": [
+    "folder",
+    "browse",
+    "dir",
+    "picker",
+    "choose"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5149,7 +5224,12 @@
    "id": "FilePath",
    "category": "Input",
    "description": "A path to a file.",
-   "tags": [],
+   "tags": [
+    "browse",
+    "open",
+    "picker",
+    "choose"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5166,7 +5246,13 @@
    "id": "IntegerInput",
    "category": "Input",
    "description": "A whole number (no slider range): a count, an index, a level.",
-   "tags": [],
+   "tags": [
+    "int",
+    "whole",
+    "count",
+    "index",
+    "literal"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5183,7 +5269,13 @@
    "id": "IntegerSlider",
    "category": "Input",
    "description": "An integer selected with a slider.",
-   "tags": [],
+   "tags": [
+    "range",
+    "scrub",
+    "drag",
+    "int",
+    "whole"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5200,7 +5292,14 @@
    "id": "NumberInput",
    "category": "Input",
    "description": "A number literal.",
-   "tags": [],
+   "tags": [
+    "numeric",
+    "decimal",
+    "float",
+    "double",
+    "literal",
+    "constant"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5217,7 +5316,13 @@
    "id": "NumberSlider",
    "category": "Input",
    "description": "A number selected with a slider.",
-   "tags": [],
+   "tags": [
+    "range",
+    "scrub",
+    "drag",
+    "decimal",
+    "float"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5234,7 +5339,13 @@
    "id": "StringInput",
    "category": "Input",
    "description": "A string literal.",
-   "tags": [],
+   "tags": [
+    "text",
+    "textbox",
+    "literal",
+    "word",
+    "sentence"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -5583,7 +5694,14 @@
    "id": "ListCreate",
    "category": "List",
    "description": "Builds a list from the wired item inputs.",
-   "tags": [],
+   "tags": [
+    "array",
+    "collection",
+    "build",
+    "make",
+    "items",
+    "combine"
+   ],
    "inputs": [
     {
      "name": "item0 … itemN",
@@ -16501,7 +16619,15 @@
    "id": "CapturedSelection",
    "category": "Navisworks.Selection",
    "description": "Snapshots the current Navisworks selection and keeps it, so the graph runs on that fixed set even after you select something else. Press Capture to (re)store the live selection, Clear to forget it.",
-   "tags": [],
+   "tags": [
+    "snapshot",
+    "freeze",
+    "fixed",
+    "pin",
+    "keep",
+    "capture",
+    "remember"
+   ],
    "inputs": [],
    "outputs": [
     {
@@ -22033,7 +22159,13 @@
    "id": "Reroute",
    "category": "Utility",
    "description": "A wire waypoint that passes its value through unchanged.",
-   "tags": [],
+   "tags": [
+    "wire",
+    "knot",
+    "waypoint",
+    "junction",
+    "pass through"
+   ],
    "inputs": [
     {
      "name": "in",
@@ -22227,7 +22359,17 @@
    "id": "LoopCollect",
    "category": "Workflow",
    "description": "Closes a loop and collects one value per iteration. Wire Loop.Item's 'loop' output into 'loop' and the per-item value into 'value'; 'results' is the list of collected values, available after the loop. Downstream of 'results' runs once.",
-   "tags": [],
+   "tags": [
+    "for each",
+    "foreach",
+    "iterate",
+    "repeat",
+    "per item",
+    "batch",
+    "collect",
+    "gather",
+    "end"
+   ],
    "inputs": [
     {
      "name": "loop",
@@ -22255,7 +22397,16 @@
    "id": "LoopItem",
    "category": "Workflow",
    "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order.",
-   "tags": [],
+   "tags": [
+    "for each",
+    "foreach",
+    "iterate",
+    "repeat",
+    "per item",
+    "batch",
+    "loop",
+    "each"
+   ],
    "inputs": [
     {
      "name": "items",

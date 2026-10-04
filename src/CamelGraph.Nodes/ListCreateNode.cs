@@ -36,6 +36,9 @@ public class ListCreateNode : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "array", "collection", "build", "make", "items", "combine" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <summary>Appends one item input port ("itemN") and dirties the node.</summary>

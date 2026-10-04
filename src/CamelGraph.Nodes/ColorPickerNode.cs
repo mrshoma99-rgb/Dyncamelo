@@ -85,6 +85,9 @@ public class ColorPickerNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "colour", "swatch", "palette", "hue", "paint" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

@@ -31,6 +31,9 @@ public sealed class LoopCollectNode : NodeModel
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "for each", "foreach", "iterate", "repeat", "per item", "batch", "collect", "gather", "end" };
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         // The engine's loop executor sets 'results' directly; this fallback (used

@@ -95,6 +95,9 @@ public class WatchTableNode : NodeModel, CamelGraph.Core.Player.IPlayerOutputNod
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "preview", "inspect", "debug", "grid", "rows", "columns", "show", "output", "result", "view" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
 
     /// <summary>Turns whatever arrives into a table to draw.</summary>
