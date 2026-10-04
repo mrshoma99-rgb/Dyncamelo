@@ -78,7 +78,7 @@ Except for the first two, the samples need Navisworks with a **model open**. The
 
 ## For developers (not installed)
 
-Four small graphs in the repository's `samples` folder exercise the engine without Navisworks and run on the command line: `hello-math` (result **85**), `list-lacing` (the three lacing modes side by side), `string-report` (**`Word count: 4`**) and `csv-roundtrip` (writes and reads a CSV file). The last one writes a relative path, which is why it is not shipped: see [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
+Four small graphs in the repository's `samples` folder exercise the engine without Navisworks and run on the command line: `hello-math` (result **85**), `list-lacing` (the three lacing modes side by side), `string-report` (**`Word count: 4`**) and `csv-roundtrip` (writes and reads a CSV file). The last one writes a CSV file next to itself (see [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). The four are developer test fixtures and are not part of the installer.
 
 ![hello-math after a run: a slider and a number added, multiplied, rounded and shown in a Watch as 85.](../images/wiki-sample-hello-math.png)
 

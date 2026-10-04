@@ -407,7 +407,14 @@ public sealed class ScriptSession
         }
 
         Graph.ResetForRun();
-        var run = new GraphEngine().Run(Graph, context);
+        RunResult run;
+        using (CamelGraph.Core.Files.GraphContext.Use(CamelGraph.Core.Files.GraphContext.FolderFor(Path)))
+        {
+            // Relative paths in file nodes mean "next to the script".
+            run = new GraphEngine().Run(Graph, context);
+        }
+
+
         var outputs = _outputNodes.Select(Describe).ToList();
         return new ScriptResult(run, outputs, Problems.Collect(Graph));
     }

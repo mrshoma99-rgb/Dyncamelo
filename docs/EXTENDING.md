@@ -278,6 +278,19 @@ Guidelines:
 - In a hand-written `NodeModel`, declare the port with `AddMultiInput(name, typeof(IList<object>))` in the constructor.
 - Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).
 
+### Nodes that read or write files: resolve the path
+
+A node that opens, writes, lists, copies or deletes a file passes the path it is given through `PathResolver.Resolve` (namespace `CamelGraph.Core.Files`) before it touches the disk:
+
+```csharp
+using CamelGraph.Core.Files;
+
+public static string ReadAll([NodePath(NodePathMode.Open)] string path)
+    => System.IO.File.ReadAllText(PathResolver.Resolve(path));
+```
+
+`Resolve` removes the spaces and quotes around a path pasted from Explorer's "Copy as path", and turns a **relative** path into one next to the graph: the host sets `GraphContext.Folder` before it runs a graph (the editor: the folder of the open graph file, or `Documents\CamelGraph` for a graph that has not been saved; the Script Player and `CamelGraph.Cli`: the folder of the script file). Without a host folder it falls back to the process's current directory, which inside Navisworks is the program folder, so never rely on that. A blank path comes back as it is and `Resolve` never throws, so the node reports a missing path in its own words. A host that runs graphs itself wraps the run in `using (GraphContext.Use(GraphContext.FolderFor(graphFilePath))) { ... }`, which puts the previous folder back afterwards. Also declare what the node does to the disk with `[NodeEffects(NodeEffects.WritesFiles)]` (it creates, replaces or appends to a file) or `ChangesFiles` (it deletes, moves or copies over files), and `ChangesModel` for a node that edits the open Navisworks model: the editor and the Script Player list such nodes before they run a graph that came from a file.
+
 ## 10. Changing a node that is already shipped
 
 Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its **definition id** — `Namespace.Class.Method@parameterTypes` — and stores each wire and each typed-in value by the **port name** (the parameter name, the `[MultiReturn]` key, or the return name). What you may change:

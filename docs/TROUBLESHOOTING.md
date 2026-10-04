@@ -163,9 +163,11 @@ If you measure a slow case, please add the model size, the node and the time to 
 
 ## A file node fails with "access denied" or writes to the wrong place
 
-**Cause.** The source (in the viewpoint package code, written after a field report) notes that the working folder of the Navisworks process is the Navisworks install folder under `Program Files`, which ordinary users cannot write to. A **relative path** in a file node therefore points somewhere you cannot write. Windows also reports a folder given in place of a file as "access denied", and **Controlled folder access** can block writes to Documents or Desktop.
+**Where a relative path goes.** A **relative path** in a file node (`report.xlsx`, `out\rooms.csv`) means *next to the graph*: CamelGraph puts it in the folder of the graph file you have open, or in `Documents\CamelGraph` when the graph has not been saved yet. A script run in the Script Player, and a graph run with `CamelGraph.Cli`, use the folder of the script file. Spaces and the quotes that Explorer's "Copy as path" adds around a pasted path are removed. (Older versions resolved a relative path against the working folder of the Navisworks process, which is its install folder under `Program Files`, a place ordinary users cannot write to.)
 
-**Fix.** Give a **full path** for every file a graph writes, for example `C:\Users\you\Documents\report.xlsx`. Paste it without the quotes that Explorer's "Copy as path" adds; only the viewpoint package nodes are known to remove them for you. If Controlled folder access is on, allow Navisworks or write to another folder. The *csv-roundtrip* developer sample writes a relative path and is not shipped in the installer for that reason.
+**Cause.** When a file node still fails with "access denied", the folder is one you cannot write to: a graph saved under `Program Files`, a path that names a folder where a file is expected (Windows reports that as "access denied" too), or **Controlled folder access** blocking writes to Documents or Desktop.
+
+**Fix.** Save the graph in a folder you can write to, or give a **full path** for the file, for example `C:\Users\you\Documents\report.xlsx`. If Controlled folder access is on, allow Navisworks or write to another folder.
 
 ## Navisworks closed while I was working
 

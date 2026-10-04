@@ -210,7 +210,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     `IFC4` (the default) and `IFC2x3`, set with the `schema` input of `Export.ToIfc`. See [Export model items to IFC](howto/export-to-ifc.md).
 
 ??? question "A file node fails with 'access denied'."
-    Give a full path, for example `C:\Users\you\Documents\report.xlsx`. A relative path points into the Navisworks install folder, which ordinary users cannot write to. See [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
+    The folder is one you cannot write to. A relative path goes next to the graph file (or into `Documents\CamelGraph` for a graph you have not saved), so save the graph somewhere you can write, or give a full path, for example `C:\Users\you\Documents\report.xlsx`. See [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
 
 ??? question "Dates from Excel arrive as numbers."
     `Excel.ReadFromFile` gives dates as Excel serial numbers. See [IFC, BCF, Excel and CSV](exchange-formats.md#excel).

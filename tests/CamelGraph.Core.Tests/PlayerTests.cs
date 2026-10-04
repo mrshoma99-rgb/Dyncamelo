@@ -51,6 +51,8 @@ public sealed class ModifyingTestNode : NodeModel
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context) => new[] { inputs[0] };
 }
 
+// Running a script sets the process-wide graph folder for the run, as GraphContextTests do: they must not overlap.
+[Xunit.Collection("GraphContext")]
 public sealed class PlayerTests : IDisposable
 {
     private readonly string _folder = Path.Combine(Path.GetTempPath(), "dyc-player-" + Guid.NewGuid().ToString("N"));

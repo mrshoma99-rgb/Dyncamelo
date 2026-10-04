@@ -12,8 +12,8 @@ How data gets into and out of a CamelGraph graph. Every node named here is in th
 | **Navisworks files and pictures** | `Document.Open`, `Document.AppendFiles` | `Export.NWD`, `Export.ViewpointImage` |
 | **JSON** | `JSON.ReadFromFile` | `JSON.WriteToFile` |
 
-!!! warning "Use a full path for every file a graph writes"
-    Give a full path, for example `C:\Users\you\Documents\report.xlsx`. The working folder of Navisworks is its install folder under `Program Files`, which ordinary users cannot write to, so a relative path fails with "access denied" ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Paste a path without the quotes that Explorer's *Copy as path* adds. Graphs that write files are marked, and the Script Player asks before it runs one.
+!!! tip "Where a file goes"
+    A relative path such as `report.xlsx` means next to the graph: in the folder of the graph file you have open, or in `Documents\CamelGraph` for a graph you have not saved. A full path, for example `C:\Users\you\Documents\report.xlsx`, always works. Spaces and the quotes that Explorer's *Copy as path* adds around a pasted path are removed ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Graphs that write files are marked, and the editor and the Script Player ask before they run one from a file.
 
 ## IFC
 
