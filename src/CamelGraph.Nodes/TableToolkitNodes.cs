@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Core.Types;
 using CamelGraph.Nodes.Internal;
@@ -139,10 +141,11 @@ public static class TableToolkitNodes
         return table.Rows.Select(r => (object?)new List<object?>(r)).ToList();
     }
 
-    /// <summary>The column names of a table.</summary>
+    /// <summary>The column names of a table. Retired: Table.Info gives the same list as its <c>headers</c> output.</summary>
     /// <param name="table">The table.</param>
     /// <returns>The names, in column order.</returns>
     [NodeName("Table.Headers")]
+    [NodeDeprecated("Table.Info")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("headers")]
     [NodeDescription("The column names of a table, in order.")]
@@ -160,8 +163,8 @@ public static class TableToolkitNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("rowCount", "columnCount", "headers")]
     [PortKinds("integer", "integer", "text*")]
-    [NodeDescription("How many rows and columns a table has, and its column names.")]
-    [NodeSearchTags("size", "count", "shape", "dimensions", "length")]
+    [NodeDescription("How many rows and columns a table has, and its column names (the headers output is the list of names, in column order).")]
+    [NodeSearchTags("size", "count", "shape", "dimensions", "length", "columns", "names", "header", "headers", "fields", "column names")]
     public static Dictionary<string, object> Info(CamelGraphTable table)
     {
         Require(table, "Table.Info");
@@ -212,16 +215,16 @@ public static class TableToolkitNodes
     [return: NodeName("row")]
     [NodeDescription("One row of a table as a dictionary from column name to cell (0 is the first row; -1 the last).")]
     [NodeSearchTags("row", "record", "line", "get")]
-    public static Dictionary<string, object?> Row(CamelGraphTable table, int index)
+    public static Dictionary<string, object?> Row(CamelGraphTable table, [NodeRange(-10000000, 10000000, SoftMin = -10, SoftMax = 1000)] int index)
     {
         Require(table, "Table.Row");
         var position = index < 0 ? table.RowCount + index : index;
         if (position < 0 || position >= table.RowCount)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(index),
+                null,
                 "Table.Row: row " + index.ToString(CultureInfo.InvariantCulture) + " does not exist; the table has " +
-                table.RowCount.ToString(CultureInfo.InvariantCulture) + " row(s).");
+                table.RowCount.ToString(CultureInfo.InvariantCulture) + " row(s) (0 is the first row, -1 the last).");
         }
 
         return table.RowAsDictionary(position);
@@ -231,16 +234,23 @@ public static class TableToolkitNodes
 
     /// <summary>Keeps only some columns, in the order given.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="columns">The names to keep (a list, or one text with names separated by commas).</param>
+    /// <param name="columns">The names to keep: a list, or one text with names separated by commas. A column whose own name contains a comma ("Area, gross") works when you type or wire that name whole.</param>
     /// <returns>The narrower table.</returns>
     [NodeName("Table.SelectColumns")]
     [return: NodeName("table")]
-    [NodeDescription("Keeps only the listed columns, in that order (names as a list or one comma-separated text).")]
+    [NodeDescription("Keeps only the listed columns, in that order. Names come as a list or as one text separated by commas; a column whose name has a comma in it (\"Area, gross\") is found by its whole name. At least one name is needed.")]
     [NodeSearchTags("keep", "columns", "pick", "reorder", "project", "narrow")]
-    public static CamelGraphTable SelectColumns(CamelGraphTable table, IList<object?> columns)
+    public static CamelGraphTable SelectColumns(CamelGraphTable table, [PortKinds("text")] IList<object?> columns)
     {
         Require(table, "Table.SelectColumns");
-        var indexes = ColumnNames(columns, "Table.SelectColumns").Select(c => table.IndexOf(c, "Table.SelectColumns")).ToList();
+        var indexes = ResolveColumns(table, columns, "Table.SelectColumns", "columns", false).Select(c => c.Index).ToList();
+        if (indexes.Count == 0)
+        {
+            throw new ArgumentException(
+                "Table.SelectColumns: no column names were given in 'columns', so there would be nothing left to keep. Type or wire the names to keep (" +
+                string.Join(", ", table.Headers.Take(3)) + (table.ColumnCount > 3 ? ", ..." : string.Empty) + ").");
+        }
+
         return new CamelGraphTable(
             indexes.Select(i => table.Headers[i]),
             table.Rows.Select(r => (IReadOnlyList<object?>)indexes.Select(i => r[i]).ToList()).ToList());
@@ -248,16 +258,22 @@ public static class TableToolkitNodes
 
     /// <summary>Drops some columns.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="columns">The names to remove (a list, or one text with names separated by commas).</param>
+    /// <param name="columns">The names to remove: a list, or one text with names separated by commas. A column whose own name contains a comma works when you type or wire that name whole.</param>
     /// <returns>The table without them.</returns>
     [NodeName("Table.RemoveColumns")]
     [return: NodeName("table")]
-    [NodeDescription("Drops the listed columns and keeps the rest.")]
+    [NodeDescription("Drops the listed columns and keeps the rest. Names come as a list or as one text separated by commas; a column whose name has a comma in it (\"Area, gross\") is found by its whole name. An empty list removes nothing and says so.")]
     [NodeSearchTags("drop", "delete", "columns", "remove", "hide")]
-    public static CamelGraphTable RemoveColumns(CamelGraphTable table, IList<object?> columns)
+    public static CamelGraphTable RemoveColumns(CamelGraphTable table, [PortKinds("text")] IList<object?> columns)
     {
         Require(table, "Table.RemoveColumns");
-        var drop = new HashSet<int>(ColumnNames(columns, "Table.RemoveColumns").Select(c => table.IndexOf(c, "Table.RemoveColumns")));
+        var resolved = ResolveColumns(table, columns, "Table.RemoveColumns", "columns", false);
+        if (resolved.Count == 0)
+        {
+            NodeWarnings.Add("Table.RemoveColumns: no column names were given in 'columns', so no column was removed.");
+        }
+
+        var drop = new HashSet<int>(resolved.Select(c => c.Index));
         var keep = Enumerable.Range(0, table.ColumnCount).Where(i => !drop.Contains(i)).ToList();
         return new CamelGraphTable(
             keep.Select(i => table.Headers[i]),
@@ -304,32 +320,63 @@ public static class TableToolkitNodes
             throw new ArgumentException("Table.AddColumn needs a name for the new column.", nameof(name));
         }
 
-        IList? list = values is IList l && !(values is string) ? l : null;
-        if (list != null && list.Count != table.RowCount)
-        {
-            throw new ArgumentException(
-                "Table.AddColumn: the table has " + table.RowCount.ToString(CultureInfo.InvariantCulture) + " row(s) but " +
-                list.Count.ToString(CultureInfo.InvariantCulture) + " value(s) were given. Give one per row, or a single value.");
-        }
-
+        var perRow = ValuesPerRow(table, values, "Table.AddColumn");
         var rows = new List<IReadOnlyList<object?>>(table.RowCount);
         for (int i = 0; i < table.RowCount; i++)
         {
-            var cells = new List<object?>(table.Rows[i]) { list != null ? list[i] : values };
+            var cells = new List<object?>(table.Rows[i]) { perRow[i] };
             rows.Add(cells);
         }
 
         return new CamelGraphTable(table.Headers.Concat(new[] { name }), rows);
     }
 
+    /// <summary>Replaces the cells of a column, or adds the column when there is none of that name.</summary>
+    /// <param name="table">The table.</param>
+    /// <param name="name">The column to replace (found like every other column name: exactly, then ignoring case and spaces). A name the table does not have adds a new column at the end.</param>
+    /// <param name="values">A list with one value per row, or a single value repeated on every row.</param>
+    /// <returns>The table with that column's cells replaced, in the same position (the column keeps its name).</returns>
+    [NodeName("Table.SetColumn")]
+    [return: NodeName("table")]
+    [NodeDescription("Replaces the cells of a column in place, keeping its position and name, or adds the column at the end when there is none of that name. Give a list with one value per row, or a single value repeated on every row — take a column out with Table.Column, clean it with String or List nodes, and put it back here.")]
+    [NodeSearchTags("replace column", "overwrite", "update column", "set", "clean", "modify column", "column", "fill")]
+    public static CamelGraphTable SetColumn(CamelGraphTable table, string name, object? values)
+    {
+        Require(table, "Table.SetColumn");
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Table.SetColumn needs the name of the column to replace (or to add).");
+        }
+
+        var perRow = ValuesPerRow(table, values, "Table.SetColumn");
+        var index = table.TryIndexOf(name);
+        var rows = new List<IReadOnlyList<object?>>(table.RowCount);
+        for (int i = 0; i < table.RowCount; i++)
+        {
+            var cells = new List<object?>(table.Rows[i]);
+            if (index >= 0)
+            {
+                cells[index] = perRow[i];
+            }
+            else
+            {
+                cells.Add(perRow[i]);
+            }
+
+            rows.Add(cells);
+        }
+
+        return new CamelGraphTable(index >= 0 ? table.Headers : table.Headers.Concat(new[] { name }), rows);
+    }
+
     /// <summary>Adds a column calculated from the other columns.</summary>
     /// <param name="table">The table.</param>
     /// <param name="name">The new column's name.</param>
     /// <param name="formula">A formula over the column names, e.g. <c>Width * Height</c> or <c>[Fire Rating] / 60</c> (names with spaces in square brackets).</param>
-    /// <returns>The table with the calculated column added at the end.</returns>
+    /// <returns>The table with the calculated column added at the end; a row where a column the formula uses is blank or not a number, and a result that is not a finite number, get an empty cell.</returns>
     [NodeName("Table.AddFormulaColumn")]
     [return: NodeName("table")]
-    [NodeDescription("Adds a column calculated per row from the others, e.g. \"Width * Height * Length / 1000000000\" (same formula language as Math.Formula; [Names with spaces] in brackets).")]
+    [NodeDescription("Adds a column calculated per row from the others, e.g. \"Width * Height * Length / 1000000000\" (same formula language as Math.Formula; [Names with spaces] in brackets). A blank or text cell is never counted as 0: a row where a column the formula uses is blank or not a number gets an empty cell, and so does a result that is not a finite number (a division by zero). The node turns amber and says how many rows were left empty.")]
     [NodeSearchTags("formula", "calculated", "computed", "column", "expression", "volume", "area")]
     public static CamelGraphTable AddFormulaColumn(CamelGraphTable table, string name, string formula)
     {
@@ -349,17 +396,62 @@ public static class TableToolkitNodes
             throw new FormatException("Table.AddFormulaColumn: " + ex.Message, ex);
         }
 
+        // A cell that is blank or not a number is NaN, never 0. NaN spreads through the arithmetic, so a row whose formula uses such a
+        // cell comes out as NaN and gets an empty cell; the columns the formula names tell the warning which cell was the cause.
+        var used = ReferencedColumns(formula, table.Headers);
         var rows = new List<IReadOnlyList<object?>>(table.RowCount);
+        var emptied = 0;
+        var nonFinite = 0;
+        string? firstCause = null;
         for (int r = 0; r < table.RowCount; r++)
         {
             var values = new double[table.ColumnCount];
+            var cause = -1;
             for (int c = 0; c < values.Length; c++)
             {
-                values[c] = CellNumber(table.Rows[r][c], 0d);
+                if (!TryCellNumber(table.Rows[r][c], out values[c]))
+                {
+                    values[c] = double.NaN;
+                    if (cause < 0 && used.Contains(c))
+                    {
+                        cause = c;
+                    }
+                }
             }
 
-            var cells = new List<object?>(table.Rows[r]) { compiled(values) };
-            rows.Add(cells);
+            object? result = null;
+            if (cause >= 0)
+            {
+                emptied++;
+                firstCause ??= "'" + table.Headers[cause] + "' in row " + (r + 1).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                var number = compiled(values);
+                if (double.IsNaN(number) || double.IsInfinity(number))
+                {
+                    nonFinite++;
+                }
+                else
+                {
+                    result = number;
+                }
+            }
+
+            rows.Add(new List<object?>(table.Rows[r]) { result });
+        }
+
+        if (emptied > 0)
+        {
+            NodeWarnings.Add(
+                "Table.AddFormulaColumn: " + emptied.ToString(CultureInfo.InvariantCulture) + " row(s) got an empty cell because a column the formula uses is blank or not a number there (first: " +
+                firstCause + "). A blank is never counted as 0.");
+        }
+
+        if (nonFinite > 0)
+        {
+            NodeWarnings.Add(
+                "Table.AddFormulaColumn: " + nonFinite.ToString(CultureInfo.InvariantCulture) + " result(s) were not a finite number (a division by zero, for example) and were left empty.");
         }
 
         return new CamelGraphTable(table.Headers.Concat(new[] { name }), rows);
@@ -370,31 +462,91 @@ public static class TableToolkitNodes
     /// <summary>Splits the rows into those that pass a test and those that do not.</summary>
     /// <param name="table">The table.</param>
     /// <param name="column">The column to test.</param>
-    /// <param name="test">The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</param>
-    /// <param name="value">What to test against (unused by the null / empty tests).</param>
+    /// <param name="test">The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, in, notIn, isNull, notNull, isEmpty, notEmpty.</param>
+    /// <param name="value">What to test against (unused by the null / empty tests). For in and notIn: the values to look for, as a list or as one text with the values separated by commas.</param>
     /// <param name="ignoreCase">True (default) ignores upper/lower case in text tests.</param>
     /// <returns>The rows that passed and the rows that did not, both as tables.</returns>
     [NodeName("Table.Filter")]
     [MultiReturn("matched", "rejected")]
     [PortKinds("data", "data")]
-    [NodeDescription("Splits a table by a test on one column — Level == \"L02\", Length > 3000, Name matches \"W-*\" — into the rows that pass and the rows that do not.")]
-    [NodeSearchTags("filter", "where", "query", "select rows", "search", "keep")]
+    [NodeDescription("Splits a table by a test on one column — Level == \"L02\", Length > 3000, Name matches \"W-*\", Level in \"L01, L02\" — into the rows that pass and the rows that do not. A blank cell never passes > >= < <=, and neither does text that is not a number when you compare with a number (the node turns amber and counts them); they land in the rejected table. in and notIn take a list of values, or one text with the values separated by commas; an empty cell is in no list. Regex tests are case sensitive unless ignoreCase is ticked.")]
+    [NodeSearchTags("filter", "where", "query", "select rows", "search", "keep", "in list", "is one of", "member of", "not in")]
     public static Dictionary<string, object> Filter(
         CamelGraphTable table,
         string column,
-        [NodeChoices("==", "!=", ">", ">=", "<", "<=", "contains", "!contains", "startsWith", "endsWith", "matches", "regex", "isNull", "notNull", "isEmpty", "notEmpty")]
+        [NodeChoices("==", "!=", ">", ">=", "<", "<=", "contains", "!contains", "startsWith", "endsWith", "matches", "regex", "in", "notIn", "isNull", "notNull", "isEmpty", "notEmpty")]
         string test = "==",
         object? value = null,
         bool ignoreCase = true)
     {
         Require(table, "Table.Filter");
         var index = table.IndexOf(column, "Table.Filter");
-        var op = ValueTests.Normalize(test, "Table.Filter");
+        var membership = FilterMembership(test);
+        var op = membership == null ? ValueTests.Normalize(test, "Table.Filter") : null;
+        var members = membership == null ? null : FilterMembers(value);
+        var ordering = op == ">" || op == ">=" || op == "<" || op == "<=";
+        if (ordering && (value == null || (value is string blankValue && blankValue.Trim().Length == 0)))
+        {
+            NodeWarnings.Add("Table.Filter: the test '" + op + "' needs a value to compare with in 'value', and none was given, so no row passes.");
+        }
+
         var matched = new List<IReadOnlyList<object?>>();
         var rejected = new List<IReadOnlyList<object?>>();
-        foreach (var row in table.Rows)
+        var incomparable = 0;
+        string? firstIncomparable = null;
+        for (int r = 0; r < table.RowCount; r++)
         {
-            (ValueTests.Test(op, row[index], value, ignoreCase, "Table.Filter") ? matched : rejected).Add(row);
+            var row = table.Rows[r];
+            var cell = row[index];
+            bool passes;
+            if (membership != null)
+            {
+                var found = cell != null && members!.Any(member => ValueTests.AreEqual(cell, member, ignoreCase));
+                passes = membership == "in" ? found : !found;
+            }
+            else if (ordering)
+            {
+                if (cell == null || (cell is string blankCell && blankCell.Trim().Length == 0) || value == null || (value is string blankTarget && blankTarget.Trim().Length == 0))
+                {
+                    // No value is not smaller than anything, and not larger either: it is left out of every ordering test.
+                    passes = false;
+                }
+                else
+                {
+                    try
+                    {
+                        passes = ValueTests.Test(op!, cell, value, ignoreCase, "Table.Filter");
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        passes = false;
+                        incomparable++;
+                        firstIncomparable ??= "'" + CamelGraphTable.CellText(cell) + "' in row " + (r + 1).ToString(CultureInfo.InvariantCulture);
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    passes = ValueTests.Test(op!, cell, value, ignoreCase, "Table.Filter");
+                }
+                catch (RegexMatchTimeoutException)
+                {
+                    throw new InvalidOperationException(
+                        "Table.Filter: the regular expression took longer than 2 seconds on row " + (r + 1).ToString(CultureInfo.InvariantCulture) +
+                        " and was stopped. Simplify the pattern (nested repeats such as (a+)+ are the usual cause).");
+                }
+            }
+
+            (passes ? matched : rejected).Add(row);
+        }
+
+        if (incomparable > 0)
+        {
+            NodeWarnings.Add(
+                "Table.Filter: " + incomparable.ToString(CultureInfo.InvariantCulture) + " row(s) hold something in '" + table.Headers[index] +
+                "' that cannot be compared with " + CamelGraphTable.CellText(value) + " (first: " + firstIncomparable + "); they did not pass the test.");
         }
 
         return new Dictionary<string, object>
@@ -406,42 +558,24 @@ public static class TableToolkitNodes
 
     /// <summary>Sorts the rows by one or more columns.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="columns">Columns to sort by, separated by commas; add " desc" or a leading "-" for largest first: <c>Level, -Length</c>.</param>
+    /// <param name="columns">Columns to sort by: a list of names, or one text with names separated by commas; add " desc" or a leading "-" for largest first: <c>Level, -Length</c>. A list sorts by its first name, then the next.</param>
     /// <param name="descending">True sorts every column largest first (a column can still opt out with " asc").</param>
     /// <returns>The sorted table; empty cells go last and equal rows keep their order.</returns>
     [NodeName("Table.Sort")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.Sort@CamelGraph.Nodes.CamelGraphTable,string,bool")]
     [return: NodeName("table")]
-    [NodeDescription("Sorts the rows by one or more columns (\"Level, -Length\" sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last.")]
+    [NodeDescription("Sorts the rows by one or more columns, as a list of names or one text (\"Level, -Length\" sorts by level, then longest first); numbers numerically, text alphabetically, empty cells last. A list of names sorts once by all of them, in that order.")]
     [NodeSearchTags("sort", "order", "rank", "arrange", "ascending", "descending")]
-    public static CamelGraphTable Sort(CamelGraphTable table, string columns, bool descending = false)
+    public static CamelGraphTable Sort(CamelGraphTable table, [PortKinds("text")] IList<object?> columns, bool descending = false)
     {
         Require(table, "Table.Sort");
-        var keys = ColumnNames(new List<object?> { columns }, "Table.Sort").Select(spec =>
-        {
-            var desc = descending;
-            var name = spec;
-            if (name.StartsWith("-", StringComparison.Ordinal))
-            {
-                desc = true;
-                name = name.Substring(1).Trim();
-            }
-            else if (name.EndsWith(" desc", StringComparison.OrdinalIgnoreCase))
-            {
-                desc = true;
-                name = name.Substring(0, name.Length - 5).Trim();
-            }
-            else if (name.EndsWith(" asc", StringComparison.OrdinalIgnoreCase))
-            {
-                desc = false;
-                name = name.Substring(0, name.Length - 4).Trim();
-            }
-
-            return (Index: table.IndexOf(name, "Table.Sort"), Descending: desc);
-        }).ToList();
+        var keys = ResolveColumns(table, columns, "Table.Sort", "columns", true)
+            .Select(c => (Index: c.Index, Descending: c.Descending ?? descending))
+            .ToList();
 
         if (keys.Count == 0)
         {
-            throw new ArgumentException("Table.Sort needs at least one column to sort by.", nameof(columns));
+            throw new ArgumentException("Table.Sort needs at least one column to sort by. Type or wire the column names into 'columns'.");
         }
 
         // Every cell of a sort column is read once into a sort key (empty, number, text or other, with its number and text worked out
@@ -475,18 +609,20 @@ public static class TableToolkitNodes
 
     /// <summary>Removes duplicate rows.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="columns">Columns that must differ (separated by commas); leave empty to compare whole rows.</param>
+    /// <param name="columns">Columns that must differ: a list of names, or one text with names separated by commas; leave empty to compare whole rows.</param>
     /// <returns>The table with only the first row of each kind.</returns>
     [NodeName("Table.Distinct")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.Distinct@CamelGraph.Nodes.CamelGraphTable,string")]
     [return: NodeName("table")]
-    [NodeDescription("Keeps only the first row for each distinct value (of the given columns, or of the whole row).")]
+    [NodeDescription("Keeps only the first row for each distinct value of the given columns (a list of names or one text with commas), or of the whole row when none are given.")]
     [NodeSearchTags("unique", "duplicates", "dedupe", "remove duplicates", "distinct")]
-    public static CamelGraphTable Distinct(CamelGraphTable table, string columns = "")
+    public static CamelGraphTable Distinct(CamelGraphTable table, [PortKinds("text")] IList<object?>? columns = null)
     {
         Require(table, "Table.Distinct");
-        var indexes = string.IsNullOrWhiteSpace(columns)
+        var named = columns == null ? new List<ColumnRef>() : ResolveColumns(table, columns, "Table.Distinct", "columns", false);
+        var indexes = named.Count == 0
             ? Enumerable.Range(0, table.ColumnCount).ToList()
-            : ColumnNames(new List<object?> { columns }, "Table.Distinct").Select(c => table.IndexOf(c, "Table.Distinct")).ToList();
+            : named.Select(c => c.Index).ToList();
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var rows = new List<IReadOnlyList<object?>>();
         foreach (var row in table.Rows)
@@ -556,19 +692,22 @@ public static class TableToolkitNodes
 
     /// <summary>Takes a block of rows.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="start">The first row to take, counting from 0.</param>
-    /// <param name="count">How many rows (-1 takes all the rest).</param>
+    /// <param name="start">The first row to take, counting from 0 (not below 0).</param>
+    /// <param name="count">How many rows (-1 takes all the rest; not below -1).</param>
     /// <returns>The rows from start on, at most count of them.</returns>
     [NodeName("Table.Slice")]
     [return: NodeName("table")]
     [NodeDescription("Takes count rows from a starting row (count -1 takes all the rest) — the first 10 rows: start 0, count 10.")]
     [NodeSearchTags("take", "skip", "head", "top", "limit", "page", "subset")]
-    public static CamelGraphTable Slice(CamelGraphTable table, int start = 0, int count = -1)
+    public static CamelGraphTable Slice(
+        CamelGraphTable table,
+        [NodeRange(0, 10000000, SoftMax = 1000)] int start = 0,
+        [NodeRange(-1, 10000000, SoftMin = -1, SoftMax = 1000)] int count = -1)
     {
         Require(table, "Table.Slice");
         if (start < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(start), "Table.Slice: the start row cannot be negative.");
+            throw new ArgumentOutOfRangeException(null, "Table.Slice: the start row cannot be negative; 0 is the first row.");
         }
 
         var rows = table.Rows.Skip(start);
@@ -584,19 +723,18 @@ public static class TableToolkitNodes
 
     /// <summary>Groups rows and totals them.</summary>
     /// <param name="table">The table.</param>
-    /// <param name="by">The column(s) to group by, separated by commas; leave empty for one total row.</param>
+    /// <param name="by">The column(s) to group by: a list of names, or one text with names separated by commas; leave empty for one total row.</param>
     /// <param name="aggregations">What to work out per group, one text each: <c>count</c>, <c>sum:Volume</c>, <c>average:Length as AvgLength</c>. Functions: count, sum, average, min, max, median, first, last, list, distinct.</param>
     /// <returns>One row per group: the grouping columns followed by one column per aggregation.</returns>
     [NodeName("Table.GroupBy")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.GroupBy@CamelGraph.Nodes.CamelGraphTable,string,System.Collections.Generic.IList<object>")]
     [return: NodeName("table")]
-    [NodeDescription("Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group — \"sum:Volume\", \"count\" — the pivot-table core for quantities.")]
+    [NodeDescription("Groups rows by one or more columns (a list of names or one text with commas) and works out count, sum, average, min, max, median, first, last, list or distinct per group — \"sum:Volume\", \"count\" — the pivot-table core for quantities. Blank cells are skipped by sum, average and median; text in a number column is an error that names it.")]
     [NodeSearchTags("group", "aggregate", "summary", "rollup", "total", "sum", "count", "pivot", "takeoff", "qto")]
-    public static CamelGraphTable GroupBy(CamelGraphTable table, string by, IList<object?> aggregations)
+    public static CamelGraphTable GroupBy(CamelGraphTable table, [PortKinds("text")] IList<object?> by, IList<object?> aggregations)
     {
         Require(table, "Table.GroupBy");
-        var groupIndexes = string.IsNullOrWhiteSpace(by)
-            ? new List<int>()
-            : ColumnNames(new List<object?> { by }, "Table.GroupBy").Select(c => table.IndexOf(c, "Table.GroupBy")).ToList();
+        var groupIndexes = ResolveColumns(table, by, "Table.GroupBy", "by", false).Select(c => c.Index).ToList();
         var specs = ParseAggregations(aggregations, table, "Table.GroupBy");
         if (specs.Count == 0 && groupIndexes.Count == 0)
         {
@@ -648,7 +786,7 @@ public static class TableToolkitNodes
     /// <param name="rowColumn">The column whose values become the rows.</param>
     /// <param name="columnColumn">The column whose values become the new columns.</param>
     /// <param name="valueColumn">The column to total in each cell (not needed for count).</param>
-    /// <param name="aggregation">How to combine: sum (default), count, average, min, max, first, last.</param>
+    /// <param name="aggregation">How to combine: sum (default), count, average, min, max, median, first, last, list or distinct.</param>
     /// <returns>One row per row value, one column per column value.</returns>
     [NodeName("Table.Pivot")]
     [return: NodeName("table")]
@@ -659,7 +797,7 @@ public static class TableToolkitNodes
         string rowColumn,
         string columnColumn,
         string valueColumn = "",
-        [NodeChoices("sum", "count", "average", "min", "max", "first", "last")] string aggregation = "sum")
+        [NodeChoices("sum", "count", "average", "min", "max", "median", "first", "last", "list", "distinct")] string aggregation = "sum")
     {
         Require(table, "Table.Pivot");
         var rowIndex = table.IndexOf(rowColumn, "Table.Pivot");
@@ -731,48 +869,117 @@ public static class TableToolkitNodes
         return new CamelGraphTable(headers, rows);
     }
 
-    /// <summary>Joins two tables on a key column.</summary>
+    /// <summary>Joins two tables on one or more key columns.</summary>
     /// <param name="left">The main table.</param>
     /// <param name="right">The table to add columns from.</param>
-    /// <param name="leftKey">The key column of the left table.</param>
-    /// <param name="rightKey">The key column of the right table (leave empty to use the same name as leftKey).</param>
+    /// <param name="leftKey">The key column(s) of the left table: one name, several names separated by commas, or a list of names.</param>
+    /// <param name="rightKey">The key column(s) of the right table, as many as in leftKey and in the same order (leave empty to use the same names as leftKey).</param>
     /// <param name="kind">inner keeps rows with a match on both sides; left keeps every left row; outer keeps every row of both.</param>
     /// <returns>The joined table: the left columns, then the right columns (a repeated name gets " (right)").</returns>
     [NodeName("Table.Join")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.Join@CamelGraph.Nodes.CamelGraphTable,CamelGraph.Nodes.CamelGraphTable,string,string,string")]
     [return: NodeName("table")]
-    [NodeDescription("Joins two tables on a key column (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and \"42\" are the same.")]
-    [NodeSearchTags("join", "merge", "lookup", "vlookup", "combine", "match", "relate")]
+    [NodeDescription("Joins two tables on one or more key columns (inner, left or outer) — add the Excel columns to the model data by GUID or mark. Keys match as text, so 42 and \"42\" are the same, and a key that looks like a GUID matches whatever its capitals and small letters (other text keys must match exactly). An empty key never matches anything, not even another empty key. leftKey and rightKey take one column name, several separated by commas (or a list) to join on Level and Mark together; leave rightKey empty when both tables use the same names. Table.Unmatched lists the left rows that found no partner (it replaces Table.JoinByKey's unmatchedKeys).")]
+    [NodeSearchTags("join", "merge", "lookup", "vlookup", "combine", "match", "relate", "joinbykey", "by key", "guid", "mark")]
     public static CamelGraphTable Join(
         CamelGraphTable left,
         CamelGraphTable right,
-        string leftKey,
-        string rightKey = "",
+        [PortKinds("text")] IList<object?> leftKey,
+        [PortKinds("text")] IList<object?>? rightKey = null,
         [NodeChoices("inner", "left", "outer")] string kind = "inner")
     {
-        Require(left, "Table.Join");
+        return JoinTables(left, right, leftKey, rightKey, kind, "Table.Join", out _);
+    }
+
+    /// <summary>The rows of the left table that find no partner in the right table.</summary>
+    /// <param name="left">The main table.</param>
+    /// <param name="right">The table to look the keys up in.</param>
+    /// <param name="leftKey">The key column(s) of the left table: one name, several names separated by commas, or a list of names.</param>
+    /// <param name="rightKey">The key column(s) of the right table, as many as in leftKey and in the same order (leave empty to use the same names as leftKey).</param>
+    /// <returns>The left rows with no partner, with the left columns only (rows with a blank key are always among them).</returns>
+    [NodeName("Table.Unmatched")]
+    [return: NodeName("table")]
+    [NodeDescription("The rows of the left table that find no partner in the right table, using the same keys and the same matching as Table.Join (GUIDs match whatever their case, a blank key never matches) — which model elements have no row in the Excel list, which GUIDs were not found.")]
+    [NodeSearchTags("unmatched", "anti join", "missing", "not found", "no match", "difference", "left only", "joinbykey", "unmatchedkeys", "guid", "mark")]
+    public static CamelGraphTable Unmatched(
+        CamelGraphTable left,
+        CamelGraphTable right,
+        [PortKinds("text")] IList<object?> leftKey,
+        [PortKinds("text")] IList<object?>? rightKey = null)
+    {
+        JoinTables(left, right, leftKey, rightKey, "left", "Table.Unmatched", out var unmatched);
+        return unmatched;
+    }
+
+    // The join itself, shared by Table.Join and Table.Unmatched: the joined table, and the left rows that found no partner.
+    private static CamelGraphTable JoinTables(
+        CamelGraphTable left,
+        CamelGraphTable right,
+        IList<object?> leftKey,
+        IList<object?>? rightKey,
+        string kind,
+        string nodeName,
+        out CamelGraphTable unmatchedRows)
+    {
+        Require(left, nodeName);
         if (right == null)
         {
-            throw new ArgumentNullException(nameof(right), "Table.Join requires a second table. Wire a table into the 'right' input.");
+            throw new ArgumentNullException(null, nodeName + " requires a second table. Wire a table into the 'right' input.");
         }
 
-        var li = left.IndexOf(leftKey, "Table.Join");
-        var ri = right.IndexOf(string.IsNullOrWhiteSpace(rightKey) ? leftKey : rightKey, "Table.Join");
+        var leftKeys = ResolveColumns(left, leftKey, nodeName, "leftKey", false, "the left table").Select(c => c.Index).ToList();
+        if (leftKeys.Count == 0)
+        {
+            throw new ArgumentException(nodeName + " needs the key column of the left table. Type or wire its name into 'leftKey' (for example " + (left.ColumnCount > 0 ? left.Headers[0] : "GUID") + ").");
+        }
+
+        var rightNamed = rightKey == null ? new List<ColumnRef>() : ResolveColumns(right, rightKey, nodeName, "rightKey", false, "the right table");
+        List<int> rightKeys;
+        if (rightNamed.Count == 0)
+        {
+            rightKeys = leftKeys.Select(i => FindColumn(right, left.Headers[i], nodeName, "the right table")).ToList();
+        }
+        else if (rightNamed.Count != leftKeys.Count)
+        {
+            throw new ArgumentException(
+                nodeName + ": 'leftKey' names " + leftKeys.Count.ToString(CultureInfo.InvariantCulture) + " column(s) but 'rightKey' names " +
+                rightNamed.Count.ToString(CultureInfo.InvariantCulture) + ". Give the same number on both sides, in the same order, or leave 'rightKey' empty to use the left names.");
+        }
+        else
+        {
+            rightKeys = rightNamed.Select(c => c.Index).ToList();
+        }
+
         var joinKind = (kind ?? string.Empty).Trim().ToLowerInvariant();
         if (joinKind != "inner" && joinKind != "left" && joinKind != "outer")
         {
-            throw new ArgumentException("Table.Join: kind must be inner, left or outer; got '" + kind + "'.", nameof(kind));
+            throw new ArgumentException(nodeName + ": kind must be inner, left or outer; got '" + kind + "'.");
         }
 
-        // The right key column is dropped when it carries the same name as the left one (it would only repeat it).
-        var sameName = string.Equals(left.Headers[li].Trim(), right.Headers[ri].Trim(), StringComparison.OrdinalIgnoreCase);
-        var rightColumns = Enumerable.Range(0, right.ColumnCount).Where(i => !(sameName && i == ri)).ToList();
+        // A right key column is dropped when it carries the same name as its left partner (it would only repeat it).
+        var dropped = new HashSet<int>();
+        for (int k = 0; k < leftKeys.Count; k++)
+        {
+            if (string.Equals(left.Headers[leftKeys[k]].Trim(), right.Headers[rightKeys[k]].Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                dropped.Add(rightKeys[k]);
+            }
+        }
+
+        var rightColumns = Enumerable.Range(0, right.ColumnCount).Where(i => !dropped.Contains(i)).ToList();
         var leftNames = new HashSet<string>(left.Headers, StringComparer.OrdinalIgnoreCase);
         var headers = left.Headers.Concat(rightColumns.Select(i => leftNames.Contains(right.Headers[i]) ? right.Headers[i] + " (right)" : right.Headers[i])).ToList();
 
+        // A row with a blank key cell is not in the lookup at all: blanks never match each other.
         var rightByKey = new Dictionary<string, List<int>>(StringComparer.Ordinal);
         for (int i = 0; i < right.RowCount; i++)
         {
-            var key = KeyText(right.Rows[i][ri]);
+            var key = JoinKey(right.Rows[i], rightKeys);
+            if (key == null)
+            {
+                continue;
+            }
+
             if (!rightByKey.TryGetValue(key, out var bucket))
             {
                 bucket = new List<int>();
@@ -784,9 +991,11 @@ public static class TableToolkitNodes
 
         var usedRight = new HashSet<int>();
         var rows = new List<IReadOnlyList<object?>>();
+        var unmatched = new List<IReadOnlyList<object?>>();
         foreach (var row in left.Rows)
         {
-            if (rightByKey.TryGetValue(KeyText(row[li]), out var matches))
+            var leftValue = JoinKey(row, leftKeys);
+            if (leftValue != null && rightByKey.TryGetValue(leftValue, out var matches))
             {
                 foreach (var m in matches)
                 {
@@ -794,9 +1003,13 @@ public static class TableToolkitNodes
                     rows.Add(row.Concat(rightColumns.Select(i => right.Rows[m][i])).ToList());
                 }
             }
-            else if (joinKind != "inner")
+            else
             {
-                rows.Add(row.Concat(rightColumns.Select(_ => (object?)null)).ToList());
+                unmatched.Add(row);
+                if (joinKind != "inner")
+                {
+                    rows.Add(row.Concat(rightColumns.Select(_ => (object?)null)).ToList());
+                }
             }
         }
 
@@ -810,11 +1023,16 @@ public static class TableToolkitNodes
                 }
 
                 var cells = new object?[left.ColumnCount];
-                cells[li] = right.Rows[m][ri];
+                for (int k = 0; k < leftKeys.Count; k++)
+                {
+                    cells[leftKeys[k]] = right.Rows[m][rightKeys[k]];
+                }
+
                 rows.Add(cells.Concat(rightColumns.Select(i => right.Rows[m][i])).ToList());
             }
         }
 
+        unmatchedRows = new CamelGraphTable(left.Headers, unmatched);
         return new CamelGraphTable(headers, rows);
     }
 
@@ -928,7 +1146,7 @@ public static class TableToolkitNodes
     {
         if (table == null)
         {
-            throw new ArgumentNullException(nameof(table), nodeName + " requires a table. Wire one into the 'table' input (Table.FromRows makes one).");
+            throw new ArgumentNullException(null, nodeName + " requires a table. Wire one into the 'table' input (Table.FromRows makes one).");
         }
     }
 
@@ -936,7 +1154,7 @@ public static class TableToolkitNodes
     {
         if (list == null)
         {
-            throw new ArgumentNullException(port, nodeName + " requires a list. Wire one into the '" + port + "' input.");
+            throw new ArgumentNullException(null, nodeName + " requires a list. Wire one into the '" + port + "' input.");
         }
     }
 
@@ -956,33 +1174,337 @@ public static class TableToolkitNodes
         return new List<object?> { row };
     }
 
-    // Column names given as a list, or as one text with names separated by commas.
-    private static List<string> ColumnNames(IList<object?>? columns, string nodeName)
+    // One column named on a 'columns' / 'by' / 'leftKey' input, with the sort direction when the text carried one.
+    private readonly struct ColumnRef
     {
-        if (columns == null)
+        public ColumnRef(int index, bool? descending)
         {
-            throw new ArgumentNullException(nameof(columns), nodeName + " requires column names. Wire a list of names (or one text with commas) into the 'columns' input.");
+            Index = index;
+            Descending = descending;
         }
 
-        var names = new List<string>();
-        foreach (var item in columns)
+        public int Index { get; }
+
+        public bool? Descending { get; }
+    }
+
+    // Column names given as a list, or as one text with names separated by commas. Each item is first tried as a whole name, so a
+    // column called "Area, gross (m2)" can be addressed; only when there is no such column is the item split at its commas.
+    private static List<ColumnRef> ResolveColumns(
+        CamelGraphTable table, IList<object?>? items, string nodeName, string port, bool allowDirection, string label = "the table")
+    {
+        if (items == null)
         {
+            throw new ArgumentNullException(null, nodeName + " requires column names. Wire a list of names (or one text with commas) into the '" + port + "' input.");
+        }
+
+        var result = new List<ColumnRef>();
+        for (int i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
             if (item == null)
             {
                 continue;
             }
 
-            foreach (var part in TypeCoercion.FormatValue(item).Split(','))
+            if (item is IDictionary || (item is IList && !(item is string)))
             {
-                var name = part.Trim();
-                if (name.Length > 0)
+                throw new ArgumentException(
+                    nodeName + ": item " + i.ToString(CultureInfo.InvariantCulture) + " of '" + port +
+                    "' is a list, not a column name. Give a flat list of names (List.Flatten flattens one level).");
+            }
+
+            var text = TypeCoercion.FormatValue(item).Trim();
+            if (text.Length == 0)
+            {
+                continue;
+            }
+
+            if (TryResolveColumn(table, text, allowDirection, out var whole))
+            {
+                result.Add(whole);
+                continue;
+            }
+
+            if (text.IndexOf(',') < 0)
+            {
+                result.Add(ResolveColumn(table, text, allowDirection, nodeName, label));
+                continue;
+            }
+
+            // Names separated by commas. A column whose own name holds a comma ("Area, gross (m2)") is still found: from each
+            // position the longest run of pieces that together make a column name wins.
+            var pieces = text.Split(',');
+            var at = 0;
+            while (at < pieces.Length)
+            {
+                var found = false;
+                for (int length = pieces.Length - at; length >= 1 && !found; length--)
                 {
-                    names.Add(name);
+                    var candidate = string.Join(",", pieces, at, length).Trim();
+                    if (candidate.Length > 0 && TryResolveColumn(table, candidate, allowDirection, out var column))
+                    {
+                        result.Add(column);
+                        at += length;
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                {
+                    var name = pieces[at].Trim();
+                    if (name.Length > 0)
+                    {
+                        result.Add(ResolveColumn(table, name, allowDirection, nodeName, label));
+                    }
+
+                    at++;
                 }
             }
         }
 
-        return names;
+        return result;
+    }
+
+    private static bool TryResolveColumn(CamelGraphTable table, string text, bool allowDirection, out ColumnRef column)
+    {
+        var index = table.TryIndexOf(text);
+        if (index >= 0)
+        {
+            column = new ColumnRef(index, null);
+            return true;
+        }
+
+        if (allowDirection)
+        {
+            var (name, descending) = SplitDirection(text);
+            if (descending != null)
+            {
+                index = table.TryIndexOf(name);
+                if (index >= 0)
+                {
+                    column = new ColumnRef(index, descending);
+                    return true;
+                }
+            }
+        }
+
+        column = default;
+        return false;
+    }
+
+    private static ColumnRef ResolveColumn(CamelGraphTable table, string text, bool allowDirection, string nodeName, string label)
+    {
+        if (TryResolveColumn(table, text, allowDirection, out var column))
+        {
+            return column;
+        }
+
+        FindColumn(table, allowDirection ? SplitDirection(text).Name : text, nodeName, label);
+        throw new InvalidOperationException(nodeName + ": no column named '" + text + "'.");
+    }
+
+    // "Length desc", "-Length" and "Length asc" for the sort; anything else has no direction.
+    private static (string Name, bool? Descending) SplitDirection(string spec)
+    {
+        if (spec.StartsWith("-", StringComparison.Ordinal))
+        {
+            return (spec.Substring(1).Trim(), true);
+        }
+
+        if (spec.EndsWith(" desc", StringComparison.OrdinalIgnoreCase))
+        {
+            return (spec.Substring(0, spec.Length - 5).Trim(), true);
+        }
+
+        if (spec.EndsWith(" asc", StringComparison.OrdinalIgnoreCase))
+        {
+            return (spec.Substring(0, spec.Length - 4).Trim(), false);
+        }
+
+        return (spec, null);
+    }
+
+    // The column of that name, or an error that lists the columns there are and says which table was meant.
+    private static int FindColumn(CamelGraphTable table, string name, string nodeName, string label)
+    {
+        var index = table.TryIndexOf(name);
+        if (index >= 0)
+        {
+            return index;
+        }
+
+        throw new ArgumentException(
+            nodeName + ": " + label + " has no column named '" + name + "'. Columns: " +
+            (table.ColumnCount == 0 ? "(none)" : string.Join(", ", table.Headers)) + ".");
+    }
+
+    // A list with one value per row, or one value for every row.
+    private static object?[] ValuesPerRow(CamelGraphTable table, object? values, string nodeName)
+    {
+        IList? list = values is IList l && !(values is string) ? l : null;
+        if (list != null && list.Count != table.RowCount)
+        {
+            throw new ArgumentException(
+                nodeName + ": the table has " + table.RowCount.ToString(CultureInfo.InvariantCulture) + " row(s) but " +
+                list.Count.ToString(CultureInfo.InvariantCulture) + " value(s) were given. Give one per row, or a single value.");
+        }
+
+        var cells = new object?[table.RowCount];
+        for (int i = 0; i < cells.Length; i++)
+        {
+            cells[i] = list != null ? list[i] : values;
+        }
+
+        return cells;
+    }
+
+    // The tests that look a cell up in a set of values; the other tests belong to ValueTests.
+    private static string? FilterMembership(string? test)
+    {
+        switch ((test ?? string.Empty).Trim().ToLowerInvariant())
+        {
+            case "in":
+            case "isin":
+            case "oneof":
+                return "in";
+            case "notin":
+            case "!in":
+            case "isnotin":
+                return "notIn";
+            default:
+                return null;
+        }
+    }
+
+    // The values of an in / notIn test: a list as it is, one text split at its commas, anything else as a single value.
+    private static List<object?> FilterMembers(object? value)
+    {
+        var members = new List<object?>();
+        if (value == null)
+        {
+            return members;
+        }
+
+        if (value is string text)
+        {
+            foreach (var part in text.Split(','))
+            {
+                if (part.Trim().Length > 0)
+                {
+                    members.Add(part.Trim());
+                }
+            }
+
+            return members;
+        }
+
+        if (value is IList list)
+        {
+            foreach (var item in list)
+            {
+                if (item != null)
+                {
+                    members.Add(item);
+                }
+            }
+
+            return members;
+        }
+
+        members.Add(value);
+        return members;
+    }
+
+    // The columns a formula names (the same reading of the text as FormulaParser: [bracketed names] and plain names that are not
+    // followed by a bracket), so a blank or text cell only matters where the formula really uses it.
+    private static HashSet<int> ReferencedColumns(string formula, IReadOnlyList<string> headers)
+    {
+        var used = new HashSet<int>();
+        void Add(string name)
+        {
+            for (int c = 0; c < headers.Count; c++)
+            {
+                if (string.Equals(headers[c], name, StringComparison.OrdinalIgnoreCase))
+                {
+                    used.Add(c);
+                    return;
+                }
+            }
+        }
+
+        var i = 0;
+        while (i < formula.Length)
+        {
+            var ch = formula[i];
+            if (char.IsDigit(ch) || (ch == '.' && i + 1 < formula.Length && char.IsDigit(formula[i + 1])))
+            {
+                while (i < formula.Length && (char.IsDigit(formula[i]) || formula[i] == '.'))
+                {
+                    i++;
+                }
+
+                if (i < formula.Length && (formula[i] == 'e' || formula[i] == 'E'))
+                {
+                    var j = i + 1;
+                    if (j < formula.Length && (formula[j] == '+' || formula[j] == '-'))
+                    {
+                        j++;
+                    }
+
+                    if (j < formula.Length && char.IsDigit(formula[j]))
+                    {
+                        while (j < formula.Length && char.IsDigit(formula[j]))
+                        {
+                            j++;
+                        }
+
+                        i = j;
+                    }
+                }
+
+                continue;
+            }
+
+            if (ch == '[')
+            {
+                var close = formula.IndexOf(']', i + 1);
+                if (close < 0)
+                {
+                    break;
+                }
+
+                Add(formula.Substring(i + 1, close - i - 1).Trim());
+                i = close + 1;
+                continue;
+            }
+
+            if (char.IsLetter(ch) || ch == '_')
+            {
+                var start = i;
+                while (i < formula.Length && (char.IsLetterOrDigit(formula[i]) || formula[i] == '_'))
+                {
+                    i++;
+                }
+
+                var next = i;
+                while (next < formula.Length && char.IsWhiteSpace(formula[next]))
+                {
+                    next++;
+                }
+
+                if (!(next < formula.Length && formula[next] == '('))
+                {
+                    Add(formula.Substring(start, i - start));
+                }
+
+                continue;
+            }
+
+            i++;
+        }
+
+        return used;
     }
 
     private static string KeyText(object? value)
@@ -1002,27 +1524,75 @@ public static class TableToolkitNodes
 
     private static string CellOrBlank(object? value) => value == null ? "(blank)" : CamelGraphTable.CellText(value);
 
-    private static double CellNumber(object? cell, double fallback)
+    // A cell read as a number: a number, a true / false (1 / 0) or text that reads as a finite number. Blank, other text and
+    // NaN / Infinity are not numbers.
+    private static bool TryCellNumber(object? cell, out double number)
     {
+        number = 0d;
         if (cell == null)
         {
-            return fallback;
+            return false;
         }
 
         if (ValueComparison.IsNumeric(cell))
         {
-            return ValueComparison.ToDouble(cell);
+            number = ValueComparison.ToDouble(cell);
         }
-
-        if (cell is bool flag)
+        else if (cell is bool flag)
         {
-            return flag ? 1d : 0d;
+            number = flag ? 1d : 0d;
+        }
+        else if (!(cell is string text && double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out number)))
+        {
+            return false;
         }
 
-        return cell is string text && double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
-            ? parsed
-            : fallback;
+        return !double.IsNaN(number) && !double.IsInfinity(number);
     }
+
+    /// <summary>A key cell with nothing in it: empty, or only spaces. A blank key never matches anything.</summary>
+    /// <param name="value">The cell.</param>
+    internal static bool IsBlankKey(object? value) => value == null || (value is string text && text.Trim().Length == 0);
+
+    // A GUID as Navisworks, Revit and Excel write it: 32 hex digits, usually in 8-4-4-4-12 groups, optionally in { } or ( ).
+    private static readonly Regex GuidLike = new Regex(
+        @"^[{(]?[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}[})]?$", RegexOptions.CultureInvariant);
+
+    // The text of one key cell for a join: numbers and text as KeyText, and a GUID in small letters, because the same GUID is
+    // written in capitals by one tool and in small letters by another. Any other text must match exactly.
+    private static string JoinCellText(object? cell)
+    {
+        var text = KeyText(cell);
+        return text.Length >= 32 && text.Length <= 38 && GuidLike.IsMatch(text.Trim()) ? text.Trim().Trim('{', '}', '(', ')').ToLowerInvariant() : text;
+    }
+
+    // The text a join compares for one row, or null when any key cell is blank (such a row is never matched).
+    private static string? JoinKey(object?[] row, IReadOnlyList<int> columns)
+    {
+        if (columns.Count == 1)
+        {
+            var only = row[columns[0]];
+            return IsBlankKey(only) ? null : JoinCellText(only);
+        }
+
+        var parts = new string[columns.Count];
+        for (int k = 0; k < parts.Length; k++)
+        {
+            var cell = row[columns[k]];
+            if (IsBlankKey(cell))
+            {
+                return null;
+            }
+
+            parts[k] = JoinCellText(cell);
+        }
+
+        return string.Join("\u0001", parts);
+    }
+
+    /// <summary>The text of a join key: a number as its shortest exact form (so 42 and "42" agree), anything else as its display text.</summary>
+    /// <param name="value">The key cell.</param>
+    internal static string JoinKeyText(object? value) => KeyText(value);
 
     private sealed class AggregationSpec
     {

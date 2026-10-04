@@ -20,7 +20,10 @@ public static class TableNodes
     /// for each key, returns the first row whose cell in the key column
     /// matches. Cells and keys are compared as invariant text, so the number
     /// 42 and the string "42" match; the comparison is case-sensitive. When
-    /// the same key occurs in several rows the first row wins.
+    /// the same key occurs in several rows the first row wins. A blank key
+    /// (empty, only spaces, or no value) never matches anything, in the rows
+    /// or in the key list. Retired: Table.Join does the same with tables, can
+    /// ignore case, joins on several columns and has an unmatched output.
     /// </summary>
     /// <param name="rows">Table rows; each row a list of cells (e.g. from Excel.ReadFromFile).</param>
     /// <param name="headers">Column headers, one per cell column.</param>
@@ -28,10 +31,11 @@ public static class TableNodes
     /// <param name="keyColumn">Name of the header column holding the keys.</param>
     /// <returns>Dictionary with "matchedRows" (parallel to keys; null when unmatched) and "unmatchedKeys".</returns>
     [NodeName("Table.JoinByKey")]
+    [NodeDeprecated("Table.Join")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [MultiReturn("matchedRows", "unmatchedKeys")]
     [PortKinds("", "")]
-    [NodeDescription("Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing.")]
+    [NodeDescription("Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing. A blank key never matches. Case-sensitive; first row wins.")]
     [NodeSearchTags("join", "lookup", "vlookup", "merge", "link", "table", "excel", "csv")]
     public static Dictionary<string, object> JoinByKey(
         IList<object?> rows,
@@ -41,17 +45,17 @@ public static class TableNodes
     {
         if (rows == null)
         {
-            throw new ArgumentNullException(nameof(rows), "Table.JoinByKey requires a list of rows (each row a list of cells).");
+            throw new ArgumentNullException(null, "Table.JoinByKey requires a list of rows (each row a list of cells).");
         }
 
         if (headers == null)
         {
-            throw new ArgumentNullException(nameof(headers), "Table.JoinByKey requires the table's column headers.");
+            throw new ArgumentNullException(null, "Table.JoinByKey requires the table's column headers.");
         }
 
         if (keys == null)
         {
-            throw new ArgumentNullException(nameof(keys), "Table.JoinByKey requires a list of keys to look up.");
+            throw new ArgumentNullException(null, "Table.JoinByKey requires a list of keys to look up.");
         }
 
         if (string.IsNullOrWhiteSpace(keyColumn))
@@ -72,6 +76,11 @@ public static class TableNodes
                 continue; // row too short to have a key cell
             }
 
+            if (TableToolkitNodes.IsBlankKey(cells[columnIndex]))
+            {
+                continue; // a blank key matches nothing, not even another blank
+            }
+
             var cellKey = NormalizeKey(cells[columnIndex]);
             if (!rowByKey.ContainsKey(cellKey))
             {
@@ -83,7 +92,7 @@ public static class TableNodes
         var unmatchedKeys = new List<object?>();
         foreach (var key in keys)
         {
-            if (rowByKey.TryGetValue(NormalizeKey(key), out var row))
+            if (!TableToolkitNodes.IsBlankKey(key) && rowByKey.TryGetValue(NormalizeKey(key), out var row))
             {
                 matchedRows.Add(row);
             }
@@ -147,20 +156,8 @@ public static class TableNodes
 
     /// <summary>
     /// Invariant text form of a key or cell so numeric and textual keys
-    /// compare naturally (42 and "42" match, independent of locale).
+    /// compare naturally (42 and "42" match, independent of locale); the
+    /// same rule as Table.Join.
     /// </summary>
-    private static string NormalizeKey(object? value)
-    {
-        if (value is string text)
-        {
-            return text;
-        }
-
-        if (value is double number)
-        {
-            return number.ToString("R", CultureInfo.InvariantCulture);
-        }
-
-        return TypeCoercion.FormatValue(value);
-    }
+    private static string NormalizeKey(object? value) => TableToolkitNodes.JoinKeyText(value);
 }

@@ -805,30 +805,30 @@
 | `Table.AddFormulaColumn` | table, name, formula | table | Adds a column calculated per row from the others, e.g |
 | `Table.Column` | table, column | values | The cells of one column, top to bottom |
 | `Table.Concat` | tables | table | Stacks tables one below the other, matching columns by name |
-| `Table.Distinct` | table, columns? | table | Keeps only the first row for each distinct value (of the given columns, or of the whole row) |
+| `Table.Distinct` | table, columns? | table | Keeps only the first row for each distinct value of the given columns (a list of names or one text with commas), or of the whole row when none are given |
 | `Table.Filter` | table, column, test?, value?, ignoreCase? | matched, rejected | Splits a table by a test on one column |
 | `Table.FromColumns` | columns, headers? | table | Makes a table from columns: a list of lists, one per column, with optional names |
 | `Table.FromCsvFile` | path, delimiter?, firstRowIsHeader? | table | Reads a CSV file straight into a table (numbers become numbers, everything else stays text) |
 | `Table.FromDictionaries` | dictionaries | table | Makes a table from a list of dictionaries (one row each) |
 | `Table.FromExcelFile` | path, sheet?, firstRowIsHeader? | table | Reads an Excel worksheet straight into a table |
 | `Table.FromRows` | rows, headers?, firstRowIsHeader? | table | Makes a table from rows of cells and column names (or from the first row) |
-| `Table.GroupBy` | table, by, aggregations | table | Groups rows by one or more columns and works out count, sum, average, min, max, median, first, last, list or distinct per group |
-| `Table.Headers` | table | headers | The column names of a table, in order |
-| `Table.Info` | table | rowCount, columnCount, headers | How many rows and columns a table has, and its column names |
-| `Table.Join` | left, right, leftKey, rightKey?, kind? | table | Joins two tables on a key column (inner, left or outer) |
-| `Table.JoinByKey` | rows, headers, keys, keyColumn | matchedRows, unmatchedKeys | Joins spreadsheet rows to a key list: one matched row per key (null when unmatched), plus the keys that matched nothing |
+| `Table.GroupBy` | table, by, aggregations | table | Groups rows by one or more columns (a list of names or one text with commas) and works out count, sum, average, min, max, median, first, last, list or distinct per group |
+| `Table.Info` | table | rowCount, columnCount, headers | How many rows and columns a table has, and its column names (the headers output is the list of names, in column order) |
+| `Table.Join` | left, right, leftKey, rightKey?, kind? | table | Joins two tables on one or more key columns (inner, left or outer) |
 | `Table.Pivot` | table, rowColumn, columnColumn, valueColumn?, aggregation? | table | Cross-tabulates: rows from one column, columns from another, each cell the sum (or count, average …) of a third |
 | `Table.RemoveColumns` | table, columns | table | Drops the listed columns and keeps the rest |
 | `Table.RenameColumn` | table, column, newName | table | Renames one column |
 | `Table.Row` | table, index | row | One row of a table as a dictionary from column name to cell (0 is the first row |
 | `Table.Rows` | table | rows | The rows of a table as a list of lists of cells (for Excel.WriteToFile, CSV.WriteToFile and the List nodes) |
-| `Table.SelectColumns` | table, columns | table | Keeps only the listed columns, in that order (names as a list or one comma-separated text) |
+| `Table.SelectColumns` | table, columns | table | Keeps only the listed columns, in that order |
+| `Table.SetColumn` | table, name, values | table | Replaces the cells of a column in place, keeping its position and name, or adds the column at the end when there is none of that name |
 | `Table.Slice` | table, start?, count? | table | Takes count rows from a starting row (count -1 takes all the rest) |
-| `Table.Sort` | table, columns, descending? | table | Sorts the rows by one or more columns ("Level, -Length" sorts by level, then longest first) |
+| `Table.Sort` | table, columns, descending? | table | Sorts the rows by one or more columns, as a list of names or one text ("Level, -Length" sorts by level, then longest first) |
 | `Table.ToCsvFile` | table, path, delimiter? | path | Writes a table, with its column names, to a CSV file |
 | `Table.ToDictionaries` | table | dictionaries | The rows of a table as dictionaries (column name to cell) |
 | `Table.ToExcelFile` | table, path, sheet?, append? | path | Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook) |
 | `Table.ToText` | table, format? | text | Renders a table as Markdown, CSV, tab-separated or an HTML table |
+| `Table.Unmatched` | left, right, leftKey, rightKey? | table | The rows of the left table that find no partner in the right table, using the same keys and the same matching as Table.Join (GUIDs match whatever their case, a blank key… |
 
 ## Utility
 
@@ -882,4 +882,6 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Search.ByPropertyContains` | Search.ByProperty |
 | `Search.ByPropertyValue` | Search.ByProperty |
 | `Search.ByPropertyWildcard` | Search.ByProperty |
+| `Table.Headers` | Table.Info |
+| `Table.JoinByKey` | Table.Join |
 
