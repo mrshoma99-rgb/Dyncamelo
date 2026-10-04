@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Core.Types;
 using CamelGraph.Nodes.Internal;
@@ -11,19 +13,20 @@ namespace CamelGraph.Nodes;
 
 /// <summary>
 /// List arithmetic and tallies: sums, averages, spread, counts per value, histograms, filters by value, and a few list
-/// reshaping helpers. Numbers are read from any numeric type, or text that looks like a number; nulls are skipped.
+/// reshaping helpers. Numbers are read from any numeric type, or text that looks like a number; nulls and blank text are
+/// skipped. A list with no numbers gives an empty result and a warning (a sum is 0 and a product 1), never an error.
 /// </summary>
 [NodeCategory("List")]
 public static class ListStatsNodes
 {
     /// <summary>Adds up the numbers of a list.</summary>
-    /// <param name="list">The numbers (nulls are skipped; text such as "12.5" is read as a number).</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped; text such as "12.5" is read as a number).</param>
     /// <returns>The total; 0 for an empty list.</returns>
     [NodeName("List.Sum")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("sum")]
-    [NodeDescription("Adds up the numbers of a list (nulls are skipped, an empty list gives 0).")]
+    [NodeDescription("Adds up the numbers of a list. Nulls and blank text (an empty cell) are skipped, text such as \"12.5\" is read as a number, and an empty list gives 0. A list inside the list is an error: set the input to @L2 for one total per sublist.")]
     [NodeSearchTags("total", "add", "aggregate", "quantity", "qto", "sum")]
     public static double Sum([MultiInput] IList<object?> list)
     {
@@ -37,15 +40,15 @@ public static class ListStatsNodes
     }
 
     /// <summary>Multiplies the numbers of a list.</summary>
-    /// <param name="list">The numbers (nulls are skipped).</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
     /// <returns>The product; 1 for an empty list.</returns>
     [NodeName("List.Product")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("product")]
-    [NodeDescription("Multiplies the numbers of a list (nulls are skipped, an empty list gives 1).")]
+    [NodeDescription("Multiplies the numbers of a list. Nulls and blank text are skipped and an empty list gives 1. A list inside the list is an error: set the input to @L2 for one product per sublist.")]
     [NodeSearchTags("multiply", "aggregate", "times")]
-    public static double Product(IList<object?> list)
+    public static double Product([MultiInput] IList<object?> list)
     {
         var product = 1d;
         foreach (var value in Numbers(list, "List.Product"))
@@ -57,77 +60,94 @@ public static class ListStatsNodes
     }
 
     /// <summary>The mean of the numbers of a list.</summary>
-    /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
-    /// <returns>The arithmetic mean.</returns>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
+    /// <returns>The arithmetic mean; empty (with a warning) when the list has no numbers.</returns>
     [NodeName("List.Average")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("average")]
-    [NodeDescription("The arithmetic mean of the numbers of a list (nulls are skipped; no numbers is an error).")]
+    [NodeDescription("The arithmetic mean of the numbers of a list. Nulls and blank text are skipped; with no numbers at all (an empty list) the result is empty and the node shows a warning instead of an error. A list inside the list is an error: set the input to @L2 for one average per sublist.")]
     [NodeSearchTags("mean", "aggregate", "avg", "kpi")]
-    public static double Average([MultiInput] IList<object?> list)
+    public static double? Average([MultiInput] IList<object?> list)
     {
         var values = Numbers(list, "List.Average");
-        RequireAny(values, "List.Average");
+        if (values.Count == 0)
+        {
+            return WarnNoNumbers("there is no average");
+        }
+
         return values.Sum() / values.Count;
     }
 
     /// <summary>The middle value of the numbers of a list.</summary>
-    /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
-    /// <returns>The median; the mean of the two middle values when the count is even.</returns>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
+    /// <returns>The median (the mean of the two middle values when the count is even); empty (with a warning) when the list has no numbers.</returns>
     [NodeName("List.Median")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("median")]
-    [NodeDescription("The middle value of the numbers of a list (the mean of the two middle ones when the count is even).")]
+    [NodeDescription("The middle value of the numbers of a list (the mean of the two middle ones when the count is even); the same as List.Percentile at 50. Nulls and blank text are skipped; with no numbers at all the result is empty and the node shows a warning instead of an error.")]
     [NodeSearchTags("middle", "aggregate", "typical")]
-    public static double Median(IList<object?> list)
+    public static double? Median([MultiInput] IList<object?> list)
     {
         var values = Numbers(list, "List.Median");
-        RequireAny(values, "List.Median");
+        if (values.Count == 0)
+        {
+            return WarnNoNumbers("there is no median");
+        }
+
         return PercentileOf(values, 50d);
     }
 
     /// <summary>A percentile of the numbers of a list.</summary>
-    /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
     /// <param name="percent">Which percentile, 0 to 100 (50 is the median, 90 the value 90 % of the list lies below).</param>
-    /// <returns>The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC).</returns>
+    /// <returns>The value at that percentile, interpolated linearly (like Excel's PERCENTILE.INC); empty (with a warning) when the list has no numbers.</returns>
     [NodeName("List.Percentile")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("value")]
-    [NodeDescription("The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC).")]
-    [NodeSearchTags("quantile", "quartile", "aggregate", "percent")]
-    public static double Percentile(IList<object?> list, [NodeRange(0, 100)] double percent = 90d)
+    [NodeDescription("The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC); 50 is the median, 0 the smallest and 100 the largest number. Nulls and blank text are skipped; with no numbers at all the result is empty and the node shows a warning instead of an error.")]
+    [NodeSearchTags("quantile", "quartile", "aggregate", "percent", "median")]
+    public static double? Percentile([MultiInput] IList<object?> list, [NodeRange(0, 100)] double percent = 90d)
     {
-        if (percent < 0d || percent > 100d)
+        if (double.IsNaN(percent) || percent < 0d || percent > 100d)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(percent), "List.Percentile needs a percentage from 0 to 100; got " + percent.ToString(CultureInfo.InvariantCulture) + ".");
         }
 
         var values = Numbers(list, "List.Percentile");
-        RequireAny(values, "List.Percentile");
+        if (values.Count == 0)
+        {
+            return WarnNoNumbers("there is no percentile");
+        }
+
         return PercentileOf(values, percent);
     }
 
     /// <summary>How spread out the numbers of a list are.</summary>
-    /// <param name="list">The numbers (nulls are skipped); at least one (two for a sample) is required.</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped); two are needed for a sample.</param>
     /// <param name="sample">True divides by n-1 (a sample of a larger population); false (default) divides by n.</param>
-    /// <returns>The standard deviation.</returns>
+    /// <returns>The standard deviation; empty (with a warning) when there are not enough numbers.</returns>
     [NodeName("List.StandardDeviation")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("standardDeviation")]
-    [NodeDescription("The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1).")]
+    [NodeDescription("The standard deviation of the numbers of a list (population by default; tick 'sample' to divide by n-1, which needs at least two numbers). Nulls and blank text are skipped; with too few numbers the result is empty and the node shows a warning instead of an error.")]
     [NodeSearchTags("spread", "variance", "deviation", "stdev", "statistics")]
-    public static double StandardDeviation(IList<object?> list, bool sample = false)
+    public static double? StandardDeviation([MultiInput] IList<object?> list, bool sample = false)
     {
         var values = Numbers(list, "List.StandardDeviation");
-        RequireAny(values, "List.StandardDeviation");
+        if (values.Count == 0)
+        {
+            return WarnNoNumbers("there is no standard deviation");
+        }
+
         if (sample && values.Count < 2)
         {
-            throw new InvalidOperationException("List.StandardDeviation needs at least two numbers when 'sample' is on.");
+            NodeWarnings.Add("The 'sample' option needs at least two numbers, and the 'list' input has one, so there is no standard deviation. The result is empty.");
+            return null;
         }
 
         var mean = values.Sum() / values.Count;
@@ -141,14 +161,14 @@ public static class ListStatsNodes
     }
 
     /// <summary>The usual summary figures of a list of numbers in one go.</summary>
-    /// <param name="list">The numbers (nulls are skipped).</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
     /// <returns>count, sum, min, max, average, median and standardDeviation; everything but count and sum is empty for no numbers.</returns>
     [NodeName("List.Statistics")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("count", "sum", "min", "max", "average", "median", "standardDeviation")]
     [PortKinds("integer", "number", "number", "number", "number", "number", "number")]
-    [NodeDescription("Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node.")]
+    [NodeDescription("Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node. Nulls and blank text are skipped and not counted; with no numbers at all the count is 0, the sum is 0, the rest is empty and the node shows a warning. Text that reads as a number is compared as a number here (List.MaximumItem compares text as text).")]
     [NodeSearchTags("summary", "describe", "aggregate", "kpi", "qto", "min", "max", "statistics")]
     public static Dictionary<string, object> Statistics([MultiInput] IList<object?> list)
     {
@@ -165,6 +185,7 @@ public static class ListStatsNodes
         };
         if (values.Count == 0)
         {
+            WarnNoNumbers("the minimum, maximum, average, median and standard deviation are empty");
             return result;
         }
 
@@ -179,12 +200,12 @@ public static class ListStatsNodes
     }
 
     /// <summary>Adds a running total along a list of numbers.</summary>
-    /// <param name="list">The numbers (nulls are an error here, so positions stay aligned).</param>
+    /// <param name="list">The numbers (an empty item, null or blank text, is an error here, so positions stay aligned).</param>
     /// <returns>A list as long as the input: each item is the sum of everything up to and including it.</returns>
     [NodeName("List.CumulativeSum")]
     [NodeCategory("List.Statistics")]
     [return: NodeName("totals")]
-    [NodeDescription("A running total: each item is the sum of the list up to and including that position.")]
+    [NodeDescription("A running total: each item is the sum of the list up to and including that position. An empty item (null or blank text) is an error, so the totals stay lined up with the list; remove or fill empty items first (List.FilterByValue with the notEmpty test, or List.ReplaceNulls). A list inside the list is an error: set the input to @L2 for one running total per sublist.")]
     [NodeSearchTags("running", "accumulate", "progress", "s-curve")]
     public static IList<double> CumulativeSum(IList<object?> list)
     {
@@ -193,9 +214,11 @@ public static class ListStatsNodes
         var running = 0d;
         for (int i = 0; i < list.Count; i++)
         {
-            if (list[i] == null)
+            if (IsBlank(list[i]))
             {
-                throw new ArgumentException("List.CumulativeSum: item " + i.ToString(CultureInfo.InvariantCulture) + " is empty; remove nulls first (List.Clean).");
+                throw new ArgumentException(
+                    "List.CumulativeSum: item " + i.ToString(CultureInfo.InvariantCulture) +
+                    " is empty; remove or fill empty items first (List.FilterByValue with the notEmpty test, or List.ReplaceNulls).");
             }
 
             running += ToNumber(list[i], i, "List.CumulativeSum");
@@ -208,16 +231,18 @@ public static class ListStatsNodes
     /// <summary>Counts how many times each distinct value occurs.</summary>
     /// <param name="list">The values to tally (nulls are counted as one value, shown empty).</param>
     /// <returns>The distinct values in order of first appearance and how many times each occurs.</returns>
-    [NodeName("List.CountBy")]
+    [NodeName("List.CountValues")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("values", "counts")]
     [PortKinds("", "integer*")]
-    [NodeDescription("Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs. Numbers compare by value, text with its case, and lists and dictionaries by their content.")]
-    [NodeSearchTags("tally", "frequency", "distribution", "group", "count", "how many of each")]
-    public static Dictionary<string, object> CountBy(IList<object?> list)
+    [NodeDescription("Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs. Numbers compare by value, text with its case, and lists and dictionaries by their content. (It tallies the values themselves; List.GroupByKey groups items by a separate list of keys.)")]
+    [NodeSearchTags("tally", "frequency", "distribution", "group", "count", "how many of each", "countby", "count by")]
+    public static Dictionary<string, object> CountBy(IList<object?> list) => Tally(list, "List.CountValues");
+
+    private static Dictionary<string, object> Tally(IList<object?> list, string nodeName)
     {
-        Require(list, "List.CountBy");
+        Require(list, nodeName);
         var values = new List<object?>();
         var counts = new List<object?>();
         var index = new Dictionary<object, int>(new ValueEquality());
@@ -258,11 +283,11 @@ public static class ListStatsNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("duplicates", "counts")]
     [PortKinds("", "integer*")]
-    [NodeDescription("The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names. Values compare as in List.CountBy (text with its case).")]
+    [NodeDescription("The values that occur more than once, with how many times each occurs — duplicate GUIDs, marks or names. Values compare as in List.CountValues (text with its case); nulls are not duplicates.")]
     [NodeSearchTags("duplicate", "repeated", "twice", "unique", "check", "audit")]
     public static Dictionary<string, object> Duplicates(IList<object?> list)
     {
-        var tally = CountBy(list);
+        var tally = Tally(list, "List.Duplicates");
         var values = (List<object?>)tally["values"];
         var counts = (List<object?>)tally["counts"];
         var duplicates = new List<object?>();
@@ -287,11 +312,11 @@ public static class ListStatsNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("item", "count")]
     [PortKinds("", "integer")]
-    [NodeDescription("The value that occurs most often in a list (the earliest wins a tie) and how many times. Values compare as in List.CountBy (text with its case).")]
+    [NodeDescription("The value that occurs most often in a list (the earliest wins a tie) and how many times. Values compare as in List.CountValues (text with its case); nulls are not counted. A list with nothing but nulls is an error.")]
     [NodeSearchTags("mode", "frequent", "popular", "typical")]
     public static Dictionary<string, object> MostCommon(IList<object?> list)
     {
-        var tally = CountBy(list);
+        var tally = Tally(list, "List.MostCommon");
         var values = (List<object?>)tally["values"];
         var counts = (List<object?>)tally["counts"];
         var best = -1;
@@ -312,17 +337,17 @@ public static class ListStatsNodes
     }
 
     /// <summary>Groups numbers into equal-width bins and counts them.</summary>
-    /// <param name="list">The numbers (nulls are skipped); at least one is required.</param>
+    /// <param name="list">The numbers (nulls and blank text are skipped).</param>
     /// <param name="bins">How many bins, from the smallest to the largest value.</param>
-    /// <returns>For each bin: its lower edge, upper edge, count and a text label.</returns>
+    /// <returns>For each bin: its lower edge, upper edge, count and a text label; empty lists (with a warning) when there are no numbers.</returns>
     [NodeName("List.Histogram")]
     [NodeCategory("List.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [MultiReturn("lower", "upper", "counts", "labels")]
     [PortKinds("number*", "number*", "integer*", "text*")]
-    [NodeDescription("Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart.")]
+    [NodeDescription("Splits the range of the numbers into equal bins and counts how many fall in each — the data behind a distribution chart. Nulls and blank text are skipped; with no numbers at all the four lists are empty and the node shows a warning instead of an error.")]
     [NodeSearchTags("distribution", "bins", "buckets", "chart", "frequency", "range")]
-    public static Dictionary<string, object> Histogram(IList<object?> list, [NodeRange(1, 1000)] int bins = 10)
+    public static Dictionary<string, object> Histogram([MultiInput] IList<object?> list, [NodeRange(1, 1000)] int bins = 10)
     {
         if (bins < 1 || bins > 1000)
         {
@@ -330,7 +355,18 @@ public static class ListStatsNodes
         }
 
         var values = Numbers(list, "List.Histogram");
-        RequireAny(values, "List.Histogram");
+        if (values.Count == 0)
+        {
+            WarnNoNumbers("there are no bins to count");
+            return new Dictionary<string, object>
+            {
+                ["lower"] = new List<object?>(),
+                ["upper"] = new List<object?>(),
+                ["counts"] = new List<object?>(),
+                ["labels"] = new List<object?>(),
+            };
+        }
+
         var min = values.Min();
         var max = values.Max();
         var width = (max - min) / bins;
@@ -364,19 +400,19 @@ public static class ListStatsNodes
 
     /// <summary>Keeps the items that pass a test, in one node instead of compare, mask and filter.</summary>
     /// <param name="list">The items to filter.</param>
-    /// <param name="test">The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</param>
-    /// <param name="value">What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests).</param>
+    /// <param name="test">The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty, in, notIn.</param>
+    /// <param name="value">What to test against (not used by the isNull / notNull / isEmpty / notEmpty tests). For in and notIn a list of values, or a text with the values separated by commas or semicolons.</param>
     /// <param name="keys">Optional: a list of the same length whose values are tested instead of the items themselves (filter model items by a property value).</param>
     /// <param name="ignoreCase">True (default) ignores upper/lower case in text tests.</param>
     /// <returns>The items that passed, the items that did not, and the true/false mask.</returns>
     [NodeName("List.FilterByValue")]
     [MultiReturn("matched", "rejected", "mask")]
     [PortKinds("", "", "boolean*")]
-    [NodeDescription("Keeps the items that pass a test such as > 100, contains \"wall\" or matches \"A-*\" — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask.")]
-    [NodeSearchTags("filter", "where", "select", "keep", "compare", "mask", "search", "query")]
+    [NodeDescription("Keeps the items that pass a test such as > 100, contains \"wall\", matches \"A-*\" or in [\"L01\", \"L02\"] — optionally testing a parallel list of keys instead; returns the matches, the rest and the mask. The tests > >= < <= never pass an item that has no value (null or blank text) or one that cannot be compared with the value (text against a number; the node then warns and names the first). The test in keeps the items equal to any of the values in a list (or in a text with the values separated by commas or semicolons); notIn keeps the others. Text tests ignore case unless ignoreCase is off; regex needs a pattern of its own and stops after 2 seconds.")]
+    [NodeSearchTags("filter", "where", "select", "keep", "compare", "mask", "search", "query", "in", "any of", "one of", "membership")]
     public static Dictionary<string, object> FilterByValue(
         IList<object?> list,
-        [NodeChoices("==", "!=", ">", ">=", "<", "<=", "contains", "!contains", "startsWith", "endsWith", "matches", "regex", "isNull", "notNull", "isEmpty", "notEmpty")]
+        [NodeChoices("==", "!=", ">", ">=", "<", "<=", "contains", "!contains", "startsWith", "endsWith", "matches", "regex", "isNull", "notNull", "isEmpty", "notEmpty", "in", "notIn")]
         string test = "==",
         object? value = null,
         IList<object?>? keys = null,
@@ -390,16 +426,65 @@ public static class ListStatsNodes
                 keys.Count.ToString(CultureInfo.InvariantCulture) + "; they must be the same length.");
         }
 
-        var op = ValueTests.Normalize(test, "List.FilterByValue");
+        var membership = ListMembership.TryParse(test, out var negate);
+        var op = membership ? string.Empty : ValueTests.Normalize(test, "List.FilterByValue");
+        var ordering = op == ">" || op == ">=" || op == "<" || op == "<=";
+        var members = membership ? ListMembership.Members(value, ignoreCase) : null;
+        var valueHasNoValue = ordering && IsBlank(value);
+        var uncomparable = 0;
+        var firstUncomparable = -1;
+
         var matched = new List<object?>();
         var rejected = new List<object?>();
         var mask = new List<object?>(list.Count);
         for (int i = 0; i < list.Count; i++)
         {
             var subject = keys != null ? keys[i] : list[i];
-            var passed = ValueTests.Test(op, subject, value, ignoreCase, "List.FilterByValue");
+            bool passed;
+            if (membership)
+            {
+                passed = members!.Contains(subject) != negate;
+            }
+            else if (ordering && (valueHasNoValue || IsBlank(subject)))
+            {
+                // No value is not smaller or larger than anything.
+                passed = false;
+            }
+            else
+            {
+                try
+                {
+                    passed = ValueTests.Test(op, subject, value, ignoreCase, "List.FilterByValue");
+                }
+                catch (InvalidOperationException) when (ordering)
+                {
+                    // Text against a number (or two values of unrelated types): they have no order, so the item does not pass.
+                    passed = false;
+                    if (uncomparable++ == 0)
+                    {
+                        firstUncomparable = i;
+                    }
+                }
+                catch (RegexMatchTimeoutException ex)
+                {
+                    throw new InvalidOperationException(
+                        "List.FilterByValue: matching the pattern '" + TypeCoercion.FormatValue(value) + "' on item " + i.ToString(CultureInfo.InvariantCulture) +
+                        " took longer than 2 seconds and was stopped. Simplify the pattern (avoid nested repeats such as '(a+)+') or match a shorter text.",
+                        ex);
+                }
+            }
+
             mask.Add(passed);
             (passed ? matched : rejected).Add(list[i]);
+        }
+
+        if (uncomparable > 0)
+        {
+            var first = keys != null ? keys[firstUncomparable] : list[firstUncomparable];
+            NodeWarnings.Add(
+                uncomparable.ToString(CultureInfo.InvariantCulture) + " of " + list.Count.ToString(CultureInfo.InvariantCulture) +
+                " items cannot be compared with '" + TypeCoercion.FormatValue(value) + "' (the first is item " + firstUncomparable.ToString(CultureInfo.InvariantCulture) +
+                ", '" + TypeCoercion.FormatValue(first) + "') and did not pass the " + op + " test.");
         }
 
         return new Dictionary<string, object> { ["matched"] = matched, ["rejected"] = rejected, ["mask"] = mask };
@@ -430,7 +515,7 @@ public static class ListStatsNodes
     /// <returns>[first0, second0], [first1, second1], … as long as the shorter list.</returns>
     [NodeName("List.Zip")]
     [return: NodeName("pairs")]
-    [NodeDescription("Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list.")]
+    [NodeDescription("Pairs two lists by position: [[a0, b0], [a1, b1], …], as long as the shorter list. When the lists differ in length the extra items of the longer one are left out and the node shows a warning that says how many.")]
     [NodeSearchTags("pair", "combine", "merge", "interleave", "together")]
     public static IList<object?> Zip(IList<object?> first, IList<object?> second)
     {
@@ -441,6 +526,15 @@ public static class ListStatsNodes
         }
 
         var count = Math.Min(first.Count, second.Count);
+        if (first.Count != second.Count)
+        {
+            var longer = first.Count > second.Count ? "first" : "second";
+            NodeWarnings.Add(
+                "The 'first' list has " + first.Count.ToString(CultureInfo.InvariantCulture) + " items and the 'second' has " + second.Count.ToString(CultureInfo.InvariantCulture) +
+                ", so the pairs stop at " + count.ToString(CultureInfo.InvariantCulture) + " and the last " + Math.Abs(first.Count - second.Count).ToString(CultureInfo.InvariantCulture) +
+                " item(s) of the '" + longer + "' list are left out.");
+        }
+
         var pairs = new List<object?>(count);
         for (int i = 0; i < count; i++)
         {
@@ -477,23 +571,13 @@ public static class ListStatsNodes
 
     /// <summary>Sorts a list from largest to smallest.</summary>
     /// <param name="list">The list to sort.</param>
-    /// <returns>A new list, descending (numbers numerically, text alphabetically).</returns>
+    /// <returns>A new list, largest first, by the same ordering rule as List.Sort.</returns>
     [NodeName("List.SortDescending")]
+    [NodeDeprecated("List.Sort with 'descending' ticked")]
     [return: NodeName("list")]
-    [NodeDescription("Returns the list sorted descending (largest first; text alphabetically from Z).")]
+    [NodeDescription("Returns the list sorted descending (largest first; text alphabetically from Z), by the same rule as List.Sort.")]
     [NodeSearchTags("order", "descending", "reverse", "biggest first", "top")]
-    public static IList<object?> SortDescending(IList<object?> list)
-    {
-        Require(list, "List.SortDescending");
-        try
-        {
-            return list.OrderByDescending(item => item, new ValueOrder()).ToList();
-        }
-        catch (InvalidOperationException ex) when (ex.InnerException != null)
-        {
-            throw new InvalidOperationException("List.SortDescending: " + ex.InnerException.Message, ex.InnerException);
-        }
-    }
+    public static IList<object?> SortDescending(IList<object?> list) => ListNodes.SortItems(list, descending: true, "List.SortDescending");
 
     /// <summary>Puts the items in a pseudo-random order that is the same every time for the same seed.</summary>
     /// <param name="list">The list.</param>
@@ -525,7 +609,7 @@ public static class ListStatsNodes
     /// <returns>The items before the first false.</returns>
     [NodeName("List.TakeWhile")]
     [return: NodeName("list")]
-    [NodeDescription("Takes items from the start of the list for as long as the mask is true (stops at the first false).")]
+    [NodeDescription("Takes items from the start of the list for as long as the mask is true (stops at the first false). The mask is read as in List.FilterByBoolMask: one true or false per item, a null counts as false, and a list or a value that is not true or false is an error.")]
     [NodeSearchTags("head", "until", "leading", "prefix")]
     public static IList<object?> TakeWhile(IList<object?> list, IList<object?> mask)
     {
@@ -539,7 +623,7 @@ public static class ListStatsNodes
     /// <returns>The items from the first false on.</returns>
     [NodeName("List.DropWhile")]
     [return: NodeName("list")]
-    [NodeDescription("Drops items from the start of the list for as long as the mask is true; keeps everything from the first false.")]
+    [NodeDescription("Drops items from the start of the list for as long as the mask is true; keeps everything from the first false. The mask is read as in List.FilterByBoolMask: one true or false per item, a null counts as false, and a list or a value that is not true or false is an error.")]
     [NodeSearchTags("skip", "leading", "tail", "prefix")]
     public static IList<object?> DropWhile(IList<object?> list, IList<object?> mask)
     {
@@ -568,7 +652,7 @@ public static class ListStatsNodes
 
         for (int i = 0; i < mask.Count; i++)
         {
-            if (!(TypeCoercion.TryCoerce(mask[i], typeof(bool), out var flag) && flag is bool on && on))
+            if (!ListNodes.ReadSplitMask(mask[i], i, nodeName))
             {
                 return i;
             }
@@ -585,13 +669,15 @@ public static class ListStatsNodes
         }
     }
 
-    private static void RequireAny(List<double> values, string nodeName)
+    /// <summary>Says on the node that the list had no numbers and what follows from it; returns null so a caller can return it as its empty result.</summary>
+    private static double? WarnNoNumbers(string consequence)
     {
-        if (values.Count == 0)
-        {
-            throw new InvalidOperationException(nodeName + " needs at least one number in the list (nulls are skipped).");
-        }
+        NodeWarnings.Add("The 'list' input has no numbers (it is empty, or holds only nulls and blank text), so " + consequence + ".");
+        return null;
     }
+
+    /// <summary>True for an item with no value in a column of numbers: null, or text that is empty or only spaces.</summary>
+    private static bool IsBlank(object? item) => item == null || (item is string text && text.Trim().Length == 0);
 
     private static List<double> Numbers(IList<object?> list, string nodeName)
     {
@@ -599,7 +685,7 @@ public static class ListStatsNodes
         var numbers = new List<double>(list.Count);
         for (int i = 0; i < list.Count; i++)
         {
-            if (list[i] != null)
+            if (!IsBlank(list[i]))
             {
                 numbers.Add(ToNumber(list[i], i, nodeName));
             }
@@ -613,7 +699,8 @@ public static class ListStatsNodes
         if (item is IList && !(item is string))
         {
             throw new ArgumentException(
-                nodeName + ": item " + index.ToString(CultureInfo.InvariantCulture) + " is a list, not a number. Flatten the list first (List.Flatten).");
+                nodeName + ": item " + index.ToString(CultureInfo.InvariantCulture) + " is a list, not a number. " +
+                "For one result per sublist set this input to @L2 (right-click, List Levels); for one result for everything flatten the list first (List.Flatten).");
         }
 
         if (item != null && ValueComparison.IsNumeric(item))

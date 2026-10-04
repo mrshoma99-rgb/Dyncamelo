@@ -67,7 +67,7 @@ Two ideas make most of these short:
 
 **Cross-tab.** `Table.Pivot` with rows = level, columns = status and *count*: clashes (or items) by level and status.
 
-**Distribution.** `List.Histogram` for the bins, `List.Statistics` for count / min / max / average / median in one node, `List.CountBy` for "how many of each".
+**Distribution.** `List.Histogram` for the bins, `List.Statistics` for count / min / max / average / median in one node, `List.CountValues` for "how many of each".
 
 **Duplicates.** `List.Duplicates` over the GUID or mark list; `Table.Distinct` on a table.
 

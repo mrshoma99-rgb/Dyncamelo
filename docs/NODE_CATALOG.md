@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**578 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -16,7 +16,7 @@
 | [Geometry](#geometry) | 43 |
 | [IFC](#ifc) | 2 |
 | [Input](#input) | 10 |
-| [List](#list) | 51 |
+| [List](#list) | 50 |
 | [List.Statistics](#liststatistics) | 12 |
 | [Logic](#logic) | 18 |
 | [Math](#math) | 37 |
@@ -272,7 +272,7 @@
 | `List.DropItems` | list, amount | list | Drops elements from the start of the list |
 | `List.DropWhile` | list, mask | list | Drops items from the start of the list for as long as the mask is true |
 | `List.FilterByBoolMask` | list, mask | in, out | Splits a list into elements whose mask entry is true ("in") and the rest ("out") |
-| `List.FilterByValue` | list, test?, value?, keys?, ignoreCase? | matched, rejected, mask | Keeps the items that pass a test such as > 100, contains "wall" or matches "A-*" |
+| `List.FilterByValue` | list, test?, value?, keys?, ignoreCase? | matched, rejected, mask | Keeps the items that pass a test such as > 100, contains "wall", matches "A-*" or in ["L01", "L02"] |
 | `List.FirstItem` | list | item | Returns the first element of a list |
 | `List.Flatten` | list, amount? | list | Flattens a nested list by a given number of levels (-1 = completely) |
 | `List.GetItemAtIndex` | list, index | item | Returns the element at the given index (negative indexes count from the end) |
@@ -281,27 +281,26 @@
 | `List.Insert` | list, item, index | list | Returns a new list with the value inserted at the index (0 = front |
 | `List.LastIndexOf` | list, item | index | The zero-based index of the LAST occurrence of the item (-1 when absent) |
 | `List.LastItem` | list | item | Returns the last element of a list |
-| `List.MaximumItem` | list | item | The largest element of a list (numbers, texts or dates |
+| `List.MaximumItem` | list | item | The largest element of a list (numbers, texts or dates) |
 | `List.Merge` | lists | list | Concatenates any number of lists into one |
-| `List.MinimumItem` | list | item | The smallest element of a list (numbers, texts or dates |
+| `List.MinimumItem` | list | item | The smallest element of a list (numbers, texts or dates) |
 | `List.OfRepeatedItem` | item, amount | list | A list of one value repeated N times |
 | `List.Pairs` | list, cyclic? | pairs | Pairs each item with the next one: [[a, b], [b, c], …] |
-| `List.Range` | start, end, step? | list | Creates a sequence of numbers from start to end using the given step |
-| `List.RemoveItemAtIndex` | list, index | list | Removes the element at the given index (negative indexes count from the end) |
+| `List.Range` | start, end, step? | list | Creates a sequence of numbers from start to end (both included) using the given step |
+| `List.RemoveItemAtIndex` | list, indices | list | Removes the elements at the given indices and returns one new list (negative indexes count from the end) |
 | `List.ReplaceItemAtIndex` | list, index, item | list | Returns a new list with the element at the index replaced (negative indexes count from the end) |
 | `List.ReplaceNulls` | list, substitute | list | Replaces every null element with a substitute value, at every nesting level |
 | `List.RestOfItems` | list | list | Everything but the first element |
-| `List.Reverse` | list | reversed | Returns the list in reverse order |
+| `List.Reverse` | list | list | Returns the list in reverse order |
 | `List.SetDifference` | list1, list2 | list | The distinct elements of the FIRST list that are NOT in the second |
 | `List.SetIntersection` | list1, list2 | list | The distinct elements present in BOTH lists (ordered as in the first) |
 | `List.SetUnion` | list1, list2 | list | The distinct elements present in EITHER list (first-seen order) |
 | `List.ShiftIndices` | list, amount | list | Rotates the list: +1 moves every element one place towards the end and wraps the last to the front ([a,b,c] → [c,a,b]) |
 | `List.Shuffle` | list, seed? | list | Shuffles a list |
-| `List.Slice` | list, start, end, step? | list | A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element |
-| `List.Sort` | list | list | Returns the list sorted ascending (numbers numerically, strings alphabetically) |
-| `List.SortByKey` | list, keys | sorted, sortedKeys | Sorts list elements by a parallel key list |
-| `List.SortDescending` | list | list | Returns the list sorted descending (largest first |
-| `List.TakeEveryNthItem` | list, n, offset? | list | Every n-th element, optionally after skipping offset elements |
+| `List.Slice` | list, start, end?, step? | list | A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element |
+| `List.Sort` | list, descending? | list | Returns the list sorted ascending, or largest first with descending |
+| `List.SortByKey` | list, keys, descending? | sorted, sortedKeys | Sorts list elements by a parallel key list of the same length, smallest key first or largest first with descending |
+| `List.TakeEveryNthItem` | list, n, offset? | list | Takes the n-th, 2n-th, 3n-th  |
 | `List.TakeItems` | list, amount | list | Takes elements from the start of the list |
 | `List.TakeWhile` | list, mask | list | Takes items from the start of the list for as long as the mask is true (stops at the first false) |
 | `List.Transpose` | list | lists | Swaps rows and columns of a list of lists |
@@ -313,18 +312,18 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `List.Average` | list | average | The arithmetic mean of the numbers of a list (nulls are skipped |
-| `List.CountBy` | list | values, counts | Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs |
+| `List.Average` | list | average | The arithmetic mean of the numbers of a list |
+| `List.CountValues` | list | values, counts | Tallies a list: each distinct value, in order of first appearance, with the number of times it occurs |
 | `List.CumulativeSum` | list | totals | A running total: each item is the sum of the list up to and including that position |
 | `List.Duplicates` | list | duplicates, counts | The values that occur more than once, with how many times each occurs |
 | `List.Histogram` | list, bins? | lower, upper, counts, labels | Splits the range of the numbers into equal bins and counts how many fall in each |
 | `List.Median` | list | median | The middle value of the numbers of a list (the mean of the two middle ones when the count is even) |
 | `List.MostCommon` | list | item, count | The value that occurs most often in a list (the earliest wins a tie) and how many times |
 | `List.Percentile` | list, percent? | value | The value below which a given percentage of the numbers lie (linear interpolation, like Excel's PERCENTILE.INC) |
-| `List.Product` | list | product | Multiplies the numbers of a list (nulls are skipped, an empty list gives 1) |
+| `List.Product` | list | product | Multiplies the numbers of a list |
 | `List.StandardDeviation` | list, sample? | standardDeviation | The standard deviation of the numbers of a list (population by default |
 | `List.Statistics` | list | count, sum, min, max, average, median, standardDeviation | Count, sum, minimum, maximum, average, median and standard deviation of a list of numbers in one node |
-| `List.Sum` | list | sum | Adds up the numbers of a list (nulls are skipped, an empty list gives 0) |
+| `List.Sum` | list | sum | Adds up the numbers of a list |
 
 ## Logic
 
@@ -872,6 +871,7 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
 | `List.Join` | List.Merge |
+| `List.SortDescending` | List.Sort with 'descending' ticked |
 | `Markup.AddArrow` | Markup.AddShape |
 | `Markup.AddEllipse` | Markup.AddShape |
 | `Markup.AddLine` | Markup.AddShape |
