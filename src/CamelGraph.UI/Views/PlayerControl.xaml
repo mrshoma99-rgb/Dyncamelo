@@ -71,7 +71,32 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- A read-only box for the text a script produced: keeps its columns (no wrapping), scrolls both ways, never cuts text off. -->
+            <!-- The label of a field or of a result: one step bolder than the values, so the eye finds what each box is for. -->
+            <Style x:Key="Player.FieldLabel" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <!-- A small outlined tag: the kind of control a field is (TEXT, NUMBER, CHOICE ...) or what a result is (OUTPUT, ERROR). -->
+            <Style x:Key="Player.Chip" TargetType="{x:Type Border}">
+                <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="4" />
+                <Setter Property="Padding" Value="5,1" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+            </Style>
+            <Style x:Key="Player.ChipText" TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="9.5" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+            </Style>
+
+            <!-- A read-only box for the text a script produced: keeps its columns (no wrapping), scrolls both ways, never cuts text off.
+                 It has no frame of its own: the result card around it is the frame, so a result does not look like a box you can type in. -->
             <Style x:Key="Player.OutputBox" TargetType="{x:Type TextBox}" BasedOn="{StaticResource Dyc.TextBox}">
                 <Setter Property="IsReadOnly" Value="True" />
                 <Setter Property="TextWrapping" Value="NoWrap" />
@@ -81,7 +106,9 @@
                 <Setter Property="VerticalContentAlignment" Value="Top" />
                 <Setter Property="FontFamily" Value="Consolas" />
                 <Setter Property="FontSize" Value="12" />
-                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0,6,0,0" />
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -550,10 +577,15 @@
                     <!-- The form: the same inline editors the nodes use, in roomier versions. -->
                     <Border x:Name="InputsCard" Style="{StaticResource Dyc.Panel.Section}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource Dyc.Panel.Eyebrow}"
-                                       Text="INPUTS"
-                                       Margin="0,0,0,12"
-                                       Visibility="{Binding HasFields, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                            <!-- Blue marks what you can change; the results below are marked green. -->
+                            <DockPanel Margin="0,0,0,14" Visibility="{Binding HasFields, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                <Border DockPanel.Dock="Left" Width="3" Height="13" CornerRadius="1.5" Margin="0,0,8,0"
+                                        VerticalAlignment="Center" Background="{DynamicResource Dyc.AccentBrush}" />
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding Fields.Count, Mode=OneWay}"
+                                           FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                                <TextBlock Style="{StaticResource Dyc.Panel.Eyebrow}" Text="INPUTS" VerticalAlignment="Center" />
+                            </DockPanel>
 
                             <ItemsControl ItemsSource="{Binding Fields}" IsTabStop="False">
                                 <ItemsControl.ItemTemplate>
@@ -570,18 +602,21 @@
                                             </Grid.RowDefinitions>
 
                                             <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal"
-                                                            Visibility="{Binding Connector.ShowPlainLabel, Converter={StaticResource Dyc.BoolToVisibility}}">
-                                                    <TextBlock Text="{Binding Label}"
-                                                               FontSize="12"
-                                                               Margin="0,0,0,5"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               Foreground="{DynamicResource Dyc.TextBrush}" />
-                                                    <Ellipse Width="6" Height="6" Margin="6,-3,0,0"
-                                                             Fill="{DynamicResource Dyc.AccentBrush}"
-                                                             ToolTip="Changed from the value saved in the script"
-                                                             Visibility="{Binding IsChanged, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                                                </StackPanel>
+                                                <!-- The label in bold, the kind of control as a small tag on the right, a dot when the value was changed. -->
+                                                <DockPanel Margin="0,0,0,5">
+                                                    <Border DockPanel.Dock="Right" Style="{StaticResource Player.Chip}" Margin="8,0,0,0"
+                                                            ToolTip="What kind of value this field takes"
+                                                            Visibility="{Binding HasKindLabel, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                                        <TextBlock Style="{StaticResource Player.ChipText}" Text="{Binding KindLabel}" />
+                                                    </Border>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Label}" Style="{StaticResource Player.FieldLabel}" />
+                                                        <Ellipse Width="6" Height="6" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                                 Fill="{DynamicResource Dyc.AccentBrush}"
+                                                                 ToolTip="Changed from the value saved in the script"
+                                                                 Visibility="{Binding IsChanged, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                    </StackPanel>
+                                                </DockPanel>
                                                 <TextBlock Text="{Binding Detail}"
                                                            FontSize="10.5"
                                                            Margin="0,-3,0,5"
@@ -668,6 +703,8 @@
                                         ToolTip="Copy the results as text"
                                         VerticalAlignment="Center"
                                         Command="{Binding CopyResultsCommand}" />
+                                <Border DockPanel.Dock="Left" Width="3" Height="13" CornerRadius="1.5" Margin="0,0,8,0"
+                                        VerticalAlignment="Center" Background="{DynamicResource Dyc.FnCreateBrush}" />
                                 <TextBlock Style="{StaticResource Dyc.Panel.Eyebrow}" Text="RESULTS" VerticalAlignment="Center" />
                             </DockPanel>
 
@@ -699,17 +736,62 @@
                                 </TextBlock>
                             </DockPanel>
 
-                            <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,10,0,0" IsTabStop="False">
+                            <ItemsControl ItemsSource="{Binding Outputs}" Margin="0,12,0,0" IsTabStop="False">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="0,0,0,10">
-                                            <TextBlock Text="{Binding Label}"
-                                                       FontSize="11"
-                                                       Margin="0,0,0,4"
-                                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
-                                            <TextBox Style="{StaticResource Player.OutputBox}"
-                                                     Text="{Binding Text, Mode=OneWay}" />
-                                        </StackPanel>
+                                        <!-- A result: a tinted card with a coloured bar on its left (green; red when the node failed), the name in bold,
+                                             an OUTPUT tag, and the value in the monospace face with no box around it. -->
+                                        <Border Margin="0,0,0,10" CornerRadius="8" ClipToBounds="True"
+                                                BorderThickness="1" BorderBrush="{DynamicResource Dyc.PanelBorderBrush}"
+                                                Background="{DynamicResource Dyc.HoverBrush}">
+                                            <Grid>
+                                                <Border Width="3" HorizontalAlignment="Left" CornerRadius="7,0,0,7">
+                                                    <Border.Style>
+                                                        <Style TargetType="{x:Type Border}">
+                                                            <Setter Property="Background" Value="{DynamicResource Dyc.FnCreateBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                                                                    <Setter Property="Background" Value="{DynamicResource Dyc.ErrorBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <StackPanel Margin="14,9,10,9">
+                                                    <DockPanel>
+                                                        <Border DockPanel.Dock="Right" Margin="8,0,0,0">
+                                                            <Border.Style>
+                                                                <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Player.Chip}">
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource Dyc.FnCreateBrush}" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                                                                            <Setter Property="BorderBrush" Value="{DynamicResource Dyc.ErrorBrush}" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource Player.ChipText}">
+                                                                        <Setter Property="Text" Value="OUTPUT" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource Dyc.FnCreateBrush}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                                                                                <Setter Property="Text" Value="ERROR" />
+                                                                                <Setter Property="Foreground" Value="{DynamicResource Dyc.ErrorBrush}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Label}" Style="{StaticResource Player.FieldLabel}" />
+                                                    </DockPanel>
+                                                    <TextBox Style="{StaticResource Player.OutputBox}"
+                                                             Text="{Binding Text, Mode=OneWay}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -722,17 +804,23 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <Ellipse x:Name="Dot" Width="8" Height="8" Margin="0,4,8,0" VerticalAlignment="Top" Fill="{DynamicResource Dyc.WarningBrush}" />
+                                            <Ellipse Width="8" Height="8" Margin="0,4,8,0" VerticalAlignment="Top">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="{x:Type Ellipse}">
+                                                        <Setter Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                                <Setter Property="Fill" Value="{DynamicResource Dyc.ErrorBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
                                             <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="11.5" Foreground="{DynamicResource Dyc.TextBrush}">
                                                 <Run Text="{Binding Node, Mode=OneWay}" FontWeight="SemiBold" />
                                                 <Run Text="{Binding Text, Mode=OneWay}" />
                                             </TextBlock>
                                         </Grid>
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding IsError}" Value="True">
-                                                <Setter TargetName="Dot" Property="Fill" Value="{DynamicResource Dyc.ErrorBrush}" />
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>

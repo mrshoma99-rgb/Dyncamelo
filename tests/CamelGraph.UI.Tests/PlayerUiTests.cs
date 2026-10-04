@@ -595,6 +595,71 @@ public class PlayerUiTests : IDisposable
     }
 
     [Fact]
+    public void AnInputAResultAndATextBoxDoNotLookAlike()
+    {
+        var palette = PaletteCatalog.ById("CamelGraphDark")!;
+        var graph = new GraphModel { Name = "Tell apart" };
+        var strict = new BooleanToggleNode { Name = "Strict", Value = true, Y = 0 };
+        var gap = new NumberInputNode { Name = "Gap", Value = 2, Y = 100 };
+        var test = new StringInputNode { Name = "Test name", Value = "Floors", Y = 200 };
+        var sum = new SumNode { X = 200, Y = 100 };
+        var watch = new WatchNode { Name = "Total", X = 400, Y = 100 };
+        graph.AddNode(strict);
+        graph.AddNode(gap);
+        graph.AddNode(test);
+        graph.AddNode(sum);
+        graph.AddNode(watch);
+        Assert.True(graph.Connect(gap.OutPorts[0], sum.InPorts[0]).Success);
+        Assert.True(graph.Connect(sum.OutPorts[0], watch.InPorts[0]).Success);
+        var (window, player) = ShowPlayerWith(graph);
+        StaHost.Run(() => Assert.True(player.Run()));
+        StaHost.Flush();
+        StaHost.Flush();
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var control = (PlayerControl)window.Content;
+                var inputs = (System.Windows.Controls.Border)control.FindName("InputsCard");
+                var results = (System.Windows.Controls.Border)control.FindName("ResultsCard");
+
+                // Every label is bold and a step larger than the value in its box.
+                foreach (var name in new[] { "Strict", "Gap", "Test name", "Total" })
+                {
+                    var label = Descendants<System.Windows.Controls.TextBlock>(window).First(t => t.Text == name && t.IsVisible);
+                    Assert.Equal(FontWeights.SemiBold, label.FontWeight);
+                    Assert.Equal(12.5d, label.FontSize);
+                }
+
+                var typed = Descendants<System.Windows.Controls.TextBox>(inputs).Single(t => t.Text == "Floors");
+                Assert.True(typed.FontSize < 12.5d);
+                Assert.False(typed.IsReadOnly);
+                Assert.Equal(new Thickness(1d), typed.BorderThickness);
+
+                // A tag names the kind of control; the on/off switch needs none. A number carries no label inside its box any more.
+                var tags = Descendants<System.Windows.Controls.TextBlock>(inputs).Where(t => t.FontSize == 9.5d && t.IsVisible).Select(t => t.Text).OrderBy(t => t).ToArray();
+                Assert.Equal(new[] { "NUMBER", "TEXT" }, tags);
+                Assert.Equal(string.Empty, Assert.Single(Descendants<ScrubNumberBox>(window)).Label);
+                Assert.Equal(new[] { "NUMBER", "TEXT" }, player.Fields.Select(f => f.KindLabel).Where(k => k.Length > 0).OrderBy(k => k, StringComparer.Ordinal).ToArray());
+                Assert.Single(player.Fields, f => !f.HasKindLabel);   // the switch
+
+                // A result is a card with an OUTPUT tag in the green of the results; its value is read-only, monospace, with no box of its own.
+                var output = Descendants<System.Windows.Controls.TextBox>(results).Single();
+                Assert.True(output.IsReadOnly);
+                Assert.Equal(new Thickness(0d), output.BorderThickness);
+                Assert.Equal("Consolas", output.FontFamily.Source);
+                var tag = Descendants<System.Windows.Controls.TextBlock>(results).Single(t => t.Text == "OUTPUT" && t.IsVisible);
+                Assert.Equal(palette.Colors["Dyc.FnCreateBrush"], ((SolidColorBrush)tag.Foreground).Color);
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
+        }
+    }
+
+    [Fact]
     public void TheScriptBarNamesTheScriptAndTheListFoldsAwayWithIt()
     {
         var graph = new GraphModel { Name = "Folding" };
