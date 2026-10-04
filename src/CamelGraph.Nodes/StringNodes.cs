@@ -14,23 +14,23 @@ namespace CamelGraph.Nodes;
 public static class StringNodes
 {
     /// <summary>Concatenates two strings.</summary>
-    /// <param name="a">First string.</param>
-    /// <param name="b">Second string.</param>
+    /// <param name="a">First string. A missing (null) value counts as empty text, also for the gaps of a list.</param>
+    /// <param name="b">Second string. A missing (null) value counts as empty text, also for the gaps of a list.</param>
     /// <returns>The two strings joined together.</returns>
     [NodeName("String.Concat")]
-    [NodeDescription("Joins two strings into one.")]
+    [NodeDescription("Joins two strings into one. A missing value counts as empty text, also a gap in a list (a column with blank cells keeps every row).")]
     [NodeSearchTags("concatenate", "join", "append", "+")]
-    public static string Concat(string a, string b)
+    public static string Concat([AcceptsNull] string a, [AcceptsNull] string b)
     {
         return (a ?? string.Empty) + (b ?? string.Empty);
     }
 
     /// <summary>Joins a list of values into one string with a separator between elements.</summary>
     /// <param name="separator">Text placed between elements.</param>
-    /// <param name="list">The values to join; non-strings are formatted invariantly.</param>
+    /// <param name="list">The values to join; non-strings are formatted invariantly and a missing (null) value becomes empty text, as in String.Concat.</param>
     /// <returns>The joined string.</returns>
     [NodeName("String.Join")]
-    [NodeDescription("Joins the elements of a list into a single string with a separator.")]
+    [NodeDescription("Joins the elements of a list into a single string with a separator. A missing value becomes empty text (\"a,,c\"), as in String.Concat.")]
     [NodeSearchTags("concatenate", "combine", "delimiter")]
     public static string Join(string separator, [MultiInput] IList<object?> list)
     {
@@ -42,7 +42,7 @@ public static class StringNodes
         var parts = new List<string>(list.Count);
         foreach (var item in list)
         {
-            parts.Add(TypeCoercion.FormatValue(item));
+            parts.Add(item == null ? string.Empty : TypeCoercion.FormatValue(item));
         }
 
         return string.Join(separator ?? string.Empty, parts);

@@ -70,9 +70,10 @@ public class StringExtraNodesTests
     }
 
     [Fact]
-    public void Format_NonFormattableValuesAreShownLikeFromObject()
+    public void Format_NonFormattableValuesAreShownLikeFromObject_AndAGapIsEmptyText()
     {
-        Assert.Equal("null|True|[1, 2]", StringExtraNodes.Format("{0}|{1}|{2}", Values(null, true, new List<object?> { 1, 2 })));
+        // Audit ENG-11: a missing value is empty text (as in String.Concat), no longer the word "null".
+        Assert.Equal("|True|[1, 2]", StringExtraNodes.Format("{0}|{1}|{2}", Values(null, true, new List<object?> { 1, 2 })));
     }
 
     [Fact]

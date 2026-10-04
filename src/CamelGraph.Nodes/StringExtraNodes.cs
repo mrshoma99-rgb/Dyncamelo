@@ -32,15 +32,19 @@ public static class StringExtraNodes
     /// <summary>
     /// Fills a .NET composite format with the wired values: "{0}" is the first value, "{1}" the second, and so on.
     /// A format specifier after a colon formats numbers and dates ("{0:0.00}", "{1:yyyy-MM-dd}"), an alignment after a
-    /// comma pads ("{0,8}"), and "{{" / "}}" are literal braces. The invariant culture is always used. Values that are
-    /// neither text nor numbers/dates are shown the way String.FromObject shows them (null becomes "null").
+    /// comma pads ("{0,8}"), and "{{" / "}}" are literal braces. The invariant culture is always used. Lists and other
+    /// values that are neither text nor numbers/dates are shown the way String.FromObject shows them; a missing (null)
+    /// value becomes empty text, as in String.Concat. The node makes ONE text per call: everything wired to 'values'
+    /// (and the items of a list wired there) fills {0}, {1}, ... of that one text.
     /// </summary>
     /// <param name="format">The composite format text, e.g. "Wall {0} is {1:0.00} m high".</param>
-    /// <param name="values">The values for {0}, {1}, ... in the order they are wired.</param>
+    /// <param name="values">The values for {0}, {1}, ... in the order they are wired. For one text per row, wire a list of rows (a list of lists, for example from Table.Rows) and set this input's List Levels to @L2.</param>
     /// <returns>The formatted text.</returns>
     [NodeName("String.Format")]
     [return: NodeName("text")]
-    [NodeDescription("Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces).")]
+    [NodeDescription("Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces). " +
+        "It makes one text: all the wired values, and the items of a list wired to 'values', fill {0}, {1}, ... of that one text, and a missing value becomes empty text. " +
+        "For one text per row, wire the rows (a list of lists, for example Table.Rows) to 'values' and set its List Levels to @L2, or use String.Template with Table.ToDictionaries.")]
     [NodeSearchTags("sprintf", "interpolate", "placeholder", "compose", "message", "text")]
     public static string Format(string format, [MultiInput] IList<object?> values)
     {
@@ -60,7 +64,7 @@ public static class StringExtraNodes
         for (int i = 0; i < arguments.Length; i++)
         {
             var value = values[i];
-            arguments[i] = value is string || value is IFormattable ? value! : TypeCoercion.FormatValue(value);
+            arguments[i] = value == null ? string.Empty : value is string || value is IFormattable ? value : TypeCoercion.FormatValue(value);
         }
 
         try
@@ -575,14 +579,14 @@ public static class StringExtraNodes
     }
 
     /// <summary>Tests whether a text is empty or holds only whitespace. A missing (null) text counts as blank.</summary>
-    /// <param name="text">The text to test.</param>
+    /// <param name="text">The text to test. A list is tested item by item, and a gap in the list (a blank spreadsheet cell) counts as blank.</param>
     /// <returns>True when the text is null, empty or only whitespace.</returns>
     [NodeName("String.IsBlank")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("isBlank")]
-    [NodeDescription("Tests whether a text is null, empty or only whitespace.")]
+    [NodeDescription("Tests whether a text is null, empty or only whitespace. With a list it tests every item and a gap in the list counts as blank, so a column of cells gives one true or false per cell.")]
     [NodeSearchTags("empty", "null", "whitespace", "missing", "has value", "validate")]
-    public static bool IsBlank(string text)
+    public static bool IsBlank([AcceptsNull] string text)
     {
         return string.IsNullOrWhiteSpace(text);
     }
