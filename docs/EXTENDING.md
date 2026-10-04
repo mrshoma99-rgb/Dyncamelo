@@ -178,6 +178,7 @@ public static double SafeRatio(double part, double total)
     return part / total;
 }
 ```
+- **Long jobs: checkpoint between the steps.** The engine runs on the host's UI thread, so a node that works through many steps in one call (a batch of viewpoints, a long wait) would freeze the window and could not be stopped. Call `EvaluationContext.Current?.Checkpoint()` (namespace `CamelGraph.Core.Execution`) before each step: it lets the host repaint and poll for Stop, and throws `OperationCanceledException` when the user stopped the run. Let that exception through (do not catch it as a failure of the step); the node keeps its previous outputs and stays dirty, so the next run starts it again. `EvaluationContext.Current` is the context of the run that is calling your method, and `null` outside a run (a unit test), so the call is safe everywhere. `EvaluationContext.Current.CancellationToken` is the token itself, for code that wants to pass it on.
 - **Never** show message boxes, write to the console, or swallow exceptions silently from library nodes.
 
 ## 6. Navisworks node packs

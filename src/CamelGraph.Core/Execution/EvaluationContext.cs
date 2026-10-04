@@ -13,6 +13,8 @@ namespace CamelGraph.Core.Execution;
 /// </summary>
 public class EvaluationContext
 {
+    private static readonly AsyncLocal<EvaluationContext?> Ambient = new AsyncLocal<EvaluationContext?>();
+
     private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
     private readonly List<string> _scope = new List<string>();
 
@@ -41,6 +43,42 @@ public class EvaluationContext
 
     /// <summary>Names of the node groups currently being run, outermost first; empty at the top level.</summary>
     public IReadOnlyList<string> Scope => _scope;
+
+    /// <summary>
+    /// The context of the run that is executing the zero-touch node call in progress, or null when none is (a unit test calling
+    /// the method directly, a helper used by another tool). A node that works through many steps in one call (a batch of
+    /// viewpoints, a long wait) calls <c>EvaluationContext.Current?.Checkpoint()</c> between the steps, so the host can repaint
+    /// and the user can stop the run. Never keep the value: it belongs to the call.
+    /// </summary>
+    public static EvaluationContext? Current => Ambient.Value;
+
+    /// <summary>Makes this context the <see cref="Current"/> one until the returned scope is disposed.</summary>
+    /// <returns>The scope that restores the previous context.</returns>
+    public IDisposable MakeCurrent()
+    {
+        var scope = new CurrentScope(Ambient.Value);
+        Ambient.Value = this;
+        return scope;
+    }
+
+    private sealed class CurrentScope : IDisposable
+    {
+        private readonly EvaluationContext? _previous;
+        private bool _disposed;
+
+        public CurrentScope(EvaluationContext? previous) => _previous = previous;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            Ambient.Value = _previous;
+        }
+    }
 
     /// <summary>Replaces the cancellation token (the host creates the context before it knows the run's token).</summary>
     /// <param name="token">The token for this run.</param>
