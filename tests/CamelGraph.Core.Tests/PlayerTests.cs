@@ -512,6 +512,22 @@ public sealed class PlayerTests : IDisposable
     }
 
     [Fact]
+    public void TheBuiltInPlumbingNodesAreNotCountedAsChangingTheModelJustForTheirDefaultRole()
+    {
+        // Loop.Item and Loop.Collect never chose a role, so they carry the catch-all default (Modify): that must not make every
+        // script with a loop ask "changes the model".
+        var graph = new GraphModel();
+        graph.AddNode(new LoopItemNode());
+        graph.AddNode(new LoopCollectNode());
+        graph.AddNode(new WatchNode());
+
+        var session = Load(Save(graph));
+
+        Assert.Empty(session.ModifyingNodes);
+        Assert.Empty(session.EffectLines);
+    }
+
+    [Fact]
     public void AScriptThatOnlyReadsHasNoEffectLines()
     {
         var session = Load(Save(Sample(out _, out _)));

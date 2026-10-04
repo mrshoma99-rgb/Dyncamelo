@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CamelGraph.Core.Graph;
 using CamelGraph.Core.Groups;
+using CamelGraph.Core.Loader;
 using CamelGraph.Core.Serialization;
 
 namespace CamelGraph.Core.Editing;
@@ -42,7 +43,8 @@ public static class GraphEffects
     /// <summary>
     /// Like <see cref="Survey(GraphModel)"/>, and optionally also counting a node whose role is Modify (<see cref="NodeModel.Function"/>)
     /// and that declares no effect of its own as one that <see cref="NodeEffects.ChangesModel"/>. The Script Player asks that wider
-    /// question; the editor's question about graphs from a file asks only about declared effects.
+    /// question; the editor's question about graphs from a file asks only about declared effects. The hand-written nodes that ship
+    /// with CamelGraph (List.Create, the loops, the displays...) are not counted for their default role, only for a declared effect.
     /// </summary>
     /// <param name="graph">The document graph.</param>
     /// <param name="modifyRoleChangesModel">True to report a Modify node with no declared effect as changing the model.</param>
@@ -121,6 +123,20 @@ public static class GraphEffects
         return char.ToUpperInvariant(text[0]) + text.Substring(1);
     }
 
+    // The hand-written nodes that ship with CamelGraph (List.Create, Loop.Item, Watch List, Color Picker, Captured Selection...) never
+    // chose a role, so they carry the catch-all default (Modify). That says nothing about the model: one that does change it
+    // declares NodeEffects.ChangesModel. Library nodes (zero-touch) and nodes from other packs keep the role-based rule.
+    private static bool IsBuiltInHandWritten(NodeModel node)
+    {
+        if (node is ZeroTouchNodeModel)
+        {
+            return false;
+        }
+
+        var assembly = node.GetType().Assembly.GetName().Name;
+        return assembly == "CamelGraph.Core" || assembly == "CamelGraph.Nodes" || assembly == "CamelGraph.Navisworks";
+    }
+
     private static void Walk(GraphModel graph, HashSet<NodeGroup> visited, List<EffectFinding> found, bool modifyRoleChangesModel)
     {
         foreach (var node in graph.Nodes)
@@ -141,7 +157,8 @@ public static class GraphEffects
             }
 
             var effects = node.Effects;
-            if (effects == NodeEffects.None && modifyRoleChangesModel && node.Function == NodeFunction.Modify && !(node is MissingNodeModel))
+            if (effects == NodeEffects.None && modifyRoleChangesModel && node.Function == NodeFunction.Modify && !(node is MissingNodeModel) &&
+                !IsBuiltInHandWritten(node))
             {
                 effects = NodeEffects.ChangesModel;
             }

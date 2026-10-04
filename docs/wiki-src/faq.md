@@ -243,7 +243,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     No. It has no account, analytics or licence server. Its one network request is a once-a-day look for a newer version, which you can switch off. See [Privacy and safety](privacy-and-safety.md).
 
 ??? question "Is it safe to run a graph someone sent me?"
-    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
+    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses, write, delete or overwrite files, and change the model. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Are node packs safe?"
     A node pack is code. CamelGraph loads every `.dll` in a `Packages` folder, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
