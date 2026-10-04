@@ -689,6 +689,50 @@
         </Setter>
     </Style>
 
+    <!-- The Run button of the editor header: flat and square, as tall as the bar and flush with its right edge, so it is the one fixed
+         point of the bar and cannot look pressed. The hover and pressed states are a veil over the fill. -->
+    <Style x:Key="Dyc.HeaderRunButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.OnPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="20,0" />
+        <Setter Property="MinWidth" Value="92" />
+        <Setter Property="Margin" Value="4,0,0,0" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid x:Name="Root" SnapsToDevicePixels="True">
+                        <Border x:Name="Chrome"
+                                Background="{DynamicResource Dyc.PrimaryBrush}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Sheen" Background="White" Opacity="0" IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.14" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Sheen" Property="Background" Value="Black" />
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.2" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.OnPrimaryBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="0,0,0,2" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Automatic / manual running as the on/off switch the Boolean nodes use: a track whose knob slides right and fills with the accent
          colour when on, with the name of the mode beside it. It never takes the keyboard focus, so the canvas keeps its shortcuts. -->
     <Style x:Key="Dyc.AutoRunSwitch" TargetType="{x:Type CheckBox}">

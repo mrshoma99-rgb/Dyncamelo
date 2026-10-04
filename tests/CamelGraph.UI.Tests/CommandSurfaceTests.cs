@@ -658,12 +658,20 @@ public class CommandSurfaceViewTests
             var primary = (System.Windows.Media.SolidColorBrush)host.Control.FindResource("Dyc.PrimaryBrush");
             Assert.Equal(primary.Color, ((System.Windows.Media.SolidColorBrush)chrome.Background).Color);
             Assert.True(run.ActualWidth >= 88, "the Run button is " + run.ActualWidth + " wide, not a wide key");
-            Assert.True(run.ActualHeight >= 22 && run.ActualHeight <= 26, "the Run button is " + run.ActualHeight + " high, not about 24");
 
-            // A solid fill (no gradient), raised by a shadow under it and a light edge; pressed has no shadow.
+            // It is the last thing on the right and as tall as the bar (from under the brand strip to the line under the bar), flat: a solid
+            // fill with no gradient and no shadow, so it cannot look pressed.
+            var bar = (System.Windows.Controls.Border)host.Control.FindName("HeaderBar");
+            host.Window.UpdateLayout();
+            var top = run.TranslatePoint(new System.Windows.Point(0, 0), bar).Y;
+            var bottom = run.TranslatePoint(new System.Windows.Point(0, run.ActualHeight), bar).Y;
+            var right = run.TranslatePoint(new System.Windows.Point(run.ActualWidth, 0), bar).X;
+            Assert.True(Math.Abs(top - 3d) < 1.5d, "Run starts " + top + " px down the bar, under the 3 px brand strip");
+            Assert.True(Math.Abs(bottom - (bar.ActualHeight - 1d)) < 1.5d, "Run ends at " + bottom + " of a bar " + bar.ActualHeight + " high");
+            Assert.True(Math.Abs(right - bar.ActualWidth) < 1.5d, "Run ends at " + right + " of a bar " + bar.ActualWidth + " wide");
             Assert.IsType<System.Windows.Media.SolidColorBrush>(chrome.Background);
             Assert.Null(run.Template.FindName("Gloss", run));
-            Assert.NotNull(chrome.Effect);
+            Assert.Null(chrome.Effect);
 
             // Automatic / manual is the on/off switch of the Boolean nodes, with the name of the mode beside it.
             var auto = (System.Windows.Controls.CheckBox)host.Control.FindName("AutoRunSwitch");
@@ -681,6 +689,17 @@ public class CommandSurfaceViewTests
             Assert.Equal("Auto", state.Text);
             Assert.Equal(System.Windows.HorizontalAlignment.Right, knob.HorizontalAlignment);
             Assert.False(auto.Focusable);                       // it must not take the keyboard from the canvas
+
+            // Left to right at the right of the bar: the other buttons, a separator, the switch, then Run.
+            var settings = (System.Windows.Controls.Primitives.ToggleButton)host.Control.FindName("SettingsButton");
+            double Edge(System.Windows.FrameworkElement e, bool rightEdge) =>
+                e.TranslatePoint(new System.Windows.Point(rightEdge ? e.ActualWidth : 0, 0), bar).X;
+            Assert.True(Edge(settings, true) < Edge(auto, false), "the switch should come after the other buttons");
+            Assert.True(Edge(auto, true) <= Edge(run, false) + 1d, "the switch should be just left of Run");
+            var between = System.Windows.Media.VisualTreeHelper.GetParent(auto) as System.Windows.Controls.Panel;
+            Assert.NotNull(between);
+            var separator = between!.Children.OfType<System.Windows.Controls.Border>().Last(b => b.Width == 1d);
+            Assert.True(Edge(settings, true) <= Edge(separator, false) && Edge(separator, true) <= Edge(auto, false) + 1d, "a separator should sit between the buttons and the switch");
         });
     }
 
