@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**580 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -50,7 +50,7 @@
 | [System](#system) | 5 |
 | [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
-| [Workflow](#workflow) | 7 |
+| [Workflow](#workflow) | 8 |
 | [Workflow.Actions](#workflowactions) | 9 |
 
 ## Annotation
@@ -840,7 +840,8 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Flow.Then` | value, after, after2?, after3? | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
+| `Flow.Require` | value, condition, message? | value | Stops with your own error message when a condition is false |
+| `Flow.Then` | value, after | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
 | `Flow.Try` | value, fallback? | result, failed, error | Carries on after a failure: gives the node's result, or your fallback plus the error text when that node failed |
 | `Flow.Wait` | value, seconds? | value | Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow |
 | `Flow.When` | value, condition | value | Runs the nodes wired after it only when the condition is true |

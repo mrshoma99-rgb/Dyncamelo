@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 579,
+ "count": 580,
  "categories": [
   {
    "name": "Annotation",
@@ -180,7 +180,7 @@
   },
   {
    "name": "Workflow",
-   "count": 7
+   "count": 8
   },
   {
    "name": "Workflow.Actions",
@@ -22184,11 +22184,58 @@
    "interactive": true
   },
   {
-   "name": "Flow.Then",
-   "id": "CamelGraph.Nodes.FlowNodes.Then@object,object,object,object",
+   "name": "Flow.Require",
+   "id": "CamelGraph.Nodes.FlowNodes.Require@object,bool,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Workflow",
-   "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).",
+   "description": "Stops with your own error message when a condition is false; when it is true the value passes through unchanged. The nodes wired after it do not run after a false condition, so put it in front of a step that must not run on bad input (replacing the open model, deleting files). Flow.When only skips quietly and Flow.Try only catches. To require that every item of a list passes, wire List.AllTrue into 'condition'.",
+   "tags": [
+    "require",
+    "assert",
+    "guard",
+    "precondition",
+    "check",
+    "validate",
+    "must",
+    "fail",
+    "stop",
+    "abort",
+    "error",
+    "raise"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to pass on when the condition is true. Wire it into the step that must not run on bad input."
+    },
+    {
+     "name": "condition",
+     "type": "boolean",
+     "description": "True lets the value through; false stops here with the message. To demand that every item of a list passes, wire List.AllTrue into this input."
+    },
+    {
+     "name": "message",
+     "type": "string",
+     "description": "What to tell the person when the condition is false: say what is wrong and what to do about it.",
+     "default": "\"A required condition is false.\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value input, unchanged, when the condition is true."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Flow.Then",
+   "id": "CamelGraph.Nodes.FlowNodes.Then@object,System.Collections.Generic.IEnumerable<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Workflow",
+   "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint). 'after' takes as many wires as you like, one per node that must run first; what they carry is ignored.",
    "tags": [
     "sequence",
     "order",
@@ -22206,20 +22253,9 @@
     },
     {
      "name": "after",
-     "type": "any",
-     "description": "Wire any output of the node that must run first (its value is ignored)."
-    },
-    {
-     "name": "after2",
-     "type": "any",
-     "description": "Optional second node that must run first.",
-     "default": "null"
-    },
-    {
-     "name": "after3",
-     "type": "any",
-     "description": "Optional third node that must run first.",
-     "default": "null"
+     "type": "any[]",
+     "description": "Wire any number of nodes that must run first (one wire per node; their values are ignored). A branch that a Flow.When switched off counts as nothing; the node is skipped only when every branch wired here is off.",
+     "multiInput": true
     }
    ],
    "outputs": [
