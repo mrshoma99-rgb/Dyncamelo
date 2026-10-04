@@ -1,6 +1,6 @@
-# Dyncamelo node catalogue
+# CamelGraph node catalogue
 
-> Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `dyncamelo-nodes.json` is out of date.
+> Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
 **579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
@@ -718,7 +718,7 @@
 | `Viewpoint.SaveCurrent` | name, document? | viewpoint | Saves the current view as a new saved viewpoint |
 | `Viewpoint.SaveWithOverrides` | name, folderName?, document? | viewpoint | Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) |
 | `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
-| `ViewpointPackageFile.Parse` | json | result | Parses a package from JSON with node-friendly errors: malformed text and files written by a newer Dyncamelo both fail with a message that says what to do, never a raw se… |
+| `ViewpointPackageFile.Parse` | json | result | Parses a package from JSON with node-friendly errors: malformed text and files written by a newer CamelGraph both fail with a message that says what to do, never a raw s… |
 | `Viewpoints.All` | document? | viewpoints | All saved viewpoints in a document, including those inside folders |
 | `Viewpoints.FromClashResults` | results, folderName?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result |
 

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>CamelGraph.UI</RootNamespace>
+    <AssemblyName>CamelGraph.UI</AssemblyName>
+    <Description>CamelGraph WPF node editor (Nodify-based canvas, node library browser, run controls). Host-agnostic: no Navisworks dependencies.</Description>
+    <!-- WPF/net48 cannot compile on non-Windows agents; CI builds this on windows-latest. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CamelGraph.Core\CamelGraph.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embedded WPF resources (pack://application:,,,/CamelGraph.UI;component/Assets/...). -->
+    <Resource Include="Assets\**\*.png" />
+    <!-- The privacy policy shown by Help > Privacy Policy: the repository's own PRIVACY.md, so the two cannot drift apart. -->
+    <EmbeddedResource Include="..\..\PRIVACY.md" LogicalName="CamelGraph.UI.PRIVACY.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- MIT-licensed node editor control (https://github.com/miroiu/nodify). -->
+    <PackageReference Include="Nodify" Version="7.3.0" />
+  </ItemGroup>
+
+</Project>

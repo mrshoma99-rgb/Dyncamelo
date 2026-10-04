@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>CamelGraph.Core</RootNamespace>
+    <AssemblyName>CamelGraph.Core</AssemblyName>
+    <Description>CamelGraph graph model, dataflow execution engine, zero-touch node loader and .dyc serialization. No UI or host dependencies.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Microsoft Automatic Graph Layout (MIT): the layered layout behind Arrange. Optional at run time —
+         if the DLL is missing the editor falls back to the built-in column layout. -->
+    <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CamelGraph.Core.Tests" />
+    <InternalsVisibleTo Include="CamelGraph.UI.Tests" />
+  </ItemGroup>
+
+</Project>

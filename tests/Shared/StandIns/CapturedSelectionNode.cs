@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Dyncamelo.Core.Execution;
-using Dyncamelo.Core.Graph;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Graph;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
 /// <summary>
-/// Stands in for <c>Dyncamelo.Navisworks.CapturedSelectionNode</c> (the "Captured Selection" input), which cannot be loaded without
+/// Stands in for <c>CamelGraph.Navisworks.CapturedSelectionNode</c> (the "Captured Selection" input), which cannot be loaded without
 /// Navisworks. It has the real node's type tag, name, category, description and output, and — because the editor picks a node's body
 /// by the node's class name — the same class name, so the editor draws the same body ("No selection captured", Capture, Clear).
 /// </summary>

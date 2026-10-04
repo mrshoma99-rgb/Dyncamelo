@@ -1,0 +1,620 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using CamelGraph.Core.Editing;
+using CamelGraph.Core.Graph;
+using CamelGraph.Core.Nodes;
+using CamelGraph.UI.Mvvm;
+
+namespace CamelGraph.UI.ViewModels;
+
+/// <summary>
+/// The wiring gestures of the rope-style editor: delete-and-reconnect, auto-connect,
+/// wire mute/reroute/disconnect, and selecting along links. Each one is a single undo step
+/// and is reachable from a menu item, a shortcut and the command catalogue.
+/// </summary>
+public partial class GraphEditorViewModel
+{
+    private ICommand? _deleteAndReconnectCommand;
+    private ICommand? _autoConnectCommand;
+    private ICommand? _muteWiresCommand;
+    private ICommand? _rerouteWiresCommand;
+    private ICommand? _disconnectWiresCommand;
+    private ICommand? _selectDownstreamCommand;
+    private ICommand? _selectUpstreamCommand;
+    private ICommand? _selectSimilarCommand;
+
+    /// <summary>Deletes the selected nodes but keeps their data flowing (Ctrl+Delete).</summary>
+    public ICommand DeleteAndReconnectCommand => _deleteAndReconnectCommand ??= new RelayCommand(DeleteAndReconnect);
+
+    /// <summary>Chains the selected nodes left to right with the best matching ports (F).</summary>
+    public ICommand AutoConnectCommand => _autoConnectCommand ??= new RelayCommand(AutoConnectSelection);
+
+    /// <summary>Mutes or unmutes the selected wires.</summary>
+    public ICommand MuteSelectedWiresCommand => _muteWiresCommand ??= new RelayCommand(MuteSelectedWires);
+
+    /// <summary>Adds a reroute to every selected wire.</summary>
+    public ICommand RerouteSelectedWiresCommand => _rerouteWiresCommand ??= new RelayCommand(RerouteSelectedWires);
+
+    /// <summary>Removes the selected wires.</summary>
+    public ICommand DisconnectSelectedWiresCommand => _disconnectWiresCommand ??= new RelayCommand(DisconnectSelectedWires);
+
+    /// <summary>Selects everything downstream of the selection (L).</summary>
+    public ICommand SelectDownstreamCommand => _selectDownstreamCommand ??= new RelayCommand(() => SelectAlongLinks(GraphOps.Downstream, "downstream"));
+
+    /// <summary>Selects everything upstream of the selection (Shift+L).</summary>
+    public ICommand SelectUpstreamCommand => _selectUpstreamCommand ??= new RelayCommand(() => SelectAlongLinks(GraphOps.Upstream, "upstream"));
+
+    /// <summary>Selects every node of the same kind as the selection (Shift+G).</summary>
+    public ICommand SelectSimilarCommand => _selectSimilarCommand ??= new RelayCommand(() => SelectAlongLinks(GraphOps.Similar, "similar"));
+
+    private static string Count(int n) => n.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>Shows a problem in the status bar (used by the crash guard when a command fails).</summary>
+    /// <param name="message">What to show.</param>
+    public void ReportProblem(string message) => StatusMessage = message;
+
+    private void OnConnectionMuteChanged(object? sender, ConnectionEventArgs e)
+    {
+        foreach (var connection in Connections)
+        {
+            if (connection.Model == e.Connection)
+            {
+                connection.RefreshMuted();
+            }
+        }
+    }
+
+    // ----- delete and reconnect -----------------------------------------------------------------
+
+    /// <summary>Deletes the selection; each deleted node's inputs are bridged to its outputs.</summary>
+    public void DeleteAndReconnect()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count == 0)
+        {
+            DeleteSelection();
+            return;
+        }
+
+        var bridged = 0;
+        using (_undo.Begin("Delete and reconnect"))
+        {
+            foreach (var wire in SelectedConnections.ToList())
+            {
+                _graph.Disconnect(wire.Model);
+            }
+
+            foreach (var item in SelectedItems.ToList())
+            {
+                switch (item)
+                {
+                    case NodeViewModel node:
+                        bridged += GraphOps.DissolveNode(_graph, node.Model);
+                        break;
+                    case NoteViewModel note:
+                        _graph.Notes.Remove(note.Model);
+                        break;
+                    case GroupViewModel group:
+                        _graph.Groups.Remove(group.Model);
+                        break;
+                }
+            }
+        }
+
+        StatusMessage = "Deleted " + Count(nodes.Count) + " node(s), kept " + Count(bridged) + " wire(s).";
+    }
+
+    // ----- auto-connect --------------------------------------------------------------------------
+
+    /// <summary>Connects the selected nodes left to right, best matching ports first.</summary>
+    public void AutoConnectSelection()
+    {
+        var nodes = GetSelectedNodeModels();
+        if (nodes.Count < 2)
+        {
+            StatusMessage = "Select two or more nodes to connect them.";
+            return;
+        }
+
+        int made;
+        using (_undo.Begin("Connect nodes"))
+        {
+            made = GraphOps.AutoConnect(_graph, nodes);
+        }
+
+        StatusMessage = made == 0 ? "Nothing to connect: no free matching sockets." : "Connected " + Count(made) + " wire(s).";
+    }
+
+    // ----- wires ---------------------------------------------------------------------------------
+
+    /// <summary>Mutes the selected wires, or unmutes them when every one is already muted.</summary>
+    public void MuteSelectedWires()
+    {
+        var wires = SelectedConnections.ToList();
+        if (wires.Count == 0)
+        {
+            StatusMessage = "Select one or more wires first.";
+            return;
+        }
+
+        var mute = wires.Any(w => !w.Model.IsMuted);
+        using (_undo.Begin(mute ? "Mute wire" : "Unmute wire"))
+        {
+            foreach (var wire in wires)
+            {
+                _graph.SetConnectionMuted(wire.Model, mute);
+            }
+        }
+
+        StatusMessage = (mute ? "Muted " : "Unmuted ") + Count(wires.Count) + " wire(s).";
+    }
+
+    /// <summary>Removes the selected wires.</summary>
+    public void DisconnectSelectedWires()
+    {
+        var wires = SelectedConnections.ToList();
+        if (wires.Count == 0)
+        {
+            StatusMessage = "Select one or more wires first.";
+            return;
+        }
+
+        using (_undo.Begin("Disconnect"))
+        {
+            foreach (var wire in wires)
+            {
+                _graph.Disconnect(wire.Model);
+            }
+        }
+
+        StatusMessage = "Disconnected " + Count(wires.Count) + " wire(s).";
+    }
+
+    /// <summary>Adds a reroute at the middle of every selected wire.</summary>
+    public void RerouteSelectedWires()
+    {
+        var wires = SelectedConnections.ToList();
+        if (wires.Count == 0)
+        {
+            StatusMessage = "Select one or more wires first.";
+            return;
+        }
+
+        var added = 0;
+        using (_undo.Begin("Add reroute"))
+        {
+            foreach (var wire in wires)
+            {
+                var a = wire.Source.Anchor;
+                var b = wire.TargetAnchor;
+                if (InsertRerouteOnWire(wire, new Point((a.X + b.X) / 2d, (a.Y + b.Y) / 2d)) != null)
+                {
+                    added++;
+                }
+            }
+        }
+
+        StatusMessage = "Added " + Count(added) + " reroute(s).";
+    }
+
+    /// <summary>Puts a reroute on <paramref name="wire"/> so that it sits at <paramref name="at"/> (graph space).</summary>
+    /// <param name="wire">The wire to bend.</param>
+    /// <param name="at">Where the reroute's centre goes.</param>
+    /// <returns>The reroute node, or null when the wire could not be split.</returns>
+    public NodeModel? InsertRerouteOnWire(ConnectionViewModel wire, Point at)
+    {
+        var reroute = new RerouteNode { X = at.X - 20d, Y = at.Y - 11d };
+        using (_undo.Begin("Add reroute"))
+        {
+            _graph.AddNode(reroute);
+            if (!GraphOps.InsertOnWire(_graph, reroute, wire.Model))
+            {
+                _graph.RemoveNode(reroute);
+                return null;
+            }
+        }
+
+        return reroute;
+    }
+
+    // ----- selecting along links -------------------------------------------------------------------
+
+    private void SelectAlongLinks(System.Func<GraphModel, IEnumerable<NodeModel>, IReadOnlyCollection<NodeModel>> collect, string what)
+    {
+        var seeds = GetSelectedNodeModels();
+        if (seeds.Count == 0)
+        {
+            StatusMessage = "Select a node first.";
+            return;
+        }
+
+        var found = collect(_graph, seeds);
+        SelectedItems.Clear();
+        foreach (var node in found)
+        {
+            var viewModel = FindNodeViewModel(node);
+            if (viewModel != null)
+            {
+                SelectedItems.Add(viewModel);
+            }
+        }
+
+        StatusMessage = "Selected " + Count(found.Count) + " node(s) (" + what + ").";
+    }
+}
+
+public partial class GraphEditorViewModel
+{
+    private UndoTransaction? _cutTransaction;
+    private int _cutWires;
+    private ICommand? _cuttingStartedCommand;
+    private ICommand? _cuttingCompletedCommand;
+
+    /// <summary>Whether the cut in progress should mute wires instead of removing them (Ctrl held); replaceable for tests.</summary>
+    public Func<bool> IsMuteCutRequested { get; set; } = () => (Keyboard.Modifiers & ModifierKeys.Control) != 0;
+
+    /// <summary>Nodify runs this when the cutting line starts (Alt+Shift+drag): everything it cuts is one undo step.</summary>
+    public ICommand CuttingStartedCommand => _cuttingStartedCommand ??= new RelayCommand(() =>
+    {
+        _cutTransaction?.Dispose();
+        _cutWires = 0;
+        _cutTransaction = _undo.Begin("Cut wires");
+    });
+
+    /// <summary>Nodify runs this when the cutting line ends or is cancelled.</summary>
+    public ICommand CuttingCompletedCommand => _cuttingCompletedCommand ??= new RelayCommand(() =>
+    {
+        var cut = _cutWires;
+        var transaction = _cutTransaction;
+        _cutTransaction = null;
+        _cutWires = 0;
+        transaction?.Dispose();
+        if (cut > 0)
+        {
+            StatusMessage = "Cut " + Count(cut) + " wire(s).";
+        }
+    });
+}
+
+public partial class GraphEditorViewModel
+{
+    private ICommand? _fitFrameCommand;
+    private ICommand? _ungroupSelectedCommand;
+    private ICommand? _setFrameColorCommand;
+
+    /// <summary>Shrinks or grows the selected frames to wrap the items inside them (Ctrl+Shift+G).</summary>
+    public ICommand FitFrameCommand => _fitFrameCommand ??= new RelayCommand(FitSelectedFrames);
+
+    /// <summary>Removes the selected frames, leaving their nodes (Ctrl+Shift+U).</summary>
+    public ICommand UngroupSelectedCommand => _ungroupSelectedCommand ??= new RelayCommand(UngroupSelected);
+
+    /// <summary>Colours the selected frames; the parameter is an ARGB hex string.</summary>
+    public ICommand SetFrameColorCommand => _setFrameColorCommand ??= new RelayCommand<string>(SetSelectedFrameColor);
+
+    /// <summary>The colours offered for frames (name, ARGB hex).</summary>
+    public static readonly IReadOnlyList<KeyValuePair<string, string>> FrameColors = new[]
+    {
+        new KeyValuePair<string, string>("Blue", "#FF3D6A99"),
+        new KeyValuePair<string, string>("Green", "#FF3F7249"),
+        new KeyValuePair<string, string>("Amber", "#FF9A7B2D"),
+        new KeyValuePair<string, string>("Red", "#FF8A3B3B"),
+        new KeyValuePair<string, string>("Purple", "#FF6B4E8E"),
+        new KeyValuePair<string, string>("Gray", "#FF5A6273"),
+    };
+
+    private static (double X, double Y, double Width, double Height) ItemRect(CanvasItemViewModel item) =>
+        (item.Location.X, item.Location.Y, item.Size.Width > 0 ? item.Size.Width : 160d, item.Size.Height > 0 ? item.Size.Height : 90d);
+
+    /// <summary>The nodes and notes whose centre lies inside <paramref name="group"/>.</summary>
+    public IReadOnlyList<CanvasItemViewModel> ItemsInFrame(GroupViewModel group)
+    {
+        var frame = new Rect(group.Model.X, group.Model.Y, group.Model.Width, group.Model.Height);
+        return Items
+            .Where(i => !(i is GroupViewModel))
+            .Where(i =>
+            {
+                var r = ItemRect(i);
+                return frame.Contains(new Point(r.X + r.Width / 2d, r.Y + r.Height / 2d));
+            })
+            .ToList();
+    }
+
+    private IReadOnlyList<GroupViewModel> TargetFrames()
+    {
+        var selected = SelectedItems.OfType<GroupViewModel>().ToList();
+        if (selected.Count > 0)
+        {
+            return selected;
+        }
+
+        // No frame selected: use the frames that wrap the selected nodes.
+        var chosen = SelectedItems.Where(i => !(i is GroupViewModel)).ToList();
+        return Items.OfType<GroupViewModel>().Where(g => ItemsInFrame(g).Any(chosen.Contains)).ToList();
+    }
+
+    /// <summary>Fits each target frame around the items inside it.</summary>
+    public void FitSelectedFrames()
+    {
+        var frames = TargetFrames();
+        if (frames.Count == 0)
+        {
+            StatusMessage = "Select a frame first.";
+            return;
+        }
+
+        var fitted = 0;
+        using (_undo.Begin("Fit frame"))
+        {
+            foreach (var group in frames)
+            {
+                var inside = ItemsInFrame(group);
+                var box = GraphOps.FrameAround(inside.Select(ItemRect));
+                if (box == null)
+                {
+                    continue;
+                }
+
+                group.Model.X = box.Value.X;
+                group.Model.Y = box.Value.Y;
+                group.Model.Width = box.Value.Width;
+                group.Model.Height = box.Value.Height;
+                fitted++;
+            }
+        }
+
+        StatusMessage = fitted == 0 ? "Nothing inside the frame to fit." : "Fitted " + Count(fitted) + " frame(s).";
+    }
+
+    /// <summary>Removes the target frames.</summary>
+    public void UngroupSelected()
+    {
+        var frames = TargetFrames();
+        if (frames.Count == 0)
+        {
+            StatusMessage = "Select a frame first.";
+            return;
+        }
+
+        using (_undo.Begin("Ungroup"))
+        {
+            foreach (var group in frames)
+            {
+                _graph.Groups.Remove(group.Model);
+            }
+        }
+
+        StatusMessage = "Ungrouped " + Count(frames.Count) + " frame(s).";
+    }
+
+    private void SetSelectedFrameColor(string? color)
+    {
+        var frames = TargetFrames();
+        if (string.IsNullOrEmpty(color) || frames.Count == 0)
+        {
+            StatusMessage = "Select a frame first.";
+            return;
+        }
+
+        using (_undo.Begin("Frame colour"))
+        {
+            foreach (var group in frames)
+            {
+                group.Model.Color = color!;
+            }
+        }
+    }
+}
+
+public partial class GraphEditorViewModel
+{
+    private bool _isHelpOpen;
+    private ICommand? _toggleHelpCommand;
+    private ICommand? _closeHelpCommand;
+
+    /// <summary>True while the keyboard and mouse help overlay is shown (F1).</summary>
+    public bool IsHelpOpen
+    {
+        get => _isHelpOpen;
+        set => SetProperty(ref _isHelpOpen, value);
+    }
+
+    /// <summary>Shows or hides the help overlay (F1).</summary>
+    public ICommand ToggleHelpCommand => _toggleHelpCommand ??= new RelayCommand(() => IsHelpOpen = !IsHelpOpen);
+
+    /// <summary>Hides the help overlay.</summary>
+    public ICommand CloseHelpCommand => _closeHelpCommand ??= new RelayCommand(() => IsHelpOpen = false);
+}
+
+public partial class GraphEditorViewModel
+{
+    private ICommand? _arrangeAllCommand;
+
+    /// <summary>Arranges every node left to right (Ctrl+Shift+L).</summary>
+    public ICommand ArrangeAllCommand => _arrangeAllCommand ??= new RelayCommand(ArrangeAll);
+}
+
+public partial class GraphEditorViewModel
+{
+    private ICommand? _cutCommand;
+    private ICommand? _selectAllCommand;
+    private ICommand? _resetWidthCommand;
+    private ICommand? _resetInputsCommand;
+    private ICommand? _insertIntoWireCommand;
+    private ICommand? _swapLinksCommand;
+    private ICommand? _wiresEarlierCommand;
+    private ICommand? _wiresLaterCommand;
+
+    /// <summary>Copies the selection and deletes it (Ctrl+X).</summary>
+    public ICommand CutSelectionCommand => _cutCommand ??= new RelayCommand(CutSelection);
+
+    /// <summary>Selects every node, note and frame (Ctrl+A).</summary>
+    public ICommand SelectAllItemsCommand => _selectAllCommand ??= new RelayCommand(SelectAllItems);
+
+    /// <summary>Gives the selected nodes their automatic width back.</summary>
+    public ICommand ResetSelectedWidthCommand => _resetWidthCommand ??= new RelayCommand(ResetSelectedWidth);
+
+    /// <summary>Clears every typed-in input value of the selected nodes.</summary>
+    public ICommand ResetSelectedInputsCommand => _resetInputsCommand ??= new RelayCommand(ResetSelectedInputs);
+
+    /// <summary>Splices the selected node into the selected wire.</summary>
+    public ICommand InsertIntoSelectedWireCommand => _insertIntoWireCommand ??= new RelayCommand(InsertIntoSelectedWire);
+
+    /// <summary>Swaps the destinations of two selected wires.</summary>
+    public ICommand SwapSelectedLinksCommand => _swapLinksCommand ??= new RelayCommand(SwapSelectedLinks);
+
+    /// <summary>Copies the selected nodes to the clipboard and removes them, as one undo step.</summary>
+    public void CutSelection()
+    {
+        if (SelectedItems.OfType<NodeViewModel>().Count() == 0)
+        {
+            StatusMessage = "Nothing selected to cut.";
+            return;
+        }
+
+        CopySelection();
+        DeleteSelection();
+    }
+
+    /// <summary>Selects every item on the canvas.</summary>
+    public void SelectAllItems()
+    {
+        SelectedItems.Clear();
+        foreach (var item in Items)
+        {
+            SelectedItems.Add(item);
+        }
+
+        StatusMessage = "Selected " + Count(SelectedItems.Count) + " item(s).";
+    }
+
+    /// <summary>Removes the fixed width of the selected nodes.</summary>
+    public void ResetSelectedWidth()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count == 0)
+        {
+            StatusMessage = "Select a node first.";
+            return;
+        }
+
+        using (_undo.Begin("Reset width"))
+        {
+            foreach (var node in nodes)
+            {
+                node.Model.Ui.Width = null;
+            }
+        }
+    }
+
+    /// <summary>Clears the pinned input values of the selected nodes.</summary>
+    public void ResetSelectedInputs()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count == 0)
+        {
+            StatusMessage = "Select a node first.";
+            return;
+        }
+
+        var cleared = 0;
+        using (_undo.Begin("Reset inputs"))
+        {
+            foreach (var node in nodes)
+            {
+                foreach (var port in node.Model.InPorts)
+                {
+                    if (port.HasUserValue)
+                    {
+                        port.ClearUserValue();
+                        cleared++;
+                    }
+                }
+            }
+        }
+
+        StatusMessage = cleared == 0 ? "Nothing to reset." : "Reset " + Count(cleared) + " input(s) to their defaults.";
+    }
+
+    /// <summary>Splices the one selected node into the one selected wire (the menu route of dropping a node on a wire).</summary>
+    public void InsertIntoSelectedWire()
+    {
+        var nodes = SelectedItems.OfType<NodeViewModel>().ToList();
+        if (nodes.Count != 1 || SelectedConnections.Count != 1)
+        {
+            StatusMessage = "Select one node and one wire.";
+            return;
+        }
+
+        if (!InsertNodeOnWire(nodes[0], SelectedConnections[0]))
+        {
+            StatusMessage = "That node cannot be inserted into that wire (it needs no wires of its own and matching sockets).";
+        }
+    }
+
+    /// <summary>Moves the selected wires one place earlier in the order of their multi-input socket.</summary>
+    public ICommand MoveSelectedWiresEarlierCommand => _wiresEarlierCommand ??= new RelayCommand(() => MoveSelectedWires(-1));
+
+    /// <summary>Moves the selected wires one place later in the order of their multi-input socket.</summary>
+    public ICommand MoveSelectedWiresLaterCommand => _wiresLaterCommand ??= new RelayCommand(() => MoveSelectedWires(1));
+
+    /// <summary>
+    /// Moves each selected wire that feeds a multi-input socket by <paramref name="delta"/> places in that socket's order
+    /// (negative = earlier). The moved wires stay selected so the command can be repeated.
+    /// </summary>
+    public void MoveSelectedWires(int delta)
+    {
+        var wires = SelectedConnections.Where(c => c.Target.IsMultiInput).ToList();
+        if (wires.Count == 0)
+        {
+            StatusMessage = "Select a wire that feeds a multi-input socket first.";
+            return;
+        }
+
+        // Nudging earlier goes top-first, later goes bottom-first, so wires never leap over each other.
+        wires = (delta < 0 ? wires.OrderBy(c => c.Slot) : wires.OrderByDescending(c => c.Slot)).ToList();
+        var remade = new List<ConnectionModel>();
+        using (_undo.Begin(delta < 0 ? "Move wire earlier" : "Move wire later"))
+        {
+            foreach (var wire in wires)
+            {
+                var current = _graph.FindConnectionsInto(wire.Model.Target).ToList().IndexOf(wire.Model);
+                var moved = current < 0 ? null : GraphOps.MoveWire(_graph, wire.Model, current + delta);
+                remade.Add(moved ?? wire.Model);
+            }
+        }
+
+        SelectedConnections.Clear();
+        foreach (var model in remade)
+        {
+            var viewModel = Connections.FirstOrDefault(c => c.Model == model);
+            if (viewModel != null)
+            {
+                SelectedConnections.Add(viewModel);
+            }
+        }
+
+        StatusMessage = "Moved the wire" + (wires.Count == 1 ? string.Empty : "s") + (delta < 0 ? " earlier." : " later.");
+    }
+
+    /// <summary>Swaps where two selected wires end.</summary>
+    public void SwapSelectedLinks()
+    {
+        if (SelectedConnections.Count != 2)
+        {
+            StatusMessage = "Select exactly two wires to swap.";
+            return;
+        }
+
+        bool swapped;
+        using (_undo.Begin("Swap links"))
+        {
+            swapped = GraphOps.SwapLinks(_graph, SelectedConnections[0].Model, SelectedConnections[1].Model);
+        }
+
+        StatusMessage = swapped ? "Swapped the two links." : "Those links cannot be swapped.";
+    }
+}

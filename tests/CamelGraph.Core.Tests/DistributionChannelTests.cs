@@ -1,0 +1,65 @@
+using System;
+using System.IO;
+using CamelGraph.Core.Editing;
+using Xunit;
+
+namespace CamelGraph.Core.Tests;
+
+public class DistributionChannelTests
+{
+    [Theory]
+    [InlineData(null, "direct")]
+    [InlineData("", "direct")]
+    [InlineData("   \r\n  ", "direct")]
+    [InlineData("autodesk-app-store", "autodesk-app-store")]
+    [InlineData("  Autodesk-App-Store \r\n", "autodesk-app-store")]
+    [InlineData("\n\nautodesk-app-store\nsomething else", "autodesk-app-store")]
+    [InlineData("github", "direct")]
+    [InlineData("something else\nautodesk-app-store", "direct")]
+    public void TheMarkerTextNamesTheChannel(string? text, string expected)
+    {
+        Assert.Equal(expected, DistributionChannel.Parse(text));
+    }
+
+    [Fact]
+    public void TheEditionsAreNamedAndTheFreeOneSendsProfessionalUsersToTheStore()
+    {
+        Assert.Equal("Personal use", DistributionChannel.EditionName(DistributionChannel.Direct));
+        Assert.Equal("Professional", DistributionChannel.EditionName(DistributionChannel.AppStore));
+        Assert.Contains("Free for personal", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.Contains("Autodesk App Store", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.DoesNotContain("Free for personal", DistributionChannel.EditionNote(DistributionChannel.AppStore));
+        Assert.StartsWith("https://", DistributionChannel.AppStorePage);
+        Assert.False(DistributionChannel.AppStoreListed);        // until the listing exists every store link is greyed out
+        Assert.Contains("coming soon", DistributionChannel.EditionNote(DistributionChannel.Direct));
+        Assert.Contains("coming soon", DistributionChannel.StoreButtonText);
+    }
+
+    [Fact]
+    public void AFolderWithTheMarkerIsAStoreInstallAndAnyOtherFolderIsNot()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "dyc-dist-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        try
+        {
+            Assert.Equal(DistributionChannel.Direct, DistributionChannel.Detect(folder));
+            Assert.False(DistributionChannel.IsAppStore(folder));
+
+            File.WriteAllText(Path.Combine(folder, DistributionChannel.MarkerFileName), DistributionChannel.AppStore + Environment.NewLine);
+            Assert.Equal(DistributionChannel.AppStore, DistributionChannel.Detect(folder));
+            Assert.True(DistributionChannel.IsAppStore(folder));
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [Fact]
+    public void ANullOrMissingFolderIsTheDirectChannelAndNeverThrows()
+    {
+        Assert.Equal(DistributionChannel.Direct, DistributionChannel.Detect(null));
+        Assert.Equal(DistributionChannel.Direct, DistributionChannel.Detect(string.Empty));
+        Assert.Equal(DistributionChannel.Direct, DistributionChannel.Detect(Path.Combine(Path.GetTempPath(), "dyc-no-such-folder-" + Guid.NewGuid().ToString("N"))));
+    }
+}

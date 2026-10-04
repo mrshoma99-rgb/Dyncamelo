@@ -11,8 +11,8 @@
     {
       "Id": "1f1e0d46107ebfb9975331b3d4259ccb",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Tests@Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.ClashNodes.Tests@Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Clash.Tests",
       "X": 0.0,
       "Y": 230.0,
@@ -37,8 +37,8 @@
     {
       "Id": "cfe964a49fe2a460b08886341b516056",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.GetItemAtIndex@System.Collections.Generic.IList<object>,int",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Pick a test",
       "X": 350.0,
       "Y": 200.0,
@@ -71,8 +71,8 @@
     {
       "Id": "d5e0d7ab10c3f671b2dfebc39a5fc240",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.ClashNodes.Results@Autodesk.Navisworks.Api.Clash.ClashTest",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.ClashNodes.Results@Autodesk.Navisworks.Api.Clash.ClashTest",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "ClashTest.Results",
       "X": 700.0,
       "Y": 170.0,
@@ -97,8 +97,8 @@
     {
       "Id": "da43bb18ff8fa0d3af63220609eb3819",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "BCF.ExportIssues",
       "X": 1050.0,
       "Y": 90.0,

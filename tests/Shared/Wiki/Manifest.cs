@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Dyncamelo.TestSupport.StandIns;
+using CamelGraph.TestSupport.StandIns;
 
-namespace Dyncamelo.TestSupport.Wiki;
+namespace CamelGraph.TestSupport.Wiki;
 
 /// <summary>What <c>tools/wiki/image-manifest.md</c> lists: the image ids and the names of the how-to graphs.</summary>
 internal static class Manifest

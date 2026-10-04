@@ -65,8 +65,8 @@
     {
       "Id": "347d47ddc58286f4e9df0539ba1d2968",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.HasProperty",
       "X": 360.0,
       "Y": 60.0,
@@ -112,8 +112,8 @@
     {
       "Id": "9074ad5a44fd127abcfe26b75156a979",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.TakeoffNodes.SumPropertyByGroup@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.TakeoffNodes.SumPropertyByGroup@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Takeoff.SumPropertyByGroup",
       "X": 720.0,
       "Y": 120.0,
@@ -241,14 +241,14 @@
         }
       ],
       "Data": {
-        "Path": "C:\\Temp\\dyncamelo-qto.xlsx"
+        "Path": "C:\\Temp\\camelgraph-qto.xlsx"
       }
     },
     {
       "Id": "b949053321df5e0a8b5f3e8f26b09442",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Excel.WriteToFile",
       "X": 1480.0,
       "Y": 100.0,

@@ -36,7 +36,7 @@ script, not the files.
 * Do not recolour the wire, stretch the mark, add a shadow or rotate it. Do not put the plate on a background of nearly the same dark.
 * The name is set in Share Tech (SIL Open Font Licence 1.1), the face bimcamel.com uses for headings. The lock-up files contain
   its outlines, not the font. The social images use Google Sans Flex (SIL OFL), also from bimcamel.com.
-* "Dyncamelo" is the previous name. The mark replaced the old camel-on-a-plate logo everywhere in October 2026.
+* "CamelGraph" is the previous name. The mark replaced the old camel-on-a-plate logo everywhere in October 2026.
 
 ## Rebuilding
 

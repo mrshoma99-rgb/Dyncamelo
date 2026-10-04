@@ -17,7 +17,7 @@ Auto and Manual
 :   The two run modes in the run bar. In **Manual** you press **Run** (++f5++). In **Auto** a run starts after every edit. See [Running a graph](running-graphs.md#run-auto-and-manual).
 
 Autosave
-:   A safety copy of a script with unsaved changes, written about once a minute to `%APPDATA%\Dyncamelo\recovery` and offered back after a crash. See [Saving and opening](saving-opening.md#autosave-and-recovery).
+:   A safety copy of a script with unsaved changes, written about once a minute to `%APPDATA%\CamelGraph\recovery` and offered back after a crash. See [Saving and opening](saving-opening.md#autosave-and-recovery).
 
 BCF
 :   BIM Collaboration Format: the vendor-neutral file for issues, a `.bcfzip` of topics with a title, status, comments, a camera and the elements involved. See [Send clashes to BCF](howto/clash-issues-bcf.md) and [IFC, BCF, Excel and CSV](exchange-formats.md#bcf-issues).

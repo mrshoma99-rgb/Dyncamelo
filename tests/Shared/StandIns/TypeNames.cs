@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
 /// <summary>Helpers for the text of type names: splitting, and the name a definition id gives a type.</summary>
 internal static class TypeNames

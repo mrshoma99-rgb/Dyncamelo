@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the Dyncamelo wiki: a static site for bimcamel.com, made with MkDocs and the Material theme.
+"""Builds the CamelGraph wiki: a static site for bimcamel.com, made with MkDocs and the Material theme.
 
 What it does
   1. Puts all pages in a staging folder (default build/wiki-docs):
@@ -8,7 +8,7 @@ What it does
        docs/TROUBLESHOOTING.md, docs/RECIPES.md, docs/EXTENDING.md
                                         the repository's own documents, with their links turned into links of the site
        CHANGELOG.md                     becomes the "What's new" page
-       docs/dyncamelo-nodes.json        becomes the node library (nodes/*.md, one page per category group)
+       docs/camelgraph-nodes.json        becomes the node library (nodes/*.md, one page per category group)
        docs/images/<id>.png             the pictures the pages use; <id>-light.png is the light-theme version when it exists
   2. Writes build/wiki-docs.mkdocs.yml (the navigation from docs/wiki-src/nav.yml, the addresses from tools/wiki/site.yml).
   3. Runs `mkdocs build --strict` with tools/wiki/mkdocs.yml, into build/wiki-site.
@@ -44,7 +44,7 @@ except ImportError:  # pragma: no cover - the message is the point
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "docs" / "wiki-src"
 NAV_FILE = SRC / "nav.yml"
-CATALOGUE = ROOT / "docs" / "dyncamelo-nodes.json"
+CATALOGUE = ROOT / "docs" / "camelgraph-nodes.json"
 IMAGES = ROOT / "docs" / "images"
 TOOLS = ROOT / "tools" / "wiki"
 MKDOCS_BASE = TOOLS / "mkdocs.yml"

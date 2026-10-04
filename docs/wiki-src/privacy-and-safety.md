@@ -8,7 +8,7 @@ CamelGraph does not collect your data. It has **no account, no sign-in, no licen
 
 ### What it keeps on your computer
 
-All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\AppData\Roaming\Dyncamelo`). None of it is sent anywhere by CamelGraph.
+All of it is in `%APPDATA%\CamelGraph` (on a standard install, `C:\Users\<you>\AppData\Roaming\CamelGraph`). None of it is sent anywhere by CamelGraph. Versions up to 0.48, when the product was called Dyncamelo, used `%APPDATA%\Dyncamelo`; the first start of a newer version moves that folder here.
 
 | File | What is in it |
 |---|---|
@@ -25,7 +25,7 @@ All of it is in `%APPDATA%\Dyncamelo` (on a standard install, `C:\Users\<you>\Ap
 
 One thing, and you can switch it off.
 
-* **The update check.** When the editor opens, at most once a day, CamelGraph asks GitHub (`api.github.com`) for the number of the newest release. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does, and nothing about you or your models. If a newer version exists, the start screen says so and CamelGraph asks before it opens the download page.
+* **The update check.** When the editor opens, at most once a day, CamelGraph asks GitHub (`api.github.com`) for the number of the newest release. The request carries your IP address and the name `CamelGraph-UpdateCheck`, as any web request does, and nothing about you or your models. If a newer version exists, the start screen says so and CamelGraph asks before it opens the download page.
 * **Switch it off:** **Settings ▸ Privacy ▸ Check for a newer version once a day**. With it off, CamelGraph makes no network request of its own. A copy installed from the Autodesk App Store never makes the check, because the store delivers its updates.
 
 Opening the website, the user guide or a download page from a menu or a link opens your browser at your request; that is then between you and that website.
@@ -36,7 +36,7 @@ No advertising, analytics or tracking libraries, and nothing shared with anyone.
 
 ### Removing what it stored
 
-CamelGraph keeps nothing on any server. Close Navisworks and delete the folder `%APPDATA%\Dyncamelo`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone ([Uninstalling](uninstall.md)).
+CamelGraph keeps nothing on any server. Close Navisworks and delete the folder `%APPDATA%\CamelGraph`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone ([Uninstalling](uninstall.md)).
 
 ## What a graph can do
 
@@ -58,15 +58,15 @@ A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no progr
 
 Also know that:
 
-* **Node packs are code.** CamelGraph loads every `.dll` it finds in a `Packages` folder next to `Dyncamelo.App.dll` when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
-* **The command-line tool does not ask.** `Dyncamelo.Cli` (built from source, not part of the installer) runs a graph without any question. It cannot use the Navisworks nodes.
+* **Node packs are code.** CamelGraph loads every `.dll` it finds in a `Packages` folder next to `CamelGraph.App.dll` when it builds the node library. That code runs inside Navisworks with your rights and can do anything a Navisworks add-in can. Install packs only from authors you trust.
+* **The command-line tool does not ask.** `CamelGraph.Cli` (built from source, not part of the installer) runs a graph without any question. It cannot use the Navisworks nodes.
 
 ## Running graphs from other people
 
 CamelGraph asks before it runs a graph that can do real harm:
 
 * **Editor.** When you run a graph that was **opened from a file** and contains nodes that run programs, use the network, or delete, move or overwrite files, the editor lists those nodes and asks first. You are asked once per file, and again only if the file changes. A graph saved with run mode *Auto* is **not** run when you open it: the status bar says so, and you press **Run** to review it first. Graphs you make in the editor and the built-in samples never ask. Switch this off with **Settings ▸ Editing ▸ Ask before running graphs from files**.
-* **Script Player.** A script that contains nodes that change things or reach outside the model is listed by name above its form, and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. `Dyncamelo.Run.DYNC` (the Automation API and the Batch Utility) asks the same question.
+* **Script Player.** A script that contains nodes that change things or reach outside the model is listed by name above its form, and the first time you run it, and again whenever the file changes, the Player asks you to confirm. Scripts that only read are never asked about. The answer is remembered for that file as it is now. `CamelGraph.Run.DYNC` (the Automation API and the Batch Utility) asks the same question.
 * Muted and frozen nodes do not count.
 
 Advice:
@@ -79,8 +79,8 @@ Advice:
 ## Downloads
 
 * Download CamelGraph only from the [releases page](https://github.com/mrshoma99-rgb/dyncamelo/releases) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). The professional copy will come from the Autodesk App Store, which is coming soon.
-* The installer is **not code-signed** unless the publisher configured a certificate, so Windows SmartScreen may warn about it (**More info ▸ Run anyway**). Each release publishes a SHA-256 checksum next to every download; compare it with `Get-FileHash .\DyncameloSetup.exe -Algorithm SHA256`.
-* The installer works per user, in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle`, and needs no administrator rights.
+* The installer is **not code-signed** unless the publisher configured a certificate, so Windows SmartScreen may warn about it (**More info ▸ Run anyway**). Each release publishes a SHA-256 checksum next to every download; compare it with `Get-FileHash .\CamelGraphSetup.exe -Algorithm SHA256`.
+* The installer works per user, in `%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle`, and needs no administrator rights.
 
 ## Reporting a security problem
 

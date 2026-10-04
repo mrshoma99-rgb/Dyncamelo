@@ -1,29 +1,29 @@
-# Dyncamelo sample graphs
+# CamelGraph sample graphs
 
 Two families of `.dyc` graphs live here:
 
 - **Developer samples** (lower-case file names) — four small graphs that
   exercise the headless pipeline end to end. None of them need Navisworks or
-  WPF; they run anywhere the `dyncamelo` CLI runs, including Linux and CI.
+  WPF; they run anywhere the `camelgraph` CLI runs, including Linux and CI.
 - **In-app example workflows** (Title Case file names) — fourteen teaching graphs
   that ship with the Navisworks plugin (the build stages every Title-Case
   graph — the four lower-case developer graphs are excluded — into a
   `Samples` folder next to the plugin DLL, where the UI's Samples menu finds
   them). Except for *Getting Started - Math and Watch* and *Table Summary from Text*, they use
-  `Dyncamelo.Navisworks` nodes and need a running Navisworks with a model
+  `CamelGraph.Navisworks` nodes and need a running Navisworks with a model
   open — on other machines they load as placeholder nodes.
 
 Run any of the pure-general graphs from the repository root:
 
 ```bash
-dotnet run --project src/Dyncamelo.Cli -- run samples/hello-math.dyc
-dotnet run --project src/Dyncamelo.Cli -- validate samples/hello-math.dyc
-dotnet run --project src/Dyncamelo.Cli -- list-nodes
+dotnet run --project src/CamelGraph.Cli -- run samples/hello-math.dyc
+dotnet run --project src/CamelGraph.Cli -- validate samples/hello-math.dyc
+dotnet run --project src/CamelGraph.Cli -- list-nodes
 ```
 
 The CLI exits with `0` when no node ended in the Error state, `1` when at
 least one did, and `2` for unreadable inputs — so the samples double as CI
-smoke tests. `tests/Dyncamelo.Integration.Tests` loads and runs every
+smoke tests. `tests/CamelGraph.Integration.Tests` loads and runs every
 runnable `.dyc` file in this directory on every test run, and statically
 validates the Navisworks-dependent ones (every zero-touch definition id must
 exist in the node libraries and every connector must reference real ports),
@@ -168,7 +168,7 @@ Splits a sentence into words (`String.Split`), counts them (`List.Count`) and
 formats a small report (`String.FromObject` + `String.Concat`), while a second
 branch joins the words back together with `String.Join`. Expected Watch
 values: **`Word count: 4`** and
-**`dyncamelo, makes, navisworks, programmable`**.
+**`camelgraph, makes, navisworks, programmable`**.
 
 ### csv-roundtrip.dyc
 
@@ -176,7 +176,7 @@ Builds a 2×3 numeric table (`List.Range` × 2 → `List.Create`), writes it wit
 `CSV.WriteToFile` and immediately reads it back with `CSV.ReadFromFile` into a
 Watch List. Two details worth copying into your own graphs:
 
-- The output path is **relative** (`dyncamelo-sample-output.csv`), so the file
+- The output path is **relative** (`camelgraph-sample-output.csv`), so the file
   is created in whatever directory you run the CLI from.
 - The write node's `path` **output** is wired into the read node's `path`
   **input** — that both supplies the path and forces the read to execute after
@@ -188,14 +188,14 @@ Because it touches the file system, this graph is saved with
 ## Regenerating the samples
 
 The developer graphs are authored in code
-(`src/Dyncamelo.Cli/SampleGraphs.cs`), not by hand-editing JSON. After a
+(`src/CamelGraph.Cli/SampleGraphs.cs`), not by hand-editing JSON. After a
 format or node-library change, regenerate them with:
 
 ```bash
-dotnet run --project src/Dyncamelo.Cli -- write-samples samples
+dotnet run --project src/CamelGraph.Cli -- write-samples samples
 ```
 
 `write-samples` only rewrites the four developer graphs; the in-app example
 workflows are maintained as files in this directory (their zero-touch
 definition ids and port names are pinned by
-`tests/Dyncamelo.Integration.Tests/SampleGraphStaticValidationTests.cs`).
+`tests/CamelGraph.Integration.Tests/SampleGraphStaticValidationTests.cs`).

@@ -65,8 +65,8 @@
     {
       "Id": "f447ef1a9f28c0d05518c1418a1014fb",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 340.0,
       "Y": 90.0,
@@ -140,8 +140,8 @@
     {
       "Id": "d35e18fa2cf93236535dd07035ef1d84",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.OverrideColor@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.AppearanceNodes.OverrideColor@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Appearance.OverrideColor",
       "X": 700.0,
       "Y": 140.0,
@@ -180,8 +180,8 @@
     {
       "Id": "76096011578539cc01b0d973655ad971",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "List.Count",
       "X": 1040.0,
       "Y": 140.0,

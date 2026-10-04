@@ -23,13 +23,13 @@ The result is the build artifact **appstore-package** (kept 30 days): the zip, p
 ## What the package contains
 
 ```
-Dyncamelo.bundle/
+CamelGraph.bundle/
   PackageContents.xml
   Contents/
-    v21/   Navisworks 2024: Dyncamelo.App.dll, the other DLLs, en-US/, Resources/, Samples/, distribution.txt
+    v21/   Navisworks 2024: CamelGraph.App.dll, the other DLLs, en-US/, Resources/, Samples/, distribution.txt
     v22/   Navisworks 2025
     v23/   Navisworks 2026
-    Resources/   Dyncamelo.ico, Help/index.html, PRIVACY.md, LICENSE, THIRD-PARTY-NOTICES.md
+    Resources/   CamelGraph.ico, Help/index.html, PRIVACY.md, LICENSE, THIRD-PARTY-NOTICES.md
 ```
 
 `distribution.txt` in each release folder makes CamelGraph skip its GitHub update check (the store delivers updates). The product code is derived from the version; the upgrade code in `publisher.json` must never change.

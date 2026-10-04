@@ -1,0 +1,98 @@
+using System;
+using System.Windows.Forms;
+using System.Windows.Forms.Integration;
+using Autodesk.Navisworks.Api.Plugins;
+using CamelGraph.Navisworks;
+using CamelGraph.UI.Views;
+using NavisApplication = Autodesk.Navisworks.Api.Application;
+
+namespace CamelGraph.App;
+
+/// <summary>
+/// The dockable Script Player: lists the scripts in the scripts folders and runs one with a small form for its inputs, without
+/// loading the node editor. Plugin id: "CamelGraph.PlayerPane.DYNC".
+/// </summary>
+[Plugin("CamelGraph.PlayerPane", "DYNC",
+    DisplayName = "CamelGraph Player",
+    ToolTip = "Run CamelGraph scripts without opening the node editor")]
+[DockPanePlugin(420, 640, AutoScroll = false, FixedSize = false, MinimumWidth = 320, MinimumHeight = 300)]
+public class CamelGraphPlayerDockPanePlugin : DockPanePlugin
+{
+    /// <summary>Plugin id used with SetDockPanePluginVisibility.</summary>
+    public const string PluginId = "CamelGraph.PlayerPane.DYNC";
+
+    private PaneKeyGuard? _keyGuard;
+
+    /// <summary>Shows and activates the Player pane (creating it the first time).</summary>
+    public static void Show()
+    {
+        var gui = NavisApplication.Gui;
+        if (gui != null)
+        {
+            gui.SetDockPanePluginVisibility(PluginId, true);
+            gui.SetDockPanePluginActive(PluginId);
+        }
+    }
+
+    /// <inheritdoc />
+    public override Control CreateControlPane()
+    {
+        var player = CamelGraphHost.Player;
+        player.OpenInEditorRequested -= OnOpenInEditorRequested;
+        player.OpenInEditorRequested += OnOpenInEditorRequested;
+
+        var control = new PlayerControl { ViewModel = player };
+
+        // A failing template or handler must not take Roamer down: report it in the pane and log it. The editor, when it is open,
+        // installs its own report on top of this.
+        if (CamelGraphHost.Editor == null)
+        {
+            CamelGraph.UI.Services.CrashGuard.Install(player.ReportProblem, control.Dispatcher);
+        }
+
+        var host = new ElementHost
+        {
+            Child = control,
+            Dock = DockStyle.Fill,
+        };
+        host.CreateControl();
+
+        // Navisworks binds Ctrl+Z, Ctrl+V, Delete … itself; typing into the Player's boxes must not edit the model.
+        _keyGuard?.Dispose();
+        _keyGuard = new PaneKeyGuard(host, control);
+        return host;
+    }
+
+    /// <inheritdoc />
+    public override void DestroyControlPane(Control pane)
+    {
+        if (CamelGraphHost.PlayerCreated)
+        {
+            CamelGraphHost.Player.OpenInEditorRequested -= OnOpenInEditorRequested;
+        }
+
+        _keyGuard?.Dispose();
+        _keyGuard = null;
+        pane.Dispose();
+    }
+
+    // "Edit" in the Player: show the editor and hand it the script (asking first if it has unsaved work).
+    private static void OnOpenInEditorRequested(object? sender, string path)
+    {
+        var editor = CamelGraphHost.Editor;
+        if (editor == null)
+        {
+            // The editor pane is created by the call below and picks the script up as it starts.
+            CamelGraphHost.PendingEditorPath = path;
+        }
+
+        var gui = NavisApplication.Gui;
+        if (gui != null)
+        {
+            gui.SetDockPanePluginVisibility(CamelGraphDockPanePlugin.PluginId, true);
+            gui.SetDockPanePluginActive(CamelGraphDockPanePlugin.PluginId);
+        }
+
+        editor?.OpenDroppedFiles(new[] { path });
+    }
+}

@@ -83,8 +83,8 @@
     {
       "Id": "10000000000000000000000000000005",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 340.0,
       "Y": 120.0,
@@ -137,8 +137,8 @@
     {
       "Id": "10000000000000000000000000000006",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 340.0,
       "Y": 360.0,
@@ -245,8 +245,8 @@
     {
       "Id": "1000000000000000000000000000000a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,bool,object,object,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,bool,object,object,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "FallHazard.FloorOpeningMap",
       "X": 720.0,
       "Y": 300.0,

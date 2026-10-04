@@ -7,7 +7,7 @@
     {"id": "try", "node": "Flow.Try"},
     {"id": "result", "node": "Watch Table", "title": "Result (or nothing)"},
     {"id": "gate", "node": "Flow.When", "title": "Only if it failed"},
-    {"id": "log", "node": "Log.Write", "values": {"path": "C:\\Logs\\dyncamelo.log", "level": "WARN"}}
+    {"id": "log", "node": "Log.Write", "values": {"path": "C:\\Logs\\camelgraph.log", "level": "WARN"}}
   ],
   "wires": [
     "risky.table -> try.value",

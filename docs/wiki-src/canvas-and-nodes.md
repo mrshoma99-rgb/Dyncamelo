@@ -8,7 +8,7 @@ This page tours the editor window and everything you do on the canvas. The node 
 
 ## Opening the editor
 
-Open a model in Navisworks, then click **Dyncamelo** on the **BIMCamel** ribbon tab. The button shows or hides the editor pane. It is a normal Navisworks dock pane, so you can dock it, float it or put it on a second monitor.
+Open a model in Navisworks, then click **CamelGraph** on the **BIMCamel** ribbon tab. The button shows or hides the editor pane. It is a normal Navisworks dock pane, so you can dock it, float it or put it on a second monitor.
 
 Every function of the editor can be reached four ways: a **menu**, a **shortcut**, the **command palette** (++ctrl+shift+p++) and the **Settings** page. If you cannot remember where something is, open the palette and type a word of its name.
 
@@ -16,7 +16,7 @@ Every function of the editor can be reached four ways: a **menu**, a **shortcut*
 
 | Area | What it holds |
 |---|---|
-| Header bar (one row, with a thin blue strip on top) | The BIMCamel logo and "Dyncamelo by BIMCamel" on the left, then the menus **File, Edit, View, Graph, Node, Node Groups, Wires, Help** (each shows the shortcut beside every command; File also holds **Recent Files** and **Sample Graphs**, Graph holds **Frame Colour**). On the right: the name of the open script (a `*` after it means there are unsaved changes; the file name follows once the script has been saved) and the buttons. In a narrow pane the script name goes first, then the "Dyncamelo by BIMCamel" text, and in a very narrow one the menus fold into one **☰** button that holds the same menus; the buttons always stay. Hover the logo for the version. |
+| Header bar (one row, with a thin blue strip on top) | The BIMCamel logo and "CamelGraph by BIMCamel" on the left, then the menus **File, Edit, View, Graph, Node, Node Groups, Wires, Help** (each shows the shortcut beside every command; File also holds **Recent Files** and **Sample Graphs**, Graph holds **Frame Colour**). On the right: the name of the open script (a `*` after it means there are unsaved changes; the file name follows once the script has been saved) and the buttons. In a narrow pane the script name goes first, then the "CamelGraph by BIMCamel" text, and in a very narrow one the menus fold into one **☰** button that holds the same menus; the buttons always stay. Hover the logo for the version. |
 | Buttons on the right of the header | Undo, Redo, **Run** (the blue main button), **Auto / Manual** (a switch like the ones on Boolean nodes), value previews on/off, minimap on/off, and the **Settings** gear. |
 | Library panel (left) | The list of nodes. See [Node library and search](library-and-search.md). |
 | Canvas (middle) | Where nodes and wires live. |

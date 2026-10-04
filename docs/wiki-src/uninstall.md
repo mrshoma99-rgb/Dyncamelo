@@ -9,32 +9,34 @@ Close Navisworks first. The setup window warns you if it is still running.
 
 Any one of these:
 
-* **Windows Settings ▸ Apps ▸ Installed apps ▸ Dyncamelo for Navisworks ▸ Uninstall**.
-* Run `DyncameloSetup.exe` and choose **Remove existing install**.
-* Silently, from a command prompt: `DyncameloSetup.exe /uninstall /silent`.
+* **Windows Settings ▸ Apps ▸ Installed apps ▸ CamelGraph for Navisworks ▸ Uninstall**.
+* Run `CamelGraphSetup.exe` and choose **Remove existing install**.
+* Silently, from a command prompt: `CamelGraphSetup.exe /uninstall /silent`.
 
 ## If you got the professional copy from the Autodesk App Store
 
 That copy is coming soon. Remove it the way the store describes. What stays behind is the same as in the table [below](#what-stays-behind-and-how-to-remove-it).
 
-## If you installed with `install-dyncamelo.bat`
+## If you installed with `install-camelgraph.bat`
 
 From the folder that holds the batch file, run:
 
 ```
-install-dyncamelo.bat uninstall
+install-camelgraph.bat uninstall
 ```
+
+Uninstalling also removes a leftover install from the time the product was called Dyncamelo (`Dyncamelo.bundle` and its Apps entry), if there is one.
 
 ## If you copied the bundle by hand
 
-Delete the folder `Dyncamelo.bundle` from the place you put it:
+Delete the folder `CamelGraph.bundle` from the place you put it:
 
-* `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` (this user only), or
-* `C:\ProgramData\Autodesk\ApplicationPlugins\Dyncamelo.bundle` (all users, needs administrator rights).
+* `%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle` (this user only; the old name of the folder was `Dyncamelo.bundle`), or
+* `C:\ProgramData\Autodesk\ApplicationPlugins\CamelGraph.bundle` (all users, needs administrator rights).
 
 ## If you used the classic Plugins folder
 
-Delete the folder `Dyncamelo.App` from `…\Navisworks Manage 2024\Plugins\` (or the Simulate and year folder you used). This needs administrator rights.
+Delete the folder `CamelGraph.App` from `…\Navisworks Manage 2024\Plugins\` (or the Simulate and year folder you used). This needs administrator rights.
 
 ## What stays behind, and how to remove it
 
@@ -43,16 +45,16 @@ Uninstalling removes the program and the Apps entry. It deliberately **leaves yo
 | Left behind | Where | What it is |
 |---|---|---|
 | Your graphs | wherever you saved them | Your `.dyc` files. |
-| Your scripts folder | `Documents\Dyncamelo\Scripts` | What the Script Player lists. |
-| Settings and logs | `%APPDATA%\Dyncamelo` | `ui-settings.json` (preferences, shortcuts, recent files, favourite nodes, values typed into scripts), `errors.log`, `update-check.txt` and the `recovery` folder of autosaved graphs. |
+| Your scripts folder | `Documents\CamelGraph\Scripts` | What the Script Player lists. |
+| Settings and logs | `%APPDATA%\CamelGraph` | `ui-settings.json` (preferences, shortcuts, recent files, favourite nodes, values typed into scripts), `errors.log`, `update-check.txt` and the `recovery` folder of autosaved graphs. |
 
-For a completely clean start, delete the `%APPDATA%\Dyncamelo` folder yourself (paste that into the Windows Explorer address bar). CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
+For a completely clean start, delete the `%APPDATA%\CamelGraph` folder yourself (paste that into the Windows Explorer address bar). CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
 
 ## Check that it is gone
 
-Start Navisworks. The **BIMCamel** tab should no longer have Dyncamelo, Player and About buttons from this install. If another BIMCamel tool is installed, its own buttons stay.
+Start Navisworks. The **BIMCamel** tab should no longer have CamelGraph, Player and About buttons from this install. If another BIMCamel tool is installed, its own buttons stay.
 
-If the tab or buttons are still there, look for a second copy: in the other `ApplicationPlugins` folder (user and all-users), or in a `Plugins\Dyncamelo.App` folder of Navisworks.
+If the tab or buttons are still there, look for a second copy: in the other `ApplicationPlugins` folder (user and all-users), or in a `Plugins\CamelGraph.App` folder of Navisworks.
 
 ## Next steps
 

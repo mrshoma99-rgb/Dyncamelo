@@ -6,7 +6,7 @@ You need CamelGraph [installed](installation.md) and a model open in Navisworks 
 
 ## 1. Open the editor and meet the screen
 
-On the **BIMCamel** ribbon tab, click **Dyncamelo**. The editor opens as a pane. Its parts:
+On the **BIMCamel** ribbon tab, click **CamelGraph**. The editor opens as a pane. Its parts:
 
 * **Library** (left): every node, in a category tree, with a search box. Double-click a node, or drag it onto the canvas.
 * **Canvas** (middle): your graph. Pan by dragging with the right or middle mouse button, zoom with the wheel, box-select with the left button.
@@ -88,7 +88,7 @@ Switch the run bar from **Manual** to **Auto**. Change the text of the **String*
 
 ## 7. Save the graph
 
-Press ++ctrl+s++ and save a `.dyc` file. It stores the nodes, wires and the values you typed, not the results, so a graph you open later computes afresh on its first run. It is plain text, so it can be emailed or kept in version control. Save it in `Documents\Dyncamelo\Scripts` and the [Script Player](player.md) lists it.
+Press ++ctrl+s++ and save a `.dyc` file. It stores the nodes, wires and the values you typed, not the results, so a graph you open later computes afresh on its first run. It is plain text, so it can be emailed or kept in version control. Save it in `Documents\CamelGraph\Scripts` and the [Script Player](player.md) lists it.
 
 ## 8. One search for many values
 

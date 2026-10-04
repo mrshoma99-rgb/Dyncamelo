@@ -1,8 +1,8 @@
-# The Dyncamelo wiki: how it is built
+# The CamelGraph wiki: how it is built
 
 The wiki (the user guide for bimcamel.com) is built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. Both are open source (MIT and BSD-2). The result is plain static HTML, CSS and JavaScript. It needs no server software, and it also works when you open `index.html` from a folder.
 
-Nothing the build makes is committed. `build/` is ignored by git. CI builds the wiki on every push and keeps the site as the `dyncamelo-wiki` artifact.
+Nothing the build makes is committed. `build/` is ignored by git. CI builds the wiki on every push and keeps the site as the `camelgraph-wiki` artifact.
 
 ## Build it
 
@@ -38,7 +38,7 @@ The build copies everything into a staging folder, `build/wiki-docs`, and then r
 | How-to guides | `docs/wiki-src/howto/*.md` |
 | Troubleshooting, Recipes, Writing your own nodes | `docs/TROUBLESHOOTING.md`, `docs/RECIPES.md`, `docs/EXTENDING.md`. The links in them are turned into links of the site, or into links to the file on GitHub. Their headings get the same ids as on GitHub, so links written for GitHub still work. Do not make `docs/wiki-src/troubleshooting.md` and so on; the build refuses it. |
 | What's new | `CHANGELOG.md` |
-| Node reference | `docs/dyncamelo-nodes.json` (made by `tools/generate_node_catalog.py`): one page per category group, and every node has the anchor `node-<name>`. |
+| Node reference | `docs/camelgraph-nodes.json` (made by `tools/generate_node_catalog.py`): one page per category group, and every node has the anchor `node-<name>`. |
 | Pictures | `docs/images/` |
 | Graph files | `docs/wiki-src/graphs/*.dyc` |
 | Menu and tabs | `docs/wiki-src/nav.yml` |
@@ -71,7 +71,7 @@ order: 20                                 # optional; the menu is sorted by this
 
 ## Add a picture
 
-Pictures are made by the tests in `tests/Dyncamelo.UI.Tests/Wiki` (the agreed list is in `tools/wiki/image-manifest.md`) and committed to `docs/images/`.
+Pictures are made by the tests in `tests/CamelGraph.UI.Tests/Wiki` (the agreed list is in `tools/wiki/image-manifest.md`) and committed to `docs/images/`.
 
 To refresh them all: push, let the Windows CI job finish, download its `editor-screenshots` artifact (it holds a `wiki` folder with every drawn picture and `_report.txt`, which names any scene that could not be drawn), read the pictures, then run `python tools/wiki_pictures.py path/to/wiki`. That copies the pictures the pages mention into `docs/images/` as 256-colour PNGs (about a third of the drawn size). Commit the result.
 

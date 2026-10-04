@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Dyncamelo `.dyc` graphs for the wiki from small JSON specs.
+"""Build CamelGraph `.dyc` graphs for the wiki from small JSON specs.
 
 The wiki shows pictures of real graphs and offers them for download. Writing a
 `.dyc` by hand is slow and easy to get wrong (a misspelt port silently drops a
@@ -40,7 +40,7 @@ A spec
     }
 
 * `id` is yours: a short name used by `wires`, `frames` and the generated ids.
-* `node` is a name from `docs/dyncamelo-nodes.json` (`Search.ByProperty`, `Table.Sort`, ...) or one of the
+* `node` is a name from `docs/camelgraph-nodes.json` (`Search.ByProperty`, `Table.Sort`, ...) or one of the
   built-in kinds below. `title` renames the node on the canvas.
 * `values` types a value into an input that is not wired, exactly as the editor's inline editor would:
   a number (number or integer inputs), `true`/`false` (toggles), text (text and path inputs), one of the listed
@@ -69,20 +69,20 @@ Adding a graph
 --------------
 1. Write `docs/wiki-src/graphs/specs/<name>.json`.
 2. Run `python3 tools/wiki_graph.py <name>`; fix what it reports.
-3. Run `python3 tools/wiki_graph.py --check`, then `dotnet test tests/Dyncamelo.Integration.Tests -c Release`
+3. Run `python3 tools/wiki_graph.py --check`, then `dotnet test tests/CamelGraph.Integration.Tests -c Release`
    (the static validation test also covers every graph in `docs/wiki-src/graphs/`).
 4. Commit the spec and the `.dyc` together. Link it from the page as `[Download the graph](../graphs/<name>.dyc)`.
 
 How node ids are found
 ----------------------
 A zero-touch node is saved with a definition id such as
-`Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document`
+`CamelGraph.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document`
 (declaring type, method, then the parameter types the loader writes). When a catalogue entry carries an `id` that
 value is used. The id is also derived here from the C# sources with the loader's own rules
 (`AssemblyNodeLoader.GetFunctionSignature`): keyword types stay as written, every other type is written with its
 full name, generics without spaces, `Nullable<T>` as `T?`; when both exist they must agree, and the derivation is the
 fallback for a catalogue without ids. Everything else a node needs (port names, defaults, choices, ranges,
-multi-input, kinds) is read from the same sources and cross-checked against `docs/dyncamelo-nodes.json`.
+multi-input, kinds) is read from the same sources and cross-checked against `docs/camelgraph-nodes.json`.
 A new C# parameter type from a library the tool does not know (for example a new Navisworks type) is added to
 `SourceIndex.EXTERNAL_TYPES`.
 """
@@ -103,16 +103,16 @@ from typing import Any, Iterable, Optional
 REPO = Path(__file__).resolve().parent.parent
 GRAPH_DIR = REPO / "docs" / "wiki-src" / "graphs"
 SPEC_DIR = GRAPH_DIR / "specs"
-CATALOGUE = REPO / "docs" / "dyncamelo-nodes.json"
+CATALOGUE = REPO / "docs" / "camelgraph-nodes.json"
 SOURCE_DIRS = [
-    ("Dyncamelo.Nodes", REPO / "src" / "Dyncamelo.Nodes"),
-    ("Dyncamelo.Navisworks", REPO / "src" / "Dyncamelo.Navisworks"),
+    ("CamelGraph.Nodes", REPO / "src" / "CamelGraph.Nodes"),
+    ("CamelGraph.Navisworks", REPO / "src" / "CamelGraph.Navisworks"),
 ]
 # Read for the names of the types declared there (parameter types such as NodeRegistry), never for nodes.
-TYPE_ONLY_DIRS = [REPO / "src" / "Dyncamelo.Core"]
+TYPE_ONLY_DIRS = [REPO / "src" / "CamelGraph.Core"]
 EXCLUDED_PARTS = {"bin", "obj"}
 
-NODE_ID_NAMESPACE = "dyncamelo-wiki-graph"
+NODE_ID_NAMESPACE = "camelgraph-wiki-graph"
 
 
 class SpecError(Exception):
@@ -888,7 +888,7 @@ FAMILY_BY_TYPE = {
     "ClashResultGroupCollection": "clash",
     "Document": "document", "DocumentModels": "document",
     "IDictionary": "data", "Dictionary": "data", "DataProperty": "data", "PropertyCategory": "data",
-    "ParamMapRule": "data", "DyncameloTable": "data",
+    "ParamMapRule": "data", "CamelGraphTable": "data",
     "IWorkflowAction": "action",
 }
 FAMILY_BY_KEYWORD = {
@@ -956,8 +956,8 @@ def _family_of_scalar(t: str, index: SourceIndex) -> str:
         return FAMILY_BY_KEYWORD[t]
     if index.is_enum(head):
         return "integer"
-    if len(head) > 9 and head.startswith("Dyncamelo"):
-        head = head[len("Dyncamelo"):]
+    if len(head) > len("CamelGraph") and head.startswith("CamelGraph"):
+        head = head[len("CamelGraph"):]
     if head in FAMILY_BY_TYPE:
         return FAMILY_BY_TYPE[head]
     if head in ("DateTime",):
@@ -1070,7 +1070,7 @@ def _p(name: str, family: str = "any", depth: str = "unknown", **kw: Any) -> Por
     return PortInfo(name=name, family=family, depth=depth, **kw)
 
 
-# Built-in (interactive) node kinds: the NodeModel subclasses in src/Dyncamelo.Core/Nodes and src/Dyncamelo.Nodes.
+# Built-in (interactive) node kinds: the NodeModel subclasses in src/CamelGraph.Core/Nodes and src/CamelGraph.Nodes.
 # `type` is the NodeType tag the file stores, `data` the fields of its Data object, in the order SerializeData writes them.
 INTERACTIVE: dict[str, dict] = {
     "String": dict(type="StringInput", outputs=[_p("value", "text", "item")], category="Input"),
@@ -1110,7 +1110,7 @@ PLAYER_OUTPUT_KINDS = {"Watch", "Watch List", "Watch Table", "Watch Image"}
 
 
 class Catalogue:
-    """docs/dyncamelo-nodes.json: the names, ports and descriptions the wiki and the editor's library agree on."""
+    """docs/camelgraph-nodes.json: the names, ports and descriptions the wiki and the editor's library agree on."""
 
     def __init__(self, path: Path = CATALOGUE) -> None:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -1150,7 +1150,7 @@ def resolve_node(name: str) -> NodeDef:
         close = difflib.get_close_matches(name, cat.names() + sorted(INTERACTIVE), n=4, cutoff=0.6)
         raise SpecError(
             "unknown node '" + name + "'" + ((" - did you mean " + ", ".join("'" + c + "'" for c in close) + "?") if close else "")
-            + " (nodes must be in docs/dyncamelo-nodes.json; retired nodes are not)")
+            + " (nodes must be in docs/camelgraph-nodes.json; retired nodes are not)")
     if entry.get("interactive"):
         raise SpecError("the node '" + name + "' is interactive and not supported by this tool; use another node")
     src = index.by_name.get(name)
@@ -1165,7 +1165,7 @@ def resolve_node(name: str) -> NodeDef:
             + ", sources " + str([p.name for p in definition.inputs]) + " -> " + str([p.name for p in definition.outputs])
             + "); regenerate the catalogue with tools/generate_node_catalog.py")
     cat_id = entry.get("id")
-    cat_id_usable = isinstance(cat_id, str) and cat_id.startswith("Dyncamelo.")
+    cat_id_usable = isinstance(cat_id, str) and cat_id.startswith("CamelGraph.")
     if src.id_error and not cat_id_usable:
         raise SpecError("the node '" + name + "': " + src.id_error)
     if cat_id_usable and not src.id_error and cat_id != definition.definition_id:

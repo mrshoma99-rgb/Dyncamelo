@@ -5,4 +5,4 @@ them with a throw-away certificate, builds the installer, smoke-tests it (instal
 artifact. It publishes nothing. Without [dry-run] in the message a push that touches only this file does nothing, because the version in
 dist/RELEASE_VERSION already has its release.
 
-Last dry run requested: 2026-10-04 (seventh: the CamelGraph rename, installer text and Windows Apps entry; with [store] in the message the store package is built)
+Last dry run requested: 2026-10-04 (eighth: the full CamelGraph rename, files, assemblies and installer replacing an old Dyncamelo install; with [store] in the message the store package is built)

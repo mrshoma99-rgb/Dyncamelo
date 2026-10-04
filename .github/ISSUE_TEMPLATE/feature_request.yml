@@ -35,7 +35,7 @@ body:
   - type: textarea
     id: proposal
     attributes:
-      label: What would you like Dyncamelo to do?
+      label: What would you like CamelGraph to do?
       description: "If you suggest a node, give it a name in the Category.Name style used in the library, and list its inputs and outputs."
     validations:
       required: false

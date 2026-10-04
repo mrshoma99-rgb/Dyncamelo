@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Installs DyncameloSetup.exe silently on this machine, checks what it installed against the staged bundle, installs over the top,
+  Installs CamelGraphSetup.exe silently on this machine, checks what it installed against the staged bundle, installs over the top,
   uninstalls, and checks nothing is left behind.
 
 .DESCRIPTION
@@ -8,7 +8,7 @@
   the exit codes, that every file of the staged bundle arrived byte for byte, that each year folder holds the plug-in and its libraries,
   that the assemblies carry the release version, that no downloaded-file mark (Zone.Identifier) was left on a DLL, the Add/Remove
   Programs entry, that a second install replaces the first completely (a stale file disappears), that uninstall removes the folder and
-  the entry, and (when SIGNED=true) that the installed Dyncamelo assemblies are signed.
+  the entry, and (when SIGNED=true) that the installed CamelGraph assemblies are signed.
 #>
 param(
     [Parameter(Mandatory = $true)][string]$Installer,
@@ -20,14 +20,25 @@ $ErrorActionPreference = 'Stop'
 $numeric = $Version.TrimStart('v')
 $exe = (Resolve-Path $Installer).Path
 $staged = (Resolve-Path $StagedBundle).Path
-$target = Join-Path $env:APPDATA 'Autodesk\ApplicationPlugins\Dyncamelo.bundle'
-$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Dyncamelo'
+$target = Join-Path $env:APPDATA 'Autodesk\ApplicationPlugins\CamelGraph.bundle'
+$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CamelGraph'
+# What a version from before the rename (Dyncamelo, up to 0.48) leaves on a machine; installing or removing CamelGraph must take it away.
+$legacyTarget = Join-Path $env:APPDATA 'Autodesk\ApplicationPlugins\Dyncamelo.bundle'
+$legacyKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Dyncamelo'
 $years = '2024', '2025', '2026'
 $failures = New-Object System.Collections.Generic.List[string]
 
 function Fail([string]$message) {
     Write-Host "::error::Installer smoke test: $message"
     $failures.Add($message)
+}
+
+function Seed-Legacy() {
+    New-Item -ItemType Directory -Force -Path (Join-Path $legacyTarget '2024') | Out-Null
+    Set-Content -Path (Join-Path $legacyTarget 'PackageContents.xml') -Value '<ApplicationPackage Version="0.48.0.0" />'
+    Set-Content -Path (Join-Path $legacyTarget '2024\Dyncamelo.App.dll') -Value 'old'
+    New-Item -Path $legacyKey -Force | Out-Null
+    Set-ItemProperty -Path $legacyKey -Name DisplayName -Value 'Dyncamelo for Navisworks'
 }
 
 function Run-Setup([string]$path, [string[]]$arguments) {
@@ -42,7 +53,7 @@ function Run-Setup([string]$path, [string[]]$arguments) {
 # ----- 1. a fresh install ---------------------------------------------------------------------------------------------------------
 if (Test-Path $target) { Remove-Item $target -Recurse -Force }
 $code = Run-Setup $exe @('/silent')
-if ($code -ne 0) { throw "DyncameloSetup.exe /silent exited with code $code." }
+if ($code -ne 0) { throw "CamelGraphSetup.exe /silent exited with code $code." }
 
 if (-not (Test-Path (Join-Path $target 'PackageContents.xml'))) { throw "PackageContents.xml is missing from $target after install." }
 [xml]$manifest = Get-Content (Join-Path $target 'PackageContents.xml') -Raw
@@ -61,18 +72,18 @@ foreach ($file in $stagedFiles) {
     }
 }
 
-$required = 'Dyncamelo.App.dll', 'Dyncamelo.Core.dll', 'Dyncamelo.Nodes.dll', 'Dyncamelo.Navisworks.dll', 'Dyncamelo.UI.dll',
+$required = 'CamelGraph.App.dll', 'CamelGraph.Core.dll', 'CamelGraph.Nodes.dll', 'CamelGraph.Navisworks.dll', 'CamelGraph.UI.dll',
             'Nodify.dll', 'Newtonsoft.Json.dll', 'AutomaticGraphLayout.dll'
 foreach ($year in $years) {
     $folder = Join-Path $target $year
     foreach ($name in $required) {
         if (-not (Test-Path (Join-Path $folder $name))) { Fail "$year\$name is missing" }
     }
-    if (-not (Test-Path (Join-Path $folder 'en-US\Dyncamelo.xaml'))) { Fail "$year\en-US\Dyncamelo.xaml is missing" }
+    if (-not (Test-Path (Join-Path $folder 'en-US\CamelGraph.xaml'))) { Fail "$year\en-US\CamelGraph.xaml is missing" }
     if (@(Get-ChildItem (Join-Path $folder 'Samples') -Filter *.dyc -ErrorAction SilentlyContinue).Count -lt 1) { Fail "$year has no sample graphs" }
     if (@(Get-ChildItem (Join-Path $folder 'Resources') -Filter *.png -ErrorAction SilentlyContinue).Count -lt 1) { Fail "$year has no icons" }
 
-    foreach ($name in $required | Where-Object { $_ -like 'Dyncamelo.*' }) {
+    foreach ($name in $required | Where-Object { $_ -like 'CamelGraph.*' }) {
         $path = Join-Path $folder $name
         if (-not (Test-Path $path)) { continue }
         try {
@@ -91,7 +102,7 @@ foreach ($dll in Get-ChildItem $target -Recurse -Filter *.dll) {
 }
 
 if ($env:SIGNED -eq 'true') {
-    foreach ($dll in Get-ChildItem $target -Recurse -Filter 'Dyncamelo.*.dll') {
+    foreach ($dll in Get-ChildItem $target -Recurse -Filter 'CamelGraph.*.dll') {
         $signature = Get-AuthenticodeSignature $dll.FullName
         if ($signature.Status -ne 'Valid') { Fail "$($dll.FullName.Substring($target.Length)) is not validly signed: $($signature.Status)" }
     }
@@ -104,7 +115,7 @@ else {
     if ($entry.DisplayVersion -notlike "$numeric*") { Fail "Add/Remove Programs shows version '$($entry.DisplayVersion)', expected $numeric" }
     if (-not $entry.UninstallString) { Fail "Add/Remove Programs entry has no uninstall command" }
 }
-if (-not (Test-Path (Join-Path $target 'DyncameloSetup.exe'))) { Fail "the uninstaller (DyncameloSetup.exe) was not copied into the bundle" }
+if (-not (Test-Path (Join-Path $target 'CamelGraphSetup.exe'))) { Fail "the uninstaller (CamelGraphSetup.exe) was not copied into the bundle" }
 
 # ----- 2. installing over the top replaces everything ---------------------------------------------------------------------------------
 Set-Content -Path (Join-Path $target '2024\left-over-from-an-older-version.dll') -Value 'stale'
@@ -113,13 +124,24 @@ if ($code -ne 0) { Fail "installing over an existing install exited with code $c
 if (Test-Path (Join-Path $target '2024\left-over-from-an-older-version.dll')) { Fail "a file of the previous install survived the upgrade" }
 if (-not (Test-Path (Join-Path $target 'PackageContents.xml'))) { Fail "the upgrade left no PackageContents.xml" }
 
+# ----- 2b. an install from before the rename is replaced -----------------------------------------------------------------------------
+Seed-Legacy
+$code = Run-Setup $exe @('/silent')
+if ($code -ne 0) { Fail "installing over a Dyncamelo install exited with code $code" }
+if (Test-Path $legacyTarget) { Fail "the Dyncamelo bundle folder survived installing CamelGraph" }
+if (Test-Path $legacyKey) { Fail "the Dyncamelo Add/Remove Programs entry survived installing CamelGraph" }
+if (-not (Test-Path (Join-Path $target 'PackageContents.xml'))) { Fail "installing over a Dyncamelo install left no CamelGraph PackageContents.xml" }
+
 # ----- 3. uninstall ---------------------------------------------------------------------------------------------------------------------
-$code = Run-Setup (Join-Path $target 'DyncameloSetup.exe') @('/uninstall', '/silent')
+Seed-Legacy
+$code = Run-Setup (Join-Path $target 'CamelGraphSetup.exe') @('/uninstall', '/silent')
 if ($code -ne 0) { Fail "uninstall exited with code $code" }
 # The uninstaller moves itself to %TEMP% and removes the folder just after it returns; give it a moment.
 for ($i = 0; $i -lt 30 -and (Test-Path $target); $i++) { Start-Sleep -Seconds 1 }
 if (Test-Path $target) { Fail "the bundle folder is still there after uninstall" }
 if (Test-Path $uninstallKey) { Fail "the Add/Remove Programs entry is still there after uninstall" }
+if (Test-Path $legacyTarget) { Fail "the Dyncamelo bundle folder is still there after uninstall" }
+if (Test-Path $legacyKey) { Fail "the Dyncamelo Add/Remove Programs entry is still there after uninstall" }
 
 if ($failures.Count -gt 0) {
     throw "The installer smoke test found $($failures.Count) problem(s):`n - " + ($failures -join "`n - ")

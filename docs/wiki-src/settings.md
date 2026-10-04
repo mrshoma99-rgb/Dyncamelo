@@ -14,11 +14,11 @@ The page covers the canvas. Close it with the **✕** at its top right or with +
 
 On the left is the list of sections: **Appearance, Canvas, Editing, Shortcuts, Privacy, Diagnostics**. The **search box** at the top right finds a setting in any section by words from its name or description. A small **↺** button appears beside any setting you have changed; it puts that one back to its default.
 
-Settings are saved automatically, per Windows user, in `%APPDATA%\Dyncamelo\ui-settings.json`, and are shared by the editor and the [Script Player](player.md). They apply at once.
+Settings are saved automatically, per Windows user, in `%APPDATA%\CamelGraph\ui-settings.json`, and are shared by the editor and the [Script Player](player.md). They apply at once.
 
 ## Appearance
 
-The **colour palette** of the whole editor is chosen at the top of this section: **Dyncamelo Dark** (the default), **Midnight**, **Slate** and **Light**. The Script Player follows the palette you choose.
+The **colour palette** of the whole editor is chosen at the top of this section: **CamelGraph Dark** (the default), **Midnight**, **Slate** and **Light**. The Script Player follows the palette you choose.
 
 ![The Appearance page of Settings: the colour palettes and the appearance options.](../images/wiki-settings-appearance.png)
 
@@ -98,7 +98,7 @@ The menus, the key handling, the ++f1++ help sheet and the palette all read the 
 
 | Setting | Values | Default | What it does |
 |---|---|---|---|
-| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is a newer one. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, nothing about you or your models. Off means CamelGraph makes no network request of its own. |
+| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is a newer one. The request carries your IP address and the name `CamelGraph-UpdateCheck`, nothing about you or your models. Off means CamelGraph makes no network request of its own. |
 
 This is the only network request CamelGraph makes by itself. A copy installed from the Autodesk App Store never makes it. The full policy is in **Help ▸ Privacy Policy** and on the [Privacy and safety](privacy-and-safety.md) page.
 

@@ -1,4 +1,4 @@
-# Getting Started with Dyncamelo
+# Getting Started with CamelGraph
 
 This guide takes you from a fresh Navisworks installation to your first working graph: **find every item whose Material contains "Concrete", color it red, and save it as a selection set** — without writing a line of code.
 
@@ -7,7 +7,7 @@ This guide takes you from a fresh Navisworks installation to your first working 
 ## 1. What you need
 
 - Autodesk **Navisworks Manage or Simulate 2024, 2025 or 2026** (Windows).
-- The Dyncamelo plugin files: `DyncameloSetup.exe` from the [latest release](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest), or your own build of the source (see the [README](../README.md#build-from-source-windows)). Some releases carry the source code only; the assets list of the release says which kind it is.
+- The CamelGraph plugin files: `CamelGraphSetup.exe` from the [latest release](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest), or your own build of the source (see the [README](../README.md#build-from-source-windows)). Some releases carry the source code only; the assets list of the release says which kind it is.
 - Any model to play with (`.nwd`, `.nwf`, or an appended `.rvt`/`.ifc`/`.dwg`).
 
 ## 2. Install
@@ -15,41 +15,41 @@ This guide takes you from a fresh Navisworks installation to your first working 
 ### Option A — application bundle (recommended: own ribbon tab)
 
 1. Close Navisworks.
-2. Take the `dist\Dyncamelo.bundle\` folder from this repository, drop the built
-   DLLs into its `2024\` subfolder (see `2024\PLACE_DYNCAMELO_DLLS_HERE.txt`;
+2. Take the `dist\CamelGraph.bundle\` folder from this repository, drop the built
+   DLLs into its `2024\` subfolder (see `2024\PLACE_CAMELGRAPH_DLLS_HERE.txt`;
    a Debug build of the solution deploys the whole bundle for you), and copy
    the folder to:
 
    ```
-   %APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\
+   %APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\
    ```
 
    (Per user, no admin rights needed. Use `C:\ProgramData\Autodesk\ApplicationPlugins\` for all users.)
-3. Start Navisworks 2024 — Dyncamelo appears on the **BIMCamel** ribbon tab,
+3. Start Navisworks 2024 — CamelGraph appears on the **BIMCamel** ribbon tab,
    in the *Visual Programming* panel.
 
    > If Navisworks reports `PLUGIN_LOAD_02` / `0x80131515`, the DLLs still
    > carry Windows' "downloaded file" mark. The release installer
-   > (`install-dyncamelo.bat`) unblocks automatically; for a manual copy run
-   > `Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File`
+   > (`install-camelgraph.bat`) unblocks automatically; for a manual copy run
+   > `Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\CamelGraph.bundle" -Recurse -File | Unblock-File`
    > in PowerShell and restart Navisworks.
 
 ### Option B — classic Plugins folder (no ribbon tab)
 
 1. Close Navisworks.
-2. Copy the Dyncamelo files into a plugin folder **named exactly like the plugin DLL**:
+2. Copy the CamelGraph files into a plugin folder **named exactly like the plugin DLL**:
 
    ```
-   C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\Dyncamelo.App\
-       Dyncamelo.App.dll
-       Dyncamelo.UI.dll
-       Dyncamelo.Navisworks.dll
-       Dyncamelo.Nodes.dll
-       Dyncamelo.Core.dll
+   C:\Program Files\Autodesk\Navisworks Manage 2024\Plugins\CamelGraph.App\
+       CamelGraph.App.dll
+       CamelGraph.UI.dll
+       CamelGraph.Navisworks.dll
+       CamelGraph.Nodes.dll
+       CamelGraph.Core.dll
        Nodify.dll
        Newtonsoft.Json.dll
        AutomaticGraphLayout.dll
-       en-US\Dyncamelo.xaml
+       en-US\CamelGraph.xaml
        Resources\*.png
    ```
 
@@ -57,9 +57,9 @@ This guide takes you from a fresh Navisworks installation to your first working 
 3. If Windows blocked the downloaded files, unblock them: right-click each DLL → Properties → check *Unblock* (or run `Unblock-File *` in PowerShell in that folder).
 4. Start Navisworks 2024.
 
-## 3. Open the Dyncamelo pane
+## 3. Open the CamelGraph pane
 
-Open a model first (Dyncamelo works against the active document), then go to the **BIMCamel** ribbon tab and click **Dyncamelo** (with the classic Plugins-folder install the button also appears under **Tool add-ins**). The editor opens as a dockable pane — dock it, float it, or drop it on a second monitor; Navisworks remembers the placement.
+Open a model first (CamelGraph works against the active document), then go to the **BIMCamel** ribbon tab and click **CamelGraph** (with the classic Plugins-folder install the button also appears under **Tool add-ins**). The editor opens as a dockable pane — dock it, float it, or drop it on a second monitor; Navisworks remembers the placement.
 
 The pane has three areas:
 
@@ -92,7 +92,7 @@ String ("Concrete") ──▶ Search.ByProperty (contains) ──▶ Appearance.
 
 ### Step 1 — find the right property names
 
-In Navisworks, click a concrete element and look at the **Properties** window. Find the tab (category) and row (property) that holds the material text — for Revit-sourced models this is typically category **Element**, property **Material**; other formats often use category **Item**, property **Material**. Note the two display names you see; Dyncamelo searches by exactly these names.
+In Navisworks, click a concrete element and look at the **Properties** window. Find the tab (category) and row (property) that holds the material text — for Revit-sourced models this is typically category **Element**, property **Material**; other formats often use category **Item**, property **Material**. Note the two display names you see; CamelGraph searches by exactly these names.
 
 ### Step 2 — the search
 
@@ -128,7 +128,7 @@ Flip the run bar from **Manual** to **Automatic**. Now edit the search String fr
 
 ## 5. Understanding lacing (working with lists)
 
-Most Dyncamelo power comes from feeding **lists** into inputs that expect a **single value** — the node then runs once per item automatically. This is called *replication*, and the pairing rule when several list inputs meet is called **lacing** (Dynamo users: it is the same concept).
+Most CamelGraph power comes from feeding **lists** into inputs that expect a **single value** — the node then runs once per item automatically. This is called *replication*, and the pairing rule when several list inputs meet is called **lacing** (Dynamo users: it is the same concept).
 
 Example — turn the single-set graph above into a set-per-system factory:
 

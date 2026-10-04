@@ -1,4 +1,4 @@
-"""MkDocs hooks for the Dyncamelo wiki.
+"""MkDocs hooks for the CamelGraph wiki.
 
 The build (tools/build_wiki.py) puts `edit_path: docs/wiki-src/installation.md` (the file in the repository) in the front
 matter of every page that is written by hand or is a repository document. This hook turns it into the "edit this page"

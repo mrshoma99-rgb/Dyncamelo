@@ -24,7 +24,7 @@ Goal: for every item a search finds, isolate it, frame it in the view and save a
 4. Add `Camera.ZoomToItems` (*Navisworks ▸ Camera*). Wire the `items` output of `Appearance.Isolate` into its `items`. Passing the items on makes the zoom wait for the isolate.
 5. Add `ModelItem.DisplayName` (*Navisworks ▸ ModelItem*). Wire `item` from `Loop.Item` into its `item`. This is the name for the viewpoint.
 6. Add `Flow.Then` (*Workflow*). Wire `name` into its `value` and the `done` output of `Camera.ZoomToItems` into its `after`. The name now reaches the next node only after the zoom is done.
-7. Add `Viewpoint.SaveWithOverrides` (*Navisworks ▸ Viewpoints*). Wire the `value` output of `Flow.Then` into its `name`. Type `Dyncamelo Views` into `folderName`.
+7. Add `Viewpoint.SaveWithOverrides` (*Navisworks ▸ Viewpoints*). Wire the `value` output of `Flow.Then` into its `name`. Type `CamelGraph Views` into `folderName`.
 8. Add `Loop.Collect` (*Workflow*). Wire `loop` from `Loop.Item` into its `loop` and `viewpoint` into its `value`.
 9. Add a `Watch List` (*Display*) on `results`, then press ++f5++.
 
@@ -32,7 +32,7 @@ When it finishes, open the Navisworks **Saved Viewpoints** window. There is one 
 
 ## The shorter way: Workflow.ForEach
 
-The sample *Isolated Viewpoints per Item* does the same with ready-made steps. Add `Action.Isolate`, `Action.ZoomTo` and `Action.SaveViewpoint` (*Workflow ▸ Actions*), gather them in this order with `List.Create` (*List*), and wire the list into the `actions` input of `Workflow.ForEach` (*Workflow*) and the search `items` into its `items`. `Action.SaveViewpoint` names each view `{name}` (the item's name) and files it in the folder `Dyncamelo Views` by default. Add `{index1}` or `{count}` to the name to number them.
+The sample *Isolated Viewpoints per Item* does the same with ready-made steps. Add `Action.Isolate`, `Action.ZoomTo` and `Action.SaveViewpoint` (*Workflow ▸ Actions*), gather them in this order with `List.Create` (*List*), and wire the list into the `actions` input of `Workflow.ForEach` (*Workflow*) and the search `items` into its `items`. `Action.SaveViewpoint` names each view `{name}` (the item's name) and files it in the folder `CamelGraph Views` by default. Add `{index1}` or `{count}` to the name to number them.
 
 ![The sample Isolated Viewpoints per Item: a search and a list of three actions into Workflow.ForEach.](../../images/wiki-sample-isolated-viewpoints-per-item.png)
 

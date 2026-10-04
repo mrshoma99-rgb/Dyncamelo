@@ -1,6 +1,6 @@
 # Third-party notices
 
-Dyncamelo distributes the following third-party components. They remain under
+CamelGraph distributes the following third-party components. They remain under
 their own licenses, reproduced below as required by their terms.
 
 ## Nodify
@@ -85,7 +85,7 @@ Layered graph layout behind Arrange — https://github.com/microsoft/automatic-g
 ## Wiki build tools (MkDocs, Material for MkDocs, pymdown-extensions, mkdocs-glightbox)
 
 Used only to build the wiki with `tools/build_wiki.py` (versions in `tools/wiki/requirements.txt`); they are not part of the
-Dyncamelo install. The wiki site that the build writes (it is not committed; CI keeps it as an artifact) contains parts of
+CamelGraph install. The wiki site that the build writes (it is not committed; CI keeps it as an artifact) contains parts of
 them, all MIT-licensed: the Material for MkDocs theme (styles, scripts, templates), the lunr.js search script it ships, the
 GLightbox picture viewer that mkdocs-glightbox ships and the iframe-worker shim (`tools/wiki/overrides/assets/javascripts/`).
 The icons inside the pages are from Material Design Icons (Pictogrammers Free License) and Simple Icons (CC0 1.0).
@@ -120,6 +120,6 @@ https://squidfunk.github.io/mkdocs-material/ · https://github.com/facelessuser/
 
 ## Autodesk Navisworks API
 
-Dyncamelo compiles against the Autodesk Navisworks 2024 API reference
-assemblies. No Autodesk binaries are redistributed with Dyncamelo — the
+CamelGraph compiles against the Autodesk Navisworks 2024 API reference
+assemblies. No Autodesk binaries are redistributed with CamelGraph — the
 user's licensed Navisworks installation supplies them at run time.

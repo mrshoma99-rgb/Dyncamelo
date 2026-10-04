@@ -47,8 +47,8 @@
     {
       "Id": "559b1b1bd7f746c5b9bb9fc82fd43ed9",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Range@double,double,double",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.Range@double,double,double",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Row 1",
       "X": 280.0,
       "Y": 40.0,
@@ -123,8 +123,8 @@
     {
       "Id": "f41a9459336548a593a246ac18ec7693",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Range@double,double,double",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.Range@double,double,double",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Row 2",
       "X": 280.0,
       "Y": 320.0,
@@ -208,14 +208,14 @@
         }
       ],
       "Data": {
-        "Path": "dyncamelo-sample-output.csv"
+        "Path": "camelgraph-sample-output.csv"
       }
     },
     {
       "Id": "afb9694600d049d3a8b5eb39820a75ca",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.FileNodes.WriteCsv@string,System.Collections.Generic.IList<object>,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.FileNodes.WriteCsv@string,System.Collections.Generic.IList<object>,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "CSV.WriteToFile",
       "X": 860.0,
       "Y": 200.0,
@@ -254,8 +254,8 @@
     {
       "Id": "c51dd9a9720d46968cc0c1f629290456",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.FileNodes.ReadCsv@string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.FileNodes.ReadCsv@string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "CSV.ReadFromFile",
       "X": 1140.0,
       "Y": 200.0,
@@ -384,7 +384,7 @@
   "Notes": [
     {
       "Id": "b830643313b6462bb8bcc4cc27ec8fd7",
-      "Text": "Writes [[1,2,3],[4,5,6]] to 'dyncamelo-sample-output.csv' in the current working directory, then reads it back. Wiring the write node's path output into the read node sequences the read after the write.",
+      "Text": "Writes [[1,2,3],[4,5,6]] to 'camelgraph-sample-output.csv' in the current working directory, then reads it back. Wiring the write node's path output into the read node sequences the read after the write.",
       "X": 0.0,
       "Y": -140.0
     }

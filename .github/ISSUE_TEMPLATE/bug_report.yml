@@ -13,9 +13,9 @@ body:
         **Security problems:** do not report them here. Use a [private security advisory](https://github.com/mrshoma99-rgb/dyncamelo/security/advisories/new) (see [SECURITY.md](https://github.com/mrshoma99-rgb/dyncamelo/blob/main/SECURITY.md)).
 
   - type: input
-    id: dyncamelo-version
+    id: camelgraph-version
     attributes:
-      label: Dyncamelo version
+      label: CamelGraph version
       description: "On the BIMCamel ribbon tab, click About. The version is at the bottom of the window (for example 0.45.1)."
       placeholder: "0.45.1"
     validations:
@@ -46,7 +46,7 @@ body:
       description: "Numbered steps, starting from an open model. Name the nodes you used, for example Search.ByProperty then Appearance.OverrideColor. Say how big the model is if it may matter."
       placeholder: |
         1. Open the model.
-        2. Open Dyncamelo from the BIMCamel tab.
+        2. Open CamelGraph from the BIMCamel tab.
         3. ...
     validations:
       required: true
@@ -72,7 +72,7 @@ body:
       label: Does it happen with a sample graph?
       description: "The samples are under File > Sample Graphs in the editor. If a sample shows the problem, please name it below."
       options:
-        - "Yes - with a sample graph that comes with Dyncamelo"
+        - "Yes - with a sample graph that comes with CamelGraph"
         - "No - only with my own graph"
         - "I have not tried a sample graph"
         - "Not relevant - no graph is involved (installer, ribbon, About, ...)"
@@ -84,7 +84,7 @@ body:
     attributes:
       label: End of errors.log
       description: |
-        Dyncamelo writes failures to `%APPDATA%\Dyncamelo\errors.log` (paste that into the Windows Explorer address bar to open the folder). Paste the last entries, or the ones from the time of the problem. If the file does not exist, write "no file".
+        CamelGraph writes failures to `%APPDATA%\CamelGraph\errors.log` (paste that into the Windows Explorer address bar to open the folder). Paste the last entries, or the ones from the time of the problem. If the file does not exist, write "no file".
       render: text
     validations:
       required: true
@@ -93,7 +93,7 @@ body:
     id: diagnostics
     attributes:
       label: Output of Help > Copy Diagnostics
-      description: 'In the Dyncamelo editor choose Help > Copy Diagnostics, then paste the result here. It lists the Dyncamelo and Navisworks versions and the installed Navisworks plug-ins. If the editor will not open, write: editor does not open.'
+      description: 'In the CamelGraph editor choose Help > Copy Diagnostics, then paste the result here. It lists the CamelGraph and Navisworks versions and the installed Navisworks plug-ins. If the editor will not open, write: editor does not open.'
       render: text
     validations:
       required: true

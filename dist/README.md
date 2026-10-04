@@ -1,50 +1,50 @@
-# Dyncamelo distribution bundle
+# CamelGraph distribution bundle
 
-`Dyncamelo.bundle/` is the Autodesk *application bundle* used to install
-Dyncamelo with its own ribbon presence — a **BIMCamel** ribbon tab with a
+`CamelGraph.bundle/` is the Autodesk *application bundle* used to install
+CamelGraph with its own ribbon presence — a **BIMCamel** ribbon tab with a
 "Visual Programming" panel (shared with the other BIMCamel tools, whose panels
 co-locate on the same tab).
 
 ```
-Dyncamelo.bundle/
+CamelGraph.bundle/
 ├── PackageContents.xml          # bundle manifest (Navisworks 2024, 2025, 2026; Manage + Simulate)
 └── 2024/
-    ├── Dyncamelo.App.dll        # + dependency DLLs — see PLACE_DYNCAMELO_DLLS_HERE.txt
-    ├── en-US/Dyncamelo.xaml     # ribbon layout (tab "BIMCamel" → panel "Visual Programming")
+    ├── CamelGraph.App.dll        # + dependency DLLs — see PLACE_CAMELGRAPH_DLLS_HERE.txt
+    ├── en-US/CamelGraph.xaml     # ribbon layout (tab "BIMCamel" → panel "Visual Programming")
     ├── Resources/*.png          # ribbon icons (16 px + 32 px)
     └── Samples/*.dyc            # example workflow graphs (in-app Samples menu)
 ```
 
 ## Install
 
-Easiest: run **`DyncameloSetup.exe`** — the graphical installer (black/white
-BIMCamel theme, built from `src/Dyncamelo.Installer`). It extracts the bundle
+Easiest: run **`CamelGraphSetup.exe`** — the graphical installer (black/white
+BIMCamel theme, built from `src/CamelGraph.Installer`). It extracts the bundle
 to `%APPDATA%\Autodesk\ApplicationPlugins\` for the current user (files it
 writes carry no Mark-of-the-Web, so the PLUGIN_LOAD_02 blocked-DLL failure
 can't happen), registers an Add/Remove Programs entry and can remove
 everything again. Command line: `/silent` installs, `/uninstall [/silent]`
 removes. The standalone exe downloaded from bimcamel.com embeds the bundle;
-the copy inside the release zip installs the `Dyncamelo.bundle/` folder
+the copy inside the release zip installs the `CamelGraph.bundle/` folder
 sitting next to it.
 
-Scripted alternative: **`install-dyncamelo.bat`** does the same copy with
-robocopy + `Unblock-File`; `install-dyncamelo.bat uninstall` removes it.
+Scripted alternative: **`install-camelgraph.bat`** does the same copy with
+robocopy + `Unblock-File`; `install-camelgraph.bat uninstall` removes it.
 
 Manual install / rebuilding from source:
 
-1. Build the solution on Windows (`dotnet build Dyncamelo.sln -c Release`).
-2. Copy the DLLs listed in `2024/PLACE_DYNCAMELO_DLLS_HERE.txt` into `2024/`
+1. Build the solution on Windows (`dotnet build CamelGraph.sln -c Release`).
+2. Copy the DLLs listed in `2024/PLACE_CAMELGRAPH_DLLS_HERE.txt` into `2024/`
    (a Debug build deploys them for you — see `DeployToBundle` in
-   `src/Dyncamelo.App/Dyncamelo.App.csproj`).
-3. Copy `Dyncamelo.bundle/` to `%APPDATA%\Autodesk\ApplicationPlugins\`
+   `src/CamelGraph.App/CamelGraph.App.csproj`).
+3. Copy `CamelGraph.bundle/` to `%APPDATA%\Autodesk\ApplicationPlugins\`
    (or `C:\ProgramData\Autodesk\ApplicationPlugins\` for all users).
 4. Start Navisworks Manage/Simulate 2024, 2025 or 2026 — the **BIMCamel** tab appears with
-   the Dyncamelo button; it toggles the node editor dock pane.
+   the CamelGraph button; it toggles the node editor dock pane.
 
 ## Example workflows (Samples)
 
 The `2024/Samples/` folder ships six ready-made `.dyc` example graphs —
-open them from Dyncamelo's **Samples** menu (or via File → Open). *Getting
+open them from CamelGraph's **Samples** menu (or via File → Open). *Getting
 Started - Math and Watch* runs without a model; the others (color by
 property, Excel property export, bulk selection sets, clash triage + BCF
 export, QTO rollup) expect an open Navisworks model and explain their
@@ -57,11 +57,11 @@ from the repository's `samples/` directory.
 **`PLUGIN_LOAD_02` / `FileLoadException 0x80131515` ("Operation is not
 supported") on Navisworks start** — Windows kept the browser's "downloaded
 file" mark (Zone.Identifier) on the DLLs; .NET Framework refuses to load
-web-marked assemblies. `install-dyncamelo.bat` strips the mark automatically;
+web-marked assemblies. `install-camelgraph.bat` strips the mark automatically;
 for a manual install run in PowerShell:
 
 ```powershell
-Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File
+Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\CamelGraph.bundle" -Recurse -File | Unblock-File
 ```
 
 (or unblock the downloaded zip *before* extracting: right-click → Properties →

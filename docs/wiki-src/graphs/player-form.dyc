@@ -69,8 +69,8 @@
     {
       "Id": "7be98d819931a2c0863435ac3b60ad38",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByProperty",
       "X": 380.0,
       "Y": 60.0,
@@ -150,8 +150,8 @@
     {
       "Id": "7e047a24bc78f1dcc2adf9056d99c16c",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.Split@string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Split columns",
       "X": 380.0,
       "Y": 470.0,
@@ -184,8 +184,8 @@
     {
       "Id": "b942ad30a78c6e2c49b7cbef36647652",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Properties.ToTable",
       "X": 730.0,
       "Y": 210.0,
@@ -217,8 +217,8 @@
     {
       "Id": "6b9a45ad6d180b2dfc6e27c96ae90050",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.ToExcelFile@Dyncamelo.Nodes.DyncameloTable,string,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@CamelGraph.Nodes.CamelGraphTable,string,string,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Table.ToExcelFile",
       "X": 1110.0,
       "Y": 300.0,

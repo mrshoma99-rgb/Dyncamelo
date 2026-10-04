@@ -11,7 +11,7 @@ It is made for the people who should use a tested script but should not have to 
 
 ## Opening the Player
 
-* Click the **Player** button on the **BIMCamel** ribbon tab (in the *Visual Programming* panel, beside the **Dyncamelo** and **About** buttons). The pane itself is titled **Script Player**.
+* Click the **Player** button on the **BIMCamel** ribbon tab (in the *Visual Programming* panel, beside the **CamelGraph** and **About** buttons). The pane itself is titled **Script Player**.
 * From the editor, use **View ▸ Open Script Player**, or find it in the command palette (++ctrl+shift+p++).
 
 Open a model first. Scripts that read or change the model work on whichever Navisworks document is open.
@@ -29,7 +29,7 @@ Typing in the search box never closes the script you are working in and never lo
 
 ### Where scripts live
 
-The Player lists every `.dyc` file under **`Documents\Dyncamelo\Scripts`**, including sub-folders (up to four levels deep). The list is grouped by folder, such as "Scripts ▸ Clash". To use scripts from somewhere else, such as a shared network folder, open **Script folders** at the bottom of the pane and choose **Add a folder…**. Each folder has an **Open** button to show it in Explorer, and a **✕** that takes it off the list without touching the files. The built-in folder cannot be removed.
+The Player lists every `.dyc` file under **`Documents\CamelGraph\Scripts`**, including sub-folders (up to four levels deep). The list is grouped by folder, such as "Scripts ▸ Clash". To use scripts from somewhere else, such as a shared network folder, open **Script folders** at the bottom of the pane and choose **Add a folder…**. Each folder has an **Open** button to show it in Explorer, and a **✕** that takes it off the list without touching the files. The built-in folder cannot be removed.
 
 The list stops at 2000 scripts, and files or folders whose names start with `~` or `.` are ignored. If there are no scripts yet, the pane says to save a graph from the editor into the Scripts folder. See [Saving and opening scripts](saving-opening.md).
 
@@ -101,7 +101,7 @@ All of these choices are made in the editor and saved in the `.dyc` file.
 
 ## Running a script from other tools
 
-Developers and automation can run a script by path through the add-in plug-in `Dyncamelo.Run.DYNC`, for example from another Navisworks add-in, from the Navisworks Automation API (`ExecuteAddInPlugin`) or from the Batch Utility: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise (also when the file does not exist), and it asks the same confirmation as the Player.
+Developers and automation can run a script by path through the add-in plug-in `CamelGraph.Run.DYNC`, for example from another Navisworks add-in, from the Navisworks Automation API (`ExecuteAddInPlugin`) or from the Batch Utility: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise (also when the file does not exist), and it asks the same confirmation as the Player.
 
 ## Colours
 

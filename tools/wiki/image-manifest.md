@@ -1,10 +1,10 @@
 # Wiki pictures and graphs: the agreed list
 
-Everything the wiki shows as a picture is made by a test on the Windows build machine (`tests/Dyncamelo.UI.Tests`, folder `Wiki`) from the real editor, then committed to `docs/images/`. The names below are the contract between the people writing pages, the test that draws them and the graphs it draws.
+Everything the wiki shows as a picture is made by a test on the Windows build machine (`tests/CamelGraph.UI.Tests`, folder `Wiki`) from the real editor, then committed to `docs/images/`. The names below are the contract between the people writing pages, the test that draws them and the graphs it draws.
 
 * Image file: `docs/images/<id>.png` (dark theme) and `docs/images/<id>-light.png` (light theme). Pages write `![caption](../images/<id>.png)` once; the wiki build shows the light file in the light theme and the dark file in the dark theme when both exist.
-* Graph file: `docs/wiki-src/graphs/<name>.dyc` (a real Dyncamelo graph, also offered for download on the how-to page: `[Download the graph](../graphs/<name>.dyc)`).
-* Every graph picture is the graph as it opens, without a model: nodes idle, no results (unless the scene says it was run). Navisworks nodes are drawn from stand-ins made from `docs/dyncamelo-nodes.json`, so names, ports, types and defaults are exactly the real ones.
+* Graph file: `docs/wiki-src/graphs/<name>.dyc` (a real CamelGraph graph, also offered for download on the how-to page: `[Download the graph](../graphs/<name>.dyc)`).
+* Every graph picture is the graph as it opens, without a model: nodes idle, no results (unless the scene says it was run). Navisworks nodes are drawn from stand-ins made from `docs/camelgraph-nodes.json`, so names, ports, types and defaults are exactly the real ones.
 
 ## Scenes the test draws
 
@@ -38,7 +38,7 @@ Everything the wiki shows as a picture is made by a test on the Windows build ma
 | `wiki-command-palette`, `wiki-quick-search` | Command palette and Space quick search | existing tests (copies) |
 | `wiki-sample-<kebab-name>` | One picture of every sample graph in `samples/` as it opens (e.g. `wiki-sample-color-elements-by-property`); the ones made of general nodes only (*Getting Started - Math and Watch*, *Table Summary from Text*, the four developer graphs) are run | `samples/*.dyc` |
 | `wiki-graph-<name>` | One picture per how-to graph (below), fitted to the canvas | `docs/wiki-src/graphs/<name>.dyc` |
-| `wiki-installer-ready`, `wiki-installer-done` | The installer window (stretch goal; skip if it needs more than a few lines) | `src/Dyncamelo.Installer` |
+| `wiki-installer-ready`, `wiki-installer-done` | The installer window (stretch goal; skip if it needs more than a few lines) | `src/CamelGraph.Installer` |
 
 What cannot be drawn without a running Navisworks (the ribbon, the Navisworks window, the Properties and Sets windows): not pictured; pages describe them in words.
 

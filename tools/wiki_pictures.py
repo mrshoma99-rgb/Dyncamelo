@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Copies the wiki pictures the pages use from a folder of drawn pictures into docs/images.
 
-The Windows CI job draws every wiki scene (tests/Dyncamelo.UI.Tests/Wiki) into the `wiki` folder of the `editor-screenshots`
+The Windows CI job draws every wiki scene (tests/CamelGraph.UI.Tests/Wiki) into the `wiki` folder of the `editor-screenshots`
 artifact: wiki/<id>.png for the dark theme, wiki/<id>-light.png for the light one, and wiki/_report.txt. Download and unzip the
 artifact, then:
 

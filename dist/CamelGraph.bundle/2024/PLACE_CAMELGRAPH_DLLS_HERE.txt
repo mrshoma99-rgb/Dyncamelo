@@ -1,0 +1,24 @@
+Drop the Navisworks-2024 build of CamelGraph into this folder:
+
+  CamelGraph.App.dll        (the plugin entry — must sit directly in .\2024\)
+  CamelGraph.Core.dll
+  CamelGraph.Nodes.dll
+  CamelGraph.Navisworks.dll
+  CamelGraph.UI.dll
+  Nodify.dll
+  Newtonsoft.Json.dll
+  AutomaticGraphLayout.dll   (Arrange; optional - without it Arrange uses simple columns)
+
+A Debug build does this automatically (see the DeployToBundle target in
+src/CamelGraph.App/CamelGraph.App.csproj — it deploys straight into
+%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle). For a manual install,
+build the solution on Windows and copy the files above from
+src/CamelGraph.App/bin/<Configuration>/net48/ into this folder, then copy the
+whole CamelGraph.bundle folder to:
+
+  %APPDATA%\Autodesk\ApplicationPlugins\        (per user)
+  or
+  C:\ProgramData\Autodesk\ApplicationPlugins\   (all users)
+
+The en-US\CamelGraph.xaml ribbon layout and Resources\ icons beside this file
+are already in place — Navisworks shows CamelGraph on the "BIMCamel" ribbon tab.

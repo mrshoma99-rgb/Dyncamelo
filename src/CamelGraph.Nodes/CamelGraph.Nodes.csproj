@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>CamelGraph.Nodes</RootNamespace>
+    <AssemblyName>CamelGraph.Nodes</AssemblyName>
+    <Description>CamelGraph general-purpose node library: math, logic, string, list, dictionary, color, date/time, file and geometry nodes. Host-agnostic (no UI or Navisworks dependencies).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CamelGraph.Core\CamelGraph.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CamelGraph.Nodes.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
-/// <summary>One port of a node as <c>docs/dyncamelo-nodes.json</c> lists it.</summary>
+/// <summary>One port of a node as <c>docs/camelgraph-nodes.json</c> lists it.</summary>
 internal sealed class CataloguePort
 {
     public CataloguePort(string name, string type, string description, string? defaultText, bool multiInput)
@@ -33,7 +33,7 @@ internal sealed class CataloguePort
     public bool MultiInput { get; }
 }
 
-/// <summary>One node of <c>docs/dyncamelo-nodes.json</c>.</summary>
+/// <summary>One node of <c>docs/camelgraph-nodes.json</c>.</summary>
 internal sealed class CatalogueNode
 {
     public CatalogueNode(
@@ -67,7 +67,7 @@ internal sealed class CatalogueNode
     /// </summary>
     public string Id { get; }
 
-    /// <summary>The assembly a zero-touch node comes from (<c>Dyncamelo.Navisworks</c>, <c>Dyncamelo.Nodes</c>), or empty.</summary>
+    /// <summary>The assembly a zero-touch node comes from (<c>CamelGraph.Navisworks</c>, <c>CamelGraph.Nodes</c>), or empty.</summary>
     public string Assembly { get; }
 
     public string Category { get; }
@@ -109,7 +109,7 @@ internal sealed class CatalogueNode
     public override string ToString() => Name;
 }
 
-/// <summary>The generated node catalogue, <c>docs/dyncamelo-nodes.json</c>.</summary>
+/// <summary>The generated node catalogue, <c>docs/camelgraph-nodes.json</c>.</summary>
 internal sealed class NodeCatalogue
 {
     private NodeCatalogue(string version, IReadOnlyList<CatalogueNode> nodes)

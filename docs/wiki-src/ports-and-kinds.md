@@ -40,7 +40,7 @@ The colour of a socket names the kind of data. With **Settings â–¸ Appearance â–
 
 ![One small node for each socket kind, with the type letters switched on.](../images/wiki-socket-kinds.png)
 
-On the node library pages the type is written as a programming type: `string`, `number`, `integer`, `boolean`, `ModelItem`, `Document`, `DyncameloTable` and so on. A type ending in `[]` is a **list**.
+On the node library pages the type is written as a programming type: `string`, `number`, `integer`, `boolean`, `ModelItem`, `Document`, `CamelGraphTable` and so on. A type ending in `[]` is a **list**.
 
 ## Shape: one value or a list
 

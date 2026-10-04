@@ -47,8 +47,8 @@
     {
       "Id": "b1d7a1df9b81c05dec6aeda6e983ff86",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.HasProperty@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.HasProperty",
       "X": 350.0,
       "Y": 170.0,
@@ -94,8 +94,8 @@
     {
       "Id": "38dae30bc8c3600b7ce3d057b0c3f2d0",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.PropertyNodes.Value@Autodesk.Navisworks.Api.ModelItem,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.PropertyNodes.Value@Autodesk.Navisworks.Api.ModelItem,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Properties.Value",
       "X": 700.0,
       "Y": 140.0,
@@ -134,8 +134,8 @@
     {
       "Id": "79f86303d84a6e522c7853c5a48da47b",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.AppearanceNodes.ColorByValues@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.AppearanceNodes.ColorByValues@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Appearance.ColorByValues",
       "X": 1050.0,
       "Y": 90.0,

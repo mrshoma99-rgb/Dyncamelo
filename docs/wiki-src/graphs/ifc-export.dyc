@@ -29,8 +29,8 @@
     {
       "Id": "a57e4e3073a05acd0a3756eb6f473504",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByProperty@string,string,object,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByProperty",
       "X": 350.0,
       "Y": 90.0,
@@ -92,8 +92,8 @@
     {
       "Id": "5c947f0edfee848d61cd18e03eccdb2c",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.IfcSpatialNames@string,string,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.IfcExportNodes.IfcSpatialNames@string,string,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Export.IfcSpatialNames",
       "X": 350.0,
       "Y": 680.0,
@@ -143,8 +143,8 @@
     {
       "Id": "3e33cca1f33b461ec27ffa81048a69db",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.IfcCoordinates@string,double,double,double,double,bool",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.IfcExportNodes.IfcCoordinates@string,double,double,double,double,bool",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Export.IfcCoordinates",
       "X": 350.0,
       "Y": 380.0,
@@ -204,8 +204,8 @@
     {
       "Id": "3aa41b1d352ac865923cc034d9938e5e",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.IfcExportNodes.ToIfc@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,bool,bool,bool,bool,string,string,BIMCamel.Ifc.CoordOptions,BIMCamel.Ifc.SpatialNames,BIMCamel.Data.PropertyRoles,System.Collections.Generic.IEnumerable<BIMCamel.Data.ParamMapRule>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.Dictionary<string,string>,double,bool,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.IfcExportNodes.ToIfc@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,bool,bool,bool,bool,string,string,BIMCamel.Ifc.CoordOptions,BIMCamel.Ifc.SpatialNames,BIMCamel.Data.PropertyRoles,System.Collections.Generic.IEnumerable<BIMCamel.Data.ParamMapRule>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.Dictionary<string,string>,double,bool,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Export.ToIfc",
       "X": 700.0,
       "Y": 60.0,

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
 /// <summary>An attribute as written in a C# source file: <c>[NodeRange(0, 100, Step = 5)]</c>.</summary>
 internal sealed class SourceAttribute
@@ -63,7 +63,7 @@ internal sealed class SourceAttribute
         var t = text.Trim();
         if (t == "NodeDataSource.Selection" || t.EndsWith(".NodeDataSource.Selection", StringComparison.Ordinal))
         {
-            return Dyncamelo.Core.Loader.NodeDataSource.Selection;
+            return CamelGraph.Core.Loader.NodeDataSource.Selection;
         }
 
         var name = t.Substring(t.LastIndexOf('.') + 1);
@@ -155,7 +155,7 @@ internal sealed class SourceMethod
 }
 
 /// <summary>
-/// What the C# source of <c>Dyncamelo.Navisworks</c> says about its nodes, harvested from the text because that project cannot be
+/// What the C# source of <c>CamelGraph.Navisworks</c> says about its nodes, harvested from the text because that project cannot be
 /// loaded where the tests run. Used for what the node catalogue does not carry: the drop-down choices, ranges, name-search buttons and
 /// socket kinds of the parameters, the declared function of a node, and the retired nodes that old graphs still use.
 /// </summary>

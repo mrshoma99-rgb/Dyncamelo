@@ -9,7 +9,7 @@ Nothing can run the Navisworks API outside Navisworks, so the automated tests (s
 1. Copy the [results template](#results-template) into a text file. Fill it in as you go and paste it into an issue (or the release checklist) when you finish.
 2. Do the sections in order. Use a fresh Navisworks session for each year.
 3. In the **Result** column write `Pass`, `Fail`, `N/A` or `?`. Where **Expected** says **Unknown**, nobody knows the answer yet. Do not judge: write down what you see. That is the point of the row.
-4. For every `Fail`: note the row number, save the end of `%APPDATA%\Dyncamelo\errors.log`, and run **Help > Copy Diagnostics**. See [Troubleshooting](TROUBLESHOOTING.md#how-to-collect-diagnostics).
+4. For every `Fail`: note the row number, save the end of `%APPDATA%\CamelGraph\errors.log`, and run **Help > Copy Diagnostics**. See [Troubleshooting](TROUBLESHOOTING.md#how-to-collect-diagnostics).
 5. Expected results marked *(intended)* come from a node's description in the [node catalogue](NODE_CATALOG.md), not from having seen it work.
 
 New in this release, and not yet seen working: **Help > Run Self-Test**, **Help > Copy Diagnostics**, and the warning before running a graph opened from a file (sections 5 and 6). Their rows are written from the release plan. If the real behaviour differs, write down what you see.
@@ -17,12 +17,12 @@ New in this release, and not yet seen working: **Help > Run Self-Test**, **Help 
 ## What you need
 
 * A Windows machine with Navisworks Manage or Simulate for the year under test. Write down which one.
-* The release's `DyncameloSetup.exe` and its `.sha256` file, and (for the upgrade test) the previous release's `DyncameloSetup.exe`.
+* The release's `CamelGraphSetup.exe` and its `.sha256` file, and (for the upgrade test) the previous release's `CamelGraphSetup.exe`.
 * **The small model.** A model of a few files with named items (for example items whose **Item > Name** contains "Wall"), a **Level** and a **Category** property, at least one **clash test that has been run** and has results (grouped results are better), at least two **saved viewpoints**, a **TimeLiner** task if possible, and grids if possible.
 * **The large model.** The biggest federated model you have.
-* An empty scratch folder, `C:\Temp\dyncamelo-qa`. Graphs that write files must use full paths in it.
+* An empty scratch folder, `C:\Temp\camelgraph-qa`. Graphs that write files must use full paths in it.
 * Microsoft Excel, to open the `.xlsx` files.
-* The sample graphs: they install with Dyncamelo (**File > Sample Graphs**). The list of what each needs is in [samples/README.md](../samples/README.md).
+* The sample graphs: they install with CamelGraph (**File > Sample Graphs**). The list of what each needs is in [samples/README.md](../samples/README.md).
 
 ---
 
@@ -32,17 +32,17 @@ Close Navisworks before each step unless a row says otherwise.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1.1 | Check the download against its `.sha256` file: `Get-FileHash .\DyncameloSetup.exe -Algorithm SHA256` | The hashes match. | |
-| 1.2 | On a machine with no Dyncamelo, run `DyncameloSetup.exe`. | SmartScreen may warn (the file is unsigned): **More info > Run anyway**. No administrator prompt. The setup window names the Navisworks years it found. | |
-| 1.3 | Click **Install**. | The window ends with "Installed". The folder `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle` exists with `PackageContents.xml` and the folders `2024`, `2025` and `2026`. Each year folder has `Dyncamelo.App.dll`, `en-US`, `Resources` and `Samples`. | |
-| 1.4 | Open **Windows Settings > Apps > Installed apps**. | "Dyncamelo for Navisworks" is listed with the release version. | |
-| 1.5 | Start Navisworks and open a model. | A **BIMCamel** ribbon tab with a **Visual Programming** panel and three buttons: **Dyncamelo**, **Player**, **About**. No "Run Last" button. No `PLUGIN_LOAD_02` message. | |
+| 1.1 | Check the download against its `.sha256` file: `Get-FileHash .\CamelGraphSetup.exe -Algorithm SHA256` | The hashes match. | |
+| 1.2 | On a machine with no CamelGraph, run `CamelGraphSetup.exe`. | SmartScreen may warn (the file is unsigned): **More info > Run anyway**. No administrator prompt. The setup window names the Navisworks years it found. | |
+| 1.3 | Click **Install**. | The window ends with "Installed". The folder `%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle` exists with `PackageContents.xml` and the folders `2024`, `2025` and `2026`. Each year folder has `CamelGraph.App.dll`, `en-US`, `Resources` and `Samples`. | |
+| 1.4 | Open **Windows Settings > Apps > Installed apps**. | "CamelGraph for Navisworks" is listed with the release version. | |
+| 1.5 | Start Navisworks and open a model. | A **BIMCamel** ribbon tab with a **Visual Programming** panel and three buttons: **CamelGraph**, **Player**, **About**. No "Run Last" button. No `PLUGIN_LOAD_02` message. | |
 | 1.6 | Click **About**. | The window shows "Version" with the release number. | |
-| 1.7 | Install the **previous** release, then run the new `DyncameloSetup.exe`. | The button reads "Update install (v... found)". After it, the bundle is the new version and no files of the old one are left. Settings in `%APPDATA%\Dyncamelo` are kept. A saved graph still opens. | |
-| 1.8 | Run `DyncameloSetup.exe` while Navisworks is open. | The window warns that Navisworks is running. **Unknown:** does the install finish with files in use? Does the new version load after a restart? | |
-| 1.9 | In a command prompt: `start /wait "" DyncameloSetup.exe /uninstall /silent`, then `start /wait "" DyncameloSetup.exe /silent`. | No window. Exit code 0 each time (`echo %errorlevel%`). The bundle folder is gone, then back. | |
-| 1.10 | Uninstall from **Windows Settings > Apps**. | The bundle folder and the Apps entry are gone. `%APPDATA%\Dyncamelo`, `Documents\Dyncamelo\Scripts` and your `.dyc` files are still there. | |
-| 1.11 | Zip install (once, any year): extract the release zip, run `DyncameloSetup.exe` from the extracted folder. Also try `install-dyncamelo.bat`. | Both install the bundle. No `PLUGIN_LOAD_02`. | |
+| 1.7 | Install the **previous** release, then run the new `CamelGraphSetup.exe`. | The button reads "Update install (v... found)". After it, the bundle is the new version and no files of the old one are left. Settings in `%APPDATA%\CamelGraph` are kept. A saved graph still opens. | |
+| 1.8 | Run `CamelGraphSetup.exe` while Navisworks is open. | The window warns that Navisworks is running. **Unknown:** does the install finish with files in use? Does the new version load after a restart? | |
+| 1.9 | In a command prompt: `start /wait "" CamelGraphSetup.exe /uninstall /silent`, then `start /wait "" CamelGraphSetup.exe /silent`. | No window. Exit code 0 each time (`echo %errorlevel%`). The bundle folder is gone, then back. | |
+| 1.10 | Uninstall from **Windows Settings > Apps**. | The bundle folder and the Apps entry are gone. `%APPDATA%\CamelGraph`, `Documents\CamelGraph\Scripts` and your `.dyc` files are still there. | |
+| 1.11 | Zip install (once, any year): extract the release zip, run `CamelGraphSetup.exe` from the extracted folder. Also try `install-camelgraph.bat`. | Both install the bundle. No `PLUGIN_LOAD_02`. | |
 | 1.12 | Download the zip in a browser, extract it with Windows Explorer, and copy its bundle folder by hand into `ApplicationPlugins`, without unblocking. | **May fail** with `PLUGIN_LOAD_02` / `0x80131515` (it does when Windows kept the "downloaded file" mark). If it fails, run the `Unblock-File` command from [Troubleshooting](TROUBLESHOOTING.md#navisworks-reports-plugin_load_02-or-0x80131515-at-start) and restart: it must load. | |
 
 ## 2. The editor and Player panes
@@ -51,16 +51,16 @@ Open a model first.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 2.1 | Click **Dyncamelo** on the ribbon. | The editor pane opens with the node library on the left and an empty canvas. | |
-| 2.2 | Click **Dyncamelo** again, then again. | The pane hides, then shows (the button toggles it). | |
-| 2.3 | Click **Player**. | A separate **Dyncamelo Player** pane opens, with the editor still open. | |
+| 2.1 | Click **CamelGraph** on the ribbon. | The editor pane opens with the node library on the left and an empty canvas. | |
+| 2.2 | Click **CamelGraph** again, then again. | The pane hides, then shows (the button toggles it). | |
+| 2.3 | Click **Player**. | A separate **CamelGraph Player** pane opens, with the editor still open. | |
 | 2.4 | Dock the editor on the left, right and bottom. Float it. Move it to a second monitor if you have one. | After each move the pane still works: add a node, run a graph. | |
 | 2.5 | Dock the Player as a tab next to the editor, then float it. | It still works: pick a script, run it. | |
 | 2.6 | Hide the editor pane with its close button, then re-open it from the ribbon. | It opens. **Unknown:** is the graph still there, or an empty canvas with an offer to restore it? | |
 | 2.7 | With unsaved changes in the editor (wait a minute after your last edit) and the Player open, **close Navisworks**. | Navisworks closes with no error dialog, and no `Roamer.exe` is left in Task Manager. | |
 | 2.8 | Start Navisworks and open the editor. | An empty canvas, and an offer to restore the autosaved graph from step 2.7. Saving or answering *No* removes the copy. | |
 | 2.9 | Restart Navisworks with the panes where you left them. | **Unknown:** are the panes where you left them? ([Getting Started](GETTING_STARTED.md) says Navisworks remembers placement.) | |
-| 2.10 | With the editor pane focused, press `Ctrl+Z`, `Ctrl+Y`, `Delete` and `F1`. | They act on the Dyncamelo canvas (undo a node move, delete a node, show Dyncamelo's shortcut list), not on the Navisworks model or help. | |
+| 2.10 | With the editor pane focused, press `Ctrl+Z`, `Ctrl+Y`, `Delete` and `F1`. | They act on the CamelGraph canvas (undo a node move, delete a node, show CamelGraph's shortcut list), not on the Navisworks model or help. | |
 | 2.11 | Type in a text box in the Player, using `Ctrl+V`, `Ctrl+Z` and `Delete`. | Nothing in the Navisworks model changes. | |
 | 2.12 | With the editor open, open another model (or append one). | No error. A run on the new model works. | |
 | 2.13 | Press **F1**, and open the command palette with `Ctrl+Shift+P`. | The shortcut list and the palette open and close with `Esc`. | |
@@ -74,7 +74,7 @@ Open a model first.
 | 3.3 | Drag a node from the library onto the canvas, and onto an existing wire. | It lands where dropped; on a wire it is spliced in. | |
 | 3.4 | Press `Space` over the canvas, type `Add`, press `Enter`. | An Add node is added at the cursor. | |
 | 3.5 | Type in the library search box, then press `Esc`. | Matching nodes are listed; `Esc` clears the search. | |
-| 3.6 | In **Settings > Appearance**, choose each palette (Dyncamelo Dark, Midnight, Slate, Light). After each, select an entry in the library. | No crash. The selection is visible and follows the palette. | |
+| 3.6 | In **Settings > Appearance**, choose each palette (CamelGraph Dark, Midnight, Slate, Light). After each, select an entry in the library. | No crash. The selection is visible and follows the palette. | |
 | 3.7 | Add one node from each library category (open each category, add its first node). | No crash. Each node appears with its sockets. | |
 | 3.8 | Wire two nodes, delete the wire, rewire, copy and paste nodes, undo and redo (`Ctrl+Z`, `Ctrl+Y`). | The canvas follows each step. | |
 | 3.9 | Make a node group (`Ctrl+Alt+G`), open it with `Tab`, close it with `Shift+Tab`. | It works. Run the graph while inside the group. | |
@@ -95,7 +95,7 @@ Use the small model. Set the graph to **Manual** run mode (Graph > Auto-Run off)
 | 4.1.1 | Number, Number Slider, Integer, Integer Slider, String, Boolean, Choice, Date: add each and wire it to a **Watch**. | Each shows an inline editor. Run: the Watch shows the value. Drag a slider: the number field scrubs. | |
 | 4.1.2 | File Path and Directory Path: use the browse button. | The chosen path appears; a Watch shows it. | |
 | 4.1.3 | Color Picker: open its popup (it is in the node, not a window). Pick a colour. Use the dropper on the Navisworks 3D view, then press `Esc` in another try. **Repeat 5 times.** | No crash. (A Color Picker crash report is not yet confirmed fixed, see [Known issues](TROUBLESHOOTING.md#known-issues).) The dropper takes the colour under the pointer; `Esc` cancels. | |
-| 4.1.4 | `List.Range` into **Watch List**; `Table.FromRows` into **Watch Table**; a PNG path into **Watch Image** (type it out in full, for example `C:\Users\<you>\AppData\Roaming\Autodesk\ApplicationPlugins\Dyncamelo.bundle\2024\Resources\dyncamelo_32.png`). | A numbered list, a grid, and the picture. | |
+| 4.1.4 | `List.Range` into **Watch List**; `Table.FromRows` into **Watch Table**; a PNG path into **Watch Image** (type it out in full, for example `C:\Users\<you>\AppData\Roaming\Autodesk\ApplicationPlugins\CamelGraph.bundle\2024\Resources\camelgraph_32.png`). | A numbered list, a grid, and the picture. | |
 
 ### 4.2 Pure data nodes
 
@@ -106,7 +106,7 @@ Use the small model. Set the graph to **Manual** run mode (Graph > Auto-Run off)
 | 4.2.3 | `Table.FromRows`, `Table.GroupBy`, `Table.Sort`, `Table.ToText`. (Or run the sample *Table Summary from Text*, section 7.) | The table is grouped and sorted; the text is Markdown. | |
 | 4.2.4 | `Flow.Wait` with `seconds` = 1. | The run takes about a second; the value passes through unchanged. | |
 
-### 4.3 Files, system and web (scratch folder `C:\Temp\dyncamelo-qa`)
+### 4.3 Files, system and web (scratch folder `C:\Temp\camelgraph-qa`)
 
 | # | Step | Expected | Result |
 |---|---|---|---|
@@ -135,7 +135,7 @@ Use the small model. Set the graph to **Manual** run mode (Graph > Auto-Run off)
 | 4.4.5 | `Selection.SetCurrent` with the search result. | Those items are selected in the 3D view. | |
 | 4.4.6 | **Captured Selection**: press Capture with 3 items selected, change the selection, press **Run**. Then Clear. | The node keeps outputting the 3 captured items until cleared. | |
 | 4.4.7 | `Properties.ValueAsString` for one item; `Properties.ToTable` for the search result into a **Watch Table**; `Properties.Discover`. | The value equals the Properties window. One table row per item. Discover lists the properties with counts. | |
-| 4.4.8 | `Properties.SetCustom` (tab `DyncameloQA`), then `Properties.RemoveCustomTab`. | The tab appears in the Navisworks Properties window with the values, then disappears. | |
+| 4.4.8 | `Properties.SetCustom` (tab `CamelGraphQA`), then `Properties.RemoveCustomTab`. | The tab appears in the Navisworks Properties window with the values, then disappears. | |
 
 ### 4.5 Appearance
 
@@ -212,8 +212,8 @@ New in this release. Open the small model first.
 | 5.3 | After the self-test, look at the model. | Nothing changed: no overrides, hidden items, new sets, viewpoints or properties. (The nodes are read-only.) | |
 | 5.4 | Run the self-test twice. | The same result both times. | |
 | 5.5 | Run the self-test with no model open. | The checks that need a model show "skipped: open a model first"; the others still run. Navisworks stays open. | |
-| 5.6 | **Help > Copy Diagnostics**, paste into a text editor. | The Dyncamelo version, the Navisworks version, the installed Navisworks plug-ins and the end of `errors.log`. The versions match **About** and the Navisworks year. | |
-| 5.7 | Rename `%APPDATA%\Dyncamelo\errors.log` and run **Copy Diagnostics** again. | **Unknown:** it should still copy the versions. Record what it does about the missing log. (Rename it back.) | |
+| 5.6 | **Help > Copy Diagnostics**, paste into a text editor. | The CamelGraph version, the Navisworks version, the installed Navisworks plug-ins and the end of `errors.log`. The versions match **About** and the Navisworks year. | |
+| 5.7 | Rename `%APPDATA%\CamelGraph\errors.log` and run **Copy Diagnostics** again. | **Unknown:** it should still copy the versions. Record what it does about the missing log. (Rename it back.) | |
 | 5.8 | Open the Performance HUD with `Ctrl+Shift+F12` and click **Copy report**. | **Unknown:** the HUD appears over the canvas; the report holds frame rate, visuals, node count and render tier. | |
 
 ## 6. Questions before a graph runs
@@ -227,7 +227,7 @@ New in this release. Open the small model first.
 | 6.5 | Repeat 6.2 with `Web.Get`, `File.Delete` and `File.Move`. | The warning names each of them. | |
 | 6.6 | Save the same graph in **Automatic** run mode and open it from the file (new trust: rename the file first). | Nothing runs on opening and no dialog appears; the status bar says "Not run automatically: this graph came from a file …". Press **Run**: the warning appears. | |
 | 6.7 | Open *Getting Started - Math and Watch*. | No warning (it has no such nodes). | |
-| 6.8 | Put a graph with `Appearance.OverrideColor` in `Documents\Dyncamelo\Scripts`. Open the Player, pick it. | The Player says "Changes the model, writes files, runs programs or uses the network: Appearance.OverrideColor" above the form. | |
+| 6.8 | Put a graph with `Appearance.OverrideColor` in `Documents\CamelGraph\Scripts`. Open the Player, pick it. | The Player says "Changes the model, writes files, runs programs or uses the network: Appearance.OverrideColor" above the form. | |
 | 6.9 | Run it. | A question lists the node; after **yes** it runs. Run it again: no question. Edit and save the file: the question is back. | |
 | 6.10 | A script whose only risky node is `Web.Get`. | The Player lists `Web.Get` above the form and asks the first time (it uses the network). | |
 | 6.11 | A script with a node that is not installed (rename a node's id in the file). | The Player says nodes are missing and does not run it. | |
@@ -257,7 +257,7 @@ Open each from **File > Sample Graphs**. For every sample: it opens with no "cou
 
 **The answer is unknown.** The node descriptions call permanent overrides "undoable", and [Getting Started](GETTING_STARTED.md) says one **Undo** reverts a whole run. The source has no code that groups a run into one undo step, and the editor's own Undo only changes the graph. This section finds out.
 
-Use Navisworks's own Undo: `Ctrl+Z` with the **3D view** focused (not the Dyncamelo pane, which takes `Ctrl+Z` for itself), or an Undo button on the Quick Access Toolbar if you have one. For each row: run the node once on 5 items, press Undo, and write down **how many presses** it took and **what remained**.
+Use Navisworks's own Undo: `Ctrl+Z` with the **3D view** focused (not the CamelGraph pane, which takes `Ctrl+Z` for itself), or an Undo button on the Quick Access Toolbar if you have one. For each row: run the node once on 5 items, press Undo, and write down **how many presses** it took and **what remained**.
 
 | # | Node run once | Expected | Result |
 |---|---|---|---|
@@ -271,7 +271,7 @@ Use Navisworks's own Undo: `Ctrl+Z` with the **3D view** focused (not the Dyncam
 | 8.8 | `ModelItem.Translate` | **Unknown** (described as undoable) | |
 | 8.9 | `ClashTest.Delete` | **Unknown** (described as "Undoable in Navisworks"): is the test back with its results? | |
 | 8.10 | Run a graph of three of the nodes above, then Undo once. | **Unknown:** does one press undo the whole run, or only the last step? | |
-| 8.11 | After a run, press `Ctrl+Z` in the Dyncamelo pane. | The graph changes, the model does not, and the status bar says "(graph only — Navisworks changes from earlier runs are not reverted)". | |
+| 8.11 | After a run, press `Ctrl+Z` in the CamelGraph pane. | The graph changes, the model does not, and the status bar says "(graph only — Navisworks changes from earlier runs are not reverted)". | |
 
 ## 9. Save, reopen and recover
 
@@ -292,7 +292,7 @@ Use the large model. There is no time limit to meet yet. The numbers are for com
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 10.1 | Open the model. Write down its size on disk, the number of files, and the Navisworks memory use. | Navisworks opens it as without Dyncamelo. | |
+| 10.1 | Open the model. Write down its size on disk, the number of files, and the Navisworks memory use. | Navisworks opens it as without CamelGraph. | |
 | 10.2 | `Model.Statistics`, nothing wired, `by` = `model`, then `class`, then `layer`. | A table of counts. **Record the three times.** (It walks every item once: O(items).) | |
 | 10.3 | A broad `Search.ByProperty` into `List.Count`. | **Record** count and time. | |
 | 10.4 | `Properties.ToTable` for 1,000 items (use `List.TakeItems`). | **Record** the time. | |
@@ -340,9 +340,9 @@ These nodes were only compiled and unit-tested before. The list is from "For the
 Paste into an issue or the release checklist. One copy per Navisworks year.
 
 ````text
-Dyncamelo QA result
+CamelGraph QA result
 -------------------
-Dyncamelo version:
+CamelGraph version:
 Date:
 Tester:
 Navisworks: [Manage | Simulate] [2024 | 2025 | 2026]  (update/build: )

@@ -1,4 +1,4 @@
-# Dyncamelo v0.48.0: personal-use edition with installer
+# CamelGraph v0.48.0: personal-use edition with installer
 
 > **Personal use only.** This download (GitHub, bimcamel.com) is the free *Personal use* edition under the PolyForm Noncommercial License 1.0.0: learning, hobby projects, research, and charities, schools, universities, public research bodies and government institutions. **For professional use** (work at a company, a consultancy or design office, a paid project or product) a copy for the **Autodesk App Store** is **coming soon**; it will come with a commercial licence from BIMCamel. It is the same program in both editions.
 
@@ -11,4 +11,4 @@
 
 The full list is in `CHANGELOG.md`.
 
-Only Navisworks Manage 2024 has been seen running Dyncamelo in the field; 2025, 2026 and Simulate are built and installed the same way but not yet confirmed. **Help > Run Self-Test** checks the nodes against your own model.
+Only Navisworks Manage 2024 has been seen running CamelGraph in the field; 2025, 2026 and Simulate are built and installed the same way but not yet confirmed. **Help > Run Self-Test** checks the nodes against your own model.

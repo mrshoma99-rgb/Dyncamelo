@@ -45,7 +45,7 @@ Two ideas make most of these short:
 
 ## Automation and bulk actions
 
-**One script, many inputs.** Give the script *input nodes* (`Number`, `Integer`, `Date`, `Choice`, `File Path`, `Directory Path`) and open it in the **Script Player**: the form is built from them, the values are remembered, and the same script runs from the ribbon, the Player or `Dyncamelo.Run.DYNC` (Automation API / Batch Utility).
+**One script, many inputs.** Give the script *input nodes* (`Number`, `Integer`, `Date`, `Choice`, `File Path`, `Directory Path`) and open it in the **Script Player**: the form is built from them, the values are remembered, and the same script runs from the ribbon, the Player or `CamelGraph.Run.DYNC` (Automation API / Batch Utility).
 
 **Run another program, call a service.** `System.Run` (exit code, output, error) and `Web.Get` / `Web.Post` (status, body); both need `Flow.Try` around them if a failure should not stop the graph. `Flow.Wait` gives an external tool time to finish writing.
 
@@ -83,4 +83,4 @@ Two ideas make most of these short:
 
 ---
 
-*Checked by a script:* every node name above exists in `docs/dyncamelo-nodes.json` (or is an input node / plugin id). The same is done for [`plans/node-library-gaps.md`](plans/node-library-gaps.md).
+*Checked by a script:* every node name above exists in `docs/camelgraph-nodes.json` (or is an input node / plugin id). The same is done for [`plans/node-library-gaps.md`](plans/node-library-gaps.md).

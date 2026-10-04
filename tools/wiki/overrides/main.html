@@ -1,5 +1,5 @@
 {#-
-  The page template of the Dyncamelo wiki: Material's own, plus the announcement bar.
+  The page template of the CamelGraph wiki: Material's own, plus the announcement bar.
   The addresses come from tools/wiki/site.yml (config.extra.*). While `app_store_url` is empty the bar says the
   Autodesk App Store copy is coming soon, without a link.
 -#}
@@ -50,7 +50,7 @@
 {% endblock %}
 
 {% block announce %}
-  CamelGraph (previously Dyncamelo; version 0.48 still shows the old name on screen) is free for personal use
+  CamelGraph (previously Dyncamelo) is free for personal use
   (<a href="{{ config.extra.github_url }}" target="_blank" rel="noopener">GitHub</a>
   or <a href="{{ config.extra.bimcamel_url }}" target="_blank" rel="noopener">bimcamel.com</a>).
   {% if config.extra.app_store_url %}

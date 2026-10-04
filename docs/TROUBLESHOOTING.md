@@ -2,14 +2,14 @@
 
 Find the symptom, read the cause, try the fix. If nothing here helps, [collect diagnostics](#how-to-collect-diagnostics) and open an issue with the bug report form.
 
-`DyncameloSetup.exe` is the installer attached to a release that carries one (v0.47.0 and newer do; some earlier releases carry the source code only). A Debug build of the solution also puts the bundle in the right folder for you.
+`CamelGraphSetup.exe` is the installer attached to a release that carries one (v0.47.0 and newer do; some earlier releases carry the source code only). A Debug build of the solution also puts the bundle in the right folder for you.
 
 Everything below comes from the CamelGraph source and docs. Where a behaviour has **not** been seen inside a real Navisworks yet, the text says so. See [Known issues](#known-issues).
 
 ## Symptoms
 
 * [Navisworks reports `PLUGIN_LOAD_02` or `0x80131515` at start](#navisworks-reports-plugin_load_02-or-0x80131515-at-start)
-* [The BIMCamel ribbon tab or the Dyncamelo button is missing](#the-bimcamel-ribbon-tab-or-the-dyncamelo-button-is-missing)
+* [The BIMCamel ribbon tab or the CamelGraph button is missing](#the-bimcamel-ribbon-tab-or-the-camelgraph-button-is-missing)
 * [The editor says "Something went wrong"](#the-editor-says-something-went-wrong)
 * [A node is red or amber](#a-node-is-red-or-amber)
 * [A graph opens with a warning, or with missing nodes](#a-graph-opens-with-a-warning-or-with-missing-nodes)
@@ -28,39 +28,39 @@ Then: [how to collect diagnostics](#how-to-collect-diagnostics), [which version 
 
 ## Navisworks reports `PLUGIN_LOAD_02` or `0x80131515` at start
 
-**Cause.** Windows kept the browser's "downloaded file" mark (Zone.Identifier) on the CamelGraph DLLs. .NET Framework refuses to load assemblies with that mark. `DyncameloSetup.exe` and `install-dyncamelo.bat` remove the mark. A manual copy of the bundle from the zip does not.
+**Cause.** Windows kept the browser's "downloaded file" mark (Zone.Identifier) on the CamelGraph DLLs. .NET Framework refuses to load assemblies with that mark. `CamelGraphSetup.exe` and `install-camelgraph.bat` remove the mark. A manual copy of the bundle from the zip does not.
 
 **Fix.** In PowerShell:
 
 ```powershell
-Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File
+Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\CamelGraph.bundle" -Recurse -File | Unblock-File
 ```
 
-Then restart Navisworks. You can also unblock the downloaded zip before you extract it (right-click, **Properties**, **Unblock**), or simply run `DyncameloSetup.exe`.
+Then restart Navisworks. You can also unblock the downloaded zip before you extract it (right-click, **Properties**, **Unblock**), or simply run `CamelGraphSetup.exe`.
 
-## The BIMCamel ribbon tab or the Dyncamelo button is missing
+## The BIMCamel ribbon tab or the CamelGraph button is missing
 
 Check these in order.
 
-1. **Is the bundle in the right folder?** The installer puts it in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle`. That folder must hold `PackageContents.xml` and one folder per Navisworks year: `2024`, `2025` and `2026`. Each year folder holds `Dyncamelo.App.dll` and the other DLLs. (For all users the bundle can go in `C:\ProgramData\Autodesk\ApplicationPlugins\` instead.) If a folder is missing, run `DyncameloSetup.exe` again.
+1. **Is the bundle in the right folder?** The installer puts it in `%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle`. That folder must hold `PackageContents.xml` and one folder per Navisworks year: `2024`, `2025` and `2026`. Each year folder holds `CamelGraph.App.dll` and the other DLLs. (For all users the bundle can go in `C:\ProgramData\Autodesk\ApplicationPlugins\` instead.) If a folder is missing, run `CamelGraphSetup.exe` again.
 2. **Did you restart Navisworks?** Navisworks reads the bundle at start. Close it fully and start it again.
 3. **Is your Navisworks supported?** `PackageContents.xml` lists Navisworks **Manage and Simulate, 2024, 2025 and 2026**, 64-bit Windows (2024 is series Nw21, 2025 is Nw22, 2026 is Nw23). Other products and years are not listed. The installer's start screen says which supported years it found.
 4. **Are the files blocked?** See `PLUGIN_LOAD_02` above.
-5. **Wrong-year DLL.** A DLL built for one Navisworks year still loads its ribbon button in another, but its dock pane cannot register. The button then shows "The Dyncamelo editor panel is not registered with Navisworks". Reinstall with the installer from the same release, which carries a build for each year.
-6. **Classic Plugins-folder install.** If you copied the files to `...\Navisworks Manage 2024\Plugins\Dyncamelo.App\` instead, there is no ribbon tab. The button is under **Tool add-ins** ([Getting Started](GETTING_STARTED.md)).
+5. **Wrong-year DLL.** A DLL built for one Navisworks year still loads its ribbon button in another, but its dock pane cannot register. The button then shows "The CamelGraph editor panel is not registered with Navisworks". Reinstall with the installer from the same release, which carries a build for each year.
+6. **Classic Plugins-folder install.** If you copied the files to `...\Navisworks Manage 2024\Plugins\CamelGraph.App\` instead, there is no ribbon tab. The button is under **Tool add-ins** ([Getting Started](GETTING_STARTED.md)).
 
-The tab is named **BIMCamel** and the panel **Visual Programming**. It holds three buttons: **Dyncamelo**, **Player** and **About**. If you also installed another BIMCamel tool, CamelGraph merges the duplicate "BIMCamel" tabs into one. If you still see two, please report it.
+The tab is named **BIMCamel** and the panel **Visual Programming**. It holds three buttons: **CamelGraph**, **Player** and **About**. If you also installed another BIMCamel tool, CamelGraph merges the duplicate "BIMCamel" tabs into one. If you still see two, please report it.
 
 ## The editor says "Something went wrong"
 
-The full text is "Something went wrong (*ExceptionType*: *message*). Details: %APPDATA%\Dyncamelo\errors.log".
+The full text is "Something went wrong (*ExceptionType*: *message*). Details: %APPDATA%\CamelGraph\errors.log".
 
 **Cause.** CamelGraph's *crash guard* caught a failure in its own code, for example in a command, or WPF failing to build a visual soon after you clicked. Without the guard, an error like this would close Navisworks. The editor keeps running and the failure is written to the log.
 
 **Fix.**
 
 1. Save your graph if you have changes. (Autosave is on by default; see **Settings > Editing > Autosave unsaved work**.)
-2. Open `%APPDATA%\Dyncamelo\errors.log` (paste that into the Windows Explorer address bar). Each entry starts with the date and time and where it happened (`a command`, `the editor` or `a failure that ended the host`), followed by the full exception and, for XAML problems, the file and line.
+2. Open `%APPDATA%\CamelGraph\errors.log` (paste that into the Windows Explorer address bar). Each entry starts with the date and time and where it happened (`a command`, `the editor` or `a failure that ended the host`), followed by the full exception and, for XAML problems, the file and line.
 3. Send the last entry, together with what you clicked just before. Use the bug report form and [the diagnostics](#how-to-collect-diagnostics).
 
 If the message also says "The node that could not be drawn was taken off the canvas", the node you just added could not be shown. Leave it out and report which node it was.
@@ -99,7 +99,7 @@ More in the [editor guide](UI_GUIDE.md#finding-your-way).
 **The file will not open at all.**
 
 * "The file requires .dyc reader version N but this application supports version M": update CamelGraph. (A file that contains node groups is refused by older versions rather than opened without them.)
-* "The file is not valid JSON" or "not a Dyncamelo .dyc document": the file is damaged or is not a graph.
+* "The file is not valid JSON" or "not a CamelGraph .dyc document": the file is damaged or is not a graph.
 
 ## Nothing happens when I press Run
 
@@ -159,7 +159,7 @@ If you measure a slow case, please add the model size, the node and the time to 
 * The answer is remembered **for that file as it is now**. If the script file changes, the question comes back.
 * Scripts that only read are never asked about.
 * Muted and frozen nodes do not count.
-* A script run by path through `Dyncamelo.Run.DYNC` (the Automation API, the Batch Utility) asks the same question. In an unattended run nobody can answer, so run the script once by hand in the Player first (not tested in an unattended run).
+* A script run by path through `CamelGraph.Run.DYNC` (the Automation API, the Batch Utility) asks the same question. In an unattended run nobody can answer, so run the script once by hand in the Player first (not tested in an unattended run).
 
 ## A file node fails with "access denied" or writes to the wrong place
 
@@ -169,15 +169,15 @@ If you measure a slow case, please add the model size, the node and the time to 
 
 ## Navisworks closed while I was working
 
-1. Start Navisworks and open the editor. If you had unsaved changes and **Autosave** was on, CamelGraph offers the autosaved copy when the editor opens on an empty canvas. Saving, or answering *No*, deletes the copy. The copies are in `%APPDATA%\Dyncamelo\recovery`.
-2. Open `%APPDATA%\Dyncamelo\errors.log`. If there is an entry marked `a failure that ended the host` from the time of the crash, it holds the full exception. Send it.
+1. Start Navisworks and open the editor. If you had unsaved changes and **Autosave** was on, CamelGraph offers the autosaved copy when the editor opens on an empty canvas. Saving, or answering *No*, deletes the copy. The copies are in `%APPDATA%\CamelGraph\recovery`.
+2. Open `%APPDATA%\CamelGraph\errors.log`. If there is an entry marked `a failure that ended the host` from the time of the crash, it holds the full exception. Send it.
 3. Tell us what you clicked last. A crash of Navisworks is the most serious kind of bug for this project.
 
 ## Running next to other add-ins
 
-CamelGraph ships its own copies of `Nodify.dll`, `Newtonsoft.Json.dll` and `AutomaticGraphLayout.dll` in the folder of `Dyncamelo.App.dll`, and CamelGraph's own DLLs there too. Navisworks loads all add-ins into **one process**, so if two add-ins use the same library in different versions, the .NET Framework rules decide which copy a request gets.
+CamelGraph ships its own copies of `Nodify.dll`, `Newtonsoft.Json.dll` and `AutomaticGraphLayout.dll` in the folder of `CamelGraph.App.dll`, and CamelGraph's own DLLs there too. Navisworks loads all add-ins into **one process**, so if two add-ins use the same library in different versions, the .NET Framework rules decide which copy a request gets.
 
-What the code does about it (`src/Dyncamelo.App/DyncameloHost.cs`):
+What the code does about it (`src/CamelGraph.App/CamelGraphHost.cs`):
 
 * It redirects the one strong-named Navisworks reference that does not match across years, `Autodesk.Navisworks.Timeliner`, to the copy the running Navisworks has already loaded. Without it the TimeLiner nodes would silently vanish from the library.
 * For any other assembly that the normal lookup cannot find, it loads `<name>.dll` from the add-in folder as a last resort. This is how WPF finds the theme's `Nodify` resources.
@@ -191,10 +191,10 @@ Whether any real combination of add-ins conflicts with CamelGraph has not been t
 
 When you report a problem, include:
 
-1. **Dyncamelo version.** On the **BIMCamel** ribbon tab, click **About**. The version is at the bottom of the window.
+1. **CamelGraph version.** On the **BIMCamel** ribbon tab, click **About**. The version is at the bottom of the window.
 2. **Navisworks product and year** (Manage or Simulate, 2024, 2025 or 2026) and your Windows version.
 3. **Help > Copy Diagnostics** in the editor. It copies the CamelGraph and Navisworks versions, the installed Navisworks plug-ins and the end of `errors.log`. Paste it into the issue.
-4. **The end of `%APPDATA%\Dyncamelo\errors.log`**, if the problem produced an error.
+4. **The end of `%APPDATA%\CamelGraph\errors.log`**, if the problem produced an error.
 5. **Help > Run Self-Test** with a model open, if a Navisworks node behaves oddly. It runs a set of read-only Navisworks nodes and shows pass or fail for each. The report can be copied.
 6. **The graph** (`.dyc`), if you can share it. Open it in a text editor first: it can hold file paths, names and values.
 7. **Does it happen with a sample graph?** Samples are under **File > Sample Graphs**. If one shows the problem, say which.
@@ -202,18 +202,18 @@ When you report a problem, include:
 ## Which version is installed
 
 * **BIMCamel** ribbon tab, **About**: "Version x.y.z".
-* **Windows Settings > Apps > Installed apps**: "Dyncamelo for Navisworks" shows the version.
-* The `Version` attribute in `%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\PackageContents.xml` (it reads like `0.45.1.0`).
-* `DyncameloSetup.exe` shows "Update install (v... found)" when a version is already installed.
+* **Windows Settings > Apps > Installed apps**: "CamelGraph for Navisworks" shows the version.
+* The `Version` attribute in `%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\PackageContents.xml` (it reads like `0.45.1.0`).
+* `CamelGraphSetup.exe` shows "Update install (v... found)" when a version is already installed.
 
 ## How to uninstall
 
-* **Windows Settings > Apps > Installed apps > Dyncamelo for Navisworks > Uninstall**, or run `DyncameloSetup.exe` and choose **Remove existing install**.
-* Silent: `DyncameloSetup.exe /uninstall /silent`.
-* Scripted: `install-dyncamelo.bat uninstall` (from the zip).
+* **Windows Settings > Apps > Installed apps > CamelGraph for Navisworks > Uninstall**, or run `CamelGraphSetup.exe` and choose **Remove existing install**.
+* Silent: `CamelGraphSetup.exe /uninstall /silent`.
+* Scripted: `install-camelgraph.bat uninstall` (from the zip).
 * Close Navisworks first (the setup window warns when Navisworks is running).
 
-Uninstalling removes the bundle folder and the Apps entry. It **leaves** your `.dyc` graphs, your scripts folder (`Documents\Dyncamelo\Scripts`) and `%APPDATA%\Dyncamelo` (settings, `errors.log`, autosaved copies, `update-check.txt`). Delete `%APPDATA%\Dyncamelo` yourself for a completely clean start.
+Uninstalling removes the bundle folder and the Apps entry. It **leaves** your `.dyc` graphs, your scripts folder (`Documents\CamelGraph\Scripts`) and `%APPDATA%\CamelGraph` (settings, `errors.log`, autosaved copies, `update-check.txt`). Delete `%APPDATA%\CamelGraph` yourself for a completely clean start.
 
 ## Known issues
 

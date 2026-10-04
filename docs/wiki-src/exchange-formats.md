@@ -133,7 +133,7 @@ CamelGraph reads and writes `.xlsx` files itself, so **Excel does not have to be
 |---|---|
 | `Table.ToExcelFile` | Writes a table with its column names. `sheet` names the worksheet; `append` adds a sheet to an existing workbook. |
 | `Table.FromExcelFile` | Reads a worksheet into a table. `firstRowIsHeader` controls the column names. |
-| `Excel.WriteToFile` | Writes rows (and optional headers). `append` adds a sheet to an existing workbook; **styles and formulas that were not written by Dyncamelo are not preserved**. |
+| `Excel.WriteToFile` | Writes rows (and optional headers). `append` adds a sheet to an existing workbook; **styles and formulas that were not written by CamelGraph are not preserved**. |
 | `Excel.ReadFromFile` | Gives `rows`, `headers` and `sheetNames`. **Dates arrive as Excel serial numbers.** |
 
 Tables are the easiest way in: `Properties.ToTable` reads the named properties of items into a table (use `Category.Property` names such as `Element.Category`, or `@Name`, `@Path`, `@Guid`), and the `Table.*` nodes then filter, sort, group, join, pivot and format it before `Table.ToExcelFile` writes it.

@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dyncamelo.Core.Editing;
-using Dyncamelo.Core.Execution;
-using Dyncamelo.Core.Graph;
-using Dyncamelo.Core.Groups;
-using Dyncamelo.Core.Loader;
-using Dyncamelo.Core.Nodes;
+using CamelGraph.Core.Editing;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Graph;
+using CamelGraph.Core.Groups;
+using CamelGraph.Core.Loader;
+using CamelGraph.Core.Nodes;
 
-namespace Dyncamelo.TestSupport.Wiki;
+namespace CamelGraph.TestSupport.Wiki;
 
 /// <summary>Builds a graph from library nodes: put a node where you want it, set the values typed into its inputs, wire outputs to inputs.</summary>
 internal sealed class Sketch
@@ -245,8 +245,8 @@ internal static class SceneGraphs
             ("Boolean", "value", typeof(bool)),
             ("Text", "value", typeof(string)),
             ("DateTime", "value", typeof(DateTime)),
-            ("Colour", "value", typeof(Dyncamelo.Nodes.DyncameloColor)),
-            ("Geometry", "value", typeof(Dyncamelo.Nodes.DyncameloPoint)),
+            ("Colour", "value", typeof(CamelGraph.Nodes.CamelGraphColor)),
+            ("Geometry", "value", typeof(CamelGraph.Nodes.CamelGraphPoint)),
             ("Item", "value", typeof(ModelItem)),
             ("Selection", "value", typeof(ModelItemCollection)),
             ("Viewpoint", "value", typeof(Viewpoint)),

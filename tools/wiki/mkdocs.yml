@@ -1,4 +1,4 @@
-# Settings of the Dyncamelo wiki (MkDocs with the Material theme). Build it with `python tools/build_wiki.py`;
+# Settings of the CamelGraph wiki (MkDocs with the Material theme). Build it with `python tools/build_wiki.py`;
 # see tools/wiki/README.md.
 #
 # The build puts the pages in a staging folder (build/wiki-docs) and writes build/wiki-mkdocs.yml, a small file that
@@ -64,7 +64,7 @@ theme:
         name: Dark colours. Switch to the system setting.
 
 extra_css:
-  - assets/stylesheets/dyncamelo.css
+  - assets/stylesheets/camelgraph.css
 
 extra:
   # Material's offline plugin would load this small script from unpkg.com; a local copy keeps the page from asking another

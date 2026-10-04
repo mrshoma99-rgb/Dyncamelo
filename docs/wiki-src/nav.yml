@@ -1,6 +1,6 @@
 # The order and grouping of the wiki's navigation. One entry per section; a page is its file name without .md (relative to docs/wiki-src).
 # The pages "troubleshooting", "recipes" and "extending" are built from docs/TROUBLESHOOTING.md, docs/RECIPES.md and docs/EXTENDING.md,
-# "whats-new" from CHANGELOG.md, and "nodes/index" with a page per category from docs/dyncamelo-nodes.json; they are listed here too.
+# "whats-new" from CHANGELOG.md, and "nodes/index" with a page per category from docs/camelgraph-nodes.json; they are listed here too.
 # A section with `glob` takes every matching file, ordered by the `order:` number in the file's front matter, then by file name.
 - section: Start here
   pages:

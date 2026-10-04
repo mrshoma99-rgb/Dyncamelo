@@ -25,7 +25,7 @@ if ($files.Count -eq 0) {
 
 $pfxBase64 = $env:PFX_BASE64
 $password = $env:PFX_PASSWORD
-$pfxFile = Join-Path ([IO.Path]::GetTempPath()) ('dyncamelo-sign-' + [guid]::NewGuid().ToString('N') + '.pfx')
+$pfxFile = Join-Path ([IO.Path]::GetTempPath()) ('camelgraph-sign-' + [guid]::NewGuid().ToString('N') + '.pfx')
 $selfSigned = $false
 
 if ([string]::IsNullOrWhiteSpace($pfxBase64)) {
@@ -36,7 +36,7 @@ if ([string]::IsNullOrWhiteSpace($pfxBase64)) {
     Write-Host "No signing certificate configured: signing with a throw-away self-signed certificate to exercise the steps."
     # PowerShell 7 reaches the certificate cmdlets through the Windows PowerShell compatibility layer when it must.
     Import-Module PKI -ErrorAction SilentlyContinue
-    $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=Dyncamelo dry-run signing' -CertStoreLocation Cert:\CurrentUser\My
+    $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject 'CN=CamelGraph dry-run signing' -CertStoreLocation Cert:\CurrentUser\My
     $password = [guid]::NewGuid().ToString('N')
     Export-PfxCertificate -Cert $cert -FilePath $pfxFile -Password (ConvertTo-SecureString $password -AsPlainText -Force) | Out-Null
     $selfSigned = $true

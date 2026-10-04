@@ -8,7 +8,7 @@ CamelGraph does not collect your data. It has no account, no sign-in, no licence
 
 ## What CamelGraph stores on your computer
 
-Everything below is in the folder `%APPDATA%\Dyncamelo` (on a standard Windows install, `C:\Users\<you>\AppData\Roaming\Dyncamelo`). None of it is sent anywhere by CamelGraph.
+Everything below is in the folder `%APPDATA%\CamelGraph` (on a standard Windows install, `C:\Users\<you>\AppData\Roaming\CamelGraph`). None of it is sent anywhere by CamelGraph. Versions up to 0.48, when the product was called Dyncamelo, used `%APPDATA%\Dyncamelo`; the first start of a newer version moves that folder here.
 
 * `ui-settings.json`: your preferences (palette, shortcuts, recent files and favourite nodes, Script Player folders and the last values you typed into scripts, which graph files you agreed to run).
 * `errors.log`: the technical details of a failure that CamelGraph caught: the error, the place in the code, the XAML file involved. An error message can name a node or a file; model contents are not written to it.
@@ -21,7 +21,7 @@ Everything below is in the folder `%APPDATA%\Dyncamelo` (on a standard Windows i
 
 One thing, and you can switch it off.
 
-* **Update check.** When the editor opens, at most once a day, CamelGraph asks GitHub (`https://api.github.com/repos/mrshoma99-rgb/dyncamelo/releases/latest`) for the number of the newest release. The request carries your IP address and the name `Dyncamelo-UpdateCheck`, as any web request does; nothing else about you or your models. If a newer version exists, CamelGraph asks before it opens the download page. GitHub handles the request under its privacy statement (https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). **Switch it off:** Settings > Privacy > "Check for a newer version once a day". When it is off, CamelGraph makes no network request of its own. A copy installed from the Autodesk App Store never makes this check: the store delivers its updates.
+* **Update check.** When the editor opens, at most once a day, CamelGraph asks GitHub (`https://api.github.com/repos/mrshoma99-rgb/dyncamelo/releases/latest`) for the number of the newest release. The request carries your IP address and the name `CamelGraph-UpdateCheck`, as any web request does; nothing else about you or your models. If a newer version exists, CamelGraph asks before it opens the download page. GitHub handles the request under its privacy statement (https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). **Switch it off:** Settings > Privacy > "Check for a newer version once a day". When it is off, CamelGraph makes no network request of its own. A copy installed from the Autodesk App Store never makes this check: the store delivers its updates.
 
 Opening the user guide, the website or a download page from a menu or a link opens your web browser at your request; that is then between you and that website.
 
@@ -35,7 +35,7 @@ CamelGraph contains no advertising, analytics or tracking libraries and shares y
 
 ## Keeping and deleting data
 
-CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere. To remove what it stored on your computer, close Navisworks and delete the folder `%APPDATA%\Dyncamelo`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone, so you can keep them.
+CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere. To remove what it stored on your computer, close Navisworks and delete the folder `%APPDATA%\CamelGraph`. The uninstaller removes the program but leaves that folder and your `.dyc` graphs alone, so you can keep them.
 
 ## Withdrawing consent and asking questions
 

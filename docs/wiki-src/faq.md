@@ -29,7 +29,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     ![The CamelGraph editor with a graph that has just run.](../images/wiki-editor-overview.png)
 
 ??? question "Is CamelGraph the same as Dyncamelo?"
-    Yes. CamelGraph is the new name of Dyncamelo: the same program, the same node library, the same `.dyc` graph files and the same free personal-use copy. Version 0.48 and earlier still carry the old name on screen and in file names (the installer is `DyncameloSetup.exe`, the ribbon button and the window say **Dyncamelo**, and Windows lists it as *Dyncamelo for Navisworks*), so where this guide says CamelGraph and your screen says Dyncamelo, they are the same thing. The next release uses CamelGraph throughout. Your saved graphs open as before.
+    Yes. CamelGraph is the new name of Dyncamelo (versions up to 0.48): the same program, the same node library, the same `.dyc` graph files and the same free personal-use copy. The installer, the plug-in files and the folders carry the new name too. Installing the new version replaces the old install, and your settings, recent files and scripts carry over. Your saved graphs open as before.
 
 ??? question "Is it free?"
     The copy from GitHub or bimcamel.com is free for personal use: learning, hobby projects, research, charities, schools and universities, public research bodies and government institutions. Using it for your job at a company, or in a paid project or product, needs the professional copy, which is coming soon to the Autodesk App Store. Until it is there, get in touch through bimcamel.com. See [Licence](licence.md).
@@ -67,10 +67,10 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     The installer is not code-signed unless the publisher set a certificate up. Compare its SHA-256 checksum with the one published next to it, then choose **More info ▸ Run anyway**.
 
 ??? question "Navisworks shows PLUGIN_LOAD_02 when it starts."
-    Windows still marks the DLLs as downloaded. Run `Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\Dyncamelo.bundle" -Recurse -File | Unblock-File` in PowerShell and restart Navisworks. The installer does this for you. See [Troubleshooting](troubleshooting.md#navisworks-reports-plugin_load_02-or-0x80131515-at-start).
+    Windows still marks the DLLs as downloaded. Run `Get-ChildItem "$env:APPDATA\Autodesk\ApplicationPlugins\CamelGraph.bundle" -Recurse -File | Unblock-File` in PowerShell and restart Navisworks. The installer does this for you. See [Troubleshooting](troubleshooting.md#navisworks-reports-plugin_load_02-or-0x80131515-at-start).
 
-??? question "I cannot find the Dyncamelo button."
-    Look on the **BIMCamel** ribbon tab, panel **Visual Programming**. If it is not there, see [Troubleshooting](troubleshooting.md#the-bimcamel-ribbon-tab-or-the-dyncamelo-button-is-missing).
+??? question "I cannot find the CamelGraph button."
+    Look on the **BIMCamel** ribbon tab, panel **Visual Programming**. If it is not there, see [Troubleshooting](troubleshooting.md#the-bimcamel-ribbon-tab-or-the-camelgraph-button-is-missing).
 
 ??? question "How do I know which version I have?"
     Click **About** on the **BIMCamel** tab, or look at the start screen of an empty canvas. [Updating](updating.md#which-version-do-i-have) lists the other places.
@@ -176,10 +176,10 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Yes. Runs happen on the Navisworks main thread, so Navisworks waits until the run ends. A progress overlay shows which node is working. See [Speed up a slow graph](howto/speed-up-slow-graph.md).
 
 ??? question "Can I run graphs automatically, without a person?"
-    The plug-in `Dyncamelo.Run.DYNC` runs a script by path for the Navisworks Automation API and the Batch Utility, and the command-line tool runs graphs that use only the general nodes. See [Running a graph](running-graphs.md#running-without-the-editor).
+    The plug-in `CamelGraph.Run.DYNC` runs a script by path for the Navisworks Automation API and the Batch Utility, and the command-line tool runs graphs that use only the general nodes. See [Running a graph](running-graphs.md#running-without-the-editor).
 
 ??? question "Where are my graphs and settings?"
-    Graphs are `.dyc` files where you saved them. Settings, the error log and autosaved copies are in `%APPDATA%\Dyncamelo`. See [Privacy and safety](privacy-and-safety.md#what-it-keeps-on-your-computer).
+    Graphs are `.dyc` files where you saved them. Settings, the error log and autosaved copies are in `%APPDATA%\CamelGraph`. See [Privacy and safety](privacy-and-safety.md#what-it-keeps-on-your-computer).
 
 ??? question "My graph was lost when Navisworks closed."
     If **Autosave** was on (it is by default), CamelGraph offers the autosaved copy the next time the editor opens on an empty canvas. See [Troubleshooting](troubleshooting.md#navisworks-closed-while-i-was-working).
@@ -224,7 +224,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ## The Script Player
 
 ??? question "How do I give a graph to a colleague who does not use the editor?"
-    Save it in `Documents\Dyncamelo\Scripts` (or a shared folder added in the Player), give it input nodes for what should change, and they run it from the [Script Player](player.md). A colleague who only needs the result can also be given the output of the graph, such as the Excel file. See [Give colleagues a form](howto/form-for-colleagues.md).
+    Save it in `Documents\CamelGraph\Scripts` (or a shared folder added in the Player), give it input nodes for what should change, and they run it from the [Script Player](player.md). A colleague who only needs the result can also be given the output of the graph, such as the Excel file. See [Give colleagues a form](howto/form-for-colleagues.md).
 
     ![The Script Player with a script chosen and its form.](../images/wiki-player-form.png)
 
@@ -254,13 +254,13 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ## Troubleshooting
 
 ??? question "The editor says 'Something went wrong'."
-    CamelGraph's crash guard caught a failure in its own code. Save your graph, then look at `%APPDATA%\Dyncamelo\errors.log`. See [Troubleshooting](troubleshooting.md#the-editor-says-something-went-wrong).
+    CamelGraph's crash guard caught a failure in its own code. Save your graph, then look at `%APPDATA%\CamelGraph\errors.log`. See [Troubleshooting](troubleshooting.md#the-editor-says-something-went-wrong).
 
 ??? question "A graph opens with a warning or with missing nodes."
     The file was saved by another version or needs a node pack you do not have. The missing node is kept as a placeholder, so saving loses nothing. See [Troubleshooting](troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes).
 
 ??? question "How do I report a bug or ask for a feature?"
-    On GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the CamelGraph and Navisworks versions, the end of `%APPDATA%\Dyncamelo\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
+    On GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the CamelGraph and Navisworks versions, the end of `%APPDATA%\CamelGraph\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
 
 ??? question "Is there a quick check that the Navisworks nodes work on my model?"
     Yes. **Help ▸ Run Self-Test…** runs a set of read-only Navisworks nodes on the open model and shows pass or fail for each. Run it once after installing, especially on 2025 or 2026. See [Requirements](requirements.md#what-has-been-tested).
@@ -274,10 +274,10 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Yes. [Writing your own nodes](extending.md) describes the pack format. Pull requests are welcome; read `CONTRIBUTING.md` in the repository first.
 
 ??? question "Can I run a graph from the command line?"
-    The command-line tool `Dyncamelo.Cli`, built from source, runs graphs that use only the general nodes, with no Navisworks. It exits with `0` when no node failed, `1` when one did and `2` for unreadable input, and it never asks before running. See [Running a graph](running-graphs.md#running-without-the-editor).
+    The command-line tool `CamelGraph.Cli`, built from source, runs graphs that use only the general nodes, with no Navisworks. It exits with `0` when no node failed, `1` when one did and `2` for unreadable input, and it never asks before running. See [Running a graph](running-graphs.md#running-without-the-editor).
 
 ??? question "Can another add-in or the Batch Utility run a script?"
-    Yes, through the plug-in `Dyncamelo.Run.DYNC`: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and asks the same confirmation as the Player. See [The Script Player](player.md#running-a-script-from-other-tools).
+    Yes, through the plug-in `CamelGraph.Run.DYNC`: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and asks the same confirmation as the Player. See [The Script Player](player.md#running-a-script-from-other-tools).
 
 ??? question "Is CamelGraph connected to Autodesk?"
     No. It is not affiliated with or endorsed by Autodesk. Autodesk, Navisworks, Revit and Dynamo are trademarks of Autodesk, Inc. See [Licence](licence.md#trademarks).

@@ -65,8 +65,8 @@
     {
       "Id": "815613186ebce8604b6a7312091e89a8",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 320.0,
       "Y": 90.0,
@@ -191,8 +191,8 @@
     {
       "Id": "dc2a29cf6252f44d9833f4607d8f9ab6",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Item names",
       "X": 700.0,
       "Y": 60.0,
@@ -231,8 +231,8 @@
     {
       "Id": "b3b9868392d26a4c4cdce1d019f4dab7",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Property 1 values",
       "X": 700.0,
       "Y": 260.0,
@@ -271,8 +271,8 @@
     {
       "Id": "b98638d1ff0e552bbe374216d125033a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.PropertyNodes.ValueAsString@Autodesk.Navisworks.Api.ModelItem,string,string",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Property 2 values",
       "X": 700.0,
       "Y": 460.0,
@@ -356,14 +356,14 @@
         }
       ],
       "Data": {
-        "Path": "C:\\Temp\\dyncamelo-properties.xlsx"
+        "Path": "C:\\Temp\\camelgraph-properties.xlsx"
       }
     },
     {
       "Id": "0981cb108ee05fbc9c41c4c68f5a8576",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ExcelNodes.WriteToFile@string,System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>,string,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Excel.WriteToFile",
       "X": 1420.0,
       "Y": 200.0,

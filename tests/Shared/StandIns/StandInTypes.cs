@@ -5,13 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
-using Dyncamelo.Core.Loader;
-using Dyncamelo.Nodes;
+using CamelGraph.Core.Loader;
+using CamelGraph.Nodes;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
 /// <summary>
-/// Turns the type names of a node signature into <see cref="Type"/>s. Types of the .NET library and of Dyncamelo's own assemblies
+/// Turns the type names of a node signature into <see cref="Type"/>s. Types of the .NET library and of CamelGraph's own assemblies
 /// are the real ones; the types of the host application (<c>Autodesk.Navisworks.Api.ModelItem</c>, <c>Document</c>...) are empty
 /// public classes of the same full name made in a dynamic module, so a definition id built from them is the real one and the editor
 /// colours their sockets by name exactly as it does for the real types.
@@ -51,13 +51,13 @@ internal sealed class StandInTypes
         { "IList", typeof(IList) },
     };
 
-    // The catalogue's short names for Dyncamelo's own value types (generate_node_catalog.py: DYNCAMELO_TYPES).
+    // The catalogue's short names for CamelGraph's own value types (generate_node_catalog.py: CAMELGRAPH_TYPES).
     private static readonly Dictionary<string, Type> CatalogueAliases = new Dictionary<string, Type>(StringComparer.Ordinal)
     {
-        { "Point", typeof(DyncameloPoint) },
-        { "Vector", typeof(DyncameloVector) },
-        { "Color", typeof(DyncameloColor) },
-        { "BoundingBox", typeof(DyncameloBoundingBox) },
+        { "Point", typeof(CamelGraphPoint) },
+        { "Vector", typeof(CamelGraphVector) },
+        { "Color", typeof(CamelGraphColor) },
+        { "BoundingBox", typeof(CamelGraphBoundingBox) },
     };
 
     private readonly ModuleBuilder _module;
@@ -196,7 +196,7 @@ internal sealed class StandInTypes
         return CatalogueAliases.TryGetValue(t, out var alias) ? alias : FromSimpleName(t);
     }
 
-    /// <summary>The real type with this full name when it is a .NET or Dyncamelo type, otherwise the stand-in of that name.</summary>
+    /// <summary>The real type with this full name when it is a .NET or CamelGraph type, otherwise the stand-in of that name.</summary>
     public Type FromFullName(string fullName)
     {
         var known = Type.GetType(fullName, false);
@@ -205,7 +205,7 @@ internal sealed class StandInTypes
             return known;
         }
 
-        if (fullName.StartsWith("Dyncamelo.", StringComparison.Ordinal))
+        if (fullName.StartsWith("CamelGraph.", StringComparison.Ordinal))
         {
             var own = typeof(NodeRegistry).Assembly.GetType(fullName, false) ?? typeof(NodeLibrary).Assembly.GetType(fullName, false);
             if (own != null)

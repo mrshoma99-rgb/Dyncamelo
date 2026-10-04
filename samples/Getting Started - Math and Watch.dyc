@@ -53,8 +53,8 @@
     {
       "Id": "4974637f162a685644907a68beff6aa4",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Multiply@double,double",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.MathNodes.Multiply@double,double",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Multiply",
       "X": 340.0,
       "Y": 80.0,
@@ -128,8 +128,8 @@
     {
       "Id": "25ee994c4461ae1c9ea2ff1d5131ec76",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.FromObject@object",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.FromObject@object",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.FromObject",
       "X": 640.0,
       "Y": 260.0,
@@ -154,8 +154,8 @@
     {
       "Id": "bd17962070a95b1e103642309bf0a2f3",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Concat@string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.Concat@string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.Concat",
       "X": 940.0,
       "Y": 170.0,
@@ -263,7 +263,7 @@
   "Notes": [
     {
       "Id": "1ff31318496a27c21d7316964d9c951d",
-      "Text": "WELCOME TO DYNCAMELO! This graph needs no model, so it is a safe playground. Drag the Length and Width sliders and watch every downstream node recompute (the run type is Automatic; use Run for Manual graphs).",
+      "Text": "WELCOME TO CAMELGRAPH! This graph needs no model, so it is a safe playground. Drag the Length and Width sliders and watch every downstream node recompute (the run type is Automatic; use Run for Manual graphs).",
       "X": 0.0,
       "Y": -170.0
     },

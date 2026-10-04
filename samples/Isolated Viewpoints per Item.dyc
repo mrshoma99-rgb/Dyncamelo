@@ -65,8 +65,8 @@
     {
       "Id": "5ece50aca61b45d39c98eeea514ba8e2",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@string,string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByPropertyContains",
       "X": 340.0,
       "Y": 90.0,
@@ -119,8 +119,8 @@
     {
       "Id": "861486ddfffd4235927a2e7616781ffd",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.Isolate",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.WorkflowActionNodes.Isolate",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Action.Isolate",
       "X": 700.0,
       "Y": 0.0,
@@ -137,8 +137,8 @@
     {
       "Id": "6aa558d385b5473f850298e6239165e4",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.ZoomTo@double",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.WorkflowActionNodes.ZoomTo@double",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Action.ZoomTo",
       "X": 700.0,
       "Y": 150.0,
@@ -163,8 +163,8 @@
     {
       "Id": "5c77d0806a0440a9be56bf84a0469bef",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Action.SaveViewpoint",
       "X": 700.0,
       "Y": 300.0,
@@ -243,8 +243,8 @@
     {
       "Id": "a78513c68f3344a3ae2b9655af70885b",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Workflow.ForEach",
       "X": 1320.0,
       "Y": 110.0,
@@ -366,7 +366,7 @@
   "Notes": [
     {
       "Id": "2b1e7c9a4d8f4a1e9c3b6d5e0f7a8c21",
-      "Text": "HOW TO USE: 1) Set the three inputs to find the items you want a viewpoint for (defaults find items whose Item>Name contains \"Room\"). 2) Press Run. One saved viewpoint is created per found item under the \"Dyncamelo Views\" folder, framed and isolated on that item.",
+      "Text": "HOW TO USE: 1) Set the three inputs to find the items you want a viewpoint for (defaults find items whose Item>Name contains \"Room\"). 2) Press Run. One saved viewpoint is created per found item under the \"CamelGraph Views\" folder, framed and isolated on that item.",
       "X": 0.0,
       "Y": -210.0
     },

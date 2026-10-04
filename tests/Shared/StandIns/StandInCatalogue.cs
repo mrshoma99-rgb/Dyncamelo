@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using Dyncamelo.Core.Graph;
-using Dyncamelo.Core.Loader;
+using CamelGraph.Core.Graph;
+using CamelGraph.Core.Loader;
 
-namespace Dyncamelo.TestSupport.StandIns;
+namespace CamelGraph.TestSupport.StandIns;
 
 /// <summary>
-/// The Navisworks nodes made loadable without Navisworks. <c>Dyncamelo.Navisworks</c> is made of static methods that take and return
+/// The Navisworks nodes made loadable without Navisworks. <c>CamelGraph.Navisworks</c> is made of static methods that take and return
 /// Autodesk types, so it cannot be loaded on a machine without Navisworks, and a saved graph that uses it opens as a row of
-/// "unresolved" placeholders. This builds, from the node catalogue (<c>docs/dyncamelo-nodes.json</c>), a dynamic assembly named
-/// <c>Dyncamelo.Navisworks</c> with one public static method per node that the registry does not already know: the same class,
+/// "unresolved" placeholders. This builds, from the node catalogue (<c>docs/camelgraph-nodes.json</c>), a dynamic assembly named
+/// <c>CamelGraph.Navisworks</c> with one public static method per node that the registry does not already know: the same class,
 /// method, parameter types, names and defaults, so the node's definition id is the one saved graphs use, with the same
 /// <c>[NodeName]</c>, category, description, search tags, <c>[MultiInput]</c> and <c>[MultiReturn]</c>. What the catalogue does not
 /// carry (drop-down choices, ranges, name-search buttons, socket kinds, the declared function, earlier ids, retired nodes) is read
-/// from the C# source of <c>Dyncamelo.Navisworks</c>. The Autodesk types are empty public classes of the same full name. The method
+/// from the C# source of <c>CamelGraph.Navisworks</c>. The Autodesk types are empty public classes of the same full name. The method
 /// bodies do nothing: the nodes are for drawing and for loading graphs, not for running.
 /// </summary>
 internal sealed class StandInCatalogue
@@ -117,7 +117,7 @@ internal sealed class StandInCatalogue
         }
 
         // Retired Navisworks nodes: not in the catalogue, but samples and older graphs still carry their ids.
-        if (source != null && typesByAssembly.TryGetValue("Dyncamelo.Navisworks", out var navisworksTypes))
+        if (source != null && typesByAssembly.TryGetValue("CamelGraph.Navisworks", out var navisworksTypes))
         {
             var known = new HashSet<string>(plans.Select(p => p.ExpectedId), StringComparer.Ordinal);
             foreach (var method in source.Methods.Where(m => m.IsDeprecated))
@@ -202,7 +202,7 @@ internal sealed class StandInCatalogue
     }
 
     /// <summary>
-    /// The conversions the real <c>NavisworksTypeConverters</c> registers between Dyncamelo's own value types and the Navisworks ones
+    /// The conversions the real <c>NavisworksTypeConverters</c> registers between CamelGraph's own value types and the Navisworks ones
     /// (colour, point, bounding box, a picked element), so that a wire between a general node and a stand-in is judged exactly as the
     /// real one is. Nothing is converted here (the stand-ins never run), only the pairs are made known.
     /// </summary>
@@ -222,16 +222,16 @@ internal sealed class StandInCatalogue
         var box = Host("BoundingBox3D");
         var item = Host("ModelItem");
         var collection = Host("ModelItemCollection");
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(Dyncamelo.Nodes.DyncameloColor), colour, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(string), colour, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(string), item, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(string), typeof(List<>).MakeGenericType(item), none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(string), collection, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(Dyncamelo.Nodes.DyncameloPoint), point, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(point, typeof(Dyncamelo.Nodes.DyncameloPoint), none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(box, typeof(Dyncamelo.Nodes.DyncameloBoundingBox), none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(typeof(Dyncamelo.Nodes.DyncameloBoundingBox), box, none);
-        Dyncamelo.Core.Types.TypeCoercion.RegisterConverter(item, typeof(Dyncamelo.Nodes.DyncameloBoundingBox), none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(CamelGraph.Nodes.CamelGraphColor), colour, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(string), colour, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(string), item, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(string), typeof(List<>).MakeGenericType(item), none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(string), collection, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(CamelGraph.Nodes.CamelGraphPoint), point, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(point, typeof(CamelGraph.Nodes.CamelGraphPoint), none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(box, typeof(CamelGraph.Nodes.CamelGraphBoundingBox), none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(typeof(CamelGraph.Nodes.CamelGraphBoundingBox), box, none);
+        CamelGraph.Core.Types.TypeCoercion.RegisterConverter(item, typeof(CamelGraph.Nodes.CamelGraphBoundingBox), none);
     }
 
     private static bool IsRegistered(NodeRegistry registry, CatalogueNode node)
@@ -319,7 +319,7 @@ internal sealed class StandInCatalogue
             var kinds = scanned?.Attribute("PortKinds")?.Strings();
             if (kinds == null && scanned == null)
             {
-                kinds = node.Outputs.Select(o => Dyncamelo.Core.Editing.PortKinds.ToHint(Dyncamelo.Core.Editing.PortKinds.FromTypeName(o.Type))).ToArray();
+                kinds = node.Outputs.Select(o => CamelGraph.Core.Editing.PortKinds.ToHint(CamelGraph.Core.Editing.PortKinds.FromTypeName(o.Type))).ToArray();
             }
 
             plan.Kinds = kinds;
@@ -351,7 +351,7 @@ internal sealed class StandInCatalogue
         {
             var plan = new NodePlan
             {
-                AssemblyName = "Dyncamelo.Navisworks",
+                AssemblyName = "CamelGraph.Navisworks",
                 ClassFullName = method.Namespace + "." + method.ClassName,
                 MethodName = method.MethodName,
                 Source = method,
@@ -363,9 +363,9 @@ internal sealed class StandInCatalogue
             };
 
             var ns = method.Namespace;
-            if (ns.StartsWith("Dyncamelo.Navisworks", StringComparison.Ordinal))
+            if (ns.StartsWith("CamelGraph.Navisworks", StringComparison.Ordinal))
             {
-                ns = ns.Substring("Dyncamelo.Navisworks".Length).TrimStart('.');
+                ns = ns.Substring("CamelGraph.Navisworks".Length).TrimStart('.');
             }
 
             plan.Category = method.Attribute("NodeCategory")?.Strings().FirstOrDefault()

@@ -11,8 +11,8 @@
     {
       "Id": "cea14b671ccad8da7bec57a57efe57e8",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Table.FromExcelFile",
       "X": 0.0,
       "Y": 280.0,
@@ -52,8 +52,8 @@
     {
       "Id": "f362d735fbe3617f6c3a8d346037ffd1",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.Column@Dyncamelo.Nodes.DyncameloTable,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.TableToolkitNodes.Column@CamelGraph.Nodes.CamelGraphTable,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Table.Column",
       "X": 350.0,
       "Y": 250.0,
@@ -86,8 +86,8 @@
     {
       "Id": "beff3ec8aafdce99babf80dba8d05c3b",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SelectionExtraNodes.ByGuid@System.Collections.Generic.IList<object>,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SelectionExtraNodes.ByGuid@System.Collections.Generic.IList<object>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Search.ByGuid",
       "X": 700.0,
       "Y": 200.0,
@@ -122,8 +122,8 @@
     {
       "Id": "fe4cffbe1ff58fa2e37942da45619b04",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SelectionNodes.SetCurrent@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SelectionNodes.SetCurrent@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "Selection.SetCurrent",
       "X": 1050.0,
       "Y": 260.0,

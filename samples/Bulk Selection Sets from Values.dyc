@@ -59,14 +59,14 @@
         }
       ],
       "Data": {
-        "Value": "Dyncamelo - By Level"
+        "Value": "CamelGraph - By Level"
       }
     },
     {
       "Id": "9f57c75112166703f6b7f5f9c852e90f",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "SelectionSets.BulkByPropertyValues",
       "X": 380.0,
       "Y": 90.0,
@@ -139,8 +139,8 @@
     {
       "Id": "b2fcc64175e655fd29bc51856fa97023",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "List.Count",
       "X": 760.0,
       "Y": 40.0,

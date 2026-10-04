@@ -99,8 +99,8 @@ Nodes that change the model do so in the open Navisworks document. Many are real
 ## Running without the editor
 
 * The **[Script Player](player.md)** runs a saved graph from a form built out of its input nodes.
-* The add-in plugin **`Dyncamelo.Run.DYNC`** runs a script by path, for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation as the Player. In an unattended run nobody can answer that question, so run the script once by hand in the Player first.
-* The command line tool `Dyncamelo.Cli` (built from source) runs graphs that use only the general nodes, with no Navisworks: `dotnet run --project src/Dyncamelo.Cli -- run samples/hello-math.dyc`. It exits with `0` when no node ended in the error state, `1` when at least one did, and `2` for unreadable input. It never asks before running a graph.
+* The add-in plugin **`CamelGraph.Run.DYNC`** runs a script by path, for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility: `Execute("C:\\Scripts\\audit.dyc")`. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation as the Player. In an unattended run nobody can answer that question, so run the script once by hand in the Player first.
+* The command line tool `CamelGraph.Cli` (built from source) runs graphs that use only the general nodes, with no Navisworks: `dotnet run --project src/CamelGraph.Cli -- run samples/hello-math.dyc`. It exits with `0` when no node ended in the error state, `1` when at least one did, and `2` for unreadable input. It never asks before running a graph.
 
 ## Next steps
 

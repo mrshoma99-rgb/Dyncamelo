@@ -42,8 +42,8 @@ A `*` after the script's name in the header (next to the buttons; the name is hi
 
 Closing the editor pane cannot show a question, so CamelGraph keeps a safety copy instead.
 
-* **Autosave** (on by default; **Settings ▸ Editing ▸ Autosave unsaved work**) writes a copy of a script that has unsaved changes about once a minute, and once more when the pane closes. It does not write during a run. The copies live in the folder `%APPDATA%\Dyncamelo\recovery`.
-* The next time the editor opens on an **empty canvas**, CamelGraph offers the work back: "Dyncamelo found work that was not saved when the last session ended … Restore it?" Answer **Yes** to restore it, or **No** to throw it away. Either answer deletes that safety copy, and so does saving normally.
+* **Autosave** (on by default; **Settings ▸ Editing ▸ Autosave unsaved work**) writes a copy of a script that has unsaved changes about once a minute, and once more when the pane closes. It does not write during a run. The copies live in the folder `%APPDATA%\CamelGraph\recovery`.
+* The next time the editor opens on an **empty canvas**, CamelGraph offers the work back: "CamelGraph found work that was not saved when the last session ended … Restore it?" Answer **Yes** to restore it, or **No** to throw it away. Either answer deletes that safety copy, and so does saving normally.
 * A restored script counts as unsaved until you save it. If its original file still exists, **Save** writes back to that file; otherwise it asks for a name.
 * Safety copies older than 14 days are deleted without asking. A copy that belongs to another Navisworks window that is still open is left alone.
 
@@ -56,7 +56,7 @@ Autosave protects you from a crash or a forgotten **Save**. It is not a version 
 
 **Graph ▸ Script Description…** lets you type what the script does. The text is saved in the file and shown above the form in the Player.
 
-The Script Player looks for scripts in the folder **`Documents\Dyncamelo\Scripts`** (your own Documents folder) and its sub-folders, down to four levels. Save scripts you want to run from the Player there, or add other folders, such as a shared network folder, in the Player itself. The editor's Save As dialog does not default to that folder, so browse to it the first time.
+The Script Player looks for scripts in the folder **`Documents\CamelGraph\Scripts`** (your own Documents folder) and its sub-folders, down to four levels. Save scripts you want to run from the Player there, or add other folders, such as a shared network folder, in the Player itself. The editor's Save As dialog does not default to that folder, so browse to it the first time.
 
 ## Sharing a script
 
@@ -84,7 +84,7 @@ Nodes that CamelGraph has retired in newer versions keep loading and running in 
 
 ## Where CamelGraph keeps its own files
 
-Everything CamelGraph stores about you is under `%APPDATA%\Dyncamelo`: your settings and recent files (`ui-settings.json`), the autosave folder (`recovery`), and a log of caught errors (`errors.log`). Your `.dyc` scripts are never stored there; they are wherever you saved them. See [Privacy and safety](privacy-and-safety.md).
+Everything CamelGraph stores about you is under `%APPDATA%\CamelGraph`: your settings and recent files (`ui-settings.json`), the autosave folder (`recovery`), and a log of caught errors (`errors.log`). Your `.dyc` scripts are never stored there; they are wherever you saved them. See [Privacy and safety](privacy-and-safety.md).
 
 ## Next steps
 

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>CamelGraph.Cli</RootNamespace>
+    <AssemblyName>camelgraph</AssemblyName>
+    <Description>Headless CamelGraph graph runner: executes, validates and inspects .dyc graphs from the command line without Navisworks or WPF.</Description>
+    <!-- Everything in the CLI is internal; nothing to document. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CamelGraph.Core\CamelGraph.Core.csproj" />
+    <ProjectReference Include="..\CamelGraph.Nodes\CamelGraph.Nodes.csproj" />
+  </ItemGroup>
+
+</Project>

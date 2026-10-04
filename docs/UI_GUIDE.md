@@ -1,6 +1,6 @@
 # CamelGraph editor guide
 
-> The tables in this file are generated from the editor's own command and settings catalogues by a test (`UiGuideTests`). Do not edit them by hand — change the catalogue and regenerate with `DYNCAMELO_REGEN_DOCS=1 dotnet test tests/Dyncamelo.Core.Tests --filter UiGuideTests`.
+> The tables in this file are generated from the editor's own command and settings catalogues by a test (`UiGuideTests`). Do not edit them by hand — change the catalogue and regenerate with `CAMELGRAPH_REGEN_DOCS=1 dotnet test tests/CamelGraph.Core.Tests --filter UiGuideTests`.
 
 Every function of the editor can be reached four ways: a **menu**, a **shortcut**, the **command palette** (`Ctrl+Shift+P`) and the **Settings** page. If you cannot remember where something is, open the palette and type a word of its name.
 
@@ -83,7 +83,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 
 * A `*` after the graph name in the header means there are **unsaved changes**. Saving removes it; undoing back to the saved state keeps it, to be on the safe side.
 * **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask whether to save first (*Yes* saves, *No* discards, *Cancel* stops) when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
-* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\Dyncamelo\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, CamelGraph offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
+* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\CamelGraph\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, CamelGraph offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
 * Drag a `.dyc` file from Explorer onto the canvas to open it.
 
 ## Finding your way
@@ -109,13 +109,13 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 The **Player** runs a saved graph without opening the node editor: pick a script, fill in the values it asks for, press **Run**, read the results. It is a pane of its own (ribbon ▸ BIMCamel ▸ **Player**, or *Open Script Player* in the View menu and the palette) and does not load the editor, so it opens fast and stays small.
 
 * **The script bar.** The pane opens on a bar that names the open script and the folder it is in; click it (or press its chevron) to unfold the list of scripts, click a script to choose it and the list folds away. Until a script is chosen the list stays unfolded. In the list, typing filters by name or folder, `Down` moves into it, `Enter` chooses (and puts the focus on **Run**, so `Enter` again runs the script), `Esc` folds it, and ↻ looks for scripts again. Typing in the search box never closes the script you are working in or loses the values you filled in.
-* **Where scripts live.** Every `.dyc` file under `Documents\Dyncamelo\Scripts` (subfolders included, up to four levels) is listed. **Script folders ▸ Add a folder…** at the bottom of the pane adds more — a shared network folder, say; ✕ takes a folder off the list without touching the files.
+* **Where scripts live.** Every `.dyc` file under `Documents\CamelGraph\Scripts` (subfolders included, up to four levels) is listed. **Script folders ▸ Add a folder…** at the bottom of the pane adds more — a shared network folder, say; ✕ takes a folder off the list without touching the files.
 * **What a script asks for.** The *form* is built from the graph itself: every **input node** (Number, Integer, Sliders, Boolean, String, Date, Choice, File / Folder path, Colour) becomes a field, and so does any node input you chose to show. The fields are the same editors as on the canvas, only roomier — scrub a number, pick a colour, browse for a file. A text field wraps and grows with its text (up to a limit, then it scrolls), so a long or multi-line value is never cut off; in a String input `Enter` starts a new line, in other text fields it does not. A dot beside the label marks a field you changed, ↺ puts it back to the value saved in the script, and the values you typed are remembered per script.
 * **What it shows.** After a run the Player lists the results: every **Watch** node (text, list and image watches) and any node you marked to show. Failed or warned nodes are listed underneath with the reason; **Copy** puts the results on the clipboard as text. `Esc` stops a running script, exactly as in the editor.
 * **Choosing what appears — in the editor.** `Ctrl+Alt+P` (*Show / Hide in Player*) toggles the selected nodes: an input or Watch node is shown unless you hide it, any other node is hidden unless you show it (its first result is then listed). *Show / Hide Unwired Inputs in Player* (palette, Node menu) offers a node's unconnected inputs as fields; the same choice is in a socket's right-click menu, and a shown node or input carries a small **▶** badge. *Script Description…* (Graph menu) sets the text shown under the script's name in the Player. All of this is saved in the `.dyc` file and is undoable.
 * **Run, Reset, Edit and File.** The bar at the bottom stays in view however long the form is: **Run** runs the script, **Reset** puts every field back to the saved value, *Edit* opens the script in the node editor (pane and file both), *File* shows it in Explorer.
 * **Safety.** A script that **changes the model** (a node that writes to the model or to disk: Appearance, Selection, Export…) says so above the form, and the first time you run it — and again whenever the file changes — CamelGraph asks for confirmation. Scripts that only read are never asked about. The answer is remembered for that file as it is now; edit the script and the question comes back.
-* **From other tools.** The add-in plugin `Dyncamelo.Run.DYNC` runs a script by path: `Execute("C:\\Scripts\\audit.dyc")` — for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation.
+* **From other tools.** The add-in plugin `CamelGraph.Run.DYNC` runs a script by path: `Execute("C:\\Scripts\\audit.dyc")` — for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation.
 * **Limits.** Nodes inside node groups are not offered in the form (put the input at the top level); the list stops at 2000 scripts; a script that needs a node library that is not installed is listed with what is missing and cannot run.
 
 ## Commands and shortcuts
@@ -333,7 +333,7 @@ The table of every command with its shortcut; see [Changing shortcuts](#changing
 
 | Setting | Values | Default | What it does |
 |---|---|---|---|
-| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name Dyncamelo-UpdateCheck, nothing about you or your models. Off means CamelGraph makes no network request of its own. The full policy is under Help > Privacy Policy. |
+| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name CamelGraph-UpdateCheck, nothing about you or your models. Off means CamelGraph makes no network request of its own. The full policy is under Help > Privacy Policy. |
 
 ### Diagnostics
 

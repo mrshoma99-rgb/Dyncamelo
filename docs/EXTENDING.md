@@ -1,8 +1,8 @@
-# Extending Dyncamelo — Write Your Own Nodes
+# Extending CamelGraph — Write Your Own Nodes
 
 CamelGraph is designed so that adding a node is a five-minute job: **a public static C# method with a couple of attributes is a node.** This guide walks through building a complete node pack, from an empty project to nodes showing up in the editor, and then covers the advanced path — interactive `NodeModel` nodes with custom WPF UI.
 
-> Packs are loaded from a `Packages` folder next to `Dyncamelo.App.dll`, the first time the editor or the Script Player opens in a session. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
+> Packs are loaded from a `Packages` folder next to `CamelGraph.App.dll`, the first time the editor or the Script Player opens in a session. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
 
 ## Contents
 
@@ -21,12 +21,12 @@ CamelGraph is designed so that adding a node is a five-minute job: **a public st
 
 ## 1. How node loading works
 
-At startup, CamelGraph's zero-touch loader (in `Dyncamelo.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
+At startup, CamelGraph's zero-touch loader (in `CamelGraph.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`CamelGraph.Nodes`, `CamelGraph.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
 
-The loader also scans the `Packages` folder next to `Dyncamelo.App.dll` (subfolders included):
+The loader also scans the `Packages` folder next to `CamelGraph.App.dll` (subfolders included):
 
 ```
-%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\<year>\Packages\<YourPackName>\
+%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\<year>\Packages\<YourPackName>\
     YourPack.dll            (plus any private dependencies)
 ```
 
@@ -36,7 +36,7 @@ Each pack folder is loaded in isolation: a pack that fails to load is reported i
 
 ### Step 1 — create the project
 
-A general-purpose pack (no Navisworks API) targets `netstandard2.0` and references `Dyncamelo.Core` only:
+A general-purpose pack (no Navisworks API) targets `netstandard2.0` and references `CamelGraph.Core` only:
 
 ```xml
 <!-- RebarToolkit.csproj -->
@@ -48,22 +48,24 @@ A general-purpose pack (no Navisworks API) targets `netstandard2.0` and referenc
     <RootNamespace>RebarToolkit</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <!-- During development, a project or DLL reference to Dyncamelo.Core.
-         (A Dyncamelo.Core NuGet package is planned alongside the M5 package manager.) -->
-    <Reference Include="Dyncamelo.Core">
-      <HintPath>path\to\Dyncamelo.Core.dll</HintPath>
+    <!-- During development, a project or DLL reference to CamelGraph.Core.
+         (A CamelGraph.Core NuGet package is planned alongside the M5 package manager.) -->
+    <Reference Include="CamelGraph.Core">
+      <HintPath>path\to\CamelGraph.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
 </Project>
 ```
 
-`Private=false` matters: CamelGraph already provides `Dyncamelo.Core` at runtime — your pack must not ship its own copy.
+`Private=false` matters: CamelGraph already provides `CamelGraph.Core` at runtime — your pack must not ship its own copy.
+
+*A pack built for version 0.48 or earlier, when the product was called Dyncamelo, references `Dyncamelo.Core.dll` and the value types `DyncameloColor`, `DyncameloPoint`, …; it has to be built again against `CamelGraph.Core.dll` to load in newer versions.*
 
 ### Step 2 — write a node
 
 ```csharp
-using Dyncamelo.Core.Loader; // the attributes: [NodeName], [NodeCategory], [NodeDescription], [MultiReturn]…
+using CamelGraph.Core.Loader; // the attributes: [NodeName], [NodeCategory], [NodeDescription], [MultiReturn]…
 
 namespace RebarToolkit;
 
@@ -106,7 +108,7 @@ public void BarWeight_D16_1m_IsAboutOnePoint58Kg()
 Copy the build output to the Packages folder and restart the editor (or use the library's refresh action):
 
 ```
-%APPDATA%\Autodesk\ApplicationPlugins\Dyncamelo.bundle\2024\Packages\RebarToolkit\RebarToolkit.dll
+%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\2024\Packages\RebarToolkit\RebarToolkit.dll
 ```
 
 Your nodes appear under *RebarToolkit → Rebar* in the node browser, with your descriptions as tooltips. Done.
@@ -140,7 +142,7 @@ public static Dictionary<string, object> ParseBarMark(string barMark)
 }
 ```
 
-**Value types across nodes:** ports can carry any CLR type. Prefer the shared `Dyncamelo.Core` value types (`Point`, `Vector`, `BoundingBox`, `Color`) where they fit so your nodes compose with the built-in library, and give custom types a meaningful `ToString()` so `Watch` shows something useful.
+**Value types across nodes:** ports can carry any CLR type. Prefer the shared `CamelGraph.Core` value types (`Point`, `Vector`, `BoundingBox`, `Color`) where they fit so your nodes compose with the built-in library, and give custom types a meaningful `ToString()` so `Watch` shows something useful.
 
 ## 4. Lists and replication — what your node sees
 
@@ -155,7 +157,7 @@ You do **not** write loops. Declare the rank you actually need and the engine's 
 The contract (see [ARCHITECTURE.md §9](ARCHITECTURE.md#9-error-handling-philosophy)):
 
 - **Throw for real failures.** Any exception is caught by the engine and shown as that node's `Error` state with your message. Throw `ArgumentException` and friends with messages an end user can act on ("Bar mark must look like '16-B-250', got 'x'"). The run continues; Navisworks never crashes.
-- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value; `Dyncamelo.Core` provides a warning-reporting mechanism for zero-touch nodes so the node shows a yellow `Warning` badge instead of a hard error — see the `Dyncamelo.Core` XML documentation for the exact API. Under replication, warnings aggregate rather than spam.
+- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value; `CamelGraph.Core` provides a warning-reporting mechanism for zero-touch nodes so the node shows a yellow `Warning` badge instead of a hard error — see the `CamelGraph.Core` XML documentation for the exact API. Under replication, warnings aggregate rather than spam.
 - **Never** show message boxes, write to the console, or swallow exceptions silently from library nodes.
 
 ## 6. Navisworks node packs
@@ -171,7 +173,7 @@ A pack that talks to the Navisworks API targets **net48** and adds the same comp
 <ItemGroup>
   <PackageReference Include="Speckle.Navisworks.API" Version="2024.0.0" ExcludeAssets="runtime" />
   <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
-  <Reference Include="Dyncamelo.Core" ... Private="false" />
+  <Reference Include="CamelGraph.Core" ... Private="false" />
 </ItemGroup>
 ```
 
@@ -183,16 +185,16 @@ Rules for Navisworks nodes (the built-in library follows the same ones):
 2. Emit and accept **flat `List<ModelItem>`** so your nodes compose with search, sets, clash, and appearance nodes — it is the lingua franca of the Navisworks library.
 3. Take a `Document` parameter (it defaults to the active document when unconnected) rather than reading `Application.ActiveDocument` mid-method — it keeps nodes testable and multi-doc-ready.
 4. Mutate the document only through the documented `Document*` edit APIs (`DocumentClashTests`, `DocumentTimeliner`, `Document.Models.Override...`) so the Navisworks UI stays in sync and the host transaction scoping gives users one undo step per run.
-5. Convert at the boundary: accept/return `Dyncamelo.Core` geometry (`Point`, `BoundingBox`, `Color`) instead of `Point3D`/`BoundingBox3D`/`Api.Color`, so downstream pure nodes can consume your outputs.
+5. Convert at the boundary: accept/return `CamelGraph.Core` geometry (`Point`, `BoundingBox`, `Color`) instead of `Point3D`/`BoundingBox3D`/`Api.Color`, so downstream pure nodes can consume your outputs.
 
 ## 7. Custom interactive nodes (NodeModel + WPF view)
 
 Zero-touch covers everything that is "inputs in, outputs out". Subclass `NodeModel` only when a node needs state or UI of its own — inline editors (sliders), variable ports (`List.Create`), pass-through viewers (`Watch`), or OS dialogs (`File Path`). The built-in interactive nodes are implemented through exactly this seam, so it is a supported, stable extension point — not internals.
 
-The shape of it (illustrative — the `Dyncamelo.Core` XML docs are the normative API reference):
+The shape of it (illustrative — the `CamelGraph.Core` XML docs are the normative API reference):
 
 ```csharp
-using Dyncamelo.Core.Graph;
+using CamelGraph.Core.Graph;
 
 namespace RebarToolkit;
 
@@ -218,14 +220,14 @@ public class RebarDiameterSlider : NodeModel
 
     // Evaluation: publish the current value to the out-port.
     // Persistence: the node's state (Diameter) round-trips through the .dyc "data" bag.
-    // See Dyncamelo.Core docs for the exact override points.
+    // See CamelGraph.Core docs for the exact override points.
 }
 ```
 
 Two halves, strictly separated:
 
 - **The model** lives in your pack assembly (no WPF references) — ports, state, dirty-marking, evaluation, `.dyc` persistence of its `data` bag. Because it is UI-free it remains unit-testable on Linux like everything else.
-- **The view** is a WPF `DataTemplate` keyed by your model type, supplied in a companion UI assembly loaded from the same pack folder. `Dyncamelo.UI` resolves templates for node models it does not know from loaded packs; a model without a template still works — it renders with the default node chrome (ports and name), just without custom controls.
+- **The view** is a WPF `DataTemplate` keyed by your model type, supplied in a companion UI assembly loaded from the same pack folder. `CamelGraph.UI` resolves templates for node models it does not know from loaded packs; a model without a template still works — it renders with the default node chrome (ports and name), just without custom controls.
 
 Keep custom UI minimal (a slider, a text box, a swatch). Anything heavier belongs in a dialog opened from the node, not on the canvas.
 
@@ -243,12 +245,12 @@ Before publishing a pack:
 - [ ] A `[MultiReturn]` node also declares `[PortKinds(...)]`, one kind per output, so its sockets are coloured before the graph has run (a test fails when it is missing).
 - [ ] Errors thrown with actionable messages; recoverable issues warn + return null; no UI, no console, no threads.
 - [ ] Pure logic covered by xunit tests (runnable on Linux).
-- [ ] Pack folder contains only your DLLs (+ third-party MIT/Apache/BSD dependencies you are licensed to ship) — never `Dyncamelo.*` or `Autodesk.*` assemblies.
+- [ ] Pack folder contains only your DLLs (+ third-party MIT/Apache/BSD dependencies you are licensed to ship) — never `CamelGraph.*` or `Autodesk.*` assemblies.
 - [ ] LICENSE file included in the pack folder; license shown in your README.
 
 ## 9. Making a node look right in the editor
 
-The editor builds a node's rows from your method signature, so most nodes need nothing extra. A handful of optional attributes (all in `Dyncamelo.Core.Loader`) tune how the rows look. They are **advisory**: none of them changes the node's definition id, so adding one to an existing parameter never breaks saved `.dyc` files.
+The editor builds a node's rows from your method signature, so most nodes need nothing extra. A handful of optional attributes (all in `CamelGraph.Core.Loader`) tune how the rows look. They are **advisory**: none of them changes the node's definition id, so adding one to an existing parameter never breaks saved `.dyc` files.
 
 | You write | The editor shows |
 |---|---|
@@ -287,4 +289,4 @@ Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its 
 
 Without an alias, a wire or value whose port no longer exists is dropped when the graph opens; the editor then says so in the status bar ("*N connections or values could not be restored*") instead of losing it silently.
 
-After adding, renaming or retiring a node, run `python3 tools/generate_node_catalog.py` and commit `docs/dyncamelo-nodes.json` and `docs/NODE_CATALOG.md`; CI fails when they are out of date.
+After adding, renaming or retiring a node, run `python3 tools/generate_node_catalog.py` and commit `docs/camelgraph-nodes.json` and `docs/NODE_CATALOG.md`; CI fails when they are out of date.

@@ -11,8 +11,8 @@
     {
       "Id": "603dfcb1651b8b2abc685f3c818cd0a3",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Risky step",
       "X": 0.0,
       "Y": 320.0,
@@ -52,8 +52,8 @@
     {
       "Id": "6bc3123197edb9307f1484acc68140b6",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.Try@object,object",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.FlowNodes.Try@object,object",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Flow.Try",
       "X": 350.0,
       "Y": 240.0,
@@ -118,8 +118,8 @@
     {
       "Id": "67f5f7a0272fe1d491848061f1625f26",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.FlowNodes.When@object,bool",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.FlowNodes.When@object,bool",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Only if it failed",
       "X": 700.0,
       "Y": 300.0,
@@ -151,8 +151,8 @@
     {
       "Id": "37b8027b6843a8c65fd2bc38549a9f6e",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.FileExtraNodes.WriteLog@string,string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.FileExtraNodes.WriteLog@string,string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Log.Write",
       "X": 1080.0,
       "Y": 240.0,
@@ -165,7 +165,7 @@
           "Level": -1,
           "UseLevels": false,
           "KeepListStructure": false,
-          "UserValue": "C:\\Logs\\dyncamelo.log"
+          "UserValue": "C:\\Logs\\camelgraph.log"
         },
         {
           "Name": "message",

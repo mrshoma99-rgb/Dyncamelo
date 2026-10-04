@@ -23,7 +23,7 @@
         }
       ],
       "Data": {
-        "Value": "dyncamelo makes navisworks programmable"
+        "Value": "camelgraph makes navisworks programmable"
       }
     },
     {
@@ -47,8 +47,8 @@
     {
       "Id": "d211f47d0c9449ffbc7f1f9a3ee3ec85",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Split@string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.Split@string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.Split",
       "X": 320.0,
       "Y": 40.0,
@@ -80,8 +80,8 @@
     {
       "Id": "997e54fa04fd4b15b0105fb5ee26d801",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.ListNodes.Count@System.Collections.Generic.IList<object>",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "List.Count",
       "X": 620.0,
       "Y": 200.0,
@@ -106,8 +106,8 @@
     {
       "Id": "40bf8abbaf804b68bc558e5d81456e23",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.FromObject@object",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.FromObject@object",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.FromObject",
       "X": 880.0,
       "Y": 200.0,
@@ -150,8 +150,8 @@
     {
       "Id": "7314910963e64124adf0857eeaaddb7a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Concat@string,string",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.Concat@string,string",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.Concat",
       "X": 1140.0,
       "Y": 120.0,
@@ -201,8 +201,8 @@
     {
       "Id": "75f12f39d66546429f2ea1ea46988e27",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.StringNodes.Join@string,System.Collections.Generic.IList<object>",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.StringNodes.Join@string,System.Collections.Generic.IList<object>",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "String.Join",
       "X": 620.0,
       "Y": 380.0,
@@ -355,7 +355,7 @@
   "Notes": [
     {
       "Id": "688c049afd4647558755862f50d07910",
-      "Text": "Expected: Count report = 'Word count: 4', Joined words = 'dyncamelo, makes, navisworks, programmable'.",
+      "Text": "Expected: Count report = 'Word count: 4', Joined words = 'camelgraph, makes, navisworks, programmable'.",
       "X": 0.0,
       "Y": -120.0
     }

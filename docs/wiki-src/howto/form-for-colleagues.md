@@ -26,7 +26,7 @@ Goal: build a graph whose inputs appear as a form in the **Script Player**, so a
 6. Add `Table.ToExcelFile` (*Table*). Wire the table into `table` and `path` from `File Path` into `path`. Type `Large items` into `sheet`.
 7. Add a `Watch Table` (*Display*), rename it `Items found`, and wire the table into it. Press ++f5++ and check it works.
 8. Choose **Graph ▸ Script Description…** and type what the script does. It is shown above the form.
-9. Save with ++ctrl+s++ into `Documents\Dyncamelo\Scripts`.
+9. Save with ++ctrl+s++ into `Documents\CamelGraph\Scripts`.
 
 ![The player-form graph: a Number, a Choice and a File Path feeding a search, a table and Table.ToExcelFile.](../../images/wiki-graph-player-form.png)
 
@@ -48,7 +48,7 @@ After the run the Player shows a results card: a green or red dot with a summary
 
 ## If it does not work
 
-* The script is not in the list: save it in `Documents\Dyncamelo\Scripts` or add its folder under **Script folders**, then press ↻.
+* The script is not in the list: save it in `Documents\CamelGraph\Scripts` or add its folder under **Script folders**, then press ↻.
 * The Player says a node is not installed: the script cannot run until it is. See [A graph opens with a warning, or with missing nodes](../troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes).
 * The confirmation question appears: [that is a safety check, not an error](../troubleshooting.md#the-script-player-asks-me-to-confirm-a-script).
 

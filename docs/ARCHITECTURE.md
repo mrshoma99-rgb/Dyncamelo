@@ -1,6 +1,6 @@
-# Dyncamelo Architecture
+# CamelGraph Architecture
 
-How Dyncamelo is put together: the solution layout, the graph model, the execution engine pipeline, zero-touch node loading, the `.dyc` file format, the threading model, and the extension points. The milestone plan and rationale for the decisions below live in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+How CamelGraph is put together: the solution layout, the graph model, the execution engine pipeline, zero-touch node loading, the `.dyc` file format, the threading model, and the extension points. The milestone plan and rationale for the decisions below live in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 ---
 
@@ -11,17 +11,17 @@ Five projects, strictly layered. The rule that generates the whole structure: **
 ```mermaid
 graph TD
     subgraph "Windows only (net48)"
-        APP["Dyncamelo.App<br/>Navisworks add-in<br/>AddInPlugin + DockPanePlugin"]
-        UI["Dyncamelo.UI<br/>WPF editor (Nodify 7.3.0)"]
-        NAV["Dyncamelo.Navisworks<br/>Navisworks node library"]
+        APP["CamelGraph.App<br/>Navisworks add-in<br/>AddInPlugin + DockPanePlugin"]
+        UI["CamelGraph.UI<br/>WPF editor (Nodify 7.3.0)"]
+        NAV["CamelGraph.Navisworks<br/>Navisworks node library"]
     end
     subgraph "Portable (netstandard2.0) — builds and tests on Linux"
-        NODES["Dyncamelo.Nodes<br/>general node library"]
-        CORE["Dyncamelo.Core<br/>graph model + engine + loader + .dyc<br/>(Newtonsoft.Json 13.0.3)"]
+        NODES["CamelGraph.Nodes<br/>general node library"]
+        CORE["CamelGraph.Core<br/>graph model + engine + loader + .dyc<br/>(Newtonsoft.Json 13.0.3)"]
     end
     subgraph "Tests (net8.0, xunit — run on Linux CI)"
-        CT["Dyncamelo.Core.Tests"]
-        NT["Dyncamelo.Nodes.Tests"]
+        CT["CamelGraph.Core.Tests"]
+        NT["CamelGraph.Nodes.Tests"]
     end
 
     APP --> UI
@@ -39,15 +39,15 @@ graph TD
 
 | Project | Target | Contents | May reference |
 |---|---|---|---|
-| `Dyncamelo.Core` | netstandard2.0 | `NodeModel`, ports, connectors, workspace; execution engine; replication; coercion; zero-touch loader; `.dyc` serializer; core value types (`Point`, `Vector`, `BoundingBox`, `Color`) | Newtonsoft.Json only |
-| `Dyncamelo.Nodes` | netstandard2.0 | General-purpose zero-touch nodes (Math, Logic, String, List, Dictionary, Color, DateTime, File/CSV, Geometry) and UI-agnostic interactive `NodeModel`s (sliders, Watch, Note, List.Create) | Core only |
-| `Dyncamelo.Navisworks` | net48 | All Navisworks nodes; boundary converters (Core geometry ↔ `Point3D`/`Vector3D`/`BoundingBox3D`/`Api.Color`); transaction/undo scoping host | Core + compile-time Navisworks API packages |
-| `Dyncamelo.UI` | net48, WPF | Nodify canvas, node library browser, inline editors/views for interactive nodes, run controls, state badges | Core (+ Nodes for interactive-node view models) |
-| `Dyncamelo.App` | net48, WPF | `AddInPlugin` (ribbon entry), `DockPanePlugin` (hosts the editor), composition root: loads node libraries, wires engine to document events | everything above |
+| `CamelGraph.Core` | netstandard2.0 | `NodeModel`, ports, connectors, workspace; execution engine; replication; coercion; zero-touch loader; `.dyc` serializer; core value types (`Point`, `Vector`, `BoundingBox`, `Color`) | Newtonsoft.Json only |
+| `CamelGraph.Nodes` | netstandard2.0 | General-purpose zero-touch nodes (Math, Logic, String, List, Dictionary, Color, DateTime, File/CSV, Geometry) and UI-agnostic interactive `NodeModel`s (sliders, Watch, Note, List.Create) | Core only |
+| `CamelGraph.Navisworks` | net48 | All Navisworks nodes; boundary converters (Core geometry ↔ `Point3D`/`Vector3D`/`BoundingBox3D`/`Api.Color`); transaction/undo scoping host | Core + compile-time Navisworks API packages |
+| `CamelGraph.UI` | net48, WPF | Nodify canvas, node library browser, inline editors/views for interactive nodes, run controls, state badges | Core (+ Nodes for interactive-node view models) |
+| `CamelGraph.App` | net48, WPF | `AddInPlugin` (ribbon entry), `DockPanePlugin` (hosts the editor), composition root: loads node libraries, wires engine to document events | everything above |
 
 The Navisworks API is provided at compile time by `Speckle.Navisworks.API 2024.0.0` and `Chuongmep.Navis.Api.Autodesk.Navisworks.Timeliner 2023.0.7`, both with `ExcludeAssets="runtime"`; at runtime the add-in binds the genuine assemblies of the host Navisworks installation (they are not strong-named, so the 2023-surface TimeLiner reference binds to the host's 2024 DLL — caveat tracked in the [plan](IMPLEMENTATION_PLAN.md#9-known-caveats-tracked-honestly)). `Microsoft.NETFramework.ReferenceAssemblies` (`PrivateAssets="all"`) lets the net48 projects compile with the .NET 8 SDK on Linux.
 
-## 2. Graph model (`Dyncamelo.Core`)
+## 2. Graph model (`CamelGraph.Core`)
 
 The workspace is a directed acyclic graph:
 
@@ -148,11 +148,11 @@ Loader rules:
 - **Discovery**: public static methods carrying `[NodeName]` in public static classes. `[NodeCategory]` places the node in the library tree; `[NodeDescription]` becomes the tooltip/help text.
 - **Ports**: each parameter becomes an input port (name = parameter name, advisory type = parameter type, declared rank inferred per §4). **Optional parameters become defaulted ports** — unconnected, they supply their default; connected, the wire wins. The return value becomes the output port.
 - **Multi-output**: a method returning `Dictionary<string, object>` and tagged `[MultiReturn("a", "b")]` gets one output port per named key.
-- **Document defaulting**: in `Dyncamelo.Navisworks`, `Document` parameters resolve to the active document when unconnected, so most graphs never wire `Document.Current` explicitly.
+- **Document defaulting**: in `CamelGraph.Navisworks`, `Document` parameters resolve to the active document when unconnected, so most graphs never wire `Document.Current` explicitly.
 - **Isolation**: a library that fails to load (bad image, missing dependency, duplicate node names) is reported and skipped — it never takes down the editor. Duplicate `[NodeName]`s within one load are rejected with a clear message.
-- **Sources**: built-in libraries (`Dyncamelo.Nodes`, `Dyncamelo.Navisworks`) are loaded by `Dyncamelo.App` at startup; a `Packages` folder next to `Dyncamelo.App.dll` (`…\Dyncamelo.bundle\<year>\Packages\`) is scanned the same way (see [EXTENDING.md](EXTENDING.md)).
+- **Sources**: built-in libraries (`CamelGraph.Nodes`, `CamelGraph.Navisworks`) are loaded by `CamelGraph.App` at startup; a `Packages` folder next to `CamelGraph.App.dll` (`…\CamelGraph.bundle\<year>\Packages\`) is scanned the same way (see [EXTENDING.md](EXTENDING.md)).
 
-Interactive nodes (sliders, Watch, Note, `List.Create`'s growable ports, Color Picker, File Path) can't be expressed as a static function; they subclass `NodeModel` in Core/Nodes and get a WPF view in `Dyncamelo.UI` via `DataTemplate` (§8, extension point 4).
+Interactive nodes (sliders, Watch, Note, `List.Create`'s growable ports, Color Picker, File Path) can't be expressed as a static function; they subclass `NodeModel` in Core/Nodes and get a WPF view in `CamelGraph.UI` via `DataTemplate` (§8, extension point 4).
 
 ## 6. The `.dyc` file format
 
@@ -169,7 +169,7 @@ A `.dyc` file is a versioned JSON envelope (UTF-8, Newtonsoft.Json). Shape of fo
   "nodes": [
     {
       "id": "a1b2c3d4-0001-4000-8000-000000000001",
-      "type": "Dyncamelo.Nodes.Input.StringInput",
+      "type": "CamelGraph.Nodes.Input.StringInput",
       "kind": "nodeModel",
       "name": "String",
       "x": 120.0,
@@ -180,7 +180,7 @@ A `.dyc` file is a versioned JSON envelope (UTF-8, Newtonsoft.Json). Shape of fo
     },
     {
       "id": "a1b2c3d4-0002-4000-8000-000000000002",
-      "type": "Dyncamelo.Navisworks.SearchNodes.ByPropertyContains@Dyncamelo.Navisworks",
+      "type": "CamelGraph.Navisworks.SearchNodes.ByPropertyContains@CamelGraph.Navisworks",
       "kind": "zeroTouch",
       "name": "Search.ByPropertyContains",
       "x": 420.0,
@@ -222,15 +222,15 @@ The full statement lives in the [plan, §7](IMPLEMENTATION_PLAN.md#7-threading-m
 2. The engine is **synchronous on the calling thread**: no worker threads, no parallel node execution.
 3. The editor triggers runs from its WPF **dispatcher thread, which is the Navisworks main thread** for a docked pane — so Navisworks nodes execute on the correct thread *by construction*, with no marshalling layer.
 4. Responsiveness comes from **cancellation between nodes** and the Automatic-mode **coalescing debounce**, not from background threads.
-5. Navisworks **write nodes run inside a transaction/undo scope** owned by the node host in `Dyncamelo.Navisworks` (one undo entry per run); all mutations go through the documented `Document*` edit APIs so the host UI stays in sync.
+5. Navisworks **write nodes run inside a transaction/undo scope** owned by the node host in `CamelGraph.Navisworks` (one undo entry per run); all mutations go through the documented `Document*` edit APIs so the host UI stays in sync.
 6. Debug builds **assert the expected thread** at the Navisworks node-host boundary.
 
 ## 8. Extension points
 
 Designed-in seams, in increasing order of effort:
 
-1. **A new zero-touch node** — one attributed static method in `Dyncamelo.Nodes` (pure) or `Dyncamelo.Navisworks` (API-touching). No engine, UI, or serializer changes. This is the default way to grow the product.
-2. **A node pack** — a separate DLL referencing `Dyncamelo.Core` (and the compile-time Navisworks packages if needed), dropped into `%APPDATA%\Dyncamelo\Packages\<PackName>\` (M3+). Same loader, full error isolation, per-pack enable/disable. Tutorial: [EXTENDING.md](EXTENDING.md).
+1. **A new zero-touch node** — one attributed static method in `CamelGraph.Nodes` (pure) or `CamelGraph.Navisworks` (API-touching). No engine, UI, or serializer changes. This is the default way to grow the product.
+2. **A node pack** — a separate DLL referencing `CamelGraph.Core` (and the compile-time Navisworks packages if needed), dropped into `%APPDATA%\CamelGraph\Packages\<PackName>\` (M3+). Same loader, full error isolation, per-pack enable/disable. Tutorial: [EXTENDING.md](EXTENDING.md).
 3. **Custom value types** — nodes may exchange any CLR type; the engine treats unknown types as opaque `object`s (rank 0). Provide a good `ToString()` for Watch.
 4. **A custom interactive node** — subclass `NodeModel` (declare ports, persist state into `data`, implement evaluation) and supply a WPF `DataTemplate` in the UI layer keyed by the model type. Sliders/Watch/Note are implemented through exactly this seam — it is proven, not speculative.
 5. **Engine consumers** — the engine publishes node-state/run-lifecycle events; the UI's badges/log are one subscriber. Headless hosts (CLI graph runner, future test harnesses) can drive `EngineController` directly since Core has no UI dependency.
@@ -240,4 +240,4 @@ Designed-in seams, in increasing order of effort:
 
 - A node that **throws** → `Error` state with the exception message; run continues; downstream of a failed node does not execute with garbage (missing upstream values behave like unconnected required inputs).
 - A **recoverable issue** (property not found, parse failure, divide by zero, empty list in Longest lacing) → `Warning` state, `null` (or documented sentinel like `NaN`) result, run continues. During replication, warnings aggregate ("312 of 5,000 items missing property") instead of spamming.
-- The graph run **never crashes the host**. Anything that escapes these rules is a Dyncamelo bug by definition and a release blocker.
+- The graph run **never crashes the host**. Anything that escapes these rules is a CamelGraph bug by definition and a release blocker.

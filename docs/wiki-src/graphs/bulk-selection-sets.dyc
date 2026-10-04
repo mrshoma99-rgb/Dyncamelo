@@ -11,8 +11,8 @@
     {
       "Id": "d3649d5ed8e8183d9bfa3381f7f89d33",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
-      "Assembly": "Dyncamelo.Navisworks",
+      "DefinitionId": "CamelGraph.Navisworks.SelectionSetNodes.BulkByPropertyValues@string,string,string,Autodesk.Navisworks.Api.Document",
+      "Assembly": "CamelGraph.Navisworks",
       "Name": "SelectionSets.BulkByPropertyValues",
       "X": 0.0,
       "Y": 110.0,

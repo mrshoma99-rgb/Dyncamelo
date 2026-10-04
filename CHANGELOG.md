@@ -1,10 +1,24 @@
 # Changelog
 
-All notable changes to Dyncamelo are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
+All notable changes to CamelGraph (called Dyncamelo up to version 0.48) are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
 
 Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.47.0](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
+
+## Unreleased
+
+Dyncamelo is now called **CamelGraph**, with a new logo, and everything on disk carries the new name. Installing the new version replaces an old Dyncamelo install. Entries below this one use the name the program had at the time.
+
+### Changed
+* **New name and logo** on screen: the ribbon button and its tooltips, the editor header and start screen, About, dialogs, the installer, the Windows Apps entry (*CamelGraph for Navisworks*), the diagnostics, self-test and performance reports, the colour theme (*CamelGraph Dark*), the `.dyc` file filter and the privacy policy. The logo is two node ends and the wire between them; the Autodesk App Store icons and the wiki use it too.
+* **New file names.** The installer is `CamelGraphSetup.exe`, the zip `CamelGraph-<version>-navisworks.zip`, the bundle folder `CamelGraph.bundle` with `CamelGraph.App.dll`, `CamelGraph.Core.dll`, `CamelGraph.UI.dll`, `CamelGraph.Nodes.dll` and `CamelGraph.Navisworks.dll`, the script `install-camelgraph.bat`, the node catalogue `docs/camelgraph-nodes.json` and the command-line tool `camelgraph`. Settings are in `%APPDATA%\CamelGraph` and the default scripts folder is `Documents\CamelGraph\Scripts`.
+* **Installing replaces an old install.** `CamelGraphSetup.exe` and `install-camelgraph.bat` remove the old `Dyncamelo.bundle` folder and its entry in Windows Settings > Apps before they install; removing CamelGraph also removes a leftover Dyncamelo install. The installer window says "Install (replaces Dyncamelo v…)" when it finds one.
+* **Settings and scripts carry over.** The first start moves `%APPDATA%\Dyncamelo` (settings, recent files, favourite nodes, autosaved copies, the error log) to `%APPDATA%\CamelGraph`. The Script Player adds `Documents\Dyncamelo\Scripts` to its folders once, so the scripts there still show up.
+* **Old graphs open as before.** Node ids written by earlier versions (they start with `Dyncamelo.`) are upgraded when a graph loads, and so are favourite and recent nodes and the saved *Dyncamelo Dark* theme. The `.dyc` format has not changed, and its envelope key stays `Dyncamelo`, so graphs saved now still open in older versions.
+* **Custom property tab.** `Properties.SetCustom` and the cluster nodes write to a tab called *CamelGraph Data* by default; it was *Dyncamelo Data*. A tab already written to a model keeps its old name, so a graph that reads that tab by name needs the old name typed in.
+* **Plug-in ids.** The Navisworks plug-ins are `CamelGraph.Command.DYNC`, `CamelGraph.DockPane.DYNC`, `CamelGraph.Launch.DYNC`, `CamelGraph.PlayerPane.DYNC` and `CamelGraph.Run.DYNC` (the last was `Dyncamelo.Run.DYNC`): a script, add-in or Batch Utility job that runs a graph through `ExecuteAddInPlugin` needs the new id.
+* **For node pack authors.** The libraries are `CamelGraph.*` and the value types `CamelGraphColor`, `CamelGraphPoint`, `CamelGraphVector`, `CamelGraphBoundingBox` and `CamelGraphTable`. A pack built for 0.48 or earlier has to be built again against `CamelGraph.Core.dll`.
 
 ## 0.48.0 - 2026-10-03
 

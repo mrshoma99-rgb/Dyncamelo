@@ -68,8 +68,8 @@
     {
       "Id": "302e585a9d0b4bcbad82074b40ddacdc",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Add@double,double",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.MathNodes.Add@double,double",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Add",
       "X": 320.0,
       "Y": 40.0,
@@ -101,8 +101,8 @@
     {
       "Id": "e75dbcdb23bc4428b8bbf132deb76d7a",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Multiply@double,double",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.MathNodes.Multiply@double,double",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Multiply",
       "X": 620.0,
       "Y": 90.0,
@@ -134,8 +134,8 @@
     {
       "Id": "5cf8b3c0dfaa43589a636ff8f3ef1912",
       "NodeType": "ZeroTouch",
-      "DefinitionId": "Dyncamelo.Nodes.MathNodes.Round@double,int",
-      "Assembly": "Dyncamelo.Nodes",
+      "DefinitionId": "CamelGraph.Nodes.MathNodes.Round@double,int",
+      "Assembly": "CamelGraph.Nodes",
       "Name": "Math.Round",
       "X": 900.0,
       "Y": 90.0,

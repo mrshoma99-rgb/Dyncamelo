@@ -102,7 +102,7 @@ The package already contains the finished page, `Contents/Resources/Help/index.h
 
 **Getting started.** Open a model. On the BIMCamel tab, in the Visual Programming panel, click CamelGraph. Open File > Sample Graphs and pick one, then press Run. To add a node press Space on the empty canvas, type a word and press Enter; drag from a dot on one node to a dot on another to connect them. F1 lists every shortcut.
 
-**Uninstallation.** Close Navisworks and remove CamelGraph in Windows Settings > Apps. Your graphs and the settings folder `%APPDATA%\Dyncamelo` are left alone.
+**Uninstallation.** Close Navisworks and remove CamelGraph in Windows Settings > Apps. Your graphs and the settings folder `%APPDATA%\CamelGraph` are left alone.
 
 **Support.** https://github.com/mrshoma99-rgb/Dyncamelo/issues, or the support email. Include the text from Help > Copy Diagnostics.
 

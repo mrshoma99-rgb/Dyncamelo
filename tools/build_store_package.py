@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Build the Autodesk App Store package for CamelGraph (previously Dyncamelo) from the staged release bundle.
 
-The GitHub release ships ``Dyncamelo.bundle`` with one folder per Navisworks year (``2024``, ``2025``, ``2026``). The App Store wants
-the layout Autodesk documents for Navisworks apps -- ``Dyncamelo.bundle/PackageContents.xml`` and ``Contents/v21``, ``v22``, ``v23`` (the
+The GitHub release ships ``CamelGraph.bundle`` with one folder per Navisworks year (``2024``, ``2025``, ``2026``). The App Store wants
+the layout Autodesk documents for Navisworks apps -- ``CamelGraph.bundle/PackageContents.xml`` and ``Contents/v21``, ``v22``, ``v23`` (the
 Navisworks API major version, 2024 = 21) -- and a PackageContents.xml with the attributes a downloadable app needs (Author, Name,
 Description, Icon, HelpFile, ProductCode, UpgradeCode, and the company's name and email). This script takes the staged bundle that
 the release workflow has already built and signed, re-lays it out, writes that manifest, checks the result and zips it.
 
-    python3 tools/build_store_package.py --staging staging/Dyncamelo.bundle --version v0.45.1 --out store-package
+    python3 tools/build_store_package.py --staging staging/CamelGraph.bundle --version v0.45.1 --out store-package
     python3 tools/build_store_package.py ... --submission     # also fails while the support email is empty
     python3 tools/build_store_package.py --self-test
 
 Outputs, in --out:
-    CamelGraph-AppStore-<version>.zip     the package (a single top-level Dyncamelo.bundle folder)
+    CamelGraph-AppStore-<version>.zip     the package (a single top-level CamelGraph.bundle folder)
     submission/                           listing.md, README.md, icons, screenshots, privacy policy, package-report.txt
 
 Exit status: 0 = built (warnings may be printed), 1 = could not build, 2 = built but not ready to submit (--submission only).
@@ -41,11 +41,11 @@ STORE = REPO / "appstore"
 YEARS: Dict[str, Tuple[str, str]] = {"2024": ("v21", "Nw21"), "2025": ("v22", "Nw22"), "2026": ("v23", "Nw23")}
 PLATFORMS = (("NAVMAN", "Manage"), ("NAVSIM", "Simulate"))
 
-PLUGIN_DLL = "Dyncamelo.App.dll"
-MARKER_FILE = "distribution.txt"      # next to the DLLs; Dyncamelo.Core.Editing.DistributionChannel reads it
+PLUGIN_DLL = "CamelGraph.App.dll"
+MARKER_FILE = "distribution.txt"      # next to the DLLs; CamelGraph.Core.Editing.DistributionChannel reads it
 MARKER_TEXT = "autodesk-app-store"
 RESOURCES = "Contents/Resources"
-ICON_PATH = RESOURCES + "/Dyncamelo.ico"
+ICON_PATH = RESOURCES + "/CamelGraph.ico"
 HELP_PATH = RESOURCES + "/Help/index.html"
 
 GUID_RE = re.compile(r"^\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\}$")
@@ -53,7 +53,7 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s.]+$")
 VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 
 # The store requires every DLL name to be unique within a Navisworks session. These are third-party names other add-ins are likely to
-# ship too (or Navisworks itself does); the build prints them so the publisher can weigh the risk. Dyncamelo's own are all prefixed.
+# ship too (or Navisworks itself does); the build prints them so the publisher can weigh the risk. CamelGraph's own are all prefixed.
 GENERIC_DLL_NAMES = ("Newtonsoft.Json.dll", "Nodify.dll", "AutomaticGraphLayout.dll", "BIMCamel.dll")
 
 EMAIL_EMPTY = "CompanyDetails@Email is empty: the store requires it for a download (set supportEmail in appstore/publisher.json)"
@@ -91,7 +91,7 @@ def app_version(tag: str) -> str:
 def product_code(upgrade_code: str, version: str) -> str:
     """Stable per version (an MSI wants a new product code for each version, the same upgrade code for all of them)."""
     namespace = uuid.UUID(upgrade_code.strip("{}"))
-    return "{" + str(uuid.uuid5(namespace, "Dyncamelo " + version)).upper() + "}"
+    return "{" + str(uuid.uuid5(namespace, "CamelGraph " + version)).upper() + "}"
 
 
 def build_manifest(pub: dict, version: str) -> str:
@@ -160,7 +160,7 @@ def stage_package(staging: Path, pkg: Path, pub: dict, version: str, repo: Path)
     resources = pkg / RESOURCES
     (resources / "Help").mkdir(parents=True)
     store = repo / "appstore"
-    shutil.copyfile(store / "assets" / "Dyncamelo.ico", pkg / ICON_PATH)
+    shutil.copyfile(store / "assets" / "CamelGraph.ico", pkg / ICON_PATH)
     template = (store / "help" / "index.html").read_text(encoding="utf-8")
     (pkg / HELP_PATH).write_text(render_help(template, version, pub.get("supportEmail", "").strip()), encoding="utf-8")
     for name in ("PRIVACY.md", "LICENSE", "THIRD-PARTY-NOTICES.md"):
@@ -312,13 +312,13 @@ def build(staging: Path, version_tag: str, out: Path, publisher: Path, submissio
 # ----------------------------------------------------------------------------------------------------------------------------------
 
 def _fake_staging(root: Path) -> Path:
-    staging = root / "staging" / "Dyncamelo.bundle"
+    staging = root / "staging" / "CamelGraph.bundle"
     for year in YEARS:
         folder = staging / year
         (folder / "en-US").mkdir(parents=True)
-        for name in (PLUGIN_DLL, "Dyncamelo.Core.dll", "Dyncamelo.UI.dll", "Nodify.dll", "Newtonsoft.Json.dll"):
+        for name in (PLUGIN_DLL, "CamelGraph.Core.dll", "CamelGraph.UI.dll", "Nodify.dll", "Newtonsoft.Json.dll"):
             (folder / name).write_bytes(b"MZ" + year.encode())
-        (folder / "en-US" / "Dyncamelo.xaml").write_text("<x/>", encoding="utf-8")
+        (folder / "en-US" / "CamelGraph.xaml").write_text("<x/>", encoding="utf-8")
     return staging
 
 
@@ -341,7 +341,7 @@ def self_test() -> int:
             publisher.write_text(json.dumps(data), encoding="utf-8")
             use = staging
             if drop_year:
-                use = root / ("staging-" + name) / "Dyncamelo.bundle"
+                use = root / ("staging-" + name) / "CamelGraph.bundle"
                 shutil.copytree(staging, use)
                 shutil.rmtree(use / drop_year)
             out = root / ("out-" + name)
@@ -363,24 +363,24 @@ def self_test() -> int:
             with zipfile.ZipFile(zips[0]) as archive:
                 names = set(archive.namelist())
                 for must in (
-                    "Dyncamelo.bundle/PackageContents.xml",
-                    "Dyncamelo.bundle/Contents/v21/Dyncamelo.App.dll",
-                    "Dyncamelo.bundle/Contents/v22/Dyncamelo.App.dll",
-                    "Dyncamelo.bundle/Contents/v23/Dyncamelo.App.dll",
-                    "Dyncamelo.bundle/Contents/v21/en-US/Dyncamelo.xaml",
-                    "Dyncamelo.bundle/Contents/v22/distribution.txt",
-                    "Dyncamelo.bundle/Contents/Resources/Dyncamelo.ico",
-                    "Dyncamelo.bundle/Contents/Resources/Help/index.html",
+                    "CamelGraph.bundle/PackageContents.xml",
+                    "CamelGraph.bundle/Contents/v21/CamelGraph.App.dll",
+                    "CamelGraph.bundle/Contents/v22/CamelGraph.App.dll",
+                    "CamelGraph.bundle/Contents/v23/CamelGraph.App.dll",
+                    "CamelGraph.bundle/Contents/v21/en-US/CamelGraph.xaml",
+                    "CamelGraph.bundle/Contents/v22/distribution.txt",
+                    "CamelGraph.bundle/Contents/Resources/CamelGraph.ico",
+                    "CamelGraph.bundle/Contents/Resources/Help/index.html",
                 ):
                     check(must in names, f"the zip should contain {must}")
-                check(not any(n.startswith("Dyncamelo.bundle/20") for n in names), "the per-year folders must not be in the store package")
-                manifest = ET.fromstring(archive.read("Dyncamelo.bundle/PackageContents.xml"))
+                check(not any(n.startswith("CamelGraph.bundle/20") for n in names), "the per-year folders must not be in the store package")
+                manifest = ET.fromstring(archive.read("CamelGraph.bundle/PackageContents.xml"))
                 check(manifest.get("AppVersion") == "1.2.3", "AppVersion should be the release version")
                 check(manifest.get("UpgradeCode") == base["upgradeCode"].upper(), "UpgradeCode should be the constant one")
                 check(manifest.get("ProductCode") == product_code(base["upgradeCode"].upper(), "1.2.3"), "ProductCode should be derived from version")
                 check(manifest.find("CompanyDetails").get("Email") == "support@example.com", "the support email should be in the manifest")
                 check(len(list(manifest.iter("ComponentEntry"))) == 6, "three releases x Manage/Simulate = six components")
-                help_text = archive.read("Dyncamelo.bundle/Contents/Resources/Help/index.html").decode("utf-8")
+                help_text = archive.read("CamelGraph.bundle/Contents/Resources/Help/index.html").decode("utf-8")
                 check("1.2.3" in help_text and "{{" not in help_text, "the help page should have the version and no placeholders")
                 check("support@example.com" in help_text, "the help page should show the support email")
             digest_a = hashlib.sha256(zips[0].read_bytes()).hexdigest()
@@ -411,7 +411,7 @@ def self_test() -> int:
         # The validator itself: break a good package in turn.
         publisher = root / "ok.json"
         pub = load_publisher(publisher)
-        pkg = root / "pkg" / "Dyncamelo.bundle"
+        pkg = root / "pkg" / "CamelGraph.bundle"
         stage_package(staging, pkg, pub, "1.2.3", REPO)
         errors, _ = validate(pkg, pub, True)
         check(errors == [], f"the staged package should validate, got {errors}")
@@ -443,7 +443,7 @@ def self_test() -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--staging", type=Path, help="the staged release bundle (Dyncamelo.bundle with 2024/2025/2026 folders)")
+    parser.add_argument("--staging", type=Path, help="the staged release bundle (CamelGraph.bundle with 2024/2025/2026 folders)")
     parser.add_argument("--version", help="the release tag, for example v0.45.1")
     parser.add_argument("--out", type=Path, default=Path("store-package"), help="output folder")
     parser.add_argument("--publisher", type=Path, default=STORE / "publisher.json", help="publisher facts (default appstore/publisher.json)")

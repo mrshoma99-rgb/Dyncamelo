@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate the Dyncamelo node catalog (dyncamelo-nodes.json) from source.
+"""Generate the CamelGraph node catalog (camelgraph-nodes.json) from source.
 
-Walks the zero-touch node sources (src/Dyncamelo.Nodes, src/Dyncamelo.Navisworks)
+Walks the zero-touch node sources (src/CamelGraph.Nodes, src/CamelGraph.Navisworks)
 and the interactive NodeModel nodes (every file under those directories and
-src/Dyncamelo.Core/Nodes that defines a NodeModel subclass), mirroring the import rules in
-src/Dyncamelo.Core/Loader/AssemblyNodeLoader.cs:
+src/CamelGraph.Core/Nodes that defines a NodeModel subclass), mirroring the import rules in
+src/CamelGraph.Core/Loader/AssemblyNodeLoader.cs:
 
   * every public class contributes its public static methods
   * name    = [NodeName] or "Class.Method"
@@ -41,11 +41,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 ZERO_TOUCH_DIRS = [
-    REPO / "src" / "Dyncamelo.Nodes",
-    REPO / "src" / "Dyncamelo.Navisworks",
+    REPO / "src" / "CamelGraph.Nodes",
+    REPO / "src" / "CamelGraph.Navisworks",
 ]
 INTERACTIVE_DIRS = [
-    REPO / "src" / "Dyncamelo.Core" / "Nodes",
+    REPO / "src" / "CamelGraph.Core" / "Nodes",
 ]
 EXCLUDED_PARTS = {"Internal", "bin", "obj"}
 
@@ -196,11 +196,11 @@ PRIMITIVES = {
     "TimeSpan": "duration",
     "Guid": "guid",
 }
-DYNCAMELO_TYPES = {
-    "DyncameloPoint": "Point",
-    "DyncameloVector": "Vector",
-    "DyncameloColor": "Color",
-    "DyncameloBoundingBox": "BoundingBox",
+CAMELGRAPH_TYPES = {
+    "CamelGraphPoint": "Point",
+    "CamelGraphVector": "Vector",
+    "CamelGraphColor": "Color",
+    "CamelGraphBoundingBox": "BoundingBox",
 }
 
 
@@ -253,7 +253,7 @@ def friendly_type(cs: str) -> str:
     t = t.split(".")[-1]
     if t in PRIMITIVES:
         return PRIMITIVES[t]
-    return DYNCAMELO_TYPES.get(t, t)
+    return CAMELGRAPH_TYPES.get(t, t)
 
 
 def friendly_default(expr: str) -> str:
@@ -327,7 +327,7 @@ def repo_types() -> dict:
     global _repo_types
     if _repo_types is None:
         found: dict = {}
-        for d in (REPO / "src" / "Dyncamelo.Core", *ZERO_TOUCH_DIRS):
+        for d in (REPO / "src" / "CamelGraph.Core", *ZERO_TOUCH_DIRS):
             for f in sorted(d.rglob("*.cs")):
                 if EXCLUDED_PARTS.intersection(f.relative_to(d).parts):
                     continue
@@ -424,7 +424,7 @@ def parse_zero_touch_file(path: Path, nodes: list[dict]) -> None:
         (m.group(1) for line in lines if (m := re.match(r"\s*namespace\s+([\w.]+)", line))),
         "",
     )
-    assembly = "Dyncamelo.Navisworks" if "Dyncamelo.Navisworks" in str(path) else "Dyncamelo.Nodes"
+    assembly = "CamelGraph.Navisworks" if "CamelGraph.Navisworks" in str(path) else "CamelGraph.Nodes"
     usings = {m.group(1) for m in USING_RE.finditer("\n".join(lines))}
 
     doc_lines: list[str] = []
@@ -733,11 +733,11 @@ def find_retired() -> list:
 def render_markdown(catalog: dict, retired: list) -> str:
     """docs/NODE_CATALOG.md: every node by category, from the same data as the JSON."""
     lines = [
-        "# Dyncamelo node catalogue",
+        "# CamelGraph node catalogue",
         "",
         "> Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. "
         "Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; "
-        "CI fails when this file or `dyncamelo-nodes.json` is out of date.",
+        "CI fails when this file or `camelgraph-nodes.json` is out of date.",
         "",
         f"**{catalog['count']} nodes in {len(catalog['categories'])} categories.** "
         "A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.",
@@ -781,7 +781,7 @@ def comparable(catalog: dict) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(REPO / "docs" / "dyncamelo-nodes.json"))
+    ap.add_argument("--out", default=str(REPO / "docs" / "camelgraph-nodes.json"))
     ap.add_argument("--markdown", default=str(REPO / "docs" / "NODE_CATALOG.md"))
     ap.add_argument("--baseline", help="existing catalog to diff node names against")
     ap.add_argument("--check", action="store_true", help="fail when the committed JSON or Markdown is not what the source generates")

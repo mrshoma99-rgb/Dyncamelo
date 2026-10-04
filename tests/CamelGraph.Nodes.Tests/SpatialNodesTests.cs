@@ -1,0 +1,144 @@
+using System;
+using Xunit;
+
+namespace CamelGraph.Nodes.Tests;
+
+public class SpatialNodesTests
+{
+    private static CamelGraphBoundingBox Box(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) =>
+        new CamelGraphBoundingBox(new CamelGraphPoint(minX, minY, minZ), new CamelGraphPoint(maxX, maxY, maxZ));
+
+    // ------------------------------------------------- BoundingBox.Scale
+
+    [Fact]
+    public void BoundingBoxScale_ScalesAboutCenter()
+    {
+        var box = Box(0, 0, 0, 10, 10, 10); // center (5,5,5)
+        var doubled = GeometryNodes.BoundingBoxScale(box, 2.0);
+
+        Assert.Equal(new CamelGraphPoint(-5, -5, -5), doubled.Min);
+        Assert.Equal(new CamelGraphPoint(15, 15, 15), doubled.Max);
+        Assert.Equal(box.Center, doubled.Center); // center is preserved
+    }
+
+    [Fact]
+    public void BoundingBoxScale_HalvingShrinksAboutCenter()
+    {
+        var half = GeometryNodes.BoundingBoxScale(Box(0, 0, 0, 10, 10, 10), 0.5);
+        Assert.Equal(new CamelGraphPoint(2.5, 2.5, 2.5), half.Min);
+        Assert.Equal(new CamelGraphPoint(7.5, 7.5, 7.5), half.Max);
+    }
+
+    [Fact]
+    public void BoundingBoxScale_RejectsNonPositiveFactor()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => GeometryNodes.BoundingBoxScale(Box(0, 0, 0, 1, 1, 1), 0.0));
+    }
+
+    // ------------------------------------------------- BoundingBox.PlanGap
+
+    [Fact]
+    public void PlanGap_ReturnsWidestSide_NotNarrowest()
+    {
+        // Opening 10×10; equipment offset to the left → wide strip on the +X side.
+        var opening = Box(0, 0, 0, 10, 10, 1);
+        var equipment = Box(1, 1, 0, 4, 9, 1); // gaps: -X=1, +X=6, -Y=1, +Y=1
+        Assert.Equal(6.0, GeometryNodes.BoundingBoxPlanGap(opening, equipment));
+    }
+
+    [Fact]
+    public void PlanGap_CenteredEquipment_IsHalfTheDifference()
+    {
+        var opening = Box(0, 0, 0, 10, 10, 1);
+        var equipment = Box(4, 4, 0, 6, 6, 1); // 2×2 centred → 4 on every side
+        Assert.Equal(4.0, GeometryNodes.BoundingBoxPlanGap(opening, equipment));
+    }
+
+    [Fact]
+    public void PlanGap_EquipmentFillsOpening_IsZero()
+    {
+        var box = Box(0, 0, 0, 10, 10, 1);
+        Assert.Equal(0.0, GeometryNodes.BoundingBoxPlanGap(box, box));
+    }
+
+    // ------------------------------------------------- BoundingBox.Contains
+
+    [Fact]
+    public void Contains_PointInside_ReturnsTrue()
+    {
+        var box = Box(0, 0, 0, 10, 10, 10);
+        Assert.True(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(5, 5, 5)));
+    }
+
+    [Theory]
+    [InlineData(-0.001, 5, 5)]
+    [InlineData(10.001, 5, 5)]
+    [InlineData(5, -0.001, 5)]
+    [InlineData(5, 10.001, 5)]
+    [InlineData(5, 5, -0.001)]
+    [InlineData(5, 5, 10.001)]
+    public void Contains_PointOutsideAnyAxis_ReturnsFalse(double x, double y, double z)
+    {
+        var box = Box(0, 0, 0, 10, 10, 10);
+        Assert.False(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(x, y, z)));
+    }
+
+    [Fact]
+    public void Contains_PointsOnBoundary_CountAsInside()
+    {
+        var box = Box(0, 0, 0, 10, 10, 10);
+        Assert.True(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(0, 0, 0)));    // corner
+        Assert.True(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(10, 10, 10))); // opposite corner
+        Assert.True(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(10, 5, 5)));   // face
+    }
+
+    [Fact]
+    public void Contains_WorksWithNegativeCoordinates()
+    {
+        var box = Box(-10, -10, -10, -1, -1, -1);
+        Assert.True(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(-5, -5, -5)));
+        Assert.False(SpatialNodes.BoundingBoxContains(box, new CamelGraphPoint(0, -5, -5)));
+    }
+
+    [Fact]
+    public void Contains_NullArguments_Throw()
+    {
+        var box = Box(0, 0, 0, 1, 1, 1);
+        Assert.Throws<ArgumentNullException>(() => SpatialNodes.BoundingBoxContains(null!, new CamelGraphPoint(0, 0, 0)));
+        Assert.Throws<ArgumentNullException>(() => SpatialNodes.BoundingBoxContains(box, null!));
+    }
+
+    // ------------------------------------------------------- Point.Translate
+
+    [Fact]
+    public void Translate_OffsetsByVectorComponents()
+    {
+        var moved = SpatialNodes.PointTranslate(new CamelGraphPoint(1, 2, 3), new CamelGraphVector(-1, 0.5, 2));
+        Assert.Equal(new CamelGraphPoint(0, 2.5, 5), moved);
+    }
+
+    [Fact]
+    public void Translate_ZeroVector_ReturnsEqualPoint()
+    {
+        var moved = SpatialNodes.PointTranslate(new CamelGraphPoint(1, 2, 3), new CamelGraphVector(0, 0, 0));
+        Assert.Equal(new CamelGraphPoint(1, 2, 3), moved);
+    }
+
+    [Fact]
+    public void Translate_ReturnsNewPoint_InputUnchanged()
+    {
+        var original = new CamelGraphPoint(1, 1, 1);
+        var moved = SpatialNodes.PointTranslate(original, new CamelGraphVector(0, 0, 1));
+
+        Assert.NotSame(original, moved);
+        Assert.Equal(new CamelGraphPoint(1, 1, 1), original);
+        Assert.Equal(new CamelGraphPoint(1, 1, 2), moved);
+    }
+
+    [Fact]
+    public void Translate_NullArguments_Throw()
+    {
+        Assert.Throws<ArgumentNullException>(() => SpatialNodes.PointTranslate(null!, new CamelGraphVector(0, 0, 0)));
+        Assert.Throws<ArgumentNullException>(() => SpatialNodes.PointTranslate(new CamelGraphPoint(0, 0, 0), null!));
+    }
+}
