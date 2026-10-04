@@ -172,6 +172,43 @@ public static class TypeCoercion
     }
 
     /// <summary>
+    /// Converts <paramref name="value"/> with a converter a node pack registered for its type and <paramref name="targetType"/>
+    /// (<see cref="RegisterConverter"/>), and with nothing else: no widening, no element-wise list conversion. The engine uses it
+    /// before it wraps a single value into a one-item list for a list-typed input, so that a value that stands for several things
+    /// (a picked selection of N elements) reaches the list input as N items instead of being treated as one item.
+    /// </summary>
+    /// <param name="value">The value to convert (not null).</param>
+    /// <param name="targetType">The requested CLR type.</param>
+    /// <param name="result">The converted value on success.</param>
+    /// <returns>True when a registered converter applies and succeeded.</returns>
+    public static bool TryConvertWithRegisteredConverter(object value, Type targetType, out object? result)
+    {
+        result = null;
+        if (value == null || targetType == null)
+        {
+            return false;
+        }
+
+        var converter = FindConverter(value.GetType(), Nullable.GetUnderlyingType(targetType) ?? targetType);
+        if (converter == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            result = converter(value);
+            return true;
+        }
+        catch (Exception)
+        {
+            // A converter that refuses this value (a text that is not a pick) means "not for me": the caller carries on.
+            result = null;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Coerces <paramref name="value"/> to <paramref name="targetType"/> or throws.
     /// </summary>
     /// <param name="value">The value to convert.</param>

@@ -359,7 +359,16 @@ internal static class Replicator
             // Rank promotion: a value shallower than the port demands (e.g. a
             // scalar wired into a list input) is wrapped in single-element lists
             // until the depths match, mirroring Dynamo's replication semantics.
+            // Unless a node pack registered a converter that makes the list itself: a picked selection travels as ONE text
+            // standing for N elements, and wrapping it first would turn it into one element.
             var reportedType = value.GetType();
+            if (GetValueRank(value) < minimumRanks[i] &&
+                TypeCoercion.TryConvertWithRegisteredConverter(value, declared, out var madeList))
+            {
+                call[i] = madeList;
+                continue;
+            }
+
             for (int rank = GetValueRank(value); rank < minimumRanks[i]; rank++)
             {
                 value = new List<object?> { value };

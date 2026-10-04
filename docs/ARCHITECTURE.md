@@ -115,7 +115,7 @@ Replication is what makes a scalar node work on lists without a loop node.
 | **Longest** | zip; shorter list repeats its **last element** (an empty list cannot extend → empty output + Warning) | `[11, 22, 23]` |
 | **Cross-Product** | nested loops; **leftmost replicated port is the outermost loop**; depth grows by (replicated inputs − 1) | `[[11,21,31],[12,22,32]]` |
 
-- **Coercion** applies per invocation: numeric widening (`int → double`), `IConvertible` conversions, `object` accepts anything. Coercion failure → node Warning/Error per case, never a crash.
+- **Coercion** applies per invocation: numeric widening (`int → double`), `IConvertible` conversions, `object` accepts anything. Coercion failure → node Warning/Error per case, never a crash. A single value wired or pinned on a list-typed input is wrapped into a one-item list — unless a node pack registered a converter from that value's type to the list type: it is then used on the value itself, so one text that stands for a picked selection of N elements delivers all N.
 
 - **Null propagation (Dynamo semantics, since v0.28)** — during replication, per-element trouble never sinks the node:
   - a **null element** of a laced list maps to a **null result** at that position — the node method is never invoked for it, the other elements still compute;
