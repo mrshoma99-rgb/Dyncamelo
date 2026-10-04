@@ -157,7 +157,26 @@ You do **not** write loops. Declare the rank you actually need and the engine's 
 The contract (see [ARCHITECTURE.md §9](ARCHITECTURE.md#9-error-handling-philosophy)):
 
 - **Throw for real failures.** Any exception is caught by the engine and shown as that node's `Error` state with your message. Throw `ArgumentException` and friends with messages an end user can act on ("Bar mark must look like '16-B-250', got 'x'"). The run continues; Navisworks never crashes.
-- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value; `CamelGraph.Core` provides a warning-reporting mechanism for zero-touch nodes so the node shows a yellow `Warning` badge instead of a hard error — see the `CamelGraph.Core` XML documentation for the exact API. Under replication, warnings aggregate rather than spam.
+- **Warn and keep going for recoverable issues.** Return `null` (or a documented sentinel like `double.NaN`) for a missing/unparseable value and call `NodeWarnings.Add("…")` (namespace `CamelGraph.Core.Execution`) so the node shows the amber `Warning` badge with your sentence instead of a hard error. The node still delivers its result to the nodes after it.
+  - Call it from inside the node method (or any helper it calls); the engine collects the messages **per call** of your method. The same text reported several times in one call is shown once with a count, and at most five different texts are listed.
+  - Under replication the messages of all calls are summarised in one line, `3 of 40 calls: <first message>`, so a thousand bad elements cannot flood the badge.
+  - Outside a run (a unit test that calls your method directly) `NodeWarnings.Add` does nothing and never throws, so a node stays testable on its own.
+  - Write the message for the person at the keyboard: what was wrong and what the node did about it ("2 of 10 values were not numbers and were skipped"), not an exception dump.
+
+```csharp
+using CamelGraph.Core.Execution;
+
+public static double SafeRatio(double part, double total)
+{
+    if (total == 0)
+    {
+        NodeWarnings.Add("The total is 0, so the ratio is 0.");
+        return 0;
+    }
+
+    return part / total;
+}
+```
 - **Never** show message boxes, write to the console, or swallow exceptions silently from library nodes.
 
 ## 6. Navisworks node packs

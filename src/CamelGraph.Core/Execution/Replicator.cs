@@ -69,8 +69,10 @@ internal static class Replicator
         public int NullSkipped;
         public int Failed;
         public int CoercionFailed;
+        public int Warned;
         public string? FirstError;
         public string? FirstCoercionMessage;
+        public string? FirstWarning;
     }
 
     private static void ReportStats(NodeModel node, ReplicationStats stats)
@@ -96,6 +98,12 @@ internal static class Replicator
             node.AddMessage(
                 MessageSeverity.Warning,
                 stats.Failed + " of " + stats.Calls + " laced calls failed and returned null. First error: " + stats.FirstError);
+        }
+
+        if (stats.Warned > 0)
+        {
+            // The node's own warnings (NodeWarnings.Add), one line however many calls raised one.
+            node.AddMessage(MessageSeverity.Warning, stats.Warned + " of " + stats.Calls + " calls: " + stats.FirstWarning);
         }
     }
 
@@ -373,27 +381,40 @@ internal static class Replicator
         }
 
         object?[]? outputs;
-        if (insideReplication)
+        using (var warnings = NodeWarnings.Begin())
         {
-            // One bad element must not sink the other thousand: a per-element
-            // failure becomes a null result plus one summary warning. A single
-            // (non-laced) call keeps failing loudly via the engine's catch.
-            try
+            if (insideReplication)
+            {
+                // One bad element must not sink the other thousand: a per-element
+                // failure becomes a null result plus one summary warning. A single
+                // (non-laced) call keeps failing loudly via the engine's catch.
+                try
+                {
+                    outputs = node.Evaluate(call, context);
+                }
+                catch (Exception ex) when (!(ex is OperationCanceledException) &&
+                                           !(ex is OutOfMemoryException) &&
+                                           !(ex is StackOverflowException))
+                {
+                    stats.Failed++;
+                    stats.FirstError ??= ex.Message;
+                    return new object?[outCount];
+                }
+
+                if (warnings.Total > 0)
+                {
+                    stats.Warned++;
+                    stats.FirstWarning ??= warnings.First;
+                }
+            }
+            else
             {
                 outputs = node.Evaluate(call, context);
+                if (warnings.Total > 0)
+                {
+                    NodeWarnings.Report(node, warnings);
+                }
             }
-            catch (Exception ex) when (!(ex is OperationCanceledException) &&
-                                       !(ex is OutOfMemoryException) &&
-                                       !(ex is StackOverflowException))
-            {
-                stats.Failed++;
-                stats.FirstError ??= ex.Message;
-                return new object?[outCount];
-            }
-        }
-        else
-        {
-            outputs = node.Evaluate(call, context);
         }
 
         outputs ??= new object?[outCount];
