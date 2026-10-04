@@ -529,12 +529,8 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
     /// <summary>True when the form has fields.</summary>
     public bool HasFields => Fields.Count > 0;
 
-    /// <summary>"Changes the model, writes files, runs programs or uses the network: A, B" — or empty for a script that only reads.</summary>
-    public string ModifiesText =>
-        _session == null || _session.ModifyingNodes.Count == 0
-            ? string.Empty
-            : "Changes the model, writes files, runs programs or uses the network: " + string.Join(", ", _session.ModifyingNodes.Take(6)) +
-              (_session.ModifyingNodes.Count > 6 ? ", … +" + (_session.ModifyingNodes.Count - 6).ToString(CultureInfo.InvariantCulture) : string.Empty);
+    /// <summary>"Changes the model: A, B; writes files: C" (what the script's nodes do) — or empty for a script that only reads.</summary>
+    public string ModifiesText => _session == null ? string.Empty : _session.EffectSummary;
 
     /// <summary>True when the script changes things.</summary>
     public bool HasModifies => ModifiesText.Length > 0;
@@ -775,9 +771,8 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
 
         if (session.ModifyingNodes.Count > 0 && _settings.PlayerConfirmedHash(session.Path) != session.Hash)
         {
-            var message = "'" + session.Name + "' changes the model, writes files, runs programs or uses the network, through:\n\n  • " +
-                          string.Join("\n  • ", session.ModifyingNodes.Take(10)) +
-                          (session.ModifyingNodes.Count > 10 ? "\n  • …" : string.Empty) +
+            var message = "'" + session.Name + "' contains nodes that:\n\n  • " +
+                          string.Join("\n  • ", session.EffectLines) +
                           "\n\nRun it? You are asked again only if the script file changes.";
             if (!Dialogs.Confirm(message, "Run Script"))
             {

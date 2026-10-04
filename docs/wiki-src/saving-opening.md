@@ -72,9 +72,9 @@ A `.dyc` file is small and can be emailed, put on a shared drive or kept in vers
 
 ### What happens when someone opens your script
 
-A script is a small program, and CamelGraph treats a file that came from somewhere else with care. When you **run** a script opened from a file, and it contains nodes that **start other programs, use the network, or delete, move or overwrite files**, CamelGraph lists those nodes and asks whether to go ahead. You are asked once per file, and again only if the file changes. Scripts you build in the editor and the built-in samples never ask. A script saved with **Auto** on starts running as soon as it opens, but if it came from a file and contains such nodes, CamelGraph waits for you to press **Run** and say so in the status bar.
+A script is a small program, and CamelGraph treats a file that came from somewhere else with care. When you **run** a script opened from a file, and it contains nodes that **start other programs, use the network, write, delete, move or overwrite files, or change the Navisworks model**, CamelGraph lists those nodes, says what each one does and asks whether to go ahead. You are asked once per file, and again only if the file changes. Scripts you build in the editor and the built-in samples never ask. A script saved with **Auto** on starts running as soon as it opens, but if it came from a file and contains such nodes, CamelGraph waits for you to press **Run** and say so in the status bar.
 
-You can turn the question off in **Settings ▸ Editing ▸ Ask before running graphs from files**, but the safer choice is to leave it on. The Script Player asks a similar question for scripts that change the model. See [Privacy and safety](privacy-and-safety.md).
+You can turn the question off in **Settings ▸ Editing ▸ Ask before running graphs from files**, but the safer choice is to leave it on. The Script Player asks a similar question for scripts that change the model or write files. See [Privacy and safety](privacy-and-safety.md).
 
 ### Missing nodes
 

@@ -74,8 +74,8 @@ After a run the Player shows a **Results** card:
 
 A script can change your model, write files, run programs or use the network. The Player tells you before it does:
 
-* A script that does any of this shows a note above the form: "Changes the model, writes files, runs programs or uses the network:" followed by the names of the nodes responsible.
-* **The first time you run such a script** in the Player, and again whenever the script file changes, a dialog lists those nodes and asks "Run it?". If you agree, the answer is remembered for that file exactly as it is now. Edit the script and the question comes back.
+* A script that does any of this shows a note above the form that says what it does and which nodes are responsible, for example "Changes the model: Isolate Walls; writes files: Log.Write". The kinds are *runs programs*, *uses the network*, *deletes, moves or overwrites files*, *writes files* and *changes the model*.
+* **The first time you run such a script** in the Player, and again whenever the script file changes, a dialog lists what the nodes do and asks "Run it?". If you agree, the answer is remembered for that file exactly as it is now. Edit the script and the question comes back.
 * Scripts that only read are never asked about.
 * A script that uses nodes which are not installed shows a warning ("1 node is not installed, so this script cannot run") and will not run.
 

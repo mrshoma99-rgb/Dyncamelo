@@ -490,6 +490,35 @@ public sealed class PlayerTests : IDisposable
     }
 
     [Fact]
+    public void AScriptThatWritesFilesOrChangesTheModelSaysSoInTheConsentTexts()
+    {
+        var definitions = AssemblyNodeLoader.LoadType(typeof(EffectFixtures));
+        var graph = new GraphModel();
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "WriteFile")));
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "ChangeModel")));
+        graph.AddNode(new ZeroTouchNodeModel(definitions.Single(d => d.Method.Name == "Harmless")));
+
+        var session = Load(Save(graph));
+
+        Assert.Equal(2, session.ModifyingNodes.Count);
+        Assert.Contains(session.ModifyingNodes, n => n.Contains("WriteFile"));
+        Assert.Contains(session.ModifyingNodes, n => n.Contains("ChangeModel"));
+        Assert.Contains(session.EffectLines, l => l.StartsWith("writes files: ", StringComparison.Ordinal) && l.Contains("WriteFile"));
+        Assert.Contains(session.EffectLines, l => l.StartsWith("changes the model: ", StringComparison.Ordinal) && l.Contains("ChangeModel"));
+        Assert.Contains("Writes files: ", session.EffectSummary);
+        Assert.Contains("changes the model: ", session.EffectSummary);
+    }
+
+    [Fact]
+    public void AScriptThatOnlyReadsHasNoEffectLines()
+    {
+        var session = Load(Save(Sample(out _, out _)));
+
+        Assert.Empty(session.EffectLines);
+        Assert.Equal(string.Empty, session.EffectSummary);
+    }
+
+    [Fact]
     public void TheHashChangesWhenTheFileDoes()
     {
         var graph = Sample(out var number, out _);

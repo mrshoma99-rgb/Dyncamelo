@@ -201,10 +201,23 @@ public sealed class ScriptSession
     public IReadOnlyList<NodeModel> OutputNodes => _outputNodes;
 
     /// <summary>
-    /// Names of the nodes that change the model, write files, run programs or use the network (distinct, muted and frozen ones left out):
-    /// the nodes the Player asks about before it first runs a script.
+    /// Names of the nodes that change the model, write or change files, run programs or use the network (distinct, muted and frozen
+    /// ones left out): the nodes the Player asks about before it first runs a script. A node counts when it declares such an effect
+    /// (<see cref="NodeModel.Effects"/>) or its role is Modify.
     /// </summary>
     public IReadOnlyList<string> ModifyingNodes { get; private set; } = new List<string>();
+
+    /// <summary>
+    /// What those nodes do, one line per kind of effect, for the confirmation: "changes the model: Isolate Walls", "writes files:
+    /// Text.WriteToFile". Empty for a script that only reads.
+    /// </summary>
+    public IReadOnlyList<string> EffectLines { get; private set; } = new List<string>();
+
+    /// <summary>
+    /// <see cref="EffectLines"/> as one sentence for the form's header ("Changes the model: Isolate Walls; writes files: Log.Write").
+    /// Empty for a script that only reads.
+    /// </summary>
+    public string EffectSummary { get; private set; } = string.Empty;
 
     /// <summary>Number of nodes whose type is not installed (the script cannot run fully).</summary>
     public int MissingNodes { get; private set; }
@@ -270,17 +283,19 @@ public sealed class ScriptSession
             }
         }
 
-        var modifying = new List<string>();
         var missing = 0;
         var count = 0;
-        Survey(Graph, new HashSet<NodeGroup>(), modifying, ref missing, ref count);
-        ModifyingNodes = modifying.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        Count(Graph, new HashSet<NodeGroup>(), ref missing, ref count);
+        var findings = GraphEffects.Survey(Graph, true);
+        ModifyingNodes = findings.Select(f => f.NodeName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        EffectLines = GraphEffects.Describe(findings);
+        EffectSummary = GraphEffects.Summarize(findings);
         MissingNodes = missing;
         NodeCount = count;
     }
 
-    // Walks the graph and, through every node group instance, the groups' bodies.
-    private static void Survey(GraphModel graph, HashSet<NodeGroup> visited, List<string> modifying, ref int missing, ref int count)
+    // Counts the nodes and the ones whose type is not installed, through every node group instance into the groups' bodies.
+    private static void Count(GraphModel graph, HashSet<NodeGroup> visited, ref int missing, ref int count)
     {
         foreach (var node in graph.Nodes)
         {
@@ -289,15 +304,10 @@ public sealed class ScriptSession
             {
                 missing++;
             }
-            else if (!node.IsMuted && !node.IsFrozen && !(node is GroupInstanceNode) &&
-                     (node.Function == NodeFunction.Modify || node.Effects != NodeEffects.None))
-            {
-                modifying.Add(node.Name);
-            }
 
             if (node is GroupInstanceNode instance && instance.Definition != null && visited.Add(instance.Definition))
             {
-                Survey(instance.Definition.Graph, visited, modifying, ref missing, ref count);
+                Count(instance.Definition.Graph, visited, ref missing, ref count);
             }
         }
     }

@@ -61,7 +61,7 @@ The **colour palette** of the whole editor is chosen at the top of this section:
 | Esc cancels a running graph | On / Off | On | Pressing ++esc++ during a run stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
 | Autosave unsaved work | On / Off | On | Keeps a copy of a script with unsaved changes once a minute, and offers it back if Navisworks closed or crashed before you saved. The copy is deleted when you save. See [Saving and opening scripts](saving-opening.md). |
 | Highlight selected node in Navisworks | On / Off | Off | Selects the model items a node outputs in the Navisworks viewport when you click the node. This overwrites the live selection, so turn it off if you use `Selection.Current`. |
-| Ask before running graphs from files | On / Off | On | A script opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Scripts you create in the editor and the built-in samples never ask. |
+| Ask before running graphs from files | On / Off | On | A script opened from a file is run only after you have been told if it starts programs, uses the network, writes, deletes, moves or overwrites files, or changes the model. You are asked once per file, and again only if the file changes. Scripts you create in the editor and the built-in samples never ask. |
 | Double-click empty canvas | Insert a String node / Insert a Number node / Add a note / Do nothing | Insert a String node | What double-clicking empty canvas does. |
 
 Notes on a few of these:
@@ -71,7 +71,7 @@ Notes on a few of these:
 * **Ask before running graphs from files.** Turning it off removes a safety question. See [Privacy and safety](privacy-and-safety.md) before you do.
 
 !!! warning "Leave the safety question on"
-    **Ask before running graphs from files** is how CamelGraph warns you before a graph from a file starts programs, uses the network, or deletes, moves or overwrites files. Leave it on.
+    **Ask before running graphs from files** is how CamelGraph warns you before a graph from a file starts programs, uses the network, writes, deletes, moves or overwrites files, or changes the model. Leave it on.
 
 ## Shortcuts
 
