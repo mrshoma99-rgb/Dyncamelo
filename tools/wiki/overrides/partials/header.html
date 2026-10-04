@@ -20,7 +20,7 @@
     <a class="dyc-logo" href="{{ config.extra.bimcamel_url }}" title="BIMCamel" aria-label="BIMCamel">
       {% include "partials/logo.html" %}
     </a>
-    <a class="dyc-sitename" href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"><img class="dyc-sitemark" src="{{ 'assets/camelgraph-mark.svg' | url }}" alt="" width="22" height="22">{{ config.site_name }}</a>
+    <a class="dyc-sitename" href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"><img class="dyc-sitemark dyc-sitemark--light" src="{{ 'assets/camelgraph-mark-on-light.svg' | url }}" alt="" width="22" height="22"><img class="dyc-sitemark dyc-sitemark--dark" src="{{ 'assets/camelgraph-mark-on-dark.svg' | url }}" alt="" width="22" height="22">{{ config.site_name }}</a>
     {% if config.theme.palette %}
       {% if not config.theme.palette is mapping %}
         {% include "partials/palette.html" %}

@@ -109,7 +109,11 @@
 .dyc-sitename:hover { color: var(--md-accent-fg-color); }
 /* The product's own mark, before its name. */
 .dyc-sitename { display: inline-flex; align-items: center; gap: 0.5rem; }
-.dyc-sitemark { display: block; width: 1.4rem; height: 1.4rem; flex: none; border-radius: 0.3rem; }
+.dyc-sitemark { display: block; width: 1.4rem; height: 1.4rem; flex: none; }
+/* Two drawings of the mark, no plate: dark node ends on a light header, light ones on a dark header. */
+.dyc-sitemark--dark { display: none; }
+[data-md-color-scheme="slate"] .dyc-sitemark--light { display: none; }
+[data-md-color-scheme="slate"] .dyc-sitemark--dark { display: block; }
 
 /* The spacer: the colour toggle is the first thing pushed to the right. */
 .md-header__inner > .md-header__option:first-of-type,

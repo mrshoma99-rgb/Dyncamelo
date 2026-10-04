@@ -58,7 +58,8 @@ internal static class AboutDialog
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        var logo = LoadLogo("camelgraph_32.png") ?? LoadLogo("camel_32.png");
+        // The dialog is dark, so the mark without a plate (light node ends, blue wire); the ribbon icon is the fallback.
+        var logo = LoadLogo("camelgraph_about_96.png") ?? LoadLogo("camelgraph_32.png") ?? LoadLogo("camel_32.png");
         if (logo != null)
         {
             var img = new Image { Source = logo, Width = 44, Height = 44, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 2, 14, 0) };

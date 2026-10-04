@@ -26,7 +26,7 @@
             <!-- window chrome -->
             <Grid Grid.Row="0" Margin="16,12,12,0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Source="Resources/logo.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="Resources/logo-small.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <TextBlock Text="CamelGraph Setup" Foreground="{StaticResource Paper45}"
                                FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>

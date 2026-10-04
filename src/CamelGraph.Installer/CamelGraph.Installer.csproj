@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <Resource Include="Resources\logo.png" />
+    <Resource Include="Resources\logo-small.png" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(BundlePayload)' != ''">

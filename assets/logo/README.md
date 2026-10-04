@@ -11,8 +11,9 @@ script, not the files.
 | Windows icon (installer, shortcuts) | `ico/camelgraph.ico` (16, 24, 32, 48, 64, 128, 256) |
 | Browser tab | `ico/favicon.ico`, `png/camelgraph-mark-32.png` |
 | Navisworks ribbon button (white on black, like the Player button) | `png/camelgraph-mark-mono-plate-16.png`, `-32.png`, `ico/camelgraph-mono.ico` |
-| Light backgrounds (documents, white pages) | `svg/camelgraph-mark-light.svg`, `svg/camelgraph-mark-on-light.svg` (no plate) |
-| Dark backgrounds, no plate | `svg/camelgraph-mark-on-dark.svg` |
+| Anywhere the logo sits on the page itself, not as an app icon: **light mark on a dark surface, dark mark on a light one**, no plate | `svg/camelgraph-mark-on-dark.svg` (light node ends, blue wire), `svg/camelgraph-mark-on-light.svg` (dark node ends, darker blue wire); PNGs `png/camelgraph-mark-on-dark-<px>.png`, `-on-light-<px>.png`, the small drawing up to 48 px |
+| The editor (header, start screen, Script Player) | `src/CamelGraph.UI/Themes/Logo.xaml`, generated: the node ends take the palette's text colour and the wire its accent, so it follows the theme |
+| Documents and white pages, with a plate | `svg/camelgraph-mark-light.svg` |
 | One colour only (print, stamps, embossing) | `svg/camelgraph-mark-mono-white.svg`, `svg/camelgraph-mark-mono-black.svg` |
 | Round avatars and badges | `svg/camelgraph-mark-round.svg`, `social/avatar-round-800.png` |
 | iOS and Android home-screen icons | `png/camelgraph-mark-square-180.png` (the OS rounds it), `png/camelgraph-mark-maskable-192.png` and `-512.png` |
@@ -33,7 +34,8 @@ script, not the files.
 
 * Keep clear space around the plate of at least a quarter of its width.
 * Below 48 px use the `-small` drawing; do not scale the standard one down.
-* Do not recolour the wire, stretch the mark, add a shadow or rotate it. Do not put the plate on a background of nearly the same dark.
+* Do not recolour the wire, stretch the mark, add a shadow or rotate it. Do not put the dark plate on a dark surface: use the plate-less
+  mark for that background (light on dark, dark on light). The plate is for app icons, the store and the ribbon, where it is the icon's shape.
 * The name is set in Share Tech (SIL Open Font Licence 1.1), the face bimcamel.com uses for headings. The lock-up files contain
   its outlines, not the font. The social images use Google Sans Flex (SIL OFL), also from bimcamel.com.
 * "CamelGraph" is the previous name. The mark replaced the old camel-on-a-plate logo everywhere in October 2026.

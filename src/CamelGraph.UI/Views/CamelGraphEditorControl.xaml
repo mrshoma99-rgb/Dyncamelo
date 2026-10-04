@@ -10,6 +10,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/CamelGraphDark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/Logo.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- The cards of the start screen (New, a recent script, an example). -->
@@ -82,9 +83,12 @@
                                 Width="24" Height="24"
                                 CornerRadius="6"
                                 VerticalAlignment="Center">
-                            <Image Source="pack://application:,,,/CamelGraph.UI;component/Assets/camelgraph_chip_48.png"
-                                   Width="24" Height="24"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <!-- the mark follows the palette: light node ends on a dark one, dark on a light one -->
+                            <ContentControl Template="{StaticResource Dyc.Logo.MarkSmall}"
+                                            Width="24" Height="24"
+                                            Focusable="False" IsTabStop="False"
+                                            Foreground="{DynamicResource Dyc.TextBrush}"
+                                            BorderBrush="{DynamicResource Dyc.AccentBrush}" />
                         </Border>
                         <StackPanel x:Name="HeaderWordmark" VerticalAlignment="Center" Margin="8,0,0,0">
                             <TextBlock Text="CamelGraph"
@@ -1479,9 +1483,11 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Border Width="46" Height="46" CornerRadius="12" VerticalAlignment="Top">
-                            <Image Source="pack://application:,,,/CamelGraph.UI;component/Assets/camelgraph_96.png"
-                                   Width="46" Height="46"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <ContentControl Template="{StaticResource Dyc.Logo.Mark}"
+                                            Width="46" Height="46"
+                                            Focusable="False" IsTabStop="False"
+                                            Foreground="{DynamicResource Dyc.TextBrush}"
+                                            BorderBrush="{DynamicResource Dyc.AccentBrush}" />
                         </Border>
                         <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
                             <WrapPanel>

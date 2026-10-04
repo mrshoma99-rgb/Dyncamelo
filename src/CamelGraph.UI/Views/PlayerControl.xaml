@@ -11,6 +11,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/CamelGraphDark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/Logo.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <CollectionViewSource x:Key="ScriptsView" Source="{Binding Scripts}">
@@ -129,9 +130,12 @@
                         Width="22" Height="22"
                         CornerRadius="6"
                         VerticalAlignment="Center">
-                    <Image Source="pack://application:,,,/CamelGraph.UI;component/Assets/camelgraph_chip_48.png"
-                           Width="22" Height="22"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <!-- one colour on the title bar, whatever the palette makes of it (blue in the dark ones, pale in Light) -->
+                    <ContentControl Template="{StaticResource Dyc.Logo.MarkSmall}"
+                                    Width="22" Height="22"
+                                    Focusable="False" IsTabStop="False"
+                                    Foreground="{DynamicResource Dyc.OnBrandBrush}"
+                                    BorderBrush="{DynamicResource Dyc.OnBrandBrush}" />
                 </Border>
                 <TextBlock Text="Script Player"
                            Margin="9,0,0,0"
