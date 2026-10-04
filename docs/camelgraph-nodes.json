@@ -16147,7 +16147,7 @@
    "id": "CamelGraph.Navisworks.CustomPropertyNodes.SetCustom@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<object>,string,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Properties",
-   "description": "Writes a user-defined property tab onto items — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Merge keeps existing same-tab properties; new values win on name collisions.",
+   "description": "Writes ONE set of names and values as a user-defined property tab onto every item you give it — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Each value must be a single text, number, true/false or date: a list in the values is refused with a message, because a property holds one value. For a different row of values per item (a table from Excel) use Properties.SetCustomFromTable. Merge keeps existing same-tab properties; new values win on name collisions. Inside a node group every instance writes the same tab name, so wire the name in from the group's input when instances must not share a tab.",
    "tags": [
     "property",
     "custom",
@@ -16174,7 +16174,7 @@
     {
      "name": "values",
      "type": "any[]",
-     "description": "Property values (string, number, boolean or date; index-aligned with names)."
+     "description": "Property values (string, number, boolean or date; index-aligned with names). Every value must be a single value: a list inside the values is refused."
     },
     {
      "name": "tabName",

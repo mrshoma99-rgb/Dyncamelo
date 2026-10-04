@@ -616,7 +616,7 @@
 | `Properties.InCategory` | item, categoryName | names, values | All property names and values inside one category of an item |
 | `Properties.RemoveCustomTab` | modelItems, tabName | modelItems, removedCount | Removes a user-defined property tab from items |
 | `Properties.RenameCustomTab` | modelItems, tabName, newTabName | modelItems | Renames a user-defined property tab in place (same properties, same internal name |
-| `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes a user-defined property tab onto items |
+| `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes ONE set of names and values as a user-defined property tab onto every item you give it |
 | `Properties.ToTable` | items, properties | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
 | `Properties.Value` | item, categoryName, propertyName | value | Reads a property value from a model item, converted to a plain value |
 | `Properties.ValueAsString` | item, categoryName, propertyName | text | Reads a property value as text |

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
@@ -20,20 +21,21 @@ public static class CustomPropertyNodes
     /// <summary>Writes a user-defined property tab onto items.</summary>
     /// <param name="modelItems">The model items to stamp.</param>
     /// <param name="names">Property display names (index-aligned with <paramref name="values"/>).</param>
-    /// <param name="values">Property values (string, number, boolean or date; index-aligned with <paramref name="names"/>).</param>
+    /// <param name="values">Property values (string, number, boolean or date; index-aligned with <paramref name="names"/>). Every value must be a single value: a list inside the values is refused.</param>
     /// <param name="tabName">User-visible tab name; a stable internal name is derived from it so search sets can target the tab.</param>
     /// <param name="merge">True keeps existing properties of a same-named tab (new values win on name collisions); false replaces the tab's content entirely.</param>
     /// <returns>The items (pass-through for chaining).</returns>
     [NodeName("Properties.SetCustom")]
-    [NodeDescription("Writes a user-defined property tab onto items — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Merge keeps existing same-tab properties; new values win on name collisions.")]
+    [NodeDescription("Writes ONE set of names and values as a user-defined property tab onto every item you give it — values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified). Each value must be a single text, number, true/false or date: a list in the values is refused with a message, because a property holds one value. For a different row of values per item (a table from Excel) use Properties.SetCustomFromTable. Merge keeps existing same-tab properties; new values win on name collisions. Inside a node group every instance writes the same tab name, so wire the name in from the group's input when instances must not share a tab.")]
     [NodeSearchTags("property", "custom", "set", "write", "user", "tab", "parameter", "smartproperties", "stamp")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("modelItems")]
     public static List<ModelItem> SetCustom(
         [MultiInput] IEnumerable<ModelItem> modelItems,
         IEnumerable<string> names,
         IEnumerable<object?> values,
-        string tabName = "CamelGraph Data",
-        bool merge = true)
+        [NodeTabChoice("modelItems")] string tabName = "CamelGraph Data",
+        [NodePanel("Advanced")] bool merge = true)
     {
         var items = NavisValues.ToItemList(modelItems);
         if (items.Count == 0)
@@ -62,11 +64,12 @@ public static class CustomPropertyNodes
     [NodeName("Properties.RemoveCustomTab")]
     [NodeDescription("Removes a user-defined property tab from items. Items without the tab are skipped (see removedCount) — safe for clean re-runs of SetCustom graphs.")]
     [NodeSearchTags("property", "custom", "remove", "delete", "tab", "clean", "user")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [MultiReturn("modelItems", "removedCount")]
     [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> RemoveCustomTab(
         [MultiInput] IEnumerable<ModelItem> modelItems,
-        string tabName)
+        [NodeTabChoice("modelItems")] string tabName)
     {
         var items = NavisValues.ToItemList(modelItems);
         if (items.Count == 0)
@@ -103,10 +106,11 @@ public static class CustomPropertyNodes
     [NodeName("Properties.RenameCustomTab")]
     [NodeDescription("Renames a user-defined property tab in place (same properties, same internal name — search sets targeting the tab stay valid). Items without the tab are skipped.")]
     [NodeSearchTags("property", "custom", "rename", "tab", "user")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [return: NodeName("modelItems")]
     public static List<ModelItem> RenameCustomTab(
         [MultiInput] IEnumerable<ModelItem> modelItems,
-        string tabName,
+        [NodeTabChoice("modelItems")] string tabName,
         string newTabName)
     {
         var items = NavisValues.ToItemList(modelItems);
@@ -188,6 +192,9 @@ public static class CustomPropertyNodes
                     "Property name at index " + i + " is empty — every property needs a name.", nameof(names));
             }
 
+            // A property holds one value. A list here (a table row that lost its @L2 badge) used to be written as the text of its
+            // .NET type into every item; refuse it before any item is touched.
+            CustomPropertyValues.Require("Properties.SetCustom", nameList[i], valueList[i]);
             pairs.Add(new KeyValuePair<string, object?>(nameList[i], valueList[i]));
         }
 

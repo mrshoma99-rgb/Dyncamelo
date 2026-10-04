@@ -47,6 +47,7 @@ Running again with `merge` on (the default) keeps other properties in the tab an
 ## If it does not work
 
 * The `Cost` and `Supplier` cells in the Watch Table are empty: the keys do not match. Compare one `@Guid` value with the sheet.
+* `Properties.SetCustom` is red and says the value for a property "is a list of 2 values": the `values` socket lacks its `@L2` badge, so a whole row reached one property. The node refuses it instead of writing the list into every item.
 * Items get the wrong values: a socket lacks its `@L1` or `@L2` badge, or the sheet has duplicate GUIDs ([Concepts](../concepts.md#lists-replication-and-lacing)).
 * A node is red: see [Read errors and warnings](read-errors-and-warnings.md).
 

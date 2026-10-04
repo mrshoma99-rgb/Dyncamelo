@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.ComApi;
+using CamelGraph.Nodes.Portable;
 using ComApi = Autodesk.Navisworks.Api.Interop.ComApi;
 
 namespace CamelGraph.Navisworks.Internal;
@@ -423,7 +424,10 @@ internal static class ComBridge
     /// Converts a CamelGraph port value to a COM-VARIANT-friendly value for
     /// <c>InwOaProperty.value</c>: string/double/int/bool/DateTime pass through,
     /// other numerics widen losslessly (a long beyond Int32 range becomes a
-    /// double), everything else becomes its invariant string.
+    /// double), a character, GUID or other simple value becomes its invariant
+    /// string. A list, a dictionary or any other object is refused with a message
+    /// (a property holds one value; it used to be written as the text of its .NET
+    /// type, into every item).
     /// </summary>
     internal static object ToComValue(object? value)
     {
@@ -438,11 +442,22 @@ internal static class ComBridge
             case long l: return l >= int.MinValue && l <= int.MaxValue ? (int)l : (object)(double)l;
             case short s: return (int)s;
             case byte b: return (int)b;
+            case sbyte sb: return (int)sb;
+            case ushort us: return (int)us;
+            case uint ui: return ui <= int.MaxValue ? (int)ui : (object)(double)ui;
+            case ulong ul: return ul <= int.MaxValue ? (int)ul : (object)(double)ul;
             case double d: return d;
             case float f: return (double)f;
             case decimal m: return (double)m;
             case DateTime time: return time;
             default:
+                if (!CustomPropertyValues.IsStorable(value))
+                {
+                    throw new ArgumentException(
+                        "A property holds one value (text, a number, true/false or a date), but it was given " +
+                        CustomPropertyValues.Describe(value) + ".", nameof(value));
+                }
+
                 return Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
         }
     }
