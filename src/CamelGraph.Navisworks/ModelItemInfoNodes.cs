@@ -19,7 +19,7 @@ public static class ModelItemInfoNodes
     /// <param name="item">The model item.</param>
     /// <returns>Bounding-box center, bounding-box minimum corner, and the local-frame origin (world coordinates; null when the item has no geometry or the value is unavailable).</returns>
     [NodeName("ModelItem.ReferencePoints")]
-    [NodeDescription("Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value.")]
+    [NodeDescription("Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value. ModelItem.GetTransform.origin is a third base point: the translation of the item's active transform, which follows ModelItem.Translate and the other transform nodes.")]
     [NodeSearchTags("item", "reference", "base", "point", "insertion", "origin", "location", "center")]
     [MultiReturn("bboxCenter", "bboxMin", "localOrigin")]
     [PortKinds("geometry", "geometry", "geometry")]
@@ -42,7 +42,7 @@ public static class ModelItemInfoNodes
     /// <param name="item">The model item.</param>
     /// <returns>The source file name, the Item-tab type (falls back to the class display name), and the owning model.</returns>
     [NodeName("ModelItem.SourceInfo")]
-    [NodeDescription("One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model.")]
+    [NodeDescription("One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model. ModelItem.ModelName is the short form (the model root's name only).")]
     [NodeSearchTags("item", "source", "file", "origin", "type", "model", "provenance")]
     [MultiReturn("sourceFileName", "itemType", "model")]
     [PortKinds("file", "text", "item")]

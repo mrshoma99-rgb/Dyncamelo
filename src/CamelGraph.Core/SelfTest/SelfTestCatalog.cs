@@ -23,7 +23,7 @@ public static class SelfTestCatalog
         "Units.Current", "Units.All", "Export.IfcClasses", "Camera.Current",
         "Selection.Current", "SelectionSets.All", "Viewpoints.All", "TimeLiner.Tasks", "Clash.Tests", "Clash.SummaryTable",
         "Search.ByProperty", "List.FirstItem", "Properties.Value",
-        "ModelItem.DisplayName", "ModelItem.ClassInfo", "ModelItem.ModelName", "ModelItem.SourceInfo", "ModelItem.HasGeometry",
+        "ModelItem.Info", "ModelItem.ModelName", "ModelItem.SourceInfo",
         "ModelItem.BoundingBox", "ModelItem.Children", "ModelItem.IfcGuid",
         "Properties.Categories", "Properties.AsDictionary", "Properties.Discover", "Properties.ToTable",
     };
@@ -127,11 +127,9 @@ public static class SelfTestCatalog
         });
 
         // ----- model items: each node run on the root item of every model --------------------------------------------------
-        cases.Add(OnRootItems("display names", "ModelItem.DisplayName", n => AllTextsNotEmpty(n[1], "name")));
-        cases.Add(OnRootItems("class names", "ModelItem.ClassInfo", null));
+        cases.Add(OnRootItems("display names, class names and geometry flag", "ModelItem.Info", n => AllTextsNotEmpty(n[1], "name")));
         cases.Add(OnRootItems("name of the file they come from", "ModelItem.ModelName", null));
         cases.Add(OnRootItems("source file and type", "ModelItem.SourceInfo", null));
-        cases.Add(OnRootItems("has geometry", "ModelItem.HasGeometry", null));
         cases.Add(OnRootItems("bounding boxes", "ModelItem.BoundingBox", n => NotNull(n[1], "boundingBox")));
         cases.Add(OnRootItems("children", "ModelItem.Children", null));
         cases.Add(OnRootItems("IFC GlobalId", "ModelItem.IfcGuid", null));

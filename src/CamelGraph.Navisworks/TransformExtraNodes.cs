@@ -20,30 +20,38 @@ namespace CamelGraph.Navisworks;
 public static class TransformExtraNodes
 {
     /// <summary>Scales model items uniformly about a point.</summary>
-    /// <param name="items">The model items to scale. Wire the items themselves, not a container AND its children.</param>
-    /// <param name="factor">The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive.</param>
+    /// <param name="items">The model items to scale. An item with another listed item above it is left out (scaling a container scales everything below it).</param>
+    /// <param name="factor">The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive. One factor per run: a list of factors scales the same items once per factor and the factors multiply ([2, 3] scales by 6 in total).</param>
     /// <param name="about">The fixed point of the scaling (a Point or a list of three numbers); leave unwired to scale about the centre of the items' combined bounding box.</param>
+    /// <param name="accumulate">True (default) adds this scaling to whatever override the items already have, so every run scales them again. False replaces their override, so the items end up exactly this much larger or smaller than the model has them and re-running does not pile up.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The scaled items (pass-through for chaining).</returns>
     [NodeName("ModelItem.Scale")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.TransformExtraNodes.Scale@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,Autodesk.Navisworks.Api.Document")]
     [NodeDescription(
         "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group " +
         "grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed " +
-        "by ModelItem.ResetTransform. Re-runs accumulate (each run scales again). One override per item, so allow a moment on large selections.")]
+        "by ModelItem.ResetTransform. Re-runs accumulate (each run scales again); in Advanced, switch accumulate off to scale " +
+        "from where the model had the items, so re-running does not pile up. One factor per run: a list of factors against the " +
+        "whole item list scales the same items once per factor and the factors multiply ([2, 3] is 6 in total; the node warns). " +
+        "Items that sit below another listed item are left out, because scaling a container already scales everything under " +
+        "it. One override per item, so allow a moment on large selections.")]
     [NodeSearchTags("item", "scale", "resize", "size", "grow", "shrink", "factor", "transform", "units")]
     [return: NodeName("items")]
     public static List<ModelItem> Scale(
         [MultiInput] IEnumerable<ModelItem> items,
-        [NodeRange(0, 1000000, SoftMin = 0.1, SoftMax = 10, Step = 0.1)] double factor,
+        [NodeRange(0.001, 1000000, SoftMin = 0.1, SoftMax = 10, Step = 0.1)] double factor,
         [PortKinds("geometry")] object? about = null,
+        [NodePanel("Advanced")] bool accumulate = true,
         Document? document = null)
     {
-        var list = NavisValues.RequireItems(items);
+        var list = TransformHelpers.WithoutListedDescendants(NavisValues.RequireItems(items), "scaled");
         ItemTransformMath.RequireScaleFactor(factor);
         var doc = NavisworksContext.ResolveDocument(document);
 
-        if (ItemTransformMath.IsIdentityScale(factor))
+        if (ItemTransformMath.IsIdentityScale(factor) && accumulate)
         {
             return list; // a factor of 1 changes nothing: do not create overrides
         }
@@ -66,21 +74,25 @@ public static class TransformExtraNodes
         }
 
         var delta = TransformHelpers.FromRowMajorMatrix(ItemTransformMath.ScaleAboutPoint(factor, cx, cy, cz));
-        ApplyDelta(doc, list, delta);
+        TransformHelpers.WarnIfRunOncePerValue(list.Count, "scales", accumulate);
+        TransformNodes.ApplyDelta(doc, list, delta, accumulate);
         return list;
     }
 
     /// <summary>Moves model items so the centre of their combined bounding box lands on a point.</summary>
-    /// <param name="items">The model items to move (they keep their layout relative to each other).</param>
-    /// <param name="target">Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units.</param>
+    /// <param name="items">The model items to move (they keep their layout relative to each other). An item with another listed item above it is left out (moving a container moves everything below it).</param>
+    /// <param name="target">Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units. One target per run: a list of targets moves the same items to each in turn and the last one stays.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The moved items (pass-through for chaining).</returns>
     [NodeName("ModelItem.MoveTo")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription(
         "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where " +
         "it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by " +
-        "ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there.")]
+        "ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there. One target per run: " +
+        "a list of targets moves the same items to each in turn and the last one stays (the node warns). Items that sit below " +
+        "another listed item are left out, because moving a container already moves everything under it.")]
     [NodeSearchTags("item", "move", "moveto", "place", "position", "target", "centre", "center", "transform")]
     [return: NodeName("items")]
     public static List<ModelItem> MoveTo(
@@ -88,7 +100,7 @@ public static class TransformExtraNodes
         [PortKinds("geometry")] object target,
         Document? document = null)
     {
-        var list = NavisValues.RequireItems(items);
+        var list = TransformHelpers.WithoutListedDescendants(NavisValues.RequireItems(items), "moved");
         if (target == null)
         {
             throw new ArgumentNullException(
@@ -107,7 +119,8 @@ public static class TransformExtraNodes
             return list; // already there
         }
 
-        ApplyDelta(doc, list, TransformHelpers.Translation(new Vector3D(move.X, move.Y, move.Z)));
+        TransformHelpers.WarnIfRunOncePerValue(list.Count, "moves", false);
+        TransformNodes.ApplyDelta(doc, list, TransformHelpers.Translation(new Vector3D(move.X, move.Y, move.Z)));
         return list;
     }
 
@@ -121,25 +134,11 @@ public static class TransformExtraNodes
         {
             throw new InvalidOperationException(
                 "The items carry no geometry, so they have no bounding box. Wire geometry-bearing items " +
-                "(ModelItem.GeometryLeaves resolves containers to theirs). " + hint);
+                "(Selection.Resolve with level Geometry resolves containers to theirs). " + hint);
         }
 
         var min = box.Min;
         var max = box.Max;
         return ItemTransformMath.BoxCentre(min.X, min.Y, min.Z, max.X, max.Y, max.Z);
-    }
-
-    /// <summary>
-    /// Applies a delta on top of each item's existing permanent override (per item — overrides can
-    /// differ across the selection). Same mechanism as ModelItem.Translate; see the RUNTIME-CHECK
-    /// note on TransformNodes.ApplyDelta.
-    /// </summary>
-    private static void ApplyDelta(Document doc, List<ModelItem> items, Transform3D delta)
-    {
-        foreach (var item in items)
-        {
-            var composed = TransformHelpers.ComposeWithOverride(item, delta);
-            doc.Models.OverridePermanentTransform(new[] { item }, composed, false);
-        }
     }
 }

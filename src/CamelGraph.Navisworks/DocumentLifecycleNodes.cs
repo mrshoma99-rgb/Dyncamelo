@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -21,15 +23,26 @@ namespace CamelGraph.Navisworks;
 public static class DocumentLifecycleNodes
 {
     /// <summary>Opens a file into the active document.</summary>
-    /// <param name="filePath">The file to open (.nwd/.nwf/.nwc or any appendable design format).</param>
+    /// <param name="filePath">The file to open (.nwd/.nwf/.nwc or any appendable design format). One path only; a relative path means next to the graph.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The document, now holding the opened file.</returns>
     [NodeName("Document.Open")]
-    [NodeDescription("Opens a file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Opens ONE file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node. A list of paths is an error, because each file would replace the one before; to add several files use Document.AppendFiles. A relative path means next to the graph.")]
     [NodeSearchTags("document", "open", "file", "load", "batch", "nwd", "nwf")]
     [return: NodeName("document")]
-    public static Document Open(string filePath, Document? document = null)
+    public static Document Open(
+        [NodePath(NodePathMode.Open, Filter = "Navisworks and CAD files|*.nwd;*.nwf;*.nwc;*.rvt;*.ifc;*.dwg;*.dgn;*.skp;*.fbx;*.3ds|All files (*.*)|*.*")] string filePath,
+        Document? document = null)
     {
+        if (NodeWarnings.IsLaced)
+        {
+            throw new InvalidOperationException(
+                "Document.Open opens one file and replaces what is open, so it cannot run once per path of a list: the last file would be all that stays. " +
+                "Wire a single path, or use Document.AppendFiles to add several files.");
+        }
+
+        filePath = PathResolver.Resolve(filePath);
         RequireExistingFile(filePath);
         // allowClear: opening the first file into a fresh (empty) session is
         // exactly this node's job — do not reject IsClear documents.
@@ -49,11 +62,12 @@ public static class DocumentLifecycleNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The document and the newly appended models.</returns>
     [NodeName("Document.AppendFiles")]
-    [NodeDescription("Appends design files to the document — Directory.GetFiles → Document.AppendFiles → Export.NWD is the Navisworks Batch Utility in three nodes. Cached model items from earlier runs are invalidated.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Appends design files to the document — Directory.FindFiles → Document.AppendFiles → Document.Save is the Navisworks Batch Utility in three nodes. Takes the whole list of paths (several wires are joined); relative paths mean next to the graph. Cached model items from earlier runs are invalidated.")]
     [NodeSearchTags("document", "append", "files", "add", "batch", "federate", "combine")]
     [MultiReturn("document", "models")]
     [PortKinds("document", "item*")]
-    public static Dictionary<string, object?> AppendFiles(IEnumerable<string> filePaths, Document? document = null)
+    public static Dictionary<string, object?> AppendFiles([MultiInput] IEnumerable<string> filePaths, Document? document = null)
     {
         var paths = MaterializePaths(filePaths);
         // allowClear: appending the first files into a fresh (empty) session is
@@ -92,6 +106,7 @@ public static class DocumentLifecycleNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when any file was updated from disk.</returns>
     [NodeName("Document.Refresh")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Refreshes every linked/appended file from disk — Home > Refresh, scriptable. Returns true when anything was updated. Cached model items from earlier runs are invalidated.")]
     [NodeSearchTags("document", "refresh", "update", "reload", "linked", "files")]
     [return: NodeName("updated")]
@@ -106,11 +121,15 @@ public static class DocumentLifecycleNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The document, with the file's contents merged in.</returns>
     [NodeName("Document.Merge")]
-    [NodeDescription("Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. Cached model items from earlier runs are invalidated.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. A list of files merges them one after the other. A relative path means next to the graph. Cached model items from earlier runs are invalidated.")]
     [NodeSearchTags("document", "merge", "combine", "review", "duplicate", "nwf")]
     [return: NodeName("document")]
-    public static Document Merge(string filePath, Document? document = null)
+    public static Document Merge(
+        [NodePath(NodePathMode.Open, Filter = "Navisworks files (*.nwf;*.nwd)|*.nwf;*.nwd|All files (*.*)|*.*")] string filePath,
+        Document? document = null)
     {
+        filePath = PathResolver.Resolve(filePath);
         RequireExistingFile(filePath);
         // allowClear: merging into an empty session behaves like an open.
         var doc = NavisworksContext.ResolveDocument(document, allowClear: true);
@@ -151,7 +170,7 @@ public static class DocumentLifecycleNodes
         {
             if (!string.IsNullOrEmpty(path))
             {
-                paths.Add(path);
+                paths.Add(PathResolver.Resolve(path));
             }
         }
 

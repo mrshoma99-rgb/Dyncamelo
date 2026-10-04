@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 584,
+ "count": 580,
  "categories": [
   {
    "name": "Annotation",
@@ -92,7 +92,7 @@
   },
   {
    "name": "Navisworks.Comments",
-   "count": 3
+   "count": 4
   },
   {
    "name": "Navisworks.Document",
@@ -116,7 +116,7 @@
   },
   {
    "name": "Navisworks.ModelItem",
-   "count": 20
+   "count": 15
   },
   {
    "name": "Navisworks.Properties",
@@ -13496,7 +13496,7 @@
    "id": "CamelGraph.Navisworks.SavedItemCommentNodes.AddComment@Autodesk.Navisworks.Api.SavedItem,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Comments",
-   "description": "Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk.",
+   "description": "Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk. Every run adds another comment: running the graph twice leaves two identical comments (SavedItem.ClearComments empties the thread first, SavedItem.SetCommentStatus changes the status of one that is already there).",
    "tags": [
     "comment",
     "add",
@@ -13550,7 +13550,7 @@
    "id": "CamelGraph.Navisworks.SavedItemCommentNodes.ClearComments@Autodesk.Navisworks.Api.SavedItem,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Comments",
-   "description": "Deletes every comment on a saved viewpoint, selection/search set or folder (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment.",
+   "description": "Deletes every comment on a saved viewpoint, selection/search set, folder, clash result or result group (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment. A clash test itself has no comment thread here.",
    "tags": [
     "comment",
     "clear",
@@ -13563,7 +13563,7 @@
     {
      "name": "item",
      "type": "SavedItem",
-     "description": "The saved item (a viewpoint, selection/search set, or one of their folders)."
+     "description": "The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group)."
     },
     {
      "name": "document",
@@ -13627,6 +13627,58 @@
    "returns": "Index-aligned comment bodies, authors, statuses and creation dates."
   },
   {
+   "name": "SavedItem.SetCommentStatus",
+   "id": "CamelGraph.Navisworks.SavedItemCommentNodes.SetCommentStatus@Autodesk.Navisworks.Api.SavedItem,string,int,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Comments",
+   "description": "Changes the status (New, Active, Approved, Resolved) of one comment, or of every comment, on a saved viewpoint, selection/search set, folder, clash result or result group, keeping its text, its author and its place in the thread — close out review comments without clearing the thread. Navisworks cannot edit a comment in place, so a changed comment is replaced by a copy: its date becomes the time of the change. Comments that already have the status are left alone. Wire a list of items to change several threads.",
+   "tags": [
+    "comment",
+    "status",
+    "resolve",
+    "resolved",
+    "approve",
+    "approved",
+    "close",
+    "review",
+    "active",
+    "new",
+    "set"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "SavedItem",
+     "description": "The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group). Wire a list to change several items."
+    },
+    {
+     "name": "status",
+     "type": "string",
+     "description": "\"New\", \"Active\", \"Approved\" or \"Resolved\"."
+    },
+    {
+     "name": "index",
+     "type": "integer",
+     "description": "The 0-based position of the comment in the thread (0 is the first); -1 changes every comment.",
+     "default": "-1"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "item",
+     "type": "SavedItem",
+     "description": "The item (pass-through for chaining)."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Application.Version",
    "id": "CamelGraph.Navisworks.ApplicationNodes.Version",
    "assembly": "CamelGraph.Navisworks",
@@ -13659,7 +13711,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.AppendFiles@System.Collections.Generic.IEnumerable<string>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Appends design files to the document — Directory.GetFiles → Document.AppendFiles → Export.NWD is the Navisworks Batch Utility in three nodes. Cached model items from earlier runs are invalidated.",
+   "description": "Appends design files to the document — Directory.FindFiles → Document.AppendFiles → Document.Save is the Navisworks Batch Utility in three nodes. Takes the whole list of paths (several wires are joined); relative paths mean next to the graph. Cached model items from earlier runs are invalidated.",
    "tags": [
     "document",
     "append",
@@ -13673,7 +13725,8 @@
     {
      "name": "filePaths",
      "type": "string[]",
-     "description": "The files to append, in order (e.g. from Directory.GetFiles)."
+     "description": "The files to append, in order (e.g. from Directory.GetFiles).",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -13723,7 +13776,7 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Info@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "File name, title, display units and model count of a document.",
+   "description": "File name, title, display units and model count of a document, read again on every run. The units output is the same text as Units.Current.",
    "tags": [
     "document",
     "info",
@@ -13768,7 +13821,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.Merge@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. Cached model items from earlier runs are invalidated.",
+   "description": "Merges another Navisworks file into the document with duplicate resolution — pulls a colleague's review artifacts (sets, viewpoints, comments) into yours. Not a model-diff tool. A list of files merges them one after the other. A relative path means next to the graph. Cached model items from earlier runs are invalidated.",
    "tags": [
     "document",
     "merge",
@@ -13804,7 +13857,7 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Models@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "The models (appended source files) loaded in a document.",
+   "description": "The models (appended source files) loaded in a document, read again on every run.",
    "tags": [
     "document",
     "models",
@@ -13833,7 +13886,7 @@
    "id": "CamelGraph.Navisworks.DocumentLifecycleNodes.Open@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Opens a file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node.",
+   "description": "Opens ONE file into the document, REPLACING its current contents (the headless batch driver). Every model item from before the open is invalidated — re-query items downstream of this node. A list of paths is an error, because each file would replace the one before; to add several files use Document.AppendFiles. A relative path means next to the graph.",
    "tags": [
     "document",
     "open",
@@ -13847,7 +13900,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The file to open (.nwd/.nwf/.nwc or any appendable design format)."
+     "description": "The file to open (.nwd/.nwf/.nwc or any appendable design format). One path only; a relative path means next to the graph."
     },
     {
      "name": "document",
@@ -13901,20 +13954,23 @@
    "id": "CamelGraph.Navisworks.DocumentNodes.Save@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Document",
-   "description": "Saves the document as .nwf (references) or .nwd (published snapshot) to the given path.",
+   "description": "Saves the document as .nwf (references to the source files) or .nwd (a published snapshot with the appearance overrides baked in) to the given path; the extension decides. This is the node for publishing an NWD (it replaces Export.NWD). An existing file is replaced. A relative path means next to the graph, and the folder is created when missing. Inside a node group that is used twice, a fixed path is written twice: the second save replaces the first.",
    "tags": [
     "document",
     "save",
     "nwf",
     "nwd",
     "publish",
-    "write"
+    "write",
+    "export",
+    "snapshot",
+    "batch"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination path ending in .nwf or .nwd; the directory is created when missing."
+     "description": "Destination path ending in .nwf or .nwd (a relative path means next to the graph); the directory is created when missing, an existing file is replaced."
     },
     {
      "name": "document",
@@ -14760,7 +14816,7 @@
    "id": "CamelGraph.Navisworks.GridNodes.ClosestIntersection@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Grids",
-   "description": "The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.",
+   "description": "The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units. One point per run (a list of three numbers is one point): to label many points, such as the centres of many clashes, right-click the point input, choose List Levels and set L1 (L2 for a list of [x, y, z] lists), and you get one label per point.",
    "tags": [
     "grid",
     "intersection",
@@ -14774,7 +14830,7 @@
     {
      "name": "point",
      "type": "any",
-     "description": "The query point (document units) — e.g. a ClashResult center or a bounding-box center."
+     "description": "The query point (document units) — e.g. a ClashResult center or a bounding-box center. One point per run; for a list of points set List Levels L1 on this input."
     },
     {
      "name": "document",
@@ -14901,7 +14957,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddCloud@object,System.Collections.Generic.IList<object>,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.",
+   "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list. Wire a list of viewpoints and every one gets the cloud (the points input stays one outline).",
    "tags": [
     "markup",
     "redline",
@@ -14914,7 +14970,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "points",
@@ -14954,7 +15010,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddNumberTag@object,int,double,double,double,string,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the tag.",
    "tags": [
     "markup",
     "redline",
@@ -14968,7 +15024,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "number",
@@ -15030,7 +15086,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddShape@object,string,double,double,double,double,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the shape.",
    "tags": [
     "markup",
     "redline",
@@ -15046,7 +15102,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "shape",
@@ -15106,7 +15162,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddText@object,string,double,double,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List. Wire a list of viewpoints and every one gets the text.",
    "tags": [
     "markup",
     "redline",
@@ -15120,7 +15176,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "text",
@@ -15170,7 +15226,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.Clear@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API).",
+   "description": "EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API). Wire a list of viewpoints and every one is cleared.",
    "tags": [
     "markup",
     "redline",
@@ -15183,7 +15239,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "document",
@@ -15206,7 +15262,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.List@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.",
+   "description": "EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes. Wire a list of viewpoints and you get one result per viewpoint.",
    "tags": [
     "markup",
     "redline",
@@ -15220,7 +15276,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "document",
@@ -15308,7 +15364,7 @@
    "id": "CamelGraph.Navisworks.ModelOpsNodes.Remove@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses the removal. Cached model items from earlier runs are invalidated.",
+   "description": "Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). Wire a LIST of models, indices or file names to remove several in one go: they are all looked up in the document as it is now and removed from the last to the first, so the indices [0, 1] remove the first two models, not the first and third. No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses a removal. Cached model items from earlier runs are invalidated.",
    "tags": [
     "model",
     "remove",
@@ -15322,7 +15378,7 @@
     {
      "name": "model",
      "type": "any",
-     "description": "The model to remove: a Model (from Document.Models), its 0-based index, or its file name."
+     "description": "The model to remove: a Model (from Document.Models), its 0-based index, or its file name. A list removes all of them in one go."
     },
     {
      "name": "document",
@@ -15335,7 +15391,7 @@
     {
      "name": "removed",
      "type": "boolean",
-     "description": "True when the model was removed; false when Navisworks refused (e.g. the last remaining model)."
+     "description": "True when every wanted model was removed; false when Navisworks refused one (e.g. the last remaining model)."
     }
    ],
    "returns": ""
@@ -15368,7 +15424,8 @@
     {
      "name": "properties",
      "type": "any[]",
-     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid."
+     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -15385,7 +15442,7 @@
    "id": "CamelGraph.Navisworks.ModelDataNodes.Statistics@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item.",
+   "description": "Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item. A wired list that is empty, such as a search that found nothing, counts nothing: you get an empty table (headers only) and a warning, never the whole document by accident.",
    "tags": [
     "model",
     "statistics",
@@ -15405,7 +15462,7 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The items to count; leave empty (or unwired) to count every item of the document.",
+     "description": "The items to count. Leave it unwired to count every item of the document; a wired list that is empty (a search that found nothing) counts nothing and gives an empty table.",
      "default": "null",
      "multiInput": true
     },
@@ -15436,7 +15493,7 @@
    "id": "CamelGraph.Navisworks.ModelNodes.RootItems@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "The root model items of every model loaded in a document.",
+   "description": "The root model items of every model loaded in a document, read again on every run.",
    "tags": [
     "models",
     "roots",
@@ -15557,12 +15614,12 @@
      "description": "The model item whose ancestor chain to test."
     },
     {
-     "name": "category",
+     "name": "categoryName",
      "type": "string",
      "description": "The property category (tab) name, as the Properties window shows it (e.g. \"Element\", \"Item\")."
     },
     {
-     "name": "property",
+     "name": "propertyName",
      "type": "string",
      "description": "The property name inside that category (e.g. \"Name\", \"Type\", \"Source File\")."
     },
@@ -15649,7 +15706,7 @@
    "id": "CamelGraph.Navisworks.ModelItemNodes.BoundingBox@Autodesk.Navisworks.Api.ModelItem,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox.",
+   "description": "The axis-aligned bounding box of a model item, in document units. Wire a LIST in and lacing gives one box per item — for one box around them all use ModelItem.CombinedBoundingBox. An item with no geometry of its own below it (an empty layer or group) has no box: the result is null and the node shows a warning, so List.Clean drops it and BoundingBox.Center / Size are not fed an empty box.",
    "tags": [
     "item",
     "boundingbox",
@@ -15674,7 +15731,7 @@
     {
      "name": "boundingBox",
      "type": "BoundingBox3D",
-     "description": "The item's bounding box, in document units."
+     "description": "The item's bounding box, in document units; null (with a warning) when the item carries no geometry."
     }
    ],
    "returns": ""
@@ -15706,40 +15763,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "ModelItem.ClassInfo",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.ClassInfo@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "The internal and localized class names of a model item (layer/group/geometry detection).",
-   "tags": [
-    "item",
-    "class",
-    "classname",
-    "type",
-    "kind"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "className",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "classDisplayName",
-     "type": "string",
-     "description": ""
-    }
-   ],
-   "returns": "The internal and localized class names (layer/group/geometry detection)."
   },
   {
    "name": "ModelItem.CombinedBoundingBox",
@@ -15845,92 +15868,6 @@
    "returns": ""
   },
   {
-   "name": "ModelItem.DisplayName",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.DisplayName@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "The display name of a model item (falls back to its class name when unnamed).",
-   "tags": [
-    "item",
-    "name",
-    "displayname",
-    "label"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "name",
-     "type": "string",
-     "description": "The item's display name; falls back to its class display name when unnamed."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.GeometryLeaves",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.GeometryLeaves@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "Flattens items to their unique geometry-bearing descendants (the items QTO and coloring actually want).",
-   "tags": [
-    "item",
-    "geometry",
-    "leaves",
-    "flatten",
-    "descendants"
-   ],
-   "inputs": [
-    {
-     "name": "items",
-     "type": "ModelItem[]",
-     "description": "The model items to flatten.",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "leaves",
-     "type": "ModelItem[]",
-     "description": "The unique geometry leaves — the items QTO, coloring and clash selections actually want."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.HasGeometry",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.HasGeometry@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "True when the model item carries geometry.",
-   "tags": [
-    "item",
-    "geometry",
-    "solid",
-    "mesh"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "hasGeometry",
-     "type": "boolean",
-     "description": "True when the item has geometry."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "ModelItem.IfcGuid",
    "id": "CamelGraph.Navisworks.ModelItemIfcNodes.IfcGuid@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
@@ -15963,13 +15900,27 @@
    "returns": ""
   },
   {
-   "name": "ModelItem.InstanceGuid",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.InstanceGuid@Autodesk.Navisworks.Api.ModelItem",
+   "name": "ModelItem.Info",
+   "id": "CamelGraph.Navisworks.ModelItemNodes.Info@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The stable instance GUID of a model item (\"\" when absent) — cross-run identity for reports.",
+   "description": "Everything quick to know about a model item in one node: its display name (the class name when it has none), class name and localized class name (layer/group/geometry detection), instance GUID (\"\" when absent, a stable cross-run identity for reports), whether it carries geometry and whether it is hidden right now. Use the outputs you need; replaces the single-property nodes ModelItem.DisplayName, ClassInfo, HasGeometry, IsHidden and InstanceGuid. The IFC GlobalId (ModelItem.IfcGuid), the source file (ModelItem.SourceInfo) and the tree path (ModelItem.Path) are separate nodes because they read more.",
    "tags": [
     "item",
+    "info",
+    "name",
+    "displayname",
+    "label",
+    "class",
+    "classname",
+    "type",
+    "kind",
+    "geometry",
+    "solid",
+    "mesh",
+    "hidden",
+    "visible",
+    "state",
     "guid",
     "id",
     "identity",
@@ -15979,52 +15930,49 @@
     {
      "name": "item",
      "type": "ModelItem",
-     "description": "The model item."
+     "description": "The model item. Wire a list and lacing gives one result per item (each output becomes a list)."
     }
    ],
    "outputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "className",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "classDisplayName",
+     "type": "string",
+     "description": ""
+    },
     {
      "name": "guid",
      "type": "string",
-     "description": "The GUID string, or \"\" when the item has none — cross-run identity for reports."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.IsHidden",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.IsHidden@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "True when the model item is currently hidden in the viewport.",
-   "tags": [
-    "item",
-    "hidden",
-    "visible",
-    "state"
-   ],
-   "inputs": [
+     "description": ""
+    },
     {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item."
-    }
-   ],
-   "outputs": [
+     "name": "hasGeometry",
+     "type": "boolean",
+     "description": ""
+    },
     {
      "name": "isHidden",
      "type": "boolean",
-     "description": "True when the item is hidden."
+     "description": ""
     }
    ],
-   "returns": ""
+   "returns": "The display name (the class name when unnamed), the internal and localized class names, the instance GUID text (\"\" when absent), whether the item carries geometry and whether it is hidden."
   },
   {
    "name": "ModelItem.ModelName",
    "id": "CamelGraph.Navisworks.ModelItemNodes.ModelName@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model.",
+   "description": "The name of the model/file an item comes from (the root of its selection tree, e.g. \"Structure.nwc\"). Combine with ClashResult.Items to filter clashes by discipline/source model — e.g. keep only clashes between the MEP model and the Structure model. ModelItem.SourceInfo answers the same question with more detail (the source file name, the item type and the owning model); Model.Statistics labels a model without a name by its file name, this node gives an empty text.",
    "tags": [
     "item",
     "model",
@@ -16046,38 +15994,6 @@
      "name": "modelName",
      "type": "string",
      "description": "The root ancestor's display name, e.g. \"Structure.nwc\"."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "ModelItem.ObjectAncestor",
-   "id": "CamelGraph.Navisworks.ModelItemNodes.ObjectAncestor@Autodesk.Navisworks.Api.ModelItem",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.ModelItem",
-   "description": "Walks up the selection tree to the whole object/element a geometry item belongs to (Navisworks' first composite-object ancestor) — the item you usually want to name, colour or tag. Returns the item itself when it is already an object.",
-   "tags": [
-    "item",
-    "object",
-    "element",
-    "ancestor",
-    "parent",
-    "composite",
-    "tree",
-    "up"
-   ],
-   "inputs": [
-    {
-     "name": "item",
-     "type": "ModelItem",
-     "description": "The model item (often a geometry leaf deep in the tree)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "object",
-     "type": "ModelItem",
-     "description": "The nearest ancestor flagged as a composite object (the \"element\" in the tree); the item itself when it is already an object."
     }
    ],
    "returns": ""
@@ -16112,11 +16028,49 @@
    "returns": ""
   },
   {
+   "name": "ModelItem.Path",
+   "id": "CamelGraph.Navisworks.ModelItemNodes.Path@Autodesk.Navisworks.Api.ModelItem,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.ModelItem",
+   "description": "The selection-tree path of an item as one text, from its model file down to the item (\"Structure.nwc > Level 1 > Walls > Basic Wall\") — a label for BCF titles, clash names and reports. The same text is the @Path column of Properties.ToTable. ModelItem.Info gives only the item's own name.",
+   "tags": [
+    "item",
+    "path",
+    "breadcrumb",
+    "tree",
+    "hierarchy",
+    "location",
+    "label",
+    "full name"
+   ],
+   "inputs": [
+    {
+     "name": "item",
+     "type": "ModelItem",
+     "description": "The model item. Wire a list and lacing gives one path per item."
+    },
+    {
+     "name": "separator",
+     "type": "string",
+     "description": "The text between the names (default \" > \").",
+     "default": "\" > \""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "The names from the model file down to the item, joined by the separator; an unnamed level shows its class name and a level with neither is left out."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "ModelItem.ReferencePoints",
    "id": "CamelGraph.Navisworks.ModelItemInfoNodes.ReferencePoints@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value.",
+   "description": "Candidate base/reference points of an item, in world document units. Navisworks has NO insertion-point API — bboxCenter/bboxMin come from the bounding box; localOrigin is the item's local-frame origin (COM fragment transform), which approximates the source insertion point for many formats (null when unavailable, e.g. non-geometry items or outside a live session). Source properties (Revit \"Location\" etc.) remain readable via Properties.Value. ModelItem.GetTransform.origin is a third base point: the translation of the item's active transform, which follows ModelItem.Translate and the other transform nodes.",
    "tags": [
     "item",
     "reference",
@@ -16158,7 +16112,7 @@
    "id": "CamelGraph.Navisworks.ModelItemInfoNodes.SourceInfo@Autodesk.Navisworks.Api.ModelItem",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.ModelItem",
-   "description": "One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model.",
+   "description": "One-node answer to \"which file did this element come from and what is it\": the source file name, the Item-tab Type (falling back to the item's class name), and the owning appended model. ModelItem.ModelName is the short form (the model root's name only).",
    "tags": [
     "item",
     "source",
@@ -17159,7 +17113,7 @@
    "id": "CamelGraph.Navisworks.SelectionLevelNodes.Resolve@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Selection",
-   "description": "Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection).",
+   "description": "Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection). Level Geometry flattens items to their unique geometry-bearing descendants (the items QTO, colouring and clash selections want; it was ModelItem.GeometryLeaves). Level LastObject walks up from a geometry leaf to the whole object it belongs to, the item you usually want to name, colour or tag (it was ModelItem.ObjectAncestor). The result has no duplicates and keeps the input order; wire a list of groups and lacing gives one resolved list per group.",
    "tags": [
     "selection",
     "resolve",
@@ -17172,11 +17126,19 @@
     "last unique",
     "geometry",
     "parent",
-    "ancestor"
+    "ancestor",
+    "leaves",
+    "flatten",
+    "descendants",
+    "object ancestor",
+    "element",
+    "composite",
+    "whole object",
+    "geometry leaves"
    ],
    "inputs": [
     {
-     "name": "modelItems",
+     "name": "items",
      "type": "ModelItem[]",
      "description": "The model items to resolve.",
      "multiInput": true
@@ -18284,7 +18246,7 @@
    "id": "CamelGraph.Navisworks.TransformExtraNodes.MoveTo@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there.",
+   "description": "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there. One target per run: a list of targets moves the same items to each in turn and the last one stays (the node warns). Items that sit below another listed item are left out, because moving a container already moves everything under it.",
    "tags": [
     "item",
     "move",
@@ -18300,13 +18262,13 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to move (they keep their layout relative to each other).",
+     "description": "The model items to move (they keep their layout relative to each other). An item with another listed item above it is left out (moving a container moves everything below it).",
      "multiInput": true
     },
     {
      "name": "target",
      "type": "any",
-     "description": "Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units."
+     "description": "Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units. One target per run: a list of targets moves the same items to each in turn and the last one stays."
     },
     {
      "name": "document",
@@ -18344,7 +18306,8 @@
      "name": "items",
      "type": "ModelItem[]",
      "description": "The model items to reset.",
-     "default": "null"
+     "default": "null",
+     "multiInput": true
     },
     {
      "name": "resetAll",
@@ -18370,10 +18333,10 @@
   },
   {
    "name": "ModelItem.RotateAboutAxis",
-   "id": "CamelGraph.Navisworks.TransformNodes.RotateAboutAxis@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,object,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformNodes.RotateAboutAxis@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,object,double,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Rotates model items by an angle (degrees) about an axis through a point. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate.",
+   "description": "Rotates model items by an angle (degrees) about an axis through a point. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate; in Advanced, switch accumulate off to turn the items exactly this much from where the model had them, so re-running does not pile up. One angle per run: a list of angles against the whole item list turns the same items once per angle and the turns add up ([10, 20] turns them 30 degrees in total, and the node warns). To give every item its own angle, set List Levels L1 on items and on degrees and wire one angle per item. Items that sit below another listed item are left out, because turning a container already turns everything under it.",
    "tags": [
     "item",
     "rotate",
@@ -18387,7 +18350,7 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to rotate.",
+     "description": "The model items to rotate. An item with another listed item above it is left out (turning a container turns everything below it).",
      "multiInput": true
     },
     {
@@ -18403,7 +18366,13 @@
     {
      "name": "degrees",
      "type": "number",
-     "description": "The rotation angle in degrees (right-hand rule around the axis)."
+     "description": "The rotation angle in degrees (right-hand rule around the axis). One angle per run: to turn every item by its own angle, set List Levels L1 on both items and degrees and wire one angle per item."
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this turn to whatever override the items already have, so every run turns them again. False replaces their override, so the items end up turned exactly this much from where the model had them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -18423,10 +18392,10 @@
   },
   {
    "name": "ModelItem.Scale",
-   "id": "CamelGraph.Navisworks.TransformExtraNodes.Scale@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformExtraNodes.Scale@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again). One override per item, so allow a moment on large selections.",
+   "description": "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again); in Advanced, switch accumulate off to scale from where the model had the items, so re-running does not pile up. One factor per run: a list of factors against the whole item list scales the same items once per factor and the factors multiply ([2, 3] is 6 in total; the node warns). Items that sit below another listed item are left out, because scaling a container already scales everything under it. One override per item, so allow a moment on large selections.",
    "tags": [
     "item",
     "scale",
@@ -18442,19 +18411,25 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to scale. Wire the items themselves, not a container AND its children.",
+     "description": "The model items to scale. An item with another listed item above it is left out (scaling a container scales everything below it).",
      "multiInput": true
     },
     {
      "name": "factor",
      "type": "number",
-     "description": "The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive."
+     "description": "The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive. One factor per run: a list of factors scales the same items once per factor and the factors multiply ([2, 3] scales by 6 in total)."
     },
     {
      "name": "about",
      "type": "any",
      "description": "The fixed point of the scaling (a Point or a list of three numbers); leave unwired to scale about the centre of the items' combined bounding box.",
      "default": "null"
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this scaling to whatever override the items already have, so every run scales them again. False replaces their override, so the items end up exactly this much larger or smaller than the model has them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -18477,7 +18452,7 @@
    "id": "CamelGraph.Navisworks.TransformNodes.SetTransform@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent.",
+   "description": "Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent. One matrix per run: several matrices against the whole item list would replace each other and only the last stays.",
    "tags": [
     "item",
     "transform",
@@ -18517,10 +18492,10 @@
   },
   {
    "name": "ModelItem.Translate",
-   "id": "CamelGraph.Navisworks.TransformNodes.Translate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformNodes.Translate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again.",
+   "description": "Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again; in Advanced, switch accumulate off to put the items exactly this far from where the model had them, so re-running (or tuning the vector with Auto-run on) does not pile up. One vector per run: to give every item its own vector set List Levels L1 on items and on vector and wire one vector per item; a list of vectors against the whole item list moves the same items once per vector and the moves add up (the node warns). Items that sit below another listed item are left out, because moving a container already moves everything under it. A container has no override of its own to read, so each run on a container starts from where the model had it; use Selection.Resolve with level Geometry first if re-runs should add up.",
    "tags": [
     "item",
     "translate",
@@ -18533,13 +18508,19 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to move.",
+     "description": "The model items to move. An item with another listed item above it is left out (moving a container moves everything below it).",
      "multiInput": true
     },
     {
      "name": "vector",
      "type": "any",
-     "description": "The offset, in document units: a Vector (Vector.ByCoordinates) or a list of three numbers."
+     "description": "The offset, in document units: a Vector (Vector.ByCoordinates) or a list of three numbers. One vector per run: to move every item by its own vector, set List Levels L1 on both items and vector."
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this move to whatever override the items already have, so every run moves them again. False replaces their override, so the items end up exactly this far from where the model put them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -18582,15 +18563,19 @@
   },
   {
    "name": "Units.Convert",
-   "id": "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units",
+   "id": "CamelGraph.Navisworks.UnitNodes.Convert@double,Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "Converts a length value from one unit to another (e.g. Feet to Millimeters).",
+   "description": "Converts a length, an area or a volume from one unit to another (e.g. Feet to Millimeters). Set dimension to Area for square units (square feet to square meters) or Volume for cubic units; the default, Length, converts a length as before.",
    "tags": [
     "units",
     "convert",
     "length",
-    "conversion"
+    "conversion",
+    "area",
+    "volume",
+    "square",
+    "cubic"
    ],
    "inputs": [
     {
@@ -18607,6 +18592,12 @@
      "name": "toUnits",
      "type": "Units",
      "description": "Target units (e.g. \"Millimeters\")."
+    },
+    {
+     "name": "dimension",
+     "type": "string",
+     "description": "Length (default), Area or Volume: what the value measures. An area is converted with the length factor squared, a volume with it cubed.",
+     "default": "\"Length\""
     }
    ],
    "outputs": [
@@ -18623,7 +18614,7 @@
    "id": "CamelGraph.Navisworks.UnitNodes.Current@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "The display units of a document (all API lengths, areas and volumes use them).",
+   "description": "The display units of a document (all API lengths, areas and volumes use them), read again on every run. The same text is the units output of Document.Info.",
    "tags": [
     "units",
     "current",
@@ -18650,15 +18641,19 @@
   },
   {
    "name": "Units.ScaleFactor",
-   "id": "CamelGraph.Navisworks.UnitNodes.ScaleFactor@Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units",
+   "id": "CamelGraph.Navisworks.UnitNodes.ScaleFactor@Autodesk.Navisworks.Api.Units,Autodesk.Navisworks.Api.Units,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Units",
-   "description": "The multiplier that converts a length from one unit to another.",
+   "description": "The multiplier that converts a length, an area or a volume from one unit to another. With dimension Length (the default) it is the factor for lengths; Area gives that factor squared and Volume cubed, which is what quantities such as the areas and volumes from Model.Statistics or takeoffs need (square feet to square meters is the length factor squared).",
    "tags": [
     "units",
     "scale",
     "factor",
-    "conversion"
+    "conversion",
+    "area",
+    "volume",
+    "square",
+    "cubic"
    ],
    "inputs": [
     {
@@ -18670,6 +18665,12 @@
      "name": "toUnits",
      "type": "Units",
      "description": "Target units (e.g. \"Millimeters\")."
+    },
+    {
+     "name": "dimension",
+     "type": "string",
+     "description": "Length (default), Area or Volume: an area factor is the length factor squared, a volume factor is it cubed.",
+     "default": "\"Length\""
     }
    ],
    "outputs": [

@@ -56,10 +56,19 @@ public static class NodeWarnings
     /// <summary>True while a node call is collecting warnings.</summary>
     internal static bool IsCollecting => Active.Value != null;
 
+    /// <summary>
+    /// True while the call that is running is one of several the engine makes for a single run of the node, because an input
+    /// held a list the node is mapped over (lacing). A node that changes the model once per intent (open a file, replace the
+    /// selection) can use it to refuse a list in a scalar input instead of repeating its edit once per element; a node whose
+    /// edits add up (a move, a rotation) can warn that they will. False for a single call, and outside a run.
+    /// </summary>
+    public static bool IsLaced => Active.Value?.Laced ?? false;
+
     /// <summary>Starts collecting for one call of a node; dispose to stop (the previous collector, if any, takes over again).</summary>
-    internal static WarningCollector Begin()
+    /// <param name="laced">True when the call is one of several made for one run of the node.</param>
+    internal static WarningCollector Begin(bool laced = false)
     {
-        var collector = new WarningCollector(Active.Value);
+        var collector = new WarningCollector(Active.Value) { Laced = laced };
         Active.Value = collector;
         return collector;
     }
@@ -108,6 +117,9 @@ public static class NodeWarnings
         {
             _previous = previous;
         }
+
+        /// <summary>True when the call is one of several made for one run of the node (see <see cref="NodeWarnings.IsLaced"/>).</summary>
+        public bool Laced { get; set; }
 
         /// <summary>Number of times <see cref="NodeWarnings.Add"/> was called for this call.</summary>
         public int Total { get; private set; }

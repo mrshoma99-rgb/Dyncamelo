@@ -177,7 +177,7 @@ public static class ViewpointExtraNodes
         {
             throw new InvalidOperationException(
                 items != null
-                    ? "The items carry no geometry to frame — they are container/grouping nodes. Wire geometry-bearing items (ModelItem.GeometryLeaves resolves containers to theirs)."
+                    ? "The items carry no geometry to frame — they are container/grouping nodes. Wire geometry-bearing items (Selection.Resolve with level Geometry resolves containers to theirs)."
                     : "The model has no geometry to frame.");
         }
 

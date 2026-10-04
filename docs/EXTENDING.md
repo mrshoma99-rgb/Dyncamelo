@@ -161,6 +161,7 @@ The contract (see [ARCHITECTURE.md §9](ARCHITECTURE.md#9-error-handling-philoso
   - Call it from inside the node method (or any helper it calls); the engine collects the messages **per call** of your method. The same text reported several times in one call is shown once with a count, and at most five different texts are listed.
   - Under replication the messages of all calls are summarised in one line, `3 of 40 calls: <first message>`, so a thousand bad elements cannot flood the badge.
   - Outside a run (a unit test that calls your method directly) `NodeWarnings.Add` does nothing and never throws, so a node stays testable on its own.
+  - `NodeWarnings.IsLaced` is true while the call that is running is one of several the engine makes for one run of the node (an input held a list the node is mapped over). A node that must change the model once per intent can refuse a list in a scalar input with it (`Document.Open` throws "opens one file" instead of opening each path in turn and replacing the contents every time); a node whose edits add up can warn that they will.
   - `NodeWarnings.WarnIfNotFinite(value, "The result")` is a one-line check for a node whose arithmetic can quietly produce `NaN` or `Infinity`: it reports "The result is not a finite number (NaN)." and returns true when it did.
   - Write the message for the person at the keyboard: what was wrong and what the node did about it ("2 of 10 values were not numbers and were skipped"), not an exception dump.
 

@@ -296,6 +296,11 @@ internal static class NavisValues
             case CamelGraphPoint camelGraphPoint:
                 return new Point3D(camelGraphPoint.X, camelGraphPoint.Y, camelGraphPoint.Z);
             case IList list when !(value is string):
+                if (SeveralValues.HoldsSeveral(list))
+                {
+                    throw new ArgumentException(SeveralValues.Describe("point", list));
+                }
+
                 if (list.Count < 3)
                 {
                     throw new ArgumentException("A point list needs three numeric components (x, y, z).");
@@ -322,7 +327,7 @@ internal static class NavisValues
     /// "file.nwc &gt; Level 1 &gt; Walls &gt; Basic Wall". Unnamed nodes fall back to
     /// their class display name; still-empty segments are skipped.
     /// </summary>
-    internal static string ItemPath(ModelItem? item)
+    internal static string ItemPath(ModelItem? item, string separator = " > ")
     {
         if (item == null)
         {
@@ -345,7 +350,7 @@ internal static class NavisValues
         }
 
         segments.Reverse();
-        return string.Join(" > ", segments);
+        return string.Join(separator ?? " > ", segments);
     }
 
     private static NwColor ParseHexColor(string text)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes;
@@ -103,7 +104,7 @@ public static class ModelDataNodes
     [return: NodeName("snapshot")]
     [NodeDescription("Captures the named properties of the given items as a dictionary keyed by each item's instance GUID (items without one are keyed \"path:\" plus their tree path) — the input Snapshot.Diff compares, so save one with JSON.WriteToFile now and diff it against a later run to see added, removed and changed items. Nothing in the model is changed.")]
     [NodeSearchTags("snapshot", "version", "compare", "delta", "diff", "baseline", "history", "changes", "guid", "properties")]
-    public static Dictionary<string, object?> Snapshot([MultiInput] IEnumerable<ModelItem> items, IList<object?> properties)
+    public static Dictionary<string, object?> Snapshot([MultiInput] IEnumerable<ModelItem> items, [MultiInput] IList<object?> properties)
     {
         var list = NavisValues.NonNullItems(items);
         var specs = PropertySpec.ParseList(properties, "Model.Snapshot");
@@ -130,14 +131,14 @@ public static class ModelDataNodes
     }
 
     /// <summary>Counts items by model, class or layer.</summary>
-    /// <param name="items">The items to count; leave empty (or unwired) to count every item of the document.</param>
+    /// <param name="items">The items to count. Leave it unwired to count every item of the document; a wired list that is empty (a search that found nothing) counts nothing and gives an empty table.</param>
     /// <param name="by">What to group by: "model" (the file the item belongs to), "class" (its class name, such as Layer or Geometry) or "layer" (its Item &gt; Layer property).</param>
     /// <param name="document">The document (defaults to the active document); only used when no items are given.</param>
     /// <returns>A table with the columns Group, Items, WithGeometry and Share (percent of all items, one decimal), the biggest group first.</returns>
     [NodeName("Model.Statistics")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("table")]
-    [NodeDescription("Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item.")]
+    [NodeDescription("Counts items per model file, class or layer: how many items, how many carry geometry and each group's share of all items. With no items wired it walks every item of the document once, so on a large federated model it takes a while (O(items)); \"layer\" also reads one property per item. A wired list that is empty, such as a search that found nothing, counts nothing: you get an empty table (headers only) and a warning, never the whole document by accident.")]
     [NodeSearchTags("model", "statistics", "count", "health", "inventory", "summary", "items", "geometry", "class", "layer", "file", "size", "breakdown")]
     public static CamelGraphTable Statistics(
         [MultiInput] IEnumerable<ModelItem>? items = null,
@@ -146,8 +147,17 @@ public static class ModelDataNodes
     {
         var mode = ParseBy(by);
         var stats = new GroupStatistics();
-        var list = NavisValues.ToItemList(items);
-        if (list.Count > 0)
+
+        // Unwired means "the whole document"; wired but empty means "nothing" (the engine hands over null for the first
+        // and an empty list for the second), so an empty upstream search can never turn into a count of the whole federated model.
+        var scope = OptionalScope.Classify(items, out var list);
+        if (scope == ScopeKind.Nothing)
+        {
+            NodeWarnings.Add("The items input is empty, so there is nothing to count and the table has no rows. Leave the input unwired to count every item of the document.");
+            return stats.ToTable();
+        }
+
+        if (scope == ScopeKind.Given)
         {
             foreach (var item in list)
             {
@@ -157,7 +167,7 @@ public static class ModelDataNodes
             return stats.ToTable();
         }
 
-        // No items given: every item of the document, walked once.
+        // No items wired: every item of the document, walked once.
         var doc = NavisworksContext.ResolveDocument(document);
         if (mode == GroupMode.Model)
         {
