@@ -14473,7 +14473,7 @@
    "id": "CamelGraph.Navisworks.GridNodes.ClosestIntersection@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Grids",
-   "description": "The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.",
+   "description": "The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units. One point per run (a list of three numbers is one point): to label many points, such as the centres of many clashes, right-click the point input, choose List Levels and set L1 (L2 for a list of [x, y, z] lists), and you get one label per point.",
    "tags": [
     "grid",
     "intersection",
@@ -14487,7 +14487,7 @@
     {
      "name": "point",
      "type": "any",
-     "description": "The query point (document units) — e.g. a ClashResult center or a bounding-box center."
+     "description": "The query point (document units) — e.g. a ClashResult center or a bounding-box center. One point per run; for a list of points set List Levels L1 on this input."
     },
     {
      "name": "document",

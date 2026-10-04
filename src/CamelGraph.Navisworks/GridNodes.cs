@@ -113,11 +113,11 @@ public static class GridNodes
     }
 
     /// <summary>The grid intersection and level nearest to a point.</summary>
-    /// <param name="point">The query point (document units) — e.g. a ClashResult center or a bounding-box center.</param>
+    /// <param name="point">The query point (document units) — e.g. a ClashResult center or a bounding-box center. One point per run; for a list of points set List Levels L1 on this input.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The intersection name (e.g. "B-3"), its position, the level name, and a combined "B-3 : Level 2" label.</returns>
     [NodeName("Grids.ClosestIntersection")]
-    [NodeDescription("The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units.")]
+    [NodeDescription("The grid intersection and level nearest to any point — ready-made \"B-3 : Level 2\" location labels for clash naming, reports and zone tagging. Document units. One point per run (a list of three numbers is one point): to label many points, such as the centres of many clashes, right-click the point input, choose List Levels and set L1 (L2 for a list of [x, y, z] lists), and you get one label per point.")]
     [NodeSearchTags("grid", "intersection", "closest", "nearest", "location", "label", "level")]
     [MultiReturn("name", "position", "levelName", "label")]
     [PortKinds("text", "geometry", "text", "text")]

@@ -580,6 +580,17 @@ public class NavisworksModelAuditTests
         }
     }
 
+    [Fact]
+    public void ClosestIntersectionSaysHowToLabelManyPointsAndKeepsAListOfNumbersAsOnePoint()
+    {
+        var description = Def("Grids.ClosestIntersection").Description;
+
+        Assert.Contains("One point per run", description);
+        Assert.Contains("List Levels and set L1", description);
+        // A plain list of three numbers is one point, so the port must not split lists by itself.
+        Assert.Null(Parameter("Grids.ClosestIntersection", "point").Attribute("ScalarInput"));
+    }
+
     // ----------------------------------------------------------------- helpers
 
     /// <summary>The text of a method from the line with its signature to its closing brace.</summary>
