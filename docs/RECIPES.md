@@ -29,7 +29,7 @@ Two ideas make most of these short:
 
 **Naming rule.** `Properties.ToTable` with the Name and category columns → `Table.Filter` (`regex`, `!matches` or `isEmpty`) → `Watch Table` for the offenders, `Table.ToExcelFile` for the list to send.
 
-**Status colours.** `Logic.Switch` maps a status text to a colour name; or `Color.Palette` (colour-blind safe) with `Appearance.ColorByValues`.
+**Status colours.** `Logic.Switch` maps a status text to a colour name, and a whole column of statuses to a column of colours (a list on `value` is looked up element by element); or `Color.Palette` (colour-blind safe) with `Appearance.ColorByValues`.
 
 **Track change between two states.** `Model.Snapshot` on the item set (a GUID → property values map) saved with `JSON.WriteToFile`; later `JSON.ReadFromFile` and `Snapshot.Diff` against a fresh snapshot.
 
@@ -49,7 +49,7 @@ Two ideas make most of these short:
 
 **Run another program, call a service.** `System.Run` (exit code, output, error) and `Web.Get` / `Web.Post` (status, body); both need `Flow.Try` around them if a failure should not stop the graph. `Flow.Wait` gives an external tool time to finish writing.
 
-**Pick the branch.** `Logic.Choose` (by position) or `Logic.Switch` (by matching value) for more than two ways; `If` for two.
+**Pick the branch.** `Logic.Choose` (by position) or `Logic.Switch` (by matching value) for more than two ways; `If` for two. They only pick a value: every branch is computed whichever is picked, so to skip nodes use `Flow.When`.
 
 ## Open BIM integration
 

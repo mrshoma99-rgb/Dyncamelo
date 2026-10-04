@@ -102,13 +102,13 @@ Interactive constant nodes (all *(NodeModel)* subclasses with inline editors; no
 
 | Node | Category | Inputs (name: type) | Outputs (name: type) | Description | Maps to API | Tier |
 |---|---|---|---|---|---|---|
-| If | Logic | test: bool, true: object, false: object | result: object | Returns `true` or `false` input depending on test. Replicates over test lists. | pure C# | MVP |
+| If | Logic | test: bool, true: object, false: object | result: object | Returns `true` or `false` input depending on test. Replicates over test lists. Both branches are always computed; use `Flow.When` to skip nodes. | pure C# | MVP |
 | And | Logic | a: bool, b: bool | result: bool | Logical AND. | C# `&&` | MVP |
 | Or | Logic | a: bool, b: bool | result: bool | Logical OR. | C# `\|\|` | MVP |
 | Not | Logic | value: bool | result: bool | Logical negation. | C# `!` | MVP |
 | IsNull | Logic | value: object | isNull: bool | True when the value is null; with @L1 on the input it masks a whole list element-wise for List.FilterByBoolMask. | C# `== null` | Implemented (v0.28) |
 | IsNullOrEmpty | Logic | value: object | isEmpty: bool | True for null, "", an empty list or an empty dictionary — the "did anything come out?" guard. @L1 tests elements instead of the list itself. | C# type switch | Implemented (v0.28) |
-| Equals | Logic | a: object, b: object | equal: bool | Value equality with numeric/string coercion. | Object.Equals + coercion | MVP |
+| Equals | Logic | a: object, b: object | equal: bool | Value equality, the same rules as `Logic.Compare` `==`: numbers by value, text ignoring case, text that reads as a number or a date equals it, lists item by item. A list is one value; `@L1` on `a` tests every element. | ValueTests.AreEqual | MVP |
 | GreaterThan | Logic | a: double, b: double | result: bool | a &gt; b. | C# `>` | MVP |
 | LessThan | Logic | a: double, b: double | result: bool | a &lt; b. | C# `<` | MVP |
 | GreaterThanOrEqual | Logic | a: double, b: double | result: bool | a ≥ b. | C# `>=` | Implemented (v0.2) |

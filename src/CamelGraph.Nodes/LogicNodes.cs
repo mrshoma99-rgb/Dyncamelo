@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using CamelGraph.Core.Loader;
+using CamelGraph.Nodes.Internal;
 
 namespace CamelGraph.Nodes;
 
@@ -21,8 +22,11 @@ public static class LogicNodes
     /// <param name="falseValue">Value returned when the condition is false.</param>
     /// <returns>Either <paramref name="trueValue"/> or <paramref name="falseValue"/>.</returns>
     [NodeName("If")]
-    [NodeDescription("Returns one of two values depending on a boolean condition.")]
-    [NodeSearchTags("condition", "branch", "ternary", "switch")]
+    [NodeDescription(
+        "Returns one of two values depending on a boolean condition. Both branches are always computed, so a node wired into " +
+        "the unused branch still runs: to skip nodes (a modifying node, a slow search) use Flow.When instead. A list of " +
+        "booleans on test gives a list of choices.")]
+    [NodeSearchTags("condition", "branch", "ternary", "switch", "flow", "when", "Logic.If")]
     public static object? If(bool test, object? trueValue, object? falseValue)
     {
         return test ? trueValue : falseValue;
@@ -34,7 +38,7 @@ public static class LogicNodes
     /// <returns>True when both operands are true.</returns>
     [NodeName("And")]
     [NodeDescription("Returns true only when both inputs are true.")]
-    [NodeSearchTags("&&", "conjunction", "boolean")]
+    [NodeSearchTags("&&", "conjunction", "boolean", "Logic.And")]
     public static bool And(bool a, bool b)
     {
         return a && b;
@@ -46,38 +50,40 @@ public static class LogicNodes
     /// <returns>True when at least one operand is true.</returns>
     [NodeName("Or")]
     [NodeDescription("Returns true when at least one input is true.")]
-    [NodeSearchTags("||", "disjunction", "boolean")]
+    [NodeSearchTags("||", "disjunction", "boolean", "Logic.Or")]
     public static bool Or(bool a, bool b)
     {
         return a || b;
     }
 
     /// <summary>Whether a value is null.</summary>
-    /// <param name="value">The value to test. To test each element of a list, set this input's List Levels to @L1.</param>
+    /// <param name="value">The value to test. A list is tested as a whole (a list is never null). To test each element of a list, set this input's List Levels to @L1: an empty element then gives true.</param>
     /// <returns>True when the value is null.</returns>
     [NodeName("IsNull")]
     [NodeDescription(
-        "True when the value is null — with @L1 on the input it tests a whole list element-wise, giving " +
-        "the bool mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). The input port " +
-        "is untyped, so a list arrives whole unless levels are set.")]
-    [NodeSearchTags("null", "is", "check", "missing", "empty", "mask", "test")]
+        "True when the value is null (nothing came out). Wired to a list it tests the LIST, which is never null; set the " +
+        "input's List Levels to @L1 to test every element instead, and each empty element gives true. That gives the bool " +
+        "mask for List.FilterByBoolMask (pair with Not to keep the non-nulls). Text that is empty or blank is not null: " +
+        "use IsNullOrEmpty or String.IsBlank for that.")]
+    [NodeSearchTags("null", "is", "check", "missing", "empty", "mask", "test", "Logic.IsNull")]
     [return: NodeName("isNull")]
-    public static bool IsNull(object? value)
+    public static bool IsNull([AcceptsNull] object? value)
     {
         return value == null;
     }
 
     /// <summary>Whether a value is null or empty.</summary>
-    /// <param name="value">The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1.</param>
+    /// <param name="value">The value to test: null, an empty string, an empty list and an empty dictionary all count as empty. To test each element of a list, set this input's List Levels to @L1: an empty element then gives true.</param>
     /// <returns>True when the value is null or empty.</returns>
     [NodeName("IsNullOrEmpty")]
     [NodeDescription(
         "True when the value is null, an empty string, an empty list or an empty dictionary — the guard " +
         "for \"did anything come out?\" checks before If branches. NOTE: wired to a list directly it " +
-        "tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead.")]
-    [NodeSearchTags("null", "empty", "is", "check", "blank", "missing", "guard", "test")]
+        "tests the LIST (empty or not); set the input's List Levels to @L1 to test each element instead, and each empty " +
+        "element gives true. Text of only spaces is not empty here: String.IsBlank counts it as blank.")]
+    [NodeSearchTags("null", "empty", "is", "check", "missing", "guard", "test", "Logic.IsNullOrEmpty")]
     [return: NodeName("isEmpty")]
-    public static bool IsNullOrEmpty(object? value)
+    public static bool IsNullOrEmpty([AcceptsNull] object? value)
     {
         switch (value)
         {
@@ -99,26 +105,32 @@ public static class LogicNodes
     /// <returns>True when the input is false.</returns>
     [NodeName("Not")]
     [NodeDescription("Inverts a boolean value.")]
-    [NodeSearchTags("!", "negate", "invert", "boolean")]
+    [NodeSearchTags("!", "negate", "invert", "boolean", "Logic.Not")]
     public static bool Not(bool value)
     {
         return !value;
     }
 
     /// <summary>
-    /// Value equality with numeric tolerance for boxed types: any two numbers
-    /// compare by numeric value (2 equals 2.0), strings compare ordinally and
-    /// everything else uses <see cref="object.Equals(object)"/>.
+    /// Value equality, the same rules as <c>Logic.Compare</c> with <c>==</c>: numbers compare by value (2 equals 2.0), text
+    /// ignores upper and lower case, text that reads as a number equals that number, text that reads as a date equals that
+    /// date, and two lists are equal when every pair of items is.
     /// </summary>
-    /// <param name="a">First value.</param>
+    /// <param name="a">First value. A list is compared as one value; set List Levels to @L1 to compare every element instead.</param>
     /// <param name="b">Second value.</param>
     /// <returns>True when the values are considered equal.</returns>
     [NodeName("Equals")]
-    [NodeDescription("Tests whether two values are equal (numbers compare by value regardless of numeric type).")]
-    [NodeSearchTags("==", "equal", "same", "compare")]
-    public static bool EqualTo(object? a, object? b)
+    [NodeDescription(
+        "Tests whether two values are equal, the same way as Logic.Compare with ==: numbers compare by value (2 equals 2.0), " +
+        "text ignores upper and lower case, text that reads as a number equals that number (\"5\" equals 5), text that reads " +
+        "as a date equals that date, and two lists are equal when they have the same items in the same order. A list is " +
+        "compared as ONE value; to test every element of a list set List Levels to @L1 on a (an empty element is equal only to " +
+        "another empty one). For a case-sensitive text test use Logic.Compare with ignoreCase off, and for numbers within a " +
+        "tolerance use Math.IsClose.")]
+    [NodeSearchTags("==", "equal", "same", "compare", "Logic.Equals")]
+    public static bool EqualTo([AcceptsNull] object? a, [AcceptsNull] object? b)
     {
-        return ValueComparison.AreEqual(a, b);
+        return ValueTests.AreEqual(a, b, ignoreCase: true);
     }
 
     /// <summary>Tests whether the first number is greater than the second.</summary>
@@ -127,7 +139,7 @@ public static class LogicNodes
     /// <returns>True when a &gt; b.</returns>
     [NodeName("GreaterThan")]
     [NodeDescription("Returns true when the first number is greater than the second.")]
-    [NodeSearchTags(">", "compare", "larger")]
+    [NodeSearchTags(">", "compare", "larger", "Logic.GreaterThan")]
     public static bool GreaterThan(double a, double b)
     {
         return a > b;
@@ -139,7 +151,7 @@ public static class LogicNodes
     /// <returns>True when a &lt; b.</returns>
     [NodeName("LessThan")]
     [NodeDescription("Returns true when the first number is less than the second.")]
-    [NodeSearchTags("<", "compare", "smaller")]
+    [NodeSearchTags("<", "compare", "smaller", "Logic.LessThan")]
     public static bool LessThan(double a, double b)
     {
         return a < b;
@@ -151,7 +163,7 @@ public static class LogicNodes
     /// <returns>True when a &gt;= b.</returns>
     [NodeName("GreaterThanOrEqual")]
     [NodeDescription("Returns true when the first number is greater than or equal to the second.")]
-    [NodeSearchTags(">=", "compare", "atleast")]
+    [NodeSearchTags(">=", "compare", "atleast", "Logic.GreaterThanOrEqual")]
     public static bool GreaterThanOrEqual(double a, double b)
     {
         return a >= b;
@@ -163,7 +175,7 @@ public static class LogicNodes
     /// <returns>True when a &lt;= b.</returns>
     [NodeName("LessThanOrEqual")]
     [NodeDescription("Returns true when the first number is less than or equal to the second.")]
-    [NodeSearchTags("<=", "compare", "atmost")]
+    [NodeSearchTags("<=", "compare", "atmost", "Logic.LessThanOrEqual")]
     public static bool LessThanOrEqual(double a, double b)
     {
         return a <= b;

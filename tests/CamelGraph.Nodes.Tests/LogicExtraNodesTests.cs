@@ -100,7 +100,10 @@ public class LogicExtraNodesTests
     public void IsBetween_Dates_AndEmptyInputs()
     {
         Assert.True(LogicExtraNodes.IsBetween(new DateTime(2026, 3, 1), new DateTime(2026, 1, 1), new DateTime(2026, 12, 31)));
-        Assert.Throws<ArgumentNullException>(() => LogicExtraNodes.IsBetween(null, 1, 2));
+        // Wave D: a missing value is "no value", it is not between anything (it used to be an error); an empty bound still is one.
+        Assert.False(LogicExtraNodes.IsBetween(null, 1, 2));
+        Assert.Throws<ArgumentNullException>(() => LogicExtraNodes.IsBetween(5, null, 2));
+        Assert.Throws<ArgumentNullException>(() => LogicExtraNodes.IsBetween(5, 1, null));
     }
 
     [Fact]
