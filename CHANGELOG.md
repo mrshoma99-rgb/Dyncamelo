@@ -2,9 +2,25 @@
 
 All notable changes to CamelGraph (called Dyncamelo up to version 0.48) are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
 
-Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.49.0](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
+Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.50.0](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
+
+## 0.50.0 - 2026-10-04
+
+A new logo, a floating node library, a Script Player that is easier to read, and Run at the right edge of the header. These downloads (GitHub, bimcamel.com) are the free personal-use edition; a copy for professional use is coming soon to the Autodesk App Store.
+
+### Changed
+* **New logo.** The mark is the wire that climbs into a hump before it drops into the right-hand socket. The dark icon is a wash from deep blue to near-black instead of flat black; the editor, the Script Player, the installer and the About window show a light mark on a dark surface and a dark one on a light surface.
+* **The name in pixel letters.** "CamelGraph" is set in the pixel letters of the BIMCamel wordmark in the editor header and start screen, the About window and the installer.
+* **New Script Player icon**: a play triangle made of woven wires, in the ribbon (black and white) and in the Script Player's header.
+* **Floating node library.** A rounded card on the canvas with a full-width search box, round expand-all and collapse-all buttons, a **HIDE** tab on its edge and a **NODES** tab on the edge of the canvas to bring it back.
+* **Script Player redesign.** Header with its icon and a folder button (the script folders open under it), cards for the script, the inputs and the results, and a sticky footer with a wide **Run** button and reset, edit and show-in-Explorer buttons.
+* **Clearer rows in the Script Player.** Bold labels; a tag for the kind of control on each input; the name of a number above its field; results as cards with a green bar and an OUTPUT tag (ERROR in red for a failed node) and a monospace value with no box.
+* **Run at the right edge of the editor header**, flat and as tall as the header, with the Auto / Manual switch just left of it, then a separator, then undo, redo, previews, minimap and settings.
+
+### Fixed
+* A problem listed under the Script Player's results is marked red for an error and amber for a warning; the dot's colour was set in a way a trigger could not override.
 
 ## 0.49.0 - 2026-10-04
 
