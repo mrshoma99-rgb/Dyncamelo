@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 580,
+ "count": 579,
  "categories": [
   {
    "name": "Annotation",
@@ -32,7 +32,7 @@
   },
   {
    "name": "Geometry",
-   "count": 43
+   "count": 42
   },
   {
    "name": "IFC",
@@ -3600,7 +3600,7 @@
    "id": "CamelGraph.Nodes.GeometryNodes.BoundingBoxByCorners@CamelGraph.Nodes.CamelGraphPoint,CamelGraph.Nodes.CamelGraphPoint",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "Creates an axis-aligned bounding box spanning two corner points.",
+   "description": "Creates an axis-aligned bounding box spanning two opposite corner points, given in any order (the smaller coordinates become the box's min corner, the larger its max corner).",
    "tags": [
     "box",
     "extent",
@@ -3608,12 +3608,12 @@
    ],
    "inputs": [
     {
-     "name": "min",
+     "name": "cornerA",
      "type": "Point",
      "description": "One corner of the box."
     },
     {
-     "name": "max",
+     "name": "cornerB",
      "type": "Point",
      "description": "The opposite corner of the box."
     }
@@ -3741,7 +3741,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -3774,7 +3774,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     },
@@ -3811,7 +3811,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -3821,39 +3821,6 @@
      "name": "area",
      "type": "number",
      "description": "The footprint area, in square model units."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "BoundingBox.FromPoints",
-   "id": "CamelGraph.Nodes.BoundingBoxExtraNodes.FromPoints@System.Collections.Generic.IList<object>",
-   "assembly": "CamelGraph.Nodes",
-   "category": "Geometry",
-   "description": "The smallest bounding box around a set of points (several wires can feed one input; a single point gives a zero-size box).",
-   "tags": [
-    "fit",
-    "enclose",
-    "extents",
-    "around",
-    "points",
-    "aabb",
-    "bounds",
-    "from points"
-   ],
-   "inputs": [
-    {
-     "name": "points",
-     "type": "any[]",
-     "description": "The points to enclose (at least one; every item must be a point).",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "boundingBox",
-     "type": "BoundingBox",
-     "description": "The bounding box that just contains all the points."
     }
    ],
    "returns": ""
@@ -3988,7 +3955,7 @@
     {
      "name": "factor",
      "type": "number",
-     "description": "Scale factor (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center."
+     "description": "Scale factor above 0 (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center."
     }
    ],
    "outputs": [
@@ -4067,7 +4034,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -4096,7 +4063,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     },
@@ -4120,7 +4087,7 @@
    "id": "CamelGraph.Nodes.GeometryNodes.BoundingBoxUnion@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.",
+   "description": "ONE bounding box fitting every box and/or point wired in — the geometric union, e.g. one frame around scattered elements' boxes or around a set of points (several wires can feed the one input; [x,y,z] triples work too; lists nest freely, a list of lists included).",
    "tags": [
     "union",
     "combine",
@@ -4130,13 +4097,18 @@
     "multiple",
     "all",
     "extents",
-    "aabb"
+    "aabb",
+    "around",
+    "points",
+    "bounds",
+    "from points"
    ],
    "inputs": [
     {
      "name": "geometry",
      "type": "any[]",
-     "description": "Boxes and/or points to enclose (lists nest freely; at least one required)."
+     "description": "Boxes and/or points to enclose (several wires can feed this one input; lists nest freely; at least one required). Wire a single [x, y, z] triple on its own, or inside a list: next to other wires a bare list is spread into its numbers.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -4164,7 +4136,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -4223,7 +4195,7 @@
    "id": "CamelGraph.Nodes.PointExtraNodes.Centroid@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "The centroid (average position) of a list of points; an empty list, a null or a non-point item is an error naming the item.",
+   "description": "The centroid (average position) of a list of points; several wires can feed the one input. An empty list, a null or a non-point item is an error naming the item.",
    "tags": [
     "average",
     "mean",
@@ -4238,7 +4210,8 @@
     {
      "name": "points",
      "type": "any[]",
-     "description": "The points to average; at least one, and every item must be a point."
+     "description": "The points to average (several wires can feed this one input); at least one, and every item must be a point.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -4338,12 +4311,12 @@
    ],
    "inputs": [
     {
-     "name": "point",
+     "name": "a",
      "type": "Point",
      "description": "The first point."
     },
     {
-     "name": "other",
+     "name": "b",
      "type": "Point",
      "description": "The second point."
     }
@@ -4386,7 +4359,7 @@
     {
      "name": "t",
      "type": "number",
-     "description": "The interpolation parameter (not clamped)."
+     "description": "The interpolation parameter (not clamped): 0 to 1 lies between the points, other values extend the line."
     }
    ],
    "outputs": [
@@ -4922,7 +4895,7 @@
    "id": "CamelGraph.Nodes.VectorNodes.Scale@CamelGraph.Nodes.CamelGraphVector,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "Multiplies a vector by a number (2 doubles its length, -1 reverses it).",
+   "description": "Multiplies a vector by a number (2 doubles its length, -1 reverses it). A factor that is not a finite number gives a warning.",
    "tags": [
     "multiply",
     "stretch",
