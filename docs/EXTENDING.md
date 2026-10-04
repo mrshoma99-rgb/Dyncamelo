@@ -295,6 +295,17 @@ Guidelines:
 - In a hand-written `NodeModel`, declare the port with `AddMultiInput(name, typeof(IList<object>))` in the constructor.
 - Every attribute is listed with its editor result in the [editor guide](UI_GUIDE.md#anatomy-of-a-node).
 
+### Attributes that change how a node runs
+
+Some attributes say nothing about how the node looks; they tell the engine how to treat a port or the whole node. They are advisory in the same sense as the ones above: none of them changes the definition id, so adding one to a shipped node never breaks a saved graph.
+
+- **`[AcceptsNull]` on a parameter** — by default a `null` element of a list the node is mapped over never reaches the node: that position gets a `null` result and the node shows one warning ("1 of 3 laced calls received a null element"). Mark the parameter when the node's job is to answer the empty case itself — a test for "is this blank?", a join that treats a missing cell as empty text. The null is then passed to the method and its answer is used. Only the marked parameter changes; a single call with a null, and every other parameter, behave as before. The parameter must be able to hold null (a reference or nullable type): on a plain `double` the engine still says "Null value passed to input".
+
+```csharp
+// ["a", null, ""] gives [false, true, true]; without [AcceptsNull] it gave [false, null, true] plus a warning.
+public static bool IsBlank([AcceptsNull] string text) => string.IsNullOrWhiteSpace(text);
+```
+
 ## 10. Changing a node that is already shipped
 
 Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its **definition id** — `Namespace.Class.Method@parameterTypes` — and stores each wire and each typed-in value by the **port name** (the parameter name, the `[MultiReturn]` key, or the return name). What you may change:

@@ -334,7 +334,7 @@ internal static class Replicator
                 // other elements still compute, and one summary warning is
                 // reported at the end. Nulls on non-laced inputs (unwired
                 // optionals and the like) keep flowing through unchanged.
-                if (elementBound[i])
+                if (elementBound[i] && !node.InPorts[i].AcceptsNull)
                 {
                     stats.NullSkipped++;
                     return new object?[outCount];

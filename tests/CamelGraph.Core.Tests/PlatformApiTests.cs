@@ -41,6 +41,12 @@ public static class PlatformFixtures
 
         return x;
     }
+
+    public static bool IsNullish([AcceptsNull] string text) => text == null;
+
+    public static string BlankToDash([AcceptsNull] string text, string other = "") => text ?? "-";
+
+    public static double NullableDouble([AcceptsNull] double x) => x;
 }
 
 public class PlatformApiTests
@@ -173,5 +179,67 @@ public class PlatformApiTests
         Assert.Contains("negative value -2", warns.StateMessage);
         Assert.Equal(2.0, instance.OutPorts[0].Value);
         Assert.DoesNotContain("negative value", instance.StateMessage);
+    }
+
+    // -------------------------------------------------------------- AcceptsNull
+
+    [Fact]
+    public void AcceptsNullPassesTheNullElementToTheNode()
+    {
+        var (_, node) = Run("IsNullish", L("a", null, "c"));
+
+        Assert.Equal(L(false, true, false), node.OutPorts[0].Value);
+        Assert.Equal(NodeState.Executed, node.State);
+        Assert.Empty(node.Messages);
+    }
+
+    [Fact]
+    public void WithoutAcceptsNullANullElementStillGivesANullResultAndAWarning()
+    {
+        var graph = new GraphModel();
+        var source = ZT.Value(graph, L("a", null));
+        var node = ZT.Node("Shout");
+        graph.AddNode(node);
+        ZT.Wire(graph, source, 0, node, 0);
+
+        new GraphEngine().Run(graph);
+
+        Assert.Equal(L("A!", null), node.OutPorts[0].Value);
+        Assert.Equal(NodeState.Warning, node.State);
+    }
+
+    [Fact]
+    public void AcceptsNullOnlyAffectsTheMarkedParameter()
+    {
+        var graph = new GraphModel();
+        var texts = ZT.Value(graph, L("a", null));
+        var others = ZT.Value(graph, L("x", null));
+        var node = Node("BlankToDash");
+        graph.AddNode(node);
+        ZT.Wire(graph, texts, 0, node, 0);
+        ZT.Wire(graph, others, 0, node, 1);
+
+        new GraphEngine().Run(graph);
+
+        // Second element: 'other' is null and not marked, so the call is skipped as before; first element computes.
+        Assert.Equal(L("a", null), node.OutPorts[0].Value);
+        Assert.Equal(NodeState.Warning, node.State);
+    }
+
+    [Fact]
+    public void AcceptsNullOnAValueTypeStillWarnsAboutTheNull()
+    {
+        var (_, node) = Run("NullableDouble", L(1.0, null));
+
+        Assert.Equal(L(1.0, null), node.OutPorts[0].Value);
+        Assert.Equal(NodeState.Warning, node.State);
+        Assert.Contains("Null value passed to input 'x'", node.StateMessage);
+    }
+
+    [Fact]
+    public void TheLoaderRecordsAcceptsNullOnThePort()
+    {
+        Assert.True(Node("IsNullish").InPorts[0].AcceptsNull);
+        Assert.False(ZT.Node("Shout").InPorts[0].AcceptsNull);
     }
 }

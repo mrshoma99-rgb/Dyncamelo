@@ -121,6 +121,7 @@ Replication is what makes a scalar node work on lists without a loop node.
   - a **null element** of a laced list maps to a **null result** at that position — the node method is never invoked for it, the other elements still compute;
   - a **per-element exception** (or per-element coercion failure) likewise becomes a null result;
   - each kind is reported as **one aggregated Warning** ("N of M laced calls …" + the first error text), so a thousand bad elements cannot flood the badge. `List.Clean` strips the nulls downstream; `IsNull` builds a filter mask.
+  - A parameter marked **`[AcceptsNull]`** opts out of the first rule: the null element is passed to the node (`IsNull`, `String.IsBlank` and the like answer it themselves). Default behaviour is unchanged.
   - A **single, non-replicated call** keeps today's fail-fast contract: a thrown exception errors the node (red), and nulls on non-laced inputs (unwired optionals) flow through unchanged.
 
 ## 5. Zero-touch node loading

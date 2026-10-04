@@ -485,6 +485,9 @@ public static class AssemblyNodeLoader
         descriptor.MultiInput = parameter.GetCustomAttribute<MultiInputAttribute>() != null &&
                                 TypeCoercion.IsListType(parameter.ParameterType);
 
+        // Run-time behaviours of the port (never part of the definition id).
+        descriptor.AcceptsNull = parameter.GetCustomAttribute<AcceptsNullAttribute>() != null;
+
         if (parameter.IsOptional)
         {
             descriptor.HasDefault = true;

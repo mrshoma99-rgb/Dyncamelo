@@ -43,6 +43,7 @@ public class ZeroTouchNodeModel : NodeModel
             port.PanelDefaultOpen = input.PanelDefaultOpen;
             port.KindHint = input.Kind;
             port.IsMultiInput = input.MultiInput;
+            port.AcceptsNull = input.AcceptsNull;
             port.Aliases = input.Aliases;
         }
 

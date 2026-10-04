@@ -266,6 +266,19 @@ public sealed class CatchesUpstreamErrorsAttribute : Attribute
 }
 
 /// <summary>
+/// The node wants to see the empty elements of a list it is mapped over. Normally a null element of a laced list never reaches the
+/// node: that position gets a null result and one warning ("1 of 3 laced calls received a null element"). With this attribute the
+/// null is passed to the parameter and the node answers it itself, so <c>IsNull</c> can say <c>true</c> and <c>String.IsBlank</c>
+/// can treat a missing cell as blank. The parameter must be able to hold null (a reference or nullable type; on a plain value type
+/// such as <c>double</c> the engine still reports "Null value passed to input"). Calls with a single value are not affected,
+/// and neither is any other parameter. Purely a run-time behaviour: it never changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class AcceptsNullAttribute : Attribute
+{
+}
+
+/// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
 /// renaming a port would silently drop them; with this attribute a graph that still says the old name finds the
 /// port now called the current name. Repeat the attribute for several ports.
