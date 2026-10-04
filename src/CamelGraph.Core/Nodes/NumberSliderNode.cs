@@ -42,7 +42,7 @@ public class NumberSliderNode : NodeModel, IPlayerInputNode
         }
     }
 
-    /// <summary>Lower bound of the slider.</summary>
+    /// <summary>Lower bound of the slider. Raising it above <see cref="Max"/> pushes <see cref="Max"/> up, so Min never exceeds Max.</summary>
     public double Min
     {
         get => _min;
@@ -50,12 +50,17 @@ public class NumberSliderNode : NodeModel, IPlayerInputNode
         {
             if (SetField(ref _min, value))
             {
+                if (_max < _min)
+                {
+                    Max = _min;
+                }
+
                 Value = _value; // re-clamp
             }
         }
     }
 
-    /// <summary>Upper bound of the slider.</summary>
+    /// <summary>Upper bound of the slider. Lowering it below <see cref="Min"/> pushes <see cref="Min"/> down, so Min never exceeds Max.</summary>
     public double Max
     {
         get => _max;
@@ -63,6 +68,11 @@ public class NumberSliderNode : NodeModel, IPlayerInputNode
         {
             if (SetField(ref _max, value))
             {
+                if (_min > _max)
+                {
+                    Min = _max;
+                }
+
                 Value = _value; // re-clamp
             }
         }
@@ -108,8 +118,16 @@ public class NumberSliderNode : NodeModel, IPlayerInputNode
     /// <inheritdoc />
     public override void DeserializeData(JObject data)
     {
-        Min = data.Value<double?>("Min") ?? 0d;
-        Max = data.Value<double?>("Max") ?? 100d;
+        var min = data.Value<double?>("Min") ?? 0d;
+        var max = data.Value<double?>("Max") ?? 100d;
+        if (min > max)
+        {
+            // A file with the bounds the wrong way round: read them as the author meant, lowest first.
+            (min, max) = (max, min);
+        }
+
+        Min = min;
+        Max = max;
         Step = data.Value<double?>("Step") ?? 0.1d;
         Value = data.Value<double?>("Value") ?? 0d;
     }
