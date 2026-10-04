@@ -212,7 +212,7 @@ public class NavisworksStandInTests
     [InlineData("Clash.GroupResultsBySameItem", "test,useItem1,document", "test,groupCount")]
     [InlineData("Clash.GroupResultsByProximity", "test,radius,units,document", "test,groupCount")]
     [InlineData("Clash.GroupResultsByLevel", "test,levelNames,levelElevations,units,document", "test,groupCount")]
-    [InlineData("Viewpoints.FromClashResults", "results,folderName,document", "viewpoints")]
+    [InlineData("Viewpoints.FromClashResults", "results,folderName,nameFormat,document", "viewpoints")]
     [InlineData("SelectionSets.BulkByPropertyValues", "categoryName,propertyName,folderName,document", "selectionSets,values")]
     public void TheClashGroupingAndFolderFillingNodesKeepTheirSockets(string name, string inputs, string outputs)
     {

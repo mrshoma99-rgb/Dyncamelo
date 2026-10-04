@@ -42,6 +42,8 @@ public sealed class ViewpointPackageFile
     /// files written by a newer CamelGraph both fail with a message that says
     /// what to do, never a raw serializer stack trace.
     /// </summary>
+    [NodeName("ViewpointPackageFile.Parse")]
+    [NodeDeprecated("Viewpoints.ImportFile")]
     [NodeCategory("Navisworks.Viewpoints")]
     public static ViewpointPackageFile Parse(string json)
     {

@@ -71,7 +71,7 @@ public static class DocumentNodes
     [NodeName("Document.Save")]
     [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeDescription("Saves the document as .nwf (references to the source files) or .nwd (a published snapshot with the appearance overrides baked in) to the given path; the extension decides. This is the node for publishing an NWD (it replaces Export.NWD). An existing file is replaced. A relative path means next to the graph, and the folder is created when missing. Inside a node group that is used twice, a fixed path is written twice: the second save replaces the first.")]
-    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write", "export", "snapshot", "batch")]
+    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write", "export", "export nwd", "snapshot", "batch")]
     [return: NodeName("filePath")]
     public static string Save(
         [NodePath(NodePathMode.Save, Filter = "Navisworks published (*.nwd)|*.nwd|Navisworks file set (*.nwf)|*.nwf")] string filePath,

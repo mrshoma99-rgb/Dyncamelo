@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Timeliner;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Coordination;
@@ -29,7 +30,8 @@ public static class TimelinerProgressNodes
     /// <returns>The updated stored task. Lace over task / percent lists for bulk progress updates.</returns>
     [NodeName("TimelinerTask.SetProgress")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
-    [NodeDescription("Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".")]
     [NodeSearchTags("timeliner", "task", "progress", "percent", "complete", "status", "4d", "update")]
     [return: NodeName("task")]
     public static TimelinerTask SetProgress(
@@ -48,28 +50,50 @@ public static class TimelinerProgressNodes
 
     /// <summary>Sets a TimeLiner task's actual start and end dates.</summary>
     /// <param name="task">The stored TimeLiner task.</param>
-    /// <param name="start">Actual start date.</param>
-    /// <param name="end">Actual end date.</param>
+    /// <param name="start">Actual start date; leave it unwired to keep the task's actual start as it is.</param>
+    /// <param name="end">Actual end date; leave it unwired to keep the task's actual end as it is (a task that has started and not finished).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The updated stored task. Lace over lists for bulk updates.</returns>
     [NodeName("TimelinerTask.SetActual")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
-    [NodeDescription("Sets a task's ACTUAL start and end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Sets a task's ACTUAL start and/or end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site " +
+        "next to the plan. A date you leave unwired is kept as it is, so \"started today, end not known yet\" is just the start. With neither date the node " +
+        "changes nothing and shows a warning. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".")]
     [NodeSearchTags("timeliner", "task", "actual", "dates", "start", "end", "schedule", "4d", "update")]
     [return: NodeName("task")]
     public static TimelinerTask SetActual(
         TimelinerTask task,
-        DateTime start,
-        DateTime end,
+        DateTime? start = null,
+        DateTime? end = null,
         Document? document = null)
     {
         var timelinerTask = RequireTask(task, "TimelinerTask.SetActual");
-        ScheduleRules.RequireDateRange(start, end, "actual", nameof(end));
+        if (start == null && end == null)
+        {
+            NodeWarnings.Add("TimelinerTask.SetActual got neither an actual start nor an actual end, so the task was left as it is.");
+            return timelinerTask;
+        }
+
+        if (start != null && end != null)
+        {
+            ScheduleRules.RequireDateRange(start.Value, end.Value, "actual", nameof(end));
+        }
 
         var doc = NavisworksContext.ResolveDocument(document);
         var copy = timelinerTask.CreateCopy();
-        copy.ActualStartDate = start;
-        copy.ActualEndDate = end;
+        if (start != null)
+        {
+            copy.ActualStartDate = start.Value;
+        }
+
+        if (end != null)
+        {
+            copy.ActualEndDate = end.Value;
+        }
+
         return CommitTaskEdit(doc, timelinerTask, copy);
     }
 
@@ -79,7 +103,8 @@ public static class TimelinerProgressNodes
     /// <returns>True when the task was removed; false when it is not in the document.</returns>
     [NodeName("TimelinerTask.Delete")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
-    [NodeDescription("Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document, so a clean-up step can run twice.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document or was already removed by an earlier delete in the same run, so a clean-up step can run twice and a list holding a task and its subtasks can be deleted whole (set TimeLiner.Tasks to order \"children first\" for that).")]
     [NodeSearchTags("timeliner", "task", "delete", "remove", "clean", "4d", "schedule")]
     [return: NodeName("deleted")]
     public static bool Delete(TimelinerTask task, Document? document = null)
@@ -89,7 +114,7 @@ public static class TimelinerProgressNodes
         var timeliner = doc.GetTimeliner()
             ?? throw new InvalidOperationException("TimeLiner is not available in this Navisworks edition.");
 
-        var path = TryGetIndexPath(timeliner, timelinerTask);
+        var path = TryGetIndexPath(timeliner, timelinerTask, staleMeansGone: true);
         if (path == null || path.Count == 0)
         {
             return false;
@@ -121,7 +146,7 @@ public static class TimelinerProgressNodes
 
     /// <summary>The index path of a stored task, or null when the task is not in the document's TimeLiner tree.</summary>
     private static System.Collections.ObjectModel.Collection<int>? TryGetIndexPath(
-        DocumentTimeliner timeliner, TimelinerTask task)
+        DocumentTimeliner timeliner, TimelinerTask task, bool staleMeansGone = false)
     {
         try
         {
@@ -131,6 +156,12 @@ public static class TimelinerProgressNodes
         {
             if (ClashHelpers.IsDisposed(ex))
             {
+                if (staleMeansGone)
+                {
+                    NodeWarnings.Add("A task wired to TimelinerTask.Delete was already removed or replaced by an earlier edit in this run, so it was not deleted again.");
+                    return null;
+                }
+
                 throw new InvalidOperationException(
                     "The wired TimeLiner task is stale — Navisworks disposed it when the schedule was last edited. " +
                     "Re-fetch it from TimeLiner.Tasks between edits.", ex);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -16,6 +17,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The recolored items (pass-through).</returns>
     [NodeName("Appearance.OverrideColor")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Overrides the color of model items (a permanent override: saved with the file and undoable).")]
     [NodeSearchTags("appearance", "color", "override", "paint", "tint")]
     [return: NodeName("items")]
@@ -33,7 +35,8 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The changed items (pass-through).</returns>
     [NodeName("Appearance.OverrideTransparency")]
-    [NodeDescription("Overrides the transparency of model items (0 = opaque, 1 = invisible).")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Overrides the transparency of model items, from 0 (opaque) to 1 (invisible). Appearance.Focus takes percent (0 to 100) instead.")]
     [NodeSearchTags("appearance", "transparency", "override", "ghost", "opacity")]
     [return: NodeName("items")]
     public static List<ModelItem> OverrideTransparency(
@@ -58,6 +61,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The reset items (pass-through).</returns>
     [NodeName("Appearance.Reset")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Removes permanent color and transparency overrides from model items, restoring their original materials.")]
     [NodeSearchTags("appearance", "reset", "restore", "original", "materials")]
     [return: NodeName("items")]
@@ -96,7 +100,7 @@ public static class AppearanceNodes
     /// <returns>The changed items (pass-through).</returns>
     [NodeName("Appearance.OverrideTransparencyTemporary")]
     [NodeDescription(
-        "Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) — " +
+        "Applies a TEMPORARY (viewpoint-scoped) transparency override (from 0 = opaque to 1 = invisible; Appearance.Focus takes percent, 0 to 100) — " +
         "the ghosting that Viewpoint.SaveWithOverrides bakes into each saved view. Fade 'the other' items " +
         "so the highlighted one stands out. Clear with Appearance.ResetTemporary.")]
     [NodeSearchTags("appearance", "transparency", "temporary", "ghost", "fade", "viewpoint", "runtime")]
@@ -149,6 +153,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The hidden items (pass-through).</returns>
     [NodeName("Appearance.Hide")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Hides model items in the viewport.")]
     [NodeSearchTags("appearance", "hide", "hidden", "invisible")]
     [return: NodeName("items")]
@@ -165,6 +170,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The shown items (pass-through).</returns>
     [NodeName("Appearance.Show")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Shows (un-hides) model items in the viewport.")]
     [NodeSearchTags("appearance", "show", "unhide", "visible")]
     [return: NodeName("items")]
@@ -180,6 +186,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the hidden flags were cleared.</returns>
     [NodeName("Appearance.ShowAll")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Shows (un-hides) every item in the model — undoes Appearance.Hide and Appearance.Isolate.")]
     [NodeSearchTags("appearance", "show", "all", "unhide", "reveal", "isolate")]
     [return: NodeName("done")]
@@ -194,6 +201,7 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the overrides were cleared.</returns>
     [NodeName("Appearance.ResetAll")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Removes every permanent color/transparency override in the model — a clean slate before re-coloring.")]
     [NodeSearchTags("appearance", "reset", "all", "clear", "clean")]
     [return: NodeName("done")]
@@ -209,12 +217,23 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The isolated items (pass-through).</returns>
     [NodeName("Appearance.Isolate")]
-    [NodeDescription("Shows only these items and hides everything else (undo with Appearance.ShowAll).")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription(
+        "Shows only these items and hides everything else (undo with Appearance.ShowAll). An empty list does nothing and the node " +
+        "shows a warning: isolating nothing would hide the whole model, and an empty search result is the usual cause.")]
     [NodeSearchTags("appearance", "isolate", "only", "hide", "focus")]
     [return: NodeName("items")]
     public static List<ModelItem> Isolate([MultiInput] IEnumerable<ModelItem> items, Document? document = null)
     {
         var list = NavisValues.NonNullItems(items);
+        if (list.Count == 0)
+        {
+            NodeWarnings.Add(
+                "Appearance.Isolate got no items, so nothing was isolated and the model was left as it is. " +
+                "Wire at least one model item (an empty search result is the usual cause).");
+            return list;
+        }
+
         var doc = NavisworksContext.ResolveDocument(document);
 
         // Isolate means "show ONLY these", from whatever state the model is in,
@@ -240,7 +259,8 @@ public static class AppearanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The colored items and a value → "#RRGGBB" legend for reporting.</returns>
     [NodeName("Appearance.ColorByValues")]
-    [NodeDescription("One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend. The colours are permanent overrides, saved with the file; Appearance.ColorByValuesTemporary does the same as a temporary override that Viewpoint.Save can bake into a saved viewpoint.")]
     [NodeSearchTags("appearance", "color", "values", "legend", "heatmap", "code", "byvalue")]
     [MultiReturn("items", "legend")]
     [PortKinds("item*", "data")]
@@ -249,6 +269,41 @@ public static class AppearanceNodes
         IEnumerable<object?> values,
         IEnumerable<object>? palette = null,
         Document? document = null)
+    {
+        return ColorByValuesCore(items, values, palette, document, false);
+    }
+
+    /// <summary>Color-codes items by their values with TEMPORARY colour overrides and returns the value→color legend.</summary>
+    /// <param name="items">The model items to color.</param>
+    /// <param name="values">One value per item (same length as items) — the color key.</param>
+    /// <param name="palette">Colors to cycle through per distinct value (null uses a built-in palette; all-numeric values get a blue→red gradient instead).</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The colored items and a value → "#RRGGBB" legend for reporting.</returns>
+    [NodeName("Appearance.ColorByValuesTemporary")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription(
+        "Like Appearance.ColorByValues, but the colours are TEMPORARY (viewpoint-scoped) overrides: nothing is written into the file, " +
+        "Viewpoint.Save with bakeOverrides on keeps them in a saved viewpoint (colour by clash status or by level, one view each), and " +
+        "Appearance.ResetTemporary clears them. Pairs each item with its value, colors each distinct value (categorical palette, or a " +
+        "blue→red gradient when every value is numeric) and outputs the legend.")]
+    [NodeSearchTags("appearance", "color", "values", "legend", "heatmap", "code", "byvalue", "temporary", "viewpoint", "status")]
+    [MultiReturn("items", "legend")]
+    [PortKinds("item*", "data")]
+    public static Dictionary<string, object?> ColorByValuesTemporary(
+        [MultiInput] IEnumerable<ModelItem> items,
+        IEnumerable<object?> values,
+        IEnumerable<object>? palette = null,
+        Document? document = null)
+    {
+        return ColorByValuesCore(items, values, palette, document, true);
+    }
+
+    private static Dictionary<string, object?> ColorByValuesCore(
+        IEnumerable<ModelItem> items,
+        IEnumerable<object?> values,
+        IEnumerable<object>? palette,
+        Document? document,
+        bool temporary)
     {
         var itemList = NavisValues.NonNullItems(items);
         if (values == null)
@@ -289,7 +344,15 @@ public static class AppearanceNodes
         for (int i = 0; i < keys.Count; i++)
         {
             var color = colors[i];
-            doc.Models.OverridePermanentColor(buckets[keys[i]], color);
+            if (temporary)
+            {
+                doc.Models.OverrideTemporaryColor(buckets[keys[i]], color);
+            }
+            else
+            {
+                doc.Models.OverridePermanentColor(buckets[keys[i]], color);
+            }
+
             legend[keys[i]] = ToHex(color);
         }
 

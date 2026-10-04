@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**588 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**589 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -21,8 +21,8 @@
 | [Logic](#logic) | 18 |
 | [Math](#math) | 38 |
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
-| [Navisworks.Appearance](#navisworksappearance) | 13 |
-| [Navisworks.Camera](#navisworkscamera) | 7 |
+| [Navisworks.Appearance](#navisworksappearance) | 14 |
+| [Navisworks.Camera](#navisworkscamera) | 9 |
 | [Navisworks.Clash.Filter](#navisworksclashfilter) | 8 |
 | [Navisworks.Clash.Group](#navisworksclashgroup) | 9 |
 | [Navisworks.Clash.Report](#navisworksclashreport) | 4 |
@@ -30,7 +30,7 @@
 | [Navisworks.Clash.Tests](#navisworksclashtests) | 16 |
 | [Navisworks.Comments](#navisworkscomments) | 4 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
-| [Navisworks.Export](#navisworksexport) | 14 |
+| [Navisworks.Export](#navisworksexport) | 12 |
 | [Navisworks.Grids](#navisworksgrids) | 3 |
 | [Navisworks.Markup](#navisworksmarkup) | 6 |
 | [Navisworks.Model](#navisworksmodel) | 5 |
@@ -39,12 +39,12 @@
 | [Navisworks.Search](#navisworkssearch) | 2 |
 | [Navisworks.Selection](#navisworksselection) | 9 |
 | [Navisworks.SelectionSets](#navisworksselectionsets) | 17 |
-| [Navisworks.TimeLiner](#navisworkstimeliner) | 10 |
+| [Navisworks.TimeLiner](#navisworkstimeliner) | 11 |
 | [Navisworks.Transform](#navisworkstransform) | 7 |
 | [Navisworks.Units](#navisworksunits) | 4 |
-| [Navisworks.Viewpoints](#navisworksviewpoints) | 17 |
+| [Navisworks.Viewpoints](#navisworksviewpoints) | 15 |
 | [Navisworks.Viewpoints.Files](#navisworksviewpointsfiles) | 2 |
-| [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 5 |
+| [Navisworks.Viewpoints.Folders](#navisworksviewpointsfolders) | 6 |
 | [Report](#report) | 2 |
 | [String](#string) | 36 |
 | [System](#system) | 7 |
@@ -401,14 +401,14 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Audit.DuplicateItems` | items, tolerance?, document? | items1, items2, count | Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items |
+| `Audit.DuplicateItems` | items, tolerance?, units?, document? | items1, items2, count | Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items |
 | `Audit.MissingProperty` | categoryName, propertyName, items?, geometryOnly?, document? | items, count | Finds every item that does NOT carry the given property |
 | `Distance.BetweenItems` | itemsA, itemsB, method?, document? | distance, pointA, pointB | Shortest distance between two selections, with the closest (witness) point on each side |
 | `FallHazard.EdgeHandrailCheck` | floors, level, handrails, obstructions?, band?, cellSize?, limit?, handrailTolerance?, minPassage?, units?, imagePath?, pixelsPerCell?, showOverage?, dangerousColor?, protectedColor?, safeColor?, document? | imagePath, dangerousLength, protectedLength, safeLength, report | Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), a… |
 | `FallHazard.FloorOpeningMap` | floors, level, obstructions?, band?, cellSize?, minGap?, units?, imagePath?, saveViewpoints?, pixelsPerCell?, showOverage?, lowColor?, highColor?, document? | imagePath, openingCount, widestGaps, centers, viewpoints, report | Whole-floor fall-hazard heat map |
 | `Proximity.Cluster` | items, tolerance?, units?, method?, propertyName?, tabName?, document? | groups, clusterNumbers, clusterCount, sizes, report | Groups items into clusters of touching geometry (gap <= tolerance, chained) |
 | `Proximity.NearestDistance` | items, targets, method?, document? | distances | For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by |
-| `Takeoff.SumPropertyByGroup` | items, groupCategoryName, groupPropertyName, valueCategoryName, valuePropertyName | keys, sums, counts | One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g |
+| `Takeoff.SumPropertyByGroup` | items, groupCategoryName, groupPropertyName, valueCategoryName, valuePropertyName | keys, sums, counts, table | One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g |
 | `Zone.AssignByVolumes` | zoneItems, zoneNames, targetItems, tabName?, propertyName? | items, assignedCount | Tags each target with the name of the zone volume containing its bounding-box center |
 
 ## Navisworks.Appearance
@@ -416,13 +416,14 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Appearance.ColorByValues` | items, values, palette?, document? | items, legend | One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs t… |
+| `Appearance.ColorByValuesTemporary` | items, values, palette?, document? | items, legend | Like Appearance.ColorByValues, but the colours are TEMPORARY (viewpoint-scoped) overrides: nothing is written into the file, Viewpoint.Save with bakeOverrides on keeps t… |
 | `Appearance.Focus` | items, otherTransparency?, resetFirst?, document? | items | Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparenc… |
 | `Appearance.Hide` | items, document? | items | Hides model items in the viewport |
 | `Appearance.Isolate` | items, document? | items | Shows only these items and hides everything else (undo with Appearance.ShowAll) |
 | `Appearance.OverrideColor` | items, color, document? | items | Overrides the color of model items (a permanent override: saved with the file and undoable) |
 | `Appearance.OverrideColorTemporary` | items, color, document? | items | Applies a TEMPORARY (viewpoint-scoped) color override |
-| `Appearance.OverrideTransparency` | items, transparency, document? | items | Overrides the transparency of model items (0 = opaque, 1 = invisible) |
-| `Appearance.OverrideTransparencyTemporary` | items, transparency, document? | items | Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) |
+| `Appearance.OverrideTransparency` | items, transparency, document? | items | Overrides the transparency of model items, from 0 (opaque) to 1 (invisible) |
+| `Appearance.OverrideTransparencyTemporary` | items, transparency, document? | items | Applies a TEMPORARY (viewpoint-scoped) transparency override (from 0 = opaque to 1 = invisible |
 | `Appearance.Reset` | items, document? | items | Removes permanent color and transparency overrides from model items, restoring their original materials |
 | `Appearance.ResetAll` | document? | done | Removes every permanent color/transparency override in the model |
 | `Appearance.ResetTemporary` | after?, document? | done, after | Clears every TEMPORARY color/transparency override in the model |
@@ -433,12 +434,14 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Camera.Current` | document? | position, focalDistance, heightField | The current camera position, focal distance and vertical field height |
-| `Camera.LookAt` | eye, target, document? | done | Moves the camera to 'eye' looking at 'target' (up stays +Z) |
-| `Camera.SetFieldOfView` | degrees, document? | done | Sets the camera's vertical field of view in degrees (perspective camera) |
-| `Camera.SetProjection` | perspective, document? | done | Switches the camera between perspective (true) and orthographic (false) projection |
-| `Camera.SetStandardView` | view?, items?, paddingFactor?, document? | viewpoint | Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items |
-| `Camera.ZoomToItems` | items, paddingFactor?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
+| `Camera.Current` | after?, document? | position, focalDistance, heightField | The current camera position, focal distance and vertical field height, read again on every run |
+| `Camera.LookAt` | eye, target, after?, document? | done | Moves the camera to 'eye' looking at 'target' (up stays +Z) |
+| `Camera.Restore` | viewpoint, after?, document? | done | Puts a camera back on the current view: the viewpoint kept by Camera.Save, or a saved viewpoint |
+| `Camera.Save` | after?, document? | viewpoint | Keeps a copy of the current camera inside the graph (nothing is added to the Saved Viewpoints window |
+| `Camera.SetFieldOfView` | degrees, after?, document? | done | Sets the camera's vertical field of view in degrees (perspective camera) |
+| `Camera.SetProjection` | perspective, after?, document? | done | Switches the camera between perspective (true) and orthographic (false) projection |
+| `Camera.SetStandardView` | view?, items?, paddingFactor?, after?, document? | viewpoint | Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items |
+| `Camera.ZoomToItems` | items, paddingFactor?, after?, document? | done | Frames the given items in the current view (per-item close-ups, screenshot staging) |
 | `Viewpoint.SetSectionBox` | boundingBox, enabled?, document? | done | Applies a section box around a region on the current view (Sectioning > Box, scriptable) |
 
 ## Navisworks.Clash.Filter
@@ -547,18 +550,16 @@
 |---|---|---|---|
 | `BCF.ExportIssues` | filePath, results?, viewpoints?, includeSnapshots?, statusMap?, document? | filePath, topicCount | Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) |
 | `BCF.ImportIssues` | filePath, applyCameraTopicIndex?, document? | topics, modelItems | Reads a BCF 2.0/2.1 package: per topic title/status/description/comments/component GUIDs/camera, plus the model items each topic's components resolve to (matched by IFC… |
-| `Export.ClashReportCsv` | filePath, tests?, document? | filePath, rowCount | One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready) |
-| `Export.ClashReportHtml` | filePath, tests?, includeImages?, imageWidth?, imageHeight?, document? | filePath, rowCount | Self-contained HTML clash report |
+| `Export.ClashReport` | filePath, tests?, includeImages?, imageWidth?, imageHeight?, document? | filePath, rowCount | One-node clash report |
 | `Export.IfcClasses` | — | classes | Lists the friendly IFC class names (Wall, Beam, Door, …) accepted by Export.IfcSetClassMap |
 | `Export.IfcCoordinates` | basePoint?, eastings?, northings?, elevation?, rotationDegrees?, writeGeoref? | coordinates | Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing |
 | `Export.IfcParameterRule` | source, targetPset?, targetName?, sourceCategory? | rule | One property rename/relocate rule for Export.ToIfc |
 | `Export.IfcRoles` | typeProperty?, typeCategory?, levelProperty?, levelCategory?, materialProperty?, materialCategory?, classificationProperty?, classificationCategory? | roles | Maps Navisworks source properties to IFC roles |
 | `Export.IfcSetClassMap` | setNames, ifcClasses, predefinedTypes?, document? | classMap | Assigns an IFC class to every item of the named saved/search sets (set→class), producing the classMap for Export.ToIfc |
 | `Export.IfcSpatialNames` | project?, site?, building?, storey? | spatialNames | Names for the IFC spatial tree (Project/Site/Building/default Storey) used by Export.ToIfc |
-| `Export.NWD` | filePath, document? | filePath | Saves the document as a published .nwd snapshot (appearance overrides baked in) |
-| `Export.ToCsv` | items, filePath, categoryName?, propertyNames? | filePath | Writes one CSV row per model item with a Name column plus property columns |
-| `Export.ToIfc` | items, filePath, schema?, instancing?, properties?, materials?, quantities?, units?, quality?, coordinates?, spatialNames?, roles?, parameterRules?, categoryFilter?, classMap?, splitMegabytes?, validate?, document? | filePath, fileCount, elementCount, triangleCount, fileSizeKb | Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing |
-| `Export.ViewpointImage` | filePath, width?, height?, document? | filePath | Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter |
+| `Export.ToCsv` | items, filePath, categoryName?, propertyNames? | filePath | Writes one CSV row per model item with a Name column plus property columns, straight from the model: a quick quantity take-off file |
+| `Export.ToIfc` | items, filePath, schema?, instancing?, properties?, materials?, quantities?, units?, quality?, coordinates?, spatialNames?, roles?, parameterRules?, categoryFilter?, classMap?, splitMegabytes?, validate?, document? | filePath, fileCount, elementCount, triangleCount, fileSizeKb, files | Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing |
+| `Export.ViewpointImage` | filePath, width?, height?, viewpoint?, after?, document? | filePath | Renders a view to a .png/.jpg/.bmp file via the Navisworks image exporter |
 
 ## Navisworks.Grids
 
@@ -674,14 +675,15 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `TimeLiner.AutoAttachByProperty` | category, property, document? | attachedCount, unmatchedTasks | For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them |
-| `TimeLiner.Tasks` | document? | tasks | All TimeLiner tasks in a document, with subtasks flattened into one list |
-| `TimelinerTask.AttachSet` | task, setName, document? | task | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) |
-| `TimelinerTask.Create` | name, plannedStart, plannedEnd, items?, taskType?, document? | task | Creates a top-level TimeLiner task with planned dates and optionally attaches model items |
+| `TimeLiner.AutoAttachByProperty` | category, property, matchOn?, document? | attachedCount, unmatchedTasks | For every TimeLiner task (subtasks included), finds all items whose property value equals the task name (or, with matchOn "Display id", the task's display id) and attach… |
+| `TimeLiner.Tasks` | order?, document? | tasks | All TimeLiner tasks in a document, with subtasks flattened into one list, read again on every run |
+| `TimelinerTask.AttachSet` | task, set, document? | task | Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) |
+| `TimelinerTask.ByName` | name, document? | task | Finds a TimeLiner task by its name (subtasks too) |
+| `TimelinerTask.Create` | name, plannedStart, plannedEnd, items?, taskType?, parent?, onExisting?, document? | task | Creates a TimeLiner task with planned dates and optionally attaches model items |
 | `TimelinerTask.Delete` | task, document? | deleted | Deletes a TimeLiner task together with its subtasks |
-| `TimelinerTask.Info` | task | name, displayId, plannedStart, plannedEnd, actualStart, actualEnd, taskType, progress | Name, id, planned and actual dates, task type and progress of a TimeLiner task |
+| `TimelinerTask.Info` | task | name, displayId, plannedStart, plannedEnd, actualStart, actualEnd, taskType, progress, parent, depth | Name, id, planned and actual dates, task type and progress of a TimeLiner task, the name of its parent task (empty for a top-level task) and its depth (0 for a top-level… |
 | `TimelinerTask.Items` | task, document? | items | The model items attached to a TimeLiner task |
-| `TimelinerTask.SetActual` | task, start, end, document? | task | Sets a task's ACTUAL start and end dates (the planned dates are untouched |
+| `TimelinerTask.SetActual` | task, start?, end?, document? | task | Sets a task's ACTUAL start and/or end dates (the planned dates are untouched |
 | `TimelinerTask.SetDates` | task, plannedStart, plannedEnd, document? | task | Updates a task's planned start/end dates in place |
 | `TimelinerTask.SetProgress` | task, percent, document? | task | Sets a task's percent complete (0-100 |
 
@@ -710,23 +712,21 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `SavedViewpoint.Apply` | viewpoint, document? | viewpoint | Makes a saved viewpoint the current view (camera, plus any saved overrides) |
+| `SavedViewpoint.Apply` | viewpoint, after?, document? | viewpoint | Makes a saved viewpoint the current view (camera, plus any saved overrides) |
 | `SavedViewpoint.ByName` | name, document? | viewpoint | Finds a saved viewpoint by its display name (searches folders too) |
 | `SavedViewpoint.CopyOverrides` | fromViewpoint, toViewpoint, document? | viewpoint | Copies the appearance the way one saved view looks |
-| `SavedViewpoint.Delete` | name, document? | deleted | Deletes a saved viewpoint by name (searches folders too) |
+| `SavedViewpoint.Delete` | viewpoint, document? | deleted | Deletes a saved viewpoint: wire the viewpoint itself (so exactly that one goes, whatever its folder), or its name, or its folder path and name ("Reviews/Week 12/Level 1") |
 | `SavedViewpoint.Duplicate` | viewpoint, newName?, document? | viewpoint | Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides |
 | `SavedViewpoint.Folder` | viewpoint, document? | folderPath, folder | The folder containing a saved viewpoint: its path as "A/B" ("" for top-level viewpoints) and the folder itself |
 | `SavedViewpoint.Info` | viewpoint, document? | name, folder, hasSection, hasOverrides, commentCount, position, lookAt | Reads a saved viewpoint: its name, folder path ("A/B", "" at the top level), whether it carries a section box, whether it has baked appearance or visibility overrides, i… |
 | `SavedViewpoint.MoveToFolder` | viewpoint, folder, document? | viewpoint | Moves a saved viewpoint into a folder (appended at the end) |
 | `SavedViewpoint.Name` | viewpoint | name | The display name of a saved viewpoint |
-| `SavedViewpoint.Rename` | viewpoint, newName, document? | viewpoint | Renames a saved viewpoint (accepts the viewpoint or its current name |
-| `SavedViewpoint.Update` | viewpoint, document? | viewpoint | Re-captures the current view into an existing saved viewpoint |
-| `Viewpoint.SaveCurrent` | name, document? | viewpoint | Saves the current view as a new saved viewpoint |
-| `Viewpoint.SaveWithOverrides` | name, folderName?, document? | viewpoint | Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) |
-| `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
-| `ViewpointPackageFile.Parse` | json | result | Parses a package from JSON with node-friendly errors: malformed text and files written by a newer CamelGraph both fail with a message that says what to do, never a raw s… |
+| `SavedViewpoint.Rename` | viewpoint, newName, document? | viewpoint | Renames a saved viewpoint (accepts the viewpoint, its current name or a folder path and name such as "Reviews/Week 12/Level 1" |
+| `SavedViewpoint.Update` | viewpoint, after?, document? | viewpoint | Re-captures the current view into an existing saved viewpoint |
+| `Viewpoint.Save` | name, folder?, bakeOverrides?, after?, document? | viewpoint | Saves the current view as a saved viewpoint in the Saved Viewpoints window |
+| `Viewpoint.VisibleItems` | items, viewpoint?, fullyInside?, after?, document? | visibleItems, outsideItems, mask, containsAny, report | Checks which of the given items a viewpoint can see (bounding box vs the camera frustum) |
 | `Viewpoints.All` | document? | viewpoints | All saved viewpoints in a document, including those inside folders |
-| `Viewpoints.FromClashResults` | results, folderName?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result |
+| `Viewpoints.FromClashResults` | results, folderName?, nameFormat?, document? | viewpoints | Batch-generates one saved viewpoint per clash result, camera aimed at the clash |
 
 ## Navisworks.Viewpoints.Files
 
@@ -740,10 +740,11 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Viewpoints.CreateFolder` | name, parentFolder?, document? | folder | Creates a folder in the Saved Viewpoints window, optionally nested under a parent folder |
+| `Viewpoints.DeleteFolder` | folder, contentsOnly?, document? | deleted, viewpointCount | Deletes a Saved Viewpoints folder together with every viewpoint and sub-folder in it, or with contentsOnly on empties the folder and keeps it |
 | `Viewpoints.DuplicateFolder` | folder, newName, document? | folder | Duplicates a Saved Viewpoints folder |
 | `Viewpoints.InFolder` | folder?, recursive?, document? | viewpoints, names, subfolders, count | All saved viewpoints inside a folder, in Saved Viewpoints window order |
-| `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder or its current name |
-| `Viewpoints.SortFolder` | folder?, recursive?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) |
+| `Viewpoints.RenameFolder` | folder, newName, document? | folder | Renames a Saved Viewpoints folder (accepts the folder, its current name or a path such as "Reviews/Week 12" |
+| `Viewpoints.SortFolder` | folder?, recursive?, numeric?, document? | folder | Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z), ignoring case |
 
 ## Report
 
@@ -889,6 +890,9 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Directory.FindFiles` | Directory.Find |
 | `Directory.GetDirectories` | Directory.Find |
 | `Directory.GetFiles` | Directory.Find |
+| `Export.ClashReportCsv` | Export.ClashReport |
+| `Export.ClashReportHtml` | Export.ClashReport |
+| `Export.NWD` | Document.Save |
 | `List.Join` | List.Merge |
 | `List.SortDescending` | List.Sort with 'descending' ticked |
 | `Markup.AddArrow` | Markup.AddShape |
@@ -914,4 +918,7 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Search.InItems` | Search.ByProperty |
 | `Table.Headers` | Table.Info |
 | `Table.JoinByKey` | Table.Join |
+| `Viewpoint.SaveCurrent` | Viewpoint.Save |
+| `Viewpoint.SaveWithOverrides` | Viewpoint.Save |
+| `ViewpointPackageFile.Parse` | Viewpoints.ImportFile |
 

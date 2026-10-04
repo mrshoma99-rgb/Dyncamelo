@@ -138,7 +138,7 @@ The start screen (cards for a new script, recent scripts and examples, the versi
 
 ## A run is slow on a large model
 
-Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.SaveWithOverrides 71,200 ms (17×)").
+Runs happen on the Navisworks main thread, so Navisworks is busy until the run ends (the editor shows a progress overlay). The status bar shows the time of each run and, when a run takes a second or more, the slowest node ("slowest: Viewpoint.Save 71,200 ms (17×)").
 
 ![The progress overlay during a run: the working node and the hint that Esc cancels.](images/wiki-run-progress.png)
 

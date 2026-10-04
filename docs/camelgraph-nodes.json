@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 588,
+ "count": 589,
  "categories": [
   {
    "name": "Annotation",
@@ -64,11 +64,11 @@
   },
   {
    "name": "Navisworks.Appearance",
-   "count": 13
+   "count": 14
   },
   {
    "name": "Navisworks.Camera",
-   "count": 7
+   "count": 9
   },
   {
    "name": "Navisworks.Clash.Filter",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.Export",
-   "count": 14
+   "count": 12
   },
   {
    "name": "Navisworks.Grids",
@@ -136,7 +136,7 @@
   },
   {
    "name": "Navisworks.TimeLiner",
-   "count": 10
+   "count": 11
   },
   {
    "name": "Navisworks.Transform",
@@ -148,7 +148,7 @@
   },
   {
    "name": "Navisworks.Viewpoints",
-   "count": 17
+   "count": 15
   },
   {
    "name": "Navisworks.Viewpoints.Files",
@@ -156,7 +156,7 @@
   },
   {
    "name": "Navisworks.Viewpoints.Folders",
-   "count": 5
+   "count": 6
   },
   {
    "name": "Report",
@@ -9902,10 +9902,10 @@
   },
   {
    "name": "Audit.DuplicateItems",
-   "id": "CamelGraph.Navisworks.AuditNodes.DuplicateItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.AuditNodes.DuplicateItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.",
+   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items. The test is added to the Clash Detective tests for the moment the check runs and removed again, so the node changes the clash tests (and the Script Player says so). tolerance is in the unit of the Advanced input units; \"document\" means the file's own unit, which is often feet, so name the unit when you know it.",
    "tags": [
     "audit",
     "duplicate",
@@ -9924,8 +9924,14 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "Duplicate tolerance in document units.",
+     "description": "Duplicate tolerance, in the unit of the units input.",
      "default": "0.001"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "The unit of the tolerance: \"document\" (the file's own unit, often feet) or a unit name such as Meters or Millimeters.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -10016,7 +10022,7 @@
    "id": "CamelGraph.Navisworks.DistanceNodes.BetweenItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.",
+   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert. The bbox tier measures between the combined box of each side, a coarser answer than Proximity.NearestDistance, which measures to each target on its own. The default is mesh here and bbox on Proximity.NearestDistance.",
    "tags": [
     "distance",
     "clearance",
@@ -10153,7 +10159,7 @@
     {
      "name": "imagePath",
      "type": "string",
-     "description": "Where to write the PNG (empty = a temp file; the path is returned).",
+     "description": "Where to write the PNG (empty = a temp file; the path is returned). A relative path is next to the graph file.",
      "default": "null"
     },
     {
@@ -10227,7 +10233,7 @@
    "id": "CamelGraph.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,bool,object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.",
+   "description": "Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint (named \"Opening 1 — gap 0.35 Meters\", the gap in the unit you chose) in the folder \"Floor Openings\"; running again replaces a viewpoint of the same name instead of adding another, and turning saveViewpoints off leaves the document alone. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.",
    "tags": [
     "fall",
     "hazard",
@@ -10291,7 +10297,7 @@
     {
      "name": "imagePath",
      "type": "string",
-     "description": "Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).",
+     "description": "Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned). A relative path is next to the graph file.",
      "default": "null"
     },
     {
@@ -10370,7 +10376,7 @@
    "id": "CamelGraph.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set propertyName to also stamp every item with its cluster number as a searchable custom property.",
+   "description": "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set propertyName (Advanced) to also stamp every item with its cluster number as a searchable custom property in the tab tabName; without it the node only reads.",
    "tags": [
     "cluster",
     "group",
@@ -10462,7 +10468,7 @@
    "id": "CamelGraph.Navisworks.DistanceNodes.NearestDistance@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" = fast, \"mesh\" = exact surfaces (slower on big sets).",
+   "description": "For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" (the default here; Distance.BetweenItems defaults to mesh) = fast, \"mesh\" = exact surfaces (slower on big sets).",
    "tags": [
     "proximity",
     "nearest",
@@ -10513,7 +10519,7 @@
    "id": "CamelGraph.Navisworks.TakeoffNodes.SumPropertyByGroup@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".",
+   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\". keys, sums and counts are three parallel lists; table is the same result as one table (columns: the grouping property, the summed property, Count) that goes straight into Table.ToExcelFile, Table.ToCsvFile, Table.Sort or Report.Html. For sums over several properties use Properties.ToTable and Table.GroupBy.",
    "tags": [
     "takeoff",
     "qto",
@@ -10521,7 +10527,8 @@
     "sum",
     "group",
     "rollup",
-    "pivot"
+    "pivot",
+    "table"
    ],
    "inputs": [
     {
@@ -10566,9 +10573,14 @@
      "name": "counts",
      "type": "integer[]",
      "description": ""
+    },
+    {
+     "name": "table",
+     "type": "dict",
+     "description": ""
     }
    ],
-   "returns": "Index-aligned group keys, per-group sums and per-group item counts."
+   "returns": "Index-aligned group keys, per-group sums and per-group item counts, and the same as one table."
   },
   {
    "name": "Zone.AssignByVolumes",
@@ -10634,7 +10646,7 @@
    "id": "CamelGraph.Navisworks.AppearanceNodes.ColorByValues@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Appearance",
-   "description": "One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.",
+   "description": "One-node color-coding: pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend. The colours are permanent overrides, saved with the file; Appearance.ColorByValuesTemporary does the same as a temporary override that Viewpoint.Save can bake into a saved viewpoint.",
    "tags": [
     "appearance",
     "color",
@@ -10684,11 +10696,68 @@
    "returns": "The colored items and a value → \"#RRGGBB\" legend for reporting."
   },
   {
+   "name": "Appearance.ColorByValuesTemporary",
+   "id": "CamelGraph.Navisworks.AppearanceNodes.ColorByValuesTemporary@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Appearance",
+   "description": "Like Appearance.ColorByValues, but the colours are TEMPORARY (viewpoint-scoped) overrides: nothing is written into the file, Viewpoint.Save with bakeOverrides on keeps them in a saved viewpoint (colour by clash status or by level, one view each), and Appearance.ResetTemporary clears them. Pairs each item with its value, colors each distinct value (categorical palette, or a blue→red gradient when every value is numeric) and outputs the legend.",
+   "tags": [
+    "appearance",
+    "color",
+    "values",
+    "legend",
+    "heatmap",
+    "code",
+    "byvalue",
+    "temporary",
+    "viewpoint",
+    "status"
+   ],
+   "inputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": "The model items to color.",
+     "multiInput": true
+    },
+    {
+     "name": "values",
+     "type": "any[]",
+     "description": "One value per item (same length as items) — the color key."
+    },
+    {
+     "name": "palette",
+     "type": "any[]",
+     "description": "Colors to cycle through per distinct value (null uses a built-in palette; all-numeric values get a blue→red gradient instead).",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "items",
+     "type": "ModelItem[]",
+     "description": ""
+    },
+    {
+     "name": "legend",
+     "type": "dict",
+     "description": ""
+    }
+   ],
+   "returns": "The colored items and a value → \"#RRGGBB\" legend for reporting."
+  },
+  {
    "name": "Appearance.Focus",
    "id": "CamelGraph.Navisworks.AppearanceExtraNodes.Focus@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Appearance",
-   "description": "Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparency override — the Action.Ghost look in one node, no permanent change. With resetFirst on, every temporary override is cleared first; undo it later with Appearance.ResetTemporary. Touches every item in the model, so allow a moment on large models.",
+   "description": "Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent (0 = opaque, 100 = invisible) with a TEMPORARY transparency override — the Action.Ghost look in one node, no permanent change. With resetFirst on, every temporary override is cleared first; undo it later with Appearance.ResetTemporary. The scale is percent here; Appearance.OverrideTransparencyTemporary and Action.Ghost take 0 to 1. Touches every item in the model, so allow a moment on large models.",
    "tags": [
     "appearance",
     "focus",
@@ -10775,7 +10844,7 @@
    "id": "CamelGraph.Navisworks.AppearanceNodes.Isolate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Appearance",
-   "description": "Shows only these items and hides everything else (undo with Appearance.ShowAll).",
+   "description": "Shows only these items and hides everything else (undo with Appearance.ShowAll). An empty list does nothing and the node shows a warning: isolating nothing would hide the whole model, and an empty search result is the usual cause.",
    "tags": [
     "appearance",
     "isolate",
@@ -10895,7 +10964,7 @@
    "id": "CamelGraph.Navisworks.AppearanceNodes.OverrideTransparency@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Appearance",
-   "description": "Overrides the transparency of model items (0 = opaque, 1 = invisible).",
+   "description": "Overrides the transparency of model items, from 0 (opaque) to 1 (invisible). Appearance.Focus takes percent (0 to 100) instead.",
    "tags": [
     "appearance",
     "transparency",
@@ -10936,7 +11005,7 @@
    "id": "CamelGraph.Navisworks.AppearanceNodes.OverrideTransparencyTemporary@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Appearance",
-   "description": "Applies a TEMPORARY (viewpoint-scoped) transparency override (0 = opaque, 1 = invisible) — the ghosting that Viewpoint.SaveWithOverrides bakes into each saved view. Fade 'the other' items so the highlighted one stands out. Clear with Appearance.ResetTemporary.",
+   "description": "Applies a TEMPORARY (viewpoint-scoped) transparency override (from 0 = opaque to 1 = invisible; Appearance.Focus takes percent, 0 to 100) — the ghosting that Viewpoint.SaveWithOverrides bakes into each saved view. Fade 'the other' items so the highlighted one stands out. Clear with Appearance.ResetTemporary.",
    "tags": [
     "appearance",
     "transparency",
@@ -11152,10 +11221,10 @@
   },
   {
    "name": "Camera.Current",
-   "id": "CamelGraph.Navisworks.CameraNodes.Current@Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.CameraNodes.Current@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "The current camera position, focal distance and vertical field height.",
+   "description": "The current camera position, focal distance and vertical field height, read again on every run. To keep the whole camera and put it back later, use Camera.Save and Camera.Restore.",
    "tags": [
     "camera",
     "current",
@@ -11164,6 +11233,12 @@
     "eye"
    ],
    "inputs": [
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera is read when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
     {
      "name": "document",
      "type": "Document",
@@ -11192,10 +11267,10 @@
   },
   {
    "name": "Camera.LookAt",
-   "id": "CamelGraph.Navisworks.CameraNodes.LookAt@object,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.CameraNodes.LookAt@object,object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Moves the camera to 'eye' looking at 'target' (up stays +Z).",
+   "description": "Moves the camera to 'eye' looking at 'target' (up stays +Z). Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "camera",
     "lookat",
@@ -11215,6 +11290,12 @@
      "description": "Point to look at: a Point, or a list of three numbers."
     },
     {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera moves when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -11231,11 +11312,95 @@
    "returns": ""
   },
   {
-   "name": "Camera.SetFieldOfView",
-   "id": "CamelGraph.Navisworks.CameraNodes.SetFieldOfView@double,Autodesk.Navisworks.Api.Document",
+   "name": "Camera.Restore",
+   "id": "CamelGraph.Navisworks.CameraNodes.Restore@object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Sets the camera's vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider.",
+   "description": "Puts a camera back on the current view: the viewpoint kept by Camera.Save, or a saved viewpoint. Only the camera moves; it does not undo hidden items or colour overrides (use Appearance.ShowAll and Appearance.ResetTemporary for those). Wire the last node that moves the camera into 'after' so this one runs at the end.",
+   "tags": [
+    "camera",
+    "restore",
+    "back",
+    "reset",
+    "undo",
+    "view",
+    "viewpoint",
+    "apply"
+   ],
+   "inputs": [
+    {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The camera to restore: the viewpoint from Camera.Save, or a saved viewpoint (its camera is used)."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera moves when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "done",
+     "type": "boolean",
+     "description": "True when the camera was restored."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Camera.Save",
+   "id": "CamelGraph.Navisworks.CameraNodes.Save@object,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Camera",
+   "description": "Keeps a copy of the current camera inside the graph (nothing is added to the Saved Viewpoints window; for that use Viewpoint.Save). Put it before the nodes that move the camera (Camera.ZoomToItems, SavedViewpoint.Apply, Camera.SetStandardView ...) and wire its viewpoint into Camera.Restore at the end, so the graph leaves the view as it found it. The copy is taken when this node runs: wire what must happen before it into 'after'.",
+   "tags": [
+    "camera",
+    "save",
+    "remember",
+    "keep",
+    "current",
+    "view",
+    "restore",
+    "undo",
+    "viewpoint"
+   ],
+   "inputs": [
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera is read when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "viewpoint",
+     "type": "Viewpoint",
+     "description": "A copy of the current camera (position, direction, projection and field of view)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Camera.SetFieldOfView",
+   "id": "CamelGraph.Navisworks.CameraNodes.SetFieldOfView@double,object,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Camera",
+   "description": "Sets the camera's vertical field of view in degrees (perspective camera) — smaller = more zoomed/telephoto, larger = wider. Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "camera",
     "fov",
@@ -11250,6 +11415,12 @@
      "name": "degrees",
      "type": "number",
      "description": "Vertical field of view in degrees (typical 20–90). Applies to the perspective camera."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera changes when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -11269,10 +11440,10 @@
   },
   {
    "name": "Camera.SetProjection",
-   "id": "CamelGraph.Navisworks.CameraNodes.SetProjection@bool,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.CameraNodes.SetProjection@bool,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Switches the camera between perspective (true) and orthographic (false) projection.",
+   "description": "Switches the camera between perspective (true) and orthographic (false) projection. Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "camera",
     "projection",
@@ -11286,6 +11457,12 @@
      "name": "perspective",
      "type": "boolean",
      "description": "True for perspective, false for orthographic."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera changes when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -11305,10 +11482,10 @@
   },
   {
    "name": "Camera.SetStandardView",
-   "id": "CamelGraph.Navisworks.ViewpointExtraNodes.SetStandardView@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointExtraNodes.SetStandardView@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items — or the whole model when none are wired. Convention: Z is up and +Y is north, so top is a plan with north at the top of the screen, front looks north from the south side, left looks east from the west side, and iso looks from the south-east above. Assumes a Z-up model; for others use Camera.LookAt.",
+   "description": "Sets the camera to a standard view (top, bottom, front, back, left, right, iso) and frames the given items — or the whole model when none are wired. Convention: Z is up and +Y is north, so top is a plan with north at the top of the screen, front looks north from the south side, left looks east from the west side, and iso looks from the south-east above. Assumes a Z-up model; for others use Camera.LookAt. Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "camera",
     "standard",
@@ -11344,6 +11521,12 @@
      "default": "1.2"
     },
     {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera moves when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -11354,17 +11537,17 @@
     {
      "name": "viewpoint",
      "type": "Viewpoint",
-     "description": "A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.SaveCurrent)."
+     "description": "A copy of the new current viewpoint (feed it to nodes that take a viewpoint, or save it with Viewpoint.Save)."
     }
    ],
    "returns": ""
   },
   {
    "name": "Camera.ZoomToItems",
-   "id": "CamelGraph.Navisworks.CameraNodes.ZoomToItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.CameraNodes.ZoomToItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Frames the given items in the current view (per-item close-ups, screenshot staging).",
+   "description": "Frames the given items in the current view (per-item close-ups, screenshot staging). Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "camera",
     "zoom",
@@ -11387,6 +11570,12 @@
      "default": "1.5"
     },
     {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the camera moves when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -11407,7 +11596,7 @@
    "id": "CamelGraph.Navisworks.SectionBoxNodes.SetSectionBox@object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Camera",
-   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.",
+   "description": "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off. It works on Navisworks 2024 only: on 2025 and 2026 the node stops with a message, because the section-box call differs there. It acts on the view like the Camera nodes (hence its place under Camera): set the box first, then save the view with Viewpoint.Save.",
    "tags": [
     "section",
     "box",
@@ -11415,7 +11604,9 @@
     "sectioning",
     "viewpoint",
     "crop",
-    "isolate"
+    "isolate",
+    "camera",
+    "camera section"
    ],
    "inputs": [
     {
@@ -14370,6 +14561,7 @@
     "publish",
     "write",
     "export",
+    "export nwd",
     "snapshot",
     "batch"
    ],
@@ -14400,7 +14592,7 @@
    "id": "CamelGraph.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention.",
+   "description": "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention. Navisworks numbers clash results per test (Clash1 in every test), so when the results come from more than one test each issue title gets its test in front (\"Test - Clash1\"), and titles that would still repeat are numbered (2), (3) with a warning.",
    "tags": [
     "bcf",
     "export",
@@ -14416,7 +14608,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .bcfzip (or .bcf) path; the directory is created when missing."
+     "description": "Destination .bcfzip (or .bcf) path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "results",
@@ -14482,7 +14674,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The .bcfzip (or .bcf) file to read."
+     "description": "The .bcfzip (or .bcf) file to read. A relative path is next to the graph file."
     },
     {
      "name": "applyCameraTopicIndex",
@@ -14505,101 +14697,59 @@
     },
     {
      "name": "modelItems",
-     "type": "ModelItem[]",
+     "type": "ModelItem[][]",
      "description": ""
     }
    ],
-   "returns": "Topic dictionaries and, per topic, the model items its component GUIDs resolve to."
+   "returns": "Topic dictionaries and, per topic, the list of model items its component GUIDs resolve to (a list of lists)."
   },
   {
-   "name": "Export.ClashReportCsv",
-   "id": "CamelGraph.Navisworks.ExportNodes.ClashReportCsv@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+   "name": "Export.ClashReport",
+   "id": "CamelGraph.Navisworks.ExportNodes.ClashReport@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,bool,int,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready).",
+   "description": "One-node clash report. A .csv path writes one row per result (test, group, result, status, distance, assignee, description, both item paths and GUIDs, the clash point; Excel-ready). A .html path writes a self-contained page, one section per test, optionally with a snapshot of every result (Advanced: includeImages, imageWidth, imageHeight), shareable as one file. Unwired tests reports every test in the document; an empty list reports none, so a filter that finds nothing gives an empty report instead of a report on everything.",
    "tags": [
     "export",
     "clash",
     "report",
     "csv",
-    "excel",
-    "triage"
-   ],
-   "inputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "Destination .csv path; the directory is created when missing."
-    },
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "The clash tests to report (null reports every test in the document).",
-     "default": "null"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "filePath",
-     "type": "file",
-     "description": ""
-    },
-    {
-     "name": "rowCount",
-     "type": "integer",
-     "description": ""
-    }
-   ],
-   "returns": "The written file path and the number of result rows."
-  },
-  {
-   "name": "Export.ClashReportHtml",
-   "id": "CamelGraph.Navisworks.ExportNodes.ClashReportHtml@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,bool,int,int,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Export",
-   "description": "Self-contained HTML clash report — one section per test, one row per result, optionally with embedded snapshots. Shareable as a single file.",
-   "tags": [
-    "export",
-    "clash",
-    "report",
     "html",
+    "excel",
+    "triage",
     "snapshot",
-    "share"
+    "share",
+    "clashreportcsv",
+    "clashreporthtml"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .html path; the directory is created when missing."
+     "description": "Destination .csv or .html (.htm) path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "tests",
      "type": "ClashTest[]",
-     "description": "The clash tests to report (null reports every test in the document).",
+     "description": "The clash tests to report. Leave unwired for every test in the document; an empty list reports no test.",
      "default": "null"
     },
     {
      "name": "includeImages",
      "type": "boolean",
-     "description": "True to embed a snapshot per result (larger file, needs the Navisworks viewport).",
+     "description": "HTML only: true embeds a snapshot per result (larger file, needs the Navisworks viewport).",
      "default": "false"
     },
     {
      "name": "imageWidth",
      "type": "integer",
-     "description": "Snapshot width in pixels.",
+     "description": "HTML only: snapshot width in pixels.",
      "default": "320"
     },
     {
      "name": "imageHeight",
      "type": "integer",
-     "description": "Snapshot height in pixels.",
+     "description": "HTML only: snapshot height in pixels.",
      "default": "240"
     },
     {
@@ -14651,7 +14801,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcCoordinates@string,double,double,double,double,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing.",
+   "description": "Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing. eastings, northings and elevation are in metres and are used only when basePoint is Custom.",
    "tags": [
     "ifc",
     "export",
@@ -14671,19 +14821,19 @@
     {
      "name": "eastings",
      "type": "number",
-     "description": "Custom base-point easting in metres (Custom mode).",
+     "description": "Custom base-point easting in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
      "name": "northings",
      "type": "number",
-     "description": "Custom base-point northing in metres (Custom mode).",
+     "description": "Custom base-point northing in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
      "name": "elevation",
      "type": "number",
-     "description": "Custom base-point elevation in metres (Custom mode).",
+     "description": "Custom base-point elevation in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
@@ -14713,7 +14863,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcParameterRule@string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export.",
+   "description": "One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export. The search button next to source and sourceCategory lists what the elements selected in Navisworks right now carry.",
    "tags": [
     "ifc",
     "export",
@@ -14763,7 +14913,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcRoles@string,string,string,string,string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc.",
+   "description": "Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc. The search button next to a name lists the tabs and properties of the elements selected in Navisworks right now.",
    "tags": [
     "ifc",
     "export",
@@ -14934,53 +15084,20 @@
    "returns": ""
   },
   {
-   "name": "Export.NWD",
-   "id": "CamelGraph.Navisworks.ExportNodes.Nwd@string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Export",
-   "description": "Saves the document as a published .nwd snapshot (appearance overrides baked in).",
-   "tags": [
-    "export",
-    "nwd",
-    "publish",
-    "save",
-    "snapshot"
-   ],
-   "inputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "Destination .nwd path; the directory is created when missing."
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "The written file path."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Export.ToCsv",
    "id": "CamelGraph.Navisworks.ExportNodes.ToCsv@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,System.Collections.Generic.IEnumerable<string>",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Writes one CSV row per model item with a Name column plus property columns. Useful for quantity take-offs.",
+   "description": "Writes one CSV row per model item with a Name column plus property columns, straight from the model: a quick quantity take-off file. For anything you want to shape first (sort, filter, group, add columns, dates as dates, an Excel workbook) use Properties.ToTable and the Table nodes, then Table.ToCsvFile or Table.ToExcelFile: they share the CSV and Excel options of the rest of the library.",
    "tags": [
     "export",
     "csv",
     "qto",
     "takeoff",
     "report",
-    "excel"
+    "excel",
+    "table",
+    "properties"
    ],
    "inputs": [
     {
@@ -14992,7 +15109,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .csv path; the directory is created when missing."
+     "description": "Destination .csv path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "categoryName",
@@ -15021,7 +15138,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.ToIfc@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,bool,bool,bool,bool,string,string,BIMCamel.Ifc.CoordOptions,BIMCamel.Ifc.SpatialNames,BIMCamel.Data.PropertyRoles,System.Collections.Generic.IEnumerable<BIMCamel.Data.ParamMapRule>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.Dictionary<string,string>,double,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing.",
+   "description": "Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing. The main inputs are the items, the file and the schema and units; the options of the Advanced panel (instancing, property sets, materials, quantities, quality, splitting, validation and the Export.Ifc* option nodes) have sensible defaults. filePath always comes out as ONE text, the first file written; files lists every file (more than one only when splitMegabytes splits the export), so a node after it sees the same kind of value whatever the split.",
    "tags": [
     "export",
     "ifc",
@@ -15042,7 +15159,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .ifc path; the directory is created when missing."
+     "description": "Destination .ifc path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "schema",
@@ -15166,29 +15283,36 @@
      "name": "fileSizeKb",
      "type": "number",
      "description": ""
+    },
+    {
+     "name": "files",
+     "type": "file[]",
+     "description": ""
     }
    ],
-   "returns": "The written path(s) and export statistics."
+   "returns": "The first written path, how many files were written, the exported element and triangle counts, the size, and every written path."
   },
   {
    "name": "Export.ViewpointImage",
-   "id": "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int,object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter.",
+   "description": "Renders a view to a .png/.jpg/.bmp file via the Navisworks image exporter. Without 'viewpoint' it is the view as it is when the node runs: wire what sets the view into 'after'. Wire saved viewpoints into 'viewpoint' and the node shows each one itself and takes its picture; put {name} in the file path (\"C:\\Pictures\\{name}.png\") for one file per viewpoint. That is the batch for a folder: Viewpoints.InFolder into 'viewpoint'. (SavedViewpoint.Apply followed by this node over a list does not work: every Apply runs first, then every picture shows the last view.) The view is left on the last viewpoint shown; Camera.Save and Camera.Restore put it back.",
    "tags": [
     "export",
     "image",
     "screenshot",
     "render",
     "viewpoint",
-    "png"
+    "png",
+    "picture",
+    "batch"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .png, .jpg or .bmp path; the directory is created when missing."
+     "description": "Destination .png, .jpg or .bmp path; the directory is created when missing. A relative path is next to the graph file. With a viewpoint, {name} in the path becomes the viewpoint's name."
     },
     {
      "name": "width",
@@ -15203,6 +15327,18 @@
      "default": "1080"
     },
     {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "Optional: the viewpoint to show first (a saved viewpoint, its name or folder path, or a camera from Camera.Save). A list takes one picture per viewpoint. Empty takes the picture of the view as it is.",
+     "default": "null"
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the picture is of the view at the moment this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -15213,7 +15349,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The written file path. After SavedViewpoint.Apply in a lacing loop this is a batch screenshot factory."
+     "description": "The written file path."
     }
    ],
    "returns": ""
@@ -18302,10 +18438,10 @@
   },
   {
    "name": "TimeLiner.AutoAttachByProperty",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerAutoNodes.AutoAttachByProperty@string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks.",
+   "description": "For every TimeLiner task (subtasks included), finds all items whose property value equals the task name (or, with matchOn \"Display id\", the task's display id) and attaches them — the UI's \"Auto-Attach Using Rules\", scriptable. Replaces each matched task's existing attachment; tasks with no matching items are left untouched and reported in unmatchedTasks. The search buttons next to category and property list what the elements selected in Navisworks right now carry.",
    "tags": [
     "timeliner",
     "auto",
@@ -18314,7 +18450,9 @@
     "4d",
     "link",
     "schedule",
-    "property"
+    "property",
+    "timelinertask",
+    "activity id"
    ],
    "inputs": [
     {
@@ -18326,6 +18464,12 @@
      "name": "property",
      "type": "string",
      "description": "Property display name (e.g. \"Task Name\"). Internal names do not match."
+    },
+    {
+     "name": "matchOn",
+     "type": "string",
+     "description": "What the property value is compared with: the task's \"Name\" (default) or its \"Display id\" (the Activity ID column of an imported schedule).",
+     "default": "\"Name\""
     },
     {
      "name": "document",
@@ -18350,18 +18494,26 @@
   },
   {
    "name": "TimeLiner.Tasks",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Tasks@Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Tasks@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "All TimeLiner tasks in a document, with subtasks flattened into one list.",
+   "description": "All TimeLiner tasks in a document, with subtasks flattened into one list, read again on every run. Each task comes before its subtasks (\"parents first\"). Navisworks replaces a task's subtasks when the task itself is edited, so when you edit or delete a whole list that holds tasks together with their subtasks (TimelinerTask.SetProgress, SetDates, SetActual, Delete over the list), set order to \"children first\" in the Advanced panel: the subtasks are then handled before their task and none is already replaced when its turn comes.",
    "tags": [
     "timeliner",
     "tasks",
     "schedule",
     "4d",
-    "all"
+    "all",
+    "timelinertask",
+    "timeliner task"
    ],
    "inputs": [
+    {
+     "name": "order",
+     "type": "string",
+     "description": "\"parents first\" (default) lists each task before its subtasks; \"children first\" lists the subtasks before their task.",
+     "default": "\"parents first\""
+    },
     {
      "name": "document",
      "type": "Document",
@@ -18380,10 +18532,10 @@
   },
   {
    "name": "TimelinerTask.AttachSet",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.AttachSet@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.AttachSet@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation.",
+   "description": "Attaches a saved selection/search set to a task as a LIVE link (like Attach Set in the UI) — the core 4D-linking automation. Give the set itself, its name, or its folder path and name; a list of tasks and a list of sets link each task to the set at the same position.",
    "tags": [
     "timeliner",
     "task",
@@ -18399,9 +18551,9 @@
      "description": "The stored TimeLiner task (from TimeLiner.Tasks or TimelinerTask.Create)."
     },
     {
-     "name": "setName",
-     "type": "string",
-     "description": "The saved set's display name (folders are searched too)."
+     "name": "set",
+     "type": "any",
+     "description": "The saved selection or search set: the set itself (SelectionSet.ByName, SelectionSets.All), its display name or its folder path and name."
     },
     {
      "name": "document",
@@ -18414,30 +18566,71 @@
     {
      "name": "task",
      "type": "TimelinerTask",
-     "description": "The updated stored task. Lace over task/set-name lists for bulk 4D linking."
+     "description": "The updated stored task. Lace over task/set lists for bulk 4D linking."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "TimelinerTask.ByName",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.ByName@string,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.TimeLiner",
+   "description": "Finds a TimeLiner task by its name (subtasks too). When several tasks share the name the first one in the list is used and the node shows a warning; give the path through the parent tasks (\"Structure/Level 2\") to choose one exactly. Fails when there is no such task.",
+   "tags": [
+    "timeliner",
+    "task",
+    "byname",
+    "find",
+    "lookup",
+    "schedule",
+    "4d",
+    "path"
+   ],
+   "inputs": [
+    {
+     "name": "name",
+     "type": "string",
+     "description": "The task's name, or its path through the parent tasks such as \"Structure/Level 2\"."
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "task",
+     "type": "TimelinerTask",
+     "description": "The stored task."
     }
    ],
    "returns": ""
   },
   {
    "name": "TimelinerTask.Create",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Create@string,System.DateTime,System.DateTime,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Create@string,System.DateTime,System.DateTime,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Creates a top-level TimeLiner task with planned dates and optionally attaches model items.",
+   "description": "Creates a TimeLiner task with planned dates and optionally attaches model items. Leave parent empty for a top-level task, or give the parent task (TimelinerTask.ByName, or its name or path) to build a schedule hierarchy. A task of the same name under the same parent is updated instead of added again, so running the graph twice does not duplicate the schedule; set onExisting (Advanced) to \"add\" to always add one or to \"error\" to stop.",
    "tags": [
     "timeliner",
     "task",
     "create",
     "new",
     "schedule",
-    "4d"
+    "4d",
+    "subtask",
+    "parent",
+    "hierarchy"
    ],
    "inputs": [
     {
      "name": "name",
      "type": "string",
-     "description": "Display name for the new task."
+     "description": "Display name for the task."
     },
     {
      "name": "plannedStart",
@@ -18458,8 +18651,20 @@
     {
      "name": "taskType",
      "type": "string",
-     "description": "Simulation task type name: \"Construct\", \"Demolish\" or \"Temporary\".",
+     "description": "Simulation task type: Construct, Demolish or Temporary (a custom task type of the document can be wired in as text).",
      "default": "\"Construct\""
+    },
+    {
+     "name": "parent",
+     "type": "any",
+     "description": "The task to create this one under: a task, its name or its path such as \"Structure/Level 2\". Empty creates a top-level task.",
+     "default": "null"
+    },
+    {
+     "name": "onExisting",
+     "type": "string",
+     "description": "What to do when the same parent already has a task of this name: \"update\" changes that task (dates, type, items), \"add\" always adds another, \"error\" stops.",
+     "default": "\"update\""
     },
     {
      "name": "document",
@@ -18482,7 +18687,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.Delete@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document, so a clean-up step can run twice.",
+   "description": "Deletes a TimeLiner task together with its subtasks. Returns false (and changes nothing) when the task is not in the document or was already removed by an earlier delete in the same run, so a clean-up step can run twice and a list holding a task and its subtasks can be deleted whole (set TimeLiner.Tasks to order \"children first\" for that).",
    "tags": [
     "timeliner",
     "task",
@@ -18519,13 +18724,16 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.Info@Autodesk.Navisworks.Api.Timeliner.TimelinerTask",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Name, id, planned and actual dates, task type and progress of a TimeLiner task.",
+   "description": "Name, id, planned and actual dates, task type and progress of a TimeLiner task, the name of its parent task (empty for a top-level task) and its depth (0 for a top-level task, 1 for a subtask ...).",
    "tags": [
     "timeliner",
     "task",
     "info",
     "dates",
-    "schedule"
+    "schedule",
+    "parent",
+    "depth",
+    "hierarchy"
    ],
    "inputs": [
     {
@@ -18574,9 +18782,19 @@
      "name": "progress",
      "type": "number",
      "description": ""
+    },
+    {
+     "name": "parent",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "depth",
+     "type": "integer",
+     "description": ""
     }
    ],
-   "returns": "Name, id, planned/actual dates, task type and progress."
+   "returns": "Name, id, planned/actual dates, task type, progress, the parent task's name and the depth in the hierarchy."
   },
   {
    "name": "TimelinerTask.Items",
@@ -18615,10 +18833,10 @@
   },
   {
    "name": "TimelinerTask.SetActual",
-   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetActual@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime?,System.DateTime?,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Sets a task's ACTUAL start and end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan.",
+   "description": "Sets a task's ACTUAL start and/or end dates (the planned dates are untouched; use TimelinerTask.SetDates for those) — record what happened on site next to the plan. A date you leave unwired is kept as it is, so \"started today, end not known yet\" is just the start. With neither date the node changes nothing and shows a warning. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",
@@ -18639,12 +18857,14 @@
     {
      "name": "start",
      "type": "datetime",
-     "description": "Actual start date."
+     "description": "Actual start date; leave it unwired to keep the task's actual start as it is.",
+     "default": "null"
     },
     {
      "name": "end",
      "type": "datetime",
-     "description": "Actual end date."
+     "description": "Actual end date; leave it unwired to keep the task's actual end as it is (a task that has started and not finished).",
+     "default": "null"
     },
     {
      "name": "document",
@@ -18667,7 +18887,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerNodes.SetDates@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,System.DateTime,System.DateTime,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Updates a task's planned start/end dates in place — bulk schedule edits without a re-import.",
+   "description": "Updates a task's planned start/end dates in place — bulk schedule edits without a re-import. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",
@@ -18713,7 +18933,7 @@
    "id": "CamelGraph.Navisworks.TimeLiner.TimelinerProgressNodes.SetProgress@Autodesk.Navisworks.Api.Timeliner.TimelinerTask,double,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.TimeLiner",
-   "description": "Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages.",
+   "description": "Sets a task's percent complete (0-100; anything outside is clamped) — update progress from a site report in bulk. Lace over tasks and percentages. Over a list that holds tasks together with their subtasks, set TimeLiner.Tasks to order \"children first\".",
    "tags": [
     "timeliner",
     "task",
@@ -19236,10 +19456,10 @@
   },
   {
    "name": "SavedViewpoint.Apply",
-   "id": "CamelGraph.Navisworks.ViewpointNodes.Apply@Autodesk.Navisworks.Api.SavedViewpoint,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointNodes.Apply@Autodesk.Navisworks.Api.SavedViewpoint,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Makes a saved viewpoint the current view (camera, plus any saved overrides).",
+   "description": "Makes a saved viewpoint the current view (camera, plus any saved overrides). Over a list of viewpoints it applies each in turn, leaving the last one on screen; to take a picture of each use Export.ViewpointImage with the viewpoints wired to its own 'viewpoint' input. Wire the output of the node that must run before this one into 'after'.",
    "tags": [
     "viewpoint",
     "view",
@@ -19252,6 +19472,12 @@
      "name": "viewpoint",
      "type": "SavedViewpoint",
      "description": "The saved viewpoint to apply."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the view changes when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -19274,19 +19500,21 @@
    "id": "CamelGraph.Navisworks.ViewpointNodes.ByName@string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Finds a saved viewpoint by its display name (searches folders too).",
+   "description": "Finds a saved viewpoint by its display name (searches folders too). When several viewpoints share the name the first one in the Saved Viewpoints window is used and the node shows a warning; give the folder path as the name (\"Reviews/Week 12/Level 1\") to choose one exactly. Read again on every run.",
    "tags": [
     "viewpoint",
     "view",
     "byname",
     "find",
-    "camera"
+    "camera",
+    "path",
+    "folder"
    ],
    "inputs": [
     {
      "name": "name",
      "type": "string",
-     "description": "The viewpoint's display name."
+     "description": "The viewpoint's display name, or its folder path and name such as \"Reviews/Week 12/Level 1\"."
     },
     {
      "name": "document",
@@ -19309,7 +19537,7 @@
    "id": "CamelGraph.Navisworks.ViewpointNodes.CopyOverrides@object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Copies the appearance the way one saved view looks — its colour, transparency and hidden-item overrides — onto another saved view, WITHOUT changing that view's camera. Apply one view's highlighting scheme to many others in one graph. Both views must have their overrides baked in (Viewpoint.SaveWithOverrides).",
+   "description": "Copies the appearance the way one saved view looks — its colour, transparency and hidden-item overrides — onto another saved view, WITHOUT changing that view's camera. Apply one view's highlighting scheme to many others in one graph: a list of target views is handled one view at a time. Both views must have their overrides baked in (Viewpoint.Save with bakeOverrides on).",
    "tags": [
     "viewpoint",
     "view",
@@ -19350,10 +19578,10 @@
   },
   {
    "name": "SavedViewpoint.Delete",
-   "id": "CamelGraph.Navisworks.ViewpointNodes.Delete@string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointNodes.Delete@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Deletes a saved viewpoint by name (searches folders too). Returns false when absent — safe for clean re-runs of batch generation.",
+   "description": "Deletes a saved viewpoint: wire the viewpoint itself (so exactly that one goes, whatever its folder), or its name, or its folder path and name (\"Reviews/Week 12/Level 1\"). A list deletes one viewpoint per entry. A name shared by several viewpoints deletes the first one in the tree and shows a warning. Returns false when there is no such viewpoint, so a clean-up step can run twice.",
    "tags": [
     "viewpoint",
     "view",
@@ -19363,9 +19591,9 @@
    ],
    "inputs": [
     {
-     "name": "name",
-     "type": "string",
-     "description": "The viewpoint's display name (folders are searched too)."
+     "name": "viewpoint",
+     "type": "any",
+     "description": "The saved viewpoint (for example from Viewpoints.InFolder), or its name or folder path and name such as \"Reviews/Week 12/Level 1\"."
     },
     {
      "name": "document",
@@ -19378,7 +19606,7 @@
     {
      "name": "deleted",
      "type": "boolean",
-     "description": "True when a viewpoint was deleted; false when no viewpoint has that name."
+     "description": "True when a viewpoint was deleted; false when there is no such viewpoint."
     }
    ],
    "returns": ""
@@ -19388,7 +19616,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.Duplicate@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given.",
+   "description": "Duplicates a saved viewpoint in its folder, copying its camera and any baked appearance overrides. Names the copy \"<name> copy\" unless newName is given. A list of viewpoints makes one copy of each.",
    "tags": [
     "viewpoint",
     "view",
@@ -19429,7 +19657,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.Folder@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "The folder containing a saved viewpoint: its path as \"A/B\" (\"\" for top-level viewpoints) and the folder itself — drives folder-based status workflows.",
+   "description": "The folder containing a saved viewpoint: its path as \"A/B\" (\"\" for top-level viewpoints) and the folder itself — drives folder-based status workflows. A list of viewpoints gives one path and one folder per viewpoint. Read again on every run.",
    "tags": [
     "viewpoint",
     "view",
@@ -19540,7 +19768,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.MoveToFolder@object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Moves a saved viewpoint into a folder (appended at the end). A viewpoint already in the folder is left alone, so re-runs are clean.",
+   "description": "Moves a saved viewpoint into a folder (appended at the end). A viewpoint already in the folder is left alone, so re-runs are clean. A list of viewpoints moves each one into the folder; a list of folders pairs with the viewpoints one to one.",
    "tags": [
     "viewpoint",
     "view",
@@ -19608,7 +19836,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.Rename@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Renames a saved viewpoint (accepts the viewpoint or its current name; searches folders too). Batch-rename via lacing.",
+   "description": "Renames a saved viewpoint (accepts the viewpoint, its current name or a folder path and name such as \"Reviews/Week 12/Level 1\"; searches folders too). Batch-rename by wiring a list of viewpoints and a list of new names: each viewpoint gets the new name at the same position.",
    "tags": [
     "viewpoint",
     "view",
@@ -19645,10 +19873,10 @@
   },
   {
    "name": "SavedViewpoint.Update",
-   "id": "CamelGraph.Navisworks.ViewpointExtraNodes.Update@Autodesk.Navisworks.Api.SavedViewpoint,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointExtraNodes.Update@Autodesk.Navisworks.Api.SavedViewpoint,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Re-captures the current view into an existing saved viewpoint — the UI's \"Update\" — keeping its name, folder and place in the list. Set the camera first (Camera.LookAt, Camera.ZoomToItems, Camera.SetStandardView), then update the view; compare Viewpoint.SaveCurrent, which replaces a view by name with a new one.",
+   "description": "Re-captures the current view into an existing saved viewpoint — the UI's \"Update\" — keeping its name, folder and place in the list. Set the camera first (Camera.LookAt, Camera.ZoomToItems, Camera.SetStandardView) and wire the output of the last of those nodes into 'after', because the view is read when this node runs. Compare Viewpoint.Save, which replaces a view by name with a new one.",
    "tags": [
     "viewpoint",
     "view",
@@ -19664,6 +19892,12 @@
      "name": "viewpoint",
      "type": "SavedViewpoint",
      "description": "The saved viewpoint to refresh (or wire it by name through SavedViewpoint.ByName)."
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the view is read when this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
     },
     {
      "name": "document",
@@ -19682,67 +19916,49 @@
    "returns": ""
   },
   {
-   "name": "Viewpoint.SaveCurrent",
-   "id": "CamelGraph.Navisworks.ViewpointNodes.SaveCurrent@string,Autodesk.Navisworks.Api.Document",
+   "name": "Viewpoint.Save",
+   "id": "CamelGraph.Navisworks.ViewpointNodes.Save@string,string,bool,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Saves the current view as a new saved viewpoint. An existing top-level viewpoint with the same name is replaced.",
+   "description": "Saves the current view as a saved viewpoint in the Saved Viewpoints window. folder files it in a folder (a name, or a path such as \"Reviews/Week 12\"; folders that do not exist are created); leave it empty for the top level. A viewpoint with the same name in that folder is replaced, so running the graph again updates it instead of piling up. Turn bakeOverrides on to save the temporary colour, transparency and hidden-item overrides (Appearance.OverrideColorTemporary and friends) with the camera, so recalling the viewpoint restores that exact look; off saves the camera only. The view is read when this node runs: set the camera and the overrides first and wire the last of those nodes into 'after'.",
    "tags": [
     "viewpoint",
     "view",
     "save",
     "capture",
-    "camera"
-   ],
-   "inputs": [
-    {
-     "name": "name",
-     "type": "string",
-     "description": "Display name for the new viewpoint."
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "viewpoint",
-     "type": "SavedViewpoint",
-     "description": "The stored saved viewpoint."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "Viewpoint.SaveWithOverrides",
-   "id": "CamelGraph.Navisworks.ViewpointNodes.SaveWithOverrides@string,string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Viewpoints",
-   "description": "Saves the current view AND the current temporary color/transparency/hidden overrides into the viewpoint (Navisworks CaptureRuntimeOverrides) — so recalling it restores that exact look, frozen as created. Unlike Viewpoint.SaveCurrent (camera only), each view keeps its own appearance. Use with Appearance.OverrideColorTemporary / OverrideTransparencyTemporary. An existing same-named viewpoint is replaced.",
-   "tags": [
-    "viewpoint",
-    "view",
-    "save",
+    "camera",
     "overrides",
     "appearance",
-    "capture",
     "isolate",
     "color",
-    "freeze"
+    "freeze",
+    "folder",
+    "saved viewpoint",
+    "savecurrent",
+    "savewithoverrides"
    ],
    "inputs": [
     {
      "name": "name",
      "type": "string",
-     "description": "Display name for the new viewpoint."
+     "description": "Display name for the viewpoint."
     },
     {
-     "name": "folderName",
+     "name": "folder",
      "type": "string",
-     "description": "Viewpoint folder to file it under (null/empty stores it at the top level).",
+     "description": "Where to file it: empty for the top level, a folder name, or a path such as \"Reviews/Week 12\". Folders that do not exist are created.",
+     "default": "null"
+    },
+    {
+     "name": "bakeOverrides",
+     "type": "boolean",
+     "description": "True saves the temporary colour, transparency and hidden-item overrides with the camera; false saves the camera only.",
+     "default": "false"
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the view is read when this node runs, and the engine does not order nodes that share no wire.",
      "default": "null"
     },
     {
@@ -19763,10 +19979,10 @@
   },
   {
    "name": "Viewpoint.VisibleItems",
-   "id": "CamelGraph.Navisworks.ViewpointVisibilityNodes.VisibleItems@object,object,bool,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointVisibilityNodes.VisibleItems@object,object,bool,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Checks which of the given items a viewpoint can see (bounding box vs the camera frustum). Feed it a list of items, a selection/search set, a set name or one item; the viewpoint input accepts a saved viewpoint, a viewpoint name, or nothing for the current view. Note: this is a framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.",
+   "description": "Checks which of the given items a viewpoint can see (bounding box vs the camera frustum). Feed it a list of items, a selection/search set, a set name or one item; the viewpoint input accepts a saved viewpoint, a viewpoint name, or nothing for the current view, which is read when the node runs (wire the node that sets the camera into 'after'). A list of viewpoints runs the test once per viewpoint. Note: this is a framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.",
    "tags": [
     "viewpoint",
     "visible",
@@ -19776,7 +19992,8 @@
     "view",
     "sees",
     "inview",
-    "mask"
+    "mask",
+    "saved viewpoint"
    ],
    "inputs": [
     {
@@ -19795,6 +20012,12 @@
      "type": "boolean",
      "description": "True requires an item's whole bounding box inside the view; false (default) counts partly visible items.",
      "default": "false"
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from (matters when the viewpoint is left empty and the current camera is tested).",
+     "default": "null"
     },
     {
      "name": "document",
@@ -19833,34 +20056,11 @@
    "returns": "visibleItems / outsideItems split, a boolean mask over the input order, whether anything is visible, and a diagnostic report."
   },
   {
-   "name": "ViewpointPackageFile.Parse",
-   "id": "CamelGraph.Nodes.Portable.ViewpointPackageFile.Parse@string",
-   "assembly": "CamelGraph.Nodes",
-   "category": "Navisworks.Viewpoints",
-   "description": "Parses a package from JSON with node-friendly errors: malformed text and files written by a newer CamelGraph both fail with a message that says what to do, never a raw serializer stack trace.",
-   "tags": [],
-   "inputs": [
-    {
-     "name": "json",
-     "type": "string",
-     "description": ""
-    }
-   ],
-   "outputs": [
-    {
-     "name": "result",
-     "type": "ViewpointPackageFile",
-     "description": ""
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Viewpoints.All",
    "id": "CamelGraph.Navisworks.ViewpointNodes.All@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "All saved viewpoints in a document, including those inside folders.",
+   "description": "All saved viewpoints in a document, including those inside folders. Read again on every run, so a viewpoint added or removed since the last run is seen.",
    "tags": [
     "viewpoints",
     "views",
@@ -19887,17 +20087,19 @@
   },
   {
    "name": "Viewpoints.FromClashResults",
-   "id": "CamelGraph.Navisworks.ViewpointNodes.FromClashResults@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointNodes.FromClashResults@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints",
-   "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash and named after the result — the clash-triage staple. Existing same-named viewpoints in the folder are replaced.",
+   "description": "Batch-generates one saved viewpoint per clash result, camera aimed at the clash — the clash-triage staple. Existing same-named viewpoints in the folder are replaced. Navisworks numbers results per test (Clash1, Clash2 ... in every test), so when the results come from more than one test each viewpoint is named \"Test - Clash1\" and none replaces another; nameFormat sets the name yourself ({test}, {name}, {index}). Names that would still repeat are numbered (2), (3) and the node shows a warning.",
    "tags": [
     "viewpoints",
     "clash",
     "results",
     "batch",
     "generate",
-    "triage"
+    "triage",
+    "name",
+    "folder"
    ],
    "inputs": [
     {
@@ -19908,8 +20110,14 @@
     {
      "name": "folderName",
      "type": "string",
-     "description": "Viewpoint folder to file them under (null/empty stores them at the top level).",
+     "description": "Viewpoint folder to file them under: a name or a path such as \"Clash Views/Week 12\" (null/empty stores them at the top level).",
      "default": "\"Clash Views\""
+    },
+    {
+     "name": "nameFormat",
+     "type": "string",
+     "description": "How to name each viewpoint, with {name} (the result's name), {test} (its clash test) and {index} (its position in the list, from 1). Empty names it after the result, with the test in front when the results come from more than one test.",
+     "default": "\"\""
     },
     {
      "name": "document",
@@ -19932,7 +20140,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTransferNodes.ExportFile@string,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints.Files",
-   "description": "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave viewpoints empty to export them all, or wire specific viewpoints, folders or names. Element overrides are not carried (they only exist relative to the source model's items).",
+   "description": "Exports saved viewpoints — camera, section box and folder location — to a portable JSON package for Viewpoints.ImportFile to rebuild in ANOTHER model, even one in different units. Leave viewpoints empty to export them all, or wire specific viewpoints, folders or names. Element overrides are not carried (they only exist relative to the source model's items). A relative file path is next to the graph file; a folder gets a camelgraph-viewpoints.json inside it.",
    "tags": [
     "viewpoints",
     "export",
@@ -19949,7 +20157,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Where to write the package: a .json file path, or a folder (a camelgraph-viewpoints.json is created inside). Relative paths land in Documents."
+     "description": "Where to write the package: a .json file path, or a folder (a camelgraph-viewpoints.json is created inside). A relative path is next to the graph file."
     },
     {
      "name": "viewpoints",
@@ -20085,11 +20293,60 @@
    "returns": ""
   },
   {
+   "name": "Viewpoints.DeleteFolder",
+   "id": "CamelGraph.Navisworks.ViewpointTreeNodes.DeleteFolder@object,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Viewpoints.Folders",
+   "description": "Deletes a Saved Viewpoints folder together with every viewpoint and sub-folder in it, or with contentsOnly on empties the folder and keeps it — the clean-up before Viewpoints.FromClashResults fills \"Clash Views\" again. Accepts the folder, its name or a path such as \"Reviews/Week 12\". Returns deleted = false when there is no such folder (or it is already empty), so a clean-up step can run twice. A list of folders deletes one folder per entry. This cannot be undone from the graph.",
+   "tags": [
+    "viewpoints",
+    "folder",
+    "delete",
+    "remove",
+    "clean",
+    "empty",
+    "clear",
+    "organize"
+   ],
+   "inputs": [
+    {
+     "name": "folder",
+     "type": "any",
+     "description": "The folder (for example from Viewpoints.CreateFolder), its name, or a path such as \"Reviews/Week 12\"."
+    },
+    {
+     "name": "contentsOnly",
+     "type": "boolean",
+     "description": "True removes everything inside the folder and keeps the folder; false removes the folder with everything in it.",
+     "default": "false"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "deleted",
+     "type": "boolean",
+     "description": ""
+    },
+    {
+     "name": "viewpointCount",
+     "type": "integer",
+     "description": ""
+    }
+   ],
+   "returns": "Whether anything was deleted, and how many saved viewpoints were inside (nested folders included)."
+  },
+  {
    "name": "Viewpoints.DuplicateFolder",
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.DuplicateFolder@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints.Folders",
-   "description": "Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused, so re-runs top up rather than pile up.",
+   "description": "Duplicates a Saved Viewpoints folder — a new folder (created as a sibling) with copies of every viewpoint and nested sub-folder inside. An existing same-named target folder is reused and topped up: a viewpoint that is already in it under the same name is replaced by the copy, a missing one is added, so re-runs do not pile up. The new name must differ from the source folder's own name. A list of folders and a list of new names duplicate one folder per name.",
    "tags": [
     "viewpoints",
     "folder",
@@ -20130,7 +20387,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.InFolder@object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints.Folders",
-   "description": "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object (Viewpoints.CreateFolder / SavedViewpoint.Folder), a folder NAME, or a path like \"Reviews/Week 12\" to pick between same-named folders; leave it empty for the top level. Nested subfolders are included unless recursive is off. Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage, Viewpoints.ExportFile or a Loop.Item.",
+   "description": "All saved viewpoints inside a folder, in Saved Viewpoints window order. Give it a folder object (Viewpoints.CreateFolder / SavedViewpoint.Folder), a folder NAME, or a path like \"Reviews/Week 12\" to pick between same-named folders; leave it empty for the top level. Nested subfolders are included unless recursive is off. A list of folders gives one list of viewpoints per folder. Read again on every run. Feeds straight into SavedViewpoint.Apply, Export.ViewpointImage (wire the viewpoints to its own viewpoint input for a picture of each), Viewpoints.ExportFile or a Loop.Item.",
    "tags": [
     "viewpoints",
     "folder",
@@ -20190,7 +20447,7 @@
    "id": "CamelGraph.Navisworks.ViewpointTreeNodes.RenameFolder@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints.Folders",
-   "description": "Renames a Saved Viewpoints folder (accepts the folder or its current name; searches nested folders too).",
+   "description": "Renames a Saved Viewpoints folder (accepts the folder, its current name or a path such as \"Reviews/Week 12\"; searches nested folders too). A list of folders and a list of new names rename one folder per name.",
    "tags": [
     "viewpoints",
     "folder",
@@ -20227,10 +20484,10 @@
   },
   {
    "name": "Viewpoints.SortFolder",
-   "id": "CamelGraph.Navisworks.ViewpointTreeNodes.SortFolder@object,bool,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ViewpointTreeNodes.SortFolder@object,bool,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Viewpoints.Folders",
-   "description": "Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z) — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort before/among viewpoints by name.",
+   "description": "Sorts a Saved Viewpoints folder's contents alphabetically by name (A→Z), ignoring case — so you never drag-and-drop views into order again. Pass no folder to sort the top level; set recursive to sort nested folders too. Folders sort among the viewpoints by name. Turn numeric on to put Clash2 before Clash10 (letter by letter, \"Clash10\" comes first).",
    "tags": [
     "viewpoints",
     "folder",
@@ -20238,7 +20495,9 @@
     "alphabetical",
     "order",
     "organize",
-    "arrange"
+    "arrange",
+    "numeric",
+    "natural"
    ],
    "inputs": [
     {
@@ -20251,6 +20510,12 @@
      "name": "recursive",
      "type": "boolean",
      "description": "True to also sort every nested folder.",
+     "default": "false"
+    },
+    {
+     "name": "numeric",
+     "type": "boolean",
+     "description": "True sorts runs of digits by their number (Clash2 before Clash10); false sorts letter by letter (Clash10 before Clash2).",
      "default": "false"
     },
     {

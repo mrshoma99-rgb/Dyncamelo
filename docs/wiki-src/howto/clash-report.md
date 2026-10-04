@@ -33,8 +33,7 @@ Goal: write an HTML page that shows, for each clash test, how many results are N
 A self-contained HTML page with a light and a dark style, ready to print or paste into an e-mail. A line in a section that starts with `# ` becomes a heading, so you can add text sections above or below the table. Wire several tables or texts into the one `sections` socket; they appear top to bottom in wire order.
 
 !!! tip "Quick alternatives"
-    * `Export.ClashReportHtml` (*Navisworks ▸ Export*) writes a single-file HTML report with one section per test and one row per result, and can embed a snapshot of each result (`includeImages`).
-    * `Export.ClashReportCsv` writes the same detail as a CSV file you can open in Excel.
+    * `Export.ClashReport` (*Navisworks ▸ Export*) with an `.html` path writes a single-file HTML report with one section per test and one row per result, and can embed a snapshot of each result (Advanced: `includeImages`). With a `.csv` path it writes the same detail as a file you can open in Excel.
     * `Report.Markdown` builds the same report as Markdown for Teams or an issue tracker.
 
 !!! note "Keep a weekly history"
