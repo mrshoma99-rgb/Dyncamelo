@@ -223,7 +223,7 @@ The full statement lives in the [plan, §7](IMPLEMENTATION_PLAN.md#7-threading-m
 2. The engine is **synchronous on the calling thread**: no worker threads, no parallel node execution.
 3. The editor triggers runs from its WPF **dispatcher thread, which is the Navisworks main thread** for a docked pane — so Navisworks nodes execute on the correct thread *by construction*, with no marshalling layer.
 4. Responsiveness comes from **cancellation between nodes** and the Automatic-mode **coalescing debounce**, not from background threads.
-5. Navisworks **write nodes run inside a transaction/undo scope** owned by the node host in `CamelGraph.Navisworks` (one undo entry per run); all mutations go through the documented `Document*` edit APIs so the host UI stays in sync.
+5. Navisworks **write nodes** change the model through the documented `Document*` edit APIs, so the host UI stays in sync. There is **no run-level undo scope**: the node host opens no transaction around a run (only the clash nodes open one, around their own edit), so Navisworks records an undo step per modifying call, where it records one at all, and a node mapped over a list makes one call per element. One run is therefore not one undo step. A host-owned scope around the whole run is a deferred idea ([plan, §7 rule 6](IMPLEMENTATION_PLAN.md#7-threading-model)); until then no document or message may promise it.
 6. Debug builds **assert the expected thread** at the Navisworks node-host boundary.
 
 ## 8. Extension points
