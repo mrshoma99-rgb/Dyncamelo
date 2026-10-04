@@ -68,13 +68,25 @@ internal static class AboutDialog
         }
 
         var titles = new StackPanel();
-        titles.Children.Add(new TextBlock
+        // The name in the pixel letters of the BIMCamel wordmark (drawn at four pixels a cell, shown at two); plain text if the file is missing.
+        var wordmark = LoadLogo("camelgraph_wordmark.png");
+        if (wordmark != null)
         {
-            Text = "CamelGraph",
-            Foreground = Paper,
-            FontSize = 20,
-            FontWeight = FontWeights.SemiBold,
-        });
+            var name = new Image { Source = wordmark, Width = 240, Height = 38, HorizontalAlignment = HorizontalAlignment.Left };
+            RenderOptions.SetBitmapScalingMode(name, BitmapScalingMode.HighQuality);
+            System.Windows.Automation.AutomationProperties.SetName(name, "CamelGraph");
+            titles.Children.Add(name);
+        }
+        else
+        {
+            titles.Children.Add(new TextBlock
+            {
+                Text = "CamelGraph",
+                Foreground = Paper,
+                FontSize = 20,
+                FontWeight = FontWeights.SemiBold,
+            });
+        }
         titles.Children.Add(new TextBlock
         {
             Text = "Visual programming for Autodesk Navisworks — wire nodes, no code.",

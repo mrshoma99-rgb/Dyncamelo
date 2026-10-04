@@ -1,0 +1,326 @@
+<!-- Styles the floating panels share (the node library, the Script Player), so both read as one family with the BIMCamel site: a rounded
+     card, round icon buttons, a vertical edge tab, section cards, a gradient main button. Every colour is a DynamicResource on a palette
+     brush, looked up where the style is used, so a view merges CamelGraphDark.xaml first and this file after it. The file has no
+     StaticResource to the theme: a merged dictionary cannot see its neighbours at load time. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===== Surfaces ===== -->
+
+    <!-- A panel that floats on the canvas: rounded, with a hairline border. Put Dyc.Panel.CardShadow behind it for the shadow. -->
+    <Style x:Key="Dyc.Panel.Card" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Dyc.PanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- The shadow of a card, as an empty rounded border of its own behind it. An Effect on the card itself would render the tree and the
+         scroll viewer it holds through the effect on every change. -->
+    <Style x:Key="Dyc.Panel.CardShadow" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Dyc.PanelBrush}" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="Black" Opacity="0.22" BlurRadius="18" ShadowDepth="4" Direction="270" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A group of controls set apart inside a panel: a bordered rounded block one step lighter than the panel. -->
+    <Style x:Key="Dyc.Panel.Section" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Dyc.NodeBodyBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- A tinted note in a panel (a status message, the progress of a run). -->
+    <Style x:Key="Dyc.Panel.Banner" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.SelectionBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- The tinted square behind a glyph in a panel header or a selector. -->
+    <Style x:Key="Dyc.Panel.IconWell" TargetType="{x:Type Border}">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- The small bold label that names a section. WPF cannot space the letters, and cannot upper-case a TextBlock, so write the text in capitals. -->
+    <Style x:Key="Dyc.Panel.Eyebrow" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <!-- ===== Buttons ===== -->
+
+    <!-- A round icon button. Put a Path in it and bind the Path's Fill to the button's Foreground so the glyph follows hover. -->
+    <Style x:Key="Dyc.Panel.IconButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid Background="Transparent" SnapsToDevicePixels="True">
+                        <Ellipse x:Name="Chrome"
+                                 Fill="{TemplateBinding Background}"
+                                 Stroke="{TemplateBinding BorderBrush}"
+                                 StrokeThickness="1" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Fill" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="Stroke" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter TargetName="Chrome" Property="StrokeThickness" Value="2" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Fill" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A vertical tab glued to the edge of a panel or of the canvas, label running along it. The side it is glued to stays square and the free
+         side rounds; the side follows HorizontalAlignment (Right: glued to a right edge, label reads downwards; Left: label reads upwards).
+         Write the label in capitals. It is 20 px wide, so a list beside it can leave exactly that much room. -->
+    <Style x:Key="Dyc.Panel.EdgeTab" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1,1,0,1"
+                            CornerRadius="8,0,0,8"
+                            Padding="2,10"
+                            SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" Opacity="0.25" BlurRadius="8" ShadowDepth="1" Direction="270" />
+                        </Border.Effect>
+                        <ContentPresenter x:Name="Label" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <ContentPresenter.LayoutTransform>
+                                <RotateTransform Angle="90" />
+                            </ContentPresenter.LayoutTransform>
+                        </ContentPresenter>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HorizontalAlignment" Value="Left">
+                            <Setter TargetName="Chrome" Property="CornerRadius" Value="0,8,8,0" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="0,1,1,1" />
+                            <Setter TargetName="Label" Property="LayoutTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="270" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.8" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A bordered rounded button with a text label (a small one: Copy). -->
+    <Style x:Key="Dyc.Panel.GhostButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.PanelBorderBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The same, square, for a glyph beside the main button. Bind the Path's Fill to the button's Foreground. -->
+    <Style x:Key="Dyc.Panel.GhostIconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource Dyc.Panel.GhostButton}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.SubtleTextBrush}" />
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- The main button of a panel: the palette's main-action colour with a shade towards the lower right, 10 px corners, bold text.
+         The shade is a black overlay and the sheen a white one, so any palette's colour works under them. (The shade starts at transparent
+         black: the named Transparent is transparent white and would lighten the middle of the gradient.) -->
+    <Style x:Key="Dyc.Panel.PrimaryButton" TargetType="{x:Type Button}">
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.OnPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid SnapsToDevicePixels="True">
+                        <Border x:Name="Chrome"
+                                Background="{DynamicResource Dyc.PrimaryBrush}"
+                                CornerRadius="10"
+                                MinHeight="40">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="12" ShadowDepth="3" Direction="270" />
+                            </Border.Effect>
+                        </Border>
+                        <Border x:Name="Shade" CornerRadius="10" Opacity="0.28" IsHitTestVisible="False">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#00000000" Offset="0" />
+                                    <GradientStop Color="Black" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Border x:Name="Sheen" CornerRadius="10" Background="White" Opacity="0" IsHitTestVisible="False" />
+                        <Border x:Name="FocusRing"
+                                CornerRadius="12"
+                                Margin="-3"
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource Dyc.AccentBrush}"
+                                IsHitTestVisible="False"
+                                Visibility="Collapsed" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.14" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="FocusRing" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Sheen" Property="Background" Value="Black" />
+                            <Setter TargetName="Sheen" Property="Opacity" Value="0.2" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Fields ===== -->
+
+    <!-- A full-width search field: tall, rounded, with room at the left for a search glyph and at the right for a clear button, which the
+         view lays over it (a TextBox applies its Padding to the text itself). -->
+    <Style x:Key="Dyc.Panel.SearchBox" TargetType="{x:Type TextBox}">
+        <Setter Property="Background" Value="{DynamicResource Dyc.InputBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Dyc.InputBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CaretBrush" Value="{DynamicResource Dyc.TextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="34,0,30,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.NodeBorderBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Dyc.AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

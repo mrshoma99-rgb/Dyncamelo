@@ -360,7 +360,7 @@ internal static class EditorScenes
     private static WikiPictures LibrarySearch(WikiContext ctx)
     {
         var rig = EditorRig.Open(ctx, WindowWidth, WindowHeight, null);
-        var panel = (FrameworkElement)rig.Control.FindName("LibraryPanel");
+        var panel = (FrameworkElement)rig.Control.FindName("LibraryCard");
         rig.Settle();
         var panelRect = panel.TransformToAncestor(rig.Control).TransformBounds(new Rect(0d, 0d, panel.ActualWidth, panel.ActualHeight));
 

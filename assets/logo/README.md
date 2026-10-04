@@ -1,8 +1,9 @@
 # CamelGraph logo
 
-The mark is two node ends, cut by the edge of the icon, each with a ring socket, and one wire between them. It is drawn
-from a single geometry in `tools/logo/build_logo.py`; every file in this folder comes from that script, so change the
-script, not the files.
+The mark is two node ends, cut by the edge of the icon, each with a ring socket, and one wire between them: the wire
+climbs out of the low socket on the left, humps over and drops into the high socket on the right with a small dip (the
+camel is in the curve). It is drawn from a single geometry in `tools/logo/build_logo.py`; every file in this folder comes
+from that script, so change the script, not the files.
 
 | Use | File |
 |---|---|
@@ -18,6 +19,8 @@ script, not the files.
 | Round avatars and badges | `svg/camelgraph-mark-round.svg`, `social/avatar-round-800.png` |
 | iOS and Android home-screen icons | `png/camelgraph-mark-square-180.png` (the OS rounds it), `png/camelgraph-mark-maskable-192.png` and `-512.png` |
 | Autodesk App Store | `png/camelgraph-mark-80.png`, `-120.png`, `-256.png` |
+| The Player (a play triangle made of two wires that pass over and under a vertical wire with ring sockets) | `svg/camelgraph-player.svg` (plate), `-player-on-dark.svg`, `-player-on-light.svg`, `-player-light.svg`, `-player-mono-plate.svg` (the ribbon button); PNGs `png/camelgraph-player-<variant>-<px>.png`, the small drawing up to 32 px (48 px without a plate) |
+| The name alone, in pixel letters | `svg/camelgraph-wordmark-on-dark.svg` (white), `-on-light.svg` (dark); PNGs `png/camelgraph-wordmark-on-dark-240.png`, `-480`, `-960` (a cell is four pixels at 480) |
 | Name and mark together | `svg/camelgraph-lockup-on-dark.svg`, `-on-light.svg`; stacked: `camelgraph-lockup-stacked-on-dark.svg`, `-on-light.svg` |
 | Social posts and previews | `social/og-1200x630.png`, `github-social-1280x640.png`, `linkedin-banner-1584x396.png`, `x-header-1500x500.png`, `post-square-1080.png` |
 
@@ -25,7 +28,7 @@ script, not the files.
 
 | | |
 |---|---|
-| Plate | `#0D0E11` (the editor's background) |
+| Plate | a diagonal wash from `#22356B` (deep blue, top left) to `#0A0C12` (near black, bottom right), never flat black. `#0D0E11` is the flat dark used for node ends on a light surface and for the one-colour icons |
 | Node ends | `#FFFFFF` (on a light plate `#0D0E11`) |
 | Wire and sockets | `#2E9BFF` on dark, `#1A73C5` on light (the editor's primary blue) |
 | Social background | `#0A1020` to `#15233F` with a faint grid |
@@ -36,9 +39,14 @@ script, not the files.
 * Below 48 px use the `-small` drawing; do not scale the standard one down.
 * Do not recolour the wire, stretch the mark, add a shadow or rotate it. Do not put the dark plate on a dark surface: use the plate-less
   mark for that background (light on dark, dark on light). The plate is for app icons, the store and the ribbon, where it is the icon's shape.
-* The name is set in Share Tech (SIL Open Font Licence 1.1), the face bimcamel.com uses for headings. The lock-up files contain
-  its outlines, not the font. The social images use Google Sans Flex (SIL OFL), also from bimcamel.com.
-* "CamelGraph" is the previous name. The mark replaced the old camel-on-a-plate logo everywhere in October 2026.
+* The name is set in pixel letters on the grid of the BIMCamel wordmark (`src/bimcamel-web/src/assets/logo-text.svg`): a cell
+  is a square, strokes are three cells, the capital is fifteen cells high. C, a, m, e and l are read from that wordmark cell by cell;
+  G, r, p and h are drawn in the same style (`tools/logo/pixel_font.py`). Show it at a whole number of pixels per cell (the editor
+  uses one pixel per cell in the header and two on the start screen). The small "by BIMCamel" line is Share Tech (SIL Open Font
+  Licence 1.1), the face bimcamel.com uses for body text; the lock-up files contain its outlines, not the font. The social
+  images use Google Sans Flex (SIL OFL), also from bimcamel.com.
+* The first CamelGraph mark (an S-shaped wire) was replaced by this one (the hump in the wire) the same month; the old
+  camel-on-a-plate logo of Dyncamelo is gone everywhere.
 
 ## Rebuilding
 

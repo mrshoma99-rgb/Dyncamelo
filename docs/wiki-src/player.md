@@ -4,7 +4,7 @@ The Script Player runs a saved script from a simple form, without opening the no
 
 It is made for the people who should use a tested script but should not have to edit one: a coordinator running a weekly check, or a colleague you have handed an audit script. The Player is a pane of its own, it does not load the editor, so it opens quickly and stays small.
 
-![The Script Player with a script chosen: the script bar, the form fields and the Run, Reset, Edit and File buttons.](../images/wiki-player-form.png)
+![The Script Player with a script chosen: the script card, the form fields and the Run, Reset, Edit and File buttons.](../images/wiki-player-form.png)
 
 !!! tip "Build a form step by step"
     [Give colleagues a form with the Script Player](howto/form-for-colleagues.md) makes a small graph and runs it from the Player.
@@ -18,9 +18,9 @@ Open a model first. Scripts that read or change the model work on whichever Navi
 
 ## Choosing a script
 
-The pane opens on a **script bar** that shows the name of the open script and the folder it is in.
+Under the header, the pane shows a **script card** with the name of the open script, the folder it is in and the script's description.
 
-1. Click the bar (or its chevron) to unfold the **list of scripts**. Until you have chosen one, the list stays unfolded.
+1. Click the card (or its chevron) to unfold the **list of scripts**. Until you have chosen one, the list stays unfolded.
 2. Click a script. It is chosen and the list folds away.
 
 In the list you can **type to filter** by part of a script's name or its folder. Press ++down++ to move from the search box into the list, ++enter++ to choose the highlighted script, and ++esc++ to fold the list. Choosing with ++enter++ puts the focus on **Run**, so pressing ++enter++ again runs the script. The **↻** button looks for scripts again after you add or change files.
@@ -29,7 +29,7 @@ Typing in the search box never closes the script you are working in and never lo
 
 ### Where scripts live
 
-The Player lists every `.dyc` file under **`Documents\CamelGraph\Scripts`**, including sub-folders (up to four levels deep). The list is grouped by folder, such as "Scripts ▸ Clash". To use scripts from somewhere else, such as a shared network folder, open **Script folders** at the bottom of the pane and choose **Add a folder…**. Each folder has an **Open** button to show it in Explorer, and a **✕** that takes it off the list without touching the files. The built-in folder cannot be removed.
+The Player lists every `.dyc` file under **`Documents\CamelGraph\Scripts`**, including sub-folders (up to four levels deep). The list is grouped by folder, such as "Scripts ▸ Clash". To use scripts from somewhere else, such as a shared network folder, click the folder button at the right of the header to show the **Script folders** card and choose **Add a folder…**. Each folder has an **Open** button to show it in Explorer, and a **✕** that takes it off the list without touching the files. The built-in folder cannot be removed.
 
 The list stops at 2000 scripts, and files or folders whose names start with `~` or `.` are ignored. If there are no scripts yet, the pane says to save a graph from the editor into the Scripts folder. See [Saving and opening scripts](saving-opening.md).
 
@@ -42,11 +42,11 @@ The Player builds the form from the script itself. It shows:
 
 Fields appear top to bottom in the order their nodes sit on the canvas, each labelled with the node's name. The fields are the same editors as on the canvas, only roomier: scrub a number, pick a colour, browse for a file. A text field wraps and grows with its text, so a long or multi-line value is never cut off. In a `String` input, ++enter++ starts a new line. A small **dot** beside a label marks a field you have changed from the value saved in the script, and **↺** puts that field back. If a script asks for nothing, the form says "This script asks for nothing — it just runs."
 
-If the script has a **description**, it is shown above the form.
+If the script has a **description**, it is shown on the script card, above the form.
 
 ### The buttons at the bottom
 
-The bar at the bottom stays in view however long the form is.
+The footer stays in view however long the form is. A short note appears above the buttons when there is something to say, such as the progress of a run. **Run** is the wide button; the other three are square buttons beside it (point at one to see its name).
 
 | Button | What it does |
 |---|---|
@@ -61,7 +61,7 @@ A Player run runs **every node of the script afresh**, because a script talks to
 
 ## Results
 
-After a run the Player shows a **results card**:
+After a run the Player shows a **Results** card:
 
 ![The Script Player after a run: the summary line, the Watch results and the Copy button.](../images/wiki-player-results.png)
 

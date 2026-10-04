@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/png/camelgraph-lockup-on-dark-1200.png">
+    <img alt="CamelGraph by BIMCamel" src="assets/logo/png/camelgraph-lockup-on-light-1200.png" width="520">
+  </picture>
+</p>
+
 # CamelGraph
 
 **Dynamo-style visual programming for Autodesk Navisworks.**

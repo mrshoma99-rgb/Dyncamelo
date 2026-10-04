@@ -258,7 +258,9 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
 
     private GridLength _libraryWidth = new GridLength(230d);
 
-    // The library column takes its width back where it left off; hidden, the column, its splitter and the panel are gone.
+    // The splitter column is the quiet gap between the library card and the canvas.
+    private const double LibraryGap = 8d;
+
     // The selection colours of the library tree are the theme's own brushes (the palette changes their Color in place), so the
     // selection follows a palette change. Written in XAML as a Binding with a DynamicResource Source, WPF rejected it — and only
     // when a library item was first selected, which is what closed Navisworks when a node was picked from the library.
@@ -271,14 +273,15 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
         resources[SystemColors.InactiveSelectionHighlightTextBrushKey] = (Brush)FindResource("Dyc.TextBrush");
     }
 
+    // The library column takes its width back where it left off; hidden, the column, its splitter and the card are gone.
     private void ApplyLibraryVisibility(bool visible)
     {
         if (visible)
         {
             LibraryColumn.MinWidth = 150d;
             LibraryColumn.Width = _libraryWidth;
-            SplitterColumn.Width = new GridLength(4d);
-            LibraryPanel.Visibility = Visibility.Visible;
+            SplitterColumn.Width = new GridLength(LibraryGap);
+            LibraryHost.Visibility = Visibility.Visible;
             LibrarySplitter.Visibility = Visibility.Visible;
         }
         else
@@ -291,7 +294,7 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
             LibraryColumn.MinWidth = 0d;
             LibraryColumn.Width = new GridLength(0d);
             SplitterColumn.Width = new GridLength(0d);
-            LibraryPanel.Visibility = Visibility.Collapsed;
+            LibraryHost.Visibility = Visibility.Collapsed;
             LibrarySplitter.Visibility = Visibility.Collapsed;
         }
     }
@@ -614,7 +617,7 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
     // menu bar itself, which becomes one button holding the same menus. The buttons and the logo never go. Everything is
     // decided from widths that do not depend on what is showing (the logo, the buttons, the menu bar's width measured while it
     // was a bar), so the layout cannot flicker between two states.
-    private const double WordmarkWidth = 96d;
+    private const double WordmarkWidth = 120d;
     private const double TitleMinimumWidth = 110d;
     private const double TitleMaximumWidth = 320d;
     private const double CompactMenuWidth = 36d;

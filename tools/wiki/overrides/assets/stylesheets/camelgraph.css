@@ -115,6 +115,13 @@
 [data-md-color-scheme="slate"] .dyc-sitemark--light { display: none; }
 [data-md-color-scheme="slate"] .dyc-sitemark--dark { display: block; }
 
+/* The name in the pixel letters of the BIMCamel wordmark, and "Wiki" after it in the site's own face. */
+.dyc-sitename__word { display: block; height: 1.1rem; width: auto; flex: none; image-rendering: pixelated; }
+.dyc-sitename__word--dark { display: none; }
+[data-md-color-scheme="slate"] .dyc-sitename__word--light { display: none; }
+[data-md-color-scheme="slate"] .dyc-sitename__word--dark { display: block; }
+.dyc-sitename__label { font-weight: 700; }
+
 /* The spacer: the colour toggle is the first thing pushed to the right. */
 .md-header__inner > .md-header__option:first-of-type,
 .md-header__inner > form.md-header__option:first-of-type { margin-left: auto; }
