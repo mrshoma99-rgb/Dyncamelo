@@ -48,7 +48,7 @@ After the run the Player shows a results card: a green or red dot with a summary
 
 ## If it does not work
 
-* The script is not in the list: save it in `Documents\CamelGraph\Scripts` or add its folder under **Script folders**, then press ↻.
+* The script is not in the list: save it in `Documents\CamelGraph\Scripts` or add its folder (the folder button in the header opens **Script folders**), then press ↻.
 * The Player says a node is not installed: the script cannot run until it is. See [A graph opens with a warning, or with missing nodes](../troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes).
 * The confirmation question appears: [that is a safety check, not an error](../troubleshooting.md#the-script-player-asks-me-to-confirm-a-script).
 

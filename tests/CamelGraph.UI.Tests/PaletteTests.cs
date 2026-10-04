@@ -133,7 +133,7 @@ public class PaletteDataTests
         var files = new[]
         {
             "src/CamelGraph.UI/Themes/CamelGraphDark.xaml", "src/CamelGraph.UI/Themes/Panels.xaml", "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml",
-            "src/CamelGraph.UI/Views/TextInputDialog.xaml",
+            "src/CamelGraph.UI/Views/PlayerControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml",
         };
         var keys = new HashSet<string>(PaletteCatalog.Keys);
         var bad = new List<string>();
@@ -164,7 +164,11 @@ public class PaletteDataTests
             "#FFFCE9A6", "#FFE6C766", "#FF3A3320",                         // the sticky-note yellow
         };
         var bad = new List<string>();
-        foreach (var file in new[] { "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml", "src/CamelGraph.UI/Themes/Panels.xaml" })
+        foreach (var file in new[]
+        {
+            "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml", "src/CamelGraph.UI/Views/PlayerControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml",
+            "src/CamelGraph.UI/Themes/Panels.xaml",
+        })
         {
             var text = File.ReadAllText(IoPath.Combine(root, file));
             foreach (Match m in Regex.Matches(text, @"#[0-9A-Fa-f]{6,8}\b"))
