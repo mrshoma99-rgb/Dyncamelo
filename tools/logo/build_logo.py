@@ -150,7 +150,9 @@ def lockup_svg(share_tech: pathlib.Path, *, dark_background: bool, stacked: bool
     """The mark with the name set in outlines: 'CamelGraph' and a small 'by BIMCamel'."""
     text = WHITE if dark_background else PLATE
     muted = "#9AA3AF" if dark_background else "#4B525C"
-    mark = mark_svg(size=120, edge="#2A2F38" if dark_background else None)
+    # no plate: light node ends on a dark background, dark ones on a light background
+    mark = mark_svg(size=120, plate=None, shape="none", node=WHITE if dark_background else PLATE,
+                    wire=BLUE if dark_background else BLUE_LIGHT)
     if stacked:
         name, w = text_path(share_tech, "CamelGraph", 64, 0, 0, 1.5)
         by, w2 = text_path(share_tech, "by BIMCamel", 22, 0, 0, 1.0)
@@ -181,7 +183,8 @@ def _bg(w: int, h: int) -> str:
 
 
 def _mark_nested(x: float, y: float, size: float) -> str:
-    return mark_svg(size=int(size)).replace("<svg ", f'<svg x="{x}" y="{y}" ', 1)
+    # the cards are dark, so the mark is the plate-less light one: a black plate would nearly vanish on the navy
+    return mark_svg(size=int(size), plate=None, shape="none").replace("<svg ", f'<svg x="{x}" y="{y}" ', 1)
 
 
 def _text(x, y, s, size, fill, weight=400, anchor="start", spacing=0, family="Google Sans Flex"):
