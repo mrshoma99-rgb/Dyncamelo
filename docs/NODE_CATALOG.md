@@ -454,8 +454,8 @@
 | `Clash.AllGroups` | document? | groups, names, testNames, counts | Every result group of every clash test in the document, as ONE flat list |
 | `Clash.GroupResults` | results, groupName, moveExisting?, document? | test, group, added, moved, skipped | Puts an explicit list of clash results into a named group in Clash Detective |
 | `Clash.GroupResultsByGridIntersection` | test, document? | test, groupCount | Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g |
-| `Clash.GroupResultsByLevel` | test, levelNames, levelElevations, document? | test, groupCount | Groups a test's results by nearest level below each clash point (wire your level names and elevations) |
-| `Clash.GroupResultsByProximity` | test, radius, document? | test, groupCount | Groups a test's results into clusters whose clash points lie within a radius of the cluster seed |
+| `Clash.GroupResultsByLevel` | test, levelNames, levelElevations, units?, document? | test, groupCount | Groups a test's results by nearest level below each clash point (wire your level names and elevations) |
+| `Clash.GroupResultsByProximity` | test, radius, units?, document? | test, groupCount | Groups a test's results into clusters whose clash points lie within a radius of the cluster seed |
 | `Clash.GroupResultsBySameItem` | test, useItem1?, document? | test, groupCount | Groups a test's results so every clash involving the same element lands in one group (named after the element) |
 | `Clash.GroupResultsByStatus` | test, document? | test, groupCount | Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) |
 | `ClashGroup.ByName` | test, groupName, document? | group, results, status, count | Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count |
@@ -498,12 +498,12 @@
 | `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashTest.ByName` | name, document? | test | Finds a clash test by its display name (searches folders too) |
 | `ClashTest.ClearResults` | test, document? | test | Removes every result (and result group) of a clash test and leaves the test and its settings in place |
-| `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, document? | test | Creates a clash test between two item selections |
+| `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, units?, ifExists?, folder?, document? | test | Creates a clash test between two item selections |
 | `ClashTest.Delete` | test, document? | deleted | Deletes a clash test and all of its results from the document |
 | `ClashTest.Duplicate` | test, newName?, document? | test | Duplicates a clash test |
-| `ClashTest.Edit` | test, newName?, testType?, tolerance?, mergeComposites?, itemsA?, itemsB?, document? | test | Edits an existing clash test in place |
+| `ClashTest.Edit` | test, newName?, testType?, tolerance?, mergeComposites?, itemsA?, itemsB?, units?, document? | test | Edits an existing clash test in place |
 | `ClashTest.Groups` | test, document? | groups, names, statuses, counts | All result groups of a clash test |
-| `ClashTest.Info` | test | name, status, testType, tolerance, lastRun, resultCount | Name, status, type, tolerance, last run time and result count of a clash test |
+| `ClashTest.Info` | test, units? | name, status, testType, tolerance, lastRun, resultCount | Name, status, type, tolerance, last run time and result count of a clash test |
 | `ClashTest.Name` | test | name | The display name of a clash test |
 | `ClashTest.Rename` | test, newName, document? | test | Renames a clash test |
 | `ClashTest.Results` | test | results | The individual results of a clash test (grouped results are flattened) |

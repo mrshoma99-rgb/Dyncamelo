@@ -186,6 +186,89 @@ internal static class ClashHelpers
     }
 
     /// <summary>
+    /// The first test with the given name at the top level or inside folders (only folders are descended into, never the
+    /// results of a test). Null when there is none.
+    /// </summary>
+    internal static ClashTest? FindTestByName(IEnumerable<SavedItem> items, string name)
+    {
+        foreach (var item in items)
+        {
+            if (item is ClashTest test)
+            {
+                if (string.Equals(test.DisplayName, name, StringComparison.Ordinal))
+                {
+                    return test;
+                }
+            }
+            else if (item is FolderItem folder)
+            {
+                var inner = FindTestByName(folder.Children, name);
+                if (inner != null)
+                {
+                    return inner;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>The first Clash Detective folder with the given name, at any depth. Null when there is none.</summary>
+    internal static FolderItem? FindFolder(IEnumerable<SavedItem> items, string name)
+    {
+        foreach (var item in items)
+        {
+            if (item is FolderItem folder)
+            {
+                if (string.Equals(folder.DisplayName, name, StringComparison.Ordinal))
+                {
+                    return folder;
+                }
+
+                var inner = FindFolder(folder.Children, name);
+                if (inner != null)
+                {
+                    return inner;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Applies a type, tolerance and the two selections to a stored test IN PLACE (its results, statuses, comments and groups are
+    /// kept), the way ClashTest.Edit does: edit a detached copy, then write its settings back with <c>TestsEditTestFromCopy</c>.
+    /// </summary>
+    /// <returns>The stored test after the edit (re-located; the old wrapper may be stale).</returns>
+    internal static ClashTest UpdateTestSettings(
+        Document doc,
+        DocumentClash clash,
+        ClashTest stored,
+        ClashTestType testType,
+        double tolerance,
+        IEnumerable<ModelItem> itemsA,
+        IEnumerable<ModelItem> itemsB)
+    {
+        var guid = stored.Guid;
+        var name = stored.DisplayName;
+        using (var transaction = doc.BeginTransaction("Update clash test"))
+        {
+            var copy = (ClashTest)stored.CreateCopy();
+            copy.TestType = testType;
+            copy.Tolerance = tolerance;
+            copy.SelectionA.Selection.CopyFrom(NavisValues.ToItemCollection(itemsA));
+            copy.SelectionB.Selection.CopyFrom(NavisValues.ToItemCollection(itemsB));
+            clash.TestsData.TestsEditTestFromCopy(stored, copy);
+            transaction.Commit();
+        }
+
+        return FindStoredTest(clash, guid, name)
+            ?? throw new InvalidOperationException(
+                "The clash test '" + name + "' could not be found after it was updated.");
+    }
+
+    /// <summary>
     /// Re-locates a stored test after an edit by Guid, then name — edits can
     /// invalidate previously handed-out wrappers. Null when the test is gone.
     /// </summary>

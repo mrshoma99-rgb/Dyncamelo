@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Coordination;
 using CamelGraph.Nodes.Spatial;
 
 namespace CamelGraph.Navisworks;
@@ -32,22 +34,30 @@ public static class ClashNodes
 
     /// <summary>Summary information about a clash test.</summary>
     /// <param name="test">The clash test.</param>
+    /// <param name="units">Unit to give the tolerance in: "document" uses the file's internal unit (often feet!), or name a unit.</param>
     /// <returns>Name, status, type, tolerance, last-run time and result count.</returns>
     [NodeName("ClashTest.Info")]
     [NodeCategory("Navisworks.Clash.Tests")]
-    [NodeDescription("Name, status, type, tolerance, last run time and result count of a clash test.")]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.Info@Autodesk.Navisworks.Api.Clash.ClashTest")]
+    [NodeDescription("Name, status, type, tolerance, last run time and result count of a clash test. The tolerance is in document units unless units names another unit.")]
     [NodeSearchTags("clash", "test", "info", "status", "tolerance")]
     [MultiReturn("name", "status", "testType", "tolerance", "lastRun", "resultCount")]
     [PortKinds("text", "text", "text", "number", "datetime", "integer")]
-    public static Dictionary<string, object?> Info(ClashTest test)
+    public static Dictionary<string, object?> Info(
+        ClashTest test,
+        [NodePanel("Advanced")][NodeChoicesFromEnum(typeof(Units), "document")] string units = "document")
     {
         var clashTest = ClashHelpers.RequireTest(test);
+        // The document is only needed to convert; the default (document units) reads the test as it is.
+        var scale = string.IsNullOrWhiteSpace(units) || units.Trim().Equals("document", StringComparison.OrdinalIgnoreCase)
+            ? 1.0
+            : NavisValues.ResolveUnitsScale(NavisworksContext.ResolveDocument(null), units);
         return new Dictionary<string, object?>
         {
             ["name"] = clashTest.DisplayName,
             ["status"] = clashTest.Status.ToString(),
             ["testType"] = clashTest.TestType.ToString(),
-            ["tolerance"] = clashTest.Tolerance,
+            ["tolerance"] = clashTest.Tolerance / scale,
             ["lastRun"] = clashTest.LastRun,
             ["resultCount"] = FlattenResults(clashTest).Count,
         };
@@ -333,18 +343,29 @@ public static class ClashNodes
             "No clash test named '" + name + "' exists in the document.");
     }
 
-    /// <summary>Creates (or replaces) a clash test between two item selections.</summary>
+    /// <summary>Creates a clash test between two item selections, or finds the one that is already there.</summary>
     /// <param name="name">Display name for the test.</param>
     /// <param name="itemsA">Selection A (e.g. from a search or selection set).</param>
     /// <param name="itemsB">Selection B.</param>
     /// <param name="testType">One of: Hard, HardConservative, Clearance, Duplicate, Custom.</param>
-    /// <param name="tolerance">Tolerance in document units (Clearance distance for clearance tests).</param>
+    /// <param name="tolerance">Tolerance in the unit chosen under "units" (document units by default); the clearance distance for clearance tests.</param>
+    /// <param name="units">Unit of the tolerance: "document" uses the file's internal unit (often feet!), or name the unit your number is in.</param>
+    /// <param name="ifExists">What to do when a test with this name already exists: reuse (keep it as it is, the default), update (keep its results and apply the new settings), replace (a new empty test, results are lost) or error.</param>
+    /// <param name="folder">Name of an existing Clash Detective folder to put a new test in; empty puts it at the top level.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored clash test, ready for ClashTest.Run.</returns>
     [NodeName("ClashTest.Create")]
-    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Tests")]
-    [NodeDescription("Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. If a test " +
+        "with that name already exists, ifExists decides: reuse (the default) hands back the existing test untouched, with all " +
+        "its results, statuses, assignments, comments and groups, and says so; update keeps those results and applies the " +
+        "type, tolerance and selections you wired (re-run the test afterwards); replace swaps in a brand-new empty test, so " +
+        "everything triaged on the old one is lost; error stops. A new test goes at the top level, or into the Clash " +
+        "Detective folder named under folder (the folder must exist). The tolerance is in document units " +
+        "unless units names another unit.")]
     [NodeSearchTags("clash", "test", "create", "new", "setup", "matrix")]
     [return: NodeName("test")]
     public static ClashTest Create(
@@ -354,6 +375,9 @@ public static class ClashNodes
         [NodeChoices("Hard", "HardConservative", "Clearance", "Duplicate", "Custom")]
         string testType = "Hard",
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,
+        [NodePanel("Advanced")][NodeChoicesFromEnum(typeof(Units), "document")] string units = "document",
+        [NodeChoices("reuse", "update", "replace", "error")] string ifExists = "reuse",
+        string folder = "",
         Document? document = null)
     {
         if (string.IsNullOrEmpty(name))
@@ -371,33 +395,80 @@ public static class ClashNodes
             throw new ArgumentNullException(nameof(itemsB), "No items provided for selection B.");
         }
 
+        var mode = ClashCreateRules.ParseIfExists(ifExists);
+        var type = ClashHelpers.ParseTestType(testType);
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
+        var scaledTolerance = tolerance * NavisValues.ResolveUnitsScale(doc, units);
+        var tests = clash.TestsData;
+
+        var existing = ClashHelpers.FindTestByName(tests.Tests, name);
+        if (existing != null)
+        {
+            switch (mode)
+            {
+                case ClashIfExists.Error:
+                    throw new InvalidOperationException(ClashCreateRules.ExistsMessage(name));
+                case ClashIfExists.Reuse:
+                    NodeWarnings.Add(ClashCreateRules.ReusedMessage(name));
+                    return existing;
+                case ClashIfExists.Update:
+                    return ClashHelpers.UpdateTestSettings(doc, clash, existing, type, scaledTolerance, itemsA, itemsB);
+            }
+        }
+
+        FolderItem? target = null;
+        if (!string.IsNullOrWhiteSpace(folder))
+        {
+            target = ClashHelpers.FindFolder(tests.Tests, folder.Trim())
+                ?? throw new InvalidOperationException(
+                    "There is no clash test folder named '" + folder.Trim() + "' in the document. Create the folder in " +
+                    "Clash Detective first, or leave folder empty to put the test at the top level.");
+        }
 
         var test = new ClashTest
         {
             DisplayName = name,
-            TestType = ClashHelpers.ParseTestType(testType),
-            Tolerance = tolerance,
+            TestType = type,
+            Tolerance = scaledTolerance,
         };
         test.SelectionA.Selection.CopyFrom(NavisValues.ToItemCollection(itemsA));
         test.SelectionB.Selection.CopyFrom(NavisValues.ToItemCollection(itemsB));
 
-        // Re-running a graph should update the test, not pile up duplicates.
-        var tests = clash.TestsData;
-        var existingIndex = NavisValues.FindTopLevelIndex<ClashTest>(tests.Tests, name);
-        if (existingIndex >= 0)
+        using (var transaction = doc.BeginTransaction("Create clash test"))
         {
-            tests.TestsReplaceWithCopy(existingIndex, test);
-        }
-        else
-        {
-            tests.TestsAddCopy(test);
+            if (existing != null)
+            {
+                // ifExists = replace: the new test takes the old one's place (in its folder, if it sits in one).
+                if (!ClashHelpers.TryLocateTest(clash, existing, out var holder, out var index))
+                {
+                    throw new InvalidOperationException(
+                        "The clash test '" + name + "' disappeared from the document while it was being replaced.");
+                }
+
+                if (holder == null)
+                {
+                    tests.TestsReplaceWithCopy(index, test);
+                }
+                else
+                {
+                    tests.TestsReplaceWithCopy(holder, index, test);
+                }
+            }
+            else if (target != null)
+            {
+                tests.TestsAddCopy(target, test);
+            }
+            else
+            {
+                tests.TestsAddCopy(test);
+            }
+
+            transaction.Commit();
         }
 
         // AddCopy/ReplaceWithCopy store a copy — hand the stored instance downstream.
-        var storedIndex = NavisValues.FindTopLevelIndex<ClashTest>(tests.Tests, name);
-        return storedIndex >= 0 ? (ClashTest)tests.Tests[storedIndex] : test;
+        return ClashHelpers.FindTestByName(tests.Tests, name) ?? test;
     }
 
     /// <summary>Runs one clash test now.</summary>
@@ -643,7 +714,7 @@ public static class ClashNodes
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
-    [NodeDescription("Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.")]
+    [NodeDescription("Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.")]
     [NodeSearchTags("clash", "group", "same", "item", "element", "triage")]
     [MultiReturn("test", "groupCount")]
     [PortKinds("clash", "integer")]
@@ -657,41 +728,47 @@ public static class ClashNodes
 
     /// <summary>Groups a test's results into clusters of nearby clash points.</summary>
     /// <param name="test">The stored clash test.</param>
-    /// <param name="radius">Cluster radius in document units.</param>
+    /// <param name="radius">Cluster radius, in the unit chosen under "units" (document units by default).</param>
+    /// <param name="units">Unit of the radius: "document" uses the file's internal unit (often feet!), or name the unit your number is in.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByProximity")]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@Autodesk.Navisworks.Api.Clash.ClashTest,double,Autodesk.Navisworks.Api.Document")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
-    [NodeDescription("Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.")]
+    [NodeDescription("Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot. The radius is in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.")]
     [NodeSearchTags("clash", "group", "proximity", "cluster", "radius", "triage")]
     [MultiReturn("test", "groupCount")]
     [PortKinds("clash", "integer")]
     public static Dictionary<string, object?> GroupResultsByProximity(
         ClashTest test,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 10)] double radius,
+        [NodePanel("Advanced")][NodeChoicesFromEnum(typeof(Units), "document")] string units = "document",
         Document? document = null)
     {
         if (radius <= 0.0)
         {
-            throw new ArgumentOutOfRangeException(nameof(radius), "The cluster radius must be positive (in document units).");
+            throw new ArgumentOutOfRangeException(nameof(radius), "The cluster radius must be positive.");
         }
 
-        return ClashRegroup.Commit(test, document, results => PartitionByProximity(results, radius));
+        var documentRadius = radius * NavisValues.ResolveUnitsScale(NavisworksContext.ResolveDocument(document), units);
+        return ClashRegroup.Commit(test, document, results => PartitionByProximity(results, documentRadius));
     }
 
     /// <summary>Groups a test's results by building level.</summary>
     /// <param name="test">The stored clash test.</param>
     /// <param name="levelNames">Level names, index-aligned with the elevations.</param>
-    /// <param name="levelElevations">Level elevations (Z) in document units.</param>
+    /// <param name="levelElevations">Level elevations (Z), in the unit chosen under "units" (document units by default).</param>
+    /// <param name="units">Unit of the elevations: "document" uses the file's internal unit (often feet!), or name the unit your numbers are in.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The regrouped test and the number of groups created.</returns>
     [NodeName("Clash.GroupResultsByLevel")]
+    [NodeAliases("CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@Autodesk.Navisworks.Api.Clash.ClashTest,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>,Autodesk.Navisworks.Api.Document")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeCategory("Navisworks.Clash.Group")]
-    [NodeDescription("Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.")]
+    [NodeDescription("Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage. The elevations are in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.")]
     [NodeSearchTags("clash", "group", "level", "floor", "storey", "elevation", "triage")]
     [MultiReturn("test", "groupCount")]
     [PortKinds("clash", "integer")]
@@ -699,6 +776,7 @@ public static class ClashNodes
         ClashTest test,
         IEnumerable<string> levelNames,
         IEnumerable<double> levelElevations,
+        [NodePanel("Advanced")][NodeChoicesFromEnum(typeof(Units), "document")] string units = "document",
         Document? document = null)
     {
         if (levelNames == null)
@@ -712,7 +790,13 @@ public static class ClashNodes
         }
 
         var names = new List<string>(levelNames);
-        var elevations = new List<double>(levelElevations);
+        var levelScale = NavisValues.ResolveUnitsScale(NavisworksContext.ResolveDocument(document), units);
+        var elevations = new List<double>();
+        foreach (var elevation in levelElevations)
+        {
+            elevations.Add(elevation * levelScale);
+        }
+
         if (names.Count == 0 || names.Count != elevations.Count)
         {
             throw new ArgumentException(

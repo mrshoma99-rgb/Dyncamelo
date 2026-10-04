@@ -322,4 +322,97 @@ public class ClashAuditSourceTests
         Assert.Contains("NodeWarnings.Add(\"No clash results were given, so the view was left as it is.\")", focus);
         Assert.Contains("return new List<ModelItem>();", focus);
     }
+
+    // ----------------------------------------------------------------------------------------------- NVC-10
+
+    [Fact]
+    public void TheRegroupNodesReportWhatTheyDissolvedAndWhatStaysLoose()
+    {
+        var regroup = Source("Internal", "ClashRegroup.cs");
+
+        Assert.Contains("ClashRegroupNotes.Build(dissolvedGroups, singleBucketNames, layout.Singles.Count)", regroup);
+        Assert.Contains("NodeWarnings.Add(note)", regroup);
+    }
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsBySameItem")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByProximity")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByLevel")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByStatus")]
+    [InlineData("ClashEditNodes.cs", "Clash.GroupResultsByGridIntersection")]
+    public void TheRegroupDescriptionsSayEveryExistingGroupIsDissolvedAndSinglesStayLoose(string file, string nodeName)
+    {
+        var header = Header(file, nodeName);
+
+        Assert.Contains("every group the test already has", header);
+        Assert.Contains("a bucket with only one result stays ungrouped", header);
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-11, NVC-40 (folder input)
+
+    [Fact]
+    public void CreateKeepsAnExistingTestUnlessToldOtherwiseAndStillLoadsOldGraphs()
+    {
+        var source = Source("ClashNodes.cs");
+        var body = Method(source, "public static ClashTest Create(");
+        var header = Header("ClashNodes.cs", "ClashTest.Create");
+
+        Assert.Contains("[NodeChoices(\"reuse\", \"update\", \"replace\", \"error\")] string ifExists = \"reuse\"", body);
+        Assert.Contains("string folder = \"\"", body);
+        Assert.Contains("[NodeAliases(\"CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,Autodesk.Navisworks.Api.Document\")]", header);
+
+        // reuse: the existing test comes back untouched, with a warning; update keeps the results; replace is explicit.
+        Assert.Contains("case ClashIfExists.Reuse:", body);
+        Assert.Contains("NodeWarnings.Add(ClashCreateRules.ReusedMessage(name));", body);
+        Assert.Contains("return existing;", body);
+        Assert.Contains("ClashHelpers.UpdateTestSettings(", body);
+        Assert.Contains("TestsReplaceWithCopy(holder, index, test)", body);
+
+        // A test is added to the folder (the call ClashTest.Duplicate already makes) or at the top level.
+        Assert.Contains("tests.TestsAddCopy(target, test)", body);
+        Assert.Contains("tests.TestsAddCopy(test)", body);
+        Assert.Contains("There is no clash test folder named", body);
+        Assert.Contains("doc.BeginTransaction(\"Create clash test\")", body);
+    }
+
+    [Fact]
+    public void TheUpdateKeepsTheResultsByEditingTheStoredTestInPlace()
+    {
+        var body = Method(Source("Internal", "ClashHelpers.cs"), "internal static ClashTest UpdateTestSettings(");
+
+        Assert.Contains("TestsEditTestFromCopy(stored, copy)", body);
+        Assert.DoesNotContain("TestsReplaceWithCopy", body);
+    }
+
+    // ----------------------------------------------------------------------------------------------- NVC-31
+
+    [Theory]
+    [InlineData("ClashNodes.cs", "ClashTest.Create", "public static ClashTest Create(")]
+    [InlineData("ClashNodes.cs", "ClashTest.Info", "public static Dictionary<string, object?> Info(")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByProximity", "public static Dictionary<string, object?> GroupResultsByProximity(")]
+    [InlineData("ClashNodes.cs", "Clash.GroupResultsByLevel", "public static Dictionary<string, object?> GroupResultsByLevel(")]
+    [InlineData("ClashTestMaintenanceNodes.cs", "ClashTest.Edit", "public static ClashTest Edit(")]
+    public void TheNodesWithALengthHaveAUnitsInputInTheAdvancedPanel(string file, string nodeName, string signature)
+    {
+        var body = Method(Source(file), signature);
+
+        Assert.Contains("[NodePanel(\"Advanced\")][NodeChoicesFromEnum(typeof(Units), \"document\")] string units = \"document\"", body);
+        Assert.Contains("[NodeAliases(", Header(file, nodeName));
+        Assert.Contains("units names another unit", Header(file, nodeName));
+    }
+
+    [Fact]
+    public void TheLengthsAreConvertedToDocumentUnitsBeforeTheyAreUsed()
+    {
+        var nodes = Source("ClashNodes.cs");
+
+        Assert.Contains("var scaledTolerance = tolerance * NavisValues.ResolveUnitsScale(doc, units);", Method(nodes, "public static ClashTest Create("));
+        Assert.Contains("radius * NavisValues.ResolveUnitsScale(", Method(nodes, "public static Dictionary<string, object?> GroupResultsByProximity("));
+        Assert.Contains("elevation * levelScale", Method(nodes, "public static Dictionary<string, object?> GroupResultsByLevel("));
+        Assert.Contains("clashTest.Tolerance / scale", Method(nodes, "public static Dictionary<string, object?> Info("));
+
+        // The "keep the current tolerance" sentinel (any negative number) is never scaled.
+        var edit = Method(Source("ClashTestMaintenanceNodes.cs"), "public static ClashTest Edit(");
+        Assert.Contains("if (tolerance >= 0)", edit);
+    }
 }

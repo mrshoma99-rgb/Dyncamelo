@@ -35,6 +35,13 @@ public class ClashAuditOldIdsTests
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.SetStatus@" + Result + ",string," + Doc, "ClashResult.SetStatus", "status", "Approved" };
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.Assign@" + Result + ",string," + Doc, "ClashResult.Assign", "assignedTo", "MEP" };
         yield return new object[] { "CamelGraph.Navisworks.ClashNodes.SetDescription@" + Result + ",string," + Doc, "ClashResult.SetDescription", "description", "Check with the structural engineer" };
+        const string Items = "System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>";
+        const string Test = "Autodesk.Navisworks.Api.Clash.ClashTest";
+        yield return new object[] { "CamelGraph.Navisworks.ClashNodes.Create@string," + Items + "," + Items + ",string,double," + Doc, "ClashTest.Create", "testType", "Clearance" };
+        yield return new object[] { "CamelGraph.Navisworks.ClashNodes.Info@" + Test, "ClashTest.Info", "", "" };
+        yield return new object[] { "CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@" + Test + ",double," + Doc, "Clash.GroupResultsByProximity", "", "" };
+        yield return new object[] { "CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@" + Test + ",System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>," + Doc, "Clash.GroupResultsByLevel", "", "" };
+        yield return new object[] { "CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@" + Test + ",string,string,double,string," + Items + "," + Items + "," + Doc, "ClashTest.Edit", "newName", "Weekly clash" };
         yield return new object[] { "CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<" + Result + ">", "Clash.Deduplicate", "", "" };
     }
 

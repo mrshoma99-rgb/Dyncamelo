@@ -11398,7 +11398,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.GroupResultsByGridIntersection@Autodesk.Navisworks.Api.Clash.ClashTest,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).",
+   "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources). Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11437,10 +11437,10 @@
   },
   {
    "name": "Clash.GroupResultsByLevel",
-   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@Autodesk.Navisworks.Api.Clash.ClashTest,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@Autodesk.Navisworks.Api.Clash.ClashTest,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.",
+   "description": "Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage. The elevations are in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11464,7 +11464,13 @@
     {
      "name": "levelElevations",
      "type": "number[]",
-     "description": "Level elevations (Z) in document units."
+     "description": "Level elevations (Z), in the unit chosen under \"units\" (document units by default)."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the elevations: \"document\" uses the file's internal unit (often feet!), or name the unit your numbers are in.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -11489,10 +11495,10 @@
   },
   {
    "name": "Clash.GroupResultsByProximity",
-   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@Autodesk.Navisworks.Api.Clash.ClashTest,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@Autodesk.Navisworks.Api.Clash.ClashTest,double,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.",
+   "description": "Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot. The radius is in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11510,7 +11516,13 @@
     {
      "name": "radius",
      "type": "number",
-     "description": "Cluster radius in document units."
+     "description": "Cluster radius, in the unit chosen under \"units\" (document units by default)."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the radius: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -11538,7 +11550,7 @@
    "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsBySameItem@Autodesk.Navisworks.Api.Clash.ClashTest,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.",
+   "description": "Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11585,7 +11597,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.GroupResultsByStatus@Autodesk.Navisworks.Api.Clash.ClashTest,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.",
+   "description": "Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -12715,10 +12727,10 @@
   },
   {
    "name": "ClashTest.Create",
-   "id": "CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.",
+   "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. If a test with that name already exists, ifExists decides: reuse (the default) hands back the existing test untouched, with all its results, statuses, assignments, comments and groups, and says so; update keeps those results and applies the type, tolerance and selections you wired (re-run the test afterwards); replace swaps in a brand-new empty test, so everything triaged on the old one is lost; error stops. A new test goes at the top level, or into the Clash Detective folder named under folder (the folder must exist). The tolerance is in document units unless units names another unit.",
    "tags": [
     "clash",
     "test",
@@ -12752,8 +12764,26 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "Tolerance in document units (Clearance distance for clearance tests).",
+     "description": "Tolerance in the unit chosen under \"units\" (document units by default); the clearance distance for clearance tests.",
      "default": "0.01"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the tolerance: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
+    },
+    {
+     "name": "ifExists",
+     "type": "string",
+     "description": "What to do when a test with this name already exists: reuse (keep it as it is, the default), update (keep its results and apply the new settings), replace (a new empty test, results are lost) or error.",
+     "default": "\"reuse\""
+    },
+    {
+     "name": "folder",
+     "type": "string",
+     "description": "Name of an existing Clash Detective folder to put a new test in; empty puts it at the top level.",
+     "default": "\"\""
     },
     {
      "name": "document",
@@ -12852,10 +12882,10 @@
   },
   {
    "name": "ClashTest.Edit",
-   "id": "CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@Autodesk.Navisworks.Api.Clash.ClashTest,string,string,double,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@Autodesk.Navisworks.Api.Clash.ClashTest,string,string,double,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The test's existing results are kept but are stale after a change: re-run it with ClashTest.Run.",
+   "description": "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The tolerance is in document units unless units names another unit. The test's existing results are kept but are stale after a change: re-run it with ClashTest.Run.",
    "tags": [
     "clash",
     "test",
@@ -12889,7 +12919,7 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "The new tolerance in document units — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).",
+     "description": "The new tolerance, in the unit chosen under \"units\" (document units by default) — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).",
      "default": "-1"
     },
     {
@@ -12911,6 +12941,12 @@
      "description": "Items to use as the test's selection B (leave unwired to keep the current selection).",
      "default": "null",
      "multiInput": true
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the tolerance: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -12982,10 +13018,10 @@
   },
   {
    "name": "ClashTest.Info",
-   "id": "CamelGraph.Navisworks.ClashNodes.Info@Autodesk.Navisworks.Api.Clash.ClashTest",
+   "id": "CamelGraph.Navisworks.ClashNodes.Info@Autodesk.Navisworks.Api.Clash.ClashTest,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Name, status, type, tolerance, last run time and result count of a clash test.",
+   "description": "Name, status, type, tolerance, last run time and result count of a clash test. The tolerance is in document units unless units names another unit.",
    "tags": [
     "clash",
     "test",
@@ -12998,6 +13034,12 @@
      "name": "test",
      "type": "ClashTest",
      "description": "The clash test."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit to give the tolerance in: \"document\" uses the file's internal unit (often feet!), or name a unit.",
+     "default": "\"document\""
     }
    ],
    "outputs": [
