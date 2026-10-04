@@ -625,6 +625,201 @@ public class PlayerUiTests : IDisposable
         }
     }
 
+    // ----- the panel look: header, section cards, footer ------------------------------------------
+
+    private static Rect BoundsIn(FrameworkElement element, Visual ancestor) =>
+        element.TransformToAncestor(ancestor).TransformBounds(new Rect(0d, 0d, element.ActualWidth, element.ActualHeight));
+
+    private static Color Colour(Brush? brush) => ((SolidColorBrush)brush!).Color;
+
+    [Theory]
+    [InlineData("CamelGraphDark")]
+    [InlineData("Light")]
+    public void ThePlayerAt380PixelsIsAHeaderSectionCardsAndAFooterWithTheRunButton(string paletteId)
+    {
+        new UiSettingsService(SettingsFile).SetPaletteId(paletteId);   // the pane follows the palette saved in the settings
+        var palette = PaletteCatalog.ById(paletteId)!;
+        var graph = new GraphModel { Name = "Cards", Description = "Adds the width to two." };
+        var number = new NumberInputNode { Name = "Width", Value = 2, X = 0 };
+        var sum = new SumNode { X = 200 };
+        var watch = new WatchNode { Name = "Total", X = 400 };
+        graph.AddNode(number);
+        graph.AddNode(sum);
+        graph.AddNode(watch);
+        Assert.True(graph.Connect(number.OutPorts[0], sum.InPorts[0]).Success);
+        Assert.True(graph.Connect(sum.OutPorts[0], watch.InPorts[0]).Success);
+        var (window, player) = ShowPlayerWith(graph, 380d, 820d);
+        StaHost.Run(() => Assert.True(player.Run()));
+        StaHost.Flush();
+        StaHost.Flush();
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var control = (PlayerControl)window.Content;
+                var header = (System.Windows.Controls.Border)control.FindName("PlayerHeader");
+                var footer = (System.Windows.Controls.Border)control.FindName("PlayerFooter");
+                var run = (System.Windows.Controls.Button)control.FindName("RunButton");
+                var inputs = (System.Windows.Controls.Border)control.FindName("InputsCard");
+                var results = (System.Windows.Controls.Border)control.FindName("ResultsCard");
+                var width = control.ActualWidth;
+                Assert.InRange(width, 360d, 380d);       // the pane is about 380 px wide (a borderless window may keep a thin frame)
+
+                // The header: 52 px, at the top, with the Player mark in a tinted well, the name, the line under it and the folder button.
+                Assert.Equal(52d, header.ActualHeight);
+                Assert.Equal(0d, BoundsIn(header, control).Top);
+                Assert.Equal(new Thickness(0d, 0d, 0d, 1d), header.BorderThickness);
+                var mark = Descendants<System.Windows.Controls.ContentControl>(header).Single(c => ReferenceEquals(c.Template, control.FindResource("Dyc.Logo.PlayerSmall")));
+                Assert.Equal(palette.Colors["Dyc.TextBrush"], Colour(mark.Foreground));
+                Assert.Equal(palette.Colors["Dyc.AccentBrush"], Colour(mark.BorderBrush));
+                Assert.Equal(palette.Colors["Dyc.HoverBrush"], Colour(mark.Background));
+                var title = Descendants<System.Windows.Controls.TextBlock>(header).Single(t => t.Text == "Script Player");
+                Assert.Equal(15d, title.FontSize);
+                Assert.Equal(FontWeights.Bold, title.FontWeight);
+                Assert.Equal(palette.Colors["Dyc.TextBrush"], Colour(title.Foreground));
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(header), t => t.Text == "runs a script without the node editor");
+                var folders = Descendants<System.Windows.Controls.Button>(header).Single();
+                Assert.Same(player.ToggleFoldersCommand, folders.Command);
+                Assert.Equal("Script folders", folders.ToolTip);
+
+                // The footer sits at the bottom and holds the wide gradient Run button with the three square buttons beside it.
+                Assert.True(footer.IsVisible);
+                Assert.True(Math.Abs(BoundsIn(footer, control).Bottom - control.ActualHeight) < 1d, "the footer is not at the bottom");
+                Assert.True(run.IsVisible);
+                Assert.Same(player.RunCommand, run.Command);
+                Assert.True(run.ActualHeight >= 40d, "Run is " + run.ActualHeight + " high");
+                Assert.True(Math.Abs(run.ActualWidth - (width - 24d - 3d * 48d)) < 1.5d, "Run is " + run.ActualWidth + " wide");
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(run), t => t.Text == "Run Cards");
+                run.ApplyTemplate();
+                var chrome = (System.Windows.Controls.Border)run.Template.FindName("Chrome", run);
+                Assert.Equal(10d, chrome.CornerRadius.TopLeft);
+                Assert.Equal(palette.Colors["Dyc.PrimaryBrush"], Colour(chrome.Background));
+                Assert.Equal(palette.Colors["Dyc.OnPrimaryBrush"], Colour(run.Foreground));
+                var square = Descendants<System.Windows.Controls.Button>(footer).Where(b => !ReferenceEquals(b, run)).ToList();
+                Assert.Equal(new[] { "Reset", "Edit", "File" }, square.Select(b => System.Windows.Automation.AutomationProperties.GetName(b)).ToArray());
+                Assert.Equal(
+                    new[] { "Put every field back to the value saved in the script", "Open this script in the node editor", "Show the file in Explorer" },
+                    square.Select(b => (string)b.ToolTip).ToArray());
+                Assert.All(square, b => Assert.Equal(new Size(40d, 40d), new Size(b.ActualWidth, b.ActualHeight)));
+                Assert.Same(player.ResetCommand, square[0].Command);
+                Assert.Same(player.OpenInEditorCommand, square[1].Command);
+                Assert.Same(player.ShowInExplorerCommand, square[2].Command);
+
+                // The body: the form and the results are section cards with an eyebrow label each, inside the 12 px gutters.
+                foreach (var card in new[] { inputs, results })
+                {
+                    Assert.True(card.IsVisible);
+                    Assert.Equal(12d, card.CornerRadius.TopLeft);
+                    Assert.Equal(palette.Colors["Dyc.NodeBodyBrush"], Colour(card.Background));
+                    Assert.Equal(palette.Colors["Dyc.PanelBorderBrush"], Colour(card.BorderBrush));
+                    var bounds = BoundsIn(card, control);
+                    Assert.True(bounds.Left >= 11.5d && bounds.Right <= width - 11.5d, "card " + bounds);
+                }
+
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(inputs), t => t.Text == "INPUTS" && t.IsVisible);
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(results), t => t.Text == "RESULTS" && t.IsVisible);
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(results), t => t.Text.StartsWith("Finished", StringComparison.Ordinal) && t.IsVisible);
+                var copy = Descendants<System.Windows.Controls.Button>(results).Single(b => (b.Content as string) == "Copy");
+                Assert.Same(player.CopyResultsCommand, copy.Command);
+                Assert.True(copy.ActualHeight < 32d, "Copy is a small button: " + copy.ActualHeight);
+
+                // The script card names the script and carries its description.
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(window), t => t.Text == "Cards" && t.IsVisible);
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(window), t => t.Text == "Adds the width to two." && t.IsVisible);
+
+                // The pane itself is the palette's panel colour.
+                var root = (System.Windows.Controls.DockPanel)control.FindName("LayoutRoot");
+                Assert.Equal(palette.Colors["Dyc.PanelBrush"], Colour(root.Background));
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
+        }
+    }
+
+    [Fact]
+    public void TheFooterIsThereOnlyWhenARunOrANoteNeedsIt()
+    {
+        Window? window = null;
+        StaHost.Run(() =>
+        {
+            var player = NewPlayer();
+            player.Refresh();
+            window = new Window
+            {
+                Width = 380,
+                Height = 700,
+                Content = new PlayerControl { ViewModel = player },
+                ShowInTaskbar = false,
+                ShowActivated = false,
+                WindowStyle = WindowStyle.None,
+            };
+            window.Show();
+        });
+        StaHost.Flush();
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var control = (PlayerControl)window!.Content;
+                var player = control.ViewModel!;
+                var footer = (System.Windows.Controls.Border)control.FindName("PlayerFooter");
+                var run = (System.Windows.Controls.Button)control.FindName("RunButton");
+
+                Assert.False(footer.IsVisible);          // no script, nothing to say
+
+                player.ReportProblem("The folder could not be read.");
+                window.UpdateLayout();
+                Assert.True(footer.IsVisible);
+                Assert.False(run.IsVisible);             // still no script to run
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(footer), t => t.Text == "The folder could not be read." && t.IsVisible);
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window!.Close());
+        }
+    }
+
+    [Fact]
+    public void TheFolderButtonInTheHeaderShowsAndHidesTheScriptFolders()
+    {
+        var graph = new GraphModel { Name = "Folders" };
+        graph.AddNode(new NumberInputNode { Name = "Gap", Value = 2 });
+        var (window, player) = ShowPlayerWith(graph);
+
+        try
+        {
+            StaHost.Run(() =>
+            {
+                var control = (PlayerControl)window.Content;
+                var card = (System.Windows.Controls.Border)control.FindName("FoldersCard");
+                var button = Descendants<System.Windows.Controls.Button>((System.Windows.Controls.Border)control.FindName("PlayerHeader")).Single();
+                Assert.False(player.IsFoldersOpen);
+                Assert.False(card.IsVisible);
+
+                button.Command.Execute(null);
+                window.UpdateLayout();
+                Assert.True(player.IsFoldersOpen);
+                Assert.True(card.IsVisible);
+                Assert.Contains(Descendants<System.Windows.Controls.TextBlock>(card), t => t.Text.EndsWith("scripts", StringComparison.OrdinalIgnoreCase) && t.IsVisible);
+                var add = Descendants<System.Windows.Controls.Button>(card).Single(b => (b.Content as string) == "Add a folder…");
+                Assert.Same(player.AddFolderCommand, add.Command);
+
+                button.Command.Execute(null);
+                window.UpdateLayout();
+                Assert.False(card.IsVisible);
+            });
+        }
+        finally
+        {
+            StaHost.Run(() => window.Close());
+        }
+    }
+
     private static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject
     {
         var count = VisualTreeHelper.GetChildrenCount(root);

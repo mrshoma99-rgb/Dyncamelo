@@ -862,14 +862,14 @@ public class CommandSurfaceViewTests
     }
 
     [Fact]
-    public void TheLibraryPanelHidesWithCtrlBAndTheEdgeHandleBringsItBack()
+    public void TheLibraryPanelHidesWithCtrlBAndTheEdgeTabBringsItBack()
     {
         using var host = Build();
         StaHost.Run(() =>
         {
             var panel = (System.Windows.Controls.DockPanel)host.Control.FindName("LibraryPanel");
             var column = (System.Windows.Controls.ColumnDefinition)host.Control.FindName("LibraryColumn");
-            Assert.Equal(System.Windows.Visibility.Visible, panel.Visibility);
+            Assert.True(panel.IsVisible);
             Assert.Equal(230d, column.Width.Value);
 
             host.Control.ModifierProvider = () => ModifierKeys.Control;
@@ -878,7 +878,8 @@ public class CommandSurfaceViewTests
 
             Assert.False(host.Vm.IsLibraryVisible);
             Assert.True(host.Vm.IsLibraryHidden);
-            Assert.Equal(System.Windows.Visibility.Collapsed, panel.Visibility);
+            Assert.Equal(System.Windows.Visibility.Collapsed, ((System.Windows.FrameworkElement)host.Control.FindName("LibraryHost")).Visibility);
+            Assert.False(panel.IsVisible);
             Assert.Equal(0d, column.Width.Value);
             Assert.Equal(0d, ((System.Windows.Controls.ColumnDefinition)host.Control.FindName("SplitterColumn")).Width.Value);
             Assert.Equal(System.Windows.Visibility.Collapsed, ((System.Windows.Controls.GridSplitter)host.Control.FindName("LibrarySplitter")).Visibility);
@@ -888,12 +889,13 @@ public class CommandSurfaceViewTests
         {
             // The tab on the canvas edge is shown only while the panel is hidden, and brings it back.
             var handle = Descendants<System.Windows.Controls.Button>(host.Window).First(b => (b.ToolTip as string ?? string.Empty).StartsWith("Show the node library"));
+            Assert.Same(host.Control.FindName("LibraryShowTab"), handle);
             Assert.True(handle.IsVisible);
             handle.Command.Execute(null);
 
             Assert.True(host.Vm.IsLibraryVisible);
             var panel = (System.Windows.Controls.DockPanel)host.Control.FindName("LibraryPanel");
-            Assert.Equal(System.Windows.Visibility.Visible, panel.Visibility);
+            Assert.True(panel.IsVisible);
             Assert.Equal(230d, ((System.Windows.Controls.ColumnDefinition)host.Control.FindName("LibraryColumn")).Width.Value);
             Assert.False(handle.IsVisible);
         });

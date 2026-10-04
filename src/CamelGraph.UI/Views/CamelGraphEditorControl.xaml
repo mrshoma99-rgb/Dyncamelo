@@ -11,6 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/CamelGraphDark.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/Logo.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/CamelGraph.UI;component/Themes/Panels.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- The cards of the start screen (New, a recent script, an example). -->
@@ -238,369 +239,431 @@
             </DockPanel>
         </Border>
 
-        <!-- ===== Library + canvas ===== -->
-        <Grid>
+        <!-- ===== Library + canvas ===== (clipped, so the shadow of the library card does not spill over the header and the status bar) -->
+        <Grid ClipToBounds="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="LibraryColumn" Width="230" MinWidth="150" />
-                <ColumnDefinition x:Name="SplitterColumn" Width="4" />
+                <ColumnDefinition x:Name="SplitterColumn" Width="8" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Library browser -->
-            <DockPanel x:Name="LibraryPanel"
-                       Grid.Column="0"
-                       Background="{DynamicResource Dyc.PanelBrush}"
-                       PreviewKeyDown="OnLibraryPanelPreviewKeyDown"
-                       IsKeyboardFocusWithinChanged="OnLibraryPanelIsKeyboardFocusWithinChanged">
-                <DockPanel.Resources>
-                    <!-- One entry row template shared by the category tree and the
-                         flat search results (implicit by DataType). -->
-                    <DataTemplate DataType="{x:Type vm:LibraryEntryViewModel}">
-                        <Grid x:Name="EntryRow"
-                              Background="Transparent"
-                              ToolTipService.ShowDuration="30000"
-                              ToolTipService.InitialShowDelay="1200">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.ToolTip>
-                                <ToolTip MaxWidth="380">
-                                    <StackPanel Margin="2">
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
-                                        <TextBlock Text="{Binding Category}" Opacity="0.7" Margin="0,1,0,0" TextWrapping="Wrap" />
-                                        <TextBlock Text="{Binding Description}"
-                                                   Margin="0,6,0,0"
-                                                   TextWrapping="Wrap"
-                                                   Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                                        <TextBlock Text="{Binding Signature}"
-                                                   Margin="0,6,0,0"
-                                                   FontStyle="Italic"
-                                                   Opacity="0.85"
-                                                   TextWrapping="Wrap"
-                                                   Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                                    </StackPanel>
-                                </ToolTip>
-                            </Grid.ToolTip>
-                            <StackPanel Margin="0,1">
-                                <TextBlock Text="{Binding Name}"
-                                           Foreground="{DynamicResource Dyc.TextBrush}"
-                                           TextTrimming="CharacterEllipsis" />
-                                <TextBlock Text="{Binding Description}"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                                           TextWrapping="Wrap"
-                                           TextTrimming="CharacterEllipsis"
-                                           MaxHeight="30"
-                                           Margin="0,1,0,0"
-                                           Visibility="{Binding IsDescriptionVisible, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                            </StackPanel>
-                            <Button x:Name="StarButton"
-                                    Grid.Column="1"
-                                    VerticalAlignment="Top"
-                                    Margin="6,1,2,0"
-                                    Padding="2,0"
-                                    Content="☆"
-                                    FontSize="13"
-                                    Cursor="Hand"
-                                    Visibility="Hidden"
-                                    Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                                    ToolTip="Add to favourites"
-                                    Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                                    CommandParameter="{Binding}">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                        </Grid>
-                        <DataTemplate.Triggers>
-                            <Trigger SourceName="EntryRow" Property="IsMouseOver" Value="True">
-                                <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
-                            </Trigger>
-                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
-                                <Setter TargetName="StarButton" Property="Content" Value="★" />
-                                <Setter TargetName="StarButton" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
-                                <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </DockPanel.Resources>
-                <!-- Search row: a search-icon field with an inline quick-clear ✕, and
-                     compact expand/collapse symbol buttons sitting right beside it.
-                     (The "show descriptions" toggle now lives in the Settings popup.) -->
-                <DockPanel DockPanel.Dock="Top" Margin="6,6,6,4">
-                    <Button DockPanel.Dock="Left"
-                            Style="{StaticResource Dyc.IconButton}"
-                            Margin="0,0,4,0"
-                            ToolTip="Hide the node library (View ▸ Node Library Panel)"
-                            Command="{Binding ToggleLibraryCommand}">
-                        <Path Width="14" Height="14" Stretch="Uniform"
-                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.ChevronLeft}" />
-                    </Button>
-                    <Button DockPanel.Dock="Right"
-                            Style="{StaticResource Dyc.IconButton}"
-                            Margin="4,0,0,0"
-                            ToolTip="Collapse all categories"
-                            Command="{Binding Library.CollapseAllCommand}">
-                        <Path Width="14" Height="14" Stretch="Uniform"
-                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.ArrowUp}" />
-                    </Button>
-                    <Button DockPanel.Dock="Right"
-                            Style="{StaticResource Dyc.IconButton}"
-                            Margin="4,0,0,0"
-                            ToolTip="Expand all categories"
-                            Command="{Binding Library.ExpandAllCommand}">
-                        <Path Width="14" Height="14" Stretch="Uniform"
-                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.ArrowDown}" />
-                    </Button>
-                    <Grid>
-                        <TextBox FontSize="13"
-                                 Style="{StaticResource Dyc.TextBox}"
-                                 Padding="26,3,22,3"
-                                 Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 ToolTip="Search nodes (Esc clears)" />
-                        <!-- Search glyph inside the field (transparent to clicks). -->
-                        <Path Width="14" Height="14" Stretch="Uniform"
-                              HorizontalAlignment="Left" VerticalAlignment="Center"
-                              Margin="7,0,0,0"
-                              IsHitTestVisible="False"
-                              Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                              Data="{StaticResource Dyc.Icon.Search}" />
-                        <Button HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Margin="0,0,4,0"
-                                Padding="3,0"
-                                Content="✕"
-                                FontSize="11"
-                                Cursor="Hand"
-                                Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                                ToolTip="Clear search"
-                                Command="{Binding Library.ClearSearchCommand}"
-                                Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border x:Name="Chrome" Background="Transparent" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
-                                            <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
-                </DockPanel>
-                <Grid>
-                    <TreeView x:Name="LibraryTree"
-                              Margin="2,0,2,2"
-                              Background="Transparent"
-                              BorderThickness="0"
-                              FontSize="13"
-                              Foreground="{DynamicResource Dyc.TextBrush}"
-                              ItemsSource="{Binding Library.RootItems}"
-                              VirtualizingPanel.IsVirtualizing="True"
-                              VirtualizingPanel.VirtualizationMode="Recycling"
-                              PreviewMouseLeftButtonDown="OnLibraryMouseDown"
-                              PreviewMouseMove="OnLibraryMouseMove"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <TreeView.Style>
-                            <Style TargetType="{x:Type TreeView}">
-                                <Style.Triggers>
-                                    <!-- While searching, the flat result list replaces the
-                                         tree; the tree keeps its expansion state untouched. -->
-                                    <DataTrigger Binding="{Binding Library.IsSearching}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TreeView.Style>
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
-                                <Setter Property="Padding" Value="0,2" />
-                                <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                        <TreeView.Resources>
-                            <!-- The selection colours of the default TreeViewItem template (SystemColors.Highlight*BrushKey) are set in
-                                 code, in the control's constructor: they are the theme's own brushes, so the selection follows a palette
-                                 swap. (A Binding with a DynamicResource Source cannot be written here: WPF throws when the entry is first
-                                 looked up, i.e. when a library item is first selected.) -->
-                            <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
-                                <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Path x:Name="CategoryIcon"
-                                          Width="13" Height="13"
-                                          Stretch="Uniform"
-                                          VerticalAlignment="Center"
-                                          Margin="0,0,6,0"
-                                          Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                                          Visibility="Collapsed" />
-                                    <TextBlock x:Name="CategoryText"
-                                               Text="{Binding Name}"
-                                               FontWeight="SemiBold"
-                                               VerticalAlignment="Center"
-                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
-                                </StackPanel>
-                                <HierarchicalDataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Annotation">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Annotation}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Color">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Color}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="DateTime">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.DateTime}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Dictionary">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Dictionary}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Display">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Display}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="File">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.File}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Geometry">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Geometry}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Input">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Input}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="List">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.List}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Logic">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Logic}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Math">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Math}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Navisworks">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Navisworks}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="String">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.String}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Workflow">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Workflow}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Table">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Table}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Data">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Data}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="IFC">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.IFC}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Report">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Report}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="System">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.System}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Utility">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Utility}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
-                                    </DataTrigger>
-                                    <!-- Create / Modify / Info leaf-grouping headers: coloured glyph + label. -->
-                                    <DataTrigger Binding="{Binding IconKey}" Value="FnCreate">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnCreate}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnCreateBrush}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnCreateBrush}" />
-                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="FnModify">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnModify}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnModifyBrush}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnModifyBrush}" />
-                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IconKey}" Value="FnInfo">
-                                        <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnInfo}" />
-                                        <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnInfoBrush}" />
-                                        <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
-                                        <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnInfoBrush}" />
-                                        <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
-                                    </DataTrigger>
-                                </HierarchicalDataTemplate.Triggers>
-                            </HierarchicalDataTemplate>
-                        </TreeView.Resources>
-                    </TreeView>
-                    <!-- Flat search results (Dynamo-style) -->
-                    <DockPanel Visibility="{Binding Library.IsSearching, Converter={StaticResource Dyc.BoolToVisibility}}">
-                        <TextBlock DockPanel.Dock="Bottom"
-                                   Margin="8,4"
-                                   FontSize="11"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                                   Text="{Binding Library.SearchStatusText}"
-                                   Visibility="{Binding Library.HasSearchStatus, Converter={StaticResource Dyc.BoolToVisibility}}" />
-                        <ListBox x:Name="LibraryResults"
-                                 Margin="2,0,2,2"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 FontSize="13"
-                                 Foreground="{DynamicResource Dyc.TextBrush}"
-                                 ItemsSource="{Binding Library.SearchResults}"
-                                 ItemContainerStyle="{StaticResource Dyc.LibraryResultItemStyle}"
-                                 VirtualizingPanel.IsVirtualizing="True"
-                                 VirtualizingPanel.VirtualizationMode="Recycling"
-                                 PreviewMouseLeftButtonDown="OnLibraryMouseDown"
-                                 PreviewMouseMove="OnLibraryMouseMove"
-                                 MouseDoubleClick="OnLibraryResultsDoubleClick"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
-                    </DockPanel>
-                </Grid>
-            </DockPanel>
+            <!-- The ground the library card floats on: the canvas colour, so the card stands out from it in every palette. -->
+            <Border Grid.Column="0" Grid.ColumnSpan="2" Background="{DynamicResource Dyc.CanvasBrush}" />
 
+            <!-- Library browser: a rounded card that floats on the canvas, 8 px in from the edges (the splitter column is the gap on
+                 its right). Its shadow is a border of its own behind it; an Effect on the card would run the tree and its scroll
+                 viewer through the effect. The host sits above the canvas so the shadow falls on it. -->
+            <Grid x:Name="LibraryHost"
+                  Grid.Column="0"
+                  Margin="8,8,0,8"
+                  Panel.ZIndex="5">
+                <Border x:Name="LibraryShadow" Style="{StaticResource Dyc.Panel.CardShadow}" />
+                <Border x:Name="LibraryCard" Style="{StaticResource Dyc.Panel.Card}">
+                    <Grid PreviewKeyDown="OnLibraryPanelPreviewKeyDown"
+                          IsKeyboardFocusWithinChanged="OnLibraryPanelIsKeyboardFocusWithinChanged">
+                        <DockPanel x:Name="LibraryPanel">
+                            <DockPanel.Resources>
+                                <!-- One entry row template shared by the category tree and the
+                                     flat search results (implicit by DataType). -->
+                                <DataTemplate DataType="{x:Type vm:LibraryEntryViewModel}">
+                                    <Grid x:Name="EntryRow"
+                                          Background="Transparent"
+                                          ToolTipService.ShowDuration="30000"
+                                          ToolTipService.InitialShowDelay="1200">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.ToolTip>
+                                            <ToolTip MaxWidth="380">
+                                                <StackPanel Margin="2">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Category}" Opacity="0.7" Margin="0,1,0,0" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Description}"
+                                                               Margin="0,6,0,0"
+                                                               TextWrapping="Wrap"
+                                                               Visibility="{Binding HasDescription, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                    <TextBlock Text="{Binding Signature}"
+                                                               Margin="0,6,0,0"
+                                                               FontStyle="Italic"
+                                                               Opacity="0.85"
+                                                               TextWrapping="Wrap"
+                                                               Visibility="{Binding HasSignature, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                                </StackPanel>
+                                            </ToolTip>
+                                        </Grid.ToolTip>
+                                        <StackPanel Margin="0,1">
+                                            <TextBlock Text="{Binding Name}"
+                                                       Foreground="{DynamicResource Dyc.TextBrush}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                                       TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxHeight="30"
+                                                       Margin="0,1,0,0"
+                                                       Visibility="{Binding IsDescriptionVisible, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                        </StackPanel>
+                                        <Button x:Name="StarButton"
+                                                Grid.Column="1"
+                                                VerticalAlignment="Top"
+                                                Margin="6,1,2,0"
+                                                Padding="2,0"
+                                                Content="☆"
+                                                FontSize="13"
+                                                Cursor="Hand"
+                                                Visibility="Hidden"
+                                                Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                                ToolTip="Add to favourites"
+                                                Command="{Binding DataContext.Library.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="{x:Type Button}">
+                                                    <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <Trigger SourceName="EntryRow" Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter TargetName="StarButton" Property="Visibility" Value="Visible" />
+                                            <Setter TargetName="StarButton" Property="Content" Value="★" />
+                                            <Setter TargetName="StarButton" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
+                                            <Setter TargetName="StarButton" Property="ToolTip" Value="Remove from favourites" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DockPanel.Resources>
+                            <!-- Search: a row of its own across the whole card, a rounded field with the search glyph inside and a quick-clear ✕
+                                 at the right once there is text. (The "show descriptions" toggle lives in the Settings popup.) -->
+                            <Grid DockPanel.Dock="Top" Margin="10,10,10,0">
+                                <TextBox x:Name="LibrarySearchBox"
+                                         Style="{StaticResource Dyc.Panel.SearchBox}"
+                                         Text="{Binding Library.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="Search nodes (Esc clears)" />
+                                <!-- Search glyph inside the field (transparent to clicks). -->
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                                      Margin="12,0,0,0"
+                                      IsHitTestVisible="False"
+                                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                                      Data="{StaticResource Dyc.Icon.Search}" />
+                                <TextBlock Text="Search nodes"
+                                           IsHitTestVisible="False"
+                                           VerticalAlignment="Center"
+                                           Margin="35,0,0,0"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource Dyc.SubtleTextBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Library.SearchText}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <Button HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        Padding="4,2"
+                                        Content="✕"
+                                        FontSize="11"
+                                        Cursor="Hand"
+                                        Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                        ToolTip="Clear search"
+                                        AutomationProperties.Name="Clear search"
+                                        Command="{Binding Library.ClearSearchCommand}"
+                                        Visibility="{Binding Library.HasSearchText, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border x:Name="Chrome" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource Dyc.HoverBrush}" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            <!-- The slim row under the search: what the list is, and the two round buttons that open and close every category. -->
+                            <Grid DockPanel.Dock="Top" Margin="16,10,10,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource Dyc.Panel.Eyebrow}" Text="NODES" VerticalAlignment="Center" />
+                                <Button x:Name="LibraryExpandAllButton"
+                                        Grid.Column="1"
+                                        Style="{StaticResource Dyc.Panel.IconButton}"
+                                        Margin="0,0,6,0"
+                                        ToolTip="Expand all categories"
+                                        AutomationProperties.Name="Expand all categories"
+                                        Command="{Binding Library.ExpandAllCommand}">
+                                    <Path Width="13" Height="13" Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                          Data="{StaticResource Dyc.Icon.ArrowDown}" />
+                                </Button>
+                                <Button x:Name="LibraryCollapseAllButton"
+                                        Grid.Column="2"
+                                        Style="{StaticResource Dyc.Panel.IconButton}"
+                                        ToolTip="Collapse all categories"
+                                        AutomationProperties.Name="Collapse all categories"
+                                        Command="{Binding Library.CollapseAllCommand}">
+                                    <Path Width="13" Height="13" Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                                          Data="{StaticResource Dyc.Icon.ArrowUp}" />
+                                </Button>
+                            </Grid>
+                            <Grid Margin="6,0,22,8">
+                                <TreeView x:Name="LibraryTree"
+                                          Margin="2,0,2,2"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource Dyc.TextBrush}"
+                                          ItemsSource="{Binding Library.RootItems}"
+                                          VirtualizingPanel.IsVirtualizing="True"
+                                          VirtualizingPanel.VirtualizationMode="Recycling"
+                                          PreviewMouseLeftButtonDown="OnLibraryMouseDown"
+                                          PreviewMouseMove="OnLibraryMouseMove"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <TreeView.Style>
+                                        <Style TargetType="{x:Type TreeView}">
+                                            <Style.Triggers>
+                                                <!-- While searching, the flat result list replaces the
+                                                     tree; the tree keeps its expansion state untouched. -->
+                                                <DataTrigger Binding="{Binding Library.IsSearching}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TreeView.Style>
+                                    <TreeView.ItemContainerStyle>
+                                        <Style TargetType="{x:Type TreeViewItem}">
+                                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource Dyc.TextBrush}" />
+                                            <Setter Property="Padding" Value="0,3" />
+                                            <EventSetter Event="MouseDoubleClick" Handler="OnLibraryItemDoubleClick" />
+                                        </Style>
+                                    </TreeView.ItemContainerStyle>
+                                    <TreeView.Resources>
+                                        <!-- The selection colours of the default TreeViewItem template (SystemColors.Highlight*BrushKey) are set in
+                                             code, in the control's constructor: they are the theme's own brushes, so the selection follows a palette
+                                             swap. (A Binding with a DynamicResource Source cannot be written here: WPF throws when the entry is first
+                                             looked up, i.e. when a library item is first selected.) -->
+                                        <HierarchicalDataTemplate DataType="{x:Type vm:LibraryCategoryViewModel}" ItemsSource="{Binding Children}">
+                                            <!-- A per-root Material glyph (IconKey, top-level categories only) precedes the name. -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Path x:Name="CategoryIcon"
+                                                      Width="13" Height="13"
+                                                      Stretch="Uniform"
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,6,0"
+                                                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
+                                                      Visibility="Collapsed" />
+                                                <TextBlock x:Name="CategoryText"
+                                                           Text="{Binding Name}"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
+                                            </StackPanel>
+                                            <HierarchicalDataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Annotation">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Annotation}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Color">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Color}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="DateTime">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.DateTime}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Dictionary">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Dictionary}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Display">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Display}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="File">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.File}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Geometry">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Geometry}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Input">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Input}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="List">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.List}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Logic">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Logic}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Math">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Math}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Navisworks">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Navisworks}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="String">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.String}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Workflow">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Workflow}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Table">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Table}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Data">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Data}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="IFC">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.IFC}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Report">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Report}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="System">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.System}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Utility">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Utility}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="Favorites">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.Cat.Favorites}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.WarningBrush}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Name}" Value="★ Favourites">
+                                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.WarningBrush}" />
+                                                </DataTrigger>
+                                                <!-- Create / Modify / Info leaf-grouping headers: coloured glyph + label. -->
+                                                <DataTrigger Binding="{Binding IconKey}" Value="FnCreate">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnCreate}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnCreateBrush}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnCreateBrush}" />
+                                                    <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="FnModify">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnModify}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnModifyBrush}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnModifyBrush}" />
+                                                    <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IconKey}" Value="FnInfo">
+                                                    <Setter TargetName="CategoryIcon" Property="Data" Value="{StaticResource Dyc.Icon.FnInfo}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Fill" Value="{DynamicResource Dyc.FnInfoBrush}" />
+                                                    <Setter TargetName="CategoryIcon" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="CategoryText" Property="Foreground" Value="{DynamicResource Dyc.FnInfoBrush}" />
+                                                    <Setter TargetName="CategoryText" Property="FontSize" Value="11" />
+                                                </DataTrigger>
+                                            </HierarchicalDataTemplate.Triggers>
+                                        </HierarchicalDataTemplate>
+                                    </TreeView.Resources>
+                                </TreeView>
+                                <!-- Flat search results (Dynamo-style) -->
+                                <DockPanel Visibility="{Binding Library.IsSearching, Converter={StaticResource Dyc.BoolToVisibility}}">
+                                    <TextBlock DockPanel.Dock="Bottom"
+                                               Margin="8,4"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource Dyc.SubtleTextBrush}"
+                                               Text="{Binding Library.SearchStatusText}"
+                                               Visibility="{Binding Library.HasSearchStatus, Converter={StaticResource Dyc.BoolToVisibility}}" />
+                                    <ListBox x:Name="LibraryResults"
+                                             Margin="2,0,2,2"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             FontSize="13"
+                                             Foreground="{DynamicResource Dyc.TextBrush}"
+                                             ItemsSource="{Binding Library.SearchResults}"
+                                             ItemContainerStyle="{StaticResource Dyc.LibraryResultItemStyle}"
+                                             VirtualizingPanel.IsVirtualizing="True"
+                                             VirtualizingPanel.VirtualizationMode="Recycling"
+                                             PreviewMouseLeftButtonDown="OnLibraryMouseDown"
+                                             PreviewMouseMove="OnLibraryMouseMove"
+                                             MouseDoubleClick="OnLibraryResultsDoubleClick"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                                </DockPanel>
+                            </Grid>
+                        </DockPanel>
+                        <!-- Glued to the right edge of the card, in the middle of it. The lists leave a strip for it, so it never covers a row or
+                             the scroll bar. -->
+                        <Button x:Name="LibraryHideTab"
+                                Style="{StaticResource Dyc.Panel.EdgeTab}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Content="HIDE"
+                                ToolTip="Hide the node library (View ▸ Node Library Panel)"
+                                AutomationProperties.Name="Hide the node library"
+                                Command="{Binding ToggleLibraryCommand}" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- The gap between the card and the canvas, wide enough to grab. It is invisible until the pointer is over it, then a thin line
+                 shows where to drag. -->
             <GridSplitter x:Name="LibrarySplitter" Grid.Column="1"
                           HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"
-                          Background="{DynamicResource Dyc.PanelBorderBrush}" />
+                          VerticalAlignment="Stretch">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="{x:Type GridSplitter}">
+                        <Border Background="Transparent">
+                            <Border x:Name="Line"
+                                    Width="2"
+                                    Margin="0,24"
+                                    HorizontalAlignment="Center"
+                                    CornerRadius="1"
+                                    Background="{DynamicResource Dyc.AccentBrush}"
+                                    Opacity="0" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Line" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="Line" Property="Opacity" Value="1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
 
             <!-- Node canvas -->
             <nodify:NodifyEditor x:Name="Editor"
@@ -690,22 +753,19 @@
                 </nodify:NodifyEditor.ContextMenu>
             </nodify:NodifyEditor>
 
-            <!-- Brings the library back when it is hidden (also View ▸ Node Library Panel, Ctrl+B). -->
-            <Button Grid.Column="2"
+            <!-- Brings the library back when it is hidden (also View ▸ Node Library Panel, Ctrl+B): the HIDE tab's twin, glued to the left
+                 edge of the canvas. -->
+            <Button x:Name="LibraryShowTab"
+                    Grid.Column="2"
                     Panel.ZIndex="850"
+                    Style="{StaticResource Dyc.Panel.EdgeTab}"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Margin="0,10,0,0"
-                    Width="16"
-                    Height="46"
-                    Style="{StaticResource Dyc.IconButton}"
+                    VerticalAlignment="Center"
+                    Content="NODES"
                     ToolTip="Show the node library (Ctrl+B)"
+                    AutomationProperties.Name="Show the node library"
                     Command="{Binding ToggleLibraryCommand}"
-                    Visibility="{Binding IsLibraryHidden, Converter={StaticResource Dyc.BoolToVisibility}}">
-                <Path Width="12" Height="12" Stretch="Uniform"
-                      Fill="{DynamicResource Dyc.SubtleTextBrush}"
-                      Data="{StaticResource Dyc.Icon.ChevronRight}" />
-            </Button>
+                    Visibility="{Binding IsLibraryHidden, Converter={StaticResource Dyc.BoolToVisibility}}" />
 
             <!-- Where you are while a node group is open: Graph > Group > Inner, each step a way back; Shift+Tab closes the group. -->
             <Border Grid.Column="2"

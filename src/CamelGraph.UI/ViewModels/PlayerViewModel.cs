@@ -197,6 +197,7 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         OpenInEditorCommand = new RelayCommand(() => OpenInEditorRequested?.Invoke(this, _session!.Path), () => _session != null);
         ShowInExplorerCommand = new RelayCommand(ShowInExplorer, () => _session != null);
         AddFolderCommand = new RelayCommand(() => AddFolder());
+        ToggleFoldersCommand = new RelayCommand(() => IsFoldersOpen = !IsFoldersOpen);
         RebuildFolders();
     }
 
@@ -411,6 +412,9 @@ public sealed class PlayerViewModel : ObservableObject, IConnectorHost
         get => _isFoldersOpen;
         set => SetProperty(ref _isFoldersOpen, value);
     }
+
+    /// <summary>Shows or hides the folder list (the folder button in the header).</summary>
+    public ICommand ToggleFoldersCommand { get; }
 
     /// <summary>Asks for a folder and adds it.</summary>
     public ICommand AddFolderCommand { get; }

@@ -132,8 +132,8 @@ public class PaletteDataTests
         var root = RepoRoot();
         var files = new[]
         {
-            "src/CamelGraph.UI/Themes/CamelGraphDark.xaml", "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml",
-            "src/CamelGraph.UI/Views/TextInputDialog.xaml",
+            "src/CamelGraph.UI/Themes/CamelGraphDark.xaml", "src/CamelGraph.UI/Themes/Panels.xaml", "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml",
+            "src/CamelGraph.UI/Views/PlayerControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml",
         };
         var keys = new HashSet<string>(PaletteCatalog.Keys);
         var bad = new List<string>();
@@ -159,11 +159,16 @@ public class PaletteDataTests
         var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "#66000000",                                                   // the busy scrim
+            "#00000000",                                                   // where the shade of the main button starts (transparent black)
             "#FF3D6A99", "#FF3F7249", "#FF9A7B2D", "#FF8A3B3B", "#FF6B4E8E", "#FF5A6273", // frame colour presets (data)
             "#FFFCE9A6", "#FFE6C766", "#FF3A3320",                         // the sticky-note yellow
         };
         var bad = new List<string>();
-        foreach (var file in new[] { "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml" })
+        foreach (var file in new[]
+        {
+            "src/CamelGraph.UI/Views/CamelGraphEditorControl.xaml", "src/CamelGraph.UI/Views/PlayerControl.xaml", "src/CamelGraph.UI/Views/TextInputDialog.xaml",
+            "src/CamelGraph.UI/Themes/Panels.xaml",
+        })
         {
             var text = File.ReadAllText(IoPath.Combine(root, file));
             foreach (Match m in Regex.Matches(text, @"#[0-9A-Fa-f]{6,8}\b"))
@@ -392,8 +397,9 @@ public class PaletteWindowTests
         StaHost.Run(() =>
         {
             var light = PaletteCatalog.ById("Light")!;
-            var panel = (DockPanel)host.Control.FindName("LibraryPanel");
-            Assert.Equal(light.Colors["Dyc.PanelBrush"], ((SolidColorBrush)panel.Background).Color);
+            var card = (Border)host.Control.FindName("LibraryCard");
+            Assert.Equal(light.Colors["Dyc.PanelBrush"], ((SolidColorBrush)card.Background).Color);
+            Assert.Equal(light.Colors["Dyc.PanelBorderBrush"], ((SolidColorBrush)card.BorderBrush).Color);
 
             var header = Visuals(host.Window).OfType<Border>().First(b => b.Background is LinearGradientBrush);
             var stops = ((LinearGradientBrush)header.Background).GradientStops;
