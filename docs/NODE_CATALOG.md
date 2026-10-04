@@ -846,7 +846,7 @@
 | `Flow.When` | value, condition | value | Runs the nodes wired after it only when the condition is true |
 | `Loop.Collect` *(interactive)* | loop, value | results | Closes a loop and collects one value per iteration |
 | `Loop.Item` *(interactive)* | items | item, index, count, loop | Yields the current item of a loop |
-| `Workflow.ForEach` | items, actions | results | Runs a sequence of actions on each item, one item fully before the next |
+| `Workflow.ForEach` | items, actions, onError? | results | Runs a sequence of actions on each item, one item fully before the next (zoom, isolate, save viewpoint, then the next item), the per-item ordered loop that wiring and la… |
 
 ## Workflow.Actions
 

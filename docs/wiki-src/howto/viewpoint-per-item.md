@@ -32,7 +32,12 @@ When it finishes, open the Navisworks **Saved Viewpoints** window. There is one 
 
 ## The shorter way: Workflow.ForEach
 
-The sample *Isolated Viewpoints per Item* does the same with ready-made steps. Add `Action.Isolate`, `Action.ZoomTo` and `Action.SaveViewpoint` (*Workflow ▸ Actions*), gather them in this order with `List.Create` (*List*), and wire the list into the `actions` input of `Workflow.ForEach` (*Workflow*) and the search `items` into its `items`. `Action.SaveViewpoint` names each view `{name}` (the item's name) and files it in the folder `CamelGraph Views` by default. Add `{index1}` or `{count}` to the name to number them.
+The sample *Isolated Viewpoints per Item* does the same with ready-made steps. Add `Action.Isolate`, `Action.ZoomTo` and `Action.SaveViewpoint` (*Workflow ▸ Actions*), wire them one after the other into the `actions` input of `Workflow.ForEach` (*Workflow*), which takes any number of wires and runs them in the order the wires were made (a `List.Create` of the actions works too), and wire the search `items` into its `items`. `Action.SaveViewpoint` names each view `{name}` (the item's name) and files it in the folder `CamelGraph Views` by default. Add `{index1}` or `{count}` to the name to number them.
+
+If one item fails (a name Navisworks refuses, say), `Workflow.ForEach` leaves that item's result empty, goes on with the others and ends amber with one line that names the item and the action. Open the *Advanced* panel and set `onError` to `stop` to end with an error at the first failure instead. Press **Stop** to end the run between two actions; viewpoints saved so far stay saved.
+
+!!! note "ForEach or a loop?"
+    Use `Workflow.ForEach` when the work per item is a fixed list of `Action.*` steps. Use `Loop.Item` and `Loop.Collect` when it is built from ordinary nodes, as in the steps above.
 
 ![The sample Isolated Viewpoints per Item: a search and a list of three actions into Workflow.ForEach.](../../images/wiki-sample-isolated-viewpoints-per-item.png)
 
