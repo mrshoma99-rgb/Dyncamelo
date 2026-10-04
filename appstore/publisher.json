@@ -1,11 +1,11 @@
 {
-  "readme": "Facts the Autodesk App Store package needs that only the publisher can supply. tools/build_store_package.py reads this file. supportEmail is required by the store for a download (CompanyDetails Email) and is left empty on purpose: fill in an address that is monitored, then build with --submission.",
+  "readme": "Facts the Autodesk App Store package needs that only the publisher can supply. tools/build_store_package.py reads this file. supportEmail is required by the store for a download (CompanyDetails Email): it must be an address that is monitored. tools/build_store_package.py --submission fails while it is empty.",
   "appName": "CamelGraph",
   "bundleFolder": "CamelGraph.bundle",
   "author": "BIMCamel",
   "companyName": "BIMCamel",
   "companyUrl": "https://github.com/mrshoma99-rgb/Dyncamelo",
-  "supportEmail": "",
+  "supportEmail": "support@bimcamel.com",
   "supportUrl": "https://github.com/mrshoma99-rgb/Dyncamelo/issues",
   "privacyPolicyUrl": "https://github.com/mrshoma99-rgb/Dyncamelo/blob/main/PRIVACY.md",
   "upgradeCode": "{C9C12BD3-DD00-4CBD-9628-C2D0304C0F7C}",

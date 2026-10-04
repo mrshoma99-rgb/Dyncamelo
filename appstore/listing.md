@@ -13,7 +13,7 @@ Everything the submission form asks for, ready to paste. Limits come from Autode
 | Operating system | Windows 64-bit |
 | Price | **YOU**: not decided yet; set it in the listing form. The free copy for personal use is on GitHub and bimcamel.com |
 | Publisher name | **YOU**: the name on your Autodesk publisher profile (the package says "BIMCamel") |
-| Support email | **YOU**: an address you read; also goes into `appstore/publisher.json` |
+| Support email | support@bimcamel.com (also in `appstore/publisher.json`, the package manifest and the quick-start page) |
 | Support / contact page | https://github.com/mrshoma99-rgb/Dyncamelo/issues |
 | Privacy policy URL | https://github.com/mrshoma99-rgb/Dyncamelo/blob/main/PRIVACY.md (the same text is inside the app: Help > Privacy Policy) |
 | Website | https://github.com/mrshoma99-rgb/Dyncamelo |
@@ -104,7 +104,7 @@ The package already contains the finished page, `Contents/Resources/Help/index.h
 
 **Uninstallation.** Close Navisworks and remove CamelGraph in Windows Settings > Apps. Your graphs and the settings folder `%APPDATA%\CamelGraph` are left alone.
 
-**Support.** https://github.com/mrshoma99-rgb/Dyncamelo/issues, or the support email. Include the text from Help > Copy Diagnostics.
+**Support.** support@bimcamel.com, or https://github.com/mrshoma99-rgb/Dyncamelo/issues. Include the text from Help > Copy Diagnostics.
 
 ## What's new (for each update)
 

@@ -7,7 +7,7 @@ Files for the store listing and the store package. The submission checklist, the
 | `listing.md` | The text of the submission form: title, descriptions, categories, screenshots with their texts, quick-start fields |
 | `help/index.html` | The quick-start page that ships in the package (`HelpFile` in PackageContents.xml); self-contained, no network |
 | `assets/` | Logos (80, 120 and 256 pixels), the `.ico` the manifest points at, and `screenshots/` (made by CI, see `EditorScreenshotTests`) |
-| `publisher.json` | Publisher facts for the package: names, support email (empty until the publisher sets it), the constant upgrade code |
+| `publisher.json` | Publisher facts for the package: names, support email, the constant upgrade code |
 | `../tools/build_store_package.py` | Builds the package from the signed release files (`--self-test` runs in the Linux build) |
 | `../PRIVACY.md` | The privacy policy, also inside the app under Help > Privacy Policy |
 

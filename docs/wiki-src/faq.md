@@ -260,7 +260,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     The file was saved by another version or needs a node pack you do not have. The missing node is kept as a placeholder, so saving loses nothing. See [Troubleshooting](troubleshooting.md#a-graph-opens-with-a-warning-or-with-missing-nodes).
 
 ??? question "How do I report a bug or ask for a feature?"
-    On GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the CamelGraph and Navisworks versions, the end of `%APPDATA%\CamelGraph\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
+    Write to <support@bimcamel.com>, or on GitHub: <https://github.com/mrshoma99-rgb/dyncamelo/issues>. The bug report form asks for the CamelGraph and Navisworks versions, the end of `%APPDATA%\CamelGraph\errors.log` and the result of **Help ▸ Copy Diagnostics**. See [Troubleshooting](troubleshooting.md#how-to-collect-diagnostics). Security problems go through the private route described in [Privacy and safety](privacy-and-safety.md#reporting-a-security-problem).
 
 ??? question "Is there a quick check that the Navisworks nodes work on my model?"
     Yes. **Help ▸ Run Self-Test…** runs a set of read-only Navisworks nodes on the open model and shows pass or fail for each. Run it once after installing, especially on 2025 or 2026. See [Requirements](requirements.md#what-has-been-tested).

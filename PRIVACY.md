@@ -39,4 +39,4 @@ CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere.
 
 ## Withdrawing consent and asking questions
 
-The only optional network request is the update check; switch it off as described above. If you have a question about this policy, open an issue at https://github.com/mrshoma99-rgb/dyncamelo/issues or use the support contact on the app's listing. If the policy changes, the change is described in the release notes of the version that changes it.
+The only optional network request is the update check; switch it off as described above. If you have a question about this policy, write to support@bimcamel.com or open an issue at https://github.com/mrshoma99-rgb/dyncamelo/issues. If the policy changes, the change is described in the release notes of the version that changes it.
