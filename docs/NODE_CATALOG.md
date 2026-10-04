@@ -2,13 +2,13 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**582 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**583 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
 | [Annotation](#annotation) | 1 |
 | [Color](#color) | 18 |
-| [Data](#data) | 4 |
+| [Data](#data) | 5 |
 | [DateTime](#datetime) | 19 |
 | [Dictionary](#dictionary) | 13 |
 | [Display](#display) | 4 |
@@ -90,6 +90,7 @@
 | `JSON.Stringify` | value, indented? | json | Serializes any value to a JSON string |
 | `Snapshot.Diff` | oldValue, newValue | addedKeys, removedKeys, changedKeys | Diffs two GUID-keyed dictionaries: added/removed/changed keys (values compared by JSON equality |
 | `XML.Parse` | xml | value | Parses XML into dictionaries, lists and strings (attributes as "@name", repeated elements as lists, mixed text as "#text") |
+| `XML.ReadFromFile` | path | value | Reads an XML file into dictionaries, lists and strings, in the same shape as XML.Parse (attributes as "@name", repeated elements as lists, mixed text as "#text") |
 
 ## DateTime
 

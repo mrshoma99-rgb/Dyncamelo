@@ -48,10 +48,10 @@ A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no progr
 | A graph can… | Through these nodes |
 |---|---|
 | **Run programs** | `System.Run` starts any program with any arguments and returns what it prints. `System.OpenPath` opens a file or folder with its default application, which can start a program. |
-| **Call web addresses** | `Web.Get` downloads from an http or https address. `Web.Post` sends data to one, for example a web hook. |
-| **Delete, move and overwrite files** | `File.Delete`, `File.Move`, `File.Copy`, `Directory.Delete`, `Directory.Create`, `Zip.Extract`, `Zip.Create` |
-| **Write files** | `Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Excel.WriteToFile`, `Table.ToCsvFile`, `Table.ToExcelFile`, `Log.Write` |
-| **Read files and facts about your computer** | `Text.ReadFromFile`, `CSV.ReadFromFile`, `Excel.ReadFromFile`, `JSON.ReadFromFile`, `Directory.FindFiles`, `System.Environment` (user name, computer name, well-known folders). A graph can read a file and send it away with `Web.Post`. |
+| **Call web addresses** | `Web.Get` downloads text from an http or https address. `Web.Download` saves a file from one. `Web.Post` sends data to one, for example a web hook. |
+| **Delete, move and overwrite files** | `File.Delete`, `File.Move`, `File.Copy`, `Directory.Delete`, `Directory.Copy`, `Directory.Move`, `Zip.Extract` |
+| **Write files** | `Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Excel.WriteToFile`, `Table.ToCsvFile`, `Table.ToExcelFile`, `Log.Write`, `Directory.Create`, `Zip.Create`, `Web.Download` (and the delete, move and overwrite nodes above) |
+| **Read files and facts about your computer** | `Text.ReadFromFile`, `CSV.ReadFromFile`, `Excel.ReadFromFile`, `JSON.ReadFromFile`, `XML.ReadFromFile`, `Directory.Find`, `System.Environment` (user name, computer name, well-known folders). A graph can read a file and send it away with `Web.Post`. |
 | **Change the open model, or the files Navisworks writes** | The Navisworks nodes that change the document, for example `Appearance.OverrideColor`, `Appearance.Hide`, `SelectionSet.Create`, `Properties.SetCustom`, `ModelItem.Translate`, `Document.Open`, `Document.Save`, `Model.Remove`, `Export.NWD`, `Export.ToIfc`, `BCF.ExportIssues`. |
 
 `Zip.Extract` refuses archive entries that would land outside the target folder.

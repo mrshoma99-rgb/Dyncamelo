@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 582,
+ "count": 583,
  "categories": [
   {
    "name": "Annotation",
@@ -12,7 +12,7 @@
   },
   {
    "name": "Data",
-   "count": 4
+   "count": 5
   },
   {
    "name": "DateTime",
@@ -1009,6 +1009,41 @@
      "name": "value",
      "type": "any",
      "description": "The parsed value (dictionary of dictionaries/lists/strings)."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "XML.ReadFromFile",
+   "id": "CamelGraph.Nodes.XmlFileNodes.ReadFromFile@string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Data",
+   "description": "Reads an XML file into dictionaries, lists and strings, in the same shape as XML.Parse (attributes as \"@name\", repeated elements as lists, mixed text as \"#text\"). The encoding the file declares is honoured - UTF-8, UTF-16, Windows-1252 / ISO-8859-1 - so the accents of an MSP or P6 export survive; reading the file with Text.ReadFromFile and then XML.Parse would decode it as UTF-8 first. A relative path starts in the graph's folder.",
+   "tags": [
+    "xml",
+    "read",
+    "load",
+    "import",
+    "file",
+    "parse",
+    "markup",
+    "schedule",
+    "msp",
+    "p6",
+    "encoding"
+   ],
+   "inputs": [
+    {
+     "name": "path",
+     "type": "string",
+     "description": "Path to the XML file. A relative path starts in the graph's folder."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The parsed value (dictionary of dictionaries/lists/strings), see XML.Parse."
     }
    ],
    "returns": ""

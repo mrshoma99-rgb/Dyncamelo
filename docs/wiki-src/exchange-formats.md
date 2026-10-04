@@ -8,18 +8,20 @@ How data gets into and out of a CamelGraph graph. Every node named here is in th
 | **BCF** (issues) | `BCF.ImportIssues` (BCF 2.0 and 2.1) | `BCF.ExportIssues` (BCF 2.1) |
 | **Excel** (`.xlsx`) | `Table.FromExcelFile`, `Excel.ReadFromFile` | `Table.ToExcelFile`, `Excel.WriteToFile` |
 | **CSV** | `Table.FromCsvFile`, `CSV.ReadFromFile` | `Table.ToCsvFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `Export.ToCsv` |
+| **Text and XML** | `Text.ReadFromFile`, `XML.ReadFromFile` | `Text.WriteToFile`, `Text.AppendToFile`, `Log.Write` |
+| **Files from the web, folders and zips** | `Web.Download`, `Directory.Find`, `Zip.List` | `Directory.Copy`, `Directory.Move`, `Zip.Create`, `Zip.Extract` |
 | **Reports** | | `Report.Html`, `Report.Markdown`, `Table.ToText`, `Export.ClashReportCsv`, `Export.ClashReportHtml` |
 | **Navisworks files and pictures** | `Document.Open`, `Document.AppendFiles` | `Export.NWD`, `Export.ViewpointImage` |
 | **JSON** | `JSON.ReadFromFile` | `JSON.WriteToFile` |
 
 !!! tip "Where a file goes"
-    A relative path such as `report.xlsx` means next to the graph: in the folder of the graph file you have open, or in `Documents\CamelGraph` for a graph you have not saved. A full path, for example `C:\Users\you\Documents\report.xlsx`, always works. Spaces and the quotes that Explorer's *Copy as path* adds around a pasted path are removed ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Graphs that write files are marked, and the editor and the Script Player ask before they run one from a file.
+    A relative path such as `report.xlsx` means next to the graph: in the folder of the graph file you have open, or in `Documents\CamelGraph` for a graph you have not saved (the Script Player and the command-line runner use the folder of the script). `Graph.Folder` gives that folder as text, and `Path.Join` builds a path from any number of parts. A full path, for example `C:\Users\you\Documents\report.xlsx`, always works. Spaces and the quotes that Explorer's *Copy as path* adds around a pasted path are removed ([Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place)). Graphs that write files are marked, and the editor and the Script Player ask before they run one from a file.
 
 ## IFC
 
 ### Bringing IFC in
 
-Navisworks opens and appends IFC files by itself. To add several files in a graph, use `Directory.FindFiles` (a pattern such as `*.ifc;*.nwc`, sorted by date) into `Document.AppendFiles`, then `Document.Save` or `Export.NWD`. `Document.Open` replaces the current contents of the document instead of appending.
+Navisworks opens and appends IFC files by itself. To add several files in a graph, use `Directory.Find` (a pattern such as `*.ifc;*.nwc`, sorted by date under *Advanced*) into `Document.AppendFiles`, then `Document.Save` or `Export.NWD`. `Document.Open` replaces the current contents of the document instead of appending.
 
 ### IFC identity: GlobalIds
 
@@ -133,8 +135,8 @@ CamelGraph reads and writes `.xlsx` files itself, so **Excel does not have to be
 |---|---|
 | `Table.ToExcelFile` | Writes a table with its column names. `sheet` names the worksheet; `append` adds a sheet to an existing workbook. |
 | `Table.FromExcelFile` | Reads a worksheet into a table. `firstRowIsHeader` controls the column names. |
-| `Excel.WriteToFile` | Writes rows (and optional headers). `append` adds a sheet to an existing workbook; **styles and formulas that were not written by CamelGraph are not preserved**. |
-| `Excel.ReadFromFile` | Gives `rows`, `headers` and `sheetNames`. **Dates arrive as Excel serial numbers.** |
+| `Excel.WriteToFile` | Writes rows (and optional headers). Dates are written as real date cells, so Excel shows them as dates. Under *Advanced*, `append` adds a sheet to an existing workbook; **styles, formulas, charts and pictures that were not written by CamelGraph are not preserved** (the node warns). The workbook is built next to the file and then put in place, so a failure never leaves a broken workbook. |
+| `Excel.ReadFromFile` | Gives `rows`, `headers` and `sheetNames`. **Dates arrive as Excel serial numbers** (convert them with `DateTime.FromExcelSerial`). Every row is padded to the widest row and the empty rows at the end of the sheet are dropped (*Advanced* > `trimEmptyRows`). |
 
 Tables are the easiest way in: `Properties.ToTable` reads the named properties of items into a table (use `Category.Property` names such as `Element.Category`, or `@Name`, `@Path`, `@Guid`), and the `Table.*` nodes then filter, sort, group, join, pivot and format it before `Table.ToExcelFile` writes it.
 
@@ -156,12 +158,16 @@ To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, j
 
 | Node | Notes |
 |---|---|
-| `Table.ToCsvFile`, `Table.FromCsvFile` | Tables in and out. Numbers become numbers; everything else stays text. `delimiter` is a comma unless you change it. |
-| `CSV.WriteToFile` | Writes a list of rows. Overwrites; creates missing folders. |
+| `Table.ToCsvFile`, `Table.FromCsvFile` | Tables in and out. Plain numbers become numbers; everything else stays text, including codes with a leading zero such as `007`. `delimiter` is a comma unless you change it. |
+| `CSV.WriteToFile` | Writes a list of rows. Overwrites; creates missing folders. Dates are written as `2026-10-04 14:30:00`, the same in every country. |
 | `CSV.AppendToFile` | Adds rows to a file, writing the optional headers only when the file is new or empty: one row of totals per run. |
-| `CSV.ReadFromFile` | Reads rows (numeric cells become numbers). |
+| `CSV.ReadFromFile` | Reads rows. Plain numbers become numbers; codes with a leading zero (`007`), whole numbers of more than 15 digits and the words `NaN` and `Infinity` stay text; *Advanced* > `numbers` = `text` keeps every cell as text. |
 | `Export.ToCsv` | One row per model item: a name column plus the property columns you list. Useful for quantity take-offs. |
 | `Export.ClashReportCsv` | One-node clash report: test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point. Excel-ready. |
+
+**Delimiter and encoding.** `delimiter` is a drop-down: comma, semicolon, bar or `tab`. The nodes that read text (`Text.ReadFromFile`, `CSV.ReadFromFile`, `JSON.ReadFromFile`) detect the encoding: UTF-8 or UTF-16 as the file marks it, and a file that is not valid UTF-8 is read as Windows-1252, which is what a European Excel *CSV (Comma delimited)* export uses. The nodes that write text (`Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Log.Write`) write UTF-8 without a byte-order mark; under *Advanced* > `encoding` choose *UTF-8 with BOM* so that Excel shows accents and symbols correctly, or Windows-1252 or UTF-16.
+
+**Writing text.** `Text.WriteToFile` writes a list of texts one item per line. A list of paths writes every file with the same text; set the `text` input to `@L1` to write one text per path. Nothing wired into `text` (or `data`) is an error that leaves the existing file alone: empty text `""` empties a file on purpose.
 
 ## Reports
 

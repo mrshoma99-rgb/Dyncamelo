@@ -116,7 +116,7 @@ Use the small model. Set the graph to **Manual** run mode (Graph > Auto-Run off)
 | 4.3.4 | `Excel.WriteToFile` with headers and rows; open the file in Excel. | Excel opens it with no repair message; the cells are right. | |
 | 4.3.5 | `Zip.Create` on a folder, `Zip.List`, `Zip.Extract` into another folder. | The listing and the extracted files match. Extracting again without `overwrite` fails with a message. | |
 | 4.3.6 | `File.Copy`, `File.Move`, `File.Delete` on a test file. | Each does what it says; `File.Delete` on a missing file returns false. | |
-| 4.3.7 | `Text.WriteToFile` with a **relative** path such as `qa-relative.txt`. | **Unknown:** where does the file land, or does it fail with "access denied"? ([Troubleshooting](TROUBLESHOOTING.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place) says it cannot be written under the Navisworks install folder.) | |
+| 4.3.7 | `Text.WriteToFile` with a **relative** path such as `qa-relative.txt`. | The file lands next to the graph file (in `Documents\CamelGraph` for a graph that was never saved); `Graph.Folder` shows that folder. It does not fail with "access denied". ([Troubleshooting](TROUBLESHOOTING.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place) says it cannot be written under the Navisworks install folder.) | |
 | 4.3.8 | `Log.Write` twice to the same file. | Two lines, each with a time stamp and level. | |
 | 4.3.9 | `System.Environment` into a Watch. | Your user name, the computer name, and the temp and Documents folders. | |
 | 4.3.10 | `System.Run` with `executable` = `cmd.exe`, `arguments` = `/c echo hello`. | `exitCode` 0 and `output` contains `hello`. | |
