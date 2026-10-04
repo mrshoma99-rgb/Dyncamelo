@@ -21334,13 +21334,16 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.FromCsvFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Reads a CSV file straight into a table (numbers become numbers, everything else stays text).",
+   "description": "Reads a CSV file straight into a table (numbers become numbers, everything else stays text). The delimiter is a comma, a semicolon (European Excel), a bar or a tab.",
    "tags": [
     "csv",
     "read",
     "import",
     "load",
-    "file"
+    "file",
+    "tsv",
+    "tab",
+    "semicolon"
    ],
    "inputs": [
     {
@@ -21351,7 +21354,7 @@
     {
      "name": "delimiter",
      "type": "string",
-     "description": "The cell separator (default a comma).",
+     "description": "The cell separator: a comma (default), a semicolon, a bar or tab.",
      "default": "\",\""
     },
     {
@@ -21405,7 +21408,7 @@
    "id": "CamelGraph.Nodes.TableToolkitNodes.FromExcelFile@string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Reads an Excel worksheet straight into a table.",
+   "description": "Reads an Excel worksheet straight into a table. Dates arrive as Excel serial numbers; DateTime.FromExcelSerial turns one into a date.",
    "tags": [
     "excel",
     "xlsx",
@@ -21979,32 +21982,35 @@
   },
   {
    "name": "Table.ToCsvFile",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@CamelGraph.Nodes.CamelGraphTable,string,string",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@object,string,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Writes a table, with its column names, to a CSV file.",
+   "description": "Writes one table, with its column names, to a CSV file; a file that is already there is replaced. The delimiter is a comma, a semicolon, a bar or a tab. A list of tables is an error (they would overwrite each other): stack them with Table.Concat first.",
    "tags": [
     "csv",
     "write",
     "export",
     "save",
-    "file"
+    "file",
+    "tsv",
+    "tab",
+    "semicolon"
    ],
    "inputs": [
     {
      "name": "table",
-     "type": "CamelGraphTable",
-     "description": "The table."
+     "type": "any",
+     "description": "The table to write: one table, not a list of them."
     },
     {
      "name": "path",
      "type": "string",
-     "description": "The file to write (overwritten; folders are created)."
+     "description": "The file to write (replaced when it exists; folders are created)."
     },
     {
      "name": "delimiter",
      "type": "string",
-     "description": "The cell separator (default a comma).",
+     "description": "The cell separator: a comma (default), a semicolon, a bar or tab.",
      "default": "\",\""
     }
    ],
@@ -22047,10 +22053,10 @@
   },
   {
    "name": "Table.ToExcelFile",
-   "id": "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@CamelGraph.Nodes.CamelGraphTable,string,string,bool",
+   "id": "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@object,string,string,bool",
    "assembly": "CamelGraph.Nodes",
    "category": "Table",
-   "description": "Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook).",
+   "description": "Writes one table, with its column names, to an Excel worksheet. With append ticked the sheet is added to the workbook that is already there; without it the whole file is replaced, other sheets included. For several sheets in one workbook use one node per table, each with its own sheet name and append ticked, and wire the path of one into the next so they run in order. A list of tables is an error (they would overwrite each other).",
    "tags": [
     "excel",
     "xlsx",
@@ -22063,8 +22069,8 @@
    "inputs": [
     {
      "name": "table",
-     "type": "CamelGraphTable",
-     "description": "The table."
+     "type": "any",
+     "description": "The table to write: one table, not a list of them."
     },
     {
      "name": "path",

@@ -824,9 +824,9 @@
 | `Table.SetColumn` | table, name, values | table | Replaces the cells of a column in place, keeping its position and name, or adds the column at the end when there is none of that name |
 | `Table.Slice` | table, start?, count? | table | Takes count rows from a starting row (count -1 takes all the rest) |
 | `Table.Sort` | table, columns, descending? | table | Sorts the rows by one or more columns, as a list of names or one text ("Level, -Length" sorts by level, then longest first) |
-| `Table.ToCsvFile` | table, path, delimiter? | path | Writes a table, with its column names, to a CSV file |
+| `Table.ToCsvFile` | table, path, delimiter? | path | Writes one table, with its column names, to a CSV file |
 | `Table.ToDictionaries` | table | dictionaries | The rows of a table as dictionaries (column name to cell) |
-| `Table.ToExcelFile` | table, path, sheet?, append? | path | Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook) |
+| `Table.ToExcelFile` | table, path, sheet?, append? | path | Writes one table, with its column names, to an Excel worksheet |
 | `Table.ToText` | table, format? | text | Renders a table as Markdown, CSV, tab-separated or an HTML table |
 | `Table.Unmatched` | left, right, leftKey, rightKey? | table | The rows of the left table that find no partner in the right table, using the same keys and the same matching as Table.Join (GUIDs match whatever their case, a blank key… |
 

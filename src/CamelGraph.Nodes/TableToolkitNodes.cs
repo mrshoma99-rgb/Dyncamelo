@@ -1070,35 +1070,43 @@ public static class TableToolkitNodes
 
     /// <summary>Reads a CSV file into a table.</summary>
     /// <param name="path">The CSV file.</param>
-    /// <param name="delimiter">The cell separator (default a comma).</param>
+    /// <param name="delimiter">The cell separator: a comma (default), a semicolon, a bar or tab.</param>
     /// <param name="firstRowIsHeader">True (default) takes the first row as the column names.</param>
     /// <returns>The table.</returns>
     [NodeName("Table.FromCsvFile")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("table")]
-    [NodeDescription("Reads a CSV file straight into a table (numbers become numbers, everything else stays text).")]
-    [NodeSearchTags("csv", "read", "import", "load", "file")]
-    public static CamelGraphTable FromCsvFile(string path, string delimiter = ",", bool firstRowIsHeader = true)
+    [NodeDescription("Reads a CSV file straight into a table (numbers become numbers, everything else stays text). The delimiter is a comma, a semicolon (European Excel), a bar or a tab.")]
+    [NodeSearchTags("csv", "read", "import", "load", "file", "tsv", "tab", "semicolon")]
+    public static CamelGraphTable FromCsvFile(
+        [NodePath(NodePathMode.Open, Filter = "CSV files (*.csv)|*.csv|Text files (*.txt;*.tsv)|*.txt;*.tsv|All files (*.*)|*.*")] string path,
+        [NodeChoices(",", ";", "|", "tab")] string delimiter = ",",
+        bool firstRowIsHeader = true)
     {
-        return FromRows(FileNodes.ReadCsv(path, delimiter), null, firstRowIsHeader);
+        return FromRows(FileNodes.ReadCsv(path, CsvDelimiter(delimiter)), null, firstRowIsHeader);
     }
 
     /// <summary>Writes a table to a CSV file.</summary>
-    /// <param name="table">The table.</param>
-    /// <param name="path">The file to write (overwritten; folders are created).</param>
-    /// <param name="delimiter">The cell separator (default a comma).</param>
+    /// <param name="table">The table to write: one table, not a list of them.</param>
+    /// <param name="path">The file to write (replaced when it exists; folders are created).</param>
+    /// <param name="delimiter">The cell separator: a comma (default), a semicolon, a bar or tab.</param>
     /// <returns>The path that was written.</returns>
     [NodeName("Table.ToCsvFile")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@CamelGraph.Nodes.CamelGraphTable,string,string")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [return: NodeName("path")]
-    [NodeDescription("Writes a table, with its column names, to a CSV file.")]
-    [NodeSearchTags("csv", "write", "export", "save", "file")]
-    public static string ToCsvFile(CamelGraphTable table, string path, string delimiter = ",")
+    [NodeDescription("Writes one table, with its column names, to a CSV file; a file that is already there is replaced. The delimiter is a comma, a semicolon, a bar or a tab. A list of tables is an error (they would overwrite each other): stack them with Table.Concat first.")]
+    [NodeSearchTags("csv", "write", "export", "save", "file", "tsv", "tab", "semicolon")]
+    public static string ToCsvFile(
+        object? table,
+        [NodePath(NodePathMode.Save, Filter = "CSV files (*.csv)|*.csv|Text files (*.txt;*.tsv)|*.txt;*.tsv|All files (*.*)|*.*")] string path,
+        [NodeChoices(",", ";", "|", "tab")] string delimiter = ",")
     {
-        Require(table, "Table.ToCsvFile");
-        var data = new List<object?> { new List<object?>(table.Headers.Cast<object?>()) };
-        data.AddRange(table.Rows.Select(r => (object?)new List<object?>(r)));
-        return FileNodes.WriteCsv(path, data, delimiter);
+        var single = RequireOneTable(table, "Table.ToCsvFile");
+        var data = new List<object?> { new List<object?>(single.Headers.Cast<object?>()) };
+        data.AddRange(single.Rows.Select(r => (object?)new List<object?>(r)));
+        return FileNodes.WriteCsv(path, data, CsvDelimiter(delimiter));
     }
 
     /// <summary>Reads an Excel worksheet into a table.</summary>
@@ -1109,9 +1117,12 @@ public static class TableToolkitNodes
     [NodeName("Table.FromExcelFile")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("table")]
-    [NodeDescription("Reads an Excel worksheet straight into a table.")]
+    [NodeDescription("Reads an Excel worksheet straight into a table. Dates arrive as Excel serial numbers; DateTime.FromExcelSerial turns one into a date.")]
     [NodeSearchTags("excel", "xlsx", "read", "import", "load", "spreadsheet")]
-    public static CamelGraphTable FromExcelFile(string path, string sheet = "", bool firstRowIsHeader = true)
+    public static CamelGraphTable FromExcelFile(
+        [NodePath(NodePathMode.Open, Filter = "Excel workbooks (*.xlsx)|*.xlsx|All files (*.*)|*.*")] string path,
+        string sheet = "",
+        bool firstRowIsHeader = true)
     {
         var read = ExcelNodes.ReadFromFile(path, sheet, firstRowIsHeader);
         var headers = (IList<string>)read["headers"];
@@ -1119,23 +1130,29 @@ public static class TableToolkitNodes
     }
 
     /// <summary>Writes a table to an Excel worksheet.</summary>
-    /// <param name="table">The table.</param>
+    /// <param name="table">The table to write: one table, not a list of them.</param>
     /// <param name="path">The .xlsx file to write.</param>
     /// <param name="sheet">The worksheet name.</param>
     /// <param name="append">True adds the sheet to an existing workbook instead of replacing the file.</param>
     /// <returns>The path that was written.</returns>
     [NodeName("Table.ToExcelFile")]
+    [NodeAliases("CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@CamelGraph.Nodes.CamelGraphTable,string,string,bool")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [return: NodeName("path")]
-    [NodeDescription("Writes a table, with its column names, to an Excel worksheet (append adds a sheet to an existing workbook).")]
+    [NodeDescription("Writes one table, with its column names, to an Excel worksheet. With append ticked the sheet is added to the workbook that is already there; without it the whole file is replaced, other sheets included. For several sheets in one workbook use one node per table, each with its own sheet name and append ticked, and wire the path of one into the next so they run in order. A list of tables is an error (they would overwrite each other).")]
     [NodeSearchTags("excel", "xlsx", "write", "export", "save", "spreadsheet", "sheet")]
-    public static string ToExcelFile(CamelGraphTable table, string path, string sheet = "Sheet1", bool append = false)
+    public static string ToExcelFile(
+        object? table,
+        [NodePath(NodePathMode.Save, Filter = "Excel workbooks (*.xlsx)|*.xlsx|All files (*.*)|*.*")] string path,
+        string sheet = "Sheet1",
+        bool append = false)
     {
-        Require(table, "Table.ToExcelFile");
+        var single = RequireOneTable(table, "Table.ToExcelFile");
         return ExcelNodes.WriteToFile(
             path,
-            table.Rows.Select(r => (object?)new List<object?>(r)).ToList(),
-            table.Headers.Cast<object?>().ToList(),
+            single.Rows.Select(r => (object?)new List<object?>(r)).ToList(),
+            single.Headers.Cast<object?>().ToList(),
             sheet,
             append);
     }
@@ -1148,6 +1165,37 @@ public static class TableToolkitNodes
         {
             throw new ArgumentNullException(null, nodeName + " requires a table. Wire one into the 'table' input (Table.FromRows makes one).");
         }
+    }
+
+    // The writers take exactly one table. A list would make the engine call the node once per table, all of them writing the same
+    // file, so the input is read whole and a list is refused with a sentence that says what to do.
+    private static CamelGraphTable RequireOneTable(object? table, string nodeName)
+    {
+        if (table is CamelGraphTable single)
+        {
+            return single;
+        }
+
+        if (table == null)
+        {
+            throw new ArgumentNullException(null, nodeName + " requires a table. Wire one into the 'table' input (Table.FromRows makes one).");
+        }
+
+        if (table is IList list && !(table is string))
+        {
+            throw new ArgumentException(
+                nodeName + " writes one table to one file, but 'table' holds a list of " + list.Count.ToString(CultureInfo.InvariantCulture) +
+                " item(s), which would overwrite each other. Stack the tables into one with Table.Concat, or write each table with its own node (or a loop) to its own file.");
+        }
+
+        throw new ArgumentException(nodeName + ": the 'table' input holds something that is not a table. Table.FromRows makes one.");
+    }
+
+    // The delimiter choices of the CSV nodes: "tab" (or \t) is a tab character, anything else is passed on as typed.
+    private static string CsvDelimiter(string? delimiter)
+    {
+        var text = delimiter ?? string.Empty;
+        return string.Equals(text.Trim(), "tab", StringComparison.OrdinalIgnoreCase) || text == "\\t" || text == "\t" ? "\t" : text;
     }
 
     private static void RequireList(IList<object?>? list, string port, string nodeName)

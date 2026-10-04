@@ -655,11 +655,126 @@ public class TableAuditTests
     [InlineData("CamelGraph.Nodes.TableToolkitNodes.Distinct@CamelGraph.Nodes.CamelGraphTable,string", "Table.Distinct")]
     [InlineData("CamelGraph.Nodes.TableToolkitNodes.GroupBy@CamelGraph.Nodes.CamelGraphTable,string,System.Collections.Generic.IList<object>", "Table.GroupBy")]
     [InlineData("CamelGraph.Nodes.TableToolkitNodes.Join@CamelGraph.Nodes.CamelGraphTable,CamelGraph.Nodes.CamelGraphTable,string,string,string", "Table.Join")]
+    [InlineData("CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@CamelGraph.Nodes.CamelGraphTable,string,string", "Table.ToCsvFile")]
+    [InlineData("CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@CamelGraph.Nodes.CamelGraphTable,string,string,bool", "Table.ToExcelFile")]
     [InlineData("Dyncamelo.Nodes.TableToolkitNodes.Sort@Dyncamelo.Nodes.DyncameloTable,string,bool", "Table.Sort")]
     public void TheIdsSavedBeforeTheAuditStillFindTheirNode(string oldId, string name)
     {
         Assert.True(Registry.TryGetDefinition(oldId, out var definition));
         Assert.Equal(name, definition!.Name);
         Assert.NotNull(Registry.CreateZeroTouchNode(oldId));
+    }
+
+    // ------------------------------------------------------------- COL-11, COL-21: the file wrappers
+
+    private static string TempFolder()
+    {
+        var folder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "camelgraph-tablefiles-" + Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(folder);
+        return folder;
+    }
+
+    [Fact]
+    public void AListOfTablesIsAnErrorThatSaysSoInsteadOfWritingTheSameFileTwice()
+    {
+        var folder = TempFolder();
+        try
+        {
+            var path = System.IO.Path.Combine(folder, "out.csv");
+            var tables = L(Elements(), Elements());
+
+            var csv = Assert.Throws<ArgumentException>(() => TableToolkitNodes.ToCsvFile(tables, path));
+            Assert.Contains("Table.ToCsvFile writes one table to one file", csv.Message);
+            Assert.Contains("list of 2", csv.Message);
+            Assert.Contains("Table.Concat", csv.Message);
+            Assert.DoesNotContain("Parameter", csv.Message);
+            var excel = Assert.Throws<ArgumentException>(() => TableToolkitNodes.ToExcelFile(tables, System.IO.Path.Combine(folder, "out.xlsx")));
+            Assert.Contains("Table.ToExcelFile writes one table to one file", excel.Message);
+            Assert.False(System.IO.File.Exists(path));
+
+            // the same through the engine: the list reaches the node whole, so it fails once instead of writing once per table
+            var node = Run("Table.ToCsvFile", ("table", tables), ("path", path));
+            Assert.Equal(NodeState.Error, node.State);
+            Assert.False(System.IO.File.Exists(path));
+
+            Assert.Throws<ArgumentNullException>(() => TableToolkitNodes.ToCsvFile(null, path));
+            Assert.Contains("not a table", Assert.Throws<ArgumentException>(() => TableToolkitNodes.ToCsvFile("text", path)).Message);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(folder, true);
+        }
+    }
+
+    [Fact]
+    public void OneTableStillWritesThroughTheEngine()
+    {
+        var folder = TempFolder();
+        try
+        {
+            var path = System.IO.Path.Combine(folder, "out.csv");
+
+            var node = Run("Table.ToCsvFile", ("table", Elements()), ("path", path));
+
+            Assert.Equal(NodeState.Executed, node.State);
+            Assert.Equal(path, node.OutPorts[0].Value);
+            Assert.Equal(5, System.IO.File.ReadAllLines(path).Length);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(folder, true);
+        }
+    }
+
+    [Theory]
+    [InlineData(";", ';')]
+    [InlineData("|", '|')]
+    [InlineData("tab", '\t')]
+    [InlineData("TAB", '\t')]
+    [InlineData("\\t", '\t')]
+    public void TheCsvWrappersTakeSemicolonBarAndTabAsDelimiters(string delimiter, char expected)
+    {
+        var folder = TempFolder();
+        try
+        {
+            var path = System.IO.Path.Combine(folder, "table.csv");
+            var table = Make(new[] { "A", "B" }, new object?[] { "x", 2.0 });
+
+            TableToolkitNodes.ToCsvFile(table, path, delimiter);
+
+            Assert.Equal("A" + expected + "B", System.IO.File.ReadAllLines(path)[0]);
+            var back = TableToolkitNodes.FromCsvFile(path, delimiter);
+            Assert.Equal(new[] { "A", "B" }, back.Headers);
+            Assert.Equal(new object?[] { "x", 2.0 }, back.Rows[0]);
+        }
+        finally
+        {
+            System.IO.Directory.Delete(folder, true);
+        }
+    }
+
+    [Fact]
+    public void TheDelimiterOfTheCsvWrappersIsADropdownAndThePathsHaveTheRightDialogs()
+    {
+        var read = Registry.Definitions.Single(d => d.Name == "Table.FromCsvFile");
+        var write = Registry.Definitions.Single(d => d.Name == "Table.ToCsvFile");
+        Assert.Equal(new[] { ",", ";", "|", "tab" }, read.Inputs.Single(i => i.Name == "delimiter").Choices);
+        Assert.Equal(new[] { ",", ";", "|", "tab" }, write.Inputs.Single(i => i.Name == "delimiter").Choices);
+
+        Assert.Equal(NodePathMode.Open, read.Inputs.Single(i => i.Name == "path").PathMode);
+        Assert.Equal(NodePathMode.Save, write.Inputs.Single(i => i.Name == "path").PathMode);
+        Assert.Equal(NodePathMode.Open, Registry.Definitions.Single(d => d.Name == "Table.FromExcelFile").Inputs.Single(i => i.Name == "path").PathMode);
+        var excel = Registry.Definitions.Single(d => d.Name == "Table.ToExcelFile").Inputs.Single(i => i.Name == "path");
+        Assert.Equal(NodePathMode.Save, excel.PathMode);
+        Assert.Contains("*.xlsx", excel.PathFilter);
+    }
+
+    [Fact]
+    public void TheTableWritersDeclareThatTheyWriteFiles()
+    {
+        foreach (var name in new[] { "Table.ToCsvFile", "Table.ToExcelFile" })
+        {
+            Assert.Equal(NodeEffects.WritesFiles, Registry.Definitions.Single(d => d.Name == name).Effects);
+        }
     }
 }

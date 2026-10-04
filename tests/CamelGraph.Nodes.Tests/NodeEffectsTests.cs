@@ -26,6 +26,8 @@ public class NodeEffectsTests
         ["File.Copy"] = NodeEffects.ChangesFiles,
         ["Directory.Delete"] = NodeEffects.ChangesFiles,
         ["Zip.Extract"] = NodeEffects.ChangesFiles,
+        ["Table.ToCsvFile"] = NodeEffects.WritesFiles,
+        ["Table.ToExcelFile"] = NodeEffects.WritesFiles,
     };
 
     [Fact]

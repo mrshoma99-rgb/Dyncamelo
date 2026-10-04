@@ -162,4 +162,47 @@ public class TableNodeEvolutionTests : IDisposable
         Assert.Equal("GUID,Name,Fire\n5f8c1b9e-0000-4a7b-9c3d-0123456789ab,Wall 1,EI30\n5F8C1B9E-0000-4A7B-9C3D-0123456789AC,Wall 2,EI60\n5f8c1b9e-0000-4a7b-9c3d-0123456789ad,Wall 3,\n", Lines(Pipeline.Output(loaded, "Text")));
         Assert.Equal(3, ((CamelGraphTable)Pipeline.Output(loaded, "Join", "table")!).ColumnCount);
     }
+
+    [Fact]
+    public void ACsvWriterSavedWithATableTypedTableInputStillLoadsKeepsItsWireAndWrites()
+    {
+        var registry = Pipeline.CreateRegistry();
+        var graph = new GraphModel { Name = "write" };
+        var read = ReadCsv(registry, graph, Csv("in.csv", "Level,Length", "L01,3000", "L02,900"), "Read");
+        var write = Pipeline.ZeroTouch(registry, "Table.ToCsvFile", "Write");
+        graph.AddNode(write);
+        Pipeline.Connect(graph, read, "table", write, "table");
+        var target = Path.Combine(_folder, "out", "copy.csv");
+        write.InPorts.First(p => p.Name == "path").SetUserValue(target);
+
+        var oldId = "CamelGraph.Nodes.TableToolkitNodes.ToCsvFile@" + Table + ",string,string";
+        var loaded = LoadAsSavedBefore(graph, registry, DefinitionId(registry, "Table.ToCsvFile"), oldId, out var result);
+
+        Assert.True(result.Success);
+        Assert.Equal(target, Pipeline.Output(loaded, "Write"));
+        Assert.Equal("Level,Length\nL01,3000\nL02,900\n", File.ReadAllText(target).Replace("\r\n", "\n"));
+    }
+
+    [Fact]
+    public void AnExcelWriterSavedBeforeStillLoadsKeepsItsWireAndWrites()
+    {
+        var registry = Pipeline.CreateRegistry();
+        var graph = new GraphModel { Name = "write-excel" };
+        var read = ReadCsv(registry, graph, Csv("in.csv", "Level,Length", "L01,3000"), "Read");
+        var write = Pipeline.ZeroTouch(registry, "Table.ToExcelFile", "Write");
+        graph.AddNode(write);
+        Pipeline.Connect(graph, read, "table", write, "table");
+        var target = Path.Combine(_folder, "out.xlsx");
+        write.InPorts.First(p => p.Name == "path").SetUserValue(target);
+        write.InPorts.First(p => p.Name == "sheet").SetUserValue("Quantities");
+
+        var oldId = "CamelGraph.Nodes.TableToolkitNodes.ToExcelFile@" + Table + ",string,string,bool";
+        var loaded = LoadAsSavedBefore(graph, registry, DefinitionId(registry, "Table.ToExcelFile"), oldId, out var result);
+
+        Assert.True(result.Success);
+        Assert.True(File.Exists(target));
+        var back = TableToolkitNodes.FromExcelFile(target, "Quantities");
+        Assert.Equal(new[] { "Level", "Length" }, back.Headers);
+        Assert.Equal(3000.0, back.Rows[0][1]);
+    }
 }
