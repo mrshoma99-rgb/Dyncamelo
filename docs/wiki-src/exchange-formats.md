@@ -165,7 +165,7 @@ To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, j
 
 ## Reports
 
-* **`Report.Html`** builds a self-contained, printable HTML report (light and dark) from tables and text; a line starting with `# ` becomes a heading. Write it with `Text.WriteToFile`, or paste it into an e-mail. **`Report.Markdown`** does the same in Markdown for Teams, trackers and wikis.
+* **`Report.Html`** builds a self-contained, printable HTML report (light and dark) from tables and text; a line starting with `# ` becomes a heading. A text line that is the path of an image file (`.png`, `.jpg`, `.gif`, `.bmp`, `.webp` or `.svg`, up to 10 MB) becomes the picture itself, embedded in the page, so a snapshot from `Export.ViewpointImage` can go straight into the report. A path that does not exist stays text and the node shows a warning. Write the page with `Text.WriteToFile`, or paste it into an e-mail. **`Report.Markdown`** does the same in Markdown for Teams, trackers and wikis; an image path becomes an image link to the file (the picture is not copied into the text).
 * **`Table.ToText`** renders a table as Markdown, CSV, tab-separated text or an HTML table.
 * **`Export.ClashReportHtml`** is a single-file HTML clash report, one section per test and one row per result, optionally with embedded snapshots (`includeImages`, `imageWidth`, `imageHeight`).
 * **`Export.ViewpointImage`** renders the current view to a `.png`, `.jpg` or `.bmp`. **`Export.NWD`** saves the document as a published `.nwd` with appearance overrides baked in.

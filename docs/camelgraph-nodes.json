@@ -19378,7 +19378,7 @@
    "id": "CamelGraph.Nodes.ReportNodes.Html@string,System.Collections.Generic.IList<object>,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Report",
-   "description": "Builds a self-contained HTML report from tables and text (\"# Heading\" makes a heading) — light and dark, printable, ready for Text.WriteToFile or an e-mail.",
+   "description": "Builds a self-contained HTML report from tables and text (\"# Heading\" makes a heading) — light and dark, printable, ready for Text.WriteToFile or an e-mail. A text section that is the path of an existing image file (.png, .jpg, .gif, .bmp, .webp, .svg; up to 10 MB) becomes the picture itself, embedded in the page; a path that is not found is shown as text with a warning.",
    "tags": [
     "report",
     "html",
@@ -19387,7 +19387,10 @@
     "summary",
     "export",
     "publish",
-    "document"
+    "document",
+    "image",
+    "picture",
+    "screenshot"
    ],
    "inputs": [
     {
@@ -19398,7 +19401,7 @@
     {
      "name": "sections",
      "type": "any[]",
-     "description": "What goes in the report, top to bottom: tables, text paragraphs (\"# Heading\" and \"## Subheading\" make headings), lists and other values (shown as text). Wire several into the one socket.",
+     "description": "What goes in the report, top to bottom: tables, text paragraphs (\"# Heading\" and \"## Subheading\" make headings), lists and other values (shown as text). A text line that is the path of an existing image file (.png, .jpg, .gif, .bmp, .webp or .svg, up to 10 MB) becomes the picture, embedded in the page. Wire several into the one socket.",
      "multiInput": true
     },
     {
@@ -19422,7 +19425,7 @@
    "id": "CamelGraph.Nodes.ReportNodes.Markdown@string,System.Collections.Generic.IList<object>,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Report",
-   "description": "Builds a Markdown report from tables and text — for Teams, issue trackers and wikis.",
+   "description": "Builds a Markdown report from tables and text — for Teams, issue trackers and wikis. A text section that is the path of an existing image file (.png, .jpg, .gif, .bmp, .webp, .svg) becomes an image link to that file (the picture is not copied into the text); a path that is not found stays text with a warning.",
    "tags": [
     "report",
     "markdown",
@@ -19430,7 +19433,10 @@
     "weekly",
     "summary",
     "wiki",
-    "document"
+    "document",
+    "image",
+    "picture",
+    "screenshot"
    ],
    "inputs": [
     {
@@ -19441,7 +19447,7 @@
     {
      "name": "sections",
      "type": "any[]",
-     "description": "What goes in the report, top to bottom: tables, text (a \"# Heading\" line stays a heading) and other values.",
+     "description": "What goes in the report, top to bottom: tables, text (a \"# Heading\" line stays a heading) and other values. A text line that is the path of an existing image file (.png, .jpg, .gif, .bmp, .webp or .svg) becomes an image link to that file; wire it as a section of its own (a list is shown as code).",
      "multiInput": true
     },
     {
