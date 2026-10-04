@@ -81,10 +81,9 @@
                         <Border x:Name="HeaderLogo"
                                 Width="24" Height="24"
                                 CornerRadius="6"
-                                Background="{DynamicResource Dyc.LogoChipBrush}"
                                 VerticalAlignment="Center">
-                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
-                                   Width="20" Height="20"
+                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camelgraph_chip_48.png"
+                                   Width="24" Height="24"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
                         <StackPanel x:Name="HeaderWordmark" VerticalAlignment="Center" Margin="8,0,0,0">
@@ -1479,9 +1478,9 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="46" Height="46" CornerRadius="12" Background="{DynamicResource Dyc.LogoChipBrush}" VerticalAlignment="Top">
-                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
-                                   Width="36" Height="36"
+                        <Border Width="46" Height="46" CornerRadius="12" VerticalAlignment="Top">
+                            <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camelgraph_96.png"
+                                   Width="46" Height="46"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
                         <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">

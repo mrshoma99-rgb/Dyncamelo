@@ -128,10 +128,9 @@
                 <Border DockPanel.Dock="Left"
                         Width="22" Height="22"
                         CornerRadius="6"
-                        Background="{DynamicResource Dyc.LogoChipBrush}"
                         VerticalAlignment="Center">
-                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camel_32.png"
-                           Width="18" Height="18"
+                    <Image Source="pack://application:,,,/Dyncamelo.UI;component/Assets/camelgraph_chip_48.png"
+                           Width="22" Height="22"
                            RenderOptions.BitmapScalingMode="HighQuality" />
                 </Border>
                 <TextBlock Text="Script Player"

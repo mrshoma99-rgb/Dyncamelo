@@ -1,0 +1,8 @@
+{
+  "name": "camelgraph-logo-tools",
+  "private": true,
+  "description": "Renders the CamelGraph logo SVGs to PNG (used by build_logo.py).",
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}
