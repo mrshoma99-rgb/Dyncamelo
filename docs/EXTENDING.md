@@ -204,7 +204,7 @@ Rules for Navisworks nodes (the built-in library follows the same ones):
 1. **Threading is solved for you** — nodes execute on the Navisworks main thread by construction ([plan §7](IMPLEMENTATION_PLAN.md#7-threading-model)). Do not spawn threads or use `Task.Run`/`async` inside a node.
 2. Emit and accept **flat `List<ModelItem>`** so your nodes compose with search, sets, clash, and appearance nodes — it is the lingua franca of the Navisworks library.
 3. Take a `Document` parameter (it defaults to the active document when unconnected) rather than reading `Application.ActiveDocument` mid-method — it keeps nodes testable and multi-doc-ready.
-4. Mutate the document only through the documented `Document*` edit APIs (`DocumentClashTests`, `DocumentTimeliner`, `Document.Models.Override...`) so the Navisworks UI stays in sync and the host transaction scoping gives users one undo step per run.
+4. Mutate the document only through the documented `Document*` edit APIs (`DocumentClashTests`, `DocumentTimeliner`, `Document.Models.Override...`) so the Navisworks UI stays in sync. Do not promise users one undo step per run: the node host opens no transaction around a run, so Navisworks records one step per modifying call where it records one at all (a node mapped over a list makes one call per element). If your node makes several edits that belong together, open a transaction around them yourself, as the clash nodes do (`doc.BeginTransaction`).
 5. Convert at the boundary: accept/return `CamelGraph.Core` geometry (`Point`, `BoundingBox`, `Color`) instead of `Point3D`/`BoundingBox3D`/`Api.Color`, so downstream pure nodes can consume your outputs.
 
 ## 7. Custom interactive nodes (NodeModel + WPF view)

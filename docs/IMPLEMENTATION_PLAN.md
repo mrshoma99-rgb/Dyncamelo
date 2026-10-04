@@ -80,12 +80,12 @@ Six milestones, each independently shippable. Tiers referenced below are the cat
 - `Dyncamelo.App`: Navisworks 2024 add-in (`AddInPlugin` ribbon entry + `DockPanePlugin` hosting the editor), plugin packaging layout (`Plugins\Dyncamelo.App\`).
 - `Dyncamelo.UI`: Nodify-based canvas (nodes, connectors, pan/zoom, selection, delete/duplicate), searchable node library browser fed by the zero-touch registry, port tooltips, per-node state badges (Warning/Error with message), lacing indicator + right-click switcher, Run button + Manual/Automatic toggle, inline editors for the interactive nodes (sliders, text, boolean, color picker, watch, note), save/open `.dyc` dialogs.
 - `Dyncamelo.Navisworks`: the *walking-skeleton* subset of MVP Navisworks nodes needed for a real workflow: `Document.Current`, `Document.Info`, `Models.RootItems`, `ModelItem.Children/Descendants/DisplayName/HasGeometry`, `Properties.Value`, `Search.ByPropertyValue`, `Search.ByPropertyContains`, `Selection.Current/SetCurrent/Clear`, `Appearance.OverrideColor/OverrideTransparency/Reset/Hide/Show`, `SelectionSet.Create`.
-- Transaction/undo scoping for write nodes (single undo entry per run), executed on the host main thread (§6).
+- Write nodes executed on the host main thread (§6). A transaction/undo scope around a run (a single undo entry per run) was planned for this milestone and was **not built**: see "Write scoping" in §7.
 - Basic diagnostics: an output/log strip showing run duration and node errors.
 
 **Exit criteria**
 
-- Reference workflow 3 (color-coding): *String → Search.ByPropertyContains → Color → Appearance.OverrideColor → SelectionSet.Create* runs end-to-end in Navisworks Manage 2024 on a real federated model, twice in a row (idempotent), with one undo step per run.
+- Reference workflow 3 (color-coding): *String → Search.ByPropertyContains → Color → Appearance.OverrideColor → SelectionSet.Create* runs end-to-end in Navisworks Manage 2024 on a real federated model, twice in a row (idempotent). (A single undo step per run was part of this criterion and is not delivered: there is no run-level undo scope.)
 - Getting Started first-graph tutorial is executable exactly as written.
 - Editor survives: no document open, document closed mid-session, run with disconnected required inputs (nodes gray/warn; no crash).
 - Graph save → close Navisworks → reopen → load → run reproduces results.
@@ -97,7 +97,7 @@ Six milestones, each independently shippable. Tiers referenced below are the cat
 | Dock pane + WPF + Nodify integration friction (input focus, DPI, theming inside Navisworks) | High | Walking skeleton first — one node on a canvas in a pane before building the library UI; keep UI virtualization on for large graphs |
 | Speckle/Autodesk compile-ref vs. runtime binding mismatches | High | Smoke-test the exact API calls listed in the catalog early in M1; pin to API members verified against 2024 |
 | Threading mistakes (API touched off main thread) crash Navisworks | High | Engine runs synchronously on the dispatcher thread by design; debug-build main-thread assertion in the Navisworks node host (§6) |
-| Undo scoping API friction | Medium | Encapsulate in one `TransactionScope`-style helper in `Dyncamelo.Navisworks`; worst case: document "no undo" for v0.1 and revisit |
+| Undo scoping API friction | Medium | Worst case taken: no run-level undo scope; documented as such (each modifying call is its own undo step where Navisworks records one). The helper idea stays deferred (§7 rule 6) |
 
 ### M2 — Full MVP node set (v0.1 "MVP" release)
 
@@ -289,7 +289,7 @@ No Navisworks in CI (licensing + no GUI), so a human runs this scripted checklis
 2. **Editor basics** — add nodes from search; wire/rewire/delete; pan/zoom a 100+ node graph without lag; undo of canvas edits.
 3. **Run semantics** — Manual vs Automatic; change one slider → only downstream re-executes (state badges confirm); freeze node ghosts downstream.
 4. **Workflow 1 (QTO)** — property extraction to CSV on a real multi-model NWF; spot-check values incl. unit suffixes against the Properties pane.
-5. **Workflow 2/3 (sets + color)** — bulk selection sets via lacing; color-code by system; single undo entry per run restores prior state; re-run idempotent.
+5. **Workflow 2/3 (sets + color)** — bulk selection sets via lacing; color-code by system; note how many Undo steps one run leaves in Navisworks (there is no run-level undo scope) and what they restore; re-run idempotent.
 6. **Workflow 4 (clash)** — read tests/results on a model with clash data; CSV report opens in Excel; (Beta) status/assign writes visible in the Clash Detective UI.
 7. **Workflow 5 (viewpoints)** — batch save/apply; names correct; visible in the Saved Viewpoints pane.
 8. **Failure drills** — run with no document; close document mid-session; disconnect a required input; a node fed garbage (Error badge, message readable, Navisworks alive).
@@ -307,7 +307,7 @@ Stated once, enforced everywhere:
 3. **The UI triggers runs from its dispatcher thread, which *is* the Navisworks main thread** for a docked pane (the dock pane's WPF dispatcher is the host UI thread). Therefore every Navisworks node executes on the correct thread *by construction*, with zero marshalling code.
 4. **Long runs and responsiveness.** Because runs occupy the UI thread, the engine checks a `CancellationToken` between nodes; the UI can pump a cancel request. Progress reporting is per-node (cheap). If profiling ever demands background evaluation of *pure* subgraphs, that is an explicit future engine feature — Navisworks nodes stay main-thread forever.
 5. **Automatic mode** debounces: graph mutations request a run via a coalescing scheduler on the dispatcher, so a slider drag produces one trailing run, not fifty.
-6. **Write scoping.** Navisworks write nodes (appearance, sets, viewpoints, clash/TimeLiner edits) execute inside a transaction/undo scope managed by the node host in `Dyncamelo.Navisworks`, yielding one undo entry per run and keeping the host UI in sync (all edits go through the documented `Document*` edit APIs, never direct setters on live objects).
+6. **Write scoping.** Navisworks write nodes (appearance, sets, viewpoints, clash/TimeLiner edits) make all edits through the documented `Document*` edit APIs, never direct setters on live objects, which keeps the host UI in sync. **Deferred:** a transaction/undo scope opened by the node host around a whole run (one undo entry per run), plus a transaction inside the per-item loops of the transform nodes. It was planned but never built; today `doc.BeginTransaction` appears only in the clash nodes, around their own edits. Why deferred: whether one Navisworks transaction around many API calls undoes cleanly has to be tried in the host (it cannot be tested in CI), and a scope that is only partly right would promise more than it keeps.
 7. **Debug guardrail.** Debug builds assert the ambient thread is the expected dispatcher thread at the Navisworks node-host boundary, so a future refactor that breaks rule 3 fails loudly in development, not in a user's session.
 
 ## 8. Versioning and compatibility strategy

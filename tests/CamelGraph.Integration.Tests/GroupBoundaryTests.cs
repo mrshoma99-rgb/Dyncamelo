@@ -327,4 +327,72 @@ public class GroupBoundaryTests
         Assert.Equal(NodeState.Warning, made.Instance.State);
         Assert.Contains(made.Instance.Messages, m => m.Text.Contains("frozen"));
     }
+
+    // ----------------------------------------------------------- the instance says so
+
+    [Fact]
+    public void AGroupWithoutOutputsSaysWhenAnInputFailed()
+    {
+        var registry = Registry();
+        var doc = new GraphModel { Name = "doc" };
+        var text = Add(doc, new StringInputNode { Value = "x" }, "Text");
+        var broken = Add(doc, Pipeline.ZeroTouch(registry, "String.ToNumber"), "Broken");
+        var negate = Add(doc, Pipeline.ZeroTouch(registry, "Math.Negate"), "Negate");
+        Wire(doc, Out(text, "value"), In(broken, "text"));
+        Wire(doc, Out(broken, "result"), In(negate, "number"));
+        var made = NodeGroupOps.MakeGroup(doc, new NodeModel[] { negate }, "No outputs", null);
+        Assert.Empty(made.Group!.Outputs);
+
+        new GraphEngine().Run(doc);
+
+        Assert.Equal(NodeState.Warning, made.Instance!.State);
+        Assert.True(made.Instance.FailedUpstream);
+        Assert.Contains(made.Instance.Messages, m => m.Text.Contains("Upstream failure"));
+        Assert.Equal(NodeState.Warning, negate.State);              // the node inside waited for the failed input
+    }
+
+    [Fact]
+    public void AGroupWithoutOutputsSaysWhenPartOfItWasSwitchedOff()
+    {
+        var registry = Registry();
+        var doc = new GraphModel { Name = "doc" };
+        var x = Add(doc, new NumberInputNode { Value = 5 }, "X");
+        var off = Add(doc, new BooleanToggleNode { Value = false }, "Off");
+        var gate = Add(doc, Pipeline.ZeroTouch(registry, "Flow.When"), "Gate");
+        var negate = Add(doc, Pipeline.ZeroTouch(registry, "Math.Negate"), "Negate");
+        Wire(doc, Out(x, "value"), In(gate, "value"));
+        Wire(doc, Out(off, "value"), In(gate, "condition"));
+        Wire(doc, Out(gate, "value"), In(negate, "number"));
+        var made = NodeGroupOps.MakeGroup(doc, new NodeModel[] { negate }, "No outputs", null);
+
+        new GraphEngine().Run(doc);
+
+        Assert.Equal(NodeState.Executed, made.Instance!.State);
+        Assert.Contains(made.Instance.Messages, m => m.Text.Contains("skipped"));
+        Assert.Equal(NodeState.Idle, negate.State);
+    }
+
+    [Fact]
+    public void AFailureCrossesTwoLevelsOfGroupsAndATryOutsideStillSeesWhatFailed()
+    {
+        var registry = Registry();
+        var doc = new GraphModel { Name = "doc" };
+        var text = Add(doc, new StringInputNode { Value = "x" }, "Text");
+        var broken = Add(doc, Pipeline.ZeroTouch(registry, "String.ToNumber"), "Broken");
+        var negate = Add(doc, Pipeline.ZeroTouch(registry, "Math.Negate"), "Negate");
+        var attempt = Add(doc, Pipeline.ZeroTouch(registry, "Flow.Try"), "Attempt");
+        Wire(doc, Out(text, "value"), In(broken, "text"));
+        Wire(doc, Out(broken, "result"), In(negate, "number"));
+        Wire(doc, Out(negate, "value"), In(attempt, "value"));
+        var inner = NodeGroupOps.MakeGroup(doc, new NodeModel[] { negate }, "Inner", null);
+        var outer = NodeGroupOps.MakeGroup(doc, new NodeModel[] { inner.Instance! }, "Outer", null);
+        Assert.True(outer.Success, outer.Message);
+
+        new GraphEngine().Run(doc);
+
+        Assert.Equal(NodeState.Executed, attempt.State);
+        Assert.Equal(true, Out(attempt, "failed").Value);
+        Assert.Contains("Broken", (string)Out(attempt, "error").Value!);
+        Assert.NotEqual(NodeState.Error, outer.Instance!.State);
+    }
 }

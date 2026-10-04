@@ -114,7 +114,7 @@ The Watch List fills with every matching item. If it is empty, re-check the cate
 3. Wire `Search.ByProperty → items` into `items`, and the Color Picker into `color` (or just click the colour swatch on the node's own `color` input).
 4. Press **Run** — every concrete item in the viewport turns red.
 
-This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (whether a single Undo reverts a whole run has not been checked yet; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
+This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (a run is not one undo step: there is no run-level undo scope, so Navisworks records one step per modifying call, where it records one at all; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
 
 ### Step 4 — save the selection set
 
