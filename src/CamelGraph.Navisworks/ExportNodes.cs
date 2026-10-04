@@ -8,8 +8,11 @@ using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
 using Autodesk.Navisworks.Api.ComApi;
 using Autodesk.Navisworks.Api.Interop.ComApi;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
@@ -19,19 +22,23 @@ public static class ExportNodes
 {
     /// <summary>Exports item properties to a CSV file.</summary>
     /// <param name="items">The model items to export (one row each).</param>
-    /// <param name="filePath">Destination .csv path; the directory is created when missing.</param>
+    /// <param name="filePath">Destination .csv path; the directory is created when missing. A relative path is next to the graph file.</param>
     /// <param name="categoryName">Property category to export; null exports every category as "Category.Property" columns.</param>
     /// <param name="propertyNames">Property names to export from the category; null exports all found.</param>
     /// <returns>The written file path.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeName("Export.ToCsv")]
-    [NodeDescription("Writes one CSV row per model item with a Name column plus property columns. Useful for quantity take-offs.")]
-    [NodeSearchTags("export", "csv", "qto", "takeoff", "report", "excel")]
+    [NodeDescription(
+        "Writes one CSV row per model item with a Name column plus property columns, straight from the model: a quick quantity take-off file. " +
+        "For anything you want to shape first (sort, filter, group, add columns, dates as dates, an Excel workbook) use Properties.ToTable " +
+        "and the Table nodes, then Table.ToCsvFile or Table.ToExcelFile: they share the CSV and Excel options of the rest of the library.")]
+    [NodeSearchTags("export", "csv", "qto", "takeoff", "report", "excel", "table", "properties")]
     [return: NodeName("filePath")]
     public static string ToCsv(
         [MultiInput] IEnumerable<ModelItem> items,
-        string filePath,
-        string? categoryName = null,
+        [NodePath(NodePathMode.Save, Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*")] string filePath,
+        [NodeTabChoice("items")] string? categoryName = null,
         IEnumerable<string>? propertyNames = null)
     {
         if (items == null)
@@ -43,6 +50,8 @@ public static class ExportNodes
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
+
+        filePath = PathResolver.Resolve(filePath);
 
         var itemList = NavisValues.ToItemList(items);
         var requestedProperties = propertyNames?.Where(n => !string.IsNullOrEmpty(n)).ToList();
@@ -122,6 +131,53 @@ public static class ExportNodes
         return filePath;
     }
 
+    /// <summary>Writes a clash report; the file type follows the extension (.csv or .html).</summary>
+    /// <param name="filePath">Destination .csv or .html (.htm) path; the directory is created when missing. A relative path is next to the graph file.</param>
+    /// <param name="tests">The clash tests to report. Leave unwired for every test in the document; an empty list reports no test.</param>
+    /// <param name="includeImages">HTML only: true embeds a snapshot per result (larger file, needs the Navisworks viewport).</param>
+    /// <param name="imageWidth">HTML only: snapshot width in pixels.</param>
+    /// <param name="imageHeight">HTML only: snapshot height in pixels.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The written file path and the number of result rows.</returns>
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeName("Export.ClashReport")]
+    [NodeDescription(
+        "One-node clash report. A .csv path writes one row per result (test, group, result, status, distance, assignee, description, both item " +
+        "paths and GUIDs, the clash point; Excel-ready). A .html path writes a self-contained page, one section per test, optionally with a " +
+        "snapshot of every result (Advanced: includeImages, imageWidth, imageHeight), shareable as one file. Unwired tests reports every test " +
+        "in the document; an empty list reports none, so a filter that finds nothing gives an empty report instead of a report on everything.")]
+    [NodeSearchTags("export", "clash", "report", "csv", "html", "excel", "triage", "snapshot", "share", "clashreportcsv", "clashreporthtml")]
+    [MultiReturn("filePath", "rowCount")]
+    [PortKinds("file", "integer")]
+    public static Dictionary<string, object?> ClashReport(
+        [NodePath(NodePathMode.Save, Filter = "Clash report (*.csv;*.html)|*.csv;*.html|All files (*.*)|*.*")] string filePath,
+        IEnumerable<ClashTest>? tests = null,
+        [NodePanel("Advanced")] bool includeImages = false,
+        [NodePanel("Advanced")] [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageWidth = 320,
+        [NodePanel("Advanced")] [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageHeight = 240,
+        Document? document = null)
+    {
+        if (string.IsNullOrEmpty(filePath))
+        {
+            throw new ArgumentException("No file path provided.", nameof(filePath));
+        }
+
+        var extension = (Path.GetExtension(PathResolver.Clean(filePath)) ?? string.Empty).ToLowerInvariant();
+        switch (extension)
+        {
+            case ".csv":
+                return WriteClashCsv(filePath, tests, document);
+            case ".html":
+            case ".htm":
+                return WriteClashHtml(filePath, tests, includeImages, imageWidth, imageHeight, document);
+            default:
+                throw new ArgumentException(
+                    "'" + filePath + "' must end in .csv (a table) or .html (a report page): the file type follows the extension.",
+                    nameof(filePath));
+        }
+    }
+
     /// <summary>Exports clash results to a CSV file.</summary>
     /// <param name="filePath">Destination .csv path; the directory is created when missing.</param>
     /// <param name="tests">The clash tests to report (null reports every test in the document).</param>
@@ -129,7 +185,9 @@ public static class ExportNodes
     /// <returns>The written file path and the number of result rows.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.ClashReportCsv")]
-    [NodeDescription("One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready).")]
+    [NodeDeprecated("Export.ClashReport")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription("Writes the clash results of the tests to a CSV file (Excel-ready).")]
     [NodeSearchTags("export", "clash", "report", "csv", "excel", "triage")]
     [MultiReturn("filePath", "rowCount")]
     [PortKinds("file", "integer")]
@@ -138,11 +196,44 @@ public static class ExportNodes
         IEnumerable<ClashTest>? tests = null,
         Document? document = null)
     {
+        return WriteClashCsv(filePath, tests, document);
+    }
+
+    /// <summary>Exports clash results to a self-contained HTML report.</summary>
+    /// <param name="filePath">Destination .html path; the directory is created when missing.</param>
+    /// <param name="tests">The clash tests to report (null reports every test in the document).</param>
+    /// <param name="includeImages">True to embed a snapshot per result (larger file, needs the Navisworks viewport).</param>
+    /// <param name="imageWidth">Snapshot width in pixels.</param>
+    /// <param name="imageHeight">Snapshot height in pixels.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The written file path and the number of result rows.</returns>
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeName("Export.ClashReportHtml")]
+    [NodeDeprecated("Export.ClashReport")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription("Writes the clash results of the tests to a self-contained HTML report, optionally with embedded snapshots.")]
+    [NodeSearchTags("export", "clash", "report", "html", "snapshot", "share")]
+    [MultiReturn("filePath", "rowCount")]
+    [PortKinds("file", "integer")]
+    public static Dictionary<string, object?> ClashReportHtml(
+        string filePath,
+        IEnumerable<ClashTest>? tests = null,
+        bool includeImages = false,
+        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageWidth = 320,
+        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageHeight = 240,
+        Document? document = null)
+    {
+        return WriteClashHtml(filePath, tests, includeImages, imageWidth, imageHeight, document);
+    }
+
+    private static Dictionary<string, object?> WriteClashCsv(string filePath, IEnumerable<ClashTest>? tests, Document? document)
+    {
         if (string.IsNullOrEmpty(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var rows = CollectClashRows(doc, tests);
 
@@ -162,27 +253,13 @@ public static class ExportNodes
         };
     }
 
-    /// <summary>Exports clash results to a self-contained HTML report.</summary>
-    /// <param name="filePath">Destination .html path; the directory is created when missing.</param>
-    /// <param name="tests">The clash tests to report (null reports every test in the document).</param>
-    /// <param name="includeImages">True to embed a snapshot per result (larger file, needs the Navisworks viewport).</param>
-    /// <param name="imageWidth">Snapshot width in pixels.</param>
-    /// <param name="imageHeight">Snapshot height in pixels.</param>
-    /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The written file path and the number of result rows.</returns>
-    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
-    [NodeName("Export.ClashReportHtml")]
-    [NodeDescription("Self-contained HTML clash report — one section per test, one row per result, optionally with embedded snapshots. Shareable as a single file.")]
-    [NodeSearchTags("export", "clash", "report", "html", "snapshot", "share")]
-    [MultiReturn("filePath", "rowCount")]
-    [PortKinds("file", "integer")]
-    public static Dictionary<string, object?> ClashReportHtml(
+    private static Dictionary<string, object?> WriteClashHtml(
         string filePath,
-        IEnumerable<ClashTest>? tests = null,
-        bool includeImages = false,
-        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageWidth = 320,
-        [NodeRange(16, 4096, SoftMin = 160, SoftMax = 1280, Unit = "px")] int imageHeight = 240,
-        Document? document = null)
+        IEnumerable<ClashTest>? tests,
+        bool includeImages,
+        int imageWidth,
+        int imageHeight,
+        Document? document)
     {
         if (string.IsNullOrEmpty(filePath))
         {
@@ -194,6 +271,7 @@ public static class ExportNodes
             throw new ArgumentOutOfRangeException(nameof(imageWidth), "Image width and height must be positive.");
         }
 
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var testList = ResolveTests(doc, tests);
         var clash = includeImages ? ClashHelpers.RequireClash(doc) : null;
@@ -267,20 +345,31 @@ public static class ExportNodes
     }
 
     /// <summary>Renders the current view to an image file.</summary>
-    /// <param name="filePath">Destination .png, .jpg or .bmp path; the directory is created when missing.</param>
+    /// <param name="filePath">Destination .png, .jpg or .bmp path; the directory is created when missing. A relative path is next to the graph file. With a viewpoint, {name} in the path becomes the viewpoint's name.</param>
     /// <param name="width">Image width in pixels.</param>
     /// <param name="height">Image height in pixels.</param>
+    /// <param name="viewpoint">Optional: the viewpoint to show first (a saved viewpoint, its name or folder path, or a camera from Camera.Save). A list takes one picture per viewpoint. Empty takes the picture of the view as it is.</param>
+    /// <param name="after">Anything at all, only to run this node after the node it comes from: the picture is of the view at the moment this node runs, and the engine does not order nodes that share no wire.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>The written file path. After SavedViewpoint.Apply in a lacing loop this is a batch screenshot factory.</returns>
+    /// <returns>The written file path.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     [NodeName("Export.ViewpointImage")]
-    [NodeDescription("Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter.")]
-    [NodeSearchTags("export", "image", "screenshot", "render", "viewpoint", "png")]
+    [NodeAliases("CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int,Autodesk.Navisworks.Api.Document")]
+    [NodeDescription(
+        "Renders a view to a .png/.jpg/.bmp file via the Navisworks image exporter. Without 'viewpoint' it is the view as it is when the node " +
+        "runs: wire what sets the view into 'after'. Wire saved viewpoints into 'viewpoint' and the node shows each one itself and takes its " +
+        "picture; put {name} in the file path (\"C:\\Pictures\\{name}.png\") for one file per viewpoint. That is the batch for a folder: " +
+        "Viewpoints.InFolder into 'viewpoint'. (SavedViewpoint.Apply followed by this node over a list does not work: every Apply runs " +
+        "first, then every picture shows the last view.) The view is left on the last viewpoint shown; Camera.Save and Camera.Restore put it back.")]
+    [NodeSearchTags("export", "image", "screenshot", "render", "viewpoint", "png", "picture", "batch")]
     [return: NodeName("filePath")]
     public static string ViewpointImage(
-        string filePath,
+        [NodePath(NodePathMode.Save, Filter = "Pictures (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp")] string filePath,
         [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int width = 1920,
         [NodeRange(16, 8192, SoftMin = 320, SoftMax = 3840, Unit = "px")] int height = 1080,
+        [ScalarInput] object? viewpoint = null,
+        object? after = null,
         Document? document = null)
     {
         if (string.IsNullOrEmpty(filePath))
@@ -291,6 +380,21 @@ public static class ExportNodes
         if (width <= 0 || height <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width), "Image width and height must be positive.");
+        }
+
+        filePath = PathResolver.Resolve(filePath);
+        if (viewpoint == null && FileNameTemplate.HasNameToken(filePath))
+        {
+            throw new ArgumentException(
+                "The file path holds {name} but no viewpoint is wired, so there is no name to put in. Wire the viewpoints into 'viewpoint', or write the file name out.",
+                nameof(filePath));
+        }
+
+        if (viewpoint != null)
+        {
+            var view = ResolveViewpointToShow(NavisworksContext.ResolveDocument(document), viewpoint, out var viewName);
+            filePath = FileNameTemplate.Apply(filePath, viewName);
+            ShowViewpoint(NavisworksContext.ResolveDocument(document), view);
         }
 
         var formatCode = ImageFormatCode(filePath);
@@ -365,7 +469,9 @@ public static class ExportNodes
     /// <returns>The written file path.</returns>
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeName("Export.NWD")]
-    [NodeDescription("Saves the document as a published .nwd snapshot (appearance overrides baked in).")]
+    [NodeDeprecated("Document.Save")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription("Saves the document as an .nwd file; the same call as Document.Save with an .nwd path.")]
     [NodeSearchTags("export", "nwd", "publish", "save", "snapshot")]
     [return: NodeName("filePath")]
     public static string Nwd(string filePath, Document? document = null)
@@ -375,15 +481,12 @@ public static class ExportNodes
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
-        if (!string.Equals(Path.GetExtension(filePath), ".nwd", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(Path.GetExtension(PathResolver.Clean(filePath)), ".nwd", StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException("'" + filePath + "' must end in .nwd.", nameof(filePath));
         }
 
-        var doc = NavisworksContext.ResolveDocument(document);
-        NavisValues.EnsureDirectory(filePath);
-        doc.SaveFile(filePath);
-        return filePath;
+        return DocumentNodes.Save(filePath, document);
     }
 
     private static readonly string[] ClashReportColumns =
@@ -478,6 +581,42 @@ public static class ExportNodes
 
         var guid = item.InstanceGuid;
         return guid == Guid.Empty ? string.Empty : guid.ToString();
+    }
+
+    /// <summary>The viewpoint a picture is to show: a saved viewpoint (by itself, name or folder path) or a raw camera.</summary>
+    private static object ResolveViewpointToShow(Document doc, object viewpoint, out string name)
+    {
+        switch (viewpoint)
+        {
+            case SavedViewpoint saved:
+                name = saved.DisplayName ?? string.Empty;
+                return saved;
+            case Viewpoint camera:
+                name = string.Empty;
+                return camera;
+            case string text when text.Trim().Length > 0:
+                var found = SavedItemTreeHelpers.FindByNameOrPath<SavedViewpoint>(doc.SavedViewpoints.RootItem, text.Trim(), "saved viewpoint")
+                    ?? throw new InvalidOperationException("No saved viewpoint named '" + text.Trim() + "' exists in the document.");
+                name = found.DisplayName ?? string.Empty;
+                return found;
+            default:
+                throw new ArgumentException(
+                    "Cannot take a picture of a " + viewpoint.GetType().Name +
+                    ". Wire a saved viewpoint, its name or folder path, or the camera from Camera.Save.", nameof(viewpoint));
+        }
+    }
+
+    private static void ShowViewpoint(Document doc, object view)
+    {
+        if (view is SavedViewpoint saved)
+        {
+            // The same call SavedViewpoint.Apply makes: the camera and any saved overrides.
+            doc.SavedViewpoints.CurrentSavedViewpoint = saved;
+        }
+        else
+        {
+            doc.CurrentViewpoint.CopyFrom((Viewpoint)view);
+        }
     }
 
     private static string ImageFormatCode(string filePath)

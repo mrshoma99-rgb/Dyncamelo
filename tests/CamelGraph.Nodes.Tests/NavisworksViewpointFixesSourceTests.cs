@@ -18,9 +18,12 @@ public class NavisworksViewpointFixesSourceTests
     /// <summary>The attributes of one node: from its [NodeName] to the method's "public static".</summary>
     private static string Attributes(string source, string nodeName)
     {
-        var match = Regex.Match(source, @"\[NodeName\(""" + Regex.Escape(nodeName) + @"""\)\]([\s\S]*?)public static");
-        Assert.True(match.Success, "node not found: " + nodeName);
-        return match.Value;
+        // Some nodes put [NodeFunction] or [NodeEffects] above [NodeName], so the block starts at the end of the XML comment.
+        var at = source.IndexOf("[NodeName(\"" + nodeName + "\")]", StringComparison.Ordinal);
+        Assert.True(at >= 0, "node not found: " + nodeName);
+        var start = source.LastIndexOf("</returns>", at, StringComparison.Ordinal);
+        var end = source.IndexOf("public static", at, StringComparison.Ordinal);
+        return source.Substring(Math.Max(start, 0), end - Math.Max(start, 0));
     }
 
     // ------------------------------------------------------------------ NVC-03

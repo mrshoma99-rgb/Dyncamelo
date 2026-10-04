@@ -305,7 +305,9 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 candidates.Any(m =>
                     m.ParameterNames.SequenceEqual(inputNames) &&
-                    m.OutputNames.SequenceEqual(outputNames) &&
+                    // An output added at the end of a multi-output node (Export.ToIfc.files, Takeoff.SumPropertyByGroup.table) does not
+                    // break a sample saved before it: wires find their output by name, so the saved ones must be the first outputs.
+                    m.OutputNames.Take(outputNames.Count).SequenceEqual(outputNames) &&
                     InputDefaultsAreConsistent(m, inputPorts)),
                 label + ": serialized ports [" + string.Join(", ", inputNames) + "] -> [" +
                 string.Join(", ", outputNames) + "] do not match the source signature of '" +

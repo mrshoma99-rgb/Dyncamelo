@@ -53,6 +53,8 @@ public class NavisworksNodeEvolutionTests
             "nameFormat",
         };
         yield return new object[] { "CamelGraph.Navisworks.ViewpointNodes.Delete@string," + doc, "SavedViewpoint.Delete", "viewpoint" };
+        yield return new object[] { "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int," + doc, "Export.ViewpointImage", "viewpoint" };
+        yield return new object[] { "CamelGraph.Navisworks.AuditNodes.DuplicateItems@" + items + ",double," + doc, "Audit.DuplicateItems", "units" };
     }
 
     [Theory]
@@ -98,15 +100,18 @@ public class NavisworksNodeEvolutionTests
     }
 
     [Theory]
-    [InlineData("CamelGraph.Navisworks.ViewpointNodes.SaveCurrent@string,Autodesk.Navisworks.Api.Document", "Viewpoint.SaveCurrent")]
-    [InlineData("CamelGraph.Navisworks.ViewpointNodes.SaveWithOverrides@string,string,Autodesk.Navisworks.Api.Document", "Viewpoint.SaveWithOverrides")]
-    public void ARetiredSaveNodeStillLoadsAndPointsAtViewpointSave(string id, string name)
+    [InlineData("CamelGraph.Navisworks.ViewpointNodes.SaveCurrent@string,Autodesk.Navisworks.Api.Document", "Viewpoint.SaveCurrent", "Viewpoint.Save")]
+    [InlineData("CamelGraph.Navisworks.ViewpointNodes.SaveWithOverrides@string,string,Autodesk.Navisworks.Api.Document", "Viewpoint.SaveWithOverrides", "Viewpoint.Save")]
+    [InlineData("CamelGraph.Navisworks.ExportNodes.Nwd@string,Autodesk.Navisworks.Api.Document", "Export.NWD", "Document.Save")]
+    [InlineData("CamelGraph.Navisworks.ExportNodes.ClashReportCsv@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document", "Export.ClashReportCsv", "Export.ClashReport")]
+    [InlineData("CamelGraph.Navisworks.ExportNodes.ClashReportHtml@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,bool,int,int,Autodesk.Navisworks.Api.Document", "Export.ClashReportHtml", "Export.ClashReport")]
+    public void ARetiredNodeStillLoadsAndPointsAtItsReplacement(string id, string name, string replacement)
     {
         Assert.True(Registry.TryGetDefinition(id, out var definition), "The retired node '" + name + "' is not registered any more.");
         Assert.Equal(name, definition!.Name);
         Assert.True(definition.IsDeprecated);
-        Assert.Equal("Viewpoint.Save", definition.Replacement);
-        Assert.Contains(Registry.Definitions, d => d.Name == "Viewpoint.Save" && !d.IsDeprecated);
+        Assert.Equal(replacement, definition.Replacement);
+        Assert.Contains(Registry.Definitions, d => d.Name == replacement && !d.IsDeprecated);
 
         LoadAsSavedUnder(definition, id);
         var current = NavisworksSourceIndex.Nodes.Single(n => n.Path == id.Substring(0, id.IndexOf('@')));
@@ -131,6 +136,26 @@ public class NavisworksNodeEvolutionTests
                     "Viewpoint.Save lacks the search tag '" + tag + "' of " + old.Name + ".");
             }
         }
+    }
+
+    [Fact]
+    public void ExportClashReportCarriesTheInputsOutputsAndSearchWordsOfBothReports()
+    {
+        var report = Registry.Definitions.Single(d => d.Name == "Export.ClashReport");
+        Assert.Equal(new[] { "filePath", "tests", "includeImages", "imageWidth", "imageHeight", "document" }, report.Inputs.Select(i => i.Name));
+        Assert.Equal(new[] { "filePath", "rowCount" }, report.Outputs.Select(o => o.Name));
+        Assert.All(report.Inputs.Skip(1), i => Assert.True(i.HasDefault, i.Name + " must be optional."));
+
+        foreach (var old in Registry.Definitions.Where(d => d.Name == "Export.ClashReportCsv" || d.Name == "Export.ClashReportHtml"))
+        {
+            foreach (var tag in old.SearchTags)
+            {
+                Assert.True(report.SearchTags.Contains(tag, StringComparer.OrdinalIgnoreCase), "Export.ClashReport lacks the search tag '" + tag + "' of " + old.Name + ".");
+            }
+        }
+
+        var save = Registry.Definitions.Single(d => d.Name == "Document.Save");
+        Assert.Contains("export nwd", save.SearchTags);
     }
 
     [Fact]
@@ -169,6 +194,10 @@ public class NavisworksNodeEvolutionTests
         Assert.DoesNotContain("Viewpoint.SaveCurrent", offered);
         Assert.DoesNotContain("Viewpoint.SaveWithOverrides", offered);
         Assert.DoesNotContain("ViewpointPackageFile.Parse", offered);
+        Assert.DoesNotContain("Export.NWD", offered);
+        Assert.DoesNotContain("Export.ClashReportCsv", offered);
+        Assert.DoesNotContain("Export.ClashReportHtml", offered);
+        Assert.Contains("Export.ClashReport", offered);
         Assert.Contains("Viewpoint.Save", offered);
         Assert.Contains("Camera.Save", offered);
         Assert.Contains("Camera.Restore", offered);

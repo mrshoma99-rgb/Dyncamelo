@@ -8,8 +8,8 @@ How data gets into and out of a CamelGraph graph. Every node named here is in th
 | **BCF** (issues) | `BCF.ImportIssues` (BCF 2.0 and 2.1) | `BCF.ExportIssues` (BCF 2.1) |
 | **Excel** (`.xlsx`) | `Table.FromExcelFile`, `Excel.ReadFromFile` | `Table.ToExcelFile`, `Excel.WriteToFile` |
 | **CSV** | `Table.FromCsvFile`, `CSV.ReadFromFile` | `Table.ToCsvFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `Export.ToCsv` |
-| **Reports** | | `Report.Html`, `Report.Markdown`, `Table.ToText`, `Export.ClashReportCsv`, `Export.ClashReportHtml` |
-| **Navisworks files and pictures** | `Document.Open`, `Document.AppendFiles` | `Export.NWD`, `Export.ViewpointImage` |
+| **Reports** | | `Report.Html`, `Report.Markdown`, `Table.ToText`, `Export.ClashReport` |
+| **Navisworks files and pictures** | `Document.Open`, `Document.AppendFiles` | `Document.Save`, `Export.ViewpointImage` |
 | **JSON** | `JSON.ReadFromFile` | `JSON.WriteToFile` |
 
 !!! tip "Where a file goes"
@@ -19,7 +19,7 @@ How data gets into and out of a CamelGraph graph. Every node named here is in th
 
 ### Bringing IFC in
 
-Navisworks opens and appends IFC files by itself. To add several files in a graph, use `Directory.FindFiles` (a pattern such as `*.ifc;*.nwc`, sorted by date) into `Document.AppendFiles`, then `Document.Save` or `Export.NWD`. `Document.Open` replaces the current contents of the document instead of appending.
+Navisworks opens and appends IFC files by itself. To add several files in a graph, use `Directory.FindFiles` (a pattern such as `*.ifc;*.nwc`, sorted by date) into `Document.AppendFiles`, then `Document.Save` (a `.nwd` path saves a published snapshot; the earlier `Export.NWD` is the same call and still works). `Document.Open` replaces the current contents of the document instead of appending.
 
 ### IFC identity: GlobalIds
 
@@ -64,7 +64,7 @@ Only `items` and `filePath` are required. The other inputs are optional:
 | `categoryFilter` | all | Export only these property categories. |
 | `document` | active | The document. |
 
-Outputs: `filePath`, `fileCount`, `elementCount`, `triangleCount` and `fileSizeKb`, so you can show or log what was written.
+Outputs: `filePath` (always one text: the first file written), `fileCount`, `elementCount`, `triangleCount`, `fileSizeKb` and `files` (the list of every file; it holds more than one only when `splitMegabytes` splits the export), so you can show or log what was written. Only `items`, `filePath`, `schema` and `units` are in the main list of the node; the other options sit in its **Advanced** panel.
 
 Five small nodes build the optional **option objects**. Wire each into the matching input of `Export.ToIfc`:
 
@@ -160,15 +160,15 @@ To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, j
 | `CSV.WriteToFile` | Writes a list of rows. Overwrites; creates missing folders. |
 | `CSV.AppendToFile` | Adds rows to a file, writing the optional headers only when the file is new or empty: one row of totals per run. |
 | `CSV.ReadFromFile` | Reads rows (numeric cells become numbers). |
-| `Export.ToCsv` | One row per model item: a name column plus the property columns you list. Useful for quantity take-offs. |
-| `Export.ClashReportCsv` | One-node clash report: test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point. Excel-ready. |
+| `Export.ToCsv` | One row per model item: a name column plus the property columns you list. A quick quantity take-off file; to sort, filter, group or add columns first use `Properties.ToTable` and the Table nodes (`Table.ToCsvFile`, `Table.ToExcelFile`). |
+| `Export.ClashReport` | One-node clash report with a `.csv` path: test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point. Excel-ready. |
 
 ## Reports
 
 * **`Report.Html`** builds a self-contained, printable HTML report (light and dark) from tables and text; a line starting with `# ` becomes a heading. Write it with `Text.WriteToFile`, or paste it into an e-mail. **`Report.Markdown`** does the same in Markdown for Teams, trackers and wikis.
 * **`Table.ToText`** renders a table as Markdown, CSV, tab-separated text or an HTML table.
-* **`Export.ClashReportHtml`** is a single-file HTML clash report, one section per test and one row per result, optionally with embedded snapshots (`includeImages`, `imageWidth`, `imageHeight`).
-* **`Export.ViewpointImage`** renders the current view to a `.png`, `.jpg` or `.bmp`. **`Export.NWD`** saves the document as a published `.nwd` with appearance overrides baked in.
+* **`Export.ClashReport`** with an `.html` path is a single-file HTML clash report, one section per test and one row per result, optionally with embedded snapshots (Advanced: `includeImages`, `imageWidth`, `imageHeight`). The file type follows the extension: `.csv` writes the table, `.html` the page. Leave `tests` unwired for every test in the document; an empty list reports no test. (`Export.ClashReportCsv` and `Export.ClashReportHtml` are the earlier two nodes; they still work.)
+* **`Export.ViewpointImage`** renders a view to a `.png`, `.jpg` or `.bmp`: the current view, or each saved viewpoint wired into its `viewpoint` input (put `{name}` in the file path for one file per viewpoint). Wire what sets the view into `after`. **`Document.Save`** with a `.nwd` path saves the document as a published `.nwd`.
 
 ## Keeping a history
 

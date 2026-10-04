@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**581 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**579 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -30,7 +30,7 @@
 | [Navisworks.Clash.Tests](#navisworksclashtests) | 16 |
 | [Navisworks.Comments](#navisworkscomments) | 3 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
-| [Navisworks.Export](#navisworksexport) | 14 |
+| [Navisworks.Export](#navisworksexport) | 12 |
 | [Navisworks.Grids](#navisworksgrids) | 3 |
 | [Navisworks.Markup](#navisworksmarkup) | 6 |
 | [Navisworks.Model](#navisworksmodel) | 5 |
@@ -395,14 +395,14 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Audit.DuplicateItems` | items, tolerance?, document? | items1, items2, count | Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items |
+| `Audit.DuplicateItems` | items, tolerance?, units?, document? | items1, items2, count | Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items |
 | `Audit.MissingProperty` | categoryName, propertyName, items?, geometryOnly?, document? | items, count | Finds every item that does NOT carry the given property |
 | `Distance.BetweenItems` | itemsA, itemsB, method?, document? | distance, pointA, pointB | Shortest distance between two selections, with the closest (witness) point on each side |
 | `FallHazard.EdgeHandrailCheck` | floors, level, handrails, obstructions?, band?, cellSize?, limit?, handrailTolerance?, minPassage?, units?, imagePath?, pixelsPerCell?, showOverage?, dangerousColor?, protectedColor?, safeColor?, document? | imagePath, dangerousLength, protectedLength, safeLength, report | Marks the floor edges around voids: green where the gap across the void is under the limit (safe), red where it is over the limit and there is no handrail (needs one), a… |
 | `FallHazard.FloorOpeningMap` | floors, level, obstructions?, band?, cellSize?, minGap?, units?, imagePath?, saveViewpoints?, pixelsPerCell?, showOverage?, lowColor?, highColor?, document? | imagePath, openingCount, widestGaps, centers, viewpoints, report | Whole-floor fall-hazard heat map |
 | `Proximity.Cluster` | items, tolerance?, units?, method?, propertyName?, tabName?, document? | groups, clusterNumbers, clusterCount, sizes, report | Groups items into clusters of touching geometry (gap <= tolerance, chained) |
 | `Proximity.NearestDistance` | items, targets, method?, document? | distances | For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by |
-| `Takeoff.SumPropertyByGroup` | items, groupCategoryName, groupPropertyName, valueCategoryName, valuePropertyName | keys, sums, counts | One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g |
+| `Takeoff.SumPropertyByGroup` | items, groupCategoryName, groupPropertyName, valueCategoryName, valuePropertyName | keys, sums, counts, table | One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g |
 | `Zone.AssignByVolumes` | zoneItems, zoneNames, targetItems, tabName?, propertyName? | items, assignedCount | Tags each target with the name of the zone volume containing its bounding-box center |
 
 ## Navisworks.Appearance
@@ -540,18 +540,16 @@
 |---|---|---|---|
 | `BCF.ExportIssues` | filePath, results?, viewpoints?, includeSnapshots?, statusMap?, document? | filePath, topicCount | Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) |
 | `BCF.ImportIssues` | filePath, applyCameraTopicIndex?, document? | topics, modelItems | Reads a BCF 2.0/2.1 package: per topic title/status/description/comments/component GUIDs/camera, plus the model items each topic's components resolve to (matched by IFC… |
-| `Export.ClashReportCsv` | filePath, tests?, document? | filePath, rowCount | One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready) |
-| `Export.ClashReportHtml` | filePath, tests?, includeImages?, imageWidth?, imageHeight?, document? | filePath, rowCount | Self-contained HTML clash report |
+| `Export.ClashReport` | filePath, tests?, includeImages?, imageWidth?, imageHeight?, document? | filePath, rowCount | One-node clash report |
 | `Export.IfcClasses` | — | classes | Lists the friendly IFC class names (Wall, Beam, Door, …) accepted by Export.IfcSetClassMap |
 | `Export.IfcCoordinates` | basePoint?, eastings?, northings?, elevation?, rotationDegrees?, writeGeoref? | coordinates | Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing |
 | `Export.IfcParameterRule` | source, targetPset?, targetName?, sourceCategory? | rule | One property rename/relocate rule for Export.ToIfc |
 | `Export.IfcRoles` | typeProperty?, typeCategory?, levelProperty?, levelCategory?, materialProperty?, materialCategory?, classificationProperty?, classificationCategory? | roles | Maps Navisworks source properties to IFC roles |
 | `Export.IfcSetClassMap` | setNames, ifcClasses, predefinedTypes?, document? | classMap | Assigns an IFC class to every item of the named saved/search sets (set→class), producing the classMap for Export.ToIfc |
 | `Export.IfcSpatialNames` | project?, site?, building?, storey? | spatialNames | Names for the IFC spatial tree (Project/Site/Building/default Storey) used by Export.ToIfc |
-| `Export.NWD` | filePath, document? | filePath | Saves the document as a published .nwd snapshot (appearance overrides baked in) |
-| `Export.ToCsv` | items, filePath, categoryName?, propertyNames? | filePath | Writes one CSV row per model item with a Name column plus property columns |
-| `Export.ToIfc` | items, filePath, schema?, instancing?, properties?, materials?, quantities?, units?, quality?, coordinates?, spatialNames?, roles?, parameterRules?, categoryFilter?, classMap?, splitMegabytes?, validate?, document? | filePath, fileCount, elementCount, triangleCount, fileSizeKb | Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing |
-| `Export.ViewpointImage` | filePath, width?, height?, document? | filePath | Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter |
+| `Export.ToCsv` | items, filePath, categoryName?, propertyNames? | filePath | Writes one CSV row per model item with a Name column plus property columns, straight from the model: a quick quantity take-off file |
+| `Export.ToIfc` | items, filePath, schema?, instancing?, properties?, materials?, quantities?, units?, quality?, coordinates?, spatialNames?, roles?, parameterRules?, categoryFilter?, classMap?, splitMegabytes?, validate?, document? | filePath, fileCount, elementCount, triangleCount, fileSizeKb, files | Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing |
+| `Export.ViewpointImage` | filePath, width?, height?, viewpoint?, after?, document? | filePath | Renders a view to a .png/.jpg/.bmp file via the Navisworks image exporter |
 
 ## Navisworks.Grids
 
@@ -873,6 +871,9 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
+| `Export.ClashReportCsv` | Export.ClashReport |
+| `Export.ClashReportHtml` | Export.ClashReport |
+| `Export.NWD` | Document.Save |
 | `List.Join` | List.Merge |
 | `Markup.AddArrow` | Markup.AddShape |
 | `Markup.AddEllipse` | Markup.AddShape |

@@ -26,6 +26,7 @@ public static class ZoneNodes
     /// <param name="propertyName">Property name inside the tab that carries the zone name.</param>
     /// <returns>The target items (pass-through) and how many of them landed inside a zone.</returns>
     [NodeName("Zone.AssignByVolumes")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("Tags each target with the name of the zone volume containing its bounding-box center — the iConstruct Zone Tool as one node. The first zone (in list order) that contains an item wins; items inside no zone are left untouched. Written as a searchable user property tab (persists in NWF/NWD only).")]
     [NodeSearchTags("zone", "assign", "volume", "room", "area", "tag", "spatial", "contains")]
     [MultiReturn("items", "assignedCount")]

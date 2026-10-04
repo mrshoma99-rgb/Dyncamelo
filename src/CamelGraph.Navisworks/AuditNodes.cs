@@ -71,18 +71,25 @@ public static class AuditNodes
 
     /// <summary>Finds pairs of duplicated (double-exported) geometry among items.</summary>
     /// <param name="items">The model items to audit.</param>
-    /// <param name="tolerance">Duplicate tolerance in document units.</param>
+    /// <param name="tolerance">Duplicate tolerance, in the unit of the units input.</param>
+    /// <param name="units">The unit of the tolerance: "document" (the file's own unit, often feet) or a unit name such as Meters or Millimeters.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Index-aligned lists of duplicate pairs and the pair count.</returns>
-    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeAliases("CamelGraph.Navisworks.AuditNodes.DuplicateItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document")]
     [NodeName("Audit.DuplicateItems")]
-    [NodeDescription("Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.")]
+    [NodeDescription(
+        "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items. The test is added to the " +
+        "Clash Detective tests for the moment the check runs and removed again, so the node changes the clash tests (and the Script Player says so). " +
+        "tolerance is in the unit of the Advanced input units; \"document\" means the file's own unit, which is often feet, so name the unit when you know it.")]
     [NodeSearchTags("audit", "duplicate", "geometry", "double", "export", "qa")]
     [MultiReturn("items1", "items2", "count")]
     [PortKinds("item*", "item*", "integer")]
     public static Dictionary<string, object?> DuplicateItems(
         [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.001,
+        [NodePanel("Advanced")] [NodeChoicesFromEnum(typeof(Units), "document")] string units = "document",
         Document? document = null)
     {
         if (items == null)
@@ -93,12 +100,13 @@ public static class AuditNodes
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
         var collection = NavisValues.ToItemCollection(items);
+        var worldTolerance = tolerance * NavisValues.ResolveUnitsScale(doc, units);
 
         var test = new ClashTest
         {
             DisplayName = "CamelGraph Duplicate Audit",
             TestType = ClashTestType.Duplicate,
-            Tolerance = tolerance,
+            Tolerance = worldTolerance,
         };
         test.SelectionA.Selection.CopyFrom(collection);
         test.SelectionB.Selection.CopyFrom(collection);

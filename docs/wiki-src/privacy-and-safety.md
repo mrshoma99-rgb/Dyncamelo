@@ -52,7 +52,7 @@ A `.dyc` file is plain JSON: nodes, wires and typed values. It contains no progr
 | **Delete, move and overwrite files** | `File.Delete`, `File.Move`, `File.Copy`, `Directory.Delete`, `Directory.Create`, `Zip.Extract`, `Zip.Create` |
 | **Write files** | `Text.WriteToFile`, `Text.AppendToFile`, `CSV.WriteToFile`, `CSV.AppendToFile`, `JSON.WriteToFile`, `Excel.WriteToFile`, `Table.ToCsvFile`, `Table.ToExcelFile`, `Log.Write` |
 | **Read files and facts about your computer** | `Text.ReadFromFile`, `CSV.ReadFromFile`, `Excel.ReadFromFile`, `JSON.ReadFromFile`, `Directory.FindFiles`, `System.Environment` (user name, computer name, well-known folders). A graph can read a file and send it away with `Web.Post`. |
-| **Change the open model, or the files Navisworks writes** | The Navisworks nodes that change the document, for example `Appearance.OverrideColor`, `Appearance.Hide`, `SelectionSet.Create`, `Properties.SetCustom`, `ModelItem.Translate`, `Document.Open`, `Document.Save`, `Model.Remove`, `Export.NWD`, `Export.ToIfc`, `BCF.ExportIssues`. |
+| **Change the open model, or the files Navisworks writes** | The Navisworks nodes that change the document, for example `Appearance.OverrideColor`, `Appearance.Hide`, `SelectionSet.Create`, `Properties.SetCustom`, `ModelItem.Translate`, `Document.Open`, `Document.Save`, `Model.Remove`, `Export.ToIfc`, `BCF.ExportIssues`. |
 
 `Zip.Extract` refuses archive entries that would land outside the target folder.
 

@@ -66,7 +66,7 @@ public static class DocumentNodes
     /// <returns>The written file path.</returns>
     [NodeName("Document.Save")]
     [NodeDescription("Saves the document as .nwf (references) or .nwd (published snapshot) to the given path.")]
-    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write")]
+    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write", "export", "export nwd", "snapshot")]
     [return: NodeName("filePath")]
     public static string Save(string filePath, Document? document = null)
     {

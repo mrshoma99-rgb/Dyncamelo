@@ -4,6 +4,7 @@ using System.Globalization;
 using Autodesk.Navisworks.Api;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes;
 
 namespace CamelGraph.Navisworks;
 
@@ -17,12 +18,15 @@ public static class TakeoffNodes
     /// <param name="groupPropertyName">Grouping property (e.g. "Level" or "System Type").</param>
     /// <param name="valueCategoryName">Category of the quantity property (e.g. "Element").</param>
     /// <param name="valuePropertyName">Numeric quantity property to sum (e.g. "Volume", "Length", "Area").</param>
-    /// <returns>Index-aligned group keys, per-group sums and per-group item counts.</returns>
+    /// <returns>Index-aligned group keys, per-group sums and per-group item counts, and the same as one table.</returns>
     [NodeName("Takeoff.SumPropertyByGroup")]
-    [NodeDescription("One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".")]
-    [NodeSearchTags("takeoff", "qto", "quantity", "sum", "group", "rollup", "pivot")]
-    [MultiReturn("keys", "sums", "counts")]
-    [PortKinds("text*", "number*", "integer*")]
+    [NodeDescription(
+        "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\". " +
+        "keys, sums and counts are three parallel lists; table is the same result as one table (columns: the grouping property, the summed property, Count) that goes straight into " +
+        "Table.ToExcelFile, Table.ToCsvFile, Table.Sort or Report.Html. For sums over several properties use Properties.ToTable and Table.GroupBy.")]
+    [NodeSearchTags("takeoff", "qto", "quantity", "sum", "group", "rollup", "pivot", "table")]
+    [MultiReturn("keys", "sums", "counts", "table")]
+    [PortKinds("text*", "number*", "integer*", "data")]
     public static Dictionary<string, object?> SumPropertyByGroup(
         [MultiInput] IEnumerable<ModelItem> items,
         [NodeTabChoice("items")] string groupCategoryName,
@@ -61,11 +65,18 @@ public static class TakeoffNodes
             counts[index]++;
         }
 
+        var rows = new List<IReadOnlyList<object?>>(keys.Count);
+        for (int i = 0; i < keys.Count; i++)
+        {
+            rows.Add(new object?[] { keys[i], sums[i], counts[i] });
+        }
+
         return new Dictionary<string, object?>
         {
             ["keys"] = keys,
             ["sums"] = sums,
             ["counts"] = counts,
+            ["table"] = new CamelGraphTable(new[] { groupPropertyName, valuePropertyName, "Count" }, rows),
         };
     }
 

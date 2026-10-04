@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 581,
+ "count": 579,
  "categories": [
   {
    "name": "Annotation",
@@ -100,7 +100,7 @@
   },
   {
    "name": "Navisworks.Export",
-   "count": 14
+   "count": 12
   },
   {
    "name": "Navisworks.Grids",
@@ -9374,10 +9374,10 @@
   },
   {
    "name": "Audit.DuplicateItems",
-   "id": "CamelGraph.Navisworks.AuditNodes.DuplicateItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.AuditNodes.DuplicateItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items.",
+   "description": "Finds duplicated geometry (double-exported elements) by running a temporary Duplicate clash test over the items. The test is added to the Clash Detective tests for the moment the check runs and removed again, so the node changes the clash tests (and the Script Player says so). tolerance is in the unit of the Advanced input units; \"document\" means the file's own unit, which is often feet, so name the unit when you know it.",
    "tags": [
     "audit",
     "duplicate",
@@ -9396,8 +9396,14 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "Duplicate tolerance in document units.",
+     "description": "Duplicate tolerance, in the unit of the units input.",
      "default": "0.001"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "The unit of the tolerance: \"document\" (the file's own unit, often feet) or a unit name such as Meters or Millimeters.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -9488,7 +9494,7 @@
    "id": "CamelGraph.Navisworks.DistanceNodes.BetweenItems@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert.",
+   "description": "Shortest distance between two selections, with the closest (witness) point on each side. method \"mesh\" = exact surface-to-surface via the Clash engine (can be slow on very large selections); \"bbox\" = fast bounding-box approximation. Document units — chain Units.Convert. The bbox tier measures between the combined box of each side, a coarser answer than Proximity.NearestDistance, which measures to each target on its own. The default is mesh here and bbox on Proximity.NearestDistance.",
    "tags": [
     "distance",
     "clearance",
@@ -9625,7 +9631,7 @@
     {
      "name": "imagePath",
      "type": "string",
-     "description": "Where to write the PNG (empty = a temp file; the path is returned).",
+     "description": "Where to write the PNG (empty = a temp file; the path is returned). A relative path is next to the graph file.",
      "default": "null"
     },
     {
@@ -9699,7 +9705,7 @@
    "id": "CamelGraph.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,bool,object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.",
+   "description": "Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint (named \"Opening 1 — gap 0.35 Meters\", the gap in the unit you chose) in the folder \"Floor Openings\"; running again replaces a viewpoint of the same name instead of adding another, and turning saveViewpoints off leaves the document alone. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.",
    "tags": [
     "fall",
     "hazard",
@@ -9763,7 +9769,7 @@
     {
      "name": "imagePath",
      "type": "string",
-     "description": "Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).",
+     "description": "Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned). A relative path is next to the graph file.",
      "default": "null"
     },
     {
@@ -9842,7 +9848,7 @@
    "id": "CamelGraph.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set propertyName to also stamp every item with its cluster number as a searchable custom property.",
+   "description": "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set propertyName (Advanced) to also stamp every item with its cluster number as a searchable custom property in the tab tabName; without it the node only reads.",
    "tags": [
     "cluster",
     "group",
@@ -9934,7 +9940,7 @@
    "id": "CamelGraph.Navisworks.DistanceNodes.NearestDistance@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" = fast, \"mesh\" = exact surfaces (slower on big sets).",
+   "description": "For each item, the distance to the NEAREST of the targets (document units), so you can flag items with nothing close by — e.g. openings with no handrail within a distance: compare the result with GreaterThan. Returns +∞ for an item when there are no targets at all. method \"bbox\" (the default here; Distance.BetweenItems defaults to mesh) = fast, \"mesh\" = exact surfaces (slower on big sets).",
    "tags": [
     "proximity",
     "nearest",
@@ -9985,7 +9991,7 @@
    "id": "CamelGraph.Navisworks.TakeoffNodes.SumPropertyByGroup@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Analysis",
-   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\".",
+   "description": "One-node QTO rollup: groups items by a property value and sums a numeric property per group (e.g. Volume per Level). Items without the grouping property land in \"(none)\". keys, sums and counts are three parallel lists; table is the same result as one table (columns: the grouping property, the summed property, Count) that goes straight into Table.ToExcelFile, Table.ToCsvFile, Table.Sort or Report.Html. For sums over several properties use Properties.ToTable and Table.GroupBy.",
    "tags": [
     "takeoff",
     "qto",
@@ -9993,7 +9999,8 @@
     "sum",
     "group",
     "rollup",
-    "pivot"
+    "pivot",
+    "table"
    ],
    "inputs": [
     {
@@ -10038,9 +10045,14 @@
      "name": "counts",
      "type": "integer[]",
      "description": ""
+    },
+    {
+     "name": "table",
+     "type": "dict",
+     "description": ""
     }
    ],
-   "returns": "Index-aligned group keys, per-group sums and per-group item counts."
+   "returns": "Index-aligned group keys, per-group sums and per-group item counts, and the same as one table."
   },
   {
    "name": "Zone.AssignByVolumes",
@@ -13742,7 +13754,10 @@
     "nwf",
     "nwd",
     "publish",
-    "write"
+    "write",
+    "export",
+    "export nwd",
+    "snapshot"
    ],
    "inputs": [
     {
@@ -13771,7 +13786,7 @@
    "id": "CamelGraph.Navisworks.BcfNodes.ExportIssues@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.SavedViewpoint>,bool,System.Collections.IDictionary,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention.",
+   "description": "Exports clash results (or saved viewpoints) as BCF 2.1 issues (.bcfzip: markup, camera viewpoint, component GUIDs, snapshot) — the vendor-neutral bridge into BIMcollab / Konekt / Revizto / ACC. Components use the IFC GlobalId when present, else the InstanceGuid (lossy for non-IFC sources). Cameras are written in meters per the BCF convention. Navisworks numbers clash results per test (Clash1 in every test), so when the results come from more than one test each issue title gets its test in front (\"Test - Clash1\"), and titles that would still repeat are numbered (2), (3) with a warning.",
    "tags": [
     "bcf",
     "export",
@@ -13787,7 +13802,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .bcfzip (or .bcf) path; the directory is created when missing."
+     "description": "Destination .bcfzip (or .bcf) path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "results",
@@ -13853,7 +13868,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The .bcfzip (or .bcf) file to read."
+     "description": "The .bcfzip (or .bcf) file to read. A relative path is next to the graph file."
     },
     {
      "name": "applyCameraTopicIndex",
@@ -13876,101 +13891,59 @@
     },
     {
      "name": "modelItems",
-     "type": "ModelItem[]",
+     "type": "ModelItem[][]",
      "description": ""
     }
    ],
-   "returns": "Topic dictionaries and, per topic, the model items its component GUIDs resolve to."
+   "returns": "Topic dictionaries and, per topic, the list of model items its component GUIDs resolve to (a list of lists)."
   },
   {
-   "name": "Export.ClashReportCsv",
-   "id": "CamelGraph.Navisworks.ExportNodes.ClashReportCsv@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+   "name": "Export.ClashReport",
+   "id": "CamelGraph.Navisworks.ExportNodes.ClashReport@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,bool,int,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "One-node clash report: writes test, group, result, status, distance, assignee, both item paths and GUIDs, and the clash point to a CSV file (Excel-ready).",
+   "description": "One-node clash report. A .csv path writes one row per result (test, group, result, status, distance, assignee, description, both item paths and GUIDs, the clash point; Excel-ready). A .html path writes a self-contained page, one section per test, optionally with a snapshot of every result (Advanced: includeImages, imageWidth, imageHeight), shareable as one file. Unwired tests reports every test in the document; an empty list reports none, so a filter that finds nothing gives an empty report instead of a report on everything.",
    "tags": [
     "export",
     "clash",
     "report",
     "csv",
-    "excel",
-    "triage"
-   ],
-   "inputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "Destination .csv path; the directory is created when missing."
-    },
-    {
-     "name": "tests",
-     "type": "ClashTest[]",
-     "description": "The clash tests to report (null reports every test in the document).",
-     "default": "null"
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "filePath",
-     "type": "file",
-     "description": ""
-    },
-    {
-     "name": "rowCount",
-     "type": "integer",
-     "description": ""
-    }
-   ],
-   "returns": "The written file path and the number of result rows."
-  },
-  {
-   "name": "Export.ClashReportHtml",
-   "id": "CamelGraph.Navisworks.ExportNodes.ClashReportHtml@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,bool,int,int,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Export",
-   "description": "Self-contained HTML clash report — one section per test, one row per result, optionally with embedded snapshots. Shareable as a single file.",
-   "tags": [
-    "export",
-    "clash",
-    "report",
     "html",
+    "excel",
+    "triage",
     "snapshot",
-    "share"
+    "share",
+    "clashreportcsv",
+    "clashreporthtml"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .html path; the directory is created when missing."
+     "description": "Destination .csv or .html (.htm) path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "tests",
      "type": "ClashTest[]",
-     "description": "The clash tests to report (null reports every test in the document).",
+     "description": "The clash tests to report. Leave unwired for every test in the document; an empty list reports no test.",
      "default": "null"
     },
     {
      "name": "includeImages",
      "type": "boolean",
-     "description": "True to embed a snapshot per result (larger file, needs the Navisworks viewport).",
+     "description": "HTML only: true embeds a snapshot per result (larger file, needs the Navisworks viewport).",
      "default": "false"
     },
     {
      "name": "imageWidth",
      "type": "integer",
-     "description": "Snapshot width in pixels.",
+     "description": "HTML only: snapshot width in pixels.",
      "default": "320"
     },
     {
      "name": "imageHeight",
      "type": "integer",
-     "description": "Snapshot height in pixels.",
+     "description": "HTML only: snapshot height in pixels.",
      "default": "240"
     },
     {
@@ -14022,7 +13995,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcCoordinates@string,double,double,double,double,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing.",
+   "description": "Base-point and georeferencing options for Export.ToIfc: geometry/model/custom origin, rotation and IFC4 georeferencing. eastings, northings and elevation are in metres and are used only when basePoint is Custom.",
    "tags": [
     "ifc",
     "export",
@@ -14042,19 +14015,19 @@
     {
      "name": "eastings",
      "type": "number",
-     "description": "Custom base-point easting in metres (Custom mode).",
+     "description": "Custom base-point easting in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
      "name": "northings",
      "type": "number",
-     "description": "Custom base-point northing in metres (Custom mode).",
+     "description": "Custom base-point northing in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
      "name": "elevation",
      "type": "number",
-     "description": "Custom base-point elevation in metres (Custom mode).",
+     "description": "Custom base-point elevation in metres; used only when basePoint is Custom.",
      "default": "0"
     },
     {
@@ -14084,7 +14057,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcParameterRule@string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export.",
+   "description": "One property rename/relocate rule for Export.ToIfc — moves/renames a source property into a target IFC Pset/name on export. The search button next to source and sourceCategory lists what the elements selected in Navisworks right now carry.",
    "tags": [
     "ifc",
     "export",
@@ -14134,7 +14107,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.IfcRoles@string,string,string,string,string,string,string,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc.",
+   "description": "Maps Navisworks source properties to IFC roles — Type→IfcElementType, Level→IfcBuildingStorey, Material→IfcMaterial, Classification→IfcClassificationReference — for Export.ToIfc. The search button next to a name lists the tabs and properties of the elements selected in Navisworks right now.",
    "tags": [
     "ifc",
     "export",
@@ -14305,53 +14278,20 @@
    "returns": ""
   },
   {
-   "name": "Export.NWD",
-   "id": "CamelGraph.Navisworks.ExportNodes.Nwd@string,Autodesk.Navisworks.Api.Document",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Export",
-   "description": "Saves the document as a published .nwd snapshot (appearance overrides baked in).",
-   "tags": [
-    "export",
-    "nwd",
-    "publish",
-    "save",
-    "snapshot"
-   ],
-   "inputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "Destination .nwd path; the directory is created when missing."
-    },
-    {
-     "name": "document",
-     "type": "Document",
-     "description": "The document (defaults to the active document).",
-     "default": "null"
-    }
-   ],
-   "outputs": [
-    {
-     "name": "filePath",
-     "type": "string",
-     "description": "The written file path."
-    }
-   ],
-   "returns": ""
-  },
-  {
    "name": "Export.ToCsv",
    "id": "CamelGraph.Navisworks.ExportNodes.ToCsv@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,System.Collections.Generic.IEnumerable<string>",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Writes one CSV row per model item with a Name column plus property columns. Useful for quantity take-offs.",
+   "description": "Writes one CSV row per model item with a Name column plus property columns, straight from the model: a quick quantity take-off file. For anything you want to shape first (sort, filter, group, add columns, dates as dates, an Excel workbook) use Properties.ToTable and the Table nodes, then Table.ToCsvFile or Table.ToExcelFile: they share the CSV and Excel options of the rest of the library.",
    "tags": [
     "export",
     "csv",
     "qto",
     "takeoff",
     "report",
-    "excel"
+    "excel",
+    "table",
+    "properties"
    ],
    "inputs": [
     {
@@ -14363,7 +14303,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .csv path; the directory is created when missing."
+     "description": "Destination .csv path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "categoryName",
@@ -14392,7 +14332,7 @@
    "id": "CamelGraph.Navisworks.IfcExportNodes.ToIfc@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,string,bool,bool,bool,bool,string,string,BIMCamel.Ifc.CoordOptions,BIMCamel.Ifc.SpatialNames,BIMCamel.Data.PropertyRoles,System.Collections.Generic.IEnumerable<BIMCamel.Data.ParamMapRule>,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.Dictionary<string,string>,double,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing.",
+   "description": "Exports model items to IFC (IFC4/IFC2x3) via the BIMCamel exporter: spatial tree, instancing, property sets, materials, base quantities and georeferencing. The main inputs are the items, the file and the schema and units; the options of the Advanced panel (instancing, property sets, materials, quantities, quality, splitting, validation and the Export.Ifc* option nodes) have sensible defaults. filePath always comes out as ONE text, the first file written; files lists every file (more than one only when splitMegabytes splits the export), so a node after it sees the same kind of value whatever the split.",
    "tags": [
     "export",
     "ifc",
@@ -14413,7 +14353,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .ifc path; the directory is created when missing."
+     "description": "Destination .ifc path; the directory is created when missing. A relative path is next to the graph file."
     },
     {
      "name": "schema",
@@ -14537,29 +14477,36 @@
      "name": "fileSizeKb",
      "type": "number",
      "description": ""
+    },
+    {
+     "name": "files",
+     "type": "file[]",
+     "description": ""
     }
    ],
-   "returns": "The written path(s) and export statistics."
+   "returns": "The first written path, how many files were written, the exported element and triangle counts, the size, and every written path."
   },
   {
    "name": "Export.ViewpointImage",
-   "id": "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ExportNodes.ViewpointImage@string,int,int,object,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Export",
-   "description": "Renders the current view to a .png/.jpg/.bmp file via the Navisworks image exporter.",
+   "description": "Renders a view to a .png/.jpg/.bmp file via the Navisworks image exporter. Without 'viewpoint' it is the view as it is when the node runs: wire what sets the view into 'after'. Wire saved viewpoints into 'viewpoint' and the node shows each one itself and takes its picture; put {name} in the file path (\"C:\\Pictures\\{name}.png\") for one file per viewpoint. That is the batch for a folder: Viewpoints.InFolder into 'viewpoint'. (SavedViewpoint.Apply followed by this node over a list does not work: every Apply runs first, then every picture shows the last view.) The view is left on the last viewpoint shown; Camera.Save and Camera.Restore put it back.",
    "tags": [
     "export",
     "image",
     "screenshot",
     "render",
     "viewpoint",
-    "png"
+    "png",
+    "picture",
+    "batch"
    ],
    "inputs": [
     {
      "name": "filePath",
      "type": "string",
-     "description": "Destination .png, .jpg or .bmp path; the directory is created when missing."
+     "description": "Destination .png, .jpg or .bmp path; the directory is created when missing. A relative path is next to the graph file. With a viewpoint, {name} in the path becomes the viewpoint's name."
     },
     {
      "name": "width",
@@ -14574,6 +14521,18 @@
      "default": "1080"
     },
     {
+     "name": "viewpoint",
+     "type": "any",
+     "description": "Optional: the viewpoint to show first (a saved viewpoint, its name or folder path, or a camera from Camera.Save). A list takes one picture per viewpoint. Empty takes the picture of the view as it is.",
+     "default": "null"
+    },
+    {
+     "name": "after",
+     "type": "any",
+     "description": "Anything at all, only to run this node after the node it comes from: the picture is of the view at the moment this node runs, and the engine does not order nodes that share no wire.",
+     "default": "null"
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -14584,7 +14543,7 @@
     {
      "name": "filePath",
      "type": "string",
-     "description": "The written file path. After SavedViewpoint.Apply in a lacing loop this is a batch screenshot factory."
+     "description": "The written file path."
     }
    ],
    "returns": ""
