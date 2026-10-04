@@ -50,7 +50,8 @@ Hover a node in the list and a **star** appears at its right. Click it to add th
 
 Type in the search box and the folder tree is replaced by a flat list of matches. Clear the box and the tree comes back exactly as you left it.
 
-* Every word you type has to appear somewhere in a node's **name, folder, search keywords or description**, in any order. Case does not matter.
+* Every word you type has to appear somewhere in a node's **name, folder, search keywords or description**, in any order. Case does not matter, and British and American spellings are the same word: `colour` finds `Color.ByHSV`, and `grey`, `centre` and `metre` find `gray`, `center` and `meter`.
+* The input, display and loop nodes answer to the words people use for them: `dropdown` finds `Choice`, `checkbox` finds `Boolean`, `preview` or `debug` find `Watch`, `for each` finds `Loop.Item` and `Loop.Collect`, `picture` finds `Watch Image`, `calendar` finds `Date` and `folder` finds `Directory Path`.
 * Matches are ranked: names that start with your first word come first, then names that contain it, then folder or keyword matches, then description-only matches. Starred nodes come before others of equal rank, then recently added ones.
 * At most 200 results are shown. If there are more, a line at the bottom says so; type another word to narrow it down. If nothing matches, it says "No nodes match" followed by your text.
 * ++esc++ in the panel clears the search. A second ++esc++ clears the highlight.
