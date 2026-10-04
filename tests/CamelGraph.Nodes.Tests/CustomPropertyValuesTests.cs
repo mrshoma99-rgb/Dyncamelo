@@ -138,7 +138,7 @@ public class CustomPropertyWiringTests
         foreach (var method in new[] { "SetCustom", "RemoveCustomTab", "RenameCustomTab" })
         {
             var declaration = NavisworksMethodText.Declaration("CustomPropertyNodes.cs", method);
-            Assert.Contains("[NodeTabChoice(\"modelItems\")] string tabName", declaration);
+            Assert.Contains("[NodeTabChoice(\"modelItems\", UserDefinedOnly = true)] string tabName", declaration);
             Assert.Contains("[NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]", declaration);
         }
     }

@@ -36,7 +36,7 @@ public static class CustomPropertyNodes
         [MultiInput] IEnumerable<ModelItem> modelItems,
         IEnumerable<string> names,
         IEnumerable<object?> values,
-        [NodeTabChoice("modelItems")] string tabName = "CamelGraph Data",
+        [NodeTabChoice("modelItems", UserDefinedOnly = true)] string tabName = "CamelGraph Data",
         [NodePanel("Advanced")] bool merge = true)
     {
         var items = NavisValues.ToItemList(modelItems);
@@ -78,7 +78,7 @@ public static class CustomPropertyNodes
         CamelGraphTable table,
         [MultiInput] IEnumerable<ModelItem>? modelItems = null,
         [MultiInput] IList<object?>? columns = null,
-        [NodeTabChoice("modelItems")] string tabName = "CamelGraph Data",
+        [NodeTabChoice("modelItems", UserDefinedOnly = true)] string tabName = "CamelGraph Data",
         string? keyColumn = null,
         [NodePanel("Advanced")] bool merge = true,
         Document? document = null)
@@ -187,7 +187,7 @@ public static class CustomPropertyNodes
     [PortKinds("item*", "integer")]
     public static Dictionary<string, object?> RemoveCustomTab(
         [MultiInput] IEnumerable<ModelItem> modelItems,
-        [NodeTabChoice("modelItems")] string tabName)
+        [NodeTabChoice("modelItems", UserDefinedOnly = true)] string tabName)
     {
         var items = NavisValues.ToItemList(modelItems);
         if (items.Count == 0)
@@ -228,7 +228,7 @@ public static class CustomPropertyNodes
     [return: NodeName("modelItems")]
     public static List<ModelItem> RenameCustomTab(
         [MultiInput] IEnumerable<ModelItem> modelItems,
-        [NodeTabChoice("modelItems")] string tabName,
+        [NodeTabChoice("modelItems", UserDefinedOnly = true)] string tabName,
         string newTabName)
     {
         var items = NavisValues.ToItemList(modelItems);
