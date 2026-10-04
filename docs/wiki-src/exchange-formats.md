@@ -150,7 +150,7 @@ Search.ByProperty ─▶ Properties.ToTable ─▶ Table.GroupBy ─▶ Table.So
 
 [Take quantities out to Excel](howto/quantity-takeoff-to-excel.md) builds this graph step by step.
 
-To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join`, and write each row onto the items with `Properties.SetCustom`. That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified. [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md) shows the wiring.
+To **bring a spreadsheet into the model**, read it with `Table.FromExcelFile`, join it to `Properties.ToTable` on a GUID or mark column with `Table.Join`, and write each row onto the items with `Properties.SetCustomFromTable` (a different row for every item, matched by position or by a GUID column; `Properties.SetCustom` stamps one set of values on all the items it is given). That writes a user-defined tab that is searchable and schedulable and travels with the NWF or NWD; the source files are never modified. [Write spreadsheet data onto model items](howto/write-excel-data-onto-items.md) shows the wiring.
 
 ## CSV
 

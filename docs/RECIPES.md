@@ -55,7 +55,7 @@ Two ideas make most of these short:
 
 **IFC GlobalId bridge.** `ModelItem.IfcGuid` gives an item's 22-character IFC GlobalId; `IFC.GuidDecode` / `IFC.GuidEncode` convert to and from the standard GUID other tools use; `Search.ByGuid` finds the items for a list of either form (the ones it could not find come out of a second socket).
 
-**COBie / classification sheets.** `Table.FromExcelFile` → `Table.Join` against `Properties.ToTable` on the GUID column → `Properties.SetCustom` per row writes the classification onto the items.
+**COBie / classification sheets.** `Table.FromExcelFile` → `Table.Join` against `Properties.ToTable` on the GUID column → `Properties.SetCustomFromTable` (key column = the GUID column) writes each row's classification onto its item.
 
 **IDS-style requirement check.** A requirements sheet (category, property, expected pattern) read with `Table.FromExcelFile`; for each row `Search.ByProperty` + `List.FilterByValue` (`regex`) → failing items to `Table.ToExcelFile` with the reason.
 

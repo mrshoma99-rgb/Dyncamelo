@@ -15025,7 +15025,8 @@
     {
      "name": "properties",
      "type": "any[]",
-     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid."
+     "description": "The properties to capture, written like Properties.ToTable: \"Category.Property\", \"Category|Property\", a bare name, or @Name, @Path, @Guid.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -16199,11 +16200,98 @@
    "returns": ""
   },
   {
+   "name": "Properties.SetCustomFromTable",
+   "id": "CamelGraph.Navisworks.CustomPropertyNodes.SetCustomFromTable@CamelGraph.Nodes.CamelGraphTable,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>,string,string,bool,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Properties",
+   "description": "Writes a table onto model items as a user-defined property tab, a DIFFERENT row for every item — the spreadsheet-to-model step in one node (Table.FromExcelFile, Table.Join with Properties.ToTable, then this). Each column becomes a property named after its header. Either row 1 goes to item 1, row 2 to item 2 and so on (the counts must match, or nothing is written), or give keyColumn the column that holds each row's GUID and every row finds its item by GUID in one pass (rows that match no item are skipped and listed in missing). Every value must be text, a number, true/false or a date (an empty cell is written as empty text), and all values are checked before the first item is touched. Values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified); merge keeps existing same-tab properties.",
+   "tags": [
+    "property",
+    "custom",
+    "table",
+    "excel",
+    "spreadsheet",
+    "import",
+    "write",
+    "user",
+    "tab",
+    "row",
+    "guid",
+    "stamp",
+    "cobie",
+    "classification",
+    "parameter"
+   ],
+   "inputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "The table: one row per item, one column per property (the header is the property name)."
+    },
+    {
+     "name": "modelItems",
+     "type": "ModelItem[]",
+     "description": "The items. With no keyColumn row 1 goes to item 1, row 2 to item 2 and so on, so there must be as many rows as items. With a keyColumn these are the items the GUIDs are looked for among; leave it unwired to look in the whole model.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "columns",
+     "type": "any[]",
+     "description": "The headers of the columns to write; leave empty for every column except the key column and the @ columns that Properties.ToTable adds.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "tabName",
+     "type": "string",
+     "description": "User-visible tab name; a stable internal name is derived from it so search sets can target the tab.",
+     "default": "\"CamelGraph Data\""
+    },
+    {
+     "name": "keyColumn",
+     "type": "string",
+     "description": "The header of the column that holds each row's item GUID (instance GUID text, or a 22-character IFC id); leave empty to pair rows and items by position.",
+     "default": "null"
+    },
+    {
+     "name": "merge",
+     "type": "boolean",
+     "description": "True keeps existing properties of a same-named tab (new values win on name collisions); false replaces the tab's content entirely.",
+     "default": "true"
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document); only used to look items up by GUID.",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "modelItems",
+     "type": "ModelItem[]",
+     "description": ""
+    },
+    {
+     "name": "written",
+     "type": "integer",
+     "description": ""
+    },
+    {
+     "name": "missing",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "The items that were written, how many, and the keys that matched no item."
+  },
+  {
    "name": "Properties.ToTable",
    "id": "CamelGraph.Navisworks.ModelDataNodes.ToTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Properties",
-   "description": "Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values.",
+   "description": "Reads the named properties of every item into a table with one row per item and one column per name (\"Element.Category\", \"Item|Layer\", a bare property name, or @Name, @Path, @Guid), ready for the Table nodes, Excel or CSV; a property an item lacks is an empty cell. Reads items times names values. Leave properties unwired to read EVERY property the items carry instead, one \"Category.Property\" column each in the order first met (capped at one million cells; with the Table nodes and Table.ToCsvFile this is the all-properties CSV export). Several wires into properties are joined into one list.",
    "tags": [
     "properties",
     "table",
@@ -16215,7 +16303,9 @@
     "dataframe",
     "report",
     "schedule",
-    "quantities"
+    "quantities",
+    "all properties",
+    "dump"
    ],
    "inputs": [
     {
@@ -16227,14 +16317,16 @@
     {
      "name": "properties",
      "type": "any[]",
-     "description": "The columns: \"Category.Property\" or \"Category|Property\" (split at the first \"|\" if there is one, otherwise at the first \".\"), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid."
+     "description": "The columns: \"Category.Property\" or \"Category|Property\" (split at the first \"|\" if there is one, otherwise at the first \".\"), a bare property name (searched in every category, first match wins), or @Name, @Path, @Guid. Leave it unwired (or empty) to get every property the items carry.",
+     "default": "null",
+     "multiInput": true
     }
    ],
    "outputs": [
     {
      "name": "table",
      "type": "CamelGraphTable",
-     "description": "A table with one column per entry of properties, headed with the text as written."
+     "description": "A table with one column per entry of properties, headed with the text as written; with no properties, one column per category and property found, headed \"Category.Property\", in the order first met."
     }
    ],
    "returns": ""
@@ -16316,45 +16408,6 @@
     }
    ],
    "returns": ""
-  },
-  {
-   "name": "Property.Info",
-   "id": "CamelGraph.Navisworks.PropertyNodes.Info@Autodesk.Navisworks.Api.DataProperty",
-   "assembly": "CamelGraph.Navisworks",
-   "category": "Navisworks.Properties",
-   "description": "The internal name, display name and plain value of a raw data property.",
-   "tags": [
-    "property",
-    "info",
-    "name",
-    "displayname",
-    "raw"
-   ],
-   "inputs": [
-    {
-     "name": "property",
-     "type": "DataProperty",
-     "description": "The data property (e.g. from Properties.InCategory workflows)."
-    }
-   ],
-   "outputs": [
-    {
-     "name": "name",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "displayName",
-     "type": "string",
-     "description": ""
-    },
-    {
-     "name": "value",
-     "type": "any",
-     "description": ""
-    }
-   ],
-   "returns": "Internal name, display name, and the plain value."
   },
   {
    "name": "Search.ByGuid",

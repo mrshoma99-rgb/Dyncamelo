@@ -41,6 +41,9 @@ Why step 10: `Properties.SetCustom` writes one list of names and values to **all
 
 Running again with `merge` on (the default) keeps other properties in the tab and lets the new values win. `Properties.RemoveCustomTab` removes the tab.
 
+!!! tip "A shorter way: Properties.SetCustomFromTable"
+    Steps 7 to 10 can be one node. Add `Properties.SetCustomFromTable` (*Navisworks ▸ Properties*), wire the joined table into `table`, type `Spreadsheet` into `tabName` and `@Guid` into `keyColumn`, and leave `items` and `columns` empty. Every row finds its item by the GUID in the `@Guid` column, in one pass over the model, and every column except `@Guid` and the other `@` columns becomes a property named after its header. No list levels are needed, rows that match no item are skipped and listed in `missing`, and the node checks every value before it writes to the first item. Without `keyColumn`, row 1 goes to item 1, row 2 to item 2 and so on, and the node refuses a table with a different number of rows than items.
+
 !!! warning "One row for each GUID"
     If the sheet holds a GUID twice, the join adds a second row for that item and items and rows no longer line up. Remove duplicates first.
 

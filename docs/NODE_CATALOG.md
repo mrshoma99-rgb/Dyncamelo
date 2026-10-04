@@ -617,10 +617,10 @@
 | `Properties.RemoveCustomTab` | modelItems, tabName | modelItems, removedCount | Removes a user-defined property tab from items |
 | `Properties.RenameCustomTab` | modelItems, tabName, newTabName | modelItems | Renames a user-defined property tab in place (same properties, same internal name |
 | `Properties.SetCustom` | modelItems, names, values, tabName?, merge? | modelItems | Writes ONE set of names and values as a user-defined property tab onto every item you give it |
-| `Properties.ToTable` | items, properties | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
+| `Properties.SetCustomFromTable` | table, modelItems?, columns?, tabName?, keyColumn?, merge?, document? | modelItems, written, missing | Writes a table onto model items as a user-defined property tab, a DIFFERENT row for every item |
+| `Properties.ToTable` | items, properties? | table | Reads the named properties of every item into a table with one row per item and one column per name ("Element.Category", "Item\|Layer", a bare property name, or @Name, @P… |
 | `Properties.Value` | item, categoryName, propertyName | value | Reads a property value from a model item, converted to a plain value |
 | `Properties.ValueAsString` | item, categoryName, propertyName | text | Reads a property value as text |
-| `Property.Info` | property | name, displayName, value | The internal name, display name and plain value of a raw data property |
 
 ## Navisworks.Search
 
@@ -879,6 +879,7 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | `Model.FileName` | Model.Info |
 | `Model.RootItem` | Model.Info |
 | `Model.Units` | Model.Info |
+| `Property.Info` | Properties.InCategory |
 | `Search.ByPropertyCompare` | Search.ByProperty |
 | `Search.ByPropertyContains` | Search.ByProperty |
 | `Search.ByPropertyValue` | Search.ByProperty |

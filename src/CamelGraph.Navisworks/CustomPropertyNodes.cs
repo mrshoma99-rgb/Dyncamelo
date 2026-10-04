@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes;
 using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
@@ -55,6 +57,122 @@ public static class CustomPropertyNodes
         }
 
         return items;
+    }
+
+    /// <summary>Writes each row of a table as a user-defined property tab on its own item.</summary>
+    /// <param name="table">The table: one row per item, one column per property (the header is the property name).</param>
+    /// <param name="modelItems">The items. With no keyColumn row 1 goes to item 1, row 2 to item 2 and so on, so there must be as many rows as items. With a keyColumn these are the items the GUIDs are looked for among; leave it unwired to look in the whole model.</param>
+    /// <param name="columns">The headers of the columns to write; leave empty for every column except the key column and the @ columns that Properties.ToTable adds.</param>
+    /// <param name="tabName">User-visible tab name; a stable internal name is derived from it so search sets can target the tab.</param>
+    /// <param name="keyColumn">The header of the column that holds each row's item GUID (instance GUID text, or a 22-character IFC id); leave empty to pair rows and items by position.</param>
+    /// <param name="merge">True keeps existing properties of a same-named tab (new values win on name collisions); false replaces the tab's content entirely.</param>
+    /// <param name="document">The document (defaults to the active document); only used to look items up by GUID.</param>
+    /// <returns>The items that were written, how many, and the keys that matched no item.</returns>
+    [NodeName("Properties.SetCustomFromTable")]
+    [NodeDescription("Writes a table onto model items as a user-defined property tab, a DIFFERENT row for every item — the spreadsheet-to-model step in one node (Table.FromExcelFile, Table.Join with Properties.ToTable, then this). Each column becomes a property named after its header. Either row 1 goes to item 1, row 2 to item 2 and so on (the counts must match, or nothing is written), or give keyColumn the column that holds each row's GUID and every row finds its item by GUID in one pass (rows that match no item are skipped and listed in missing). Every value must be text, a number, true/false or a date (an empty cell is written as empty text), and all values are checked before the first item is touched. Values are searchable, schedulable, and travel with the NWF/NWD (source files are never modified); merge keeps existing same-tab properties.")]
+    [NodeSearchTags("property", "custom", "table", "excel", "spreadsheet", "import", "write", "user", "tab", "row", "guid", "stamp", "cobie", "classification", "parameter")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [MultiReturn("modelItems", "written", "missing")]
+    [PortKinds("item*", "integer", "text*")]
+    public static Dictionary<string, object?> SetCustomFromTable(
+        CamelGraphTable table,
+        [MultiInput] IEnumerable<ModelItem>? modelItems = null,
+        [MultiInput] IList<object?>? columns = null,
+        [NodeTabChoice("modelItems")] string tabName = "CamelGraph Data",
+        string? keyColumn = null,
+        [NodePanel("Advanced")] bool merge = true,
+        Document? document = null)
+    {
+        if (string.IsNullOrWhiteSpace(tabName))
+        {
+            throw new ArgumentException("No tab name provided.", nameof(tabName));
+        }
+
+        var plan = TablePropertyPlan.Create(table, columns, keyColumn, "Properties.SetCustomFromTable");
+
+        // Every value is checked before the first item is written to.
+        var rows = new List<List<KeyValuePair<string, object?>>>(plan.RowCount);
+        for (var row = 0; row < plan.RowCount; row++)
+        {
+            rows.Add(plan.PairsOf(row));
+        }
+
+        var written = new List<ModelItem>();
+        var missing = new List<string>();
+        if (!plan.IsKeyed)
+        {
+            var items = NavisValues.ToItemList(modelItems);
+            if (items.Count == 0)
+            {
+                throw new ArgumentException("No model items provided. Wire the items the rows belong to, or give keyColumn the column that holds each row's GUID.", nameof(modelItems));
+            }
+
+            plan.RequireItemCount(items.Count);
+            for (var i = 0; i < items.Count; i++)
+            {
+                ComBridge.SetUserDefinedTab(items[i], tabName, null, rows[i], merge);
+                written.Add(items[i]);
+            }
+        }
+        else
+        {
+            var wanted = new Dictionary<Guid, int>();
+            for (var row = 0; row < plan.RowCount; row++)
+            {
+                wanted[plan.Keys![row].Guid] = row;
+            }
+
+            // One pass over the wired items, or over the whole model when none were wired.
+            var source = modelItems != null
+                ? NavisValues.ToItemList(modelItems)
+                : ModelDataReader.AllItems(NavisworksContext.ResolveDocument(document));
+            var matches = new Dictionary<int, List<ModelItem>>();
+            foreach (var item in source)
+            {
+                var guid = item.InstanceGuid;
+                if (guid == Guid.Empty || !wanted.TryGetValue(guid, out var row))
+                {
+                    continue;
+                }
+
+                if (!matches.TryGetValue(row, out var found))
+                {
+                    found = new List<ModelItem>();
+                    matches[row] = found;
+                }
+
+                found.Add(item);
+            }
+
+            for (var row = 0; row < plan.RowCount; row++)
+            {
+                if (!matches.TryGetValue(row, out var found))
+                {
+                    missing.Add(plan.Keys![row].Text);
+                    continue;
+                }
+
+                foreach (var item in found)
+                {
+                    ComBridge.SetUserDefinedTab(item, tabName, null, rows[row], merge);
+                    written.Add(item);
+                }
+            }
+
+            if (missing.Count > 0)
+            {
+                NodeWarnings.Add(missing.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " of " +
+                                 plan.RowCount.ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                                 " row(s) matched no item and were skipped (see the 'missing' output).");
+            }
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["modelItems"] = written,
+            ["written"] = written.Count,
+            ["missing"] = missing,
+        };
     }
 
     /// <summary>Removes a user-defined tab from items.</summary>
