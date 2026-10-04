@@ -13,8 +13,8 @@ namespace Dyncamelo.App;
 /// loading the node editor. Plugin id: "Dyncamelo.PlayerPane.DYNC".
 /// </summary>
 [Plugin("Dyncamelo.PlayerPane", "DYNC",
-    DisplayName = "Dyncamelo Player",
-    ToolTip = "Run Dyncamelo scripts without opening the node editor")]
+    DisplayName = "CamelGraph Player",
+    ToolTip = "Run CamelGraph scripts without opening the node editor")]
 [DockPanePlugin(420, 640, AutoScroll = false, FixedSize = false, MinimumWidth = 320, MinimumHeight = 300)]
 public class DyncameloPlayerDockPanePlugin : DockPanePlugin
 {

@@ -39,8 +39,8 @@ public class DiagnosticsUiTests
 
         var text = Report(vm);
 
-        Assert.StartsWith("Dyncamelo diagnostics", text);
-        Assert.Matches(@"Dyncamelo: \d+\.\d+\.\d+", text);
+        Assert.StartsWith("CamelGraph diagnostics", text);
+        Assert.Matches(@"CamelGraph: \d+\.\d+\.\d+", text);
         Assert.Contains("Host:      Test Host 9.9 (API 1.2)", text);
         Assert.Contains("Windows:", text);
         Assert.Contains("Node library:", text);

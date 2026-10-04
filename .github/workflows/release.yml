@@ -300,7 +300,7 @@ jobs:
             $changes = ((Get-Content dist/RELEASE_NOTES.md -Raw) -replace '(?s)^# [^\r\n]*\r?\n', '').Trim()
           }
           $notes = @"
-          Dyncamelo for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks. **Personal-use edition**: free for personal and other noncommercial use; a copy for professional use is coming soon to the Autodesk App Store.
+          CamelGraph (previously Dyncamelo) for Autodesk Navisworks 2024, 2025 & 2026 — visual programming (node graphs) inside Navisworks. **Personal-use edition**: free for personal and other noncommercial use; a copy for professional use is coming soon to the Autodesk App Store.
 
           $changes
 
@@ -308,9 +308,9 @@ jobs:
 
           1. Download ``DyncameloSetup.exe`` and run it — a graphical installer puts the bundle in ``%APPDATA%\Autodesk\ApplicationPlugins`` (per-user, no admin rights) and registers an Add/Remove Programs entry.
           2. If Windows SmartScreen appears (unsigned download), click **More info → Run anyway**.
-          3. Start Navisworks Manage/Simulate 2024, 2025 or 2026 — the **BIMCamel** ribbon tab appears with the Dyncamelo button.
+          3. Start Navisworks Manage/Simulate 2024, 2025 or 2026 — the **BIMCamel** ribbon tab appears with the CamelGraph button.
 
-          Uninstall from Windows **Settings → Apps → Dyncamelo for Navisworks**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
+          Uninstall from Windows **Settings → Apps → CamelGraph for Navisworks**, or rerun the setup. Silent modes: ``DyncameloSetup.exe /silent`` and ``DyncameloSetup.exe /uninstall /silent``.
 
           ## Install (zip, scripted deployments)
 
@@ -332,7 +332,7 @@ jobs:
             "Dyncamelo-navisworks.zip" "Dyncamelo-navisworks.zip.sha256" `
             "DyncameloSetup.exe" "DyncameloSetup.exe.sha256" `
             --target $env:GITHUB_SHA `
-            --title "Dyncamelo $env:VERSION (personal use, Navisworks 2024-2026)" `
+            --title "CamelGraph $env:VERSION (personal use, Navisworks 2024-2026)" `
             --notes-file notes.md
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -349,7 +349,7 @@ jobs:
           # GitHub adds its own "Source code" archives to every release; nothing else is attached.
           gh release create $env:VERSION `
             --target $env:GITHUB_SHA `
-            --title "Dyncamelo $env:VERSION (source code)" `
+            --title "CamelGraph $env:VERSION (source code)" `
             --notes-file dist/RELEASE_NOTES.md
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -418,7 +418,7 @@ jobs:
           git add src/bimcamel-web/public/downloads
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 0) { Write-Host "Site asset already current"; exit 0 }
-          git commit -m "chore: Dyncamelo $env:VERSION download asset"
+          git commit -m "chore: CamelGraph $env:VERSION download asset"
           git push origin HEAD:main
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Pop-Location

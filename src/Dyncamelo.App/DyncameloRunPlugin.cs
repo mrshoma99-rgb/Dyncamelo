@@ -8,8 +8,8 @@ namespace Dyncamelo.App;
 /// script runs exactly as it does in the Player; a script that changes the model asks the first time.
 /// </summary>
 [Plugin("Dyncamelo.Run", "DYNC",
-    DisplayName = "Dyncamelo Run Script",
-    ToolTip = "Run a Dyncamelo script given its file path")]
+    DisplayName = "CamelGraph Run Script",
+    ToolTip = "Run a CamelGraph script given its file path")]
 [AddInPlugin(AddInLocation.None)]
 public class DyncameloRunPlugin : AddInPlugin
 {

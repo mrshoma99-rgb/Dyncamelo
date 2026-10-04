@@ -21,7 +21,7 @@ public class PrivacyUiTests
         var file = File.ReadAllText(Path.Combine(dir!.FullName, "PRIVACY.md")).Replace("\r\n", "\n");
 
         Assert.Equal(file, PrivacyPolicy.Text());
-        Assert.Contains("## What Dyncamelo sends over the network", PrivacyPolicy.Text());
+        Assert.Contains("## What CamelGraph sends over the network", PrivacyPolicy.Text());
     }
 
     [Fact]

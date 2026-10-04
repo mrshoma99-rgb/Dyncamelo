@@ -10,27 +10,27 @@ namespace Dyncamelo.App;
 /// LayoutNavisworksPlugin / DeployToBundle build targets arrange both.
 /// </summary>
 [Plugin("Dyncamelo.Command", "DYNC",
-    DisplayName = "Dyncamelo",
-    ToolTip = "Dyncamelo — visual programming for Navisworks")]
+    DisplayName = "CamelGraph",
+    ToolTip = "CamelGraph — visual programming for Navisworks")]
 [RibbonLayout("Dyncamelo.xaml")]
 [RibbonTab("ID_Tab_BIMCamel")]
 [Command("ID_Button_Dyncamelo",
-    DisplayName = "Dyncamelo",
+    DisplayName = "CamelGraph",
     Icon = "Resources\\dyncamelo_16.png",
     LargeIcon = "Resources\\dyncamelo_32.png",
-    ToolTip = "Open the Dyncamelo node editor panel")]
+    ToolTip = "Open the CamelGraph node editor panel")]
 [Command("ID_Button_DyncameloPlayer",
     DisplayName = "Player",
     Icon = "Resources\\player_16.png",
     LargeIcon = "Resources\\player_32.png",
-    ToolTip = "Run Dyncamelo scripts without opening the node editor")]
+    ToolTip = "Run CamelGraph scripts without opening the node editor")]
 [Command("ID_Button_DyncameloAbout",
     DisplayName = "About",
     // The camel logo, same as the IFC exporter's About button — every BIMCamel
     // tool uses the brand mark for About (camel_*.png already ships in Resources).
     Icon = "Resources\\camel_16.png",
     LargeIcon = "Resources\\camel_32.png",
-    ToolTip = "About Dyncamelo")]
+    ToolTip = "About CamelGraph")]
 public class DyncameloRibbonPlugin : CommandHandlerPlugin
 {
     // The dock-pane lookup key is "<pluginId>.<developerId>".
@@ -59,7 +59,7 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
             if (record == null)
             {
                 ShowError(
-                    "The Dyncamelo editor panel is not registered with Navisworks " +
+                    "The CamelGraph editor panel is not registered with Navisworks " +
                     "(looked up \"" + DockPaneKey + "\" and found nothing).\n\n" +
                     "This usually means the Dyncamelo.App.dll in this Navisworks year folder " +
                     "was built against a different Navisworks release. A DLL built for the " +
@@ -71,7 +71,7 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
 
             if (!(record is DockPanePluginRecord dockRecord))
             {
-                ShowError("The Dyncamelo panel registered as an unexpected plugin type: " +
+                ShowError("The CamelGraph panel registered as an unexpected plugin type: " +
                           record.GetType().Name + ".");
                 return 0;
             }
@@ -87,13 +87,13 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
             }
             else
             {
-                ShowError("The Dyncamelo panel failed to load (LoadedPlugin was " +
+                ShowError("The CamelGraph panel failed to load (LoadedPlugin was " +
                           (dockRecord.LoadedPlugin?.GetType().Name ?? "null") + ").");
             }
         }
         catch (Exception ex)
         {
-            ShowError("Dyncamelo could not open the node editor panel:\n\n" + ex);
+            ShowError("CamelGraph could not open the node editor panel:\n\n" + ex);
         }
 
         return 0;
@@ -103,7 +103,7 @@ public class DyncameloRibbonPlugin : CommandHandlerPlugin
     // here would otherwise be invisible. Surface it to the user instead.
     private static void ShowError(string message) =>
         System.Windows.Forms.MessageBox.Show(
-            message, "Dyncamelo",
+            message, "CamelGraph",
             System.Windows.Forms.MessageBoxButtons.OK,
             System.Windows.Forms.MessageBoxIcon.Warning);
 }

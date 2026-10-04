@@ -100,7 +100,7 @@ if ($env:SIGNED -eq 'true') {
 if (-not (Test-Path $uninstallKey)) { Fail "no Add/Remove Programs entry ($uninstallKey)" }
 else {
     $entry = Get-ItemProperty $uninstallKey
-    if ($entry.DisplayName -ne 'Dyncamelo for Navisworks') { Fail "Add/Remove Programs shows '$($entry.DisplayName)'" }
+    if ($entry.DisplayName -ne 'CamelGraph for Navisworks') { Fail "Add/Remove Programs shows '$($entry.DisplayName)'" }
     if ($entry.DisplayVersion -notlike "$numeric*") { Fail "Add/Remove Programs shows version '$($entry.DisplayVersion)', expected $numeric" }
     if (-not $entry.UninstallString) { Fail "Add/Remove Programs entry has no uninstall command" }
 }

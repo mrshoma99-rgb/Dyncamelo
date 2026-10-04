@@ -43,7 +43,7 @@ public static class DistributionChannel
     public static string EditionNote(string channel) => channel == AppStore
         ? "Licensed for professional use. Updates come from the Autodesk App Store."
         : AppStoreListed
-            ? "Free for personal and other noncommercial use. For professional use (work at a company, a paid project) get Dyncamelo from the Autodesk App Store."
+            ? "Free for personal and other noncommercial use. For professional use (work at a company, a paid project) get CamelGraph from the Autodesk App Store."
             : "Free for personal and other noncommercial use. A copy for professional use (work at a company, a paid project) is coming soon to the Autodesk App Store.";
 
     /// <summary>The channel named by the first non-empty line of a marker file; anything unrecognised is <see cref="Direct"/>.</summary>

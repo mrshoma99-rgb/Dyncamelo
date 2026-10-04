@@ -58,10 +58,10 @@ public static class DiagnosticsReport
         }
 
         var text = new StringBuilder();
-        text.AppendLine("Dyncamelo diagnostics");
+        text.AppendLine("CamelGraph diagnostics");
         text.AppendLine("Made " + generatedAt.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) + " (local time)");
         text.AppendLine();
-        text.AppendLine("Dyncamelo: " + Or(info.DyncameloVersion));
+        text.AppendLine("CamelGraph: " + Or(info.DyncameloVersion));
         text.AppendLine("Host:      " + Or(info.Host));
         text.AppendLine("Process:   " + Or(info.Process));
         text.AppendLine("Windows:   " + Or(info.OperatingSystem));

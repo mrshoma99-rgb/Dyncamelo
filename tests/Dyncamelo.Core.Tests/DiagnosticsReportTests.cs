@@ -33,9 +33,9 @@ public class DiagnosticsReportTests
     {
         var text = DiagnosticsReport.Build(Info(), When);
 
-        Assert.StartsWith("Dyncamelo diagnostics", text);
+        Assert.StartsWith("CamelGraph diagnostics", text);
         Assert.Contains("Made 2026-10-02 08:30 (local time)", text);
-        Assert.Contains("Dyncamelo: 0.45.1", text);
+        Assert.Contains("CamelGraph: 0.45.1", text);
         Assert.Contains("Host:      Autodesk Navisworks Manage 2024 (API 21.0)", text);
         Assert.Contains("  BIMCamel.bundle", text);
         Assert.Contains("  Nodify 7.3.0.0", text);
@@ -49,7 +49,7 @@ public class DiagnosticsReportTests
     {
         var text = DiagnosticsReport.Build(new DiagnosticsInfo { ErrorLogMissing = true }, When);
 
-        Assert.Contains("Dyncamelo: unknown", text);
+        Assert.Contains("CamelGraph: unknown", text);
         Assert.Contains("(none found)", text);
         Assert.Contains("(not available)", text);
         Assert.Contains("(no errors.log: nothing has been logged)", text);

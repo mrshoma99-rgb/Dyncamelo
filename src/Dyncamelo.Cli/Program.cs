@@ -51,7 +51,7 @@ internal static class Program
 
     private static void PrintUsage(System.IO.TextWriter output)
     {
-        output.WriteLine("dyncamelo — headless Dyncamelo graph runner");
+        output.WriteLine("dyncamelo — headless CamelGraph graph runner");
         output.WriteLine();
         output.WriteLine("Usage:");
         output.WriteLine("  dyncamelo run <graph.dyc> [--pack <dll-or-dir>]...");

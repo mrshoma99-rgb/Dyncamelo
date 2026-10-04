@@ -86,7 +86,7 @@ public static class PaletteCatalog
     private static readonly List<UiPalette> _all = new List<UiPalette>
     {
         // Default — mirrors DyncameloDark.xaml's defaults (BIMCamel dark tokens); switching back restores the theme exactly.
-        Make("DyncameloDark", "Dyncamelo Dark", new Dictionary<string, string>
+        Make("DyncameloDark", "CamelGraph Dark", new Dictionary<string, string>
         {
             ["Dyc.CanvasBrush"] = "#FF15171B", ["Dyc.GridLineBrush"] = "#FF20242C", ["Dyc.PanelBrush"] = "#FF1C1F24",
             ["Dyc.PanelBorderBrush"] = "#FF333941", ["Dyc.NodeBodyBrush"] = "#FF23272E", ["Dyc.NodeBorderBrush"] = "#FF3D444D",

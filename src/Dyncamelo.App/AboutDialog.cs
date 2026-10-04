@@ -38,7 +38,7 @@ internal static class AboutDialog
 
         var window = new Window
         {
-            Title = "About Dyncamelo",
+            Title = "About CamelGraph",
             WindowStyle = WindowStyle.None,
             AllowsTransparency = true,
             Background = Brushes.Transparent,
@@ -69,7 +69,7 @@ internal static class AboutDialog
         var titles = new StackPanel();
         titles.Children.Add(new TextBlock
         {
-            Text = "Dyncamelo",
+            Text = "CamelGraph",
             Foreground = Paper,
             FontSize = 20,
             FontWeight = FontWeights.SemiBold,
@@ -116,7 +116,7 @@ internal static class AboutDialog
         {
             if (DistributionChannel.AppStoreListed)
             {
-                body.Children.Add(LinkBlock(DistributionChannel.AppStorePage, "Autodesk App Store: Dyncamelo for professional use", Paper, 12.5, FontWeights.SemiBold, topMargin: 6));
+                body.Children.Add(LinkBlock(DistributionChannel.AppStorePage, "Autodesk App Store: CamelGraph for professional use", Paper, 12.5, FontWeights.SemiBold, topMargin: 6));
             }
             else
             {

@@ -166,7 +166,7 @@ public class ViewpointPackageFileTests
     {
         var ex = Assert.Throws<InvalidOperationException>(
             () => ViewpointPackageFile.Parse("{\"Version\": 99, \"Views\": []}"));
-        Assert.Contains("newer Dyncamelo", ex.Message);
+        Assert.Contains("newer CamelGraph", ex.Message);
     }
 
     [Fact]

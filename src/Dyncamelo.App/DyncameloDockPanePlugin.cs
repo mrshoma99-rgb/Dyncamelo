@@ -17,8 +17,8 @@ namespace Dyncamelo.App;
 /// <see cref="ElementHost"/>. Plugin id: "Dyncamelo.DockPane.DYNC".
 /// </summary>
 [Plugin("Dyncamelo.DockPane", "DYNC",
-    DisplayName = "Dyncamelo",
-    ToolTip = "Dyncamelo visual programming for Navisworks")]
+    DisplayName = "CamelGraph",
+    ToolTip = "CamelGraph visual programming for Navisworks")]
 [DockPanePlugin(1000, 700, AutoScroll = false, FixedSize = false, MinimumWidth = 480, MinimumHeight = 360)]
 public class DyncameloDockPanePlugin : DockPanePlugin
 {

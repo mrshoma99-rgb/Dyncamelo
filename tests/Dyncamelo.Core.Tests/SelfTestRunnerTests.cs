@@ -185,7 +185,7 @@ public class SelfTestRunnerTests
         var text = report.ToText("Autodesk Navisworks Manage 2024 (API 21.0)", "0.46.0", new DateTime(2026, 10, 2, 9, 0, 0));
 
         Assert.Equal("1 passed, 1 failed, 1 skipped", report.Summary);
-        Assert.Contains("Dyncamelo 0.46.0 in Autodesk Navisworks Manage 2024 (API 21.0), 2026-10-02 09:00", text);
+        Assert.Contains("CamelGraph 0.46.0 in Autodesk Navisworks Manage 2024 (API 21.0), 2026-10-02 09:00", text);
         Assert.Contains("1 passed, 1 failed, 1 skipped", text);
         Assert.Contains("[pass] fine", text);
         Assert.Contains("[FAIL] broken", text);

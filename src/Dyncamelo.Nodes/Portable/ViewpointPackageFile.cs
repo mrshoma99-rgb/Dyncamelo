@@ -71,9 +71,9 @@ public sealed class ViewpointPackageFile
         if (package.Version > CurrentVersion)
         {
             throw new InvalidOperationException(
-                "This viewpoint package was created by a newer Dyncamelo (format version " +
+                "This viewpoint package was created by a newer CamelGraph (format version " +
                 package.Version + "; this build reads up to " + CurrentVersion +
-                "). Update Dyncamelo to import it.");
+                "). Update CamelGraph to import it.");
         }
 
         package.Views ??= new List<PortableViewpoint>();

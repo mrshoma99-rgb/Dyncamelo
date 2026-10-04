@@ -19,8 +19,8 @@ public class PrivacyPolicyContentTests
     }
 
     [Theory]
-    [InlineData("What Dyncamelo stores on your computer")]
-    [InlineData("What Dyncamelo sends over the network")]
+    [InlineData("What CamelGraph stores on your computer")]
+    [InlineData("What CamelGraph sends over the network")]
     [InlineData("What a graph can send")]
     [InlineData("Third parties")]
     [InlineData("Keeping and deleting data")]
@@ -68,7 +68,7 @@ public class PrivacyPolicyContentTests
         Assert.Contains("Repo = \"dyncamelo\"", updateSource);
         Assert.Contains("Dyncamelo-UpdateCheck", updateSource);
 
-        // "Dyncamelo makes no network request of its own" holds only while the first network use in the app is the update check.
+        // "CamelGraph makes no network request of its own" holds only while the first network use in the app is the update check.
         var network = new[] { "HttpClient", "WebClient", "WebRequest.Create", "HttpWebRequest", "TcpClient", "System.Net.Sockets", "new Socket(" };
         var offenders = Directory.GetFiles(Path.Combine(root, "src"), "*.cs", SearchOption.AllDirectories)
             .Where(f => !f.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar))

@@ -308,7 +308,7 @@ public static class InstallerEngine
     {
         var exe = Path.Combine(BundleDir, "DyncameloSetup.exe");
         using var key = Registry.CurrentUser.CreateSubKey(UninstallKeyPath);
-        key.SetValue("DisplayName", "Dyncamelo for Navisworks");
+        key.SetValue("DisplayName", "CamelGraph for Navisworks");
         key.SetValue("DisplayVersion", InstalledVersion() ?? SetupVersion());
         key.SetValue("Publisher", "BIMCamel");
         key.SetValue("DisplayIcon", exe);

@@ -83,8 +83,8 @@ public partial class MainWindow : Window
     {
         var confirm = MessageBox.Show(
             this,
-            "Remove Dyncamelo from this machine?\n\nYour saved .dyc graphs are not touched.",
-            "Dyncamelo Setup",
+            "Remove CamelGraph from this machine?\n\nYour saved .dyc graphs are not touched.",
+            "CamelGraph Setup",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
         if (confirm == MessageBoxResult.Yes)
@@ -109,7 +109,7 @@ public partial class MainWindow : Window
                 {
                     Progress.IsIndeterminate = false;
                     DoneTitle.Text = "Removed.";
-                    DoneBody.Text = "Dyncamelo has been uninstalled. Your saved .dyc graphs were left untouched.";
+                    DoneBody.Text = "CamelGraph has been uninstalled. Your saved .dyc graphs were left untouched.";
                     ShowPanel(DonePanel);
                 });
             }
@@ -133,7 +133,7 @@ public partial class MainWindow : Window
             : "Navisworks Manage or Simulate 2024/2025/2026";
         var verb = InstallerEngine.IsNavisworksRunning() ? "Restart" : "Start";
         DoneBody.Text = verb + " " + which +
-            " — the BIMCamel ribbon tab appears with the Dyncamelo button.";
+            " — the BIMCamel ribbon tab appears with the CamelGraph button.";
         ShowPanel(DonePanel);
     }
 

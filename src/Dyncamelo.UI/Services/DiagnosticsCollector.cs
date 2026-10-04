@@ -42,7 +42,7 @@ public static class DiagnosticsCollector
         var info = new DiagnosticsInfo
         {
             DyncameloVersion = DyncameloVersion(),
-            Host = string.IsNullOrWhiteSpace(hostDescription) ? "no host application reported (Dyncamelo running on its own)" : hostDescription!,
+            Host = string.IsNullOrWhiteSpace(hostDescription) ? "no host application reported (CamelGraph running on its own)" : hostDescription!,
             Process = Attempt(() => Process.GetCurrentProcess().ProcessName + ", " + (Environment.Is64BitProcess ? "64-bit" : "32-bit")),
             OperatingSystem = Attempt(() => Environment.OSVersion.VersionString),
             Runtime = Attempt(() => System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription),

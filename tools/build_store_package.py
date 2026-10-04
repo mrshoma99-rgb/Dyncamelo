@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Autodesk App Store package for Dyncamelo from the staged release bundle.
+"""Build the Autodesk App Store package for CamelGraph (previously Dyncamelo) from the staged release bundle.
 
 The GitHub release ships ``Dyncamelo.bundle`` with one folder per Navisworks year (``2024``, ``2025``, ``2026``). The App Store wants
 the layout Autodesk documents for Navisworks apps -- ``Dyncamelo.bundle/PackageContents.xml`` and ``Contents/v21``, ``v22``, ``v23`` (the
@@ -12,7 +12,7 @@ the release workflow has already built and signed, re-lays it out, writes that m
     python3 tools/build_store_package.py --self-test
 
 Outputs, in --out:
-    Dyncamelo-AppStore-<version>.zip      the package (a single top-level Dyncamelo.bundle folder)
+    CamelGraph-AppStore-<version>.zip     the package (a single top-level Dyncamelo.bundle folder)
     submission/                           listing.md, README.md, icons, screenshots, privacy policy, package-report.txt
 
 Exit status: 0 = built (warnings may be printed), 1 = could not build, 2 = built but not ready to submit (--submission only).
@@ -282,12 +282,12 @@ def build(staging: Path, version_tag: str, out: Path, publisher: Path, submissio
         errors, warnings = validate(pkg, pub, submission)
         not_ready = [e for e in errors if e == EMAIL_EMPTY]
         broken = [e for e in errors if e != EMAIL_EMPTY]
-        lines = [f"Dyncamelo Autodesk App Store package {version_tag}"]
+        lines = [f"CamelGraph Autodesk App Store package {version_tag}"]
         zip_name = ""
         if not broken:
             # Without a support email the store would refuse the download, so the file says it is a draft.
             draft = bool(not_ready) or EMAIL_EMPTY in warnings
-            zip_name = f"Dyncamelo-AppStore-{version_tag}" + ("-DRAFT" if draft else "") + ".zip"
+            zip_name = f"CamelGraph-AppStore-{version_tag}" + ("-DRAFT" if draft else "") + ".zip"
             digest = write_zip(pkg, out / zip_name, pub["bundleFolder"])
             lines += [
                 f"File:    {zip_name}",
@@ -357,7 +357,7 @@ def self_test() -> int:
         with contextlib.redirect_stdout(io.StringIO()):
             code, out = run("support@example.com", True, "ok")
         check(code == 0, f"a complete package should build and validate (exit {code})")
-        zips = list(out.glob("Dyncamelo-AppStore-*.zip"))
+        zips = list(out.glob("CamelGraph-AppStore-*.zip"))
         check(len(zips) == 1 and "DRAFT" not in zips[0].name, "a complete package should not be named DRAFT")
         if zips:
             with zipfile.ZipFile(zips[0]) as archive:
@@ -386,7 +386,7 @@ def self_test() -> int:
             digest_a = hashlib.sha256(zips[0].read_bytes()).hexdigest()
             with contextlib.redirect_stdout(io.StringIO()):
                 _code, out_b = run("support@example.com", True, "ok")
-            digest_b = hashlib.sha256(next(out_b.glob("Dyncamelo-AppStore-*.zip")).read_bytes()).hexdigest()
+            digest_b = hashlib.sha256(next(out_b.glob("CamelGraph-AppStore-*.zip")).read_bytes()).hexdigest()
             check(digest_a == digest_b, "building twice should give the same bytes")
         check((out / "submission" / "package-report.txt").is_file(), "the submission folder should have the report")
         check((out / "submission" / "listing.md").is_file(), "the submission folder should have the listing")

@@ -1,7 +1,7 @@
 <Window x:Class="Dyncamelo.Installer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Dyncamelo Setup"
+        Title="CamelGraph Setup"
         Width="620" Height="460"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -27,7 +27,7 @@
             <Grid Grid.Row="0" Margin="16,12,12,0" MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Source="Resources/logo.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <TextBlock Text="Dyncamelo Setup" Foreground="{StaticResource Paper45}"
+                    <TextBlock Text="CamelGraph Setup" Foreground="{StaticResource Paper45}"
                                FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -40,7 +40,7 @@
             <StackPanel x:Name="WelcomePanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8">
                 <Image Source="Resources/logo.png" Width="84" Height="84" HorizontalAlignment="Center"
                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                <TextBlock Text="Dyncamelo" Foreground="{StaticResource Paper}" FontSize="27"
+                <TextBlock Text="CamelGraph" Foreground="{StaticResource Paper}" FontSize="27"
                            FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,4"/>
                 <TextBlock Text="Visual programming for Autodesk Navisworks 2024, 2025 &amp; 2026"
                            Style="{StaticResource Body}" HorizontalAlignment="Center" TextAlignment="Center"/>
@@ -82,7 +82,7 @@
                            FontSize="27" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="DoneBody" Style="{StaticResource Body}" TextAlignment="Center"
                            HorizontalAlignment="Center" Margin="0,12,0,0"
-                           Text="Start Navisworks Manage or Simulate 2024 — the BIMCamel ribbon tab appears with the Dyncamelo button."/>
+                           Text="Start Navisworks Manage or Simulate 2024 — the BIMCamel ribbon tab appears with the CamelGraph button."/>
                 <Button Style="{StaticResource PrimaryButton}" Content="Close" Margin="0,26,0,0"
                         HorizontalAlignment="Center" Click="Close_Click"/>
             </StackPanel>

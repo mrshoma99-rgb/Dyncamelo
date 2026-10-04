@@ -1,4 +1,4 @@
-# Dyncamelo editor guide
+# CamelGraph editor guide
 
 > The tables in this file are generated from the editor's own command and settings catalogues by a test (`UiGuideTests`). Do not edit them by hand — change the catalogue and regenerate with `DYNCAMELO_REGEN_DOCS=1 dotnet test tests/Dyncamelo.Core.Tests --filter UiGuideTests`.
 
@@ -70,7 +70,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * **Open one:** select an instance and press `Tab` (or click the arrow in its header). The canvas shows the group's nodes between a **Group Input** and a **Group Output** node, and the bar above the canvas shows where you are; `Shift+Tab` (or *Close group*) goes back. Running while a group is open still runs the whole graph, so an edit shows its effect at once. Each level keeps its own Undo history.
 * **Edit the interface:** inside a group, *+ Add input* / *+ Add output* on the Group Input / Group Output node adds a socket, and right-clicking a socket renames, retypes, moves or removes it (wires on a removed socket go too, everywhere the group is used, and come back on undo). Sockets pass whole values, so a list travels through as one list. Giving a socket a type colours it and, on instances, gives it an inline editor.
 * **Instances share the group:** editing the group changes every instance. *Make Node Group Single User* gives one instance its own copy; *Ungroup* (`Ctrl+Alt+U`) puts a copy of the group's nodes in place of an instance. The group stays in the file until you use *Delete Unused Node Groups*.
-* Groups can hold other groups but never themselves. The library lists the file's groups under **Node Groups**, so an instance is added like any node; copying an instance into another file brings its group along. Older versions of Dyncamelo refuse a file with node groups rather than silently dropping them.
+* Groups can hold other groups but never themselves. The library lists the file's groups under **Node Groups**, so an instance is added like any node; copying an instance into another file brings its group along. Older versions of CamelGraph refuse a file with node groups rather than silently dropping them.
 * The progress text names the group path (`Outer ▸ Inner ▸ node`), and `Esc` cancels from inside a group too.
 
 ## Running and stopping
@@ -83,7 +83,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 
 * A `*` after the graph name in the header means there are **unsaved changes**. Saving removes it; undoing back to the saved state keeps it, to be on the safe side.
 * **New**, **Open**, opening a sample, opening a recent file, and dropping a `.dyc` file on the canvas first ask whether to save first (*Yes* saves, *No* discards, *Cancel* stops) when something is unsaved. A cancelled or failed save cancels the whole action, so nothing is thrown away by accident.
-* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\Dyncamelo\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, Dyncamelo offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
+* **Autosave** (Settings ▸ Editing) keeps a copy of a graph with unsaved changes once a minute in `%APPDATA%\Dyncamelo\recovery`, and again when the pane is closed. If Navisworks closed or crashed before you saved, CamelGraph offers that copy back the next time the editor opens on an empty canvas; saving, or answering *No*, deletes it. A restored graph counts as unsaved until you save it.
 * Drag a `.dyc` file from Explorer onto the canvas to open it.
 
 ## Finding your way
@@ -101,7 +101,7 @@ A **node group** is a reusable piece of graph — a few nodes that do one job, w
 * **Colour eyedropper.** The dropper button in a colour popup turns the next click anywhere on the screen — the Navisworks viewport included — into the colour under the pointer. `Esc` or a right click cancels.
 * **Dragging numbers further.** With *Wrap the pointer while dragging numbers* on (Settings ▸ Editing), dragging a number to the edge of the screen brings the pointer back on the other side and the value carries on.
 * **Socket tooltips.** Hover a socket to see its type and, after a run, the **value it holds** — for a list the number of items and the first few — or, on a wired input, what arrives on the wire.
-* **The start screen.** While the canvas is empty — when Dyncamelo opens, or after you delete every node — it shows the installed **version**, a link to **bimcamel.com** (guides, the node library and updates), a notice with a **Get it** button when a newer version has been found (the once-a-day update check, Settings ▸ Privacy), and cards: **New script** (starts an empty script and puts the cards away), your four newest **recent scripts**, and the **examples**. Click a card to open it. The cards go as soon as you open a script or add a node. *Help ▸ BIMCamel Website* and *Help ▸ Get the Newest Version…* do the same as the two links; **Settings ▸ Appearance ▸ Start screen on an empty canvas** switches the screen off.
+* **The start screen.** While the canvas is empty — when CamelGraph opens, or after you delete every node — it shows the installed **version**, a link to **bimcamel.com** (guides, the node library and updates), a notice with a **Get it** button when a newer version has been found (the once-a-day update check, Settings ▸ Privacy), and cards: **New script** (starts an empty script and puts the cards away), your four newest **recent scripts**, and the **examples**. Click a card to open it. The cards go as soon as you open a script or add a node. *Help ▸ BIMCamel Website* and *Help ▸ Get the Newest Version…* do the same as the two links; **Settings ▸ Appearance ▸ Start screen on an empty canvas** switches the screen off.
 * **Hints.** The status bar shows a hint line that follows what you are doing (the keys for the selected nodes, what releasing a dragged wire will do), and an empty canvas shows the start screen (below). Both can be switched off in Settings ▸ Appearance, which also has **Window scale** (90–150%) for high-resolution screens or a small pane.
 
 ## The Script Player
@@ -114,7 +114,7 @@ The **Player** runs a saved graph without opening the node editor: pick a script
 * **What it shows.** After a run the Player lists the results: every **Watch** node (text, list and image watches) and any node you marked to show. Failed or warned nodes are listed underneath with the reason; **Copy** puts the results on the clipboard as text. `Esc` stops a running script, exactly as in the editor.
 * **Choosing what appears — in the editor.** `Ctrl+Alt+P` (*Show / Hide in Player*) toggles the selected nodes: an input or Watch node is shown unless you hide it, any other node is hidden unless you show it (its first result is then listed). *Show / Hide Unwired Inputs in Player* (palette, Node menu) offers a node's unconnected inputs as fields; the same choice is in a socket's right-click menu, and a shown node or input carries a small **▶** badge. *Script Description…* (Graph menu) sets the text shown under the script's name in the Player. All of this is saved in the `.dyc` file and is undoable.
 * **Run, Reset, Edit and File.** The bar at the bottom stays in view however long the form is: **Run** runs the script, **Reset** puts every field back to the saved value, *Edit* opens the script in the node editor (pane and file both), *File* shows it in Explorer.
-* **Safety.** A script that **changes the model** (a node that writes to the model or to disk: Appearance, Selection, Export…) says so above the form, and the first time you run it — and again whenever the file changes — Dyncamelo asks for confirmation. Scripts that only read are never asked about. The answer is remembered for that file as it is now; edit the script and the question comes back.
+* **Safety.** A script that **changes the model** (a node that writes to the model or to disk: Appearance, Selection, Export…) says so above the form, and the first time you run it — and again whenever the file changes — CamelGraph asks for confirmation. Scripts that only read are never asked about. The answer is remembered for that file as it is now; edit the script and the question comes back.
 * **From other tools.** The add-in plugin `Dyncamelo.Run.DYNC` runs a script by path: `Execute("C:\\Scripts\\audit.dyc")` — for other add-ins, the Navisworks Automation API (`ExecuteAddInPlugin`) and the Batch Utility. It returns `0` when no node failed and `1` otherwise, and applies the same confirmation.
 * **Limits.** Nodes inside node groups are not offered in the form (put the input at the top level); the list stops at 2000 scripts; a script that needs a node library that is not installed is listed with what is missing and cannot run.
 
@@ -294,7 +294,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Node library panel | On / Off | On | Show the node library on the left of the canvas. It can also be hidden with the arrow in its header and brought back with the tab at the canvas edge. |
 | Descriptions in the library | On / Off | On | Show a description line under each node in the library panel. |
 | Value previews under nodes | On / Off | On | Show a preview bubble with the result under each node after a run. |
-| Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Make everything in the Dyncamelo window smaller or larger, for high-resolution screens or a small pane. |
+| Window scale | 90% / 100% / 110% / 125% / 150% | 100% | Make everything in the CamelGraph window smaller or larger, for high-resolution screens or a small pane. |
 | Hints in the status bar | On / Off | On | Show a line of suggestions at the bottom that follows what you are doing: the keys for the selected nodes, what a dragged wire will do. |
 | Start screen on an empty canvas | On / Off | On | While the canvas is empty, show the start screen: a New script card, your recent scripts, the examples, the installed version and a link to bimcamel.com. It goes away as soon as you open a script or add a node. |
 
@@ -333,7 +333,7 @@ The table of every command with its shortcut; see [Changing shortcuts](#changing
 
 | Setting | Values | Default | What it does |
 |---|---|---|---|
-| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name Dyncamelo-UpdateCheck, nothing about you or your models. Off means Dyncamelo makes no network request of its own. The full policy is under Help > Privacy Policy. |
+| Check for a newer version once a day | On / Off | On | When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name Dyncamelo-UpdateCheck, nothing about you or your models. Off means CamelGraph makes no network request of its own. The full policy is under Help > Privacy Policy. |
 
 ### Diagnostics
 

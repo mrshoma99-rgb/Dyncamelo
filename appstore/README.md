@@ -32,4 +32,4 @@ Dyncamelo.bundle/
     Resources/   Dyncamelo.ico, Help/index.html, PRIVACY.md, LICENSE, THIRD-PARTY-NOTICES.md
 ```
 
-`distribution.txt` in each release folder makes Dyncamelo skip its GitHub update check (the store delivers updates). The product code is derived from the version; the upgrade code in `publisher.json` must never change.
+`distribution.txt` in each release folder makes CamelGraph skip its GitHub update check (the store delivers updates). The product code is derived from the version; the upgrade code in `publisher.json` must never change.

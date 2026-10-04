@@ -159,8 +159,8 @@ public sealed class SelfTestReport
     public string ToText(string host, string version, DateTime when)
     {
         var text = new StringBuilder();
-        text.AppendLine("Dyncamelo self-test");
-        text.AppendLine("Dyncamelo " + (string.IsNullOrWhiteSpace(version) ? "unknown" : version) + " in " + (string.IsNullOrWhiteSpace(host) ? "an unknown host" : host) +
+        text.AppendLine("CamelGraph self-test");
+        text.AppendLine("CamelGraph " + (string.IsNullOrWhiteSpace(version) ? "unknown" : version) + " in " + (string.IsNullOrWhiteSpace(host) ? "an unknown host" : host) +
                         ", " + when.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture));
         text.AppendLine(Summary);
         text.AppendLine();

@@ -399,7 +399,7 @@ public class PaletteWindowTests
             var stops = ((LinearGradientBrush)header.Background).GradientStops;
             Assert.Equal(light.Colors["Dyc.BrandStartColor"], stops[0].Color);
 
-            var brandTitle = Visuals(host.Window).OfType<TextBlock>().First(t => t.Text == "Dyncamelo");
+            var brandTitle = Visuals(host.Window).OfType<TextBlock>().First(t => t.Text == "CamelGraph");
             Assert.Equal(light.Colors["Dyc.OnBrandBrush"], ((SolidColorBrush)brandTitle.Foreground).Color);
 
             var editor = (Nodify.NodifyEditor)host.Control.FindName("Editor");

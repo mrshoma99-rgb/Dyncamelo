@@ -151,7 +151,7 @@ internal static class ClashSnapshotFile
         if (!string.Equals(root.Format, ClashSnapshotRoot.FormatName, StringComparison.Ordinal))
         {
             throw new InvalidDataException(
-                "'" + path + "' is not a Dyncamelo clash snapshot (expected \"format\": \"" +
+                "'" + path + "' is not a CamelGraph clash snapshot (expected \"format\": \"" +
                 ClashSnapshotRoot.FormatName + "\" — write it with Clash.SnapshotToFile).");
         }
 

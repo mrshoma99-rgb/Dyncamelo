@@ -67,7 +67,7 @@ public static class PrivacyWindow
 
         var window = new Window
         {
-            Title = "Dyncamelo privacy policy",
+            Title = "CamelGraph privacy policy",
             Width = 720,
             Height = 640,
             Content = layout,

@@ -8,8 +8,8 @@ namespace Dyncamelo.App;
 /// dock pane. Plugin id: "Dyncamelo.Launch.DYNC".
 /// </summary>
 [Plugin("Dyncamelo.Launch", "DYNC",
-    DisplayName = "Dyncamelo",
-    ToolTip = "Open the Dyncamelo visual programming editor",
+    DisplayName = "CamelGraph",
+    ToolTip = "Open the CamelGraph visual programming editor",
     ExtendedToolTip = "Wire nodes on a canvas to automate Navisworks: selection, properties, viewpoints, clash, TimeLiner and more.")]
 [AddInPlugin(AddInLocation.AddIn)]
 public class DyncameloLaunchPlugin : AddInPlugin

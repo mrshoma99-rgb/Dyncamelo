@@ -75,7 +75,7 @@
                                 Background="Transparent">
                         <StackPanel.ToolTip>
                             <TextBlock>
-                                <Run Text="Dyncamelo " /><Run Text="{Binding ProductVersionText, Mode=OneWay}" /><Run Text=" by BIMCamel" />
+                                <Run Text="CamelGraph " /><Run Text="{Binding ProductVersionText, Mode=OneWay}" /><Run Text=" by BIMCamel" />
                             </TextBlock>
                         </StackPanel.ToolTip>
                         <Border x:Name="HeaderLogo"
@@ -87,7 +87,7 @@
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
                         <StackPanel x:Name="HeaderWordmark" VerticalAlignment="Center" Margin="8,0,0,0">
-                            <TextBlock Text="Dyncamelo"
+                            <TextBlock Text="CamelGraph"
                                        Foreground="{DynamicResource Dyc.TextBrush}"
                                        FontWeight="SemiBold"
                                        FontSize="12.5" />
@@ -1092,7 +1092,7 @@
                                                 ToolTip="Versions, installed plug-ins and the end of the error log, ready to paste into a bug report"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.diagnostics" />
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Privacy policy"
-                                                ToolTip="What Dyncamelo stores on your computer and the one network request it can make"
+                                                ToolTip="What CamelGraph stores on your computer and the one network request it can make"
                                                 Command="{Binding RunCommandIdCommand}" CommandParameter="help.privacy" />
                                         <Button Style="{StaticResource Dyc.SmallButton}" Margin="0,0,8,8" Content="Run self-test"
                                                 ToolTip="Runs read-only Navisworks nodes on the open model and reports which work. Changes nothing."
@@ -1485,7 +1485,7 @@
                         </Border>
                         <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
                             <WrapPanel>
-                                <TextBlock Text="Dyncamelo" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.TextBrush}" />
+                                <TextBlock Text="CamelGraph" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.TextBrush}" />
                                 <Border Margin="10,0,0,0" Padding="8,1" CornerRadius="9" VerticalAlignment="Center"
                                         Background="{DynamicResource Dyc.HoverBrush}" ToolTip="The installed version">
                                     <TextBlock Text="{Binding ProductVersionText}" FontSize="11" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />

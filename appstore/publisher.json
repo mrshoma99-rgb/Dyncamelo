@@ -1,6 +1,6 @@
 {
   "readme": "Facts the Autodesk App Store package needs that only the publisher can supply. tools/build_store_package.py reads this file. supportEmail is required by the store for a download (CompanyDetails Email) and is left empty on purpose: fill in an address that is monitored, then build with --submission.",
-  "appName": "Dyncamelo",
+  "appName": "CamelGraph",
   "bundleFolder": "Dyncamelo.bundle",
   "author": "BIMCamel",
   "companyName": "BIMCamel",
@@ -9,5 +9,5 @@
   "supportUrl": "https://github.com/mrshoma99-rgb/Dyncamelo/issues",
   "privacyPolicyUrl": "https://github.com/mrshoma99-rgb/Dyncamelo/blob/main/PRIVACY.md",
   "upgradeCode": "{C9C12BD3-DD00-4CBD-9628-C2D0304C0F7C}",
-  "description": "Dyncamelo - Dynamo-style visual programming (node graphs) for Autodesk Navisworks"
+  "description": "CamelGraph (previously Dyncamelo) - Dynamo-style visual programming (node graphs) for Autodesk Navisworks"
 }

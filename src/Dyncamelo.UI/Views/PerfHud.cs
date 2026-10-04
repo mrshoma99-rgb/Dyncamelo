@@ -181,7 +181,7 @@ public sealed class PerfHud : Border
         _text.Text = line;
 
         var sb = new StringBuilder();
-        sb.AppendLine("Dyncamelo perf report");
+        sb.AppendLine("CamelGraph perf report");
         sb.AppendLine(line.Replace("\n", " | "));
         sb.AppendLine("render tier " + tier.ToString(inv) + ", dpi scale " + dpi.ToString("F2", inv) +
                       ", software rendering " + (tier == 0 ? "yes" : "no"));

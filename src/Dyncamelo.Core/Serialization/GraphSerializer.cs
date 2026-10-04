@@ -145,7 +145,7 @@ public class GraphSerializer
         var envelope = root["Dyncamelo"] as JObject;
         if (envelope == null)
         {
-            throw new GraphFormatException("The file is not a Dyncamelo .dyc document (missing 'Dyncamelo' envelope).");
+            throw new GraphFormatException("The file is not a CamelGraph .dyc document (missing 'Dyncamelo' envelope).");
         }
 
         var minReaderVersion = envelope.Value<int?>("MinReaderVersion") ?? 1;

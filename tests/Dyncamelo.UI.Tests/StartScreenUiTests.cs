@@ -237,7 +237,7 @@ public class StartScreenUiTests : IDisposable
             vm.SetDistribution(Dyncamelo.Core.Editing.DistributionChannel.AppStore);
             Assert.False(vm.IsPersonalEdition);
             Assert.Equal("Professional", vm.EditionName);
-            Assert.DoesNotContain("get Dyncamelo from", vm.EditionNote);
+            Assert.DoesNotContain("get CamelGraph from", vm.EditionNote);
         });
     }
 

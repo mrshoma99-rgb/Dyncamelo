@@ -55,7 +55,7 @@ public class SampleGraphViewModel
 /// </summary>
 public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 {
-    private const string FileFilter = "Dyncamelo Graph (*.dyc)|*.dyc|All files (*.*)|*.*";
+    private const string FileFilter = "CamelGraph Graph (*.dyc)|*.dyc|All files (*.*)|*.*";
 
     private readonly GraphEngine _engine = new GraphEngine();
     private readonly DispatcherTimer _autoRunTimer;
@@ -2009,7 +2009,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
 
     private void OpenGraph()
     {
-        var path = Dialogs.ShowOpenFile(FileFilter, "Open Dyncamelo Graph");
+        var path = Dialogs.ShowOpenFile(FileFilter, "Open CamelGraph Graph");
         if (path != null && ConfirmCloseDocument("Open Graph"))
         {
             OpenFromPath(path);
@@ -2367,7 +2367,7 @@ public partial class GraphEditorViewModel : ObservableObject, IConnectorHost
     private void SaveGraphAs()
     {
         var defaultName = (DocumentGraph.Name.Length > 0 ? DocumentGraph.Name : "graph") + ".dyc";
-        var path = Dialogs.ShowSaveFile(FileFilter, "Save Dyncamelo Graph", defaultName);
+        var path = Dialogs.ShowSaveFile(FileFilter, "Save CamelGraph Graph", defaultName);
         if (path != null)
         {
             SaveTo(path);

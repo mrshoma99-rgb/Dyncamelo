@@ -224,7 +224,7 @@ public partial class GraphEditorViewModel
         }
 
         var restore = Dialogs.Confirm(
-            "Dyncamelo found work that was not saved when the last session ended:\n\n" + candidate.Describe() + "\n\nRestore it?",
+            "CamelGraph found work that was not saved when the last session ended:\n\n" + candidate.Describe() + "\n\nRestore it?",
             "Recover Graph");
         if (!restore)
         {
