@@ -40,8 +40,9 @@
             <StackPanel x:Name="WelcomePanel" Grid.Row="1" VerticalAlignment="Center" Margin="64,8">
                 <Image Source="Resources/logo.png" Width="84" Height="84" HorizontalAlignment="Center"
                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                <TextBlock Text="CamelGraph" Foreground="{StaticResource Paper}" FontSize="27"
-                           FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,4"/>
+                <!-- the name in the pixel letters of the BIMCamel wordmark (drawn at four pixels a cell, shown at two) -->
+                <Image Source="Resources/wordmark.png" Width="240" Height="38" HorizontalAlignment="Center" Margin="0,20,0,8"
+                       RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="CamelGraph"/>
                 <TextBlock Text="Visual programming for Autodesk Navisworks 2024, 2025 &amp; 2026"
                            Style="{StaticResource Body}" HorizontalAlignment="Center" TextAlignment="Center"/>
                 <TextBlock Text="Personal-use edition: free for personal and other noncommercial use. A copy for professional use is coming soon to the Autodesk App Store."

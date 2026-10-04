@@ -399,8 +399,9 @@ public class PaletteWindowTests
             var stops = ((LinearGradientBrush)header.Background).GradientStops;
             Assert.Equal(light.Colors["Dyc.BrandStartColor"], stops[0].Color);
 
-            var brandTitle = Visuals(host.Window).OfType<TextBlock>().First(t => t.Text == "CamelGraph");
-            Assert.Equal(light.Colors["Dyc.OnBrandBrush"], ((SolidColorBrush)brandTitle.Foreground).Color);
+            // the name is the pixel wordmark, a template that paints with the control's Foreground
+            var brandTitle = Visuals((DependencyObject)host.Control.FindName("HeaderWordmark")).OfType<ContentControl>().First();
+            Assert.Equal(light.Colors["Dyc.TextBrush"], ((SolidColorBrush)brandTitle.Foreground).Color);
 
             var editor = (Nodify.NodifyEditor)host.Control.FindName("Editor");
             var canvas = ((DrawingBrush)editor.Background).Drawing;

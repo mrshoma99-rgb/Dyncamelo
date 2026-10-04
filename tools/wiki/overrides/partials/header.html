@@ -20,7 +20,7 @@
     <a class="dyc-logo" href="{{ config.extra.bimcamel_url }}" title="BIMCamel" aria-label="BIMCamel">
       {% include "partials/logo.html" %}
     </a>
-    <a class="dyc-sitename" href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"><img class="dyc-sitemark dyc-sitemark--light" src="{{ 'assets/camelgraph-mark-on-light.svg' | url }}" alt="" width="22" height="22"><img class="dyc-sitemark dyc-sitemark--dark" src="{{ 'assets/camelgraph-mark-on-dark.svg' | url }}" alt="" width="22" height="22">{{ config.site_name }}</a>
+    <a class="dyc-sitename" aria-label="{{ config.site_name }}" href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}"><img class="dyc-sitemark dyc-sitemark--light" src="{{ 'assets/camelgraph-mark-on-light.svg' | url }}" alt="" width="22" height="22"><img class="dyc-sitemark dyc-sitemark--dark" src="{{ 'assets/camelgraph-mark-on-dark.svg' | url }}" alt="" width="22" height="22"><img class="dyc-sitename__word dyc-sitename__word--light" src="{{ 'assets/camelgraph-wordmark-on-light.svg' | url }}" alt="CamelGraph" height="18"><img class="dyc-sitename__word dyc-sitename__word--dark" src="{{ 'assets/camelgraph-wordmark-on-dark.svg' | url }}" alt="CamelGraph" height="18"><span class="dyc-sitename__label">Wiki</span></a>
     {% if config.theme.palette %}
       {% if not config.theme.palette is mapping %}
         {% include "partials/palette.html" %}

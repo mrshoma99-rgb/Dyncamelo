@@ -614,7 +614,7 @@ public partial class CamelGraphEditorControl : UserControl, IHostKeyTarget
     // menu bar itself, which becomes one button holding the same menus. The buttons and the logo never go. Everything is
     // decided from widths that do not depend on what is showing (the logo, the buttons, the menu bar's width measured while it
     // was a bar), so the layout cannot flicker between two states.
-    private const double WordmarkWidth = 96d;
+    private const double WordmarkWidth = 120d;
     private const double TitleMinimumWidth = 110d;
     private const double TitleMaximumWidth = 320d;
     private const double CompactMenuWidth = 36d;

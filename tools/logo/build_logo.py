@@ -447,6 +447,16 @@ def main() -> int:
     jobs.append(dict(svg=str(svg_dir / "camelgraph-mark-maskable.svg"), out=str(png_dir / "camelgraph-mark-maskable-512.png"), width=512))
     jobs.append(dict(svg=str(svg_dir / "camelgraph-mark-maskable.svg"), out=str(png_dir / "camelgraph-mark-maskable-192.png"), width=192))
 
+    # the name alone, in pixel letters: white for dark surfaces, dark for light ones (cell = 4 px, so 480 x 76; a window shows it at half size)
+    cells_w, cells_h = pixel_font.size_cells("CamelGraph")
+    for tag, colour in (("on-dark", WHITE), ("on-light", PLATE)):
+        d = pixel_font.path_data("CamelGraph", 4)
+        write(svg_dir / f"camelgraph-wordmark-{tag}.svg",
+              f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {cells_w * 4} {cells_h * 4}" width="{cells_w * 4}" height="{cells_h * 4}">'
+              f'<path d="{d}" fill="{colour}"/></svg>')
+        for px in (240, 480, 960):
+            jobs.append(dict(svg=str(svg_dir / f"camelgraph-wordmark-{tag}.svg"), out=str(png_dir / f"camelgraph-wordmark-{tag}-{px}.png"), width=px))
+
     # the Player mark: SVG, and PNG at the sizes it is used at (the small drawing up to 32 px on a plate, 48 px without one)
     for name, kw in PLAYER_VARIANTS.items():
         write(svg_dir / f"{name}.svg", player_svg(**kw))
@@ -491,8 +501,9 @@ def main() -> int:
     # the editor's templates and the wiki header's two marks
     write(ROOT / "src" / "CamelGraph.UI" / "Themes" / "Logo.xaml", mark_xaml())
     for tag in ("on-dark", "on-light"):
-        write(ROOT / "tools" / "wiki" / "overrides" / "assets" / f"camelgraph-mark-{tag}.svg",
-              (svg_dir / f"camelgraph-mark-{tag}.svg").read_text(encoding="utf-8"))
+        for kind in ("mark", "wordmark"):
+            write(ROOT / "tools" / "wiki" / "overrides" / "assets" / f"camelgraph-{kind}-{tag}.svg",
+                  (svg_dir / f"camelgraph-{kind}-{tag}.svg").read_text(encoding="utf-8"))
 
     # 3. icons: one .ico per use, each size drawn at that size (the small drawing up to 32 px)
     def ico(name: str, variant: str, sizes: list[int]) -> None:
@@ -515,6 +526,8 @@ def main() -> int:
         ("png/camelgraph-mark-mono-plate-32.png", "dist/CamelGraph.bundle/2024/Resources/camelgraph_32.png"),
         ("png/camelgraph-mark-on-dark-192.png", "src/CamelGraph.Installer/Resources/logo.png"),
         ("png/camelgraph-mark-on-dark-48.png", "src/CamelGraph.Installer/Resources/logo-small.png"),
+        ("png/camelgraph-wordmark-on-dark-480.png", "src/CamelGraph.Installer/Resources/wordmark.png"),
+        ("png/camelgraph-wordmark-on-dark-480.png", "src/CamelGraph.App/Resources/camelgraph_wordmark.png"),
         ("ico/camelgraph.ico", "src/CamelGraph.Installer/Resources/camelgraph.ico"),
         ("ico/camelgraph.ico", "appstore/assets/CamelGraph.ico"),
         ("png/camelgraph-mark-80.png", "appstore/assets/icon-80.png"),

@@ -91,14 +91,13 @@
                                             BorderBrush="{DynamicResource Dyc.AccentBrush}" />
                         </Border>
                         <StackPanel x:Name="HeaderWordmark" VerticalAlignment="Center" Margin="8,0,0,0">
-                            <TextBlock Text="CamelGraph"
-                                       Foreground="{DynamicResource Dyc.TextBrush}"
-                                       FontWeight="SemiBold"
-                                       FontSize="12.5" />
-                            <TextBlock Text="by BIMCamel"
-                                       Foreground="{DynamicResource Dyc.SubtleTextBrush}"
-                                       FontSize="9.5"
-                                       Margin="0,-1,0,0" />
+                            <!-- the name in the pixel letters of the BIMCamel wordmark (one pixel per cell, so it stays crisp); it takes
+                                 the text colour of the palette like the mark does. "by BIMCamel" is in the tooltip of the brand block. -->
+                            <ContentControl Template="{StaticResource Dyc.Logo.Wordmark}"
+                                            Width="120" Height="19"
+                                            Focusable="False" IsTabStop="False"
+                                            UseLayoutRounding="True" SnapsToDevicePixels="True"
+                                            Foreground="{DynamicResource Dyc.TextBrush}" />
                         </StackPanel>
                     </StackPanel>
 
@@ -1491,7 +1490,12 @@
                         </Border>
                         <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
                             <WrapPanel>
-                                <TextBlock Text="CamelGraph" FontSize="22" FontWeight="SemiBold" Foreground="{DynamicResource Dyc.TextBrush}" />
+                                <ContentControl Template="{StaticResource Dyc.Logo.Wordmark}"
+                                                Width="240" Height="38" VerticalAlignment="Center"
+                                                Focusable="False" IsTabStop="False"
+                                                UseLayoutRounding="True" SnapsToDevicePixels="True"
+                                                AutomationProperties.Name="CamelGraph"
+                                                Foreground="{DynamicResource Dyc.TextBrush}" />
                                 <Border Margin="10,0,0,0" Padding="8,1" CornerRadius="9" VerticalAlignment="Center"
                                         Background="{DynamicResource Dyc.HoverBrush}" ToolTip="The installed version">
                                     <TextBlock Text="{Binding ProductVersionText}" FontSize="11" Foreground="{DynamicResource Dyc.SubtleTextBrush}" />
