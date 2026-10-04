@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Navisworks.Api;
 using CamelGraph.Core.Editing;
+using CamelGraph.Core.Execution;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
 /// <summary>
-/// Backs the in-node model-element inputs: stores the current Navisworks selection as model-tree paths
-/// ("nw:0:1/2;0:4/5"), describes it for the node face, and selects it again on demand.
+/// Backs the in-node model-element inputs: stores the current Navisworks selection as model-tree paths, each with the identity of
+/// the element ("nw:0:1/2|guid;0:4/5||name"; a graph file saved before identities were stored holds the paths only and still loads),
+/// describes it for the node face, and selects it again on demand. When the stored picks are turned back into items an element that
+/// the path no longer leads to is looked up by its GUID, and what cannot be found is reported as a warning of the node, never
+/// replaced by whatever now sits at the old position.
 /// </summary>
 public sealed class NavisworksModelPicker : IModelPicker
 {
@@ -22,8 +27,8 @@ public sealed class NavisworksModelPicker : IModelPicker
             var doc = NavisworksContext.ResolveDocument(null);
             var selected = new ModelItemCollection(doc.CurrentSelection.SelectedItems);
             count = selected.Count;
-            var paths = ModelItemPaths.ComputePaths(doc, single ? selected.Take(1) : selected);
-            return paths.Count == 0 ? null : Encode(paths);
+            var entries = ModelItemPaths.ComputeEntries(doc, single ? selected.Take(1) : selected, out _);
+            return entries.Count == 0 ? null : Encode(entries);
         }
         catch (Exception)
         {
@@ -43,7 +48,7 @@ public sealed class NavisworksModelPicker : IModelPicker
         try
         {
             var doc = NavisworksContext.ResolveDocument(null);
-            var first = ModelItemPaths.ResolvePath(doc, paths[0]);
+            var first = ModelItemPaths.ResolveEntryQuick(doc, paths[0]);
             var name = first == null ? "(missing)" : Label(first);
             return paths.Count == 1 ? name : name + " (+" + (paths.Count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + ")";
         }
@@ -85,13 +90,20 @@ public sealed class NavisworksModelPicker : IModelPicker
             throw new InvalidCastException("'" + value + "' is not a picked model selection.");
         }
 
-        var paths = Decode(value);
-        if (paths.Count == 0)
+        var entries = Decode(value);
+        if (entries.Count == 0)
         {
             return new List<ModelItem>();
         }
 
-        return ModelItemPaths.ResolvePaths(NavisworksContext.ResolveDocument(null), paths);
+        var resolution = ModelItemPaths.ResolveEntries(NavisworksContext.ResolveDocument(null), entries);
+        var message = PickedEntry.MissingMessage(resolution.Total, resolution.Missing);
+        if (message != null)
+        {
+            NodeWarnings.Add(message);
+        }
+
+        return resolution.Items;
     }
 
     internal static string Encode(IEnumerable<string> paths) =>

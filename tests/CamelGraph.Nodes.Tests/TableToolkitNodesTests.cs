@@ -24,6 +24,19 @@ public class TableToolkitNodesTests
 
     private static object?[] Cells(CamelGraphTable table, int row) => table.Rows[row];
 
+    // The column inputs take a list of names; one text (with commas) is a one-item list, which is how these tests spell it.
+    private static CamelGraphTable Sort(CamelGraphTable table, string columns, bool descending = false) =>
+        TableToolkitNodes.Sort(table, L(columns), descending);
+
+    private static CamelGraphTable Distinct(CamelGraphTable table, string columns = "") =>
+        TableToolkitNodes.Distinct(table, L(columns));
+
+    private static CamelGraphTable GroupBy(CamelGraphTable table, string by, IList<object?> aggregations) =>
+        TableToolkitNodes.GroupBy(table, L(by), aggregations);
+
+    private static CamelGraphTable Join(CamelGraphTable left, CamelGraphTable right, string leftKey, string rightKey = "", string kind = "inner") =>
+        TableToolkitNodes.Join(left, right, L(leftKey), L(rightKey), kind);
+
     // ------------------------------------------------------------- Building
 
     [Fact]
@@ -191,7 +204,7 @@ public class TableToolkitNodesTests
         var table = TableToolkitNodes.AddFormulaColumn(Elements(), "Meters", "Length / 1000");
         Assert.Equal(3.0, table.Rows[0][4]);
         Assert.Equal(0.9, (double)table.Rows[1][4]!, 9);
-        Assert.Equal(0.0, table.Rows[4][4]);   // a blank cell counts as 0
+        Assert.Null(table.Rows[4][4]);   // a blank cell is not a number: the result is empty (it used to count as 0)
 
         var spaced = TableToolkitNodes.FromRows(Rows(new object?[] { 120.0, 2.0 }), L("Fire Rating", "Factor"));
         var calc = TableToolkitNodes.AddFormulaColumn(spaced, "Hours", "[Fire Rating] / 60 * factor");
@@ -236,49 +249,49 @@ public class TableToolkitNodesTests
     [Fact]
     public void Sort_OrdersByColumns_StablyWithBlanksLast()
     {
-        var byLength = TableToolkitNodes.Sort(Elements(), "Length");
+        var byLength = Sort(Elements(), "Length");
         Assert.Equal(new object?[] { 900.0, 2500.0, 3000.0, 4500.0, null }, byLength.Rows.Select(r => r[2]).ToArray());
 
-        var descending = TableToolkitNodes.Sort(Elements(), "Length", descending: true);
+        var descending = Sort(Elements(), "Length", descending: true);
         Assert.Equal(new object?[] { 4500.0, 3000.0, 2500.0, 900.0, null }, descending.Rows.Select(r => r[2]).ToArray());
     }
 
     [Fact]
     public void Sort_SupportsSeveralColumnsAndPerColumnDirection()
     {
-        var table = TableToolkitNodes.Sort(Elements(), "Level, -Length");
+        var table = Sort(Elements(), "Level, -Length");
         Assert.Equal(new object?[] { "L01", "L01", "L01", "L02", "L02" }, table.Rows.Select(r => r[0]).ToArray());
         Assert.Equal(new object?[] { 4500.0, 3000.0, null, 2500.0, 900.0 }, table.Rows.Select(r => r[2]).ToArray());
 
-        var viaWord = TableToolkitNodes.Sort(Elements(), "Level asc, Length desc");
+        var viaWord = Sort(Elements(), "Level asc, Length desc");
         Assert.Equal(table.Rows.Select(r => r[2]), viaWord.Rows.Select(r => r[2]));
     }
 
     [Fact]
     public void Sort_NeedsAColumn()
     {
-        Assert.Throws<ArgumentException>(() => TableToolkitNodes.Sort(Elements(), " "));
-        Assert.Throws<ArgumentException>(() => TableToolkitNodes.Sort(Elements(), "Nope"));
+        Assert.Throws<ArgumentException>(() => Sort(Elements(), " "));
+        Assert.Throws<ArgumentException>(() => Sort(Elements(), "Nope"));
     }
 
     [Fact]
     public void Sort_MixedNumbersAndTextDoNotThrow()
     {
         var table = TableToolkitNodes.FromRows(Rows(new object?[] { "b" }, new object?[] { 2.0 }, new object?[] { "a" }, new object?[] { 10.0 }), L("V"));
-        var sorted = TableToolkitNodes.Sort(table, "V");
+        var sorted = Sort(table, "V");
         Assert.Equal(4, sorted.RowCount);
     }
 
     [Fact]
     public void Distinct_KeepsTheFirstOfEachKind()
     {
-        Assert.Equal(3, TableToolkitNodes.Distinct(Elements(), "Category").RowCount);
-        Assert.Equal(2, TableToolkitNodes.Distinct(Elements(), "Level").RowCount);
-        Assert.Equal(5, TableToolkitNodes.Distinct(Elements()).RowCount);
+        Assert.Equal(3, Distinct(Elements(), "Category").RowCount);
+        Assert.Equal(2, Distinct(Elements(), "Level").RowCount);
+        Assert.Equal(5, Distinct(Elements()).RowCount);
 
         var doubled = TableToolkitNodes.Concat(L(Elements(), Elements()));
         Assert.Equal(10, doubled.RowCount);
-        Assert.Equal(5, TableToolkitNodes.Distinct(doubled).RowCount);
+        Assert.Equal(5, Distinct(doubled).RowCount);
     }
 
     [Fact]
@@ -308,7 +321,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void GroupBy_CountsAndSumsPerGroup_InOrderOfFirstAppearance()
     {
-        var table = TableToolkitNodes.GroupBy(Elements(), "Category", L("count", "sum:Length", "average:Length as Mean"));
+        var table = GroupBy(Elements(), "Category", L("count", "sum:Length", "average:Length as Mean"));
         Assert.Equal(new[] { "Category", "count", "sum(Length)", "Mean" }, table.Headers);
         Assert.Equal(new object?[] { "Wall", 3.0, 10000.0, 3333.3333333333335 }, Cells(table, 0));
         Assert.Equal(new object?[] { "Door", 1.0, 900.0, 900.0 }, Cells(table, 1));
@@ -320,7 +333,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void GroupBy_SeveralKeysAndAllTheFunctions()
     {
-        var table = TableToolkitNodes.GroupBy(
+        var table = GroupBy(
             Elements(), "Level, Status", L("count", "min:Length", "max:Length", "median:Length", "first:Category", "last:Category", "distinct:Category"));
         Assert.Equal(4, table.RowCount);   // L01/New (the pipe shares it), L02/Active, L01/Active, L02/New
         var l01New = table.Rows[0];
@@ -338,7 +351,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void GroupBy_ListCollectsTheCells()
     {
-        var table = TableToolkitNodes.GroupBy(Elements(), "Level", L("list:Category"));
+        var table = GroupBy(Elements(), "Level", L("list:Category"));
         var cells = (List<object?>)table.Rows[0][1]!;
         Assert.Equal(new object?[] { "Wall", "Wall", "Pipe" }, cells.ToArray());
     }
@@ -346,24 +359,24 @@ public class TableToolkitNodesTests
     [Fact]
     public void GroupBy_WithoutKeys_GivesOneTotalRow_EvenForAnEmptyTable()
     {
-        var totals = TableToolkitNodes.GroupBy(Elements(), "", L("count", "sum:Length"));
+        var totals = GroupBy(Elements(), "", L("count", "sum:Length"));
         Assert.Equal(1, totals.RowCount);
         Assert.Equal(new object?[] { 5.0, 10900.0 }, Cells(totals, 0));
 
         var empty = (CamelGraphTable)TableToolkitNodes.Filter(Elements(), "Level", "==", "L99")["matched"];
-        var none = TableToolkitNodes.GroupBy(empty, "", L("count", "sum:Length"));
+        var none = GroupBy(empty, "", L("count", "sum:Length"));
         Assert.Equal(new object?[] { 0.0, 0.0 }, Cells(none, 0));
     }
 
     [Fact]
     public void GroupBy_ExplainsMistakes()
     {
-        Assert.Contains("needs a column", Assert.Throws<ArgumentException>(() => TableToolkitNodes.GroupBy(Elements(), "Level", L("sum"))).Message);
-        Assert.Contains("not an aggregation", Assert.Throws<ArgumentException>(() => TableToolkitNodes.GroupBy(Elements(), "Level", L("total:Length"))).Message);
-        Assert.Contains("no column named 'Width'", Assert.Throws<ArgumentException>(() => TableToolkitNodes.GroupBy(Elements(), "Level", L("sum:Width"))).Message);
-        Assert.Throws<ArgumentException>(() => TableToolkitNodes.GroupBy(Elements(), "", L()));
+        Assert.Contains("needs a column", Assert.Throws<ArgumentException>(() => GroupBy(Elements(), "Level", L("sum"))).Message);
+        Assert.Contains("not an aggregation", Assert.Throws<ArgumentException>(() => GroupBy(Elements(), "Level", L("total:Length"))).Message);
+        Assert.Contains("no column named 'Width'", Assert.Throws<ArgumentException>(() => GroupBy(Elements(), "Level", L("sum:Width"))).Message);
+        Assert.Throws<ArgumentException>(() => GroupBy(Elements(), "", L()));
 
-        var text = Assert.Throws<ArgumentException>(() => TableToolkitNodes.GroupBy(Elements(), "Level", L("sum:Category")));
+        var text = Assert.Throws<ArgumentException>(() => GroupBy(Elements(), "Level", L("sum:Category")));
         Assert.Contains("'Wall'", text.Message);
         Assert.Contains("not a number", text.Message);
     }
@@ -372,20 +385,20 @@ public class TableToolkitNodesTests
     public void GroupBy_MinAndMaxOfNumbersWrittenAsText_AreNumbers_NotTextOrdering()
     {
         var table = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "9" }, new object?[] { "a", "100" }, new object?[] { "a", " 25 " }), L("K", "V"));
-        var result = TableToolkitNodes.GroupBy(table, "K", L("min:V", "max:V"));
+        var result = GroupBy(table, "K", L("min:V", "max:V"));
         Assert.Equal(9.0, result.Rows[0][1]);
         Assert.Equal(100.0, result.Rows[0][2]);
 
         // text that is not numeric still compares as text
         var words = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "pear" }, new object?[] { "a", "apple" }), L("K", "V"));
-        Assert.Equal("apple", TableToolkitNodes.GroupBy(words, "K", L("min:V")).Rows[0][1]);
+        Assert.Equal("apple", GroupBy(words, "K", L("min:V")).Rows[0][1]);
     }
 
     [Fact]
     public void GroupBy_ReadsNumericTextAsNumbers()
     {
         var table = TableToolkitNodes.FromRows(Rows(new object?[] { "a", "10" }, new object?[] { "a", "5.5" }), L("K", "V"));
-        Assert.Equal(15.5, TableToolkitNodes.GroupBy(table, "K", L("sum:V")).Rows[0][1]);
+        Assert.Equal(15.5, GroupBy(table, "K", L("sum:V")).Rows[0][1]);
     }
 
     [Fact]
@@ -429,7 +442,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void Join_Inner_KeepsOnlyMatches_AndDropsTheRepeatedKeyColumn()
     {
-        var table = TableToolkitNodes.Join(Elements(), Fire(), "Category");
+        var table = Join(Elements(), Fire(), "Category");
         Assert.Equal(new[] { "Level", "Category", "Length", "Status", "Fire", "Cost" }, table.Headers);
         Assert.Equal(4, table.RowCount);   // the pipe has no match
         Assert.Equal("EI60", table.Rows[0][4]);
@@ -438,7 +451,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void Join_Left_KeepsEveryLeftRow()
     {
-        var table = TableToolkitNodes.Join(Elements(), Fire(), "Category", "", "left");
+        var table = Join(Elements(), Fire(), "Category", "", "left");
         Assert.Equal(5, table.RowCount);
         Assert.Null(table.Rows[4][4]);
     }
@@ -446,7 +459,7 @@ public class TableToolkitNodesTests
     [Fact]
     public void Join_Outer_AlsoKeepsUnmatchedRightRows()
     {
-        var table = TableToolkitNodes.Join(Elements(), Fire(), "Category", "Category", "outer");
+        var table = Join(Elements(), Fire(), "Category", "Category", "outer");
         Assert.Equal(6, table.RowCount);
         var window = table.Rows.Single(r => (string?)r[1] == "Window");
         Assert.Null(window[0]);
@@ -457,7 +470,7 @@ public class TableToolkitNodesTests
     public void Join_UsesDifferentKeyNames_AndRenamesCollidingColumns()
     {
         var other = TableToolkitNodes.FromRows(Rows(new object?[] { "Wall", "Status!" }), L("Kind", "Status"));
-        var table = TableToolkitNodes.Join(Elements(), other, "Category", "Kind", "left");
+        var table = Join(Elements(), other, "Category", "Kind", "left");
         Assert.Equal(new[] { "Level", "Category", "Length", "Status", "Kind", "Status (right)" }, table.Headers);
     }
 
@@ -466,7 +479,7 @@ public class TableToolkitNodesTests
     {
         var left = TableToolkitNodes.FromRows(Rows(new object?[] { 42.0, "L" }), L("Id", "A"));
         var right = TableToolkitNodes.FromRows(Rows(new object?[] { "42", "r1" }, new object?[] { "42", "r2" }), L("Id", "B"));
-        var table = TableToolkitNodes.Join(left, right, "Id");
+        var table = Join(left, right, "Id");
         Assert.Equal(2, table.RowCount);
         Assert.Equal(new object?[] { "r1", "r2" }, table.Rows.Select(r => r[2]).ToArray());
     }
@@ -474,9 +487,9 @@ public class TableToolkitNodesTests
     [Fact]
     public void Join_ChecksItsArguments()
     {
-        Assert.Throws<ArgumentNullException>(() => TableToolkitNodes.Join(Elements(), null!, "Category"));
-        Assert.Throws<ArgumentException>(() => TableToolkitNodes.Join(Elements(), Fire(), "Category", "", "cross"));
-        Assert.Throws<ArgumentException>(() => TableToolkitNodes.Join(Elements(), Fire(), "Nope"));
+        Assert.Throws<ArgumentNullException>(() => Join(Elements(), null!, "Category"));
+        Assert.Throws<ArgumentException>(() => Join(Elements(), Fire(), "Category", "", "cross"));
+        Assert.Throws<ArgumentException>(() => Join(Elements(), Fire(), "Nope"));
     }
 
     // ------------------------------------------------------------- Output
@@ -566,7 +579,7 @@ public class TableToolkitNodesTests
         Assert.Contains("Table.Column", ex.Message);
         Assert.Contains("Table.FromRows", ex.Message);
         Assert.Throws<ArgumentNullException>(() => TableToolkitNodes.Rows(null!));
-        Assert.Throws<ArgumentNullException>(() => TableToolkitNodes.Sort(null!, "x"));
+        Assert.Throws<ArgumentNullException>(() => Sort(null!, "x"));
         Assert.Throws<ArgumentNullException>(() => TableToolkitNodes.FromRows(null!));
     }
 

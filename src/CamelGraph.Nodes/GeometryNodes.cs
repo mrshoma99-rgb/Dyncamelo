@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 
 namespace CamelGraph.Nodes;
@@ -22,6 +23,7 @@ public static class GeometryNodes
     [NodeSearchTags("xyz", "coordinate", "position")]
     public static CamelGraphPoint PointByCoordinates(double x = 0d, double y = 0d, double z = 0d)
     {
+        GeometryWarnings.NotFinite("Point.ByCoordinates", "the point", ("x", x), ("y", y), ("z", z));
         return new CamelGraphPoint(x, y, z);
     }
 
@@ -49,26 +51,28 @@ public static class GeometryNodes
     }
 
     /// <summary>Creates an axis-aligned bounding box from two opposite corners (any order).</summary>
-    /// <param name="min">One corner of the box.</param>
-    /// <param name="max">The opposite corner of the box.</param>
+    /// <param name="cornerA">One corner of the box.</param>
+    /// <param name="cornerB">The opposite corner of the box.</param>
     /// <returns>The bounding box.</returns>
     [NodeName("BoundingBox.ByCorners")]
+    [PortAlias("min", "cornerA")]
+    [PortAlias("max", "cornerB")]
     [return: NodeName("boundingBox")]
-    [NodeDescription("Creates an axis-aligned bounding box spanning two corner points.")]
+    [NodeDescription("Creates an axis-aligned bounding box spanning two opposite corner points, given in any order (the smaller coordinates become the box's min corner, the larger its max corner).")]
     [NodeSearchTags("box", "extent", "aabb")]
-    public static CamelGraphBoundingBox BoundingBoxByCorners(CamelGraphPoint min, CamelGraphPoint max)
+    public static CamelGraphBoundingBox BoundingBoxByCorners(CamelGraphPoint cornerA, CamelGraphPoint cornerB)
     {
-        if (min == null)
+        if (cornerA == null)
         {
-            throw new ArgumentNullException(nameof(min), "BoundingBox.ByCorners requires two corner points.");
+            throw new ArgumentNullException(nameof(cornerA), "BoundingBox.ByCorners requires two corner points.");
         }
 
-        if (max == null)
+        if (cornerB == null)
         {
-            throw new ArgumentNullException(nameof(max), "BoundingBox.ByCorners requires two corner points.");
+            throw new ArgumentNullException(nameof(cornerB), "BoundingBox.ByCorners requires two corner points.");
         }
 
-        return new CamelGraphBoundingBox(min, max);
+        return new CamelGraphBoundingBox(cornerA, cornerB);
     }
 
     /// <summary>
@@ -77,13 +81,13 @@ public static class GeometryNodes
     /// geometric union. Navisworks boxes/points are accepted through the
     /// registered converters.
     /// </summary>
-    /// <param name="geometry">Boxes and/or points to enclose (lists nest freely; at least one required).</param>
+    /// <param name="geometry">Boxes and/or points to enclose (several wires can feed this one input; lists nest freely; at least one required). Wire a single [x, y, z] triple on its own, or inside a list: next to other wires a bare list is spread into its numbers.</param>
     /// <returns>The bounding box fitting all inputs.</returns>
     [NodeName("BoundingBox.Union")]
     [return: NodeName("boundingBox")]
-    [NodeDescription("ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.")]
-    [NodeSearchTags("union", "combine", "fit", "merge", "enclose", "multiple", "all", "extents", "aabb")]
-    public static CamelGraphBoundingBox BoundingBoxUnion(IList<object?> geometry)
+    [NodeDescription("ONE bounding box fitting every box and/or point wired in — the geometric union, e.g. one frame around scattered elements' boxes or around a set of points (several wires can feed the one input; [x,y,z] triples work too; lists nest freely, a list of lists included).")]
+    [NodeSearchTags("union", "combine", "fit", "merge", "enclose", "multiple", "all", "extents", "aabb", "around", "points", "bounds", "from points")]
+    public static CamelGraphBoundingBox BoundingBoxUnion([MultiInput] IList<object?> geometry)
     {
         if (geometry == null || geometry.Count == 0)
         {
@@ -206,22 +210,26 @@ public static class GeometryNodes
 
     /// <summary>Scales a bounding box about its center by a factor.</summary>
     /// <param name="boundingBox">The bounding box.</param>
-    /// <param name="factor">Scale factor (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center.</param>
+    /// <param name="factor">Scale factor above 0 (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center.</param>
     /// <returns>The scaled bounding box.</returns>
     [NodeName("BoundingBox.Scale")]
     [return: NodeName("boundingBox")]
     [NodeDescription("Scales a bounding box about its center by a factor (2 = double, 0.5 = half) — e.g. to pad a box before a section or zoom.")]
     [NodeSearchTags("scale", "grow", "shrink", "expand", "pad", "resize", "inflate")]
-    public static CamelGraphBoundingBox BoundingBoxScale(CamelGraphBoundingBox boundingBox, double factor)
+    public static CamelGraphBoundingBox BoundingBoxScale(
+        CamelGraphBoundingBox boundingBox,
+        [NodeRange(0.001, 1000000, SoftMin = 0.1, SoftMax = 5, Step = 0.1)] double factor)
     {
         if (boundingBox == null)
         {
             throw new ArgumentNullException(nameof(boundingBox), "BoundingBox.Scale requires a bounding box.");
         }
 
-        if (factor <= 0.0)
+        if (double.IsNaN(factor) || double.IsInfinity(factor) || factor <= 0.0)
         {
-            throw new ArgumentOutOfRangeException(nameof(factor), "The scale factor must be positive.");
+            throw new ArgumentOutOfRangeException(
+                nameof(factor),
+                "BoundingBox.Scale needs a scale factor above 0 and finite (got " + Core.Types.TypeCoercion.FormatValue(factor) + "). Check the number wired into 'factor'.");
         }
 
         var center = boundingBox.Center;
@@ -239,29 +247,33 @@ public static class GeometryNodes
     }
 
     /// <summary>Euclidean distance between two points (in model units).</summary>
-    /// <param name="point">The first point.</param>
-    /// <param name="other">The second point.</param>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
     /// <returns>The distance.</returns>
     [NodeName("Point.DistanceTo")]
+    [PortAlias("point", "a")]
+    [PortAlias("other", "b")]
     [return: NodeName("distance")]
     [NodeDescription("Returns the straight-line distance between two points.")]
     [NodeSearchTags("length", "measure", "euclidean", "between")]
-    public static double PointDistanceTo(CamelGraphPoint point, CamelGraphPoint other)
+    public static double PointDistanceTo(CamelGraphPoint a, CamelGraphPoint b)
     {
-        if (point == null)
+        if (a == null)
         {
-            throw new ArgumentNullException(nameof(point), "Point.DistanceTo requires two points.");
+            throw new ArgumentNullException(nameof(a), "Point.DistanceTo requires two points.");
         }
 
-        if (other == null)
+        if (b == null)
         {
-            throw new ArgumentNullException(nameof(other), "Point.DistanceTo requires two points.");
+            throw new ArgumentNullException(nameof(b), "Point.DistanceTo requires two points.");
         }
 
-        var dx = other.X - point.X;
-        var dy = other.Y - point.Y;
-        var dz = other.Z - point.Z;
-        return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        var dx = b.X - a.X;
+        var dy = b.Y - a.Y;
+        var dz = b.Z - a.Z;
+        var distance = Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        GeometryWarnings.ResultNotFinite("Point.DistanceTo", "The distance", distance, "A point has a coordinate that is not a finite number; check the points wired in.");
+        return distance;
     }
 
     /// <summary>Creates a direction vector from X, Y and Z components.</summary>
@@ -275,6 +287,7 @@ public static class GeometryNodes
     [NodeSearchTags("xyz", "direction", "axis")]
     public static CamelGraphVector VectorByCoordinates(double x = 0d, double y = 0d, double z = 0d)
     {
+        GeometryWarnings.NotFinite("Vector.ByCoordinates", "the vector", ("x", x), ("y", y), ("z", z));
         return new CamelGraphVector(x, y, z);
     }
 
@@ -369,5 +382,50 @@ public static class GeometryNodes
 
         var maxGap = Math.Max(Math.Max(gapMinX, gapMaxX), Math.Max(gapMinY, gapMaxY));
         return maxGap < 0.0 ? 0.0 : maxGap;
+    }
+}
+
+/// <summary>The one warning the Geometry nodes give when a number that reaches them is not finite (NaN or Infinity).</summary>
+internal static class GeometryWarnings
+{
+    /// <summary>
+    /// Adds one warning, naming the node, when any of the given inputs is NaN or Infinity, and does nothing otherwise. The node
+    /// still returns its result, so the nodes after it run; the warning says what is wrong with it.
+    /// </summary>
+    /// <param name="node">The node's name as the user sees it.</param>
+    /// <param name="result">What the node makes, in the user's words ("the vector").</param>
+    /// <param name="inputs">The inputs to check, each with its port name.</param>
+    internal static void NotFinite(string node, string result, params (string Name, double Value)[] inputs)
+    {
+        var bad = new List<string>();
+        foreach (var (name, value) in inputs)
+        {
+            if (double.IsNaN(value))
+            {
+                bad.Add("'" + name + "' is not a number (NaN)");
+            }
+            else if (double.IsInfinity(value))
+            {
+                bad.Add("'" + name + "' is infinite");
+            }
+        }
+
+        if (bad.Count > 0)
+        {
+            NodeWarnings.Add(node + ": " + string.Join(" and ", bad) + ", so " + result + " is not usable. Check the numbers wired into this node.");
+        }
+    }
+
+    /// <summary>Adds one warning, naming the node, when a number the node computed is NaN or Infinity.</summary>
+    /// <param name="node">The node's name as the user sees it.</param>
+    /// <param name="result">What the number is, in the user's words ("The distance").</param>
+    /// <param name="value">The computed number.</param>
+    /// <param name="hint">What to check, as a plain sentence.</param>
+    internal static void ResultNotFinite(string node, string result, double value, string hint)
+    {
+        if (double.IsNaN(value) || double.IsInfinity(value))
+        {
+            NodeWarnings.Add(node + ": " + result + " is not a finite number (" + (double.IsNaN(value) ? "NaN" : "Infinity") + "). " + hint);
+        }
     }
 }

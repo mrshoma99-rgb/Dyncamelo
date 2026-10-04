@@ -70,9 +70,10 @@ public class StringExtraNodesTests
     }
 
     [Fact]
-    public void Format_NonFormattableValuesAreShownLikeFromObject()
+    public void Format_NonFormattableValuesAreShownLikeFromObject_AndAGapIsEmptyText()
     {
-        Assert.Equal("null|True|[1, 2]", StringExtraNodes.Format("{0}|{1}|{2}", Values(null, true, new List<object?> { 1, 2 })));
+        // Audit ENG-11: a missing value is empty text (as in String.Concat), no longer the word "null".
+        Assert.Equal("|True|[1, 2]", StringExtraNodes.Format("{0}|{1}|{2}", Values(null, true, new List<object?> { 1, 2 })));
     }
 
     [Fact]
@@ -200,59 +201,59 @@ public class StringExtraNodesTests
         Assert.Throws<ArgumentNullException>(() => StringExtraNodes.Template("x", null!));
     }
 
-    // ── Number.Format ───────────────────────────────────────────────────────
+    // ── String.FromNumber ───────────────────────────────────────────────────────
 
     [Fact]
-    public void NumberFormat_DefaultsToTwoDecimals()
+    public void FromNumber_DefaultsToTwoDecimals()
     {
-        Assert.Equal("1234.50", StringExtraNodes.NumberFormat(1234.5));
-        Assert.Equal("3", StringExtraNodes.NumberFormat(2.6, 0));
-        Assert.Equal("0.500000000000000", StringExtraNodes.NumberFormat(0.5, 15));
+        Assert.Equal("1234.50", StringExtraNodes.FromNumber(1234.5));
+        Assert.Equal("3", StringExtraNodes.FromNumber(2.6, 0));
+        Assert.Equal("0.500000000000000", StringExtraNodes.FromNumber(0.5, 15));
     }
 
     [Fact]
-    public void NumberFormat_ThousandsSeparator()
+    public void FromNumber_ThousandsSeparator()
     {
-        Assert.Equal("1,234,567.9", StringExtraNodes.NumberFormat(1234567.891, 1, true));
-        Assert.Equal("999.00", StringExtraNodes.NumberFormat(999, 2, true));
+        Assert.Equal("1,234,567.9", StringExtraNodes.FromNumber(1234567.891, 1, true));
+        Assert.Equal("999.00", StringExtraNodes.FromNumber(999, 2, true));
     }
 
     [Fact]
-    public void NumberFormat_PrefixGoesBeforeTheSign()
+    public void FromNumber_PrefixGoesBeforeTheSign()
     {
-        Assert.Equal("EUR -1,234.50", StringExtraNodes.NumberFormat(-1234.5, 2, true, "EUR "));
-        Assert.Equal("12.3 m2", StringExtraNodes.NumberFormat(12.345, 1, false, "", " m2"));
-        Assert.Equal("(5.00)", StringExtraNodes.NumberFormat(5, 2, false, "(", ")"));
-        Assert.Equal("5.00", StringExtraNodes.NumberFormat(5, 2, false, null!, null!));
+        Assert.Equal("EUR -1,234.50", StringExtraNodes.FromNumber(-1234.5, 2, true, "EUR "));
+        Assert.Equal("12.3 m2", StringExtraNodes.FromNumber(12.345, 1, false, "", " m2"));
+        Assert.Equal("(5.00)", StringExtraNodes.FromNumber(5, 2, false, "(", ")"));
+        Assert.Equal("5.00", StringExtraNodes.FromNumber(5, 2, false, null!, null!));
     }
 
     [Fact]
-    public void NumberFormat_IsInvariantCulture()
+    public void FromNumber_IsInvariantCulture()
     {
-        WithCulture("de-DE", () => Assert.Equal("1,234.50", StringExtraNodes.NumberFormat(1234.5, 2, true)));
-        WithCulture("fr-FR", () => Assert.Equal("1234.50", StringExtraNodes.NumberFormat(1234.5)));
+        WithCulture("de-DE", () => Assert.Equal("1,234.50", StringExtraNodes.FromNumber(1234.5, 2, true)));
+        WithCulture("fr-FR", () => Assert.Equal("1234.50", StringExtraNodes.FromNumber(1234.5)));
     }
 
     [Fact]
-    public void NumberFormat_NegativeZeroShowsAsZero()
+    public void FromNumber_NegativeZeroShowsAsZero()
     {
-        Assert.Equal("0.00", StringExtraNodes.NumberFormat(-0.001));
-        Assert.Equal("0", StringExtraNodes.NumberFormat(-0.0, 0));
-        Assert.Equal("-0.01", StringExtraNodes.NumberFormat(-0.01));
+        Assert.Equal("0.00", StringExtraNodes.FromNumber(-0.001));
+        Assert.Equal("0", StringExtraNodes.FromNumber(-0.0, 0));
+        Assert.Equal("-0.01", StringExtraNodes.FromNumber(-0.01));
     }
 
     [Fact]
-    public void NumberFormat_NotANumber()
+    public void FromNumber_NotANumber()
     {
-        Assert.Equal("NaN", StringExtraNodes.NumberFormat(double.NaN));
+        Assert.Equal("NaN", StringExtraNodes.FromNumber(double.NaN));
     }
 
     [Theory]
     [InlineData(-1)]
     [InlineData(16)]
-    public void NumberFormat_DecimalsOutOfRange_Throws(int decimals)
+    public void FromNumber_DecimalsOutOfRange_Throws(int decimals)
     {
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => StringExtraNodes.NumberFormat(1, decimals));
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => StringExtraNodes.FromNumber(1, decimals));
         Assert.Contains("between 0 and 15", ex.Message);
     }
 
@@ -457,10 +458,11 @@ public class StringExtraNodesTests
     }
 
     [Fact]
-    public void IndexOf_IsOrdinalWithOptionalIgnoreCase()
+    public void IndexOf_IgnoresCaseByDefault_AndIsOrdinalWhenSwitchedOff()
     {
-        Assert.Equal(-1, StringExtraNodes.IndexOf("HELLO", "l"));
+        Assert.Equal(2, StringExtraNodes.IndexOf("HELLO", "l"));
         Assert.Equal(2, StringExtraNodes.IndexOf("HELLO", "l", true));
+        Assert.Equal(-1, StringExtraNodes.IndexOf("HELLO", "l", false));
     }
 
     [Fact]
@@ -488,7 +490,8 @@ public class StringExtraNodesTests
         Assert.Equal(3, StringExtraNodes.LastIndexOf("a.b.c", "."));
         Assert.Equal(-1, StringExtraNodes.LastIndexOf("abc", "."));
         Assert.Equal(4, StringExtraNodes.LastIndexOf("a.b.C", "c", true));
-        Assert.Equal(-1, StringExtraNodes.LastIndexOf("a.b.C", "c"));
+        Assert.Equal(4, StringExtraNodes.LastIndexOf("a.b.C", "c"));
+        Assert.Equal(-1, StringExtraNodes.LastIndexOf("a.b.C", "c", false));
     }
 
     [Fact]
@@ -718,7 +721,7 @@ public class StringExtraNodesTests
             "String.RegexReplace", "String.RegexSplit", "String.PadLeft", "String.PadRight", "String.IndexOf",
             "String.LastIndexOf", "String.Lines", "String.TrimStart", "String.TrimEnd", "String.ToTitleCase",
             "String.Repeat", "String.Reverse", "String.IsBlank", "String.Left", "String.Right",
-            "String.RemoveDiacritics", "Number.Format",
+            "String.RemoveDiacritics", "String.FromNumber",
         })
         {
             Assert.Contains(name, names);
@@ -735,7 +738,7 @@ public class StringExtraNodesTests
             Assert.Equal(NodeFunction.Info, definitions[name].Function);
         }
 
-        foreach (var name in new[] { "String.Format", "String.Template", "String.RegexReplace", "String.PadLeft", "String.Lines", "Number.Format" })
+        foreach (var name in new[] { "String.Format", "String.Template", "String.RegexReplace", "String.PadLeft", "String.Lines", "String.FromNumber" })
         {
             Assert.Equal(NodeFunction.Create, definitions[name].Function);
         }
@@ -749,7 +752,7 @@ public class StringExtraNodesTests
         Assert.True(definitions["String.Format"].Inputs.Single(i => i.Name == "values").MultiInput);
         Assert.Equal(new[] { "keep", "empty", "error" }, definitions["String.Template"].Inputs.Single(i => i.Name == "onMissing").Choices);
         Assert.Equal(10000d, definitions["String.Repeat"].Inputs.Single(i => i.Name == "count").Range!.Max);
-        Assert.Equal(15d, definitions["Number.Format"].Inputs.Single(i => i.Name == "decimals").Range!.Max);
+        Assert.Equal(15d, definitions["String.FromNumber"].Inputs.Single(i => i.Name == "decimals").Range!.Max);
         Assert.Equal(new[] { "found", "match", "groups" }, definitions["String.RegexMatch"].Outputs.Select(o => o.Name));
     }
 

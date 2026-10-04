@@ -119,13 +119,13 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     Use the magnifier, or send a few selected items through `Properties.Discover` into a `Watch Table` to list everything they carry. See [Find the name of a tab or property](howto/find-property-names.md).
 
 ??? question "How do I search for numbers, such as pipes with a diameter over 100?"
-    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. Wire a `Number` node into the `value` input; the number is in document units. The other modes are `equals`, `contains` and `wildcard` (`*` matches any text, `?` one character). See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
+    Use `Search.ByProperty` and choose `>`, `>=`, `<` or `<=` in the `mode` drop-down. Wire a `Number` node into the `value` input; the number is in document units. The other modes are `equals`, `contains`, `wildcard` (`*` matches any text, `?` one character) and `exists` (the item carries the property, whatever its value). Wire a list into `value` to match any of its entries in one pass over the model. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Is the text search case sensitive?"
     The documentation of the contains search says it is case sensitive, like Find Items, so type the capitals as Navisworks shows them. If a search finds less than you expect, wire the result into a `Watch List` and try `wildcard`. See the [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "Can I search on two properties?"
-    Yes. Chain searches: wire the `items` of a `Search.ByProperty` into a `Search.InItems`, which looks only inside the items it is given. See [Search nodes](nodes/navisworks-search.md#node-search-initems).
+    Yes. Chain searches: wire the `items` of a `Search.ByProperty` into the `within` input of a second `Search.ByProperty`, which then looks only inside the items it is given (and their descendants). The second search can use any mode. `Search.InItems` does the same for equals and is retired. See [Search nodes](nodes/navisworks-search.md#node-search-byproperty).
 
 ??? question "What is the difference between a selection set and a search set?"
     `SelectionSet.Create` keeps the items it was given. A search set keeps a rule and follows the model when it changes. See [Save selection sets](howto/save-selection-sets.md).
@@ -210,7 +210,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     `IFC4` (the default) and `IFC2x3`, set with the `schema` input of `Export.ToIfc`. See [Export model items to IFC](howto/export-to-ifc.md).
 
 ??? question "A file node fails with 'access denied'."
-    Give a full path, for example `C:\Users\you\Documents\report.xlsx`. A relative path points into the Navisworks install folder, which ordinary users cannot write to. See [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
+    The folder is one you cannot write to. A relative path goes next to the graph file (or into `Documents\CamelGraph` for a graph you have not saved), so save the graph somewhere you can write, or give a full path, for example `C:\Users\you\Documents\report.xlsx`. See [Troubleshooting](troubleshooting.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place).
 
 ??? question "Dates from Excel arrive as numbers."
     `Excel.ReadFromFile` gives dates as Excel serial numbers. See [IFC, BCF, Excel and CSV](exchange-formats.md#excel).
@@ -243,7 +243,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     No. It has no account, analytics or licence server. Its one network request is a once-a-day look for a newer version, which you can switch off. See [Privacy and safety](privacy-and-safety.md).
 
 ??? question "Is it safe to run a graph someone sent me?"
-    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses and delete or overwrite files. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
+    Treat a `.dyc` like a macro. A graph contains no code of its own, but its nodes can run programs, call web addresses, write, delete or overwrite files, and change the model. CamelGraph lists such nodes and asks before it runs a graph from a file. Look at a graph before you run it, and try it on a copy of the model. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).
 
 ??? question "Are node packs safe?"
     A node pack is code. CamelGraph loads every `.dll` in your node packs folder (`%APPDATA%\CamelGraph\Packages`) when Navisworks starts, and that code runs inside Navisworks with your rights. Install packs only from authors you trust. See [Privacy and safety](privacy-and-safety.md#what-a-graph-can-do).

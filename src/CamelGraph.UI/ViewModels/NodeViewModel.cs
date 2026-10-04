@@ -805,7 +805,8 @@ public class NodeViewModel : CanvasItemViewModel
     {
         if (Model is FilePathNode filePathNode)
         {
-            var path = _owner.Dialogs.ShowOpenFile("All files (*.*)|*.*", "Select File");
+            // An open dialog, or a save dialog when everything the node feeds writes a file (see PathPicker.ForFilePathNode).
+            var path = CamelGraph.UI.Services.PathPickExtensions.PickPath(_owner.Dialogs, PathPicker.ForFilePathNode(filePathNode), filePathNode.Path);
             if (path != null)
             {
                 filePathNode.Path = path;

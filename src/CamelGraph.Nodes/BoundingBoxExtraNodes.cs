@@ -15,51 +15,54 @@ namespace CamelGraph.Nodes;
 public static class BoundingBoxExtraNodes
 {
     /// <summary>The volume of a bounding box (size X times size Y times size Z).</summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <returns>The volume, in cubic model units.</returns>
     [NodeName("BoundingBox.Volume")]
+    [PortAlias("box", "boundingBox")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("volume")]
     [NodeDescription("The volume of a bounding box (cubic model units); a flat box has volume 0.")]
     [NodeSearchTags("size", "cubic", "capacity", "space", "measure", "m3")]
-    public static double Volume(CamelGraphBoundingBox box)
+    public static double Volume(CamelGraphBoundingBox boundingBox)
     {
-        Require(box, "BoundingBox.Volume", nameof(box));
+        Require(boundingBox, "BoundingBox.Volume", nameof(boundingBox));
 
-        return SizeX(box) * SizeY(box) * SizeZ(box);
+        return SizeX(boundingBox) * SizeY(boundingBox) * SizeZ(boundingBox);
     }
 
     /// <summary>The total area of the six faces of a bounding box.</summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <returns>The surface area, in square model units.</returns>
     [NodeName("BoundingBox.SurfaceArea")]
+    [PortAlias("box", "boundingBox")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("area")]
     [NodeDescription("The total area of a bounding box's six faces (square model units) — e.g. for a coating or cladding estimate.")]
     [NodeSearchTags("area", "faces", "skin", "paint", "coating", "cladding", "measure", "m2")]
-    public static double SurfaceArea(CamelGraphBoundingBox box)
+    public static double SurfaceArea(CamelGraphBoundingBox boundingBox)
     {
-        Require(box, "BoundingBox.SurfaceArea", nameof(box));
+        Require(boundingBox, "BoundingBox.SurfaceArea", nameof(boundingBox));
 
-        var x = SizeX(box);
-        var y = SizeY(box);
-        var z = SizeZ(box);
+        var x = SizeX(boundingBox);
+        var y = SizeY(boundingBox);
+        var z = SizeZ(boundingBox);
         return 2d * (x * y + y * z + z * x);
     }
 
     /// <summary>The plan (floor) area of a bounding box: size X times size Y.</summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <returns>The footprint area, in square model units.</returns>
     [NodeName("BoundingBox.Footprint")]
+    [PortAlias("box", "boundingBox")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("area")]
     [NodeDescription("The plan (floor) area of a bounding box: size X times size Y, ignoring height.")]
     [NodeSearchTags("plan", "floor", "area", "base", "ground", "xy", "measure", "m2")]
-    public static double Footprint(CamelGraphBoundingBox box)
+    public static double Footprint(CamelGraphBoundingBox boundingBox)
     {
-        Require(box, "BoundingBox.Footprint", nameof(box));
+        Require(boundingBox, "BoundingBox.Footprint", nameof(boundingBox));
 
-        return SizeX(box) * SizeY(box);
+        return SizeX(boundingBox) * SizeY(boundingBox);
     }
 
     /// <summary>
@@ -67,19 +70,20 @@ public static class BoundingBoxExtraNodes
     /// clockwise seen from above, starting at the Min corner: (minX, minY), (maxX, minY), (maxX, maxY),
     /// (minX, maxY); then the top face (at the maximum Z) in the same order.
     /// </summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <returns>The eight corners: indices 0-3 bottom face, 4-7 top face.</returns>
     [NodeName("BoundingBox.Corners")]
+    [PortAlias("box", "boundingBox")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("corners")]
     [NodeDescription("The 8 corner points of a bounding box: the bottom face counter-clockwise from the Min corner (0-3), then the top face in the same order (4-7).")]
     [NodeSearchTags("vertices", "points", "extremes", "eight", "decompose", "explode")]
-    public static List<CamelGraphPoint> Corners(CamelGraphBoundingBox box)
+    public static List<CamelGraphPoint> Corners(CamelGraphBoundingBox boundingBox)
     {
-        Require(box, "BoundingBox.Corners", nameof(box));
+        Require(boundingBox, "BoundingBox.Corners", nameof(boundingBox));
 
-        var min = box.Min;
-        var max = box.Max;
+        var min = boundingBox.Min;
+        var max = boundingBox.Max;
         return new List<CamelGraphPoint>(8)
         {
             new CamelGraphPoint(min.X, min.Y, min.Z),
@@ -97,29 +101,30 @@ public static class BoundingBoxExtraNodes
     /// Grows a bounding box by an amount on every side (the size increases by twice the amount along each
     /// axis); a negative amount shrinks it. Shrinking by more than half the smallest size is an error.
     /// </summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <param name="amount">Distance to move every face outwards (negative moves them inwards).</param>
     /// <returns>The expanded bounding box.</returns>
     [NodeName("BoundingBox.Expand")]
+    [PortAlias("box", "boundingBox")]
     [return: NodeName("boundingBox")]
     [NodeDescription("Grows a bounding box by an amount on every side (negative shrinks it; shrinking past zero size is an error) — a clearance or tolerance zone around an element.")]
     [NodeSearchTags("grow", "inflate", "pad", "offset", "margin", "clearance", "buffer", "shrink", "tolerance")]
-    public static CamelGraphBoundingBox Expand(CamelGraphBoundingBox box, double amount)
+    public static CamelGraphBoundingBox Expand(CamelGraphBoundingBox boundingBox, double amount)
     {
-        Require(box, "BoundingBox.Expand", nameof(box));
+        Require(boundingBox, "BoundingBox.Expand", nameof(boundingBox));
         if (double.IsNaN(amount) || double.IsInfinity(amount))
         {
             throw new ArgumentException("BoundingBox.Expand needs a finite amount (got " + Format(amount) + ").", nameof(amount));
         }
 
-        var min = new CamelGraphPoint(box.Min.X - amount, box.Min.Y - amount, box.Min.Z - amount);
-        var max = new CamelGraphPoint(box.Max.X + amount, box.Max.Y + amount, box.Max.Z + amount);
+        var min = new CamelGraphPoint(boundingBox.Min.X - amount, boundingBox.Min.Y - amount, boundingBox.Min.Z - amount);
+        var max = new CamelGraphPoint(boundingBox.Max.X + amount, boundingBox.Max.Y + amount, boundingBox.Max.Z + amount);
 
         // Shrinking moves every face inwards; once opposite faces cross, the box has passed zero size.
         var collapsed = new List<string>();
-        AddIfCollapsed(collapsed, "X", min.X, max.X, SizeX(box));
-        AddIfCollapsed(collapsed, "Y", min.Y, max.Y, SizeY(box));
-        AddIfCollapsed(collapsed, "Z", min.Z, max.Z, SizeZ(box));
+        AddIfCollapsed(collapsed, "X", min.X, max.X, SizeX(boundingBox));
+        AddIfCollapsed(collapsed, "Y", min.Y, max.Y, SizeY(boundingBox));
+        AddIfCollapsed(collapsed, "Z", min.Z, max.Z, SizeZ(boundingBox));
         if (collapsed.Count > 0)
         {
             throw new ArgumentException(
@@ -198,8 +203,9 @@ public static class BoundingBoxExtraNodes
     /// <param name="points">The points to enclose (at least one; every item must be a point).</param>
     /// <returns>The bounding box that just contains all the points.</returns>
     [NodeName("BoundingBox.FromPoints")]
+    [NodeDeprecated("Use BoundingBox.Union")]
     [return: NodeName("boundingBox")]
-    [NodeDescription("The smallest bounding box around a set of points (several wires can feed one input; a single point gives a zero-size box).")]
+    [NodeDescription("The smallest bounding box around a set of points (several wires can feed one input; a single point gives a zero-size box). BoundingBox.Union does the same and also takes boxes.")]
     [NodeSearchTags("fit", "enclose", "extents", "around", "points", "aabb", "bounds", "from points")]
     public static CamelGraphBoundingBox FromPoints([MultiInput] IList<object?> points)
     {
@@ -221,41 +227,42 @@ public static class BoundingBoxExtraNodes
     }
 
     /// <summary>Moves a bounding box by an offset vector without changing its size.</summary>
-    /// <param name="box">The bounding box.</param>
+    /// <param name="boundingBox">The bounding box.</param>
     /// <param name="offset">The displacement (same units as the box).</param>
     /// <returns>The moved bounding box.</returns>
     [NodeName("BoundingBox.Translate")]
+    [PortAlias("box", "boundingBox")]
     [return: NodeName("boundingBox")]
     [NodeDescription("Moves a bounding box by an offset vector, keeping its size.")]
     [NodeSearchTags("move", "shift", "offset", "displace", "vector")]
-    public static CamelGraphBoundingBox Translate(CamelGraphBoundingBox box, CamelGraphVector offset)
+    public static CamelGraphBoundingBox Translate(CamelGraphBoundingBox boundingBox, CamelGraphVector offset)
     {
-        Require(box, "BoundingBox.Translate", nameof(box));
+        Require(boundingBox, "BoundingBox.Translate", nameof(boundingBox));
         if (offset == null)
         {
             throw new ArgumentNullException(nameof(offset), "BoundingBox.Translate requires an offset vector. Wire a vector into the 'offset' input.");
         }
 
         return new CamelGraphBoundingBox(
-            new CamelGraphPoint(box.Min.X + offset.X, box.Min.Y + offset.Y, box.Min.Z + offset.Z),
-            new CamelGraphPoint(box.Max.X + offset.X, box.Max.Y + offset.Y, box.Max.Z + offset.Z));
+            new CamelGraphPoint(boundingBox.Min.X + offset.X, boundingBox.Min.Y + offset.Y, boundingBox.Min.Z + offset.Z),
+            new CamelGraphPoint(boundingBox.Max.X + offset.X, boundingBox.Max.Y + offset.Y, boundingBox.Max.Z + offset.Z));
     }
 
     // ------------------------------------------------------------------ helpers
 
-    private static void Require(CamelGraphBoundingBox? box, string node, string parameter)
+    private static void Require(CamelGraphBoundingBox? boundingBox, string node, string parameter)
     {
-        if (box == null)
+        if (boundingBox == null)
         {
             throw new ArgumentNullException(parameter, node + " requires a bounding box. Wire a bounding box into the '" + parameter + "' input.");
         }
     }
 
-    private static double SizeX(CamelGraphBoundingBox box) => box.Max.X - box.Min.X;
+    private static double SizeX(CamelGraphBoundingBox boundingBox) => boundingBox.Max.X - boundingBox.Min.X;
 
-    private static double SizeY(CamelGraphBoundingBox box) => box.Max.Y - box.Min.Y;
+    private static double SizeY(CamelGraphBoundingBox boundingBox) => boundingBox.Max.Y - boundingBox.Min.Y;
 
-    private static double SizeZ(CamelGraphBoundingBox box) => box.Max.Z - box.Min.Z;
+    private static double SizeZ(CamelGraphBoundingBox boundingBox) => boundingBox.Max.Z - boundingBox.Min.Z;
 
     private static void AddIfCollapsed(List<string> collapsed, string axis, double newMin, double newMax, double size)
     {

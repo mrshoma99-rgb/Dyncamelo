@@ -665,12 +665,16 @@ def parse_interactive_file(path: Path, nodes: list[dict]) -> None:
             }
         )
 
+    # The node's `SearchTags { get; } = new[] { "a", "b" };` override: the words the library search matches.
+    tags_m = re.search(r"SearchTags\s*\{\s*get;\s*\}\s*=\s*new\s*(?:string)?\s*\[\s*\]\s*\{(.*?)\}\s*;", text, re.S)
+    tags = [eval_string_expr(t) for t in re.findall(r'"(?:[^"\\]|\\.)*"', tags_m.group(1))] if tags_m else []
+
     node = {
         "name": const("Name"),
         "id": const("TypeName"),
         "category": const("Category"),
         "description": const("Description"),
-        "tags": [],
+        "tags": tags,
         "inputs": ports["inputs"],
         "outputs": ports["outputs"],
         "returns": "",

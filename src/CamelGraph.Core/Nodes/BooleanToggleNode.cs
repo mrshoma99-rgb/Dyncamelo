@@ -45,6 +45,9 @@ public class BooleanToggleNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "checkbox", "switch", "toggle", "true", "false", "flag", "yes" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />

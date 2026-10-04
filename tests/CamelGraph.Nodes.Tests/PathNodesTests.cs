@@ -10,6 +10,7 @@ using GraphFunction = CamelGraph.Core.Graph.NodeFunction;
 namespace CamelGraph.Nodes.Tests;
 
 /// <summary>Path.* nodes: pure text manipulation of paths, never touching the disk.</summary>
+[Xunit.Collection("GraphContext")]
 public class PathNodesTests
 {
     private static readonly char Sep = System.IO.Path.DirectorySeparatorChar;

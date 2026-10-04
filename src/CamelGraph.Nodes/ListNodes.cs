@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Core.Types;
+using CamelGraph.Nodes.Internal;
 
 namespace CamelGraph.Nodes;
 
@@ -60,14 +62,14 @@ public static class ListNodes
     /// <returns>The first element.</returns>
     [NodeName("List.FirstItem")]
     [return: NodeName("item")]
-    [NodeDescription("Returns the first element of a list.")]
+    [NodeDescription("Returns the first element of a list. An empty list is an error: there is no first element (check List.Count first, or use List.Slice, which gives an empty list).")]
     [NodeSearchTags("head", "front")]
     public static object? FirstItem(IList<object?> list)
     {
         RequireList(list, "List.FirstItem");
         if (list.Count == 0)
         {
-            throw new InvalidOperationException("List.FirstItem requires a non-empty list.");
+            throw new InvalidOperationException("List.FirstItem: the list is empty, so it has no first element.");
         }
 
         return list[0];
@@ -84,7 +86,7 @@ public static class ListNodes
     [return: NodeName("list")]
     [NodeDescription("Flattens a nested list by a given number of levels (-1 = completely).")]
     [NodeSearchTags("nested", "unwrap")]
-    public static IList<object?> Flatten(IList<object?> list, int amount = -1)
+    public static IList<object?> Flatten(IList<object?> list, [NodeRange(-1, 100)] int amount = -1)
     {
         RequireList(list, "List.Flatten");
         var output = new List<object?>();
@@ -102,7 +104,7 @@ public static class ListNodes
     [NodeName("List.FilterByBoolMask")]
     [MultiReturn("in", "out")]
     [PortKinds("", "")]
-    [NodeDescription("Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\").")]
+    [NodeDescription("Splits a list into elements whose mask entry is true (\"in\") and the rest (\"out\"). The mask must have one entry per element: true or false, the text \"true\" or \"false\", or a number (0 is false, any other number true); an empty entry (null) counts as false, so the element goes to \"out\". A list or dictionary in the mask is an error: set both inputs to @L2 (right-click, List Levels) to filter each pair of sublists, or flatten them first.")]
     [NodeSearchTags("filter", "mask", "partition", "sieve")]
     public static Dictionary<string, object> FilterByBoolMask(IList<object?> list, IList<object?> mask)
     {
@@ -124,22 +126,7 @@ public static class ListNodes
         var rejected = new List<object?>();
         for (int i = 0; i < list.Count; i++)
         {
-            // A null mask entry (e.g. a laced check that emitted null for a
-            // missing element) counts as false — the element goes to "out"
-            // instead of the whole node failing.
-            bool flag = false;
-            if (mask[i] != null)
-            {
-                if (!TypeCoercion.TryCoerce(mask[i], typeof(bool), out var coerced) || !(coerced is bool))
-                {
-                    throw new ArgumentException(
-                        "Mask element at index " + i.ToString(CultureInfo.InvariantCulture) + " is not a boolean.");
-                }
-
-                flag = (bool)coerced;
-            }
-
-            if (flag)
+            if (ReadSplitMask(mask[i], i, "List.FilterByBoolMask"))
             {
                 accepted.Add(list[i]);
             }
@@ -156,10 +143,15 @@ public static class ListNodes
         };
     }
 
+    /// <summary>The most items a node that builds a list from a number may make (one million). A wrong number must not exhaust the memory of the host.</summary>
+    internal const int MaxListSize = 1000000;
+
     /// <summary>
     /// Produces a numeric sequence from start towards end (inclusive, with a
     /// small tolerance for floating-point drift). A step moving away from end
-    /// yields an empty list; a zero step is an error.
+    /// yields an empty list; a zero step is an error, and so is a sequence of
+    /// more than one million numbers. Each value is start + n * step, so the
+    /// error does not add up along the list.
     /// </summary>
     /// <param name="start">First value of the sequence.</param>
     /// <param name="end">Inclusive upper (or lower, for negative steps) bound.</param>
@@ -167,50 +159,79 @@ public static class ListNodes
     /// <returns>The sequence as a list of numbers.</returns>
     [NodeName("List.Range")]
     [return: NodeName("list")]
-    [NodeDescription("Creates a sequence of numbers from start to end using the given step.")]
+    [NodeDescription("Creates a sequence of numbers from start to end (both included) using the given step; a negative step counts down, a step that moves away from end gives an empty list. Each number is start + n x step, so 0.1 steps do not drift. At most 1,000,000 numbers: a larger sequence is an error, so a slip of a zero cannot use up the memory of Navisworks.")]
     [NodeSearchTags("sequence", "series", "numbers")]
     public static IList<double> Range(double start, double end, double step = 1d)
     {
+        if (double.IsNaN(start) || double.IsInfinity(start) || double.IsNaN(end) || double.IsInfinity(end) || double.IsNaN(step) || double.IsInfinity(step))
+        {
+            throw new ArgumentException(
+                "List.Range needs finite numbers for start, end and step (got start " + start.ToString(CultureInfo.InvariantCulture) +
+                ", end " + end.ToString(CultureInfo.InvariantCulture) + ", step " + step.ToString(CultureInfo.InvariantCulture) + ").");
+        }
+
         if (step == 0d)
         {
             throw new ArgumentException("List.Range requires a non-zero step.", nameof(step));
         }
 
         var result = new List<double>();
-        var tolerance = Math.Abs(step) * 1e-9;
-        if (step > 0d)
+        var span = end - start;
+        if (step > 0d ? span < 0d : span > 0d)
         {
-            for (var value = start; value <= end + tolerance; value += step)
-            {
-                result.Add(value);
-            }
+            return result;
         }
-        else
+
+        // The last number n with start + n x step still at (or, by the old 1e-9 tolerance, a hair beyond) end.
+        var last = Math.Floor((span / step) + 1e-9);
+        if (double.IsNaN(last) || double.IsInfinity(last) || last + 1d > MaxListSize)
         {
-            for (var value = start; value >= end - tolerance; value += step)
-            {
-                result.Add(value);
-            }
+            throw new ArgumentException(
+                "List.Range would make " + FormatCount(last + 1d) + " numbers; the limit is " + MaxListSize.ToString("N0", CultureInfo.InvariantCulture) +
+                ". Use a larger step or a shorter range (the limit protects the memory of Navisworks).");
+        }
+
+        var count = (int)last + 1;
+        result.Capacity = count;
+        for (var n = 0; n < count; n++)
+        {
+            result.Add(start + (n * step));
         }
 
         return result;
     }
 
+    private static string FormatCount(double count) =>
+        double.IsNaN(count) || double.IsInfinity(count) || count > 1e15 ? "far too many" : count.ToString("N0", CultureInfo.InvariantCulture);
+
     /// <summary>
-    /// Sorts a list ascending. Numbers sort numerically (regardless of numeric
-    /// type), strings ordinally; mixed incomparable types raise an error.
-    /// The sort is stable and the input list is not modified.
+    /// Sorts a list, smallest first (or largest first with <paramref name="descending"/>). The order is the one rule the
+    /// library uses everywhere (List.Sort, List.SortByKey, List.MaximumItem, List.MinimumItem and Table.Sort): numbers by value,
+    /// text alphabetically ignoring upper and lower case, text that reads as a number as a number when the other item is a
+    /// number, and empty items (null or empty text) last in either direction. The sort is stable and the input list is not modified.
     /// </summary>
     /// <param name="list">The list to sort.</param>
+    /// <param name="descending">True sorts largest first; empty items stay last.</param>
     /// <returns>A new sorted list.</returns>
     [NodeName("List.Sort")]
+    [NodeAliases("CamelGraph.Nodes.ListNodes.Sort@System.Collections.Generic.IList<object>")]
     [return: NodeName("list")]
-    [NodeDescription("Returns the list sorted ascending (numbers numerically, strings alphabetically).")]
-    [NodeSearchTags("order", "ascending", "arrange")]
-    public static IList<object?> Sort(IList<object?> list)
+    [NodeDescription("Returns the list sorted ascending, or largest first with descending. Numbers sort by value; text alphabetically, ignoring upper and lower case (\"apple\" comes before \"Zebra\", and \"10\" before \"9\" because both are text); text that reads as a number counts as a number against a number; empty items (null or empty text) always go last, in either direction. Equal items keep their order. A list inside the list cannot be put in order: set the input to @L2 to sort each sublist.")]
+    [NodeSearchTags("order", "ascending", "arrange", "descending", "reverse", "biggest first", "top", "sortdescending")]
+    public static IList<object?> Sort(IList<object?> list, bool descending = false) => SortItems(list, descending, "List.Sort");
+
+    /// <summary>Sorts a list by the library's ordering rule; the node name only shows in the error text.</summary>
+    internal static IList<object?> SortItems(IList<object?> list, bool descending, string nodeName)
     {
-        RequireList(list, "List.Sort");
-        return SortDescribingErrors(list, item => item, "List.Sort");
+        RequireList(list, nodeName);
+        var order = OrderOf(list, descending, nodeName);
+        var result = new List<object?>(list.Count);
+        foreach (var index in order)
+        {
+            result.Add(list[index]);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -221,7 +242,7 @@ public static class ListNodes
     /// <returns>A new list with duplicates removed, in original order.</returns>
     [NodeName("List.UniqueItems")]
     [return: NodeName("list")]
-    [NodeDescription("Removes duplicate elements from a list, preserving the original order.")]
+    [NodeDescription("Removes duplicate elements from a list, keeping the first of each and the original order. Numbers compare by value, text with its case, and lists and dictionaries by their content, so repeated pairs from List.Zip are removed too.")]
     [NodeSearchTags("distinct", "deduplicate", "unique")]
     public static IList<object?> UniqueItems(IList<object?> list)
     {
@@ -244,14 +265,14 @@ public static class ListNodes
     /// <returns>The last element.</returns>
     [NodeName("List.LastItem")]
     [return: NodeName("item")]
-    [NodeDescription("Returns the last element of a list.")]
+    [NodeDescription("Returns the last element of a list. An empty list is an error: there is no last element (check List.Count first, or use List.Slice, which gives an empty list).")]
     [NodeSearchTags("tail", "end", "final")]
     public static object? LastItem(IList<object?> list)
     {
         RequireList(list, "List.LastItem");
         if (list.Count == 0)
         {
-            throw new InvalidOperationException("List.LastItem requires a non-empty list.");
+            throw new InvalidOperationException("List.LastItem: the list is empty, so it has no last element.");
         }
 
         return list[list.Count - 1];
@@ -266,7 +287,7 @@ public static class ListNodes
     /// <returns>True when the value occurs in the list.</returns>
     [NodeName("List.Contains")]
     [return: NodeName("contains")]
-    [NodeDescription("Tests whether a list contains a value (numbers compare by value regardless of numeric type).")]
+    [NodeDescription("Tests whether a list contains a value. Numbers compare by value regardless of numeric type, text with its case, and a list or dictionary by its content, so a [level, type] pair can be looked up too.")]
     [NodeSearchTags("membership", "includes", "has", "any")]
     public static bool Contains(IList<object?> list, object? item)
     {
@@ -283,7 +304,7 @@ public static class ListNodes
     /// <returns>The zero-based index, or -1 when not found.</returns>
     [NodeName("List.IndexOf")]
     [return: NodeName("index")]
-    [NodeDescription("Returns the index of the first occurrence of a value in a list (-1 when absent).")]
+    [NodeDescription("Returns the index of the first occurrence of a value in a list (-1 when absent). Numbers compare by value, text with its case, and lists and dictionaries by their content.")]
     [NodeSearchTags("find", "position", "locate", "search")]
     public static int IndexOf(IList<object?> list, object? item)
     {
@@ -295,7 +316,8 @@ public static class ListNodes
     /// <param name="list">The list to reverse.</param>
     /// <returns>A new list in reverse order.</returns>
     [NodeName("List.Reverse")]
-    [return: NodeName("reversed")]
+    [PortAlias("reversed", "list")]
+    [return: NodeName("list")]
     [NodeDescription("Returns the list in reverse order.")]
     [NodeSearchTags("flip", "invert", "backwards")]
     public static IList<object?> Reverse(IList<object?> list)
@@ -371,30 +393,41 @@ public static class ListNodes
     }
 
     /// <summary>
-    /// Removes the element at an index (negative indexes count from the end).
+    /// Removes the elements at one or several indices (negative indexes count from the end).
     /// Returns a new list; the input is not modified.
     /// </summary>
     /// <param name="list">The list to remove from.</param>
-    /// <param name="index">Zero-based index; negative values count from the end.</param>
-    /// <returns>A new list without the element.</returns>
+    /// <param name="indices">Zero-based indices of the elements to remove; negative values count from the end. A single number works too. The same index twice removes the element once.</param>
+    /// <returns>A new list without the elements.</returns>
     [NodeName("List.RemoveItemAtIndex")]
+    [NodeAliases("CamelGraph.Nodes.ListNodes.RemoveItemAtIndex@System.Collections.Generic.IList<object>,int")]
+    [PortAlias("index", "indices")]
     [return: NodeName("list")]
-    [NodeDescription("Removes the element at the given index (negative indexes count from the end).")]
+    [NodeDescription("Removes the elements at the given indices and returns one new list (negative indexes count from the end). Wire a single number to remove one element, or a list of numbers, for example from List.AllIndicesOf, to remove them all in one go. Indices count in the original list; an index outside the list is an error.")]
     [NodeSearchTags("delete", "drop", "without")]
-    public static IList<object?> RemoveItemAtIndex(IList<object?> list, int index)
+    public static IList<object?> RemoveItemAtIndex(IList<object?> list, IList<int> indices)
     {
         RequireList(list, "List.RemoveItemAtIndex");
-        var effective = index < 0 ? list.Count + index : index;
-        if (effective < 0 || effective >= list.Count)
+        if (indices == null)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(index),
-                "Index " + index.ToString(CultureInfo.InvariantCulture) +
-                " is out of range for a list of " + list.Count.ToString(CultureInfo.InvariantCulture) + " element(s).");
+            throw new ArgumentNullException(nameof(indices), "List.RemoveItemAtIndex requires the index (or a list of indices) to remove. Wire a number or a list of numbers into the 'indices' input.");
         }
 
-        var result = new List<object?>(list);
-        result.RemoveAt(effective);
+        var remove = new HashSet<int>();
+        foreach (var index in indices)
+        {
+            remove.Add(NormalizeIndex(index, list.Count, "List.RemoveItemAtIndex"));
+        }
+
+        var result = new List<object?>(list.Count);
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (!remove.Contains(i))
+            {
+                result.Add(list[i]);
+            }
+        }
+
         return result;
     }
 
@@ -409,7 +442,7 @@ public static class ListNodes
     [NodeName("List.GroupByKey")]
     [MultiReturn("groups", "uniqueKeys")]
     [PortKinds("", "")]
-    [NodeDescription("Groups list elements by a parallel key list; returns the groups and their unique keys.")]
+    [NodeDescription("Groups list elements by a parallel key list of the same length; returns the groups (in the order each key first appears) and their unique keys. A key can be a list, such as [level, type], and two keys with the same content make one group; text keys keep their case.")]
     [NodeSearchTags("group", "bucket", "categorize", "partition")]
     public static Dictionary<string, object> GroupByKey(IList<object?> list, IList<object?> keys)
     {
@@ -453,24 +486,24 @@ public static class ListNodes
     }
 
     /// <summary>
-    /// Sorts list elements by a parallel list of keys (same length). The sort
-    /// is stable and ascending (numbers numerically, strings ordinally); the
-    /// input lists are not modified.
+    /// Sorts list elements by a parallel list of keys (same length). The sort is stable; the keys are put in order by the same
+    /// rule as List.Sort (numbers by value, text ignoring case, empty keys last); the input lists are not modified.
     /// </summary>
     /// <param name="list">The elements to sort.</param>
     /// <param name="keys">One sort key per element.</param>
+    /// <param name="descending">True sorts the largest key first; elements with an empty key stay last.</param>
     /// <returns>Dictionary with "sorted" elements and the "sortedKeys".</returns>
     [NodeName("List.SortByKey")]
+    [NodeAliases("CamelGraph.Nodes.ListNodes.SortByKey@System.Collections.Generic.IList<object>,System.Collections.Generic.IList<object>")]
     [MultiReturn("sorted", "sortedKeys")]
     [PortKinds("", "")]
-    [NodeDescription("Sorts list elements by a parallel key list; returns the sorted elements and keys.")]
-    [NodeSearchTags("order", "arrange", "rank", "key")]
-    public static Dictionary<string, object> SortByKey(IList<object?> list, IList<object?> keys)
+    [NodeDescription("Sorts list elements by a parallel key list of the same length, smallest key first or largest first with descending; returns the sorted elements and keys. Keys are put in order as in List.Sort (numbers by value, text ignoring case, empty keys last); elements with equal keys keep their order.")]
+    [NodeSearchTags("order", "arrange", "rank", "key", "descending")]
+    public static Dictionary<string, object> SortByKey(IList<object?> list, IList<object?> keys, bool descending = false)
     {
         RequireParallelKeys(list, keys, "List.SortByKey");
 
-        var order = SortDescribingErrors(
-            Enumerable.Range(0, list.Count), i => keys[i], "List.SortByKey");
+        var order = OrderOf(keys, descending, "List.SortByKey");
 
         return new Dictionary<string, object>
         {
@@ -500,7 +533,7 @@ public static class ListNodes
     /// <returns>The zero-based indices of every occurrence (empty when absent).</returns>
     [NodeName("List.AllIndicesOf")]
     [return: NodeName("indices")]
-    [NodeDescription("Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.")]
+    [NodeDescription("Every zero-based index at which the item occurs in the list — List.IndexOf finds only the first. Values compare as in List.IndexOf. Feed the indices to List.GetItemAtIndex on a parallel list to pull the matching entries.")]
     [NodeSearchTags("indices", "index", "all", "occurrences", "find", "positions", "where")]
     public static List<int> AllIndicesOf(IList<object?> list, object? item)
     {
@@ -523,7 +556,7 @@ public static class ListNodes
     /// <returns>The zero-based index of the last occurrence, or -1 when absent.</returns>
     [NodeName("List.LastIndexOf")]
     [return: NodeName("index")]
-    [NodeDescription("The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf.")]
+    [NodeDescription("The zero-based index of the LAST occurrence of the item (-1 when absent) — the back-to-front twin of List.IndexOf, with the same rules for comparing values.")]
     [NodeSearchTags("index", "last", "find", "position", "reverse")]
     public static int LastIndexOf(IList<object?> list, object? item)
     {
@@ -563,7 +596,7 @@ public static class ListNodes
     /// <returns>A new list with the element replaced.</returns>
     [NodeName("List.ReplaceItemAtIndex")]
     [return: NodeName("list")]
-    [NodeDescription("Returns a new list with the element at the index replaced (negative indexes count from the end).")]
+    [NodeDescription("Returns a new list with the element at the index replaced (negative indexes count from the end). A list of indices makes one new list per index (the first index with the first item, and so on); the list itself is always taken whole.")]
     [NodeSearchTags("replace", "item", "index", "set", "edit")]
     public static IList<object?> ReplaceItemAtIndex(IList<object?> list, int index, object? item)
     {
@@ -581,7 +614,7 @@ public static class ListNodes
     /// <returns>A new list with the element inserted.</returns>
     [NodeName("List.Insert")]
     [return: NodeName("list")]
-    [NodeDescription("Returns a new list with the value inserted at the index (0 = front; the list's length = append; negative counts from the end).")]
+    [NodeDescription("Returns a new list with the value inserted at the index (0 = front; the list's length = append; negative counts from the end). A list of indices makes one new list per index; the list itself is always taken whole.")]
     [NodeSearchTags("insert", "add", "index", "position")]
     public static IList<object?> Insert(IList<object?> list, object? item, int index)
     {
@@ -621,14 +654,14 @@ public static class ListNodes
     /// <returns>The list without its first element.</returns>
     [NodeName("List.RestOfItems")]
     [return: NodeName("list")]
-    [NodeDescription("Everything but the first element — pairs with List.FirstItem for head/tail processing.")]
+    [NodeDescription("Everything but the first element — pairs with List.FirstItem for head/tail processing. An empty list is an error: there is no first element to leave out.")]
     [NodeSearchTags("rest", "tail", "skip", "first")]
     public static IList<object?> RestOfItems(IList<object?> list)
     {
         RequireList(list, "List.RestOfItems");
         if (list.Count == 0)
         {
-            throw new InvalidOperationException("List.RestOfItems requires a non-empty list.");
+            throw new InvalidOperationException("List.RestOfItems: the list is empty, so there is no first element to leave out.");
         }
 
         var output = new List<object?>(list);
@@ -647,7 +680,7 @@ public static class ListNodes
     public static IList<object?> DropItems(IList<object?> list, int amount)
     {
         RequireList(list, "List.DropItems");
-        var count = Math.Min(Math.Abs(amount), list.Count);
+        var count = (int)Math.Min(Math.Abs((long)amount), list.Count);
         var output = new List<object?>(list);
         if (amount >= 0)
         {
@@ -672,7 +705,7 @@ public static class ListNodes
     public static IList<object?> TakeItems(IList<object?> list, int amount)
     {
         RequireList(list, "List.TakeItems");
-        var count = Math.Min(Math.Abs(amount), list.Count);
+        var count = (int)Math.Min(Math.Abs((long)amount), list.Count);
         var from = amount >= 0 ? 0 : list.Count - count;
         var output = new List<object?>(count);
         for (int i = 0; i < count; i++)
@@ -686,14 +719,15 @@ public static class ListNodes
     /// <summary>A sub-range of a list.</summary>
     /// <param name="list">The list to read from.</param>
     /// <param name="start">First index of the range (inclusive; negative counts from the end).</param>
-    /// <param name="end">End of the range (exclusive; negative counts from the end).</param>
+    /// <param name="end">End of the range (exclusive; negative counts from the end); leave it unset to go to the end of the list.</param>
     /// <param name="step">Take every step-th element of the range (≥ 1).</param>
     /// <returns>The sub-list.</returns>
     [NodeName("List.Slice")]
+    [NodeAliases("CamelGraph.Nodes.ListNodes.Slice@System.Collections.Generic.IList<object>,int,int,int")]
     [return: NodeName("list")]
-    [NodeDescription("A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element. Negative start/end count from the end, Python-style.")]
-    [NodeSearchTags("slice", "range", "sub", "subset", "portion", "between")]
-    public static IList<object?> Slice(IList<object?> list, int start, int end, int step = 1)
+    [NodeDescription("A sub-range of the list: from start (inclusive) to end (exclusive), taking every step-th element; leave end empty to go to the end of the list. Negative start/end count from the end, Python-style. Start 0 with a step of 3 keeps the 1st, 4th, 7th ... item, which is how to thin a list out.")]
+    [NodeSearchTags("slice", "range", "sub", "subset", "portion", "between", "thin", "to the end")]
+    public static IList<object?> Slice(IList<object?> list, int start, int? end = null, [NodeRange(1, 1000000, SoftMin = 1, SoftMax = 100)] int step = 1)
     {
         RequireList(list, "List.Slice");
         if (step < 1)
@@ -702,11 +736,12 @@ public static class ListNodes
         }
 
         var from = start < 0 ? Math.Max(0, list.Count + start) : Math.Min(start, list.Count);
-        var to = end < 0 ? Math.Max(0, list.Count + end) : Math.Min(end, list.Count);
+        var stop = end ?? list.Count;
+        var to = stop < 0 ? Math.Max(0, list.Count + stop) : Math.Min(stop, list.Count);
         var output = new List<object?>();
-        for (int i = from; i < to; i += step)
+        for (long i = from; i < to; i += step)
         {
-            output.Add(list[i]);
+            output.Add(list[(int)i]);
         }
 
         return output;
@@ -718,23 +753,37 @@ public static class ListNodes
     /// <returns>The sublists (the last one may be shorter).</returns>
     [NodeName("List.Chop")]
     [return: NodeName("lists")]
-    [NodeDescription("Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior).")]
+    [NodeDescription("Chops a list into consecutive sublists: one length chops evenly ([1..7] by 3 → [1,2,3],[4,5,6],[7]); a list of lengths is applied in sequence and repeats until the input runs out (Dynamo behavior). Every length must be a whole number of at least 1.")]
     [NodeSearchTags("chop", "split", "partition", "chunk", "sublists", "group")]
     public static IList<object?> Chop(IList<object?> list, IList<object?> lengths)
     {
         RequireList(list, "List.Chop");
         if (lengths == null || lengths.Count == 0)
         {
-            throw new ArgumentException("List.Chop requires at least one sublist length.", nameof(lengths));
+            throw new ArgumentException("List.Chop requires at least one sublist length. Wire a number (or a list of numbers) into the 'lengths' input.", nameof(lengths));
         }
 
         var sizes = new List<int>(lengths.Count);
-        foreach (var length in lengths)
+        for (var i = 0; i < lengths.Count; i++)
         {
-            var size = Convert.ToInt32(length, CultureInfo.InvariantCulture);
+            var length = lengths[i];
+            if (length is IList && !(length is string))
+            {
+                throw new ArgumentException(
+                    "List.Chop: length " + (i + 1).ToString(CultureInfo.InvariantCulture) + " is a list, but every length must be one whole number. Flatten the 'lengths' list first (List.Flatten).", nameof(lengths));
+            }
+
+            if (length == null || !TypeCoercion.TryCoerce(length, typeof(int), out var coerced) || !(coerced is int size))
+            {
+                throw new ArgumentException(
+                    "List.Chop: length " + (i + 1).ToString(CultureInfo.InvariantCulture) + " (" + (length == null ? "empty" : "'" + TypeCoercion.FormatValue(length) + "'") +
+                    ") is not a whole number. Every length must be a number of at least 1.", nameof(lengths));
+            }
+
             if (size < 1)
             {
-                throw new ArgumentException("Sublist lengths must be at least 1 (got " + size.ToString(CultureInfo.InvariantCulture) + ").", nameof(lengths));
+                throw new ArgumentException(
+                    "List.Chop: length " + (i + 1).ToString(CultureInfo.InvariantCulture) + " is " + size.ToString(CultureInfo.InvariantCulture) + "; every length must be at least 1.", nameof(lengths));
             }
 
             sizes.Add(size);
@@ -797,13 +846,13 @@ public static class ListNodes
 
     /// <summary>Repeats a whole list a number of times.</summary>
     /// <param name="list">The list to repeat.</param>
-    /// <param name="amount">How many copies to chain (≥ 0).</param>
+    /// <param name="amount">How many copies to chain (≥ 0); the result may hold at most one million items.</param>
     /// <returns>The list repeated end-to-end.</returns>
     [NodeName("List.Cycle")]
     [return: NodeName("list")]
-    [NodeDescription("Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]).")]
+    [NodeDescription("Repeats the whole list a number of times, end-to-end ([a,b] × 3 → [a,b,a,b,a,b]). The result may hold at most 1,000,000 items; more is an error.")]
     [NodeSearchTags("cycle", "repeat", "tile", "loop", "duplicate")]
-    public static IList<object?> Cycle(IList<object?> list, int amount)
+    public static IList<object?> Cycle(IList<object?> list, [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 100)] int amount)
     {
         RequireList(list, "List.Cycle");
         if (amount < 0)
@@ -811,7 +860,13 @@ public static class ListNodes
             throw new ArgumentOutOfRangeException(nameof(amount), "List.Cycle requires a non-negative amount.");
         }
 
+        RequireSize((long)list.Count * amount, "List.Cycle");
         var output = new List<object?>(list.Count * amount);
+        if (list.Count == 0)
+        {
+            return output;
+        }
+
         for (int i = 0; i < amount; i++)
         {
             output.AddRange(list);
@@ -822,19 +877,20 @@ public static class ListNodes
 
     /// <summary>A list made of one value repeated.</summary>
     /// <param name="item">The value to repeat.</param>
-    /// <param name="amount">How many copies (≥ 0).</param>
+    /// <param name="amount">How many copies (≥ 0, at most one million).</param>
     /// <returns>The repeated-value list.</returns>
     [NodeName("List.OfRepeatedItem")]
     [return: NodeName("list")]
-    [NodeDescription("A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing.")]
+    [NodeDescription("A list of one value repeated N times — constant columns for tables, or a fixed pairing partner under Longest lacing. At most 1,000,000 copies; more is an error.")]
     [NodeSearchTags("repeat", "repeated", "fill", "constant", "duplicate")]
-    public static IList<object?> OfRepeatedItem(object? item, int amount)
+    public static IList<object?> OfRepeatedItem(object? item, [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 100)] int amount)
     {
         if (amount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(amount), "List.OfRepeatedItem requires a non-negative amount.");
         }
 
+        RequireSize(amount, "List.OfRepeatedItem");
         var output = new List<object?>(amount);
         for (int i = 0; i < amount; i++)
         {
@@ -844,26 +900,37 @@ public static class ListNodes
         return output;
     }
 
+    /// <summary>Refuses a list that would be larger than <see cref="MaxListSize"/> items, with a sentence that says what to do.</summary>
+    private static void RequireSize(long size, string nodeName)
+    {
+        if (size > MaxListSize)
+        {
+            throw new ArgumentException(
+                nodeName + " would make " + size.ToString("N0", CultureInfo.InvariantCulture) + " items; the limit is " + MaxListSize.ToString("N0", CultureInfo.InvariantCulture) +
+                ". Use a smaller amount (the limit protects the memory of Navisworks).");
+        }
+    }
+
     /// <summary>The largest element of a list.</summary>
-    /// <param name="list">The list to scan (must not be empty; nulls are ignored).</param>
+    /// <param name="list">The list to scan (nulls and empty text are ignored); with none left the result is empty and the node warns.</param>
     /// <returns>The maximum element.</returns>
     [NodeName("List.MaximumItem")]
     [return: NodeName("item")]
-    [NodeDescription("The largest element of a list (numbers, texts or dates; nulls are ignored).")]
+    [NodeDescription("The largest element of a list (numbers, texts or dates). Items are compared as in List.Sort: numbers by value, text ignoring case (\"10\" and \"9\" are text, so \"9\" is the larger; List.Statistics reads such text as numbers); nulls and empty text are ignored. A list with nothing to compare gives an empty result and a warning, not an error.")]
     [NodeSearchTags("maximum", "max", "largest", "biggest", "highest")]
-    public static object? MaximumItem(IList<object?> list)
+    public static object? MaximumItem([MultiInput] IList<object?> list)
     {
         return Extreme(list, "List.MaximumItem", larger: true);
     }
 
     /// <summary>The smallest element of a list.</summary>
-    /// <param name="list">The list to scan (must not be empty; nulls are ignored).</param>
+    /// <param name="list">The list to scan (nulls and empty text are ignored); with none left the result is empty and the node warns.</param>
     /// <returns>The minimum element.</returns>
     [NodeName("List.MinimumItem")]
     [return: NodeName("item")]
-    [NodeDescription("The smallest element of a list (numbers, texts or dates; nulls are ignored).")]
+    [NodeDescription("The smallest element of a list (numbers, texts or dates). Items are compared as in List.Sort: numbers by value, text ignoring case (\"10\" and \"9\" are text, so \"10\" is the smaller; List.Statistics reads such text as numbers); nulls and empty text are ignored. A list with nothing to compare gives an empty result and a warning, not an error.")]
     [NodeSearchTags("minimum", "min", "smallest", "lowest")]
-    public static object? MinimumItem(IList<object?> list)
+    public static object? MinimumItem([MultiInput] IList<object?> list)
     {
         return Extreme(list, "List.MinimumItem", larger: false);
     }
@@ -874,7 +941,7 @@ public static class ListNodes
     /// <returns>The union, first-seen order, duplicates removed.</returns>
     [NodeName("List.SetUnion")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements present in EITHER list (value equality, first-seen order) — combine two item sets without duplicates.")]
+    [NodeDescription("The distinct elements present in EITHER list (first-seen order) — combine two item sets without duplicates. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("union", "set", "combine", "merge", "distinct", "or")]
     public static IList<object?> SetUnion(IList<object?> list1, IList<object?> list2)
     {
@@ -899,7 +966,7 @@ public static class ListNodes
     /// <returns>The intersection, ordered as in the first list.</returns>
     [NodeName("List.SetIntersection")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements present in BOTH lists (value equality, ordered as in the first) — what two searches/sets have in common.")]
+    [NodeDescription("The distinct elements present in BOTH lists (ordered as in the first) — what two searches/sets have in common. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("intersection", "set", "common", "both", "and", "overlap")]
     public static IList<object?> SetIntersection(IList<object?> list1, IList<object?> list2)
     {
@@ -925,7 +992,7 @@ public static class ListNodes
     /// <returns>The difference, ordered as in the first list.</returns>
     [NodeName("List.SetDifference")]
     [return: NodeName("list")]
-    [NodeDescription("The distinct elements of the FIRST list that are NOT in the second (value equality) — subtract an ignore-list from a result set.")]
+    [NodeDescription("The distinct elements of the FIRST list that are NOT in the second — subtract an ignore-list from a result set. Values compare as in List.UniqueItems, lists and dictionaries by content.")]
     [NodeSearchTags("difference", "set", "subtract", "except", "remove", "without")]
     public static IList<object?> SetDifference(IList<object?> list1, IList<object?> list2)
     {
@@ -948,13 +1015,16 @@ public static class ListNodes
     /// <summary>Every n-th element of a list.</summary>
     /// <param name="list">The list to sample.</param>
     /// <param name="n">Take every n-th element (≥ 1).</param>
-    /// <param name="offset">Elements to skip before the first take.</param>
+    /// <param name="offset">Elements to skip before counting starts.</param>
     /// <returns>The sampled elements.</returns>
     [NodeName("List.TakeEveryNthItem")]
     [return: NodeName("list")]
-    [NodeDescription("Every n-th element, optionally after skipping offset elements — thin out a dense list (n=2 halves it).")]
+    [NodeDescription("Takes the n-th, 2n-th, 3n-th ... element, optionally after skipping offset elements (n = 3 takes the 3rd, 6th and 9th, which are the indices 2, 5 and 8). To keep the 1st, 4th, 7th ... instead, use List.Slice with a step.")]
     [NodeSearchTags("every", "nth", "sample", "skip", "thin", "step")]
-    public static IList<object?> TakeEveryNthItem(IList<object?> list, int n, int offset = 0)
+    public static IList<object?> TakeEveryNthItem(
+        IList<object?> list,
+        [NodeRange(1, 1000000, SoftMin = 1, SoftMax = 100)] int n,
+        [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 100)] int offset = 0)
     {
         RequireList(list, "List.TakeEveryNthItem");
         if (n < 1)
@@ -963,9 +1033,9 @@ public static class ListNodes
         }
 
         var output = new List<object?>();
-        for (int i = Math.Max(0, offset) + n - 1; i < list.Count; i += n)
+        for (long i = (long)Math.Max(0, offset) + n - 1; i < list.Count; i += n)
         {
-            output.Add(list[i]);
+            output.Add(list[(int)i]);
         }
 
         return output;
@@ -998,72 +1068,75 @@ public static class ListNodes
     }
 
     /// <summary>Whether every element of a boolean list is true.</summary>
-    /// <param name="list">The booleans to test (nulls and non-booleans count as not-true).</param>
+    /// <param name="list">The booleans to test: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.</param>
     /// <returns>True when every element is true (and the list is not empty).</returns>
     [NodeName("List.AllTrue")]
     [return: NodeName("allTrue")]
-    [NodeDescription("True when EVERY element of the list is true — collapse a mask into one verdict (an empty list gives false; nulls count as not-true).")]
+    [NodeDescription("True when EVERY element of the list is true — collapse a mask into one verdict. Only the booleans true and false (or the text \"true\" and \"false\") count: an empty list gives false, null items count as not true, and any other value (a number, other text) counts as not true and adds a warning. A list inside the list is an error: set the input to @L2 for one verdict per sublist, or flatten it first. A wire that delivers nothing at all is ignored.")]
     [NodeSearchTags("all", "true", "every", "and", "mask", "verdict")]
     public static bool AllTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.AllTrue");
-        if (list.Count == 0)
+        var tally = new MaskTally(list.Count);
+        var all = list.Count > 0;
+        for (var i = 0; i < list.Count; i++)
         {
-            return false;
-        }
-
-        foreach (var element in list)
-        {
-            if (!IsTrue(element))
+            if (!ReadVerdictMask(list[i], i, "List.AllTrue", tally))
             {
-                return false;
+                all = false;
             }
         }
 
-        return true;
+        tally.Report();
+        return all;
     }
 
     /// <summary>Whether any element of a boolean list is true.</summary>
-    /// <param name="list">The booleans to test (nulls and non-booleans count as not-true).</param>
+    /// <param name="list">The booleans to test: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.</param>
     /// <returns>True when at least one element is true.</returns>
     [NodeName("List.AnyTrue")]
     [return: NodeName("anyTrue")]
-    [NodeDescription("True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node (nulls count as not-true).")]
+    [NodeDescription("True when AT LEAST ONE element of the list is true — \"did anything match?\" in one node. Only the booleans true and false (or the text \"true\" and \"false\") count: an empty list gives false, null items count as not true, and any other value (a number, other text) counts as not true and adds a warning. A list inside the list is an error: set the input to @L2 for one answer per sublist, or flatten it first. A wire that delivers nothing at all is ignored.")]
     [NodeSearchTags("any", "true", "some", "or", "mask", "exists")]
     public static bool AnyTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.AnyTrue");
-        foreach (var element in list)
+        var tally = new MaskTally(list.Count);
+        var any = false;
+        for (var i = 0; i < list.Count; i++)
         {
-            if (IsTrue(element))
+            if (ReadVerdictMask(list[i], i, "List.AnyTrue", tally))
             {
-                return true;
+                any = true;
             }
         }
 
-        return false;
+        tally.Report();
+        return any;
     }
 
     /// <summary>How many elements of a boolean list are true (and how many are not).</summary>
-    /// <param name="list">The booleans to count (nulls and non-booleans count as not-true).</param>
+    /// <param name="list">The booleans to count: only true counts as true; nulls and anything that is not true or false count as not-true, and a nested list is an error.</param>
     /// <returns>The true and not-true counts.</returns>
     [NodeName("List.CountTrue")]
     [MultiReturn("trueCount", "falseCount")]
     [PortKinds("integer", "integer")]
-    [NodeDescription("Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first (nulls count as not-true).")]
+    [NodeDescription("Counts the true and not-true elements of a mask — \"37 of 340 matched\" for reports without filtering first. Only the booleans true and false (or the text \"true\" and \"false\") count as true or false: null items and any other value (a number, other text) go into the not-true count, and a value that is not a boolean adds a warning. A list inside the list is an error: set the input to @L2 for one count per sublist, or flatten it first. A wire that delivers nothing at all is ignored.")]
     [NodeSearchTags("count", "true", "false", "mask", "tally", "how many")]
     public static Dictionary<string, object> CountTrue([MultiInput] IList<object?> list)
     {
         RequireList(list, "List.CountTrue");
+        var tally = new MaskTally(list.Count);
         int trueCount = 0;
-        foreach (var element in list)
+        for (var i = 0; i < list.Count; i++)
         {
-            if (IsTrue(element))
+            if (ReadVerdictMask(list[i], i, "List.CountTrue", tally))
             {
                 trueCount++;
             }
         }
 
+        tally.Report();
         return new Dictionary<string, object>
         {
             ["trueCount"] = trueCount,
@@ -1152,47 +1225,139 @@ public static class ListNodes
         }
     }
 
-    /// <summary>The largest/smallest non-null element by node value ordering.</summary>
+    /// <summary>The largest/smallest element that is not empty, by the library's ordering rule (see List.Sort); null with a warning when there is none.</summary>
     private static object? Extreme(IList<object?> list, string nodeName, bool larger)
     {
         RequireList(list, nodeName);
         object? best = null;
-        bool found = false;
-        foreach (var element in list)
+        CellSortKey? bestKey = null;
+        for (var i = 0; i < list.Count; i++)
         {
-            if (element == null)
+            var element = list[i];
+            if (CellSortKey.IsEmpty(element))
             {
                 continue;
             }
 
-            if (!found)
+            RequireOrderable(element, i, nodeName);
+            var key = CellSortKey.Of(element);
+            if (bestKey == null)
             {
                 best = element;
-                found = true;
+                bestKey = key;
                 continue;
             }
 
-            var comparison = ValueComparison.Compare(element, best);
+            var comparison = CellSortKey.Compare(key, bestKey, descending: false);
             if (larger ? comparison > 0 : comparison < 0)
             {
                 best = element;
+                bestKey = key;
             }
         }
 
-        if (!found)
+        if (bestKey == null)
         {
-            throw new InvalidOperationException(nodeName + " requires at least one non-null element.");
+            NodeWarnings.Add(
+                "The 'list' input has nothing to compare (it is empty, or holds only nulls and empty text), so there is no " +
+                (larger ? "largest" : "smallest") + " item. The result is empty.");
         }
 
         return best;
     }
 
-    /// <summary>True only for a value that reads as boolean true (nulls and non-booleans are not-true).</summary>
-    private static bool IsTrue(object? element)
+    /// <summary>
+    /// Reads one entry of a mask that splits or cuts a list (List.FilterByBoolMask, List.TakeWhile, List.DropWhile): true or
+    /// false, the text "true" or "false", or a number (0 is false); null counts as false. A list or dictionary, or a value
+    /// that is not true or false, is an error that names the item.
+    /// </summary>
+    internal static bool ReadSplitMask(object? entry, int index, string nodeName)
     {
-        return element != null &&
-               TypeCoercion.TryCoerce(element, typeof(bool), out var coerced) &&
-               coerced is bool flag && flag;
+        if (entry == null)
+        {
+            return false;
+        }
+
+        if (entry is bool flag)
+        {
+            return flag;
+        }
+
+        RequireNotNested(entry, index, nodeName);
+        if (TypeCoercion.TryCoerce(entry, typeof(bool), out var coerced) && coerced is bool converted)
+        {
+            return converted;
+        }
+
+        throw new ArgumentException(
+            nodeName + ": mask item " + index.ToString(CultureInfo.InvariantCulture) + " ('" + TypeCoercion.FormatValue(entry) + "') is not true or false.");
+    }
+
+    // The verdict nodes (AllTrue, AnyTrue, CountTrue) are stricter than the nodes that split a list: a number is not a boolean.
+    private static bool ReadVerdictMask(object? entry, int index, string nodeName, MaskTally tally)
+    {
+        if (entry == null)
+        {
+            return false;
+        }
+
+        if (entry is bool flag)
+        {
+            return flag;
+        }
+
+        RequireNotNested(entry, index, nodeName);
+        if (entry is string text && bool.TryParse(text.Trim(), out var parsed))
+        {
+            return parsed;
+        }
+
+        tally.NotBoolean(index, entry);
+        return false;
+    }
+
+    private static void RequireNotNested(object entry, int index, string nodeName)
+    {
+        if (entry is IList || entry is IDictionary)
+        {
+            throw new ArgumentException(
+                nodeName + ": item " + index.ToString(CultureInfo.InvariantCulture) + " is " + (entry is IDictionary ? "a dictionary" : "a list") +
+                ", not true or false. To work on each sublist set this input to @L2 (right-click, List Levels), or flatten the list first (List.Flatten).");
+        }
+    }
+
+    /// <summary>Counts the entries of a mask that were not true or false, to report them in one warning.</summary>
+    private sealed class MaskTally
+    {
+        private readonly int _count;
+        private int _notBoolean;
+        private int _firstIndex;
+        private object? _firstValue;
+
+        public MaskTally(int count)
+        {
+            _count = count;
+        }
+
+        public void NotBoolean(int index, object value)
+        {
+            if (_notBoolean++ == 0)
+            {
+                _firstIndex = index;
+                _firstValue = value;
+            }
+        }
+
+        public void Report()
+        {
+            if (_notBoolean > 0)
+            {
+                NodeWarnings.Add(
+                    _notBoolean.ToString(CultureInfo.InvariantCulture) + " of " + _count.ToString(CultureInfo.InvariantCulture) +
+                    " items are not true or false (the first is item " + _firstIndex.ToString(CultureInfo.InvariantCulture) + ", '" +
+                    TypeCoercion.FormatValue(_firstValue) + "') and count as not true.");
+            }
+        }
     }
 
     private static List<object?> CleanInto(IEnumerable source, bool removeEmptyLists)
@@ -1264,28 +1429,34 @@ public static class ListNodes
     }
 
     /// <summary>
-    /// Sorts with <see cref="NodeValueComparer"/>, unwrapping LINQ's generic
-    /// "Failed to compare two elements in the array." wrapper so the node error
-    /// carries <see cref="ValueComparison.Compare"/>'s descriptive message.
+    /// The positions of the items in sorted order, by the library's one ordering rule (<see cref="CellSortKey"/>): a stable sort,
+    /// numbers by value, text ignoring case, empty items last in either direction. A list or a dictionary has no order.
     /// </summary>
-    private static List<T> SortDescribingErrors<T>(IEnumerable<T> source, Func<T, object?> keySelector, string nodeName)
+    internal static List<int> OrderOf(IList<object?> items, bool descending, string nodeName)
     {
-        try
+        var keys = new CellSortKey[items.Count];
+        for (var i = 0; i < items.Count; i++)
         {
-            return source.OrderBy(keySelector, NodeValueComparer.Instance).ToList();
+            RequireOrderable(items[i], i, nodeName);
+            keys[i] = CellSortKey.Of(items[i]);
         }
-        catch (InvalidOperationException ex) when (ex.InnerException != null)
-        {
-            throw new InvalidOperationException(nodeName + ": " + ex.InnerException.Message, ex.InnerException);
-        }
+
+        var comparer = CellSortKey.Comparer(descending);
+        return Enumerable.Range(0, items.Count).OrderBy(i => keys[i], comparer).ToList();
     }
 
-    /// <summary>Ordering comparer delegating to <see cref="ValueComparison.Compare"/>.</summary>
-    private sealed class NodeValueComparer : IComparer<object?>
+    /// <summary>Refuses a list or dictionary where a value that can be put in order is needed, with a sentence that says what to do.</summary>
+    internal static void RequireOrderable(object? item, int index, string nodeName)
     {
-        public static readonly NodeValueComparer Instance = new NodeValueComparer();
-
-        public int Compare(object? x, object? y) => ValueComparison.Compare(x, y);
+        var kind = item is IDictionary ? "a dictionary" : item is IList && !(item is string) ? "a list" : null;
+        if (kind != null)
+        {
+            throw new ArgumentException(
+                nodeName + ": item " + index.ToString(CultureInfo.InvariantCulture) + " is " + kind + ", and " + kind + " cannot be put in order. " +
+                (kind == "a list"
+                    ? "To work on each sublist set this input to @L2 (right-click, List Levels), or flatten the list first (List.Flatten)."
+                    : "Take one of its values first (Dictionary.ValueAtKey)."));
+        }
     }
 
     /// <summary>Equality comparer delegating to <see cref="ValueComparison.AreEqual"/>.</summary>

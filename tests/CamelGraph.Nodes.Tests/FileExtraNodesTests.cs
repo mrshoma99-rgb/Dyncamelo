@@ -319,7 +319,10 @@ public class FileExtraNodesTests : IDisposable
         Assert.True(FileExtraNodes.DirectoryExists(_directory));
         Assert.False(FileExtraNodes.DirectoryExists(file));
         Assert.False(FileExtraNodes.DirectoryExists(PathFor("nope")));
-        Assert.Contains("Directory.Exists", Assert.Throws<ArgumentException>(() => FileExtraNodes.DirectoryExists(" ")).Message);
+
+        // Wave D (SYS-32): a blank path answers false instead of failing.
+        Assert.False(FileExtraNodes.DirectoryExists(" "));
+        Assert.False(FileExtraNodes.DirectoryExists(null!));
     }
 
     [Fact]
@@ -442,7 +445,9 @@ public class FileExtraNodesTests : IDisposable
     {
         Write("README");
         Write("a.txt");
-        Assert.Equal(new[] { PathFor("README"), PathFor("a.txt") }, FileExtraNodes.FindFiles(_directory, pattern));
+
+        // Names sort ignoring case (SYS-16), so README follows a.txt as in Explorer.
+        Assert.Equal(new[] { PathFor("a.txt"), PathFor("README") }, FileExtraNodes.FindFiles(_directory, pattern));
     }
 
     [Fact]
@@ -636,11 +641,19 @@ public class FileExtraNodesTests : IDisposable
     }
 
     [Fact]
-    public void AppendText_NullText_AppendsJustTheLineBreak()
+    public void AppendText_NullText_IsAnError_AndLeavesTheFileAlone()
     {
+        // Wave D (SYS-18): null used to append a bare line break; a missing value must not look like an intended blank line.
         var path = PathFor("notes.txt");
-        FileExtraNodes.AppendText(path, null!);
-        Assert.Equal(Environment.NewLine, File.ReadAllText(path));
+        File.WriteAllText(path, "kept");
+        var ex = Assert.Throws<ArgumentNullException>(() => FileExtraNodes.AppendText(path, null!));
+        Assert.Contains("Text.AppendToFile", ex.Message);
+        Assert.Contains("'text'", ex.Message);
+        Assert.Equal("kept", File.ReadAllText(path));
+
+        // Empty text is still a deliberate blank line.
+        FileExtraNodes.AppendText(path, string.Empty);
+        Assert.Equal("kept" + Environment.NewLine, File.ReadAllText(path));
     }
 
     [Fact]
@@ -1162,6 +1175,9 @@ public class FileExtraNodesTests : IDisposable
         ("Directory.Create", GraphFunction.Modify),
         ("Directory.GetDirectories", GraphFunction.Info),
         ("Directory.FindFiles", GraphFunction.Info),
+        ("Directory.Find", GraphFunction.Info),
+        ("Directory.Copy", GraphFunction.Modify),
+        ("Directory.Move", GraphFunction.Modify),
         ("Directory.Delete", GraphFunction.Modify),
         ("Text.AppendToFile", GraphFunction.Modify),
         ("CSV.AppendToFile", GraphFunction.Modify),

@@ -151,7 +151,7 @@ public static class SettingsCatalog
         new SettingDescriptor("previewSelection", "Editing", "Highlight selected node in Navisworks",
             "Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current.", false),
         new SettingDescriptor("confirmUntrustedRuns", "Editing", "Ask before running graphs from files",
-            "A graph opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask.", true),
+            "A graph opened from a file is run only after you have been told if it starts programs, uses the network, writes, deletes, moves or overwrites files, or changes the model. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask.", true),
         new SettingDescriptor("checkForUpdates", "Privacy", "Check for a newer version once a day",
             "When the editor opens, asks GitHub (api.github.com) for the newest release number, at most once a day, and offers the download page if there is one. The request carries your IP address and the name CamelGraph-UpdateCheck, nothing about you or your models. Off means CamelGraph makes no network request of its own. The full policy is under Help > Privacy Policy.", true),
         new SettingDescriptor("doubleClick", "Editing", "Double-click empty canvas", "What double-clicking the empty canvas does.", "string",

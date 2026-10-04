@@ -12,7 +12,8 @@ namespace CamelGraph.UI.ViewModels;
 /// like RLM/LRM/ALM, zero-width joiners) or exotic whitespace (NBSP); one such
 /// character glued to a token silently defeats an ordinal Contains. Everything
 /// is therefore lower-cased invariantly, invisible control/format characters
-/// are dropped, and every whitespace variant becomes a plain space.
+/// are dropped, every whitespace variant becomes a plain space, and British
+/// spellings are folded to American ones (colour/color, grey/gray, centre/center).
 /// </summary>
 internal static class LibrarySearchText
 {
@@ -43,7 +44,8 @@ internal static class LibrarySearchText
             builder.Append(char.ToLowerInvariant(ch));
         }
 
-        return builder.ToString();
+        // British and American spellings are one word: "colour" finds Color.*, "grey" finds "gray" (see SearchSpelling).
+        return CamelGraph.Core.Editing.SearchSpelling.Fold(builder.ToString());
     }
 
     /// <summary>Normalizes a query and splits it into non-empty tokens.</summary>

@@ -21,6 +21,7 @@ public static class WorkflowActionNodes
     /// <summary>Builds an action that isolates the current item (shows it, hides everything else).</summary>
     /// <returns>An isolate action for Workflow.ForEach.</returns>
     [NodeName("Action.Isolate")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: shows the current item and hides everything else (Appearance.Isolate). Place before Save Viewpoint to bake the isolation into each view.")]
     [NodeSearchTags("action", "isolate", "workflow", "foreach", "only", "focus")]
     [return: NodeName("action")]
@@ -29,6 +30,7 @@ public static class WorkflowActionNodes
     /// <summary>Builds an action that shows every item (undoes an isolate).</summary>
     /// <returns>A show-all action for Workflow.ForEach.</returns>
     [NodeName("Action.ShowAll")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: un-hides every item in the model (Appearance.ShowAll) — a reset step, e.g. before re-isolating.")]
     [NodeSearchTags("action", "showall", "workflow", "foreach", "reveal", "reset", "unhide")]
     [return: NodeName("action")]
@@ -38,23 +40,25 @@ public static class WorkflowActionNodes
     /// <param name="paddingFactor">Space to leave around the item (1 = tight fit).</param>
     /// <returns>A zoom action for Workflow.ForEach.</returns>
     [NodeName("Action.ZoomTo")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: frames the current item in the view (Camera.ZoomToItems). Place before Save Viewpoint so each view is centred on its item.")]
     [NodeSearchTags("action", "zoom", "workflow", "foreach", "frame", "fit", "focus")]
     [return: NodeName("action")]
     public static IWorkflowAction ZoomTo([NodeRange(1, 10, SoftMin = 1, SoftMax = 3, Step = 0.1)] double paddingFactor = 1.5) => new ZoomToAction(paddingFactor);
 
     /// <summary>Builds an action that saves the current view as a named viewpoint.</summary>
-    /// <param name="name">Viewpoint name; supports {name}, {index1}, {count} templating (default {name} = the item's name).</param>
+    /// <param name="name">Viewpoint name. Tokens: {name} or {item} = the item's name, {index} = its position counting from 0, {index1} or {n} = counting from 1, {count} = how many items there are. An empty name uses the item's name. Default {name}.</param>
     /// <param name="folder">Viewpoint folder to file them under (null/empty stores at the top level).</param>
     /// <param name="bakeOverrides">True to capture the current hidden AND temporary color/transparency overrides into the viewpoint, so recalling it restores that exact isolation and highlighting.</param>
     /// <returns>A save-viewpoint action that collects the created viewpoint.</returns>
     [NodeName("Action.SaveViewpoint")]
-    [NodeDescription("Per item: saves the current view as a saved viewpoint named from the item. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
+    [NodeDescription("Per item: saves the current view as a saved viewpoint named from the item. The name is a template: {name} (or {item}) is the item's name, {index} its position from 0, {index1} (or {n}) its position from 1 and {count} the number of items, so 'View {index1} of {count}: {name}' numbers the views; an empty name uses the item's name, and a viewpoint with the same name in the same folder is replaced. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.")]
     [NodeSearchTags("action", "viewpoint", "view", "save", "workflow", "foreach", "capture", "snapshot")]
     [return: NodeName("action")]
     public static IWorkflowAction SaveViewpoint(
         string name = "{name}",
-        string? folder = "CamelGraph Views",
+        [PortKinds("text")] string? folder = "CamelGraph Views",
         bool bakeOverrides = true)
         => new SaveViewpointAction(name, folder, bakeOverrides);
 
@@ -62,6 +66,7 @@ public static class WorkflowActionNodes
     /// <param name="color">A Color, a "#RRGGBB" string, or a list of three numbers.</param>
     /// <returns>A recolor action for Workflow.ForEach.</returns>
     [NodeName("Action.OverrideColor")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: overrides the current item's color (Appearance.OverrideColor).")]
     [NodeSearchTags("action", "color", "override", "workflow", "foreach", "paint", "tint")]
     [return: NodeName("action")]
@@ -70,6 +75,7 @@ public static class WorkflowActionNodes
     /// <summary>Builds an action that removes color/transparency overrides from the current item.</summary>
     /// <returns>A reset-appearance action for Workflow.ForEach.</returns>
     [NodeName("Action.ResetAppearance")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: removes color and transparency overrides from the current item (Appearance.Reset).")]
     [NodeSearchTags("action", "reset", "appearance", "workflow", "foreach", "restore", "original")]
     [return: NodeName("action")]
@@ -80,6 +86,7 @@ public static class WorkflowActionNodes
     /// <param name="transparency">Transparency for the highlighted item (0 = solid, so it stands out of the ghosted rest).</param>
     /// <returns>A highlight action for Workflow.ForEach.</returns>
     [NodeName("Action.Highlight")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: applies a TEMPORARY color to the current item so it stands out — captured per viewpoint by Action.SaveViewpoint, so each view keeps its own highlight. Pair with Action.Ghost to fade the rest.")]
     [NodeSearchTags("action", "highlight", "color", "temporary", "workflow", "foreach", "spotlight")]
     [return: NodeName("action")]
@@ -90,6 +97,7 @@ public static class WorkflowActionNodes
     /// <param name="transparency">0 = opaque, 1 = invisible (0.85 fades to a faint context).</param>
     /// <returns>A ghost action for Workflow.ForEach.</returns>
     [NodeName("Action.Ghost")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: applies a TEMPORARY transparency to the given items (wire the whole found set) so the highlighted item reads against a faded context. Captured per viewpoint. Put before Action.Highlight; reset each item with Action.ResetTemporaryAppearance.")]
     [NodeSearchTags("action", "ghost", "fade", "transparency", "temporary", "workflow", "foreach", "context")]
     [return: NodeName("action")]
@@ -98,6 +106,7 @@ public static class WorkflowActionNodes
     /// <summary>Builds an action that clears every temporary appearance override (a per-item clean slate).</summary>
     /// <returns>A reset-temporary-appearance action for Workflow.ForEach.</returns>
     [NodeName("Action.ResetTemporaryAppearance")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [NodeDescription("Per item: clears all TEMPORARY color/transparency overrides (Appearance.ResetTemporary) — put first in the sequence so the previous item's highlight/ghost doesn't linger into this view.")]
     [NodeSearchTags("action", "reset", "temporary", "appearance", "workflow", "foreach", "clear", "clean")]
     [return: NodeName("action")]
@@ -143,6 +152,9 @@ public static class WorkflowActionNodes
     {
         public string Describe() => "Isolate";
 
+        /// <inheritdoc />
+        public override string ToString() => Describe();
+
         public void Run(WorkflowContext context) => AppearanceNodes.Isolate(CurrentModelItems(context));
     }
 
@@ -150,6 +162,9 @@ public static class WorkflowActionNodes
     private sealed class ShowAllAction : IWorkflowAction
     {
         public string Describe() => "Show all";
+
+        /// <inheritdoc />
+        public override string ToString() => Describe();
 
         public void Run(WorkflowContext context) => AppearanceNodes.ShowAll();
     }
@@ -163,6 +178,9 @@ public static class WorkflowActionNodes
 
         public string Describe() => "Zoom to item";
 
+        /// <inheritdoc />
+        public override string ToString() => Describe();
+
         public void Run(WorkflowContext context) => CameraNodes.ZoomToItems(CurrentModelItems(context), _paddingFactor);
     }
 
@@ -175,6 +193,9 @@ public static class WorkflowActionNodes
 
         public string Describe() => "Override color";
 
+        /// <inheritdoc />
+        public override string ToString() => Describe();
+
         public void Run(WorkflowContext context) => AppearanceNodes.OverrideColor(CurrentModelItems(context), _color);
     }
 
@@ -182,6 +203,9 @@ public static class WorkflowActionNodes
     private sealed class ResetAppearanceAction : IWorkflowAction
     {
         public string Describe() => "Reset appearance";
+
+        /// <inheritdoc />
+        public override string ToString() => Describe();
 
         public void Run(WorkflowContext context) => AppearanceNodes.Reset(CurrentModelItems(context));
     }
@@ -200,20 +224,16 @@ public static class WorkflowActionNodes
 
         public string Describe() => "Highlight item";
 
+        /// <inheritdoc />
+        public override string ToString() => Describe();
+
         public void Run(WorkflowContext context)
         {
             var items = CurrentModelItems(context);
             AppearanceNodes.OverrideColorTemporary(items, _color);
 
-            // Make the highlighted item solid so it reads against a ghosted context.
-            if (_transparency > 0.0)
-            {
-                AppearanceNodes.OverrideTransparencyTemporary(items, _transparency);
-            }
-            else
-            {
-                AppearanceNodes.OverrideTransparencyTemporary(items, 0.0);
-            }
+            // The highlighted item gets its own transparency (solid by default) so it reads against a ghosted context.
+            AppearanceNodes.OverrideTransparencyTemporary(items, _transparency > 0.0 ? _transparency : 0.0);
         }
     }
 
@@ -232,6 +252,9 @@ public static class WorkflowActionNodes
 
         public string Describe() => "Ghost context";
 
+        /// <inheritdoc />
+        public override string ToString() => Describe();
+
         public void Run(WorkflowContext context)
         {
             if (_items.Count > 0)
@@ -245,6 +268,9 @@ public static class WorkflowActionNodes
     private sealed class ResetTemporaryAppearanceAction : IWorkflowAction
     {
         public string Describe() => "Reset temporary appearance";
+
+        /// <inheritdoc />
+        public override string ToString() => Describe();
 
         public void Run(WorkflowContext context) => AppearanceNodes.ResetTemporary();
     }
@@ -268,6 +294,9 @@ public static class WorkflowActionNodes
         }
 
         public string Describe() => "Save viewpoint '" + _nameTemplate + "'";
+
+        /// <inheritdoc />
+        public override string ToString() => Describe();
 
         public void Run(WorkflowContext context)
         {

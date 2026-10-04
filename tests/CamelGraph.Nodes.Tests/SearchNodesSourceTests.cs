@@ -43,17 +43,22 @@ public class SearchNodesSourceTests
         // The equals, compare and scoped searches try a value as several data types; that must be alternatives of ONE search.
         Assert.DoesNotMatch(@"foreach \(var \w+ in BuildEqualityVariants", source);
         Assert.DoesNotMatch(@"foreach \(var variant in variants\)", source);
-        Assert.Contains("RunAlternativesSearch(", source);
-        foreach (var method in new[] { "ByPropertyValue", "ByPropertyCompare", "InItems" })
+        Assert.Contains("AddAlternatives(search, categoryName, propertyName, equalVariants", source);
+
+        // Since the merge every search node (the retired ones too) goes through the one Find, which builds ONE Search and runs
+        // FindAll once; nothing else in the file builds a Search or runs one.
+        Assert.Equal(1, Regex.Matches(source, @"\.FindAll\(").Count);
+        Assert.Equal(2, Regex.Matches(source, @"new Search\(\)").Count); // BuildSearch and CreateVariantEqualitySearch
+        foreach (var method in new[] { "ByProperty", "ByPropertyValue", "ByPropertyContains", "ByPropertyWildcard", "ByPropertyCompare", "HasProperty", "HasCategory", "InItems" })
         {
             var body = Regex.Match(source, @"public static [^\n]* " + method + @"\(.*?\n    \}\n", RegexOptions.Singleline).Value;
             Assert.True(body.Length > 0, "method not found: " + method);
-            Assert.True(body.Contains("RunEqualitySearch(") || body.Contains("RunAlternativesSearch("), method + " does not use the single combined search");
+            Assert.Contains("Find(", body);
             Assert.DoesNotContain("new Search()", body);
         }
 
-        // The live search sets use the same alternatives.
-        Assert.Contains("AddAlternatives(search, categoryName, propertyName, BuildEqualityVariants(value)", source);
+        // The live search sets use the same builder (and the same alternatives).
+        Assert.Contains("BuildSearch(categoryName, propertyName, plan, null)", source);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Nodes.Internal;
 
@@ -186,7 +187,13 @@ public static class MathExtraNodes
     [NodeSearchTags("exponential", "e", "power")]
     public static double Exp(double power)
     {
-        return Math.Exp(power);
+        var result = Math.Exp(power);
+        if (!double.IsNaN(power) && !double.IsInfinity(power))
+        {
+            NodeWarnings.WarnIfNotFinite(result, "The result");
+        }
+
+        return result;
     }
 
     /// <summary>Sign of a number.</summary>
@@ -194,11 +201,17 @@ public static class MathExtraNodes
     /// <returns>-1, 0 or 1.</returns>
     [NodeName("Math.Sign")]
     [return: NodeName("sign")]
-    [NodeDescription("-1 for a negative number, 0 for zero, 1 for a positive number.")]
+    [NodeDescription("-1 for a negative number, 0 for zero, 1 for a positive number. A value that is not a number (NaN) gives 0 and a warning.")]
     [NodeSearchTags("positive", "negative", "direction")]
     public static int Sign(double number)
     {
-        return double.IsNaN(number) ? 0 : Math.Sign(number);
+        if (double.IsNaN(number))
+        {
+            NodeWarnings.Add("The input is not a number (NaN), so the sign is given as 0.");
+            return 0;
+        }
+
+        return Math.Sign(number);
     }
 
     /// <summary>Flips the sign of a number.</summary>
@@ -253,11 +266,17 @@ public static class MathExtraNodes
     /// <returns>a + (b - a) * t.</returns>
     [NodeName("Math.Lerp")]
     [return: NodeName("value")]
-    [NodeDescription("Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited).")]
+    [NodeDescription("Linear interpolation: a at t = 0, b at t = 1, in between for values between (not limited, so t = 2 goes past b; Math.Clamp keeps t in 0 to 1).")]
     [NodeSearchTags("interpolate", "blend", "mix", "between")]
-    public static double Lerp(double a, double b, double t)
+    public static double Lerp(double a, double b, [NodeRange(-1000000000, 1000000000, SoftMin = 0, SoftMax = 1, Step = 0.05)] double t)
     {
-        return a + (b - a) * t;
+        var result = a + (b - a) * t;
+        if (!double.IsNaN(a) && !double.IsInfinity(a) && !double.IsNaN(b) && !double.IsInfinity(b) && !double.IsNaN(t) && !double.IsInfinity(t))
+        {
+            NodeWarnings.WarnIfNotFinite(result, "The result");
+        }
+
+        return result;
     }
 
     /// <summary>What percentage one number is of another.</summary>
@@ -266,11 +285,49 @@ public static class MathExtraNodes
     /// <returns>part / total * 100, or 0 when the total is 0.</returns>
     [NodeName("Math.Percent")]
     [return: NodeName("percent")]
-    [NodeDescription("What percentage the part is of the total (37 of 340 gives 10.88); 0 when the total is 0, so an empty model reads 0 %.")]
+    [NodeDescription(
+        "What percentage the part is of the total (37 of 340 gives 10.88); 0 when the total is 0, so an empty model reads 0 % " +
+        "(Divide, in contrast, gives Infinity for a zero divisor).")]
     [NodeSearchTags("percentage", "ratio", "share", "kpi", "fraction", "%")]
     public static double Percent(double part, double total)
     {
-        return total == 0d ? 0d : part / total * 100d;
+        var result = total == 0d ? 0d : part / total * 100d;
+        if (!double.IsNaN(part) && !double.IsInfinity(part) && !double.IsNaN(total) && !double.IsInfinity(total))
+        {
+            NodeWarnings.WarnIfNotFinite(result, "The result");
+        }
+
+        return result;
+    }
+
+    /// <summary>Tests whether two numbers are equal within a tolerance.</summary>
+    /// <param name="a">The first number.</param>
+    /// <param name="b">The second number.</param>
+    /// <param name="tolerance">The largest difference still counted as equal, in the same unit as the numbers (0 or more; 0 means exactly equal).</param>
+    /// <returns>True when the two numbers differ by no more than the tolerance.</returns>
+    [NodeName("Math.IsClose")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [return: NodeName("result")]
+    [NodeDescription(
+        "True when two numbers differ by no more than the tolerance (the same unit as the numbers) — the safe way to ask \"are " +
+        "these equal?\" for lengths and levels read from a model, where 0.1 + 0.2 is not exactly 0.3. Equals compares exactly. " +
+        "A number that is not a finite number is close only to an identical one. A list on a or b gives a list of answers.")]
+    [NodeSearchTags("equal", "tolerance", "approximately", "almost", "near", "epsilon", "within", "float", "compare", "isclose")]
+    public static bool IsClose(double a, double b, [NodeRange(0, 1000000000, SoftMin = 0, SoftMax = 1, Step = 0.001)] double tolerance = 0.001)
+    {
+        if (double.IsNaN(tolerance) || tolerance < 0d)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(tolerance),
+                "Math.IsClose needs a tolerance of 0 or more; got " + tolerance.ToString(CultureInfo.InvariantCulture) + ".");
+        }
+
+        if (a == b)
+        {
+            return true;
+        }
+
+        return Math.Abs(a - b) <= tolerance;
     }
 
     /// <summary>Rounds a number to the nearest multiple of another.</summary>
@@ -340,7 +397,21 @@ public static class MathExtraNodes
     public static double Formula(string expression, double a = 0d, double b = 0d, double c = 0d, double d = 0d, double e = 0d, double f = 0d)
     {
         var compiled = FormulaParser.Compile(expression);
-        return compiled(new[] { a, b, c, d, e, f });
+        var result = compiled(new[] { a, b, c, d, e, f });
+        if ((double.IsNaN(result) || double.IsInfinity(result)) &&
+            IsFinite(a) && IsFinite(b) && IsFinite(c) && IsFinite(d) && IsFinite(e) && IsFinite(f))
+        {
+            NodeWarnings.Add(
+                "The formula gave " + (double.IsNaN(result) ? "NaN" : "Infinity") +
+                " (a division by zero, or a root or logarithm of a negative number?). Check the formula and its inputs.");
+        }
+
+        return result;
+    }
+
+    private static bool IsFinite(double value)
+    {
+        return !double.IsNaN(value) && !double.IsInfinity(value);
     }
 
     private static double ToRadians(double angle, string unit, string nodeName)

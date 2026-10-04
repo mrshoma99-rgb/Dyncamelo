@@ -327,13 +327,11 @@ public static class PortEditors
         return type != null && type.Name == "ModelItem";
     }
 
-    /// <summary>True when a port named like a folder expects a directory rather than a file.</summary>
-    public static bool IsFolder(PortModel port)
-    {
-        var n = port.Name.ToLowerInvariant();
-        return n.EndsWith("folder", StringComparison.Ordinal) || n.EndsWith("directory", StringComparison.Ordinal) ||
-               n.EndsWith("dir", StringComparison.Ordinal);
-    }
+    /// <summary>
+    /// True when a path port expects a directory rather than a file: it is marked <c>[NodePath(NodePathMode.Folder)]</c>, else
+    /// named like a folder (see <see cref="PathPicker.Resolve"/>).
+    /// </summary>
+    public static bool IsFolder(PortModel port) => PathPicker.Resolve(port).IsFolder;
 
     /// <summary>True when the choices should render as segmented buttons.</summary>
     public static bool UseSegmentedChoices(IReadOnlyList<string>? choices)

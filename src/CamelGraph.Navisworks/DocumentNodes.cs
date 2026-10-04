@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 
 namespace CamelGraph.Navisworks;
@@ -13,6 +14,7 @@ public static class DocumentNodes
     /// <summary>Gets the active Navisworks document.</summary>
     /// <returns>The active document.</returns>
     [NodeName("Document.Current")]
+    [LiveState]
     [NodeDescription("The active Navisworks document.")]
     [NodeSearchTags("document", "active", "current", "navisworks")]
     [return: NodeName("document")]
@@ -25,7 +27,8 @@ public static class DocumentNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>File name, title, units and model count.</returns>
     [NodeName("Document.Info")]
-    [NodeDescription("File name, title, display units and model count of a document.")]
+    [LiveState]
+    [NodeDescription("File name, title, display units and model count of a document, read again on every run. The units output is the same text as Units.Current.")]
     [NodeSearchTags("document", "info", "filename", "title", "units")]
     [MultiReturn("fileName", "title", "units", "modelCount")]
     [PortKinds("file", "text", "text", "integer")]
@@ -45,7 +48,8 @@ public static class DocumentNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>All loaded models.</returns>
     [NodeName("Document.Models")]
-    [NodeDescription("The models (appended source files) loaded in a document.")]
+    [LiveState]
+    [NodeDescription("The models (appended source files) loaded in a document, read again on every run.")]
     [NodeSearchTags("document", "models", "files", "appended")]
     [return: NodeName("models")]
     public static List<Model> Models(Document? document = null)
@@ -61,15 +65,19 @@ public static class DocumentNodes
     }
 
     /// <summary>Saves the document to a .nwf or .nwd file.</summary>
-    /// <param name="filePath">Destination path ending in .nwf or .nwd; the directory is created when missing.</param>
+    /// <param name="filePath">Destination path ending in .nwf or .nwd (a relative path means next to the graph); the directory is created when missing, an existing file is replaced.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written file path.</returns>
     [NodeName("Document.Save")]
-    [NodeDescription("Saves the document as .nwf (references) or .nwd (published snapshot) to the given path.")]
-    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription("Saves the document as .nwf (references to the source files) or .nwd (a published snapshot with the appearance overrides baked in) to the given path; the extension decides. This is the node for publishing an NWD (it replaces Export.NWD). An existing file is replaced. A relative path means next to the graph, and the folder is created when missing. Inside a node group that is used twice, a fixed path is written twice: the second save replaces the first.")]
+    [NodeSearchTags("document", "save", "nwf", "nwd", "publish", "write", "export", "export nwd", "snapshot", "batch")]
     [return: NodeName("filePath")]
-    public static string Save(string filePath, Document? document = null)
+    public static string Save(
+        [NodePath(NodePathMode.Save, Filter = "Navisworks published (*.nwd)|*.nwd|Navisworks file set (*.nwf)|*.nwf")] string filePath,
+        Document? document = null)
     {
+        filePath = PathResolver.Resolve(filePath);
         if (string.IsNullOrEmpty(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));

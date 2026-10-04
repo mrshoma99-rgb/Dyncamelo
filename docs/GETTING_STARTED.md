@@ -109,12 +109,12 @@ The Watch List fills with every matching item. If it is empty, re-check the cate
 
 ### Step 3 — color the results
 
-1. Add **Color Picker** (under *Color*) and pick red.
+1. Add **Color Picker** (under *Input*) and pick red.
 2. Add **Appearance.OverrideColor** (under *Navisworks → Appearance*).
 3. Wire `Search.ByProperty → items` into `items`, and the Color Picker into `color` (or just click the colour swatch on the node's own `color` input).
 4. Press **Run** — every concrete item in the viewport turns red.
 
-This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (whether a single Undo reverts a whole run has not been checked yet; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
+This is a real Navisworks color override, exactly like *Item Tools → Override Color*, and Navisworks's own **Undo** can take it back (a run is not one undo step: there is no run-level undo scope, so Navisworks records one step per modifying call, where it records one at all; see the [QA checklist](QA_CHECKLIST.md)). To clear overrides from the graph instead, use **Appearance.Reset** (or **Appearance.ResetAll** for a clean slate before re-coloring).
 
 ### Step 4 — save the selection set
 
@@ -176,7 +176,7 @@ Nodes never crash a run — they report on themselves, per node:
 Quick fixes for common cases:
 
 - **Search returns nothing** — category/property names must match the Properties window exactly (localized names included). Try `mode` set to `contains` on `Search.ByProperty` before `equals`, and verify with a Watch List.
-- **`Properties.Value` warns "property not found"** — not all items carry all properties; filter first (e.g. `ModelItem.HasGeometry → List.FilterByBoolMask`) or accept the nulls.
+- **`Properties.Value` warns "property not found"** — not all items carry all properties; filter first (e.g. the `hasGeometry` output of `ModelItem.Info` into `List.FilterByBoolMask`) or accept the nulls.
 - **Everything is Idle after loading** — that is normal; press Run once.
 - **A run takes long** — press the cancel button in the run bar; already-computed nodes keep their results and the next run resumes where it stopped. Right-click any node and **Freeze** it to exclude an expensive branch (it and its downstream ghost out) while you work on the rest.
 

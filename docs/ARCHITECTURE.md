@@ -104,7 +104,7 @@ Other engine rules:
 Replication is what makes a scalar node work on lists without a loop node.
 
 - **Rank** of a value: scalar = 0, `List<object>` = 1, list of lists = 2, ...
-- **Declared rank** of an input port is inferred from the zero-touch parameter type: `double`/`string`/`ModelItem` → 0; `IList<T>`/`IEnumerable<T>`/`List<T>` → 1; `IList<IList<T>>` → 2. `Dictionary<string, object>` → 0 (one value).
+- **Declared rank** of an input port is inferred from the zero-touch parameter type: `double`/`string`/`ModelItem` → 0; `IList<T>`/`IEnumerable<T>`/`List<T>` → 1; `IList<IList<T>>` → 2. `Dictionary<string, object>` → 0 (one value). A plain `object` parameter means "anything" and never replicates; marked **`[ScalarInput]`** it is rank 0 like a `double`, so a list maps the node.
 - **Excess rank** = actual rank − declared rank, floored at 0. **Replication happens only over excess rank** — this is exactly why `List.Count(List<object>)` consumes the whole list unmapped while `Math.Round(double)` maps over the same list.
 - **Auto-map (one replicated input):** invoked once per element along the excess dimensions; results collected preserving nesting (recursive — a rank-2 list into a rank-0 port yields a rank-2 result). A `null` element yields a `null` result element plus a node **Warning**; the other elements still compute.
 - **Multiple replicated inputs** — the node's `LacingStrategy` pairs them; rank-0 (non-excess) arguments are **broadcast** unchanged to every invocation:
@@ -115,12 +115,13 @@ Replication is what makes a scalar node work on lists without a loop node.
 | **Longest** | zip; shorter list repeats its **last element** (an empty list cannot extend → empty output + Warning) | `[11, 22, 23]` |
 | **Cross-Product** | nested loops; **leftmost replicated port is the outermost loop**; depth grows by (replicated inputs − 1) | `[[11,21,31],[12,22,32]]` |
 
-- **Coercion** applies per invocation: numeric widening (`int → double`), `IConvertible` conversions, `object` accepts anything. Coercion failure → node Warning/Error per case, never a crash.
+- **Coercion** applies per invocation: numeric widening (`int → double`), `IConvertible` conversions, `object` accepts anything. Coercion failure → node Warning/Error per case, never a crash. A single value wired or pinned on a list-typed input is wrapped into a one-item list — unless a node pack registered a converter from that value's type to the list type: it is then used on the value itself, so one text that stands for a picked selection of N elements delivers all N.
 
 - **Null propagation (Dynamo semantics, since v0.28)** — during replication, per-element trouble never sinks the node:
   - a **null element** of a laced list maps to a **null result** at that position — the node method is never invoked for it, the other elements still compute;
   - a **per-element exception** (or per-element coercion failure) likewise becomes a null result;
-  - each kind is reported as **one aggregated Warning** ("N of M laced calls …" + the first error text), so a thousand bad elements cannot flood the badge. `List.Clean` strips the nulls downstream; `IsNull` builds a filter mask.
+  - each kind is reported as **one aggregated Warning** ("N of M laced calls …" + the first error text), so a thousand bad elements cannot flood the badge. `List.Clean` strips the nulls downstream; `IsNull` with `@L1` on its input answers `true` for each null, which is the filter mask.
+  - A parameter marked **`[AcceptsNull]`** opts out of the first rule: the null element is passed to the node (`IsNull`, `String.IsBlank` and the like answer it themselves). Default behaviour is unchanged.
   - A **single, non-replicated call** keeps today's fail-fast contract: a thrown exception errors the node (red), and nulls on non-laced inputs (unwired optionals) flow through unchanged.
 
 ## 5. Zero-touch node loading
@@ -222,7 +223,7 @@ The full statement lives in the [plan, §7](IMPLEMENTATION_PLAN.md#7-threading-m
 2. The engine is **synchronous on the calling thread**: no worker threads, no parallel node execution.
 3. The editor triggers runs from its WPF **dispatcher thread, which is the Navisworks main thread** for a docked pane — so Navisworks nodes execute on the correct thread *by construction*, with no marshalling layer.
 4. Responsiveness comes from **cancellation between nodes** and the Automatic-mode **coalescing debounce**, not from background threads.
-5. Navisworks **write nodes run inside a transaction/undo scope** owned by the node host in `CamelGraph.Navisworks` (one undo entry per run); all mutations go through the documented `Document*` edit APIs so the host UI stays in sync.
+5. Navisworks **write nodes** change the model through the documented `Document*` edit APIs, so the host UI stays in sync. There is **no run-level undo scope**: the node host opens no transaction around a run (only the clash nodes open one, around their own edit), so Navisworks records an undo step per modifying call, where it records one at all, and a node mapped over a list makes one call per element. One run is therefore not one undo step. A host-owned scope around the whole run is a deferred idea ([plan, §7 rule 6](IMPLEMENTATION_PLAN.md#7-threading-model)); until then no document or message may promise it.
 6. Debug builds **assert the expected thread** at the Navisworks node-host boundary.
 
 ## 8. Extension points
@@ -239,5 +240,6 @@ Designed-in seams, in increasing order of effort:
 ## 9. Error-handling philosophy
 
 - A node that **throws** → `Error` state with the exception message; run continues; downstream of a failed node does not execute with garbage (missing upstream values behave like unconnected required inputs).
-- A **recoverable issue** (property not found, parse failure, divide by zero, empty list in Longest lacing) → `Warning` state, `null` (or documented sentinel like `NaN`) result, run continues. During replication, warnings aggregate ("312 of 5,000 items missing property") instead of spamming.
+- A node that **runs out of memory** (a list of billions of items) is an `Error` on that node like any other failure ("Ran out of memory…"); the engine gives the memory back and the rest of the graph runs. A node that can be asked for an absurd size should still check it and say so in its own words.
+- A **recoverable issue** (property not found, parse failure, divide by zero, empty list in Longest lacing) → `Warning` state, `null` (or documented sentinel like `NaN`) result, run continues. A zero-touch node raises it with `NodeWarnings.Add("…")`; the engine collects the messages per call. During replication, warnings aggregate ("3 of 40 calls: first message") instead of spamming.
 - The graph run **never crashes the host**. Anything that escapes these rules is a CamelGraph bug by definition and a release blocker.

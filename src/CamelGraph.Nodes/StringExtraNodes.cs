@@ -32,15 +32,19 @@ public static class StringExtraNodes
     /// <summary>
     /// Fills a .NET composite format with the wired values: "{0}" is the first value, "{1}" the second, and so on.
     /// A format specifier after a colon formats numbers and dates ("{0:0.00}", "{1:yyyy-MM-dd}"), an alignment after a
-    /// comma pads ("{0,8}"), and "{{" / "}}" are literal braces. The invariant culture is always used. Values that are
-    /// neither text nor numbers/dates are shown the way String.FromObject shows them (null becomes "null").
+    /// comma pads ("{0,8}"), and "{{" / "}}" are literal braces. The invariant culture is always used. Lists and other
+    /// values that are neither text nor numbers/dates are shown the way String.FromObject shows them; a missing (null)
+    /// value becomes empty text, as in String.Concat. The node makes ONE text per call: everything wired to 'values'
+    /// (and the items of a list wired there) fills {0}, {1}, ... of that one text.
     /// </summary>
     /// <param name="format">The composite format text, e.g. "Wall {0} is {1:0.00} m high".</param>
-    /// <param name="values">The values for {0}, {1}, ... in the order they are wired.</param>
+    /// <param name="values">The values for {0}, {1}, ... in the order they are wired. For one text per row, wire a list of rows (a list of lists, for example from Table.Rows) and set this input's List Levels to @L2.</param>
     /// <returns>The formatted text.</returns>
     [NodeName("String.Format")]
     [return: NodeName("text")]
-    [NodeDescription("Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces).")]
+    [NodeDescription("Fills a .NET composite format such as \"{0} is {1:0.00} m\" with the wired values (invariant culture, \"{{\" and \"}}\" are literal braces). " +
+        "It makes one text: all the wired values, and the items of a list wired to 'values', fill {0}, {1}, ... of that one text, and a missing value becomes empty text. " +
+        "For one text per row, wire the rows (a list of lists, for example Table.Rows) to 'values' and set its List Levels to @L2, or use String.Template with Table.ToDictionaries.")]
     [NodeSearchTags("sprintf", "interpolate", "placeholder", "compose", "message", "text")]
     public static string Format(string format, [MultiInput] IList<object?> values)
     {
@@ -60,7 +64,7 @@ public static class StringExtraNodes
         for (int i = 0; i < arguments.Length; i++)
         {
             var value = values[i];
-            arguments[i] = value is string || value is IFormattable ? value! : TypeCoercion.FormatValue(value);
+            arguments[i] = value == null ? string.Empty : value is string || value is IFormattable ? value : TypeCoercion.FormatValue(value);
         }
 
         try
@@ -185,11 +189,12 @@ public static class StringExtraNodes
     /// <param name="prefix">Text placed before the number (and its sign), e.g. "EUR ".</param>
     /// <param name="suffix">Text placed after the number, e.g. " m2".</param>
     /// <returns>The formatted text.</returns>
-    [NodeName("Number.Format")]
+    [NodeName("String.FromNumber")]
+    [NodeAliases("CamelGraph.Nodes.StringExtraNodes.NumberFormat@double,int,bool,string,string")]
     [return: NodeName("text")]
-    [NodeDescription("Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture).")]
-    [NodeSearchTags("round", "decimals", "currency", "unit", "thousands", "tostring", "display", "format")]
-    public static string NumberFormat(
+    [NodeDescription("Formats a number as text with fixed decimals, an optional thousands separator and a prefix/suffix (invariant culture). Formerly called Number.Format; String.ToNumber is the way back.")]
+    [NodeSearchTags("number.format", "number format", "format number", "number to text", "round", "decimals", "currency", "unit", "thousands", "tostring", "display", "format")]
+    public static string FromNumber(
         double number,
         [NodeRange(0, 15)] int decimals = 2,
         bool thousandsSeparator = false,
@@ -200,7 +205,7 @@ public static class StringExtraNodes
         {
             throw new ArgumentOutOfRangeException(
                 nameof(decimals),
-                "Number.Format: decimals must be between 0 and 15 (got " + decimals.ToString(CultureInfo.InvariantCulture) + ").");
+                "String.FromNumber: decimals must be between 0 and 15 (got " + decimals.ToString(CultureInfo.InvariantCulture) + ").");
         }
 
         var text = number.ToString((thousandsSeparator ? "N" : "F") + decimals.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
@@ -218,12 +223,12 @@ public static class StringExtraNodes
     /// <summary>Tests whether a regular expression matches anywhere in a text.</summary>
     /// <param name="text">The text to test.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "^[A-Z]{2}-\d+$".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>True when the pattern matches somewhere in the text.</returns>
     [NodeName("String.RegexIsMatch")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("isMatch")]
-    [NodeDescription("Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text).")]
+    [NodeDescription("Tests whether a .NET regular expression matches anywhere in a text (use ^ and $ to match the whole text). Case-sensitive unless ignoreCase is switched on (String.Contains and String.IndexOf ignore case by default).")]
     [NodeSearchTags("regex", "regexp", "pattern", "match", "test", "validate", "wildcard")]
     public static bool RegexIsMatch(string text, string pattern, bool ignoreCase = false)
     {
@@ -239,12 +244,12 @@ public static class StringExtraNodes
     /// </summary>
     /// <param name="text">The text to search.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "(\d+)-(\w+)".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>Dictionary with "found", "match" and "groups".</returns>
     [NodeName("String.RegexMatch")]
     [MultiReturn("found", "match", "groups")]
     [PortKinds("boolean", "text", "text*")]
-    [NodeDescription("Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n.")]
+    [NodeDescription("Finds the first match of a regular expression: whether it was found, the matched text and the capture groups 1..n. Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "capture", "group", "extract", "parse", "find")]
     public static Dictionary<string, object> RegexMatch(string text, string pattern, bool ignoreCase = false)
     {
@@ -272,11 +277,11 @@ public static class StringExtraNodes
     /// <summary>Finds every non-overlapping match of a regular expression.</summary>
     /// <param name="text">The text to search.</param>
     /// <param name="pattern">The .NET regular expression, e.g. "\d+".</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>The text of every match, in order (empty when nothing matches).</returns>
     [NodeName("String.RegexMatches")]
     [return: NodeName("matches")]
-    [NodeDescription("Returns the text of every match of a regular expression as a list (empty when nothing matches).")]
+    [NodeDescription("Returns the text of every match of a regular expression as a list (empty when nothing matches). Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "findall", "extract", "all", "numbers")]
     public static IList<string> RegexMatches(string text, string pattern, bool ignoreCase = false)
     {
@@ -301,11 +306,11 @@ public static class StringExtraNodes
     /// <param name="text">The text to change.</param>
     /// <param name="pattern">The .NET regular expression to replace.</param>
     /// <param name="replacement">The replacement text; $1, $2, ... insert capture groups.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True to ignore upper/lower case (off by default: regular expressions are case-sensitive).</param>
     /// <returns>The text with every match replaced.</returns>
     [NodeName("String.RegexReplace")]
     [return: NodeName("text")]
-    [NodeDescription("Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups.")]
+    [NodeDescription("Replaces every match of a regular expression; $1, $2, ... in the replacement insert the capture groups. Case-sensitive unless ignoreCase is switched on.")]
     [NodeSearchTags("regex", "regexp", "pattern", "substitute", "rename", "clean", "sub")]
     public static string RegexReplace(string text, string pattern, string replacement, bool ignoreCase = false)
     {
@@ -323,7 +328,7 @@ public static class StringExtraNodes
     /// <returns>The parts between the matches.</returns>
     [NodeName("String.RegexSplit")]
     [return: NodeName("list")]
-    [NodeDescription("Splits a text into a list of parts wherever a regular expression matches.")]
+    [NodeDescription("Splits a text into a list of parts wherever a regular expression matches. Case-sensitive; start the pattern with (?i) to ignore case.")]
     [NodeSearchTags("regex", "regexp", "pattern", "tokenize", "divide", "delimiter", "separator")]
     public static IList<string> RegexSplit(string text, string pattern)
     {
@@ -363,20 +368,20 @@ public static class StringExtraNodes
     }
 
     /// <summary>
-    /// Finds the first occurrence of a text, starting at an index. Case-sensitive (ordinal) unless ignoreCase is on.
-    /// An empty search text is found at the start index.
+    /// Finds the first occurrence of a text, starting at an index. Ignores upper/lower case (ordinal comparison) unless
+    /// ignoreCase is switched off. An empty search text is found at the start index.
     /// </summary>
     /// <param name="text">The text to search in.</param>
     /// <param name="search">The text to look for.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True (default) to ignore upper/lower case.</param>
     /// <param name="startIndex">Zero-based index to start searching at (0 to the text's length).</param>
     /// <returns>The zero-based index of the first occurrence, or -1 when it is absent.</returns>
     [NodeName("String.IndexOf")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("index")]
-    [NodeDescription("Returns the zero-based index of the first occurrence of a text (-1 when absent).")]
+    [NodeDescription("Returns the zero-based index of the first occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.")]
     [NodeSearchTags("find", "position", "locate", "search", "first")]
-    public static int IndexOf(string text, string search, bool ignoreCase = false, int startIndex = 0)
+    public static int IndexOf(string text, string search, bool ignoreCase = true, int startIndex = 0)
     {
         RequireText("String.IndexOf", text);
         RequireSearch("String.IndexOf", search);
@@ -397,19 +402,19 @@ public static class StringExtraNodes
     }
 
     /// <summary>
-    /// Finds the last occurrence of a text. Case-sensitive (ordinal) unless ignoreCase is on. An empty search text
-    /// is found at the end of the text.
+    /// Finds the last occurrence of a text. Ignores upper/lower case (ordinal comparison) unless ignoreCase is switched
+    /// off. An empty search text is found at the end of the text.
     /// </summary>
     /// <param name="text">The text to search in.</param>
     /// <param name="search">The text to look for.</param>
-    /// <param name="ignoreCase">True to ignore upper/lower case.</param>
+    /// <param name="ignoreCase">True (default) to ignore upper/lower case.</param>
     /// <returns>The zero-based index of the last occurrence, or -1 when it is absent.</returns>
     [NodeName("String.LastIndexOf")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("index")]
-    [NodeDescription("Returns the zero-based index of the last occurrence of a text (-1 when absent).")]
+    [NodeDescription("Returns the zero-based index of the last occurrence of a text (-1 when absent). Ignores case unless ignoreCase is switched off.")]
     [NodeSearchTags("find", "position", "locate", "search", "last", "extension")]
-    public static int LastIndexOf(string text, string search, bool ignoreCase = false)
+    public static int LastIndexOf(string text, string search, bool ignoreCase = true)
     {
         RequireText("String.LastIndexOf", text);
         RequireSearch("String.LastIndexOf", search);
@@ -575,14 +580,14 @@ public static class StringExtraNodes
     }
 
     /// <summary>Tests whether a text is empty or holds only whitespace. A missing (null) text counts as blank.</summary>
-    /// <param name="text">The text to test.</param>
+    /// <param name="text">The text to test. A list is tested item by item, and a gap in the list (a blank spreadsheet cell) counts as blank.</param>
     /// <returns>True when the text is null, empty or only whitespace.</returns>
     [NodeName("String.IsBlank")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("isBlank")]
-    [NodeDescription("Tests whether a text is null, empty or only whitespace.")]
+    [NodeDescription("Tests whether a text is null, empty or only whitespace. With a list it tests every item and a gap in the list counts as blank, so a column of cells gives one true or false per cell.")]
     [NodeSearchTags("empty", "null", "whitespace", "missing", "has value", "validate")]
-    public static bool IsBlank(string text)
+    public static bool IsBlank([AcceptsNull] string text)
     {
         return string.IsNullOrWhiteSpace(text);
     }

@@ -33,11 +33,13 @@ public static class ClusterNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Item groups (one list per cluster), each input item's 1-based cluster number (0 = no geometry), cluster count and sizes, and a diagnostic report.</returns>
     [NodeName("Proximity.Cluster")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription(
         "Groups items into clusters of touching geometry (gap <= tolerance, chained) — turns loose shapes into " +
         "logical elements, e.g. numbering each ladder. method \"bbox\" tests bounding boxes (fast); \"mesh\" " +
         "confirms every connection with the Clash engine's exact surface clearance (precise, slower). Set " +
-        "propertyName to also stamp every item with its cluster number as a searchable custom property.")]
+        "propertyName (Advanced) to also stamp every item with its cluster number as a searchable custom property in the tab tabName; without it the node only reads.")]
     [NodeSearchTags("cluster", "group", "touching", "connected", "proximity", "ladder", "assembly", "clump", "component", "mesh", "precise")]
     [NodeAliases("CamelGraph.Navisworks.ClusterNodes.Cluster@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,string,string,string,Autodesk.Navisworks.Api.Document")]
     [MultiReturn("groups", "clusterNumbers", "clusterCount", "sizes", "report")]
@@ -45,12 +47,12 @@ public static class ClusterNodes
     public static Dictionary<string, object?> Cluster(
         [MultiInput] IEnumerable<ModelItem> items,
         [NodeRange(0, 1000000, SoftMin = 0, SoftMax = 1)] double tolerance = 0.01,
-        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        [NodeChoicesFromEnum(typeof(Units), "document")]
         string units = "document",
         [NodeChoices("bbox", "mesh")]
         string method = "bbox",
-        string propertyName = "",
-        string tabName = "CamelGraph Data",
+        [NodePanel("Advanced")] string propertyName = "",
+        [NodePanel("Advanced")] string tabName = "CamelGraph Data",
         Document? document = null)
     {
         var list = NavisValues.ToItemList(items);

@@ -116,7 +116,7 @@ Use the small model. Set the graph to **Manual** run mode (Graph > Auto-Run off)
 | 4.3.4 | `Excel.WriteToFile` with headers and rows; open the file in Excel. | Excel opens it with no repair message; the cells are right. | |
 | 4.3.5 | `Zip.Create` on a folder, `Zip.List`, `Zip.Extract` into another folder. | The listing and the extracted files match. Extracting again without `overwrite` fails with a message. | |
 | 4.3.6 | `File.Copy`, `File.Move`, `File.Delete` on a test file. | Each does what it says; `File.Delete` on a missing file returns false. | |
-| 4.3.7 | `Text.WriteToFile` with a **relative** path such as `qa-relative.txt`. | **Unknown:** where does the file land, or does it fail with "access denied"? ([Troubleshooting](TROUBLESHOOTING.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place) says it cannot be written under the Navisworks install folder.) | |
+| 4.3.7 | `Text.WriteToFile` with a **relative** path such as `qa-relative.txt`. | The file lands next to the graph file (in `Documents\CamelGraph` for a graph that was never saved); `Graph.Folder` shows that folder. It does not fail with "access denied". ([Troubleshooting](TROUBLESHOOTING.md#a-file-node-fails-with-access-denied-or-writes-to-the-wrong-place) says it cannot be written under the Navisworks install folder.) | |
 | 4.3.8 | `Log.Write` twice to the same file. | Two lines, each with a time stamp and level. | |
 | 4.3.9 | `System.Environment` into a Watch. | Your user name, the computer name, and the temp and Documents folders. | |
 | 4.3.10 | `System.Run` with `executable` = `cmd.exe`, `arguments` = `/c echo hello`. | `exitCode` 0 and `output` contains `hello`. | |
@@ -180,6 +180,12 @@ Use the model with the clash test that has results.
 | 4.8.2 | `ModelItem.Translate` by a vector, then `ModelItem.ResetTransform`. | The items move, then return. Running Translate twice moves them twice (re-runs accumulate). | |
 | 4.8.3 | `Grids.Levels` (skip if the model has no grids). | Level names and elevations match the model. | |
 | 4.8.4 | `Markup.AddText` on a saved viewpoint (**experimental**). | **Unknown:** a text redline appears on that viewpoint, or an error. Record which. | |
+| 4.8.5 | `ModelItem.Translate`, Advanced > accumulate off; run it three times. | The items sit one vector from where they started, not three *(intended)*. **Unknown** until tried: that a second override replaces the first. | |
+| 4.8.6 | `ModelItem.RotateAboutAxis` 90 degrees about a point that is not the origin, with a known item. Then `ModelItem.GetTransform` into `ModelItem.SetTransform` on a copy. | The item turns about that point (not about its own origin), and the round trip changes nothing. **Unknown** until tried: the row/column-vector convention of the transform maths. | |
+| 4.8.7 | `ModelItem.Translate` with a container and one of its children in the list. | The warning says the child was left out; the child moves once, with the container. | |
+| 4.8.8 | `ModelItem.RotateAboutAxis` with `degrees` a list of three numbers and several items. | A warning says the runs add up; setting List Levels L1 on items and degrees turns each item by its own angle. | |
+| 4.8.9 | `Model.Remove` with the indices 0 and 1 in a list, on a document with four models. | The first two models are removed, the other two stay. | |
+| 4.8.10 | `ModelItem.BoundingBox` on an empty layer or group. | The result is empty with a warning; `List.Clean` drops it. | |
 
 ### 4.9 Exports
 
@@ -332,6 +338,10 @@ These nodes were only compiled and unit-tested before. The list is from "For the
 | 11.20 | `TimelinerTask.Delete` | A task with a sub-task; run twice. | The task and its sub-tasks are removed; the second run returns false *(intended)*. | |
 | 11.21 | `ModelItem.Scale` — **new behaviour** | Factor 2 about the default point; run again. | The group grows in place. A second run scales again *(intended)*. `ModelItem.ResetTransform` restores. | |
 | 11.22 | `ModelItem.MoveTo` — **new behaviour** | Move to a target point; run again. | The group's centre lands on the target; a second run does nothing *(intended)*. | |
+| 11.23 | `SavedItem.SetCommentStatus` — **new behaviour** | A viewpoint with two comments: set index 0 to Resolved, then all to Approved. Repeat on a clash result. | Text, author and order stay; the status changes; the date of a changed comment becomes now *(intended)*. | |
+| 11.24 | `SavedItem.ClearComments` on a clash result | Run it on a result that has comments. | The thread is empty. | |
+| 11.25 | `Document.Open` with a list of two paths | Wire two file paths to `filePath`. | An error says Document.Open opens one file and points to `Document.AppendFiles`; nothing is opened. | |
+| 11.26 | `ModelItem.Info` and `Selection.Resolve` (level LastObject) on a geometry leaf inside an insert | Compare with the old `ModelItem.ObjectAncestor` result if a saved graph has one. | Both give the composite/insert object nearest the leaf. Record any difference. | |
 
 ---
 

@@ -42,7 +42,7 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
         }
     }
 
-    /// <summary>Lower bound of the slider.</summary>
+    /// <summary>Lower bound of the slider. Raising it above <see cref="Max"/> pushes <see cref="Max"/> up, so Min never exceeds Max.</summary>
     public long Min
     {
         get => _min;
@@ -50,12 +50,17 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
         {
             if (SetField(ref _min, value))
             {
+                if (_max < _min)
+                {
+                    Max = _min;
+                }
+
                 Value = _value; // re-clamp
             }
         }
     }
 
-    /// <summary>Upper bound of the slider.</summary>
+    /// <summary>Upper bound of the slider. Lowering it below <see cref="Min"/> pushes <see cref="Min"/> down, so Min never exceeds Max.</summary>
     public long Max
     {
         get => _max;
@@ -63,6 +68,11 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
         {
             if (SetField(ref _max, value))
             {
+                if (_min > _max)
+                {
+                    Min = _max;
+                }
+
                 Value = _value; // re-clamp
             }
         }
@@ -85,6 +95,9 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "range", "scrub", "drag", "int", "whole" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />
@@ -105,8 +118,16 @@ public class IntegerSliderNode : NodeModel, IPlayerInputNode
     /// <inheritdoc />
     public override void DeserializeData(JObject data)
     {
-        Min = data.Value<long?>("Min") ?? 0;
-        Max = data.Value<long?>("Max") ?? 100;
+        var min = data.Value<long?>("Min") ?? 0;
+        var max = data.Value<long?>("Max") ?? 100;
+        if (min > max)
+        {
+            // A file with the bounds the wrong way round: read them as the author meant, lowest first.
+            (min, max) = (max, min);
+        }
+
+        Min = min;
+        Max = max;
         Step = data.Value<long?>("Step") ?? 1;
         Value = data.Value<long?>("Value") ?? 0;
     }

@@ -422,7 +422,7 @@ public class LibraryViewModel : ObservableObject
                 sample.Name,
                 sample.Category,
                 sample.Description,
-                Array.Empty<string>(),
+                sample.SearchTags,
                 FormatSignature(sample.InPorts, sample.OutPorts),
                 sample.Function));
         }

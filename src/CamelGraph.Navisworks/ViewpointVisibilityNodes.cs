@@ -26,21 +26,27 @@ public static class ViewpointVisibilityNodes
     /// <param name="items">What to test: a list of model items, a single item, a saved selection/search set, or a set name.</param>
     /// <param name="viewpoint">The viewpoint to test against: a saved viewpoint, a viewpoint name, or empty for the CURRENT view.</param>
     /// <param name="fullyInside">True requires an item's whole bounding box inside the view; false (default) counts partly visible items.</param>
+    /// <param name="after">Anything at all, only to run this node after the node it comes from (matters when the viewpoint is left empty and the current camera is tested).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>visibleItems / outsideItems split, a boolean mask over the input order, whether anything is visible, and a diagnostic report.</returns>
     [NodeName("Viewpoint.VisibleItems")]
+    [LiveState]
+    [NodeAliases("CamelGraph.Navisworks.ViewpointVisibilityNodes.VisibleItems@object,object,bool,Autodesk.Navisworks.Api.Document")]
     [NodeDescription(
         "Checks which of the given items a viewpoint can see (bounding box vs the camera frustum). " +
         "Feed it a list of items, a selection/search set, a set name or one item; the viewpoint input " +
-        "accepts a saved viewpoint, a viewpoint name, or nothing for the current view. Note: this is a " +
+        "accepts a saved viewpoint, a viewpoint name, or nothing for the current view, which is read when the node runs " +
+        "(wire the node that sets the camera into 'after'). A list of " +
+        "viewpoints runs the test once per viewpoint. Note: this is a " +
         "framing test — items behind other objects still count, and the viewpoint's hide overrides are ignored.")]
-    [NodeSearchTags("viewpoint", "visible", "contains", "frustum", "camera", "view", "sees", "inview", "mask")]
+    [NodeSearchTags("viewpoint", "visible", "contains", "frustum", "camera", "view", "sees", "inview", "mask", "saved viewpoint")]
     [MultiReturn("visibleItems", "outsideItems", "mask", "containsAny", "report")]
     [PortKinds("item*", "item*", "boolean*", "boolean", "")]
     public static Dictionary<string, object?> VisibleItems(
         object items,
-        object? viewpoint = null,
+        [ScalarInput] object? viewpoint = null,
         bool fullyInside = false,
+        object? after = null,
         Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);

@@ -16,7 +16,7 @@ namespace CamelGraph.Nodes;
 public static class LogicExtraNodes
 {
     /// <summary>Compares two values with a chosen test.</summary>
-    /// <param name="a">The value to test.</param>
+    /// <param name="a">The value to test. A list is tested as one value; set List Levels to @L1 on this input to test every element instead.</param>
     /// <param name="b">What to test it against (unused by the isNull / notNull / isEmpty / notEmpty tests).</param>
     /// <param name="test">The test: ==, !=, &gt;, &gt;=, &lt;, &lt;=, contains, !contains, startsWith, endsWith, matches (wildcards * and ?), regex, isNull, notNull, isEmpty, notEmpty.</param>
     /// <param name="ignoreCase">True (default) ignores upper/lower case when comparing text.</param>
@@ -24,11 +24,18 @@ public static class LogicExtraNodes
     [NodeName("Logic.Compare")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("result")]
-    [NodeDescription("Compares two values — numbers, text or dates — with a test chosen from a list (==, >, contains, matches, regex …). Text that reads as a number is compared as a number.")]
-    [NodeSearchTags("compare", "greater", "less", "equal", "date", "text", "contains", "wildcard", "regex", "test")]
+    [NodeDescription(
+        "Compares two values — numbers, text or dates — with a test chosen from a list (==, >, contains, matches, regex …). " +
+        "Text that reads as a number is compared as a number, and text that reads as a date (2026-10-01) is compared as a " +
+        "date when the other side is a date. Text ignores upper and lower case unless ignoreCase is off (the regex test is " +
+        "the same). A missing value (empty or blank) is never greater or less than anything, so it does not pass > >= < <=; " +
+        "use isNull or isEmpty to find it. Equals and Logic.NotEquals follow the same rules for == and !=. A list on a is " +
+        "tested as ONE value: to test every element set List Levels to @L1 on a (or use List.FilterByValue to split a list). " +
+        "For numbers within a tolerance use Math.IsClose.")]
+    [NodeSearchTags("compare", "greater", "less", "equal", "date", "text", "contains", "wildcard", "regex", "test", "tolerance")]
     public static bool Compare(
-        object? a,
-        object? b = null,
+        [AcceptsNull] object? a,
+        [AcceptsNull] object? b = null,
         [NodeChoices("==", "!=", ">", ">=", "<", "<=", "contains", "!contains", "startsWith", "endsWith", "matches", "regex", "isNull", "notNull", "isEmpty", "notEmpty")]
         string test = "==",
         bool ignoreCase = true)
@@ -38,17 +45,21 @@ public static class LogicExtraNodes
     }
 
     /// <summary>Tests whether two values are different.</summary>
-    /// <param name="a">First value.</param>
+    /// <param name="a">First value. A list is compared as one value; set List Levels to @L1 to compare every element instead.</param>
     /// <param name="b">Second value.</param>
     /// <returns>True when the values are not equal.</returns>
     [NodeName("Logic.NotEquals")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("result")]
-    [NodeDescription("True when two values are different (numbers compare by value regardless of numeric type).")]
+    [NodeDescription(
+        "True when two values are different — the opposite of Equals, with the same rules: numbers compare by value, text " +
+        "ignores upper and lower case, text that reads as a number or a date is compared as one, and two lists are equal when " +
+        "they have the same items in the same order. A list is compared as ONE value; to test every element of a list set " +
+        "List Levels to @L1 on a.")]
     [NodeSearchTags("!=", "different", "not equal", "unequal")]
-    public static bool NotEquals(object? a, object? b)
+    public static bool NotEquals([AcceptsNull] object? a, [AcceptsNull] object? b)
     {
-        return !ValueComparison.AreEqual(a, b);
+        return !ValueTests.AreEqual(a, b, ignoreCase: true);
     }
 
     /// <summary>Exclusive or: true when exactly one input is true.</summary>
@@ -66,25 +77,36 @@ public static class LogicExtraNodes
     }
 
     /// <summary>Tests whether a value lies within a range.</summary>
-    /// <param name="value">The value to test (number, text or date).</param>
-    /// <param name="min">The lower bound.</param>
-    /// <param name="max">The upper bound.</param>
+    /// <param name="value">The value to test (number, text or date). A list tests every element and gives a list of results. A missing value (empty or blank) is never between.</param>
+    /// <param name="min">The lower bound. A list pairs with the values.</param>
+    /// <param name="max">The upper bound. A list pairs with the values.</param>
     /// <param name="inclusive">True (default) counts the bounds themselves as inside.</param>
     /// <returns>True when the value is within the range.</returns>
     [NodeName("Logic.IsBetween")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
     [return: NodeName("result")]
-    [NodeDescription("True when a number, text or date lies between a lower and an upper bound (bounds included by default).")]
+    [NodeDescription(
+        "True when a number, text or date lies between a lower and an upper bound (bounds included by default). Text that " +
+        "reads as a number or, next to a date, as a date is compared as one. A list on value (or on a bound) gives a list " +
+        "of answers, one per element, so a whole column can be tested at once. A missing value, or text that is not a " +
+        "number next to numbers, is not between; an empty bound is an error. To test a number against a target within a " +
+        "tolerance use Math.IsClose.")]
     [NodeSearchTags("range", "within", "between", "inside", "interval", "tolerance")]
-    public static bool IsBetween(object? value, object? min, object? max, bool inclusive = true)
+    public static bool IsBetween([ScalarInput, AcceptsNull] object? value, [ScalarInput] object? min, [ScalarInput] object? max, bool inclusive = true)
     {
-        if (value == null || min == null || max == null)
+        if (min == null || max == null)
         {
-            throw new ArgumentNullException(nameof(value), "Logic.IsBetween needs a value and both bounds; one of them is empty.");
+            throw new ArgumentNullException(
+                min == null ? nameof(min) : nameof(max),
+                "Logic.IsBetween needs both bounds; the " + (min == null ? "minimum" : "maximum") + " is empty. Wire a number, text or date into it.");
         }
 
-        var low = ValueTests.Order(value, min, "Logic.IsBetween");
-        var high = ValueTests.Order(value, max, "Logic.IsBetween");
+        if (!ValueTests.TryOrder(value, min, "Logic.IsBetween", out var low) ||
+            !ValueTests.TryOrder(value, max, "Logic.IsBetween", out var high))
+        {
+            return false;
+        }
+
         return inclusive ? low >= 0 && high <= 0 : low > 0 && high < 0;
     }
 
@@ -95,8 +117,10 @@ public static class LogicExtraNodes
     [NodeName("Logic.Choose")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("value")]
-    [NodeDescription("Picks one of several options by position (0 = first) — a multi-way If.")]
-    [NodeSearchTags("select", "pick", "switch", "index", "option", "multiplexer")]
+    [NodeDescription(
+        "Picks one of several options by position (0 = first) — a multi-way If. All options are always computed, so a node " +
+        "wired into an option that is not picked still runs: to skip nodes use Flow.When.")]
+    [NodeSearchTags("select", "pick", "switch", "index", "option", "multiplexer", "flow", "when")]
     public static object? Choose(int index, [MultiInput] IList<object?> options)
     {
         if (options == null)
@@ -116,7 +140,7 @@ public static class LogicExtraNodes
     }
 
     /// <summary>Looks a value up in a list of cases and gives the matching result.</summary>
-    /// <param name="value">The value to look for.</param>
+    /// <param name="value">The value to look for. A list looks every element up and gives a list of results (a status column becomes a colour column).</param>
     /// <param name="cases">The values it can be.</param>
     /// <param name="results">What to give for each case (same length as the cases).</param>
     /// <param name="fallback">What to give when no case matches (nothing by default).</param>
@@ -124,9 +148,13 @@ public static class LogicExtraNodes
     [NodeName("Logic.Switch")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("value")]
-    [NodeDescription("Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or code-to-name mapping.")]
-    [NodeSearchTags("case", "match", "map", "lookup", "translate", "switch", "select")]
-    public static object? Switch(object? value, IList<object?> cases, IList<object?> results, object? fallback = null)
+    [NodeDescription(
+        "Gives the result that goes with the first case equal to the value, otherwise the fallback — a status-to-colour or " +
+        "code-to-name mapping. Matching follows Equals: text ignores upper and lower case and text that reads as a number " +
+        "matches that number. A list on value is looked up element by element and gives a list of results. All results are " +
+        "computed whether or not they are picked; to skip nodes use Flow.When.")]
+    [NodeSearchTags("case", "match", "map", "lookup", "translate", "switch", "select", "flow", "when")]
+    public static object? Switch([ScalarInput, AcceptsNull] object? value, IList<object?> cases, IList<object?> results, object? fallback = null)
     {
         if (cases == null)
         {

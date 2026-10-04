@@ -34,6 +34,19 @@ public partial class GraphEditorViewModel
     /// <summary>Opens the Script Player pane.</summary>
     public ICommand OpenPlayerCommand => _openPlayerCommand ??= new RelayCommand(() => OpenPlayerRequested?.Invoke(this, EventArgs.Empty));
 
+    // The Player lists the top level of the script only (inputs and results inside a node group are never offered), so while a
+    // group is open the "Show in Player" commands would set a flag that nothing reads. Say so instead.
+    private bool RefuseInsideGroup()
+    {
+        if (!IsInsideGroup)
+        {
+            return false;
+        }
+
+        StatusMessage = "The Player shows only the top level of the script. Close the node group (Tab), or wire the value out of the group and show that node.";
+        return true;
+    }
+
     private List<NodeModel> SelectedPlayerCandidates() =>
         SelectedItems.OfType<NodeViewModel>()
             .Select(n => n.Model)
@@ -42,6 +55,11 @@ public partial class GraphEditorViewModel
 
     private void TogglePlayerNode()
     {
+        if (RefuseInsideGroup())
+        {
+            return;
+        }
+
         var nodes = SelectedPlayerCandidates();
         if (nodes.Count == 0)
         {
@@ -63,6 +81,11 @@ public partial class GraphEditorViewModel
 
     private void TogglePlayerInputs()
     {
+        if (RefuseInsideGroup())
+        {
+            return;
+        }
+
         var ports = SelectedPlayerCandidates()
             .SelectMany(n => PlayerExposure.OfferableInputs(n, p => _graph.FindConnectionInto(p) != null))
             .ToList();
@@ -90,6 +113,11 @@ public partial class GraphEditorViewModel
     public void TogglePlayerInput(ConnectorViewModel? connector)
     {
         if (connector == null || !connector.IsInput)
+        {
+            return;
+        }
+
+        if (RefuseInsideGroup())
         {
             return;
         }

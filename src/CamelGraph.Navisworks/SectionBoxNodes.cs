@@ -28,8 +28,11 @@ public static class SectionBoxNodes
     /// <returns>True when the clip planes were applied to the current view.</returns>
     [NodeName("Viewpoint.SetSectionBox")]
     [NodeCategory("Navisworks.Camera")]
-    [NodeDescription("Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. enabled=false turns sectioning off.")]
-    [NodeSearchTags("section", "box", "clip", "sectioning", "viewpoint", "crop", "isolate")]
+    [NodeDescription(
+        "Applies a section box around a region on the current view (Sectioning > Box, scriptable) — chain ModelItem.BoundingBox for the clash-viewpoint close-up look. " +
+        "enabled=false turns sectioning off. It works on Navisworks 2024 only: on 2025 and 2026 the node stops with a message, because the section-box call differs there. " +
+        "It acts on the view like the Camera nodes (hence its place under Camera): set the box first, then save the view with Viewpoint.Save.")]
+    [NodeSearchTags("section", "box", "clip", "sectioning", "viewpoint", "crop", "isolate", "camera", "camera section")]
     [return: NodeName("done")]
     public static bool SetSectionBox(object boundingBox, bool enabled = true, Document? document = null)
     {

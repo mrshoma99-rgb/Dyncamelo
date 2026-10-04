@@ -31,24 +31,25 @@ public static class SelectionLevelNodes
     /// collects the leaves beneath it). The output is deduplicated and keeps the
     /// input order.
     /// </summary>
-    /// <param name="modelItems">The model items to resolve.</param>
+    /// <param name="items">The model items to resolve.</param>
     /// <param name="level">The resolution level: File, Layer, FirstObject, LastObject, LastUnique, Geometry or Self (case insensitive; spaces allowed, e.g. "Last Object").</param>
     /// <returns>The resolved items (duplicates removed, input order preserved).</returns>
     [NodeName("Selection.Resolve")]
-    [NodeDescription("Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection).")]
-    [NodeSearchTags("selection", "resolve", "resolution", "level", "file", "layer", "first object", "last object", "last unique", "geometry", "parent", "ancestor")]
+    [PortAlias("modelItems", "items")]
+    [NodeDescription("Re-selects items at another selection-tree level — File, Layer, FirstObject, LastObject, LastUnique, Geometry — like Navisworks' selection resolution option (Options > Interface > Selection). Level Geometry flattens items to their unique geometry-bearing descendants (the items QTO, colouring and clash selections want; it was ModelItem.GeometryLeaves). Level LastObject walks up from a geometry leaf to the whole object it belongs to, the item you usually want to name, colour or tag (it was ModelItem.ObjectAncestor). The result has no duplicates and keeps the input order; wire a list of groups and lacing gives one resolved list per group.")]
+    [NodeSearchTags("selection", "resolve", "resolution", "level", "file", "layer", "first object", "last object", "last unique", "geometry", "parent", "ancestor", "leaves", "flatten", "descendants", "object ancestor", "element", "composite", "whole object", "geometry leaves")]
     [return: NodeName("items")]
     public static List<ModelItem> Resolve(
-        [MultiInput] IEnumerable<ModelItem> modelItems,
+        [MultiInput] IEnumerable<ModelItem> items,
         [NodeChoices("Self", "File", "Layer", "FirstObject", "LastObject", "LastUnique", "Geometry")]
         string level = "LastObject")
     {
-        if (modelItems == null)
+        if (items == null)
         {
-            throw new ArgumentNullException(nameof(modelItems), "No model items provided.");
+            throw new ArgumentNullException(nameof(items), "No model items provided.");
         }
 
-        return SelectionLevels.Resolve(modelItems, SelectionLevels.Parse(level));
+        return SelectionLevels.Resolve(items, SelectionLevels.Parse(level));
     }
 }
 

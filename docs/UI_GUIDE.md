@@ -323,7 +323,7 @@ The **colour palette** of the whole editor is chosen here too.
 | Esc cancels a running graph | On / Off | On | Pressing Esc while a run is in progress stops it before the next node. The node in progress finishes (a Navisworks call cannot be interrupted) and the run continues from there next time. |
 | Autosave unsaved work | On / Off | On | Keep a copy of a graph with unsaved changes once a minute, and offer it back if Navisworks closed or crashed before you saved. The copy is deleted when you save. |
 | Highlight selected node in Navisworks | On / Off | Off | Select the model items a node outputs in the viewport when the node is clicked. Overwrites the live selection, so turn it off if you use Selection.Current. |
-| Ask before running graphs from files | On / Off | On | A graph opened from a file is run only after you have been told if it starts programs, uses the network, or deletes, moves or overwrites files. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask. |
+| Ask before running graphs from files | On / Off | On | A graph opened from a file is run only after you have been told if it starts programs, uses the network, writes, deletes, moves or overwrites files, or changes the model. You are asked once per file, and again only if the file changes. Graphs you create here and the built-in samples never ask. |
 | Double-click empty canvas | Insert a String node / Insert a Number node / Add a note / Do nothing | Insert a String node | What double-clicking the empty canvas does. |
 
 ### Shortcuts

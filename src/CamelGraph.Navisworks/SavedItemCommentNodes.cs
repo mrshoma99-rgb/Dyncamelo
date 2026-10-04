@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
@@ -24,7 +26,8 @@ public static class SavedItemCommentNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored item the comment was added to (pass-through for chaining).</returns>
     [NodeName("SavedItem.AddComment")]
-    [NodeDescription("Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Adds a comment to a saved viewpoint, selection/search set, folder, clash result or result group — the Review-tab Comments feature, scriptable; lace over results for review notes in bulk. Every run adds another comment: running the graph twice leaves two identical comments (SavedItem.ClearComments empties the thread first, SavedItem.SetCommentStatus changes the status of one that is already there).")]
     [NodeSearchTags("comment", "add", "review", "note", "viewpoint", "set", "annotate")]
     [return: NodeName("item")]
     public static SavedItem AddComment(
@@ -102,17 +105,26 @@ public static class SavedItemCommentNodes
         };
     }
 
-    /// <summary>Deletes every comment on a saved viewpoint, set or folder.</summary>
-    /// <param name="item">The saved item (a viewpoint, selection/search set, or one of their folders).</param>
+    /// <summary>Deletes every comment on a saved viewpoint, set, folder, clash result or result group.</summary>
+    /// <param name="item">The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group).</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored item (pass-through for chaining).</returns>
     [NodeName("SavedItem.ClearComments")]
-    [NodeDescription("Deletes every comment on a saved viewpoint, selection/search set or folder (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Deletes every comment on a saved viewpoint, selection/search set, folder, clash result or result group (replace-all with an empty thread). Rebuild the thread afterwards with SavedItem.AddComment. A clash test itself has no comment thread here.")]
     [NodeSearchTags("comment", "clear", "delete", "remove", "review", "reset")]
     [return: NodeName("item")]
     public static SavedItem ClearComments(SavedItem item, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
+
+        // A clash result or result group lives in Clash Detective's own tree, with its own write path (the one AddComment uses).
+        if (item is Autodesk.Navisworks.Api.Clash.IClashResult clashResult)
+        {
+            ClashHelpers.RequireClash(doc).TestsData.TestsEditResultComments(clashResult, new CommentCollection());
+            return item;
+        }
+
         var stored = ResolveOwningPart(doc, item, out var inViewpointsTree);
 
         var empty = new CommentCollection();
@@ -126,6 +138,99 @@ public static class SavedItemCommentNodes
         }
 
         return stored;
+    }
+
+    /// <summary>Changes the status of one comment, or of all comments, on a saved item.</summary>
+    /// <param name="item">The saved item (a viewpoint, selection/search set, one of their folders, or a clash result or group). Wire a list to change several items.</param>
+    /// <param name="status">"New", "Active", "Approved" or "Resolved".</param>
+    /// <param name="index">The 0-based position of the comment in the thread (0 is the first); -1 changes every comment.</param>
+    /// <param name="document">The document (defaults to the active document).</param>
+    /// <returns>The item (pass-through for chaining).</returns>
+    [NodeName("SavedItem.SetCommentStatus")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Changes the status (New, Active, Approved, Resolved) of one comment, or of every comment, on a saved viewpoint, selection/search set, folder, clash result or result group, keeping its text, its author and its place in the thread — close out review comments without clearing the thread. Navisworks cannot edit a comment in place, so a changed comment is replaced by a copy: its date becomes the time of the change. Comments that already have the status are left alone. Wire a list of items to change several threads.")]
+    [NodeSearchTags("comment", "status", "resolve", "resolved", "approve", "approved", "close", "review", "active", "new", "set")]
+    [return: NodeName("item")]
+    public static SavedItem SetCommentStatus(
+        SavedItem item,
+        [NodeChoices("New", "Active", "Approved", "Resolved")]
+        string status,
+        int index = -1,
+        Document? document = null)
+    {
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item), "No saved item provided.");
+        }
+
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            throw new ArgumentException("No status provided. Use \"New\", \"Active\", \"Approved\" or \"Resolved\".", nameof(status));
+        }
+
+        var wanted = NavisValues.ParseCommentStatus(status);
+        var doc = NavisworksContext.ResolveDocument(document);
+
+        if (item is Autodesk.Navisworks.Api.Clash.IClashResult clashResult)
+        {
+            var clashEdited = Retag(doc, item.Comments, wanted, index, out var clashChanged);
+            if (clashChanged > 0)
+            {
+                ClashHelpers.RequireClash(doc).TestsData.TestsEditResultComments(clashResult, clashEdited);
+            }
+
+            return item;
+        }
+
+        var stored = ResolveOwningPart(doc, item, out var inViewpointsTree);
+        var edited = Retag(doc, stored.Comments, wanted, index, out var changed);
+        if (changed == 0)
+        {
+            return stored;
+        }
+
+        if (inViewpointsTree)
+        {
+            doc.SavedViewpoints.EditComments(stored, edited);
+        }
+        else
+        {
+            doc.SelectionSets.EditComments(stored, edited);
+        }
+
+        return stored;
+    }
+
+    /// <summary>
+    /// A copy of the thread in which the chosen comments have the wanted status. A stored comment cannot be changed, so each
+    /// one that differs is replaced by a new comment with the same text and author (and a new date and id).
+    /// </summary>
+    private static CommentCollection Retag(Document doc, CommentCollection thread, CommentStatus wanted, int index, out int changed)
+    {
+        var edited = new CommentCollection(thread);
+        changed = 0;
+        if (edited.Count == 0)
+        {
+            NodeWarnings.Add("The item has no comments, so there is no status to change.");
+            return edited;
+        }
+
+        foreach (var position in CommentSelection.Positions(edited.Count, index))
+        {
+            var old = edited[position];
+            if (old.Status == wanted)
+            {
+                continue;
+            }
+
+            var body = old.Body ?? string.Empty;
+            edited[position] = string.IsNullOrEmpty(old.Author)
+                ? doc.CreateCommentWithUniqueId(body, wanted)
+                : doc.CreateCommentWithUniqueId(body, wanted, old.Author);
+            changed++;
+        }
+
+        return edited;
     }
 
     /// <summary>
@@ -175,8 +280,8 @@ public static class SavedItemCommentNodes
         }
 
         throw new InvalidOperationException(
-            "The item '" + item.DisplayName + "' is not stored in this document's saved viewpoints or selection sets. " +
-            "Comments on clash tests/results use the ClashResult comment nodes instead.");
+            "The item '" + item.DisplayName + "' is not stored in this document's saved viewpoints or selection sets, " +
+            "and it is not a clash result or result group, so these nodes cannot reach its comments.");
     }
 
 }

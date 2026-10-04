@@ -39,10 +39,14 @@ public class ZeroTouchNodeModel : NodeModel
 
             port.DataChoice = input.DataChoice;
             port.Range = input.Range;
+            port.PathMode = input.PathMode;
+            port.PathFilter = input.PathFilter;
             port.Panel = input.Panel;
             port.PanelDefaultOpen = input.PanelDefaultOpen;
             port.KindHint = input.Kind;
             port.IsMultiInput = input.MultiInput;
+            port.AcceptsNull = input.AcceptsNull;
+            port.IsScalarInput = input.ScalarInput;
             port.Aliases = input.Aliases;
         }
 
@@ -67,10 +71,37 @@ public class ZeroTouchNodeModel : NodeModel
     public override NodeEffects Effects => Definition.Effects;
 
     /// <inheritdoc />
+    public override IReadOnlyList<string> SearchTags => Definition.SearchTags;
+
+    /// <inheritdoc />
     public override bool CatchesUpstreamErrors => Definition.CatchesUpstreamErrors;
 
     /// <inheritdoc />
+    public override bool IsLiveState => Definition.IsLiveState;
+
+    /// <inheritdoc />
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
+    {
+        // Inside a run the replicator already collects per call. Evaluated on its own (a test, another tool), the node still
+        // collects what it reports with NodeWarnings.Add and shows it as warnings of this node.
+        var ownCollector = NodeWarnings.IsCollecting ? null : NodeWarnings.Begin();
+
+        // The running context is reachable from the node's static method (EvaluationContext.Current), so a node that works
+        // through many steps can checkpoint between them and honour Stop.
+        using (context?.MakeCurrent())
+        {
+            try
+            {
+                return EvaluateCore(inputs, ownCollector);
+            }
+            finally
+            {
+                ownCollector?.Dispose();
+            }
+        }
+    }
+
+    private object?[] EvaluateCore(object?[] inputs, NodeWarnings.WarningCollector? ownCollector)
     {
         object? returned;
         try
@@ -82,6 +113,11 @@ public class ZeroTouchNodeModel : NodeModel
             // Surface the node author's exception, not the reflection wrapper.
             ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
             throw; // unreachable
+        }
+
+        if (ownCollector != null && ownCollector.Total > 0)
+        {
+            NodeWarnings.Report(this, ownCollector);
         }
 
         if (Definition.IsVoid)

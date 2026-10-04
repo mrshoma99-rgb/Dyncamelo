@@ -78,7 +78,8 @@ public static class ModelNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>One root item per loaded model.</returns>
     [NodeName("Models.RootItems")]
-    [NodeDescription("The root model items of every model loaded in a document.")]
+    [LiveState]
+    [NodeDescription("The root model items of every model loaded in a document, read again on every run.")]
     [NodeSearchTags("models", "roots", "items", "tree")]
     [return: NodeName("rootItems")]
     public static List<ModelItem> RootItems(Document? document = null)

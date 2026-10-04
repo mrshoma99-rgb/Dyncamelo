@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 using CamelGraph.Nodes.Spatial;
@@ -27,7 +28,7 @@ public static class FallHazardNodes
     /// <param name="cellSize">Grid resolution in document units (smaller = finer and slower).</param>
     /// <param name="minGap">The handrail limit as a distance from the nearest floor edge or obstacle (e.g. 0.2 = 20 cm): a void point farther than this from any solid is a hazard. It is the heat-map pivot — cells below it read cool, at it yellow, above it red — and openings that contain such a point are flagged.</param>
     /// <param name="units">The unit every number on this node is in ("Meters", "Millimeters", "Feet", …). "document" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.</param>
-    /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned).</param>
+    /// <param name="imagePath">Where to write the PNG heat map. Empty = a file in the temp folder (the path is returned). A relative path is next to the graph file.</param>
     /// <param name="saveViewpoints">True to add one top-down saved viewpoint per flagged opening.</param>
     /// <param name="pixelsPerCell">How many image pixels each grid cell spans (bigger = larger image).</param>
     /// <param name="showOverage">True to print, at each flagged opening, how far its widest gap exceeds the limit (e.g. "+0.35", in the chosen units) — for plans that go into reports.</param>
@@ -36,12 +37,13 @@ public static class FallHazardNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The image path, the flagged-opening count, their widest gaps (in the chosen units) and centre points, any saved viewpoints, and a diagnostic report string (triangles read, openings found, grid size).</returns>
     [NodeName("FallHazard.FloorOpeningMap")]
-    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel | CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     // Pre-0.14 id (before units) and 0.14 id (before overage/colours).
     [NodeAliases(
         "CamelGraph.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,bool,int,Autodesk.Navisworks.Api.Document",
         "CamelGraph.Navisworks.FallHazardNodes.FloorOpeningMap@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,string,string,bool,int,Autodesk.Navisworks.Api.Document")]
-    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.")]
+    [NodeDescription("Whole-floor fall-hazard heat map. At 'level', reads the filled silhouette of the floor and (optional) equipment elements that cross that plane, finds the voids enclosed by floor, subtracts the equipment that plugs them, and writes a top-down PNG heat map coloured by how far each void point is from the nearest floor edge or obstacle: cool below the 'minGap' limit (within reach of a solid), hot beyond it (a genuine fall hazard). Wire 'lowColor'/'highColor' to replace the default ramp with your own two-colour gradient (low = safe end, high = worst hazard; the limit sits at the 50% blend), and turn on 'showOverage' to print each flagged opening's gap-over-limit on the image — ready for reports. Openings that reach past the limit are flagged and get a saved viewpoint (named \"Opening 1 — gap 0.35 Meters\", the gap in the unit you chose) in the folder \"Floor Openings\"; running again replaces a viewpoint of the same name instead of adding another, and turning saveViewpoints off leaves the document alone. Set 'units' to the unit your numbers are in (e.g. Meters). Needs a live Navisworks session.")]
     [NodeSearchTags("fall", "hazard", "opening", "hole", "floor", "handrail", "heatmap", "heat map", "gap", "safety", "plan", "grid", "slab", "color", "gradient", "label", "report")]
     [MultiReturn("imagePath", "openingCount", "widestGaps", "centers", "viewpoints", "report")]
     [PortKinds("file", "integer", "number*", "geometry*", "viewpoint*", "")]
@@ -52,9 +54,9 @@ public static class FallHazardNodes
         double band = 1.0,
         [NodeRange(0.01, 100, SoftMin = 0.05, SoftMax = 1)] double cellSize = 0.25,
         double minGap = 0.2,
-        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        [NodeChoicesFromEnum(typeof(Units), "document")]
         string units = "document",
-        string? imagePath = null,
+        [NodePath(NodePathMode.Save, Filter = "PNG pictures (*.png)|*.png")] string? imagePath = null,
         bool saveViewpoints = true,
         [NodeRange(1, 64)] int pixelsPerCell = 6,
         bool showOverage = false,
@@ -150,7 +152,7 @@ public static class FallHazardNodes
         }
 
         var viewpoints = saveViewpoints && flagged.Count > 0
-            ? CreateViewpoints(doc, flagged, level, band, cellSize)
+            ? CreateViewpoints(doc, flagged, level, band, cellSize, scale, unitsLabel)
             : new List<SavedViewpoint>();
 
         var hazardCells = 0;
@@ -213,7 +215,7 @@ public static class FallHazardNodes
     /// <param name="handrailTolerance">A handrail within this distance of a dangerous edge protects it.</param>
     /// <param name="minPassage">A dangerous stretch of edge shorter than this counts as safe — a person cannot fit through so small a break in the protection (e.g. between two handrails, or a handrail and an obstacle). 0 disables.</param>
     /// <param name="units">The unit every number on this node is in ("Meters", "Millimeters", "Feet", …). "document" = the document's own units — beware: a document often stores coordinates in feet even when the measure tool displays metres, so name your unit explicitly to be safe.</param>
-    /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned).</param>
+    /// <param name="imagePath">Where to write the PNG (empty = a temp file; the path is returned). A relative path is next to the graph file.</param>
     /// <param name="pixelsPerCell">Image pixels per grid cell.</param>
     /// <param name="showOverage">True to print, at each dangerous run, how far its gap exceeds the limit (e.g. "+0.35", in the chosen units) — for plans that go into reports.</param>
     /// <param name="dangerousColor">Colour for dangerous edges (a Color, "#RRGGBB" or [r,g,b]); empty = the default red.</param>
@@ -223,6 +225,7 @@ public static class FallHazardNodes
     /// <returns>The image path, the dangerous/protected/safe edge lengths (in the chosen units), and a diagnostic report.</returns>
     [NodeName("FallHazard.EdgeHandrailCheck")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
     // Pre-0.14 id (before units), 0.14 id (before minPassage), 0.15 id (before overage/colours).
     [NodeAliases(
         "CamelGraph.Navisworks.FallHazardNodes.EdgeHandrailCheck@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,double,double,double,string,int,Autodesk.Navisworks.Api.Document",
@@ -242,9 +245,9 @@ public static class FallHazardNodes
         double limit = 0.2,
         double handrailTolerance = 0.3,
         double minPassage = 0.0,
-        [NodeChoices("document", "Meters", "Millimeters", "Centimeters", "Feet", "Inches")]
+        [NodeChoicesFromEnum(typeof(Units), "document")]
         string units = "document",
-        string? imagePath = null,
+        [NodePath(NodePathMode.Save, Filter = "PNG pictures (*.png)|*.png")] string? imagePath = null,
         [NodeRange(1, 64)] int pixelsPerCell = 6,
         bool showOverage = false,
         [PortKinds("colour")] object? dangerousColor = null,
@@ -463,7 +466,7 @@ public static class FallHazardNodes
     {
         if (!string.IsNullOrWhiteSpace(imagePath))
         {
-            return imagePath!;
+            return PathResolver.Resolve(imagePath);
         }
 
         var stem = string.IsNullOrEmpty(doc.Title) ? "model" : Path.GetFileNameWithoutExtension(doc.Title);
@@ -472,43 +475,27 @@ public static class FallHazardNodes
     }
 
     private static List<SavedViewpoint> CreateViewpoints(
-        Document doc, List<FloorOpening> openings, double level, double band, double cellSize)
+        Document doc, List<FloorOpening> openings, double level, double band, double cellSize, double scale, string unitsLabel)
     {
         var saved = new List<SavedViewpoint>();
         var viewpoints = doc.SavedViewpoints;
 
         const string folderName = "Floor Openings";
-        var folderIndex = NavisValues.FindTopLevelIndex<FolderItem>(viewpoints.Value, folderName);
-        if (folderIndex < 0)
-        {
-            viewpoints.AddCopy(new FolderItem { DisplayName = folderName });
-            folderIndex = NavisValues.FindTopLevelIndex<FolderItem>(viewpoints.Value, folderName);
-        }
-
-        var folder = folderIndex >= 0 ? (FolderItem)viewpoints.Value[folderIndex] : null;
+        var folder = ViewpointStore.ResolveFolder(viewpoints, folderName);
 
         var index = 1;
         foreach (var opening in openings)
         {
+            // The gap in the unit the user chose (it is the unit of the widestGaps output too), not the document's own unit.
             var name = "Opening " + index.ToString(CultureInfo.InvariantCulture) +
-                       " — gap " + opening.WidestGap.ToString("0.##", CultureInfo.InvariantCulture);
+                       " — gap " + (opening.WidestGap / scale).ToString("0.##", CultureInfo.InvariantCulture) + " " + unitsLabel;
             index++;
 
             var viewpoint = BuildTopDownViewpoint(doc, opening, level, band, cellSize);
             var savedViewpoint = new SavedViewpoint(viewpoint) { DisplayName = name };
 
-            if (folder != null)
-            {
-                viewpoints.AddCopy(folder, savedViewpoint);
-            }
-            else
-            {
-                viewpoints.AddCopy(savedViewpoint);
-            }
-
-            var children = folder != null ? folder.Children : viewpoints.Value;
-            var storedIndex = NavisValues.FindTopLevelIndex<SavedViewpoint>(children, name);
-            saved.Add(storedIndex >= 0 ? (SavedViewpoint)children[storedIndex] : savedViewpoint);
+            // A viewpoint of the same name in the folder is replaced, so running the node again does not add another.
+            saved.Add(ViewpointStore.Put(viewpoints, savedViewpoint, folder));
         }
 
         return saved;

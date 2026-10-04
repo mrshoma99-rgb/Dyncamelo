@@ -1233,7 +1233,7 @@
                                       Minimum="0.000001"
                                       LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
                                       PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
-                                      ToolTip="Step size (the field snaps to this)" />
+                                      ToolTip="Step size: how far one scrub step, arrow key or Ctrl+wheel click moves the value; hold Ctrl while scrubbing to snap to it. A typed value is kept as typed." />
             </Grid>
         </StackPanel>
     </DataTemplate>
@@ -1277,7 +1277,7 @@
                                       Minimum="1"
                                       LiveCommit="{Binding DataContext.LiveScrubEvaluation, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
                                       PixelsPerStep="{Binding DataContext.ScrubPixelsPerStep, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}"
-                                      ToolTip="Step size (the field snaps to this)" />
+                                      ToolTip="Step size: how far one scrub step, arrow key or Ctrl+wheel click moves the value; hold Ctrl while scrubbing to snap to it. A typed value is kept as typed." />
             </Grid>
         </StackPanel>
     </DataTemplate>

@@ -9,9 +9,9 @@ Two ideas make most of these short:
 
 ## BIM coordinator
 
-**Clash matrix from selection sets.** `SelectionSets.All` (twice, filtered by name with `List.FilterByValue`) → `ClashTest.Create` with *cross product* lacing: one test per pair of sets.
+**Clash matrix from selection sets.** `SelectionSets.All` (twice, filtered by name with `List.FilterByValue`) → `ClashTest.Create` with *cross product* lacing: one test per pair of sets. A re-run finds the tests already there and keeps them with their results (`ifExists` is `reuse`); choose `update` to apply new selections to them, `replace` to start them empty.
 
-**Triage and report.** `Clash.Tests` → `Clash.SummaryTable` (clash counts per test and status, as `rows` and `headers`) → `Table.FromRows` → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the test with the most clashes first. For one test floor by floor, take it with `List.GetItemAtIndex` and use `Clash.GroupResultsByLevel` (it takes the test, your level names and their elevations); `ClashTest.Results` and `Clash.FilterByStatus` work on the results of a test.
+**Triage and report.** `Clash.Tests` → `Clash.SummaryTable` (clash counts per test and status, as `rows` and `headers`, or as one `table`) → `Table.FromRows` (not needed with the `table` output) → `Report.Html` → `Text.WriteToFile`. Add `Table.Sort` before the report to put the test with the most clashes first. For one test floor by floor, take it with `List.GetItemAtIndex` and use `Clash.GroupResultsByLevel` (it takes the test, your level names and their elevations); `ClashTest.Results` and `Clash.FilterByStatus` work on the results of a test.
 
 **Keep a history.** `DateTime.Now` → `DateTime.Format` for the file name; `Clash.SnapshotToFile` each week, `Clash.CompareSnapshots` against last week's file; `CSV.AppendToFile` adds one row of totals per run instead of overwriting.
 
@@ -29,17 +29,17 @@ Two ideas make most of these short:
 
 **Naming rule.** `Properties.ToTable` with the Name and category columns → `Table.Filter` (`regex`, `!matches` or `isEmpty`) → `Watch Table` for the offenders, `Table.ToExcelFile` for the list to send.
 
-**Status colours.** `Logic.Switch` maps a status text to a colour name; or `Color.Palette` (colour-blind safe) with `Appearance.ColorByValues`.
+**Status colours.** `Logic.Switch` maps a status text to a colour name, and a whole column of statuses to a column of colours (a list on `value` is looked up element by element); or `Color.Palette` (colour-blind safe) with `Appearance.ColorByValues`.
 
 **Track change between two states.** `Model.Snapshot` on the item set (a GUID → property values map) saved with `JSON.WriteToFile`; later `JSON.ReadFromFile` and `Snapshot.Diff` against a fresh snapshot.
 
 ## Model maintainer / compiler
 
-**Compile the newest files.** `Directory.FindFiles` (pattern `*.nwc;*.nwd`, sort *modified*, descending) → `Document.AppendFiles` → `Document.Save`. Put `Flow.Try` after a risky step so one bad file is logged with `Log.Write` instead of stopping the run.
+**Compile the newest files.** `Directory.Find` (pattern `*.nwc;*.nwd`, *Advanced* > sortBy *modified*, descending) → `Document.AppendFiles` → `Document.Save`. Put `Flow.Try` after a risky step so one bad file is logged with `Log.Write` instead of stopping the run.
 
 **Keep a log.** `Log.Write` appends a time-stamped line (`INFO`, `WARN`, `ERROR`); feed it the message from `String.Format` (`{0} files appended in {1} s`).
 
-**Housekeeping on disk.** `File.Info` (size, modified) for a report, `File.Copy` / `File.Move` for archiving, `Zip.Create` for the deliverable. These change files, so the Script Player asks before running a script that holds them.
+**Housekeeping on disk.** `File.Info` (size, modified) for a report, `File.Copy` / `File.Move` (and `Directory.Copy` / `Directory.Move` for whole folders) for archiving, `Zip.Create` for the deliverable. These change files, so the Script Player asks before running a script that holds them.
 
 **Sets and views.** `SelectionSet.Info` (kind, item count) over `SelectionSets.All` finds empty or stale sets; `SelectionSet.Duplicate` and `SavedViewpoint.Update` re-use what exists.
 
@@ -49,13 +49,13 @@ Two ideas make most of these short:
 
 **Run another program, call a service.** `System.Run` (exit code, output, error) and `Web.Get` / `Web.Post` (status, body); both need `Flow.Try` around them if a failure should not stop the graph. `Flow.Wait` gives an external tool time to finish writing.
 
-**Pick the branch.** `Logic.Choose` (by position) or `Logic.Switch` (by matching value) for more than two ways; `If` for two.
+**Pick the branch.** `Logic.Choose` (by position) or `Logic.Switch` (by matching value) for more than two ways; `If` for two. They only pick a value: every branch is computed whichever is picked, so to skip nodes use `Flow.When`.
 
 ## Open BIM integration
 
 **IFC GlobalId bridge.** `ModelItem.IfcGuid` gives an item's 22-character IFC GlobalId; `IFC.GuidDecode` / `IFC.GuidEncode` convert to and from the standard GUID other tools use; `Search.ByGuid` finds the items for a list of either form (the ones it could not find come out of a second socket).
 
-**COBie / classification sheets.** `Table.FromExcelFile` → `Table.Join` against `Properties.ToTable` on the GUID column → `Properties.SetCustom` per row writes the classification onto the items.
+**COBie / classification sheets.** `Table.FromExcelFile` → `Table.Join` against `Properties.ToTable` on the GUID column → `Properties.SetCustomFromTable` (key column = the GUID column) writes each row's classification onto its item.
 
 **IDS-style requirement check.** A requirements sheet (category, property, expected pattern) read with `Table.FromExcelFile`; for each row `Search.ByProperty` + `List.FilterByValue` (`regex`) → failing items to `Table.ToExcelFile` with the reason.
 
@@ -67,7 +67,7 @@ Two ideas make most of these short:
 
 **Cross-tab.** `Table.Pivot` with rows = level, columns = status and *count*: clashes (or items) by level and status.
 
-**Distribution.** `List.Histogram` for the bins, `List.Statistics` for count / min / max / average / median in one node, `List.CountBy` for "how many of each".
+**Distribution.** `List.Histogram` for the bins, `List.Statistics` for count / min / max / average / median in one node, `List.CountValues` for "how many of each".
 
 **Duplicates.** `List.Duplicates` over the GUID or mark list; `Table.Distinct` on a table.
 
@@ -77,7 +77,7 @@ Two ideas make most of these short:
 
 **Everything but the selection.** `Selection.Invert` → `Appearance.Hide`; `Selection.Remove` takes items out of the current selection.
 
-**Standard views.** `Camera.SetStandardView` (top, front, iso …) zoomed to a set, then `Viewpoint.SaveCurrent` per level.
+**Standard views.** `Camera.SetStandardView` (top, front, iso …) zoomed to a set, then `Viewpoint.Save` per level (give `folder` to file them in a folder).
 
 **Move and scale.** `ModelItem.MoveTo` puts an assembly's centre on a point; `ModelItem.Scale` scales about a point (a transform override, not a change to the model file).
 

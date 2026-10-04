@@ -484,7 +484,11 @@ public class OldGraphFilesTests
                     problems.Add(portLabel + ": the typed-in value " + (userValue.Value ?? "null") + " was dropped.");
                 }
 
-                if (saved.Value<bool?>("UsingDefaultValue") == true && !(port.HasDefault && port.UsingDefaultValue))
+                // An optional socket of an earlier version that was folded into a multi-input port ([PortAlias], as Flow.Then's
+                // after2 and after3 were) and was left unused in the file: a multi-input port takes any number of wires, so
+                // the empty socket has nothing to lose.
+                var foldedIntoMultiInput = port.IsMultiInput && name != port.Name;
+                if (saved.Value<bool?>("UsingDefaultValue") == true && !foldedIntoMultiInput && !(port.HasDefault && port.UsingDefaultValue))
                 {
                     problems.Add(portLabel + " used its default in the file but " + (port.HasDefault ? "no longer does" : "has no default now") + ".");
                 }

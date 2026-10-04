@@ -92,7 +92,7 @@ On nodes that read a property of an element, the **tab** (category) and **proper
 * Nothing is read until you press the magnifier.
 * Only that element is read, at most the first 100 if the input carries a longer list. The model is never searched to fill the list.
 * Pick an element on the node, or wire one in and run the graph, before you search.
-* On `Search.ByProperty`, `Search.HasProperty`, `Search.HasCategory`, `SelectionSet.CreateFromSearch` and `SelectionSets.BulkByPropertyValues` there is no element input, so the magnifier lists the tabs and properties of the **elements selected in Navisworks right now**.
+* On `Search.ByProperty`, `SelectionSet.CreateFromSearch` and `SelectionSets.BulkByPropertyValues` there is no element input, so the magnifier lists the tabs and properties of the **elements selected in Navisworks right now**.
 
 ![The magnifier popup on Properties.Value, listing tab names.](../images/wiki-magnifier.png)
 
@@ -123,7 +123,7 @@ When a conversion fails, the node shows a warning or an error that names the inp
 
 ## The Watch nodes
 
-Wire any output into a **Watch** node to see the value: **Watch** (text), **Watch List** (one entry per line, with an index gutter), **Watch Table** (a table) and **Watch Image** (a picture, such as a heat-map PNG). Under every node, **value previews** show the first results after a run (toggle with **Preview** in the toolbar); click a preview that says "… N more" to expand the full list.
+Wire any output into a **Watch** node to see the value: **Watch** (text), **Watch List** (one entry per line, with an index gutter), **Watch Table** (a table) and **Watch Image** (a picture, such as a heat-map PNG). Under every node, **value previews** show the first results after a run (toggle with **Preview** in the toolbar); click a preview that says "… N more" to expand the full list. The Watch nodes cap what they draw so a big model cannot freeze the canvas: **Watch** writes the first 1,000 items of a list and counts the rest, **Watch List** draws the first 2,000 entries, **Watch Table** the first 2,000 rows; the value passes on whole. **Watch Image** accepts a list of paths and shows the first picture with "(1 of N)". When a Watch node does not run (the node before it failed, was switched off or is unwired) it clears its display instead of keeping the last value.
 
 ![A Watch Table close up: a grouped table with a row for each category.](../images/wiki-watch-table.png)
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
+using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks.Internal;
 
@@ -94,7 +96,8 @@ internal static class ClashHelpers
     /// (selections, tolerance, type) and silently ignores the children, so
     /// regrouping through it reports success while the Clash Detective tree
     /// stays untouched. Wrapped in a document transaction so a regroup is one
-    /// undo step, matching Navisworks' own grouping commands.
+    /// undo step, matching Navisworks' own grouping commands. A test inside a Clash Detective folder is replaced in its
+    /// folder (the parent overload of <c>TestsReplaceWithCopy</c>), not looked for at the top level only.
     /// </summary>
     /// <param name="doc">The document owning the clash data.</param>
     /// <param name="clash">The Clash Detective document part.</param>
@@ -105,19 +108,27 @@ internal static class ClashHelpers
     internal static ClashTest CommitTestTree(
         Document doc, DocumentClash clash, ClashTest stored, ClashTest editedCopy, string undoLabel)
     {
-        var index = IndexOfTest(clash, stored);
-        if (index < 0)
+        // The test may sit in a Clash Detective folder: replace it in the folder that holds it.
+        if (!TryLocateTest(clash, stored, out var parent, out var index))
         {
             throw new InvalidOperationException(
-                "The clash test '" + stored.DisplayName + "' is no longer in the document — it may have been " +
-                "deleted or renamed while the graph ran.");
+                "The clash test '" + stored.DisplayName + "' is no longer in the document (not at the top level and not " +
+                "inside a folder) — it may have been deleted or renamed while the graph ran.");
         }
 
         var guid = stored.Guid;
         var name = stored.DisplayName;
         using (var transaction = doc.BeginTransaction(undoLabel))
         {
-            clash.TestsData.TestsReplaceWithCopy(index, editedCopy);
+            if (parent == null)
+            {
+                clash.TestsData.TestsReplaceWithCopy(index, editedCopy);
+            }
+            else
+            {
+                clash.TestsData.TestsReplaceWithCopy(parent, index, editedCopy);
+            }
+
             transaction.Commit();
         }
 
@@ -147,26 +158,114 @@ internal static class ClashHelpers
             "Flow.Then to order it after any earlier grouping edit.", inner);
     }
 
-    /// <summary>Position of a stored test among the top-level tests, by identity (-1 when absent).</summary>
-    internal static int IndexOfTest(DocumentClash clash, ClashTest test)
+    /// <summary>
+    /// Where a stored test sits in the tests tree: the folder that holds it (null for a top-level test) and its position
+    /// there. A test is recognised by reference, then by Guid, then (when it has none) by display name, in folders as well
+    /// as at the top level.
+    /// </summary>
+    /// <param name="clash">The Clash Detective document part.</param>
+    /// <param name="test">The stored test to find.</param>
+    /// <param name="parent">The folder holding the test, or null at the top level.</param>
+    /// <param name="index">The test's position in its folder, or -1 when absent.</param>
+    /// <returns>True when the test is in the document.</returns>
+    internal static bool TryLocateTest(DocumentClash clash, ClashTest test, out GroupItem? parent, out int index)
     {
-        var tests = clash.TestsData.Tests;
-        for (int i = 0; i < tests.Count; i++)
-        {
-            if (!(tests[i] is ClashTest candidate))
-            {
-                continue;
-            }
+        var guid = test.Guid;
+        var name = test.DisplayName;
+        var found = SavedTreeLocator.TryFind<SavedItem>(
+            clash.TestsData.Tests,
+            item => item is ClashTest candidate &&
+                    (ReferenceEquals(candidate, test) ||
+                     (guid != Guid.Empty && candidate.Guid == guid) ||
+                     (guid == Guid.Empty && string.Equals(candidate.DisplayName, name, StringComparison.Ordinal))),
+            item => item is GroupItem folder && !(item is ClashTest) ? folder.Children : null,
+            out var holder,
+            out index);
+        parent = holder as GroupItem;
+        return found;
+    }
 
-            if (ReferenceEquals(candidate, test) ||
-                (test.Guid != Guid.Empty && candidate.Guid == test.Guid) ||
-                (test.Guid == Guid.Empty && string.Equals(candidate.DisplayName, test.DisplayName, StringComparison.Ordinal)))
+    /// <summary>
+    /// The first test with the given name at the top level or inside folders (only folders are descended into, never the
+    /// results of a test). Null when there is none.
+    /// </summary>
+    internal static ClashTest? FindTestByName(IEnumerable<SavedItem> items, string name)
+    {
+        foreach (var item in items)
+        {
+            if (item is ClashTest test)
             {
-                return i;
+                if (string.Equals(test.DisplayName, name, StringComparison.Ordinal))
+                {
+                    return test;
+                }
+            }
+            else if (item is FolderItem folder)
+            {
+                var inner = FindTestByName(folder.Children, name);
+                if (inner != null)
+                {
+                    return inner;
+                }
             }
         }
 
-        return -1;
+        return null;
+    }
+
+    /// <summary>The first Clash Detective folder with the given name, at any depth. Null when there is none.</summary>
+    internal static FolderItem? FindFolder(IEnumerable<SavedItem> items, string name)
+    {
+        foreach (var item in items)
+        {
+            if (item is FolderItem folder)
+            {
+                if (string.Equals(folder.DisplayName, name, StringComparison.Ordinal))
+                {
+                    return folder;
+                }
+
+                var inner = FindFolder(folder.Children, name);
+                if (inner != null)
+                {
+                    return inner;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Applies a type, tolerance and the two selections to a stored test IN PLACE (its results, statuses, comments and groups are
+    /// kept), the way ClashTest.Edit does: edit a detached copy, then write its settings back with <c>TestsEditTestFromCopy</c>.
+    /// </summary>
+    /// <returns>The stored test after the edit (re-located; the old wrapper may be stale).</returns>
+    internal static ClashTest UpdateTestSettings(
+        Document doc,
+        DocumentClash clash,
+        ClashTest stored,
+        ClashTestType testType,
+        double tolerance,
+        IEnumerable<ModelItem> itemsA,
+        IEnumerable<ModelItem> itemsB)
+    {
+        var guid = stored.Guid;
+        var name = stored.DisplayName;
+        using (var transaction = doc.BeginTransaction("Update clash test"))
+        {
+            var copy = (ClashTest)stored.CreateCopy();
+            copy.TestType = testType;
+            copy.Tolerance = tolerance;
+            copy.SelectionA.Selection.CopyFrom(NavisValues.ToItemCollection(itemsA));
+            copy.SelectionB.Selection.CopyFrom(NavisValues.ToItemCollection(itemsB));
+            clash.TestsData.TestsEditTestFromCopy(stored, copy);
+            transaction.Commit();
+        }
+
+        return FindStoredTest(clash, guid, name)
+            ?? throw new InvalidOperationException(
+                "The clash test '" + name + "' could not be found after it was updated.");
     }
 
     /// <summary>
@@ -215,6 +314,139 @@ internal static class ClashHelpers
     internal static void FlattenResultsWithGroups(ClashTest test, List<ClashResult> results, List<string> groupNames)
     {
         CollectResults(test.Children, string.Empty, results, groupNames);
+    }
+
+    /// <summary>
+    /// The shared body of the nodes that edit one result, one result group, or a whole list of them
+    /// (ClashResult.SetStatus, .Assign, .SetDescription). The input is unpacked (a nested list is flattened), every entry must be a
+    /// clash result or a result group, and the edits of one call run inside ONE document transaction, so a list handed over whole
+    /// is one undo step and one Clash Detective refresh instead of one per result.
+    /// </summary>
+    /// <param name="input">The wired result(s), as they came in.</param>
+    /// <param name="document">The document (null = the active document).</param>
+    /// <param name="undoLabel">Label for the undo entry.</param>
+    /// <param name="edit">The edit for one result or group.</param>
+    /// <returns>The input, as it came in (a single result stays a single result, a list stays a list).</returns>
+    internal static object? EditResults(
+        object? input, Document? document, string undoLabel, Action<DocumentClash, IClashResult> edit)
+    {
+        if (input == null)
+        {
+            throw new ArgumentNullException(nameof(input), "No clash result provided.");
+        }
+
+        var unpacked = ClashInputs.Flatten<IClashResult>(input);
+        if (unpacked.FirstWrong != null)
+        {
+            throw new ArgumentException(
+                DescribeValue(unpacked.FirstWrong) + " is not a clash result or a result group. " +
+                "Wire results from ClashTest.Results (or a filter of them) or a group from ClashTest.Groups.", nameof(input));
+        }
+
+        if (unpacked.SkippedNulls > 0)
+        {
+            NodeWarnings.Add(
+                unpacked.SkippedNulls + " empty entr" + (unpacked.SkippedNulls == 1 ? "y" : "ies") + " in the result list " +
+                (unpacked.SkippedNulls == 1 ? "was" : "were") + " skipped.");
+        }
+
+        if (unpacked.Items.Count == 0)
+        {
+            NodeWarnings.Add("No clash results were given, so nothing was changed.");
+            return input;
+        }
+
+        var doc = NavisworksContext.ResolveDocument(document);
+        var clash = RequireClash(doc);
+        try
+        {
+            using (var transaction = doc.BeginTransaction(undoLabel))
+            {
+                foreach (var item in unpacked.Items)
+                {
+                    edit(clash, item);
+                }
+
+                transaction.Commit();
+            }
+        }
+        catch (Exception ex) when (IsDisposed(ex))
+        {
+            throw StaleInputError("clash results", ex);
+        }
+
+        return input;
+    }
+
+    /// <summary>A wired value in words for an error message: a saved item by its name, a text as it is, anything else by its kind.</summary>
+    private static string DescribeValue(object value)
+    {
+        if (value is SavedItem saved)
+        {
+            return string.IsNullOrEmpty(saved.DisplayName) ? "An unnamed " + saved.GetType().Name : "'" + saved.DisplayName + "'";
+        }
+
+        if (value is string text)
+        {
+            return "'" + text + "'";
+        }
+
+        var name = value.GetType().Name;
+        var tick = name.IndexOf('`');
+        return "A value of type " + (tick > 0 ? name.Substring(0, tick) : name);
+    }
+
+    /// <summary>
+    /// The assignee of a clash result as text, on every Navisworks year: a string through 2025, an Assignee object in 2026
+    /// (its display name). Empty when nobody is assigned.
+    /// </summary>
+    internal static string AssigneeText(IClashResult result)
+    {
+#if NAV2026
+        return result.AssignedTo?.ToString() ?? string.Empty;
+#else
+        return result.AssignedTo ?? string.Empty;
+#endif
+    }
+
+    /// <summary>
+    /// The name of the test a result or group belongs to and of the nearest result group around it, found by walking its parents
+    /// (empty when it has none, e.g. a detached copy or an ungrouped result).
+    /// </summary>
+    internal static void OwnerNames(SavedItem item, out string testName, out string groupName)
+    {
+        testName = string.Empty;
+        groupName = string.Empty;
+        for (var current = item.Parent; current != null; current = current.Parent)
+        {
+            if (current is ClashTest test)
+            {
+                testName = test.DisplayName ?? string.Empty;
+                return;
+            }
+
+            if (groupName.Length == 0 && current is ClashResultGroup group)
+            {
+                groupName = group.DisplayName ?? string.Empty;
+            }
+        }
+    }
+
+    /// <summary>Every result and every result group under a test's children, each with its Guid (groups are descended into).</summary>
+    internal static void CollectResultsAndGroups(IEnumerable<SavedItem> children, List<KeyValuePair<Guid, SavedItem>> into)
+    {
+        foreach (var child in children)
+        {
+            if (child is ClashResult)
+            {
+                into.Add(new KeyValuePair<Guid, SavedItem>(child.Guid, child));
+            }
+            else if (child is ClashResultGroup group)
+            {
+                into.Add(new KeyValuePair<Guid, SavedItem>(group.Guid, group));
+                CollectResultsAndGroups(group.Children, into);
+            }
+        }
     }
 
     /// <summary>Parses a clash result status name (New/Active/Reviewed/Approved/Resolved).</summary>

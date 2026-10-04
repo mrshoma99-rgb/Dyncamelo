@@ -26,7 +26,7 @@ namespace CamelGraph.Navisworks;
 public static class RedlineNodes
 {
     /// <summary>Adds a text markup to a saved viewpoint.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="text">The text to draw.</param>
     /// <param name="x">Markup-space X of the text anchor (0 = view centre).</param>
     /// <param name="y">Markup-space Y of the text anchor (0 = view centre).</param>
@@ -35,14 +35,15 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddText")]
-    [NodeDescription("EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List. Wire a list of viewpoints and every one gets the text.")]
     [NodeSearchTags("markup", "redline", "text", "annotate", "label", "viewpoint", "tag")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddText(
-        object viewpoint,
+        [ScalarInput] object viewpoint,
         string text,
-        double x,
-        double y,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -57,7 +58,7 @@ public static class RedlineNodes
     }
 
     /// <summary>Adds a line, arrow or ellipse markup to a saved viewpoint.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="shape">line, arrow (points from start to end) or ellipse (fitted to the corner-to-corner box).</param>
     /// <param name="x1">Markup-space X of the start point (tail, or first box corner).</param>
     /// <param name="y1">Markup-space Y of the start point.</param>
@@ -68,17 +69,18 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddShape")]
-    [NodeDescription("EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the shape.")]
     [NodeSearchTags("markup", "redline", "line", "arrow", "ellipse", "circle", "shape", "draw", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddShape(
-        object viewpoint,
+        [ScalarInput] object viewpoint,
         [NodeChoices("line", "arrow", "ellipse")]
         string shape,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -97,7 +99,7 @@ public static class RedlineNodes
     }
 
     /// <summary>Adds a straight line markup to a saved viewpoint.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="x1">Markup-space X of the start point.</param>
     /// <param name="y1">Markup-space Y of the start point.</param>
     /// <param name="x2">Markup-space X of the end point.</param>
@@ -108,15 +110,16 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddLine")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws a line redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "line", "draw", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddLine(
-        object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [ScalarInput] object viewpoint,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -126,7 +129,7 @@ public static class RedlineNodes
     }
 
     /// <summary>Adds an arrow markup to a saved viewpoint (points from start to end).</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="x1">Markup-space X of the arrow tail.</param>
     /// <param name="y1">Markup-space Y of the arrow tail.</param>
     /// <param name="x2">Markup-space X of the arrow head.</param>
@@ -137,15 +140,16 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddArrow")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws an arrow redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "arrow", "pointer", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddArrow(
-        object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [ScalarInput] object viewpoint,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -155,7 +159,7 @@ public static class RedlineNodes
     }
 
     /// <summary>Adds an ellipse markup to a saved viewpoint (fits the corner-to-corner box).</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="x1">Markup-space X of the first box corner.</param>
     /// <param name="y1">Markup-space Y of the first box corner.</param>
     /// <param name="x2">Markup-space X of the opposite corner.</param>
@@ -166,15 +170,16 @@ public static class RedlineNodes
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddEllipse")]
     [NodeDeprecated("Markup.AddShape")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeDescription("EXPERIMENTAL: draws an ellipse redline on a saved viewpoint, fitted corner-to-corner (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.")]
     [NodeSearchTags("markup", "redline", "ellipse", "circle", "ring", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddEllipse(
-        object viewpoint,
-        double x1,
-        double y1,
-        double x2,
-        double y2,
+        [ScalarInput] object viewpoint,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y1,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x2,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y2,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
         Document? document = null)
@@ -184,18 +189,19 @@ public static class RedlineNodes
     }
 
     /// <summary>Adds a revision-cloud markup through the given points.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="points">Cloud outline: a list of [x, y] pairs, or a flat list x1, y1, x2, y2, … (3+ points).</param>
     /// <param name="color">Line colour: a Color, hex "#RRGGBB" or [r,g,b] (empty keeps the Navisworks default).</param>
     /// <param name="thickness">Line thickness in pixels.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddCloud")]
-    [NodeDescription("EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list. Wire a list of viewpoints and every one gets the cloud (the points input stays one outline).")]
     [NodeSearchTags("markup", "redline", "cloud", "revision", "revcloud", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddCloud(
-        object viewpoint,
+        [ScalarInput] object viewpoint,
         IList<object?> points,
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
@@ -225,7 +231,7 @@ public static class RedlineNodes
     /// comment attached to the viewpoint. A substitute for Navisworks tags —
     /// real Find-Tags tags have no public API.
     /// </summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="number">The tag number to draw.</param>
     /// <param name="x">Markup-space X of the tag centre.</param>
     /// <param name="y">Markup-space Y of the tag centre.</param>
@@ -236,15 +242,16 @@ public static class RedlineNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.AddNumberTag")]
-    [NodeDescription("EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the tag.")]
     [NodeSearchTags("markup", "redline", "tag", "number", "bubble", "comment", "viewpoint")]
     [return: NodeName("viewpoint")]
     public static SavedViewpoint AddNumberTag(
-        object viewpoint,
+        [ScalarInput] object viewpoint,
         int number,
-        double x,
-        double y,
-        double radius = 0.08,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double x,
+        [NodeRange(-1000, 1000, SoftMin = -1, SoftMax = 1, Step = 0.05)] double y,
+        [NodeRange(0.01, 1, SoftMin = 0.01, SoftMax = 0.5, Step = 0.01)] double radius = 0.08,
         string comment = "",
         [PortKinds("colour")] object? color = null,
         [NodeRange(1, 20)] int thickness = 2,
@@ -268,15 +275,15 @@ public static class RedlineNodes
     }
 
     /// <summary>Reads the markups stored on a saved viewpoint.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>Markup count, per-markup type names, texts (empty for shapes) and anchor positions as [x, y] — the calibration reference for the Add nodes.</returns>
     [NodeName("Markup.List")]
-    [NodeDescription("EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.")]
+    [NodeDescription("EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes. Wire a list of viewpoints and you get one result per viewpoint.")]
     [NodeSearchTags("markup", "redline", "list", "read", "count", "calibrate", "viewpoint")]
     [MultiReturn("count", "types", "texts", "positions")]
     [PortKinds("integer", "text*", "text*", "")]
-    public static Dictionary<string, object?> List(object viewpoint, Document? document = null)
+    public static Dictionary<string, object?> List([ScalarInput] object viewpoint, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var stored = SavedItemTreeHelpers.ResolveStored<SavedViewpoint>(
@@ -323,14 +330,15 @@ public static class RedlineNodes
     }
 
     /// <summary>Removes every markup from a saved viewpoint.</summary>
-    /// <param name="viewpoint">The saved viewpoint (or its name).</param>
+    /// <param name="viewpoint">The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored viewpoint (pass-through for chaining).</returns>
     [NodeName("Markup.Clear")]
-    [NodeDescription("EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API).")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API). Wire a list of viewpoints and every one is cleared.")]
     [NodeSearchTags("markup", "redline", "clear", "delete", "remove", "viewpoint")]
     [return: NodeName("viewpoint")]
-    public static SavedViewpoint Clear(object viewpoint, Document? document = null)
+    public static SavedViewpoint Clear([ScalarInput] object viewpoint, Document? document = null)
     {
         return EditRedlines(viewpoint, document, list => list.Clear());
     }

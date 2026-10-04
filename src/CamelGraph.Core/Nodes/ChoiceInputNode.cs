@@ -85,6 +85,9 @@ public class ChoiceInputNode : NodeModel, IPlayerInputNode
     public override string NodeType => TypeName;
 
     /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "dropdown", "select", "option", "pick", "choose", "menu", "combo" };
+
+    /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
 
     /// <inheritdoc />
@@ -124,9 +127,16 @@ public class ChoiceInputNode : NodeModel, IPlayerInputNode
     /// <inheritdoc />
     public override void DeserializeData(JObject data)
     {
-        // Options first: setting them re-validates the value.
+        // Options first, then the value: a choice that is not on offer (a hand-edited file, options changed since) falls back to
+        // the first option, as it does when the options are edited in the editor, so the property agrees with the output.
         _optionsText = data.Value<string>("Options") ?? _optionsText;
         _value = data.Value<string>("Value") ?? string.Empty;
+        var options = Options;
+        if (!options.Contains(_value))
+        {
+            _value = options.Count > 0 ? options[0] : string.Empty;
+        }
+
         OnPropertyChanged(nameof(OptionsText));
         OnPropertyChanged(nameof(Options));
         OnPropertyChanged(nameof(Value));

@@ -53,33 +53,81 @@ public static class NodeGroupOps
     // ----- make a group ---------------------------------------------------------------------------
 
     /// <summary>
+    /// True for a node the Script Player uses: an input node it offers as a field, a Watch node (or any node the author marked) it shows
+    /// as a result, or a node with an input offered as a field. The Player reads the top level of the script only, so such a node
+    /// stays outside a node group.
+    /// </summary>
+    /// <param name="node">Any node.</param>
+    public static bool IsPlayerFacing(NodeModel node)
+    {
+        if (node == null)
+        {
+            throw new ArgumentNullException(nameof(node));
+        }
+
+        return CamelGraph.Core.Player.ScriptSession.IsFormNode(node)
+               || CamelGraph.Core.Player.ScriptSession.IsResultNode(node)
+               || node.InPorts.Any(p => p.PlayerExposed);
+    }
+
+    /// <summary>
     /// Whether <paramref name="selection"/> can become a group. It cannot when it is empty, holds a group's own Group Input /
     /// Group Output, splits a loop from its collect, or has an unselected node sitting between selected ones (that node would
-    /// have to be both inside and outside).
+    /// have to be both inside and outside). Nodes the Script Player uses (see <see cref="IsPlayerFacing"/>) are not counted: they
+    /// stay outside the group, so a selection of nothing else cannot become a group, and one that sits between the others cannot either.
     /// </summary>
     public static bool CanMakeGroup(GraphModel graph, IReadOnlyCollection<NodeModel> selection, out string reason)
+    {
+        return Plan(graph, selection, out _, out _, out reason);
+    }
+
+    // Splits a selection into the nodes that go into the group and the Player-facing ones that stay outside, and checks the result.
+    private static bool Plan(GraphModel graph, IReadOnlyCollection<NodeModel> selection, out HashSet<NodeModel> set, out List<NodeModel> stayingOut, out string reason)
+    {
+        set = new HashSet<NodeModel>();
+        stayingOut = new List<NodeModel>();
+        return Plan(graph, selection, set, stayingOut, out reason);
+    }
+
+    private static bool Plan(GraphModel graph, IReadOnlyCollection<NodeModel> selection, HashSet<NodeModel> set, List<NodeModel> stayingOut, out string reason)
     {
         if (graph == null)
         {
             throw new ArgumentNullException(nameof(graph));
         }
 
-        var set = new HashSet<NodeModel>(selection ?? new NodeModel[0]);
-        if (set.Count == 0)
+        var requested = new HashSet<NodeModel>(selection ?? new NodeModel[0]);
+        set.UnionWith(requested);
+        if (requested.Count == 0)
         {
             reason = "Select the nodes to put in a group first.";
             return false;
         }
 
-        if (set.Any(n => n.Graph != graph))
+        if (requested.Any(n => n.Graph != graph))
         {
             reason = "Those nodes are not on this canvas.";
             return false;
         }
 
-        if (set.Any(n => n is GroupInputNode || n is GroupOutputNode))
+        if (requested.Any(n => n is GroupInputNode || n is GroupOutputNode))
         {
             reason = "Group Input and Group Output belong to the group they are in; select the other nodes.";
+            return false;
+        }
+
+        // Input nodes and Watch nodes the Player uses stay where the Player can see them; their wires become the group's sockets.
+        // (Inside an open group nothing reaches the Player anyway, so every node may go into a group made there.)
+        if (graph.OwnerGroup == null)
+        {
+            stayingOut.AddRange(graph.Nodes.Where(n => requested.Contains(n) && IsPlayerFacing(n)));
+        }
+
+        set.ExceptWith(stayingOut);
+        if (set.Count == 0)
+        {
+            reason = "Nothing to group: the Script Player uses all of these nodes (" + string.Join(", ", stayingOut.Select(n => n.Name)) +
+                     "), so they stay outside a group. Select the nodes that do the work.";
             return false;
         }
 
@@ -105,7 +153,10 @@ public static class NodeGroupOps
         var between = GraphOps.Downstream(graph, set).Intersect(GraphOps.Upstream(graph, set)).FirstOrDefault(n => !set.Contains(n));
         if (between != null)
         {
-            reason = "'" + between.Name + "' sits between the selected nodes; select it too.";
+            reason = stayingOut.Contains(between)
+                ? "'" + between.Name + "' is used by the Script Player, so it must stay outside the group, but it sits between the nodes that go in. " +
+                  "Hide it from the Player (Node \u25B8 Show / Hide in Player) or leave out the nodes after it."
+                : "'" + between.Name + "' sits between the selected nodes; select it too.";
             return false;
         }
 
@@ -124,12 +175,11 @@ public static class NodeGroupOps
     /// <param name="undo">Receives the undo step; null for none.</param>
     public static NodeGroupResult MakeGroup(GraphModel graph, IReadOnlyCollection<NodeModel> selection, string? name, UndoManager? undo)
     {
-        if (!CanMakeGroup(graph, selection, out var reason))
+        if (!Plan(graph, selection, out var set, out var stayingOut, out var reason))
         {
             return NodeGroupResult.Fail(reason);
         }
 
-        var set = new HashSet<NodeModel>(selection);
         var nodes = graph.Nodes.Where(set.Contains).ToList();
         var within = graph.Connections.Where(c => set.Contains(c.SourceNode) && set.Contains(c.TargetNode)).ToList();
         var entering = graph.Connections.Where(c => !set.Contains(c.SourceNode) && set.Contains(c.TargetNode))
@@ -254,7 +304,10 @@ public static class NodeGroupOps
             return NodeGroupResult.Ok(
                 "Made node group '" + group.Name + "' from " + nodes.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) +
                 " node(s): " + group.Inputs.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " input(s), " +
-                group.Outputs.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " output(s).",
+                group.Outputs.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " output(s)." +
+                (stayingOut.Count == 0
+                    ? string.Empty
+                    : " Kept outside the group because the Player uses them: " + string.Join(", ", stayingOut.Select(n => n.Name)) + "."),
                 group,
                 instance);
         }

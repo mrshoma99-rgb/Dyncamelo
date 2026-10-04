@@ -26,7 +26,8 @@ public static class AppearanceExtraNodes
         "Focus on some items: they stay as they are and everything else in the model fades by otherTransparency percent " +
         "(0 = opaque, 100 = invisible) with a TEMPORARY transparency override — the Action.Ghost look in one node, no " +
         "permanent change. With resetFirst on, every temporary override is cleared first; undo it later with " +
-        "Appearance.ResetTemporary. Touches every item in the model, so allow a moment on large models.")]
+        "Appearance.ResetTemporary. The scale is percent here; Appearance.OverrideTransparencyTemporary and Action.Ghost take 0 to 1. " +
+        "Touches every item in the model, so allow a moment on large models.")]
     [NodeSearchTags("appearance", "focus", "ghost", "fade", "transparency", "context", "highlight", "isolate", "temporary")]
     [return: NodeName("items")]
     public static List<ModelItem> Focus(

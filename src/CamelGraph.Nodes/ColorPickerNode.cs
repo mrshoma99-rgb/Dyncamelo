@@ -25,7 +25,7 @@ public class ColorPickerNode : NodeModel, IPlayerInputNode
     public ColorPickerNode()
     {
         Name = "Color Picker";
-        Category = "Color";
+        Category = "Input";
         Description = "A color chosen with a picker.";
         AddOutput("color", typeof(CamelGraphColor), "The chosen color.");
     }
@@ -83,6 +83,9 @@ public class ColorPickerNode : NodeModel, IPlayerInputNode
 
     /// <inheritdoc />
     public override string NodeType => TypeName;
+
+    /// <inheritdoc />
+    public override System.Collections.Generic.IReadOnlyList<string> SearchTags { get; } = new[] { "colour", "swatch", "palette", "hue", "paint" };
 
     /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Create;
