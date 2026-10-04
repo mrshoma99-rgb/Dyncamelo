@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
+using CamelGraph.Core.Files;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
+using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks;
 
@@ -18,43 +21,36 @@ public static class ClashDeltaNodes
 {
     /// <summary>Persists a clash-run snapshot to a JSON file.</summary>
     /// <param name="filePath">Destination .json path; the directory is created when missing.</param>
-    /// <param name="tests">The tests to snapshot (empty/unwired = every test in the document).</param>
+    /// <param name="tests">The tests to snapshot. Leave unwired for every test in the document; a wired list means exactly those tests, and an empty list writes a snapshot without results.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The written path and the number of results captured.</returns>
     [NodeName("Clash.SnapshotToFile")]
     [NodeCategory("Navisworks.Clash.Report")]
-    [NodeDescription("Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.WritesFiles)]
+    [NodeDescription("Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path. Leave tests unwired for every test in the document; a wired list means exactly those tests, so an empty list (a filter that found no test) writes a snapshot with no results and says so. A relative file path means next to the graph.")]
     [NodeSearchTags("clash", "snapshot", "save", "history", "delta", "baseline", "json")]
     [MultiReturn("filePath", "resultCount")]
     [PortKinds("file", "integer")]
     public static Dictionary<string, object?> SnapshotToFile(
-        string filePath,
-        IEnumerable<ClashTest>? tests = null,
+        [NodePath(NodePathMode.Save, Filter = "Clash snapshots (*.json)|*.json")] string filePath,
+        [MultiInput] IEnumerable<ClashTest>? tests = null,
         Document? document = null)
     {
-        if (string.IsNullOrEmpty(filePath))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             throw new ArgumentException("No file path provided.", nameof(filePath));
         }
 
+        // A relative path means next to the graph; quotes pasted from Explorer are dropped.
+        filePath = PathResolver.Resolve(filePath);
         var doc = NavisworksContext.ResolveDocument(document);
         var clash = ClashHelpers.RequireClash(doc);
 
-        var testList = new List<ClashTest>();
-        if (tests != null)
-        {
-            foreach (var test in tests)
-            {
-                if (test != null)
-                {
-                    testList.Add(test);
-                }
-            }
-        }
-
+        var testList = ClashInputs.SelectedOrAll<ClashTest>(
+            tests, () => NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests));
         if (testList.Count == 0)
         {
-            testList = NavisValues.FlattenSavedItems<ClashTest>(clash.TestsData.Tests);
+            NodeWarnings.Add("No clash tests were given, so the snapshot holds no results.");
         }
 
         var root = new ClashSnapshotRoot
@@ -112,8 +108,12 @@ public static class ClashDeltaNodes
     [NodeSearchTags("clash", "compare", "delta", "diff", "new", "resolved", "persisting", "report")]
     [MultiReturn("newResults", "resolved", "persisting", "counts")]
     [PortKinds("data*", "data*", "data*", "data")]
-    public static Dictionary<string, object?> CompareSnapshots(string oldPath, string newPath)
+    public static Dictionary<string, object?> CompareSnapshots(
+        [NodePath(NodePathMode.Open, Filter = "Clash snapshots (*.json)|*.json")] string oldPath,
+        [NodePath(NodePathMode.Open, Filter = "Clash snapshots (*.json)|*.json")] string newPath)
     {
+        oldPath = PathResolver.Resolve(oldPath);
+        newPath = PathResolver.Resolve(newPath);
         var oldRoot = ClashSnapshotFile.Read(oldPath);
         var newRoot = ClashSnapshotFile.Read(newPath);
 

@@ -2,14 +2,16 @@ using System;
 using System.Collections.Generic;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Clash;
+using CamelGraph.Core.Execution;
 using CamelGraph.Nodes.Coordination;
 
 namespace CamelGraph.Navisworks.Internal;
 
 /// <summary>
 /// The one place where the "regroup a whole test" nodes (Clash.GroupResultsByStatus, ...ByGridIntersection,
-/// ...BySameItem, ...ByProximity, ...ByLevel) rebuild a stored test's result tree and commit it. Internal — never
-/// surfaced as a node.
+/// ...BySameItem, ...ByProximity, ...ByLevel) rebuild a stored test's result tree and commit it. Every existing group of the
+/// test is dissolved by the rebuild and a bucket of fewer than two results stays loose; both are reported as warnings
+/// (<see cref="ClashRegroupNotes"/>). Internal — never surfaced as a node.
 /// </summary>
 internal static class ClashRegroup
 {
@@ -52,7 +54,32 @@ internal static class ClashRegroup
             detached.Add((ClashResult)result.CreateCopy());
         }
 
-        var layout = ClashGroupLayout.Build(partition(detached));
+        var buckets = partition(detached);
+        var layout = ClashGroupLayout.Build(buckets);
+
+        // Say what the regrouping does to the tree that is there: it dissolves every existing group, and a bucket of one stays loose.
+        var dissolvedGroups = 0;
+        foreach (var child in copy.Children)
+        {
+            if (child is ClashResultGroup)
+            {
+                dissolvedGroups++;
+            }
+        }
+
+        var singleBucketNames = new List<string>();
+        foreach (var bucket in buckets)
+        {
+            if (bucket.Value.Count < 2)
+            {
+                singleBucketNames.Add(bucket.Key);
+            }
+        }
+
+        foreach (var note in ClashRegroupNotes.Build(dissolvedGroups, singleBucketNames, layout.Singles.Count))
+        {
+            NodeWarnings.Add(note);
+        }
 
         copy.Children.Clear();
         foreach (var bucket in layout.Groups)

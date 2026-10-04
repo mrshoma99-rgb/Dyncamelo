@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**580 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**583 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -23,10 +23,10 @@
 | [Navisworks.Analysis](#navisworksanalysis) | 9 |
 | [Navisworks.Appearance](#navisworksappearance) | 13 |
 | [Navisworks.Camera](#navisworkscamera) | 7 |
-| [Navisworks.Clash.Filter](#navisworksclashfilter) | 7 |
+| [Navisworks.Clash.Filter](#navisworksclashfilter) | 8 |
 | [Navisworks.Clash.Group](#navisworksclashgroup) | 9 |
-| [Navisworks.Clash.Report](#navisworksclashreport) | 3 |
-| [Navisworks.Clash.Results](#navisworksclashresults) | 14 |
+| [Navisworks.Clash.Report](#navisworksclashreport) | 4 |
+| [Navisworks.Clash.Results](#navisworksclashresults) | 15 |
 | [Navisworks.Clash.Tests](#navisworksclashtests) | 16 |
 | [Navisworks.Comments](#navisworkscomments) | 4 |
 | [Navisworks.Document](#navisworksdocument) | 9 |
@@ -449,6 +449,7 @@
 | `Clash.FilterByItemProperty` | results, category, property, value1, value2?, mode?, searchAncestors?, caseSensitive? | results | Keeps clashes whose two items' PROPERTY values match a pair of texts, in either order |
 | `Clash.FilterByOrientation` | results, shape1?, shape2? | results | Keeps only the clashes between elements of the given box shapes, matched in either order |
 | `Clash.FilterBySet` | results, set, which?, invert?, document? | results | Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) |
+| `Clash.FilterBySnapshot` | results, snapshotPath, keep? | results, others | Turns "what is new since last week" into live clash results you can select, group, assign or report: compares the results with a snapshot saved by Clash.SnapshotToFile,… |
 | `Clash.FilterByStatus` | results, status | results | Keeps only the clash results with the given status(es) |
 
 ## Navisworks.Clash.Group
@@ -458,8 +459,8 @@
 | `Clash.AllGroups` | document? | groups, names, testNames, counts | Every result group of every clash test in the document, as ONE flat list |
 | `Clash.GroupResults` | results, groupName, moveExisting?, document? | test, group, added, moved, skipped | Puts an explicit list of clash results into a named group in Clash Detective |
 | `Clash.GroupResultsByGridIntersection` | test, document? | test, groupCount | Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g |
-| `Clash.GroupResultsByLevel` | test, levelNames, levelElevations, document? | test, groupCount | Groups a test's results by nearest level below each clash point (wire your level names and elevations) |
-| `Clash.GroupResultsByProximity` | test, radius, document? | test, groupCount | Groups a test's results into clusters whose clash points lie within a radius of the cluster seed |
+| `Clash.GroupResultsByLevel` | test, levelNames, levelElevations, units?, document? | test, groupCount | Groups a test's results by nearest level below each clash point (wire your level names and elevations) |
+| `Clash.GroupResultsByProximity` | test, radius, units?, document? | test, groupCount | Groups a test's results into clusters whose clash points lie within a radius of the cluster seed |
 | `Clash.GroupResultsBySameItem` | test, useItem1?, document? | test, groupCount | Groups a test's results so every clash involving the same element lands in one group (named after the element) |
 | `Clash.GroupResultsByStatus` | test, document? | test, groupCount | Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) |
 | `ClashGroup.ByName` | test, groupName, document? | group, results, status, count | Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count |
@@ -470,25 +471,27 @@
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `Clash.CompareSnapshots` | oldPath, newPath | newResults, resolved, persisting, counts | Diffs two clash snapshots: clashes NEW since the baseline, clashes RESOLVED (disappeared), and clashes PERSISTING in both (with their previous status) |
+| `Clash.ResultsTable` | results, units? | table | Makes a table of the clash results you wire in: one row per result with its test, group, name, GUID, status, distance, assignee, description, creation date, the two item… |
 | `Clash.SnapshotToFile` | filePath, tests?, document? | filePath, resultCount | Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON |
-| `Clash.SummaryTable` | tests?, document? | rows, headers | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
+| `Clash.SummaryTable` | tests?, document? | rows, headers, table | Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) |
 
 ## Navisworks.Clash.Results
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
 | `ClashResult.Angle` | result | degrees | The angle in degrees (0–90) between the two clashing elements, taken from each element's overall direction (its bounding-box diagonal) |
-| `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result to a person or trade |
+| `ClashResult.Assign` | result, assignedTo, document? | result | Assigns a clash result, or a whole result group, to a person or trade |
+| `ClashResult.ByGuid` | guids, tests?, document? | results, missing | Finds clash results again from their GUIDs |
 | `ClashResult.Center` | result | point | The clash point of a result, in document units |
 | `ClashResult.Documentation` | result | hasViewpoint, hasRedlines, commentCount | How documented a clash already is |
 | `ClashResult.Focus` | results, isolate?, zoom?, select?, paddingFactor?, document? | items | Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and option… |
-| `ClashResult.Info` | result | name, status, distance, description, assignedTo, createdTime | Name, status, distance, description, assignee and creation time of a clash result |
+| `ClashResult.Info` | result | name, status, distance, description, assignedTo, createdTime, guid, testName, group | Name, status, distance, description, assignee and creation time of a clash result, plus its GUID (what BCF topics and ClashResult.ByGuid use), the name of its test and t… |
 | `ClashResult.Items` | result | item1, item2 | The two model items involved in a clash result |
 | `ClashResult.Orientation` | result | degrees, shape1, shape2, slope1, slope2 | ClashResult.Angle with world context: the crossing angle PLUS each element's bounding-box shape |
 | `ClashResult.Rename` | result, newName, document? | result | Renames a clash result or result group |
 | `ClashResult.SaveImage` | result, filePath, width?, height?, document? | filePath | Renders a clash snapshot (scene plus clash highlight) to a .png/.jpg/.bmp file |
-| `ClashResult.SetDescription` | result, description, document? | result | Sets a clash result's description text (context for reports and reviews) |
-| `ClashResult.SetStatus` | result, status, document? | result | Sets a clash result's status |
+| `ClashResult.SetDescription` | result, description, document? | result | Sets the description text of a clash result, or of a whole result group (context for reports and reviews) |
+| `ClashResult.SetStatus` | result, status, document? | result | Sets the status of a clash result, or of a whole result group (wire the group from ClashTest.Groups or ClashGroup.ByName) |
 | `ClashResult.Size` | result | volume | The size of the clash overlap region |
 | `ClashResult.Viewpoint` | result, apply?, document? | viewpoint | The camera viewpoint Navisworks generates for a clash result |
 
@@ -502,12 +505,12 @@
 | `Clash.Tests` | document? | tests | All Clash Detective tests in a document, including those inside folders |
 | `ClashTest.ByName` | name, document? | test | Finds a clash test by its display name (searches folders too) |
 | `ClashTest.ClearResults` | test, document? | test | Removes every result (and result group) of a clash test and leaves the test and its settings in place |
-| `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, document? | test | Creates a clash test between two item selections |
+| `ClashTest.Create` | name, itemsA, itemsB, testType?, tolerance?, units?, ifExists?, folder?, document? | test | Creates a clash test between two item selections |
 | `ClashTest.Delete` | test, document? | deleted | Deletes a clash test and all of its results from the document |
 | `ClashTest.Duplicate` | test, newName?, document? | test | Duplicates a clash test |
-| `ClashTest.Edit` | test, newName?, testType?, tolerance?, mergeComposites?, itemsA?, itemsB?, document? | test | Edits an existing clash test in place |
+| `ClashTest.Edit` | test, newName?, testType?, tolerance?, mergeComposites?, itemsA?, itemsB?, units?, document? | test | Edits an existing clash test in place |
 | `ClashTest.Groups` | test, document? | groups, names, statuses, counts | All result groups of a clash test |
-| `ClashTest.Info` | test | name, status, testType, tolerance, lastRun, resultCount | Name, status, type, tolerance, last run time and result count of a clash test |
+| `ClashTest.Info` | test, units? | name, status, testType, tolerance, lastRun, resultCount | Name, status, type, tolerance, last run time and result count of a clash test |
 | `ClashTest.Name` | test | name | The display name of a clash test |
 | `ClashTest.Rename` | test, newName, document? | test | Renames a clash test |
 | `ClashTest.Results` | test | results | The individual results of a clash test (grouped results are flattened) |
@@ -870,7 +873,6 @@ These still load and run in saved graphs, but are no longer offered in the libra
 | Retired node | Use instead |
 |---|---|
 | `BoundingBox.FromPoints` | Use BoundingBox.Union |
-| `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |
 | `DateTime.AddDays` | DateTime.Add |

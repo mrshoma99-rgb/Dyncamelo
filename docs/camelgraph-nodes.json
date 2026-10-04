@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 580,
+ "count": 583,
  "categories": [
   {
    "name": "Annotation",
@@ -72,7 +72,7 @@
   },
   {
    "name": "Navisworks.Clash.Filter",
-   "count": 7
+   "count": 8
   },
   {
    "name": "Navisworks.Clash.Group",
@@ -80,11 +80,11 @@
   },
   {
    "name": "Navisworks.Clash.Report",
-   "count": 3
+   "count": 4
   },
   {
    "name": "Navisworks.Clash.Results",
-   "count": 14
+   "count": 15
   },
   {
    "name": "Navisworks.Clash.Tests",
@@ -11262,10 +11262,10 @@
   },
   {
    "name": "Clash.Deduplicate",
-   "id": "CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>",
+   "id": "CamelGraph.Navisworks.ClashFilterNodes.Deduplicate@System.Collections.Generic.IEnumerable<object>",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Filter",
-   "description": "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or mirrored across an A-vs-B and B-vs-A test matrix, count once. Pairs are unordered and matched by stable item identity (InstanceGuid, else tree path); the first result in input order is the representative, the rest come out on duplicates. 400 raw results, 60 real issues.",
+   "description": "Keeps ONE clash per unique item pair — the same two elements clashing at five points, or mirrored across an A-vs-B and B-vs-A test matrix, count once. Wire the results of ONE test, or of several tests at once (the list of lists from Clash.Tests and ClashTest.Results, or several wires): everything is flattened first, so the pair is recognised across tests and both outputs are flat lists. Pairs are unordered; an element is recognised by its InstanceGuid, or, when the source file has none (DWG, NWC), by the scene node itself, so two sibling elements with the same name are never taken for one. The first result in input order is the representative, the rest come out on duplicates. 400 raw results, 60 real issues.",
    "tags": [
     "clash",
     "deduplicate",
@@ -11280,8 +11280,9 @@
    "inputs": [
     {
      "name": "results",
-     "type": "ClashResult[]",
-     "description": "The clash results — from one test, or several (mirrored A-vs-B / B-vs-A test pairs dedupe too)."
+     "type": "any[]",
+     "description": "The clash results — from one test, or from several tests at once (a list of lists is flattened, and several wires are merged): mirrored A-vs-B / B-vs-A test pairs dedupe across the tests.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -11296,14 +11297,14 @@
      "description": ""
     }
    ],
-   "returns": "The first result of each unique unordered item pair, and the duplicates that were dropped."
+   "returns": "The first result of each unique unordered item pair, and the duplicates that were dropped (both flat lists)."
   },
   {
    "name": "Clash.FilterByAngle",
    "id": "CamelGraph.Navisworks.ClashNodes.FilterByAngle@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,double,double",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Filter",
-   "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. Results with no measurable direction are dropped.",
+   "description": "Keeps only the clash results whose crossing angle (see ClashResult.Angle) is within a degree range — e.g. 80–90 for near-perpendicular crossings, or 0–10 for parallel runs. The angle is always between 0 (parallel) and 90 (perpendicular), so the range stops at 90. Results with no measurable direction are dropped.",
    "tags": [
     "clash",
     "filter",
@@ -11317,7 +11318,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "minDegrees",
@@ -11362,7 +11364,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "minDepth",
@@ -11420,7 +11423,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "category",
@@ -11492,7 +11496,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "shape1",
@@ -11521,7 +11526,7 @@
    "id": "CamelGraph.Navisworks.ClashFilterNodes.FilterBySet@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,object,string,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Filter",
-   "description": "Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) — sets are the coordination scope language: \"only my package\", \"only against the existing building\". invert turns it into the classic ignore-list: drop every clash touching the \"Accepted penetrations\" set. An item counts as in the set when itself OR any ancestor is a member, matching how Navisworks selections include descendants.",
+   "description": "Keeps clashes whose items belong to a selection/search set (either one, both, or a specific side) — sets are the coordination scope language: \"only my package\", \"only against the existing building\". invert turns it into the classic ignore-list: drop every clash touching the \"Accepted penetrations\" set. An item counts as in the set when itself OR any ancestor is a member, matching how Navisworks selections include descendants. The set input takes a set, its name, or a list of model items or sets, and a list is read as ONE combined set; to filter once per set, right-click the set socket, choose List Levels and @L1.",
    "tags": [
     "clash",
     "filter",
@@ -11537,7 +11542,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "set",
@@ -11573,6 +11579,57 @@
    "returns": ""
   },
   {
+   "name": "Clash.FilterBySnapshot",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.FilterBySnapshot@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Filter",
+   "description": "Turns \"what is new since last week\" into live clash results you can select, group, assign or report: compares the results with a snapshot saved by Clash.SnapshotToFile, using the same identity as Clash.CompareSnapshots (the test and the pair of items, by InstanceGuid or tree path), and keeps the new ones (not in the snapshot) or the persisting ones (already in it). The other group comes out on others. Clashes that were resolved no longer exist in the model, so they can only be listed by Clash.CompareSnapshots. The same two items clashing at several points are matched one for one, in order.",
+   "tags": [
+    "clash",
+    "filter",
+    "snapshot",
+    "new",
+    "persisting",
+    "delta",
+    "baseline",
+    "weekly",
+    "compare",
+    "history"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The live clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
+    },
+    {
+     "name": "snapshotPath",
+     "type": "string",
+     "description": "The snapshot .json written by Clash.SnapshotToFile (last week's file)."
+    },
+    {
+     "name": "keep",
+     "type": "string",
+     "description": "new keeps the results that are not in the snapshot; persisting keeps the ones that are.",
+     "default": "\"new\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": ""
+    },
+    {
+     "name": "others",
+     "type": "ClashResult[]",
+     "description": ""
+    }
+   ],
+   "returns": "The results that were kept, and the others, both in input order."
+  },
+  {
    "name": "Clash.FilterByStatus",
    "id": "CamelGraph.Navisworks.ClashNodes.FilterByStatus@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string",
    "assembly": "CamelGraph.Navisworks",
@@ -11594,7 +11651,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results (e.g. from ClashTest.Results)."
+     "description": "The clash results (e.g. from ClashTest.Results).",
+     "multiInput": true
     },
     {
      "name": "status",
@@ -11616,7 +11674,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.AllGroups@Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (which needs List@Level to iterate). Tests without groups contribute nothing.",
+   "description": "Every result group of every clash test in the document, as ONE flat list — the whole-project entry point for group workflows: wire it into Loop.Item and let ClashGroup.Info hand each iteration its results, group name and test name. Saves walking Clash.Tests then ClashTest.Groups per test (ClashTest.Groups runs once per test and gives a list of lists). Tests without groups contribute nothing.",
    "tags": [
     "clash",
     "groups",
@@ -11665,7 +11723,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.GroupResults@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping rule, not a built-in one: filter results any way you like, then group what came out. Results already in other groups are left alone (skipped) unless moveExisting is true, which pulls them into this group. An existing same-named group is extended; re-runs are clean.",
+   "description": "Puts an explicit list of clash results into a named group in Clash Detective — YOUR grouping rule, not a built-in one: filter results any way you like, then group what came out. Results already in other groups are left alone (skipped) unless moveExisting is true, which pulls them into this group. An existing same-named group is extended; re-runs are clean. An empty list (a filter that found nothing) changes nothing and says so; several wires are merged into one list.",
    "tags": [
     "clash",
     "group",
@@ -11679,7 +11737,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash results to group (from ClashTest.Results, Clash.FilterBy*, ...). All must belong to the same test."
+     "description": "The clash results to group (from ClashTest.Results, Clash.FilterBy*, ...). All must belong to the same test.",
+     "multiInput": true
     },
     {
      "name": "groupName",
@@ -11733,7 +11792,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.GroupResultsByGridIntersection@Autodesk.Navisworks.Api.Clash.ClashTest,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources).",
+   "description": "Groups a test's results by the model's own grid: each group is named after the nearest grid intersection and level (e.g. \"B-3 : Level 2\"). Requires a document with grids (Revit/IFC sources). Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11772,10 +11831,10 @@
   },
   {
    "name": "Clash.GroupResultsByLevel",
-   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@Autodesk.Navisworks.Api.Clash.ClashTest,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByLevel@Autodesk.Navisworks.Api.Clash.ClashTest,System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<double>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage.",
+   "description": "Groups a test's results by nearest level below each clash point (wire your level names and elevations) — per-floor triage. The elevations are in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11799,7 +11858,13 @@
     {
      "name": "levelElevations",
      "type": "number[]",
-     "description": "Level elevations (Z) in document units."
+     "description": "Level elevations (Z), in the unit chosen under \"units\" (document units by default)."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the elevations: \"document\" uses the file's internal unit (often feet!), or name the unit your numbers are in.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -11824,10 +11889,10 @@
   },
   {
    "name": "Clash.GroupResultsByProximity",
-   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@Autodesk.Navisworks.Api.Clash.ClashTest,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsByProximity@Autodesk.Navisworks.Api.Clash.ClashTest,double,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot.",
+   "description": "Groups a test's results into clusters whose clash points lie within a radius of the cluster seed — one issue per hotspot. The radius is in document units unless units names another unit. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11845,7 +11910,13 @@
     {
      "name": "radius",
      "type": "number",
-     "description": "Cluster radius in document units."
+     "description": "Cluster radius, in the unit chosen under \"units\" (document units by default)."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the radius: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
     },
     {
      "name": "document",
@@ -11873,7 +11944,7 @@
    "id": "CamelGraph.Navisworks.ClashNodes.GroupResultsBySameItem@Autodesk.Navisworks.Api.Clash.ClashTest,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element.",
+   "description": "Groups a test's results so every clash involving the same element lands in one group (named after the element) — turns thousands of raw clashes into one issue per element. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11920,7 +11991,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.GroupResultsByStatus@Autodesk.Navisworks.Api.Clash.ClashTest,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective.",
+   "description": "Groups a test's results by status (New/Active/Reviewed/Approved/Resolved) — one triage bucket per status in Clash Detective. Rebuilds the test's result tree: every group the test already has (also one made by Clash.GroupResults) is dissolved first and a group's own status, assignee and comments are not kept; a bucket with only one result stays ungrouped (a group needs two or more), so a status held by a single result gets no group. Both are reported as warnings.",
    "tags": [
     "clash",
     "group",
@@ -11960,7 +12031,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.GroupByName@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Rename/AddComment.",
+   "description": "Finds a clash result group by test name + group name and opens it up: the results inside, the group's own status, and the count. The lookup half of group-based triage — feed the results to any filter/report node, or the group to ClashResult.SetStatus/Assign/Rename and SavedItem.AddComment. A list of test names (or tests) with a list of group names runs once per pair, one to one.",
    "tags": [
     "clash",
     "group",
@@ -12017,7 +12088,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.GroupInfo@Autodesk.Navisworks.Api.Clash.ClashResultGroup",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Group",
-   "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists or List@Level gymnastics. ClashGroup.ByName is the lookup-by-name twin.",
+   "description": "Everything about a clash result group, straight from the group object — the results inside, its name and status, and the TEST it belongs to (object and name). This is what makes whole-project group workflows one flat loop: Clash.Tests to ClashTest.Groups to List.Flatten to Loop.Item to this node, and every iteration knows its results, its group name and its test name without parallel lists. ClashGroup.ByName is the lookup-by-name twin.",
    "tags": [
     "clash",
     "group",
@@ -12123,11 +12194,52 @@
    "returns": "Result dictionaries per bucket plus a counts dictionary."
   },
   {
+   "name": "Clash.ResultsTable",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.ResultsTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,string",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Report",
+   "description": "Makes a table of the clash results you wire in: one row per result with its test, group, name, GUID, status, distance, assignee, description, creation date, the two items (path and GUID) and the clash point. Wire any filter's output, so \"the New clashes deeper than 25 mm\" is one row each, ready for the Table nodes, Table.ToCsvFile, Excel.WriteTable or Report.Html. Distance and clash point are in document units unless units names another unit; the creation date is a real date. An empty list gives a table with the headers and no rows.",
+   "tags": [
+    "clash",
+    "results",
+    "table",
+    "report",
+    "export",
+    "rows",
+    "csv",
+    "excel",
+    "list",
+    "filtered"
+   ],
+   "inputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": "The clash results (e.g. from ClashTest.Results or any Clash.FilterBy* node).",
+     "multiInput": true
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the distance and the clash point: \"document\" uses the file's internal unit (often feet!), or name the unit you want the numbers in.",
+     "default": "\"document\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "table",
+     "type": "CamelGraphTable",
+     "description": "A table with the columns Test, Group, Result, Result GUID, Status, Distance, Assigned To, Description, Created, Item 1, Item 1 GUID, Item 2, Item 2 GUID, Center X, Center Y and Center Z."
+    }
+   ],
+   "returns": ""
+  },
+  {
    "name": "Clash.SnapshotToFile",
    "id": "CamelGraph.Navisworks.ClashDeltaNodes.SnapshotToFile@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Report",
-   "description": "Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path.",
+   "description": "Saves a clash-run snapshot (per result: test, item identities, status, distance, clash point) as JSON — one half of the between-runs delta report. Items are identified by InstanceGuid when available, else by their tree path. Leave tests unwired for every test in the document; a wired list means exactly those tests, so an empty list (a filter that found no test) writes a snapshot with no results and says so. A relative file path means next to the graph.",
    "tags": [
     "clash",
     "snapshot",
@@ -12146,8 +12258,9 @@
     {
      "name": "tests",
      "type": "ClashTest[]",
-     "description": "The tests to snapshot (empty/unwired = every test in the document).",
-     "default": "null"
+     "description": "The tests to snapshot. Leave unwired for every test in the document; a wired list means exactly those tests, and an empty list writes a snapshot without results.",
+     "default": "null",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -12175,7 +12288,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.SummaryTable@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Report",
-   "description": "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix, ready for CSV.WriteToFile or Excel.WriteToFile.",
+   "description": "Per-test clash counts by status (test × Total/New/Active/Reviewed/Approved/Resolved) — the clash summary matrix. The table output goes straight into the Table nodes, Table.ToCsvFile and Excel.WriteTable; rows and headers are the same data as plain lists. Leave tests unwired for every test in the document; a wired list means exactly those tests, so an empty list (a filter that found no test) gives a table with the headers and no rows, not a report on everything.",
    "tags": [
     "clash",
     "summary",
@@ -12189,8 +12302,9 @@
     {
      "name": "tests",
      "type": "ClashTest[]",
-     "description": "The tests to summarize (empty/unwired = every test in the document).",
-     "default": "null"
+     "description": "The tests to summarize. Leave unwired for every test in the document; a wired list means exactly those tests, and an empty list gives a table without rows.",
+     "default": "null",
+     "multiInput": true
     },
     {
      "name": "document",
@@ -12209,9 +12323,14 @@
      "name": "headers",
      "type": "string[]",
      "description": ""
+    },
+    {
+     "name": "table",
+     "type": "dict",
+     "description": ""
     }
    ],
-   "returns": "Rows (one per test) and headers — wire straight into CSV.WriteToFile or Excel.WriteToFile."
+   "returns": "Rows (one per test), headers, and the same as one table — wire the table straight into Table, CSV or Excel nodes."
   },
   {
    "name": "ClashResult.Angle",
@@ -12246,22 +12365,24 @@
   },
   {
    "name": "ClashResult.Assign",
-   "id": "CamelGraph.Navisworks.ClashNodes.Assign@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.Assign@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Assigns a clash result to a person or trade — bulk assignment via lacing.",
+   "description": "Assigns a clash result, or a whole result group, to a person or trade. A list of results runs the node once per result (lacing), so a list of results and a list of assignees pair up one to one; each result is its own edit. For a long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and assigns all of it in one step, one undo step. Works on Navisworks 2024 and 2025; on 2026 the node reports that it is not supported yet.",
    "tags": [
     "clash",
     "result",
     "assign",
     "trade",
-    "responsible"
+    "responsible",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "assignedTo",
@@ -12278,11 +12399,62 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through). Lace over result lists for bulk assignment."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
+  },
+  {
+   "name": "ClashResult.ByGuid",
+   "id": "CamelGraph.Navisworks.ClashLookupNodes.ByGuid@System.Collections.Generic.IEnumerable<string>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashTest>,Autodesk.Navisworks.Api.Document",
+   "assembly": "CamelGraph.Navisworks",
+   "category": "Navisworks.Clash.Results",
+   "description": "Finds clash results again from their GUIDs — the way back from a BCF topic or a snapshot to the live result: wire the guid output of BCF.ImportIssues and send the results to ClashResult.SetStatus. A GUID that belongs to a result group finds the group (the BCF export writes one topic per result or group). GUIDs may be written with or without braces, in any case. results holds what was found, in the order of the GUIDs; missing holds the GUIDs that matched nothing (not a GUID, or a result that is no longer in the tests you looked in). Leave tests unwired to search every test in the document; a wired list means exactly those tests.",
+   "tags": [
+    "clash",
+    "result",
+    "guid",
+    "find",
+    "lookup",
+    "bcf",
+    "topic",
+    "id",
+    "byguid"
+   ],
+   "inputs": [
+    {
+     "name": "guids",
+     "type": "string[]",
+     "description": "The GUIDs as text (e.g. the guid output of BCF.ImportIssues or of ClashResult.Info): one, or a list."
+    },
+    {
+     "name": "tests",
+     "type": "ClashTest[]",
+     "description": "The tests to look in. Leave unwired for every test in the document; a wired list means exactly those tests.",
+     "default": "null",
+     "multiInput": true
+    },
+    {
+     "name": "document",
+     "type": "Document",
+     "description": "The document (defaults to the active document).",
+     "default": "null"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "results",
+     "type": "ClashResult[]",
+     "description": ""
+    },
+    {
+     "name": "missing",
+     "type": "string[]",
+     "description": ""
+    }
+   ],
+   "returns": "The clash results or groups that were found, in the order of the GUIDs, and the GUIDs that were not found."
   },
   {
    "name": "ClashResult.Center",
@@ -12360,7 +12532,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Focus@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.Clash.ClashResult>,bool,bool,bool,double,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and optionally selects the elements. Wire one result, or a list to frame a whole group together. Follow with Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back.",
+   "description": "Focuses the view on clash results the way double-clicking one in Clash Detective does: hides everything else (isolate), zooms the camera to the clashing pair, and optionally selects the elements. Wire one result, or a list to frame a whole group together. Follow with Viewpoint.SaveCurrent to keep the view; Appearance.ShowAll brings the model back. An empty list leaves the view as it is and says so.",
    "tags": [
     "clash",
     "focus",
@@ -12375,7 +12547,8 @@
     {
      "name": "results",
      "type": "ClashResult[]",
-     "description": "The clash result(s) to focus — one, or a list to frame together."
+     "description": "The clash result(s) to focus — one, or a list to frame together.",
+     "multiInput": true
     },
     {
      "name": "isolate",
@@ -12422,7 +12595,7 @@
    "id": "CamelGraph.Navisworks.ClashNodes.ResultInfo@Autodesk.Navisworks.Api.Clash.ClashResult",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Name, status, distance, description, assignee and creation time of a clash result.",
+   "description": "Name, status, distance, description, assignee and creation time of a clash result, plus its GUID (what BCF topics and ClashResult.ByGuid use), the name of its test and the name of its group (empty when it is not in a group).",
    "tags": [
     "clash",
     "result",
@@ -12467,9 +12640,24 @@
      "name": "createdTime",
      "type": "datetime",
      "description": ""
+    },
+    {
+     "name": "guid",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "testName",
+     "type": "string",
+     "description": ""
+    },
+    {
+     "name": "group",
+     "type": "string",
+     "description": ""
     }
    ],
-   "returns": "Name, status, distance, description, assignee and creation time."
+   "returns": "Name, status, distance, description, assignee, creation time, GUID, the name of its test and of its group."
   },
   {
    "name": "ClashResult.Items",
@@ -12656,22 +12844,24 @@
   },
   {
    "name": "ClashResult.SetDescription",
-   "id": "CamelGraph.Navisworks.ClashNodes.SetDescription@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.SetDescription@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Sets a clash result's description text (context for reports and reviews).",
+   "description": "Sets the description text of a clash result, or of a whole result group (context for reports and reviews). A list of results runs the node once per result (lacing), so a list of results and a list of texts pair up one to one. For a long list right-click the result socket, choose List Levels and @L2: the node then gets the whole list and edits all of it in one step, one undo step.",
    "tags": [
     "clash",
     "result",
     "description",
     "set",
-    "note"
+    "note",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "description",
@@ -12688,18 +12878,18 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through)."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
   },
   {
    "name": "ClashResult.SetStatus",
-   "id": "CamelGraph.Navisworks.ClashNodes.SetStatus@Autodesk.Navisworks.Api.Clash.ClashResult,string,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.SetStatus@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Results",
-   "description": "Sets a clash result's status — with lacing this is bulk triage by rule (e.g. distance < 10 mm → Reviewed).",
+   "description": "Sets the status of a clash result, or of a whole result group (wire the group from ClashTest.Groups or ClashGroup.ByName) — approve a group in one step. A list of results runs the node once per result (lacing), so a list of results and a list of statuses pair up one to one, e.g. the topic statuses from BCF.ImportIssues; each result is its own edit and its own undo step. For a long list (thousands of results) right-click the result socket, choose List Levels and @L2: the node then gets the whole list and edits all of it in one step, one undo step. Works on Navisworks 2024 and 2025; on 2026 the node reports that it is not supported yet.",
    "tags": [
     "clash",
     "result",
@@ -12707,13 +12897,15 @@
     "set",
     "resolve",
     "approve",
-    "triage"
+    "triage",
+    "group",
+    "bulk"
    ],
    "inputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The clash result."
+     "type": "any",
+     "description": "The clash result or result group; or, with list level 2 on this input, a whole list of them."
     },
     {
      "name": "status",
@@ -12730,8 +12922,8 @@
    "outputs": [
     {
      "name": "result",
-     "type": "ClashResult",
-     "description": "The result (pass-through). Lace over result lists for bulk triage."
+     "type": "any",
+     "description": "What was wired in (pass-through): the same result, group or list."
     }
    ],
    "returns": ""
@@ -12844,7 +13036,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Status@string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus, Clash.FilterByStatus or ClashTest.ResultsByStatus instead of typing the text.",
+   "description": "A clash status as a dropdown (New/Active/Reviewed/Approved/Resolved) — wire it into ClashResult.SetStatus or Clash.FilterByStatus instead of typing the text.",
    "tags": [
     "clash",
     "status",
@@ -12878,7 +13070,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Statuses@bool,bool,bool,bool,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus and ClashTest.ResultsByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
+   "description": "Pick SEVERAL clash statuses with toggles — the multi-select for Clash.FilterByStatus: switch on New and Active to work everything not yet reviewed. Outputs comma-separated text (\"New,Active\"), which every status input accepts.",
    "tags": [
     "clash",
     "status",
@@ -13036,10 +13228,10 @@
   },
   {
    "name": "ClashTest.Create",
-   "id": "CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashNodes.Create@string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,double,string,string,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. An existing top-level test with the same name is replaced.",
+   "description": "Creates a clash test between two item selections — script the weekly test matrix instead of clicking it. If a test with that name already exists, ifExists decides: reuse (the default) hands back the existing test untouched, with all its results, statuses, assignments, comments and groups, and says so; update keeps those results and applies the type, tolerance and selections you wired (re-run the test afterwards); replace swaps in a brand-new empty test, so everything triaged on the old one is lost; error stops. A new test goes at the top level, or into the Clash Detective folder named under folder (the folder must exist). The tolerance is in document units unless units names another unit.",
    "tags": [
     "clash",
     "test",
@@ -13073,8 +13265,26 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "Tolerance in document units (Clearance distance for clearance tests).",
+     "description": "Tolerance in the unit chosen under \"units\" (document units by default); the clearance distance for clearance tests.",
      "default": "0.01"
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the tolerance: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
+    },
+    {
+     "name": "ifExists",
+     "type": "string",
+     "description": "What to do when a test with this name already exists: reuse (keep it as it is, the default), update (keep its results and apply the new settings), replace (a new empty test, results are lost) or error.",
+     "default": "\"reuse\""
+    },
+    {
+     "name": "folder",
+     "type": "string",
+     "description": "Name of an existing Clash Detective folder to put a new test in; empty puts it at the top level.",
+     "default": "\"\""
     },
     {
      "name": "document",
@@ -13173,10 +13383,10 @@
   },
   {
    "name": "ClashTest.Edit",
-   "id": "CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@Autodesk.Navisworks.Api.Clash.ClashTest,string,string,double,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@Autodesk.Navisworks.Api.Clash.ClashTest,string,string,double,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The test's existing results are kept but are stale after a change: re-run it with ClashTest.Run.",
+   "description": "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The tolerance is in document units unless units names another unit. The test's existing results are kept but are stale after a change: re-run it with ClashTest.Run.",
    "tags": [
     "clash",
     "test",
@@ -13210,7 +13420,7 @@
     {
      "name": "tolerance",
      "type": "number",
-     "description": "The new tolerance in document units — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).",
+     "description": "The new tolerance, in the unit chosen under \"units\" (document units by default) — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).",
      "default": "-1"
     },
     {
@@ -13234,6 +13444,12 @@
      "multiInput": true
     },
     {
+     "name": "units",
+     "type": "string",
+     "description": "Unit of the tolerance: \"document\" uses the file's internal unit (often feet!), or name the unit your number is in.",
+     "default": "\"document\""
+    },
+    {
      "name": "document",
      "type": "Document",
      "description": "The document (defaults to the active document).",
@@ -13254,7 +13470,7 @@
    "id": "CamelGraph.Navisworks.ClashTriageNodes.Groups@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one.",
+   "description": "All result groups of a clash test — groups, names, each group's own status and result count, index-aligned. The overview half of group-based triage; ClashGroup.ByName opens a single one. Wire a test, its name, or a list of them: with a list the node runs once per test and every output is one list per test (List.Flatten joins them).",
    "tags": [
     "clash",
     "test",
@@ -13303,10 +13519,10 @@
   },
   {
    "name": "ClashTest.Info",
-   "id": "CamelGraph.Navisworks.ClashNodes.Info@Autodesk.Navisworks.Api.Clash.ClashTest",
+   "id": "CamelGraph.Navisworks.ClashNodes.Info@Autodesk.Navisworks.Api.Clash.ClashTest,string",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Name, status, type, tolerance, last run time and result count of a clash test.",
+   "description": "Name, status, type, tolerance, last run time and result count of a clash test. The tolerance is in document units unless units names another unit.",
    "tags": [
     "clash",
     "test",
@@ -13319,6 +13535,12 @@
      "name": "test",
      "type": "ClashTest",
      "description": "The clash test."
+    },
+    {
+     "name": "units",
+     "type": "string",
+     "description": "Unit to give the tolerance in: \"document\" uses the file's internal unit (often feet!), or name a unit.",
+     "default": "\"document\""
     }
    ],
    "outputs": [
@@ -13389,7 +13611,7 @@
    "id": "CamelGraph.Navisworks.ClashEditNodes.Rename@object,string,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Clash.Tests",
-   "description": "Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing.",
+   "description": "Renames a clash test — wire a test or its current name. Batch-rename the whole matrix via lacing: a list of tests (or of names) and a list of new names pair up one to one, one test per name.",
    "tags": [
     "clash",
     "test",

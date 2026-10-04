@@ -22,17 +22,21 @@ public static class ClashTestMaintenanceNodes
     /// <param name="test">The stored clash test (from Clash.Tests, ClashTest.ByName or ClashTest.Create).</param>
     /// <param name="newName">A new display name ("" keeps the current name).</param>
     /// <param name="testType">Hard, HardConservative, Clearance, Duplicate or Custom ("unchanged" keeps the current type).</param>
-    /// <param name="tolerance">The new tolerance in document units — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).</param>
+    /// <param name="tolerance">The new tolerance, in the unit chosen under "units" (document units by default) — the clearance distance for clearance tests (any negative number, the default -1, keeps the current tolerance).</param>
     /// <param name="mergeComposites">"yes" or "no" to switch the merge-composites option, "unchanged" to keep it.</param>
     /// <param name="itemsA">Items to use as the test's selection A (leave unwired to keep the current selection).</param>
     /// <param name="itemsB">Items to use as the test's selection B (leave unwired to keep the current selection).</param>
+    /// <param name="units">Unit of the tolerance: "document" uses the file's internal unit (often feet!), or name the unit your number is in.</param>
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The edited stored test.</returns>
     [NodeName("ClashTest.Edit")]
+    [NodeAliases("CamelGraph.Navisworks.ClashTestMaintenanceNodes.Edit@Autodesk.Navisworks.Api.Clash.ClashTest,string,string,double,string,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,Autodesk.Navisworks.Api.Document")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Edits an existing clash test in place — name, test type, tolerance, merge-composites and the two selections; " +
-        "every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The test's existing results " +
+        "every input left at its default (\"\", \"unchanged\", -1, unwired) keeps the current value. The tolerance is in document " +
+        "units unless units names another unit. The test's existing results " +
         "are kept but are stale after a change: re-run it with ClashTest.Run.")]
     [NodeSearchTags("clash", "test", "edit", "modify", "tolerance", "type", "clearance", "hard", "selection", "update")]
     [return: NodeName("test")]
@@ -46,9 +50,16 @@ public static class ClashTestMaintenanceNodes
         string mergeComposites = "unchanged",
         [MultiInput] IEnumerable<ModelItem>? itemsA = null,
         [MultiInput] IEnumerable<ModelItem>? itemsB = null,
+        [NodePanel("Advanced")][NodeChoicesFromEnum(typeof(Units), "document")] string units = "document",
         Document? document = null)
     {
         RequireTestInput(test, "ClashTest.Edit");
+
+        // A negative tolerance means "keep the current one": only a real number is converted to document units.
+        if (tolerance >= 0)
+        {
+            tolerance *= NavisValues.ResolveUnitsScale(NavisworksContext.ResolveDocument(document), units);
+        }
 
         var listA = itemsA == null ? null : NavisValues.ToItemList(itemsA);
         var listB = itemsB == null ? null : NavisValues.ToItemList(itemsB);
@@ -140,6 +151,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>True when the test was removed; false when it was not in the document.</returns>
     [NodeName("ClashTest.Delete")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Deletes a clash test and all of its results from the document. Returns false (and changes nothing) when the test is " +
@@ -194,6 +206,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The new stored test, placed in the same folder as the original.</returns>
     [NodeName("ClashTest.Duplicate")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Duplicates a clash test — type, tolerance, rules and both selections — as a new test named \"<name> copy\" (or newName) " +
@@ -253,6 +266,7 @@ public static class ClashTestMaintenanceNodes
     /// <param name="document">The document (defaults to the active document).</param>
     /// <returns>The stored test, now without results.</returns>
     [NodeName("ClashTest.ClearResults")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Modify)]
     [NodeDescription(
         "Removes every result (and result group) of a clash test and leaves the test and its settings in place — " +
