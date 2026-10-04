@@ -75,7 +75,7 @@ public static class MultiInput
             return false;
         }
 
-        upstreamFailed = active.Any(w => w.SourceNode.State == NodeState.Error || w.SourceNode.FailedUpstream);
+        upstreamFailed = active.Any(w => w.SourceNode.IsOutputFailed(w.Source));
         if (active.Count == 1)
         {
             value = active[0].Source.Value;

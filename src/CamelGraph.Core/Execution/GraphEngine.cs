@@ -371,15 +371,17 @@ public class GraphEngine
             node.FailedUpstream = true;
             node.AddMessage(MessageSeverity.Warning, "Upstream failure: one or more input nodes are in an error state.");
             node.State = NodeState.Warning;
+            node.OnNotRun();
             return;
         }
 
-        if (!node.IsMuted && inputs.Any(value => value is InactiveValue))
+        if (!node.IsMuted && !node.AcceptsInactiveInputs && inputs.Any(value => value is InactiveValue))
         {
             // A branch that was switched off (Flow.When): nothing to do here, and nothing for the nodes after it to do either.
             SetOutputs(node, Enumerable.Repeat<object?>(InactiveValue.Instance, node.OutPorts.Count).ToArray());
             node.AddMessage(MessageSeverity.Info, "Skipped: an input comes from a branch that was switched off (Flow.When was false).");
             node.State = NodeState.Idle;
+            node.OnNotRun();
             return;
         }
 
@@ -388,6 +390,7 @@ public class GraphEngine
             // Bypass: no execution, outputs pass through compatible inputs.
             SetOutputs(node, MutePassThrough.Resolve(node, inputs));
             node.State = NodeState.Executed;
+            node.OnNotRun();
             return;
         }
 
@@ -400,6 +403,7 @@ public class GraphEngine
             }
 
             node.State = NodeState.Idle;
+            node.OnNotRun();
             return;
         }
 
@@ -439,6 +443,7 @@ public class GraphEngine
             SetOutputs(node, null);
             node.AddMessage(MessageSeverity.Error, ex.Message);
             node.State = NodeState.Error;
+            node.OnNotRun();
         }
         finally
         {

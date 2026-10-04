@@ -65,6 +65,13 @@ public abstract class GroupBoundNode : NodeModel
 
     /// <inheritdoc />
     public override bool ShowInLibrary => false;
+
+    /// <summary>
+    /// A socket stands for a failure when it carries one across the border of the group (an <see cref="UpstreamError"/>); the other
+    /// sockets of the same node deliver their values.
+    /// </summary>
+    /// <param name="output">One of this node's outputs.</param>
+    public override bool IsOutputFailed(PortModel output) => output.Value is UpstreamError;
 }
 
 /// <summary>
@@ -156,6 +163,12 @@ public sealed class GroupOutputNode : GroupBoundNode
     /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Info;
 
+    /// <summary>The Group Output collects whatever reaches it, socket by socket: a failure arriving at one socket does not stop the others.</summary>
+    public override bool CatchesUpstreamErrors => true;
+
+    /// <summary>A socket whose branch was switched off is delivered as switched off; the other sockets keep their values.</summary>
+    public override bool AcceptsInactiveInputs => true;
+
     /// <summary>The group this node is the output of.</summary>
     public NodeGroup? Owner { get; private set; }
 
@@ -224,6 +237,25 @@ public sealed class GroupInstanceNode : GroupBoundNode
     /// <inheritdoc />
     public override NodeFunction Function => NodeFunction.Modify;
 
+    /// <summary>
+    /// An instance runs even when an input failed upstream: the failure enters the body as a value and only the nodes that depend on
+    /// it stop (or, if they catch errors like Flow.Try, handle it). The sockets that depend on it leave the group as failures.
+    /// </summary>
+    public override bool CatchesUpstreamErrors => true;
+
+    /// <summary>An instance runs even when an input comes from a switched-off branch: only what depends on it is skipped.</summary>
+    public override bool AcceptsInactiveInputs => true;
+
+    /// <summary>
+    /// A socket is a failure when it carries one; when the run itself broke (the group contains itself, a node threw outside the
+    /// body's own engine) nothing was delivered and every socket is.
+    /// </summary>
+    /// <param name="output">One of this node's outputs.</param>
+    public override bool IsOutputFailed(PortModel output) =>
+        base.IsOutputFailed(output) || (State == NodeState.Error && !_completed);
+
+    private bool _completed = true;
+
     /// <summary>True when the group's body holds a node that reads live host state: the instance then runs on every run.</summary>
     public override bool IsLiveState => _definition != null && _definition.ContainsLiveState;
 
@@ -280,7 +312,10 @@ public sealed class GroupInstanceNode : GroupBoundNode
     public override object?[] Evaluate(object?[] inputs, EvaluationContext context)
     {
         var definition = _definition ?? throw new InvalidOperationException("This node group instance has no definition.");
-        return definition.Run(this, inputs, context);
+        _completed = false;
+        var outputs = definition.Run(this, inputs, context);
+        _completed = true;
+        return outputs;
     }
 
     /// <inheritdoc />

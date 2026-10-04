@@ -79,6 +79,30 @@ public abstract class NodeModel : INotifyPropertyChanged
     /// </summary>
     public virtual bool IsLiveState => false;
 
+    /// <summary>
+    /// True when the node runs even though some of its inputs carry a branch that was switched off (<c>Flow.When</c>): the switched-off
+    /// inputs then arrive as <see cref="CamelGraph.Core.Execution.InactiveValue"/> and the node decides what to do per socket.
+    /// Only the sockets of a node group use it; every other node is skipped and passes the "switched off" state on.
+    /// </summary>
+    public virtual bool AcceptsInactiveInputs => false;
+
+    /// <summary>
+    /// True when what leaves <paramref name="output"/> stands for a failure, so a node wired to it is stopped (or, if it catches
+    /// upstream errors, told). By default that is every output of a node that failed or was stopped by a failure; a node group
+    /// answers per socket, because one socket can carry a failure while the others deliver values.
+    /// </summary>
+    /// <param name="output">One of this node's outputs.</param>
+    public virtual bool IsOutputFailed(PortModel output) => State == NodeState.Error || FailedUpstream;
+
+    /// <summary>
+    /// Called by the engine when the node did not run this time (an input failed upstream or was switched off, a required input is
+    /// not connected, the node is muted, or it threw). A node that shows what it last received (Watch) overrides it to clear
+    /// the display, so an old value is never presented as the current result.
+    /// </summary>
+    public virtual void OnNotRun()
+    {
+    }
+
     /// <summary>True when the last run stopped this node because a node feeding it had failed (it did not execute).</summary>
     public bool FailedUpstream { get; internal set; }
 
