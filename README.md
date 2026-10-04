@@ -35,6 +35,8 @@ Dyncamelo brings the visual-programming workflow that Dynamo made famous in Revi
 
 More pictures: [start screen](docs/images/editor-start.png) · [light theme](docs/images/editor-screenshot-light.png) · [quick node search](docs/images/quick-search.png) · [command palette](docs/images/command-palette.png) · [keyboard and mouse sheet](docs/images/shortcuts.png) · [settings](docs/images/settings.png) · [Script Player](docs/images/player.png)
 
+**Documentation: the [Dyncamelo wiki](https://www.bimcamel.com/plugins/dyncamelo/wiki/)** — installing and removing it, a first script, the editor, how-to guides (clash report, BCF, Excel, quantities), the Script Player, an FAQ and every node with its inputs and outputs.
+
 ---
 
 ## What's new in v0.12–v0.23 — site safety & spatial analysis
@@ -146,7 +148,7 @@ To run a source build in Navisworks, use the application-bundle layout under `%A
 
 ## Your first graph
 
-Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon tab — the editor opens as a dockable pane. Then follow the [Getting Started guide](docs/GETTING_STARTED.md):
+Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon tab — the editor opens as a dockable pane. Then follow the [Getting Started guide](docs/GETTING_STARTED.md) (or the [wiki's first-script walkthrough](https://www.bimcamel.com/plugins/dyncamelo/wiki/first-steps.html)):
 
 > *Find every item whose Material contains "Concrete", color it red, and save it as a selection set* — about six nodes, no code.
 
@@ -160,7 +162,7 @@ Open a model in Navisworks and launch **Dyncamelo** from the **BIMCamel** ribbon
 | [Architecture](docs/ARCHITECTURE.md) | Projects, engine pipeline, zero-touch loading, `.dyc` format, threading |
 | [Extending Dyncamelo](docs/EXTENDING.md) | Write your own node pack; custom NodeModel nodes with custom UI |
 | [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Vision, milestones M0-M5, engineering decisions, testing strategy, risks |
-| [Wiki](docs/wiki-src/index.md) | The user guide for bimcamel.com as a static site: installation, a first script, the editor, the Script Player, samples, IFC / BCF / Excel exchange, troubleshooting and a page per node category with inputs and outputs. Built with MkDocs (Material theme) by `python tools/build_wiki.py` into `build/wiki-site`; see [tools/wiki/README.md](tools/wiki/README.md) |
+| [Wiki](https://www.bimcamel.com/plugins/dyncamelo/wiki/) | The user guide at bimcamel.com: installation, a first script, the editor, the Script Player, samples, how-to guides, IFC / BCF / Excel exchange, troubleshooting and a page per node category with inputs and outputs. Its source is [docs/wiki-src](docs/wiki-src/index.md), built with MkDocs (Material theme) by `python tools/build_wiki.py` into `build/wiki-site`; see [tools/wiki/README.md](tools/wiki/README.md) |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Symptom, cause and fix: missing ribbon tab, `PLUGIN_LOAD_02`, red nodes, slow runs, diagnostics, uninstalling, known issues |
 | [Changelog](CHANGELOG.md) | What changed in each release, newest first |
 | [Contributing](CONTRIBUTING.md) | Dev setup, code style, PR workflow |
