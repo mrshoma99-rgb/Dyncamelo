@@ -8,7 +8,7 @@ What it does
        docs/TROUBLESHOOTING.md, docs/RECIPES.md, docs/EXTENDING.md
                                         the repository's own documents, with their links turned into links of the site
        CHANGELOG.md                     becomes the "What's new" page
-       docs/dyncamelo-nodes.json        becomes the node reference (nodes/*.md, one page per category group)
+       docs/dyncamelo-nodes.json        becomes the node library (nodes/*.md, one page per category group)
        docs/images/<id>.png             the pictures the pages use; <id>-light.png is the light-theme version when it exists
   2. Writes build/wiki-docs.mkdocs.yml (the navigation from docs/wiki-src/nav.yml, the addresses from tools/wiki/site.yml).
   3. Runs `mkdocs build --strict` with tools/wiki/mkdocs.yml, into build/wiki-site.
@@ -468,7 +468,7 @@ def changelog_page(stage, site):
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-# Node reference
+# Node library
 # ------------------------------------------------------------------------------------------------------------------------
 
 def node_group(category):
@@ -533,7 +533,7 @@ def render_node(node):
 
 
 def node_pages(catalogue):
-    """The index page and the pages of the groups of the node reference: (index, [(group, page, count)])."""
+    """The index page and the pages of the groups of the node library: (index, [(group, page, count)])."""
     nodes = catalogue["nodes"]
     groups = {}
     for node in nodes:
@@ -566,7 +566,7 @@ def node_pages(catalogue):
         pages.append((group, page, len(items)))
 
     # the index: category cards and a table of all nodes
-    body = ["# Node reference", "",
+    body = ["# Node library", "",
             "Every node in the library, with its inputs and outputs: %s in %s. Pick a category below, or type a node's name in the search box at the top."
             % (plural(len(nodes), "node"), plural(len(order), "category group")), "",
             "## Categories", "", '<div class="grid cards" markdown>', ""]
@@ -584,7 +584,7 @@ def node_pages(catalogue):
         short = summary if cut < 0 else summary[:cut + 1]
         target = "%s.md#%s" % (page_of[node_group(node["category"])].key.split("/", 1)[1], node_anchor(node["name"]))
         body.append("| [%s](%s) | %s | %s |" % (code(node["name"], True), target, md_text(node["category"]), md_text(short)))
-    index = Page(NODES_INDEX_KEY, "\n".join(body), "Node reference",
+    index = Page(NODES_INDEX_KEY, "\n".join(body), "Node library",
                  description="Every node with its inputs and outputs, by category.")
     return index, pages
 
@@ -623,7 +623,7 @@ def build_stage(allow_missing_images, allow_missing_files):
     seen_nodes = False
 
     def add_page(key, label):
-        """Reads the page of a nav.yml key into the stage. Returns the Page, 'nodes' for the node reference, or None."""
+        """Reads the page of a nav.yml key into the stage. Returns the Page, 'nodes' for the node library, or None."""
         if key in listed:
             problems.append("docs/wiki-src/nav.yml lists '%s' twice" % key)
             return None
@@ -699,7 +699,7 @@ def build_stage(allow_missing_images, allow_missing_files):
     for key in sorted(set(sources) - listed):
         problems.append("docs/wiki-src/%s.md is not listed in nav.yml (and no 'glob' section matches it)" % key)
     if not seen_nodes:
-        problems.append("docs/wiki-src/nav.yml must list 'nodes/index' (the node reference)")
+        problems.append("docs/wiki-src/nav.yml must list 'nodes/index' (the node library)")
 
     for key, page in stage.pages.items():
         stage.files[key + ".md"] = page.render().encode("utf-8")

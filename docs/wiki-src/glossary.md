@@ -52,7 +52,7 @@ Dashed wire
 :   A wire that feeds a list into an input that wants one value, so the node runs once for each item. See [Inputs, outputs and kinds](ports-and-kinds.md#shape-one-value-or-a-list).
 
 Default
-:   The value an optional input uses when nothing is wired and nothing is typed. It is shown in the socket tooltip and in the [node reference](nodes/index.md). See [Inputs, outputs and kinds](ports-and-kinds.md#giving-an-input-a-value).
+:   The value an optional input uses when nothing is wired and nothing is typed. It is shown in the socket tooltip and in the [node library](nodes/index.md). See [Inputs, outputs and kinds](ports-and-kinds.md#giving-an-input-a-value).
 
 Document
 :   A Navisworks document, and the socket [kind](ports-and-kinds.md#kind-the-colour-and-letter-of-a-socket) for it (`F`). See [Concepts](concepts.md#document).
@@ -141,7 +141,7 @@ Mute
 ## N to O
 
 Node
-:   One step of a graph, with inputs on the left and outputs on the right. Not to be confused with a Navisworks [item](#i-to-k). See [Concepts](concepts.md#graph-script-node-wire) and the [node reference](nodes/index.md).
+:   One step of a graph, with inputs on the left and outputs on the right. Not to be confused with a Navisworks [item](#i-to-k). See [Concepts](concepts.md#graph-script-node-wire) and the [node library](nodes/index.md).
 
 Node group
 :   A few nodes packed into one reusable node with its own inputs and outputs, stored in the `.dyc` file. See [Node groups](node-groups.md) and [Make and reuse a node group](howto/reusable-node-group.md).

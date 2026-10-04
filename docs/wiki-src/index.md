@@ -4,6 +4,10 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 
 > Search a federated model by property, colour-code it by system, create selection sets in bulk, take quantities out to Excel, triage clashes by rule and make a saved viewpoint for each issue, as graphs you can save, share and run again.
 
+[Browse the node library](nodes/index.md){ .md-button .md-button--primary }
+[Your first script](first-steps.md){ .md-button }
+[Installation](installation.md){ .md-button }
+
 ![The Dyncamelo editor with the library open and the Table Summary from Text sample after a run: nodes, wires, the values under each node and a Watch Table.](../images/wiki-editor-overview.png)
 
 *It docks inside Navisworks as a pane, and has a light theme too.*
@@ -18,7 +22,7 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 | Install it | [Installation](installation.md), after a look at the [requirements](requirements.md) |
 | Build my first graph in ten minutes | [Your first script](first-steps.md) |
 | Understand how graphs work | [Concepts](concepts.md), then [Inputs, outputs and kinds](ports-and-kinds.md) |
-| Find a node and see its inputs and outputs | [Node reference](nodes/index.md), or search the whole site with the box at the top |
+| Find a node and see its inputs and outputs | [Node library](nodes/index.md), or search the whole site with the box at the top |
 | Follow a step-by-step guide for one job | [Colour elements by a property](howto/colour-elements-by-property.md), [Take quantities out to Excel](howto/quantity-takeoff-to-excel.md), [Make a clash report](howto/clash-report.md), and the other **How-to guides** in the menu |
 | Learn from a finished graph | [Sample scripts](samples.md) and [Recipes](recipes.md) |
 | Exchange data with IFC, BCF, Excel or CSV | [IFC, BCF, Excel and CSV](exchange-formats.md) |
@@ -39,7 +43,7 @@ Dyncamelo brings **Dynamo-style visual programming** to Autodesk Navisworks 2024
 * **The Script Player.** Run a saved graph from a simple form, for colleagues who should not have to open the editor.
 * **Extensible.** A public static C# method with a couple of attributes is a node.
 
-See [Concepts](concepts.md) for the vocabulary, and the [node reference](nodes/index.md) for every node.
+See [Concepts](concepts.md) for the vocabulary, and the [node library](nodes/index.md) for every node.
 
 ## Good to know before you start
 

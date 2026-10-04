@@ -13,7 +13,7 @@ Hover any socket for a tooltip. It shows:
 * a **description** of what to connect (written from the node's documentation);
 * after a run, the **value it holds**: for a list the number of items and the first few; for a wired input, what arrives on the wire.
 
-The same information for every node is on the [node reference](nodes/index.md): each node lists its inputs with their type, default and meaning, and its outputs with their type.
+The same information for every node is on the [node library](nodes/index.md): each node lists its inputs with their type, default and meaning, and its outputs with their type.
 
 ## Kind: the colour (and letter) of a socket
 
@@ -40,7 +40,7 @@ The colour of a socket names the kind of data. With **Settings â–¸ Appearance â–
 
 ![One small node for each socket kind, with the type letters switched on.](../images/wiki-socket-kinds.png)
 
-On the node reference pages the type is written as a programming type: `string`, `number`, `integer`, `boolean`, `ModelItem`, `Document`, `DyncameloTable` and so on. A type ending in `[]` is a **list**.
+On the node library pages the type is written as a programming type: `string`, `number`, `integer`, `boolean`, `ModelItem`, `Document`, `DyncameloTable` and so on. A type ending in `[]` is a **list**.
 
 ## Shape: one value or a list
 

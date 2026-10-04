@@ -1,6 +1,6 @@
 # IFC, BCF, Excel and CSV
 
-How data gets into and out of a Dyncamelo graph. Every node named here is in the [node reference](nodes/index.md) with its inputs and outputs.
+How data gets into and out of a Dyncamelo graph. Every node named here is in the [node library](nodes/index.md) with its inputs and outputs.
 
 | Format | Read | Write |
 |---|---|---|

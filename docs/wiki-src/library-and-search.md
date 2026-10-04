@@ -2,7 +2,7 @@
 
 The node library is the list of every node you can add to a script, and Dyncamelo gives you three quick ways to find one: the library panel, the quick search that opens when you press ++space++, and the search that opens when you drop a wire on empty canvas.
 
-For the full list of nodes with their inputs and outputs, see the [node reference](nodes/index.md).
+For the full list of nodes with their inputs and outputs, see the [node library](nodes/index.md).
 
 ## The library panel
 
@@ -89,7 +89,7 @@ The `@` search is for nodes you have already placed, not for the library. Press 
 | A node's title on the canvas | What the node does. |
 | A socket | The socket's name and type, whether it is required or optional (and its default), what it does, and, after a run, the value it holds or the value arriving on its wire. |
 
-++f1++ is **not** node help. It opens the sheet of keyboard shortcuts and mouse gestures. The full node documentation is in the [node reference](nodes/index.md).
+++f1++ is **not** node help. It opens the sheet of keyboard shortcuts and mouse gestures. The full node documentation is in the [node library](nodes/index.md).
 
 ## How nodes are named and organised
 
@@ -102,4 +102,4 @@ The `@` search is for nodes you have already placed, not for the library. Press 
 
 * [The editor: canvas and nodes](canvas-and-nodes.md), [Concepts](concepts.md) and the [keyboard and mouse reference](shortcuts.md).
 * [Your first script](first-steps.md) uses the quick search from the first minute.
-* [Node reference](nodes/index.md) lists every node by category.
+* [Node library](nodes/index.md) lists every node by category.

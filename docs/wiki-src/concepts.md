@@ -21,7 +21,7 @@ The same word has two meanings in Navisworks and in Dyncamelo, so here is the di
 | **Node groups** | Reusable pieces of graph that you make yourself ([Node groups](node-groups.md)). |
 | **Node packs** | Extra libraries of your own or from others, loaded from a `Packages` folder ([Writing your own nodes](extending.md)). |
 
-The [node reference](nodes/index.md) lists every built-in node with its inputs and outputs.
+The [node library](nodes/index.md) lists every built-in node with its inputs and outputs.
 
 ## Inputs, outputs and their kinds
 
@@ -91,7 +91,7 @@ A graph is a picture of **data** dependencies. When two nodes change the model a
 
 ## What a node changes
 
-Nodes are of two kinds. **Reading** nodes only look at the model and compute (`Search.*`, `Properties.*`, `Selection.Current`). **Writing** nodes change something: the model (`Appearance.*`, `SelectionSet.Create`, `Properties.SetCustom`), a file on disk (`CSV.WriteToFile`), a program or the web (`System.Run`, `Web.Post`). Dyncamelo marks the second kind, and asks before it runs a graph that came from a file and contains the riskiest ones ([Privacy and safety](privacy-and-safety.md)). The [node reference](nodes/index.md) says in each description what a node changes.
+Nodes are of two kinds. **Reading** nodes only look at the model and compute (`Search.*`, `Properties.*`, `Selection.Current`). **Writing** nodes change something: the model (`Appearance.*`, `SelectionSet.Create`, `Properties.SetCustom`), a file on disk (`CSV.WriteToFile`), a program or the web (`System.Run`, `Web.Post`). Dyncamelo marks the second kind, and asks before it runs a graph that came from a file and contains the riskiest ones ([Privacy and safety](privacy-and-safety.md)). The [node library](nodes/index.md) says in each description what a node changes.
 
 ## Node states
 

@@ -44,7 +44,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
     No. Dyncamelo has its own graph format (`.dyc`) and its own node library, built for Navisworks. It does not run Dynamo graphs or Revit nodes.
 
 ??? question "How many nodes are there?"
-    More than 570, in about 46 categories, from maths and text to clash triage. Browse them in the [node reference](nodes/index.md), or press ++space++ in the editor to search.
+    More than 570, in about 46 categories, from maths and text to clash triage. Browse them in the [node library](nodes/index.md), or press ++space++ in the editor to search.
 
 ??? question "What do the words mean?"
     The [Glossary](glossary.md) explains every term with a link to the page that covers it.
@@ -97,7 +97,7 @@ This is not legal advice. The text of the licence counts. See [Licence](licence.
 ## Using the model
 
 ??? question "Does a graph change my model?"
-    Only if it contains nodes that do. Reading nodes (search, properties, selection) do not. Writing nodes change the open document: colour, hide and transparency overrides, selection sets, viewpoints, custom properties, transforms. The description of every node in the [node reference](nodes/index.md) says what it does. The source files of the model (a Revit file, an IFC) are never modified; custom properties, for example, travel with the NWF or NWD only.
+    Only if it contains nodes that do. Reading nodes (search, properties, selection) do not. Writing nodes change the open document: colour, hide and transparency overrides, selection sets, viewpoints, custom properties, transforms. The description of every node in the [node library](nodes/index.md) says what it does. The source files of the model (a Revit file, an IFC) are never modified; custom properties, for example, travel with the NWF or NWD only.
 
 ??? question "Can I undo what a graph did?"
     Use the nodes made for it (`Appearance.Reset`, `Appearance.ResetAll`, `Appearance.ResetTemporary`, `Appearance.ShowAll`), or close without saving the model. Whether one Navisworks **Undo** reverses a whole run has not been confirmed, so save the model first. The editor's own undo changes the graph only. See [Running a graph](running-graphs.md#changing-the-model-and-undoing-it).

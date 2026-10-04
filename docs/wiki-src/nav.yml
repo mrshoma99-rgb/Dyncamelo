@@ -22,6 +22,9 @@
     - {key: player, label: The Script Player}
     - {key: settings, label: Settings}
     - {key: shortcuts, label: Keyboard and mouse}
+- section: Node library
+  pages:
+    - {key: nodes/index, label: All nodes}
 - section: How-to guides
   glob: howto/*.md
 - section: Learn by example
@@ -29,9 +32,6 @@
     - {key: samples, label: Sample scripts}
     - {key: recipes, label: Recipes}
     - {key: exchange-formats, label: "IFC, BCF, Excel and CSV"}
-- section: Node reference
-  pages:
-    - {key: nodes/index, label: All nodes}
 - section: Help
   pages:
     - {key: troubleshooting, label: Troubleshooting}

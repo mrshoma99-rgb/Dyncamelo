@@ -308,8 +308,22 @@
 .md-typeset .grid.cards.quick-links > ul > li { padding: 0.6rem 0.8rem; font-size: 0.7rem; }
 .md-typeset .grid.cards.quick-links > ul > li > p { margin: 0; }
 
+/* Buttons in the text: [Text](page.md){ .md-button } and { .md-button .md-button--primary }. The theme's primary colour is the
+   header colour (white in the light theme), so the buttons take the accent colour instead. */
+.md-typeset .md-button {
+  border-radius: 0.2rem; font-weight: 600; margin: 0 0.4rem 0.4rem 0;
+  color: var(--md-accent-fg-color); border-color: var(--md-accent-fg-color);
+}
+.md-typeset .md-button:hover, .md-typeset .md-button:focus-visible {
+  background: var(--md-accent-fg-color--transparent); color: var(--md-accent-fg-color); border-color: var(--md-accent-fg-color);
+}
+.md-typeset .md-button--primary { background: var(--dyc-accent); border-color: var(--dyc-accent); color: #ffffff; }
+.md-typeset .md-button--primary:hover, .md-typeset .md-button--primary:focus-visible {
+  background: var(--dyc-accent-strong); border-color: var(--dyc-accent-strong); color: #ffffff;
+}
+
 /* ---------------------------------------------------------------------------------------------------------------------
-   Node reference
+   Node library
    --------------------------------------------------------------------------------------------------------------------- */
 .md-typeset h3.node {
   font-family: var(--md-code-font-family);

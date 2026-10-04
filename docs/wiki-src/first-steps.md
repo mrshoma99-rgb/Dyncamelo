@@ -112,4 +112,4 @@ A node that fails shows a red border and a message; hover it, or open the **Erro
 * [Concepts](concepts.md) and [Inputs, outputs and kinds](ports-and-kinds.md) explain how graphs behave.
 * [Sample scripts](samples.md) are finished graphs to open, run and take apart.
 * [Recipes](recipes.md) list node chains for the jobs of a BIM coordinator, a manager and a model maintainer.
-* The [node reference](nodes/index.md) lists every node with its inputs and outputs.
+* The [node library](nodes/index.md) lists every node with its inputs and outputs.
