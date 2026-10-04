@@ -286,7 +286,7 @@ public static class IfcGuidNodes
     [NodeName("IFC.GuidEncode")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("globalId")]
-    [NodeDescription("Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references.")]
+    [NodeDescription("Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references. A GlobalId is refused here; for a column that mixes both forms use IFC.Normalize.")]
     [NodeSearchTags("ifc", "guid", "globalid", "uuid", "encode", "compress", "base64", "22")]
     public static string GuidEncode(string guid)
     {
@@ -311,7 +311,7 @@ public static class IfcGuidNodes
     [NodeName("IFC.GuidDecode")]
     [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
     [return: NodeName("guid")]
-    [NodeDescription("Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID.")]
+    [NodeDescription("Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID. A plain GUID is refused here; for a column that mixes both forms use IFC.Normalize.")]
     [NodeSearchTags("ifc", "guid", "globalid", "uuid", "decode", "expand", "base64", "22")]
     public static string GuidDecode(string globalId)
     {
@@ -328,5 +328,86 @@ public static class IfcGuidNodes
         }
 
         return guid.ToString("D", CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>Tells whether a text is a 22-character IFC GlobalId, so a column that mixes GlobalIds and plain GUIDs can be split.</summary>
+    /// <param name="text">The text to test; a blank or missing text is simply not a GlobalId. Spaces around it are ignored.</param>
+    /// <returns>True for a valid 22-character IFC GlobalId; false for a plain GUID, any other text, or nothing.</returns>
+    [NodeName("IFC.IsGlobalId")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Info)]
+    [return: NodeName("isGlobalId")]
+    [NodeDescription("True when a text is a 22-character IFC GlobalId (alphabet 0-9 A-Z a-z _ $, first character 0 to 3) and false for a plain GUID, any other text or an empty cell, so a column that mixes both forms can be split before IFC.GuidDecode or IFC.GuidEncode. A list gives one answer per item, empty cells included.")]
+    [NodeSearchTags("ifc", "globalid", "guid", "uuid", "is", "check", "validate", "22", "test", "format", "which")]
+    public static bool IsGlobalId([AcceptsNull] string? text)
+    {
+        return IfcGuidCodec.IsGlobalId(text);
+    }
+
+    /// <summary>
+    /// Writes an id in one form whichever form it arrives in: a 22-character IFC GlobalId or a standard GUID
+    /// (hyphenated, hyphen-less, or in braces) becomes a GlobalId or a lower-case hyphenated GUID.
+    /// </summary>
+    /// <param name="id">The id, in either form. Spaces around it are ignored.</param>
+    /// <param name="form">The form to write: "globalId" (22 characters, the default) or "guid" (lower-case, hyphenated).</param>
+    /// <returns>The id in the requested form.</returns>
+    [NodeName("IFC.Normalize")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
+    [return: NodeName("id")]
+    [NodeDescription("Writes an id in one form whichever form it comes in: a 22-character IFC GlobalId or a standard GUID (with hyphens, without, or in braces) becomes the form you choose, a GlobalId (default) or a lower-case hyphenated GUID. Use it on a column that mixes both forms, where IFC.GuidEncode and IFC.GuidDecode would each refuse the other form. A text that is neither is an error naming the text (in a list: an empty result and one warning).")]
+    [NodeSearchTags("ifc", "guid", "globalid", "uuid", "normalize", "normalise", "convert", "either", "mixed", "tolerant", "clean", "canonical", "22")]
+    public static string Normalize(string id, [NodeChoices("globalId", "guid")] string form = "globalId")
+    {
+        var toGuid = ReadForm(form);
+        if (id == null)
+        {
+            throw new ArgumentNullException(
+                nameof(id),
+                "IFC.Normalize requires an IFC GlobalId or a GUID. Wire text into the 'id' input.");
+        }
+
+        var trimmed = id.Trim();
+        if (trimmed.Length == 0)
+        {
+            throw new ArgumentException("IFC.Normalize: the id is empty. Wire an IFC GlobalId or a GUID into the 'id' input.", nameof(id));
+        }
+
+        if (!IfcGuidCodec.TryDecode(trimmed, out var guid))
+        {
+            // Say what is wrong in the terms of the form the text looks like: 22 characters means a GlobalId was meant.
+            string? problem;
+            if (trimmed.Length == IfcGuidCodec.GlobalIdLength)
+            {
+                IfcGuidCodec.TryDecodeGlobalId(trimmed, out _, out problem);
+            }
+            else
+            {
+                IfcGuidCodec.TryParseGuid(trimmed, out _, out problem);
+            }
+
+            throw new ArgumentException(
+                "IFC.Normalize: " + (problem ?? "'" + trimmed + "' is neither an IFC GlobalId nor a GUID") +
+                ". Wire an IFC GlobalId (22 characters) or a GUID (32 hexadecimal digits).",
+                nameof(id));
+        }
+
+        return toGuid
+            ? guid.ToString("D", CultureInfo.InvariantCulture)
+            : IfcGuidCodec.Encode(guid);
+    }
+
+    private static bool ReadForm(string? form)
+    {
+        var text = (form ?? string.Empty).Trim();
+        if (text.Length == 0 || text.Equals("globalId", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (text.Equals("guid", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        throw new ArgumentException("IFC.Normalize: form must be 'globalId' or 'guid', not '" + text + "'.", nameof(form));
     }
 }

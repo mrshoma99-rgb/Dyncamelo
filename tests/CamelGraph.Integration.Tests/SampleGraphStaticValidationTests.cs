@@ -285,38 +285,42 @@ public class SampleGraphStaticValidationTests
             Assert.True(
                 registry.TryGetDefinition(definitionId, out var definition),
                 label + ": definition id '" + definitionId + "' is not registered.");
-            if (!string.Equals(definition!.Id, definitionId, StringComparison.Ordinal))
-            {
-                // The sample was saved under an earlier id of this node (a [NodeAliases] entry: its signature grew or changed
-                // since). The loader finds each saved wire and value by port name or earlier port name, so that is what is
-                // pinned here: every saved port still resolves to a port of the node as it is now.
-                foreach (var name in inputNames)
-                {
-                    Assert.True(
-                        definition.Inputs.Any(i => i.Name == name || i.Aliases.Contains(name)),
-                        label + ": saved input '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
-                }
-
-                foreach (var name in outputNames)
-                {
-                    Assert.True(
-                        definition.Outputs.Any(o => o.Name == name || o.Aliases.Contains(name)),
-                        label + ": saved output '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
-                }
-
-                return;
-            }
-
-            Assert.Equal(definition.Inputs.Select(i => i.Name), inputNames);
-            Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
+            // A sample may have been saved under an earlier id of the node (a [NodeAliases] entry) or under earlier port names
+            // (a [PortAlias] entry). The loader finds each saved wire and value by port name or earlier port name, so that is
+            // what is pinned: every saved port still resolves to a port of the node as it is now. A node that kept its id and
+            // its port names must still match the sample exactly.
+            var renamed = !string.Equals(definition!.Id, definitionId, StringComparison.Ordinal);
             for (int i = 0; i < inputPorts.Count; i++)
             {
-                if (inputPorts[i].Value<bool?>("UsingDefaultValue") == true)
+                var name = inputNames[i]!;
+                var resolved = definition.Inputs.FirstOrDefault(p => p.Name == name || p.Aliases.Contains(name));
+                Assert.True(
+                    resolved != null,
+                    label + ": saved input '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                renamed |= resolved!.Name != name;
+                var foldedIntoMultiInput = resolved.MultiInput && resolved.Name != name;
+                if (inputPorts[i].Value<bool?>("UsingDefaultValue") == true && !foldedIntoMultiInput)
                 {
                     Assert.True(
-                        definition.Inputs[i].HasDefault,
-                        label + ": port '" + inputNames[i] + "' claims a default the definition lacks.");
+                        resolved.HasDefault,
+                        label + ": port '" + name + "' claims a default the definition lacks.");
                 }
+            }
+
+            for (int i = 0; i < outputNames.Count; i++)
+            {
+                var name = outputNames[i];
+                var resolved = definition.Outputs.FirstOrDefault(o => o.Name == name || o.Aliases.Contains(name));
+                Assert.True(
+                    resolved != null,
+                    label + ": saved output '" + name + "' no longer exists on '" + definition.Id + "' and has no [PortAlias].");
+                renamed |= resolved!.Name != name;
+            }
+
+            if (!renamed)
+            {
+                Assert.Equal(definition.Inputs.Select(i => i.Name), inputNames);
+                Assert.Equal(definition.Outputs.Select(o => o.Name), outputNames);
             }
         }
     }

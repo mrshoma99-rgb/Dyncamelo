@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
@@ -22,17 +23,42 @@ public static class FlowNodes
     /// happens after the section box is applied.
     /// </summary>
     /// <param name="value">The value to pass through unchanged.</param>
-    /// <param name="after">Wire any output of the node that must run first (its value is ignored).</param>
-    /// <param name="after2">Optional second node that must run first.</param>
-    /// <param name="after3">Optional third node that must run first.</param>
+    /// <param name="after">Wire any number of nodes that must run first (one wire per node; their values are ignored). A branch that a Flow.When switched off counts as nothing; the node is skipped only when every branch wired here is off.</param>
     /// <returns>The <paramref name="value"/> input, unchanged.</returns>
     [NodeName("Flow.Then")]
+    [NodeAliases("CamelGraph.Nodes.FlowNodes.Then@object,object,object,object")]
+    [PortAlias("after2", "after")]
+    [PortAlias("after3", "after")]
     [return: NodeName("value")]
-    [NodeDescription("Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).")]
+    [NodeDescription("Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint). 'after' takes as many wires as you like, one per node that must run first; what they carry is ignored.")]
     [NodeSearchTags("sequence", "order", "passthrough", "wait", "after", "chain", "depend")]
-    public static object? Then(object? value, object? after, object? after2 = null, object? after3 = null)
+    public static object? Then(object? value, [MultiInput] IEnumerable<object?> after)
     {
         return value;
+    }
+
+    /// <summary>
+    /// Stops a branch with a message of your own when a precondition is false, and passes <paramref name="value"/> through
+    /// unchanged when it is true. The node shows the message as its error, and every node wired after it waits instead of running.
+    /// </summary>
+    /// <param name="value">The value to pass on when the condition is true. Wire it into the step that must not run on bad input.</param>
+    /// <param name="condition">True lets the value through; false stops here with the message. To demand that every item of a list passes, wire List.AllTrue into this input.</param>
+    /// <param name="message">What to tell the person when the condition is false: say what is wrong and what to do about it.</param>
+    /// <returns>The <paramref name="value"/> input, unchanged, when the condition is true.</returns>
+    [NodeName("Flow.Require")]
+    [NodeFunction(CamelGraph.Core.Graph.NodeFunction.Create)]
+    [return: NodeName("value")]
+    [NodeDescription("Stops with your own error message when a condition is false; when it is true the value passes through unchanged. The nodes wired after it do not run after a false condition, so put it in front of a step that must not run on bad input (replacing the open model, deleting files). Flow.When only skips quietly and Flow.Try only catches. To require that every item of a list passes, wire List.AllTrue into 'condition'.")]
+    [NodeSearchTags("require", "assert", "guard", "precondition", "check", "validate", "must", "fail", "stop", "abort", "error", "raise")]
+    public static object? Require(object? value, bool condition, string message = "A required condition is false.")
+    {
+        if (condition)
+        {
+            return value;
+        }
+
+        throw new InvalidOperationException(
+            string.IsNullOrWhiteSpace(message) ? "A required condition is false." : message.Trim());
     }
 
     /// <summary>

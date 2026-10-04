@@ -85,13 +85,19 @@ public class ZeroTouchNodeModel : NodeModel
         // Inside a run the replicator already collects per call. Evaluated on its own (a test, another tool), the node still
         // collects what it reports with NodeWarnings.Add and shows it as warnings of this node.
         var ownCollector = NodeWarnings.IsCollecting ? null : NodeWarnings.Begin();
-        try
+
+        // The running context is reachable from the node's static method (EvaluationContext.Current), so a node that works
+        // through many steps can checkpoint between them and honour Stop.
+        using (context?.MakeCurrent())
         {
-            return EvaluateCore(inputs, ownCollector);
-        }
-        finally
-        {
-            ownCollector?.Dispose();
+            try
+            {
+                return EvaluateCore(inputs, ownCollector);
+            }
+            finally
+            {
+                ownCollector?.Dispose();
+            }
         }
     }
 

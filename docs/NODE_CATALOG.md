@@ -2,7 +2,7 @@
 
 > Generated from the source by `tools/generate_node_catalog.py` — do not edit by hand. Regenerate with `python3 tools/generate_node_catalog.py` after adding, renaming or retiring a node; CI fails when this file or `camelgraph-nodes.json` is out of date.
 
-**582 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
+**584 nodes in 46 categories.** A `?` after an input marks it as optional. Retired nodes (still loadable in old graphs) are listed at the end.
 
 | Category | Nodes |
 |---|---|
@@ -13,8 +13,8 @@
 | [Dictionary](#dictionary) | 17 |
 | [Display](#display) | 4 |
 | [File](#file) | 36 |
-| [Geometry](#geometry) | 43 |
-| [IFC](#ifc) | 2 |
+| [Geometry](#geometry) | 42 |
+| [IFC](#ifc) | 4 |
 | [Input](#input) | 11 |
 | [List](#list) | 50 |
 | [List.Statistics](#liststatistics) | 12 |
@@ -50,7 +50,7 @@
 | [System](#system) | 5 |
 | [Table](#table) | 28 |
 | [Utility](#utility) | 1 |
-| [Workflow](#workflow) | 7 |
+| [Workflow](#workflow) | 8 |
 | [Workflow.Actions](#workflowactions) | 9 |
 
 ## Annotation
@@ -189,28 +189,27 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `BoundingBox.ByCorners` | min, max | boundingBox | Creates an axis-aligned bounding box spanning two corner points |
+| `BoundingBox.ByCorners` | cornerA, cornerB | boundingBox | Creates an axis-aligned bounding box spanning two opposite corner points, given in any order (the smaller coordinates become the box's min corner, the larger its max cor… |
 | `BoundingBox.Center` | boundingBox | point | Returns the center point of a bounding box |
 | `BoundingBox.Contains` | boundingBox, point | contains | Tests whether a point lies inside a bounding box (points on the boundary count as inside) |
 | `BoundingBox.ContainsBox` | outer, inner | contains | True when the inner box fits entirely inside the outer box (touching faces count as inside) |
-| `BoundingBox.Corners` | box | corners | The 8 corner points of a bounding box: the bottom face counter-clockwise from the Min corner (0-3), then the top face in the same order (4-7) |
-| `BoundingBox.Expand` | box, amount | boundingBox | Grows a bounding box by an amount on every side (negative shrinks it |
-| `BoundingBox.Footprint` | box | area | The plan (floor) area of a bounding box: size X times size Y, ignoring height |
-| `BoundingBox.FromPoints` | points | boundingBox | The smallest bounding box around a set of points (several wires can feed one input |
+| `BoundingBox.Corners` | boundingBox | corners | The 8 corner points of a bounding box: the bottom face counter-clockwise from the Min corner (0-3), then the top face in the same order (4-7) |
+| `BoundingBox.Expand` | boundingBox, amount | boundingBox | Grows a bounding box by an amount on every side (negative shrinks it |
+| `BoundingBox.Footprint` | boundingBox | area | The plan (floor) area of a bounding box: size X times size Y, ignoring height |
 | `BoundingBox.Intersects` | boundingBox, other | intersects | Tests whether two bounding boxes overlap (touching counts as intersecting) |
 | `BoundingBox.Overlap` | a, b | boundingBox | The bounding box shared by two overlapping boxes |
 | `BoundingBox.PlanGap` | outer, inner | gap | The widest strip of open floor between an inner box (equipment) and the outer box (opening) in plan |
 | `BoundingBox.Scale` | boundingBox, factor | boundingBox | Scales a bounding box about its center by a factor (2 = double, 0.5 = half) |
 | `BoundingBox.Size` | boundingBox | sizeX, sizeY, sizeZ, min, max | Returns a bounding box's size along each axis and its min/max corner points |
-| `BoundingBox.SurfaceArea` | box | area | The total area of a bounding box's six faces (square model units) |
-| `BoundingBox.Translate` | box, offset | boundingBox | Moves a bounding box by an offset vector, keeping its size |
-| `BoundingBox.Union` | geometry | boundingBox | ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too |
-| `BoundingBox.Volume` | box | volume | The volume of a bounding box (cubic model units) |
+| `BoundingBox.SurfaceArea` | boundingBox | area | The total area of a bounding box's six faces (square model units) |
+| `BoundingBox.Translate` | boundingBox, offset | boundingBox | Moves a bounding box by an offset vector, keeping its size |
+| `BoundingBox.Union` | geometry | boundingBox | ONE bounding box fitting every box and/or point wired in |
+| `BoundingBox.Volume` | boundingBox | volume | The volume of a bounding box (cubic model units) |
 | `Point.ByCoordinates` | x?, y?, z? | point | Creates a 3D point from X, Y and Z coordinates |
 | `Point.Centroid` | points | point | The centroid (average position) of a list of points |
 | `Point.Components` | point | x, y, z | Splits a point into its X, Y and Z coordinates |
 | `Point.Distance2D` | a, b | distance | The distance between two points measured in plan (XY only, Z ignored) |
-| `Point.DistanceTo` | point, other | distance | Returns the straight-line distance between two points |
+| `Point.DistanceTo` | a, b | distance | Returns the straight-line distance between two points |
 | `Point.Lerp` | a, b, t | point | Interpolates between two points: t = 0 is the first, t = 1 the second |
 | `Point.Midpoint` | a, b | point | The point halfway between two points |
 | `Point.Round` | point, digits? | point | Rounds a point's X, Y and Z to the given number of decimal digits (midpoints round away from zero) |
@@ -239,6 +238,8 @@
 |---|---|---|---|
 | `IFC.GuidDecode` | globalId | guid | Converts a 22-character IFC GlobalId such as "0$WU4A9R19$vKWO$AdOnKA" back to a standard lower-case hyphenated GUID |
 | `IFC.GuidEncode` | guid | globalId | Converts a standard GUID such as "3f81e10a-25b0-49ff-9520-63f2a763150a" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) |
+| `IFC.IsGlobalId` | text | isGlobalId | True when a text is a 22-character IFC GlobalId (alphabet 0-9 A-Z a-z _ $, first character 0 to 3) and false for a plain GUID, any other text or an empty cell, so a colu… |
+| `IFC.Normalize` | id, form? | id | Writes an id in one form whichever form it comes in: a 22-character IFC GlobalId or a standard GUID (with hyphens, without, or in braces) becomes the form you choose, a… |
 
 ## Input
 
@@ -843,13 +844,14 @@
 
 | Node | Inputs | Outputs | What it does |
 |---|---|---|---|
-| `Flow.Then` | value, after, after2?, after3? | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
+| `Flow.Require` | value, condition, message? | value | Stops with your own error message when a condition is false |
+| `Flow.Then` | value, after | value | Passes a value through unchanged AFTER the wired 'after' nodes have run |
 | `Flow.Try` | value, fallback? | result, failed, error | Carries on after a failure: gives the node's result, or your fallback plus the error text when that node failed |
 | `Flow.Wait` | value, seconds? | value | Waits the given number of seconds, then passes the value through unchanged - use it to pause between steps of a workflow |
 | `Flow.When` | value, condition | value | Runs the nodes wired after it only when the condition is true |
 | `Loop.Collect` *(interactive)* | loop, value | results | Closes a loop and collects one value per iteration |
 | `Loop.Item` *(interactive)* | items | item, index, count, loop | Yields the current item of a loop |
-| `Workflow.ForEach` | items, actions | results | Runs a sequence of actions on each item, one item fully before the next |
+| `Workflow.ForEach` | items, actions, onError? | results | Runs a sequence of actions on each item, one item fully before the next (zoom, isolate, save viewpoint, then the next item), the per-item ordered loop that wiring and la… |
 
 ## Workflow.Actions
 
@@ -871,6 +873,7 @@ These still load and run in saved graphs, but are no longer offered in the libra
 
 | Retired node | Use instead |
 |---|---|
+| `BoundingBox.FromPoints` | Use BoundingBox.Union |
 | `ClashResult.AddComment` | SavedItem.AddComment |
 | `ClashResult.Comments` | SavedItem.Comments |
 | `ClashTest.ResultsByStatus` | ClashTest.Results followed by Clash.FilterByStatus |

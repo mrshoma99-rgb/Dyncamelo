@@ -1,6 +1,6 @@
 {
  "version": "v0.50.0",
- "count": 582,
+ "count": 584,
  "categories": [
   {
    "name": "Annotation",
@@ -32,11 +32,11 @@
   },
   {
    "name": "Geometry",
-   "count": 43
+   "count": 42
   },
   {
    "name": "IFC",
-   "count": 2
+   "count": 4
   },
   {
    "name": "Input",
@@ -180,7 +180,7 @@
   },
   {
    "name": "Workflow",
-   "count": 7
+   "count": 8
   },
   {
    "name": "Workflow.Actions",
@@ -3795,7 +3795,7 @@
    "id": "CamelGraph.Nodes.GeometryNodes.BoundingBoxByCorners@CamelGraph.Nodes.CamelGraphPoint,CamelGraph.Nodes.CamelGraphPoint",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "Creates an axis-aligned bounding box spanning two corner points.",
+   "description": "Creates an axis-aligned bounding box spanning two opposite corner points, given in any order (the smaller coordinates become the box's min corner, the larger its max corner).",
    "tags": [
     "box",
     "extent",
@@ -3803,12 +3803,12 @@
    ],
    "inputs": [
     {
-     "name": "min",
+     "name": "cornerA",
      "type": "Point",
      "description": "One corner of the box."
     },
     {
-     "name": "max",
+     "name": "cornerB",
      "type": "Point",
      "description": "The opposite corner of the box."
     }
@@ -3936,7 +3936,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -3969,7 +3969,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     },
@@ -4006,7 +4006,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -4016,39 +4016,6 @@
      "name": "area",
      "type": "number",
      "description": "The footprint area, in square model units."
-    }
-   ],
-   "returns": ""
-  },
-  {
-   "name": "BoundingBox.FromPoints",
-   "id": "CamelGraph.Nodes.BoundingBoxExtraNodes.FromPoints@System.Collections.Generic.IList<object>",
-   "assembly": "CamelGraph.Nodes",
-   "category": "Geometry",
-   "description": "The smallest bounding box around a set of points (several wires can feed one input; a single point gives a zero-size box).",
-   "tags": [
-    "fit",
-    "enclose",
-    "extents",
-    "around",
-    "points",
-    "aabb",
-    "bounds",
-    "from points"
-   ],
-   "inputs": [
-    {
-     "name": "points",
-     "type": "any[]",
-     "description": "The points to enclose (at least one; every item must be a point).",
-     "multiInput": true
-    }
-   ],
-   "outputs": [
-    {
-     "name": "boundingBox",
-     "type": "BoundingBox",
-     "description": "The bounding box that just contains all the points."
     }
    ],
    "returns": ""
@@ -4183,7 +4150,7 @@
     {
      "name": "factor",
      "type": "number",
-     "description": "Scale factor (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center."
+     "description": "Scale factor above 0 (2 = double size, 0.5 = half, 1 = unchanged). Applied about the center."
     }
    ],
    "outputs": [
@@ -4262,7 +4229,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -4291,7 +4258,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     },
@@ -4315,7 +4282,7 @@
    "id": "CamelGraph.Nodes.GeometryNodes.BoundingBoxUnion@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "ONE bounding box fitting every box and/or point wired in ([x,y,z] triples work too; lists nest freely) — the geometric union, e.g. one frame around scattered elements' boxes.",
+   "description": "ONE bounding box fitting every box and/or point wired in — the geometric union, e.g. one frame around scattered elements' boxes or around a set of points (several wires can feed the one input; [x,y,z] triples work too; lists nest freely, a list of lists included).",
    "tags": [
     "union",
     "combine",
@@ -4325,13 +4292,18 @@
     "multiple",
     "all",
     "extents",
-    "aabb"
+    "aabb",
+    "around",
+    "points",
+    "bounds",
+    "from points"
    ],
    "inputs": [
     {
      "name": "geometry",
      "type": "any[]",
-     "description": "Boxes and/or points to enclose (lists nest freely; at least one required)."
+     "description": "Boxes and/or points to enclose (several wires can feed this one input; lists nest freely; at least one required). Wire a single [x, y, z] triple on its own, or inside a list: next to other wires a bare list is spread into its numbers.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -4359,7 +4331,7 @@
    ],
    "inputs": [
     {
-     "name": "box",
+     "name": "boundingBox",
      "type": "BoundingBox",
      "description": "The bounding box."
     }
@@ -4418,7 +4390,7 @@
    "id": "CamelGraph.Nodes.PointExtraNodes.Centroid@System.Collections.Generic.IList<object>",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "The centroid (average position) of a list of points; an empty list, a null or a non-point item is an error naming the item.",
+   "description": "The centroid (average position) of a list of points; several wires can feed the one input. An empty list, a null or a non-point item is an error naming the item.",
    "tags": [
     "average",
     "mean",
@@ -4433,7 +4405,8 @@
     {
      "name": "points",
      "type": "any[]",
-     "description": "The points to average; at least one, and every item must be a point."
+     "description": "The points to average (several wires can feed this one input); at least one, and every item must be a point.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -4533,12 +4506,12 @@
    ],
    "inputs": [
     {
-     "name": "point",
+     "name": "a",
      "type": "Point",
      "description": "The first point."
     },
     {
-     "name": "other",
+     "name": "b",
      "type": "Point",
      "description": "The second point."
     }
@@ -4581,7 +4554,7 @@
     {
      "name": "t",
      "type": "number",
-     "description": "The interpolation parameter (not clamped)."
+     "description": "The interpolation parameter (not clamped): 0 to 1 lies between the points, other values extend the line."
     }
    ],
    "outputs": [
@@ -5117,7 +5090,7 @@
    "id": "CamelGraph.Nodes.VectorNodes.Scale@CamelGraph.Nodes.CamelGraphVector,double",
    "assembly": "CamelGraph.Nodes",
    "category": "Geometry",
-   "description": "Multiplies a vector by a number (2 doubles its length, -1 reverses it).",
+   "description": "Multiplies a vector by a number (2 doubles its length, -1 reverses it). A factor that is not a finite number gives a warning.",
    "tags": [
     "multiply",
     "stretch",
@@ -5252,7 +5225,7 @@
    "id": "CamelGraph.Nodes.IfcGuidNodes.GuidDecode@string",
    "assembly": "CamelGraph.Nodes",
    "category": "IFC",
-   "description": "Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID.",
+   "description": "Converts a 22-character IFC GlobalId such as \"0$WU4A9R19$vKWO$AdOnKA\" back to a standard lower-case hyphenated GUID — the form Navisworks shows as an item's GUID. A plain GUID is refused here; for a column that mixes both forms use IFC.Normalize.",
    "tags": [
     "ifc",
     "guid",
@@ -5284,7 +5257,7 @@
    "id": "CamelGraph.Nodes.IfcGuidNodes.GuidEncode@string",
    "assembly": "CamelGraph.Nodes",
    "category": "IFC",
-   "description": "Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references.",
+   "description": "Converts a standard GUID such as \"3f81e10a-25b0-49ff-9520-63f2a763150a\" to the 22-character IFC GlobalId (the IFC base-64 form, alphabet 0-9 A-Z a-z _ $) — the format of IFC files and BCF references. A GlobalId is refused here; for a column that mixes both forms use IFC.Normalize.",
    "tags": [
     "ifc",
     "guid",
@@ -5307,6 +5280,84 @@
      "name": "globalId",
      "type": "string",
      "description": "The IFC GlobalId, e.g. \"0$WU4A9R19$vKWO$AdOnKA\"."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.IsGlobalId",
+   "id": "CamelGraph.Nodes.IfcGuidNodes.IsGlobalId@string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "IFC",
+   "description": "True when a text is a 22-character IFC GlobalId (alphabet 0-9 A-Z a-z _ $, first character 0 to 3) and false for a plain GUID, any other text or an empty cell, so a column that mixes both forms can be split before IFC.GuidDecode or IFC.GuidEncode. A list gives one answer per item, empty cells included.",
+   "tags": [
+    "ifc",
+    "globalid",
+    "guid",
+    "uuid",
+    "is",
+    "check",
+    "validate",
+    "22",
+    "test",
+    "format",
+    "which"
+   ],
+   "inputs": [
+    {
+     "name": "text",
+     "type": "string",
+     "description": "The text to test; a blank or missing text is simply not a GlobalId. Spaces around it are ignored."
+    }
+   ],
+   "outputs": [
+    {
+     "name": "isGlobalId",
+     "type": "boolean",
+     "description": "True for a valid 22-character IFC GlobalId; false for a plain GUID, any other text, or nothing."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "IFC.Normalize",
+   "id": "CamelGraph.Nodes.IfcGuidNodes.Normalize@string,string",
+   "assembly": "CamelGraph.Nodes",
+   "category": "IFC",
+   "description": "Writes an id in one form whichever form it comes in: a 22-character IFC GlobalId or a standard GUID (with hyphens, without, or in braces) becomes the form you choose, a GlobalId (default) or a lower-case hyphenated GUID. Use it on a column that mixes both forms, where IFC.GuidEncode and IFC.GuidDecode would each refuse the other form. A text that is neither is an error naming the text (in a list: an empty result and one warning).",
+   "tags": [
+    "ifc",
+    "guid",
+    "globalid",
+    "uuid",
+    "normalize",
+    "normalise",
+    "convert",
+    "either",
+    "mixed",
+    "tolerant",
+    "clean",
+    "canonical",
+    "22"
+   ],
+   "inputs": [
+    {
+     "name": "id",
+     "type": "string",
+     "description": "The id, in either form. Spaces around it are ignored."
+    },
+    {
+     "name": "form",
+     "type": "string",
+     "description": "The form to write: \"globalId\" (22 characters, the default) or \"guid\" (lower-case, hyphenated).",
+     "default": "\"globalId\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "id",
+     "type": "string",
+     "description": "The id in the requested form."
     }
    ],
    "returns": ""
@@ -22560,11 +22611,58 @@
    "interactive": true
   },
   {
-   "name": "Flow.Then",
-   "id": "CamelGraph.Nodes.FlowNodes.Then@object,object,object,object",
+   "name": "Flow.Require",
+   "id": "CamelGraph.Nodes.FlowNodes.Require@object,bool,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Workflow",
-   "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint).",
+   "description": "Stops with your own error message when a condition is false; when it is true the value passes through unchanged. The nodes wired after it do not run after a false condition, so put it in front of a step that must not run on bad input (replacing the open model, deleting files). Flow.When only skips quietly and Flow.Try only catches. To require that every item of a list passes, wire List.AllTrue into 'condition'.",
+   "tags": [
+    "require",
+    "assert",
+    "guard",
+    "precondition",
+    "check",
+    "validate",
+    "must",
+    "fail",
+    "stop",
+    "abort",
+    "error",
+    "raise"
+   ],
+   "inputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value to pass on when the condition is true. Wire it into the step that must not run on bad input."
+    },
+    {
+     "name": "condition",
+     "type": "boolean",
+     "description": "True lets the value through; false stops here with the message. To demand that every item of a list passes, wire List.AllTrue into this input."
+    },
+    {
+     "name": "message",
+     "type": "string",
+     "description": "What to tell the person when the condition is false: say what is wrong and what to do about it.",
+     "default": "\"A required condition is false.\""
+    }
+   ],
+   "outputs": [
+    {
+     "name": "value",
+     "type": "any",
+     "description": "The value input, unchanged, when the condition is true."
+    }
+   ],
+   "returns": ""
+  },
+  {
+   "name": "Flow.Then",
+   "id": "CamelGraph.Nodes.FlowNodes.Then@object,System.Collections.Generic.IEnumerable<object>",
+   "assembly": "CamelGraph.Nodes",
+   "category": "Workflow",
+   "description": "Passes a value through unchanged AFTER the wired 'after' nodes have run — makes the execution order of side-effect nodes explicit (e.g. set a section box, THEN save the viewpoint). 'after' takes as many wires as you like, one per node that must run first; what they carry is ignored.",
    "tags": [
     "sequence",
     "order",
@@ -22582,20 +22680,9 @@
     },
     {
      "name": "after",
-     "type": "any",
-     "description": "Wire any output of the node that must run first (its value is ignored)."
-    },
-    {
-     "name": "after2",
-     "type": "any",
-     "description": "Optional second node that must run first.",
-     "default": "null"
-    },
-    {
-     "name": "after3",
-     "type": "any",
-     "description": "Optional third node that must run first.",
-     "default": "null"
+     "type": "any[]",
+     "description": "Wire any number of nodes that must run first (one wire per node; their values are ignored). A branch that a Flow.When switched off counts as nothing; the node is skipped only when every branch wired here is off.",
+     "multiInput": true
     }
    ],
    "outputs": [
@@ -22772,7 +22859,7 @@
    "name": "Loop.Item",
    "id": "LoopItem",
    "category": "Workflow",
-   "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order. If the list comes from a node that failed, or from a Flow.When that is false, the loop does not run and the nodes after it wait, like after any failed or switched-off node.",
+   "description": "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order. If the list comes from a node that failed, or from a Flow.When that is false, the loop does not run and the nodes after it wait, like after any failed or switched-off node. Use a loop when the work per item is built from ordinary nodes; use Workflow.ForEach with Action.* nodes when it is a fixed list of steps such as isolate, zoom, save viewpoint.",
    "tags": [
     "for each",
     "foreach",
@@ -22817,10 +22904,10 @@
   },
   {
    "name": "Workflow.ForEach",
-   "id": "CamelGraph.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>",
+   "id": "CamelGraph.Nodes.WorkflowNodes.ForEach@System.Collections.Generic.IEnumerable<object>,System.Collections.Generic.IEnumerable<object>,string",
    "assembly": "CamelGraph.Nodes",
    "category": "Workflow",
-   "description": "Runs a sequence of actions on each item, one item fully before the next — the per-item ordered loop (zoom → isolate → save viewpoint → next) that wiring and lacing cannot express. Wire items and a List.Create of Action.* nodes.",
+   "description": "Runs a sequence of actions on each item, one item fully before the next (zoom, isolate, save viewpoint, then the next item), the per-item ordered loop that wiring and lacing cannot express. Wire the items and the Action.* nodes into 'actions' (several wires run in the order they were made; a List.Create of them works too). 'results' has one entry per item: what its actions collected (one value as it is, several as a list, the item itself if the actions collect nothing), or empty when that item failed. By default a failing item is skipped and the node ends amber with one line that names the items and actions that failed; set onError to stop to end with an error at the first failure instead (what was already done stays done). Press Stop to end it between two actions. Use this node for a fixed, readable list of actions with {name} and {index1} naming (one viewpoint per item); use Loop.Item and Loop.Collect when the work per item is built from ordinary nodes.",
    "tags": [
     "workflow",
     "foreach",
@@ -22841,14 +22928,21 @@
     {
      "name": "actions",
      "type": "any[]",
-     "description": "The actions to run per item, in order — build this with List.Create from Action.* builder nodes."
+     "description": "The actions to run per item, in order. Wire the Action.* nodes straight in (several wires run in the order they were made), or one List.Create of them. An element that is not an action is skipped with a warning.",
+     "multiInput": true
+    },
+    {
+     "name": "onError",
+     "type": "string",
+     "description": "What a failing item does: \"continue\" (the default) records an empty result for it and goes on with the next item; \"stop\" ends the node with an error at the first failure (the items before it stay done).",
+     "default": "\"continue\""
     }
    ],
    "outputs": [
     {
      "name": "results",
      "type": "any[]",
-     "description": "One entry per item: the value that item's actions collected (unwrapped when a single value, a list when several, the item itself when none). For a per-item Save Viewpoint workflow this is the list of created viewpoints."
+     "description": "One entry per item: the value that item's actions collected (unwrapped when a single value, a list when several, the item itself when none, empty when the item failed). For a per-item Save Viewpoint workflow this is the list of created viewpoints."
     }
    ],
    "returns": ""
@@ -23040,7 +23134,7 @@
    "id": "CamelGraph.Navisworks.WorkflowActionNodes.SaveViewpoint@string,string,bool",
    "assembly": "CamelGraph.Navisworks",
    "category": "Workflow.Actions",
-   "description": "Per item: saves the current view as a saved viewpoint named from the item. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.",
+   "description": "Per item: saves the current view as a saved viewpoint named from the item. The name is a template: {name} (or {item}) is the item's name, {index} its position from 0, {index1} (or {n}) its position from 1 and {count} the number of items, so 'View {index1} of {count}: {name}' numbers the views; an empty name uses the item's name, and a viewpoint with the same name in the same folder is replaced. With bakeOverrides on, the current isolation AND temporary color/transparency are stored in the view, so recalling it restores that exact look. Collected as the loop's per-item result.",
    "tags": [
     "action",
     "viewpoint",
@@ -23055,7 +23149,7 @@
     {
      "name": "name",
      "type": "string",
-     "description": "Viewpoint name; supports {name}, {index1}, {count} templating (default {name} = the item's name).",
+     "description": "Viewpoint name. Tokens: {name} or {item} = the item's name, {index} = its position counting from 0, {index1} or {n} = counting from 1, {count} = how many items there are. An empty name uses the item's name. Default {name}.",
      "default": "\"{name}\""
     },
     {

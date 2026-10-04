@@ -250,7 +250,7 @@ Lightweight geometry for measurements and camera math — no display; geometry p
 | Point.ByCoordinates | Geometry | x: double, y: double, z: double = 0 | point: Point | Construct a 3D point. | Core Point ctor (↔ Api.Point3D) | MVP |
 | Point.Components | Geometry | point: Point | x: double, y: double, z: double | Deconstruct a point. | [MultiReturn] | MVP |
 | BoundingBox.Center | Geometry | boundingBox: BoundingBox | center: Point | Box center point (clash/viewpoint targeting). | (↔ BoundingBox3D.Center) | MVP |
-| Point.DistanceTo | Geometry | point: Point, other: Point | distance: double | Euclidean distance (in model units). | vector math | Implemented (v0.2) |
+| Point.DistanceTo | Geometry | a: Point, b: Point | distance: double | Euclidean distance (in model units). | vector math | Implemented (v0.2) |
 | Vector.ByCoordinates | Geometry | x: double, y: double, z: double | vector: Vector | Construct a direction vector (camera up/forward). | Core Vector ctor (↔ Api.Vector3D) | Implemented (v0.2) |
 | BoundingBox.Size | Geometry | boundingBox: BoundingBox | sizeX: double, sizeY: double, sizeZ: double, min: Point, max: Point | Extents and corner points (rough QTO dimensions). | (↔ BoundingBox3D.Min/Max) / [MultiReturn] | Implemented (v0.2) |
 | BoundingBox.Intersects | Geometry | boundingBox: BoundingBox, other: BoundingBox | intersects: bool | Axis-aligned overlap test (cheap proximity checks). | interval math | Implemented (v0.2) |

@@ -30,7 +30,7 @@ public sealed class LoopItemNode : NodeModel
     {
         Name = "Loop.Item";
         Category = "Workflow";
-        Description = "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order. If the list comes from a node that failed, or from a Flow.When that is false, the loop does not run and the nodes after it wait, like after any failed or switched-off node.";
+        Description = "Yields the current item of a loop. Wire a list into 'items', wire 'item' into the nodes that should run per item, and wire 'loop' into a Loop.Collect to close the loop. The engine runs everything between here and Loop.Collect once per item, in order. If the list comes from a node that failed, or from a Flow.When that is false, the loop does not run and the nodes after it wait, like after any failed or switched-off node. Use a loop when the work per item is built from ordinary nodes; use Workflow.ForEach with Action.* nodes when it is a fixed list of steps such as isolate, zoom, save viewpoint.";
         AddInput("items", typeof(IEnumerable<object>), "The list to iterate.");
         AddOutput("item", typeof(object), "The current item (per iteration).");
         AddOutput("index", typeof(int), "The current 0-based index.");

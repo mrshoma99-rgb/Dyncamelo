@@ -89,7 +89,7 @@ public class BoundingBoxExtraNodesTests
         {
             var error = Assert.Throws<ArgumentNullException>(() => call());
             Assert.Contains(name, error.Message);
-            Assert.Contains("'box'", error.Message);
+            Assert.Contains("'boundingBox'", error.Message);
         }
     }
 
@@ -274,7 +274,7 @@ public class BoundingBoxExtraNodesTests
     {
         var error = Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.Expand(null!, 1));
         Assert.Contains("BoundingBox.Expand", error.Message);
-        Assert.Contains("'box'", error.Message);
+        Assert.Contains("'boundingBox'", error.Message);
     }
 
     // ------------------------------------------------------------------ Overlap
@@ -563,7 +563,7 @@ public class BoundingBoxExtraNodesTests
     {
         var noBox = Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.Translate(null!, V(1, 1, 1)));
         Assert.Contains("BoundingBox.Translate", noBox.Message);
-        Assert.Contains("'box'", noBox.Message);
+        Assert.Contains("'boundingBox'", noBox.Message);
         Assert.Contains("'offset'", Assert.Throws<ArgumentNullException>(() => BoundingBoxExtraNodes.Translate(Box(0, 0, 0, 1, 1, 1), null!)).Message);
     }
 
