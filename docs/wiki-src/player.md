@@ -66,7 +66,7 @@ After a run the Player shows a **Results** card:
 ![The Script Player after a run: the summary line, the Watch results and the Copy button.](../images/wiki-player-results.png)
 
 * a summary line with a green or red dot, such as "Finished in 1.2 s — 14 nodes", "Finished with errors in …" or "Stopped after …";
-* the value of every **Watch node** (`Watch`, `Watch List`, `Watch Image`, `Watch Table`) and of any other node the author marked to show, each in a scrolling box titled with the node's name. Very long results are cut after 300 lines with a note saying how many more there are;
+* the value of every **Watch node** (`Watch`, `Watch List`, `Watch Image`, `Watch Table`) and of any other node the author marked to show, each in a scrolling box titled with the node's name. A list is shown as a count and one item per line; very long results are cut after 300 lines with a note saying how many more there are. A node that did **not** run in this run (its input failed, was switched off or is not connected) shows "(no value: …)" with the reason, in red, instead of an old value;
 * below them, every node that **failed or warned**, with the reason, errors in red and warnings in amber;
 * a **Copy** button that puts the whole report (script name, summary, results and problems) on the clipboard as text, ready to paste into an email.
 
@@ -97,7 +97,7 @@ All of these choices are made in the editor and saved in the `.dyc` file.
 * **Offer an input that is not an input node**: select the node and use **Node ▸ Show / Hide Unwired Inputs in Player**, or right-click one socket and choose **Show in Player**. Only inputs with no wire and with an editor can be offered; lists and objects cannot be typed in.
 * A small **▶** badge on a node's title bar marks a node, or a node with inputs, that the Player uses.
 * **Describe the script** with **Graph ▸ Script Description…**; the text appears above the form in the Player.
-* Put the input at the top level of the script. **Inputs inside a [node group](node-groups.md) are not offered** in the form.
+* Put the input at the top level of the script. **Inputs inside a [node group](node-groups.md) are not offered** in the form, and a Watch inside a group is not listed as a result either. **Show in Player** does nothing useful while a group is open, so the commands are switched off there. Keep the nodes the Player should use at the top level and wire them into and out of the group.
 
 ## Running a script from other tools
 

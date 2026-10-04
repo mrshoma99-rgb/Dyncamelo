@@ -644,4 +644,33 @@ public class NodeGroupViewTests
             Assert.Equal(2, Descendants<Button>(host.Window).Count(x => (x.ToolTip as string ?? string.Empty).StartsWith("Add a socket")));
         });
     }
+
+    [Fact]
+    public void ShowInPlayerDoesNothingInsideAGroupAndSaysWhy()
+    {
+        StaHost.Run(() =>
+        {
+            var chain = BuildChain();
+            MakeGroupOfB(chain);
+            chain.Vm.ToggleGroupEditCommand.Execute(null);
+            var inner = chain.Vm.Graph.Nodes.OfType<SumNode>().Single();
+            Select(chain.Vm, inner);
+
+            chain.Vm.TogglePlayerNodeCommand.Execute(null);
+
+            Assert.Null(inner.PlayerExposed);
+            Assert.Contains("top level", chain.Vm.StatusMessage);
+
+            chain.Vm.TogglePlayerInputsCommand.Execute(null);
+
+            Assert.False(inner.InPorts[1].PlayerExposed);
+
+            // Back at the top level the same command works as before.
+            chain.Vm.ExitGroupCommand.Execute(null);
+            Select(chain.Vm, chain.A);
+            chain.Vm.TogglePlayerNodeCommand.Execute(null);
+
+            Assert.True(chain.A.PlayerExposed);
+        });
+    }
 }

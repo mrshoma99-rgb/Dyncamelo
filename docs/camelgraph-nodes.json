@@ -2138,7 +2138,7 @@
    "name": "Watch",
    "id": "Watch",
    "category": "Display",
-   "description": "Displays the incoming value.",
+   "description": "Displays the incoming value. A long list shows its first 1,000 items and a count of the rest; the value itself passes through whole. When the node does not run (an input failed, was switched off or is not connected) the display is cleared.",
    "tags": [],
    "inputs": [
     {
@@ -2161,13 +2161,13 @@
    "name": "Watch Image",
    "id": "WatchImage",
    "category": "Display",
-   "description": "Displays the image file at the incoming path (PNG, JPG, BMP).",
+   "description": "Displays the image file at the incoming path (PNG, JPG, BMP). Given a list of paths it shows the first image and says how many there are. When the node does not run the picture is cleared.",
    "tags": [],
    "inputs": [
     {
      "name": "imagePath",
      "type": "any",
-     "description": "Path of the image file to display."
+     "description": "Path of the image file to display, or a list of paths (the first is shown)."
     }
    ],
    "outputs": [
@@ -2184,7 +2184,7 @@
    "name": "Watch List",
    "id": "WatchList",
    "category": "Display",
-   "description": "Displays the elements of a list, one per line.",
+   "description": "Displays the elements of a list, one per line. A very long list shows its first 2,000 elements and a count of the rest; the value itself passes through whole. When the node does not run the display is cleared.",
    "tags": [],
    "inputs": [
     {
@@ -2207,7 +2207,7 @@
    "name": "Watch Table",
    "id": "WatchTable",
    "category": "Display",
-   "description": "Displays a table as a grid: column names on top, one line per row.",
+   "description": "Displays a table as a grid: column names on top, one line per row. The grid draws the first 2,000 rows (the summary says how many there are); the value itself passes through whole. When the node does not run the display is cleared.",
    "tags": [],
    "inputs": [
     {

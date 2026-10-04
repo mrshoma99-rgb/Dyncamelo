@@ -114,8 +114,8 @@ public sealed class PlayerOutputViewModel
     /// <summary>The text.</summary>
     public string Text => Output.Text;
 
-    /// <summary>True when the node failed, so the text is an error rather than a value.</summary>
-    public bool IsFailed => Output.State == NodeState.Error;
+    /// <summary>True when the node failed or produced no value, so the text is an explanation rather than a value.</summary>
+    public bool IsFailed => Output.State == NodeState.Error || !Output.HasValue;
 }
 
 /// <summary>One problem listed after a run.</summary>
