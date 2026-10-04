@@ -47,6 +47,12 @@ public static class PlatformFixtures
     public static string BlankToDash([AcceptsNull] string text, string other = "") => text ?? "-";
 
     public static double NullableDouble([AcceptsNull] double x) => x;
+
+    public static string WhatIs([ScalarInput] object value) => value == null ? "null" : value.GetType().Name;
+
+    public static string WhatIsAny(object value) => value == null ? "null" : value.GetType().Name;
+
+    public static string NotAnObject([ScalarInput] string text) => text;
 }
 
 public class PlatformApiTests
@@ -241,5 +247,73 @@ public class PlatformApiTests
     {
         Assert.True(Node("IsNullish").InPorts[0].AcceptsNull);
         Assert.False(ZT.Node("Shout").InPorts[0].AcceptsNull);
+    }
+
+    // ------------------------------------------------------------- ScalarInput
+
+    [Fact]
+    public void AScalarObjectPortMapsTheNodeOverAList()
+    {
+        var (_, node) = Run("WhatIs", L("a", 2.5, true));
+
+        Assert.Equal(L("String", "Double", "Boolean"), node.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void AScalarObjectPortStillTakesASingleValue()
+    {
+        var (_, node) = Run("WhatIs", 7);
+
+        Assert.Equal("Int32", node.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void AScalarObjectPortMapsNestedListsLevelByLevel()
+    {
+        var (_, node) = Run("WhatIs", L(L("a", 1), L(2.5)));
+
+        Assert.Equal(L(L("String", "Int32"), L("Double")), node.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void APlainObjectPortStillReceivesTheListWhole()
+    {
+        var (_, node) = Run("WhatIsAny", L("a", 2.5));
+
+        Assert.Equal("List`1", node.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void ListLevelsCanStillHandTheWholeListToAScalarObjectPort()
+    {
+        var graph = new GraphModel();
+        var source = ZT.Value(graph, L("a", 2.5));
+        var node = Node("WhatIs");
+        graph.AddNode(node);
+        ZT.Wire(graph, source, 0, node, 0);
+        node.InPorts[0].SetLevels(true, 2, true);
+
+        new GraphEngine().Run(graph);
+
+        Assert.Equal("List`1", node.OutPorts[0].Value);
+    }
+
+    [Fact]
+    public void ScalarInputIsIgnoredOnAParameterThatIsNotAnObject()
+    {
+        Assert.False(Node("NotAnObject").InPorts[0].IsScalarInput);
+        Assert.True(Node("WhatIs").InPorts[0].IsScalarInput);
+    }
+
+    [Fact]
+    public void AScalarObjectPortIsShownAsASingleItem()
+    {
+        var kind = PortKinds.FromPort(Node("WhatIs").InPorts[0]);
+        var plain = PortKinds.FromPort(Node("WhatIsAny").InPorts[0]);
+
+        Assert.Equal(PortDepth.Item, kind.Depth);
+        Assert.Equal(PortFamily.Any, kind.Family);
+        Assert.Equal(PortDepth.Unknown, plain.Depth);
+        Assert.Equal(PortEditorKind.None, PortEditors.Resolve(Node("WhatIs").InPorts[0]));
     }
 }

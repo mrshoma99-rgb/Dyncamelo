@@ -279,6 +279,19 @@ public sealed class AcceptsNullAttribute : Attribute
 }
 
 /// <summary>
+/// An <c>object</c>-typed parameter that takes exactly one thing per call (a name, a point, a vector, a viewpoint, a value to
+/// compare). Without it an <c>object</c> port means "anything" and receives a list whole; with it the port counts as rank 0, like a
+/// <c>double</c>, so a list wired to it maps the node over the list (lacing) and the node is called once per element. Ignored
+/// on parameters that are not declared <c>object</c>. The node must therefore not expect a list on this parameter; a graph can
+/// still hand the whole list to the node by choosing a list level on the port. Purely a run-time behaviour: it never
+/// changes the definition id.
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+public sealed class ScalarInputAttribute : Attribute
+{
+}
+
+/// <summary>
 /// An input or output of this node used to be called something else. Saved graphs store wires and typed-in values by port name, so
 /// renaming a port would silently drop them; with this attribute a graph that still says the old name finds the
 /// port now called the current name. Repeat the attribute for several ports.

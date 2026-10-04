@@ -123,6 +123,12 @@ internal static class Replicator
             return port.Level - 1;
         }
 
+        // [ScalarInput] on an object port: one value per call, so a list maps the node like it does for a double.
+        if (port.IsScalarInput && port.DeclaredType == typeof(object))
+        {
+            return 0;
+        }
+
         return GetDeclaredRank(port.DeclaredType);
     }
 

@@ -159,6 +159,12 @@ public static class PortKinds
             return new PortKind(PortFamily.File, kind.Depth);
         }
 
+        // [ScalarInput]: an object port that takes one value per call is a single item, not "not known until it runs".
+        if (port.IsScalarInput && kind.Depth == PortDepth.Unknown)
+        {
+            return new PortKind(kind.Family, PortDepth.Item);
+        }
+
         return kind;
     }
 

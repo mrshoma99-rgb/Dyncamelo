@@ -104,7 +104,7 @@ Other engine rules:
 Replication is what makes a scalar node work on lists without a loop node.
 
 - **Rank** of a value: scalar = 0, `List<object>` = 1, list of lists = 2, ...
-- **Declared rank** of an input port is inferred from the zero-touch parameter type: `double`/`string`/`ModelItem` → 0; `IList<T>`/`IEnumerable<T>`/`List<T>` → 1; `IList<IList<T>>` → 2. `Dictionary<string, object>` → 0 (one value).
+- **Declared rank** of an input port is inferred from the zero-touch parameter type: `double`/`string`/`ModelItem` → 0; `IList<T>`/`IEnumerable<T>`/`List<T>` → 1; `IList<IList<T>>` → 2. `Dictionary<string, object>` → 0 (one value). A plain `object` parameter means "anything" and never replicates; marked **`[ScalarInput]`** it is rank 0 like a `double`, so a list maps the node.
 - **Excess rank** = actual rank − declared rank, floored at 0. **Replication happens only over excess rank** — this is exactly why `List.Count(List<object>)` consumes the whole list unmapped while `Math.Round(double)` maps over the same list.
 - **Auto-map (one replicated input):** invoked once per element along the excess dimensions; results collected preserving nesting (recursive — a rank-2 list into a rank-0 port yields a rank-2 result). A `null` element yields a `null` result element plus a node **Warning**; the other elements still compute.
 - **Multiple replicated inputs** — the node's `LacingStrategy` pairs them; rank-0 (non-excess) arguments are **broadcast** unchanged to every invocation:

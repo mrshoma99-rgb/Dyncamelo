@@ -44,6 +44,7 @@ public class ZeroTouchNodeModel : NodeModel
             port.KindHint = input.Kind;
             port.IsMultiInput = input.MultiInput;
             port.AcceptsNull = input.AcceptsNull;
+            port.IsScalarInput = input.ScalarInput;
             port.Aliases = input.Aliases;
         }
 

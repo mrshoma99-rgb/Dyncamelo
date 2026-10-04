@@ -306,6 +306,13 @@ Some attributes say nothing about how the node looks; they tell the engine how t
 public static bool IsBlank([AcceptsNull] string text) => string.IsNullOrWhiteSpace(text);
 ```
 
+- **`[ScalarInput]` on an `object` parameter** — an `object` port means "anything", so a list wired to it arrives whole and the node runs once. When the parameter semantically takes **one thing** (a name, a point, a vector, a viewpoint, a value to compare), mark it: the port then counts as rank 0, like a `double`, and a list maps the node over its elements (lacing), so "batch it by wiring a list" is true. Nested lists map level by level. A node that really wants the whole list should not use it, and the port's *List Levels* setting can still hand a whole list over. It is ignored on parameters that are not declared `object`. The socket is drawn as a single item.
+
+```csharp
+// A list of names wired to 'name' renames once per name; a single name still works.
+public static object Rename(object item, [ScalarInput] object name) { /* ... */ }
+```
+
 ## 10. Changing a node that is already shipped
 
 Saved graphs are the contract. A `.dyc` file refers to a zero-touch node by its **definition id** — `Namespace.Class.Method@parameterTypes` — and stores each wire and each typed-in value by the **port name** (the parameter name, the `[MultiReturn]` key, or the return name). What you may change:

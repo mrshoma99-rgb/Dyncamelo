@@ -487,6 +487,8 @@ public static class AssemblyNodeLoader
 
         // Run-time behaviours of the port (never part of the definition id).
         descriptor.AcceptsNull = parameter.GetCustomAttribute<AcceptsNullAttribute>() != null;
+        descriptor.ScalarInput = parameter.GetCustomAttribute<ScalarInputAttribute>() != null &&
+                                 parameter.ParameterType == typeof(object);
 
         if (parameter.IsOptional)
         {
