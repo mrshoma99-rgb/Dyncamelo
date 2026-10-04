@@ -108,7 +108,16 @@ Add `quick-links` to the class (`grid cards quick-links`) for a row of small car
 
 The "edit this page" button links to the page's file on GitHub. Pages that the build generates (the node reference and What's new) have none.
 
-## Publish it
+## Where it is published
+
+The wiki is live at **https://www.bimcamel.com/plugins/dyncamelo/wiki/** as static files in the BIMCamel repository, in `src/bimcamel-web/public/plugins/dyncamelo/wiki/`. The site's server hands files out as they are, so nothing else is needed. To update it after the pages or pictures change:
+
+1. Build the wiki here (`python tools/build_wiki.py`, strict).
+2. In the BIMCamel repository, on a branch, replace the contents of that folder with the contents of `build/wiki-site` and delete `sitemap.xml` from the copy (the build has no `site_url`, so it is empty).
+3. In `src/bimcamel-web` run `npm run build`, then `node scripts/prerender-snapshot.mjs --update` (the gate lists the two wiki folders that have an `index.html`) and look at what changed.
+4. Open a pull request; merging deploys it. Link to the wiki **with the closing slash** (`/plugins/dyncamelo/wiki/`) and with a plain `<a>`, not the app's router link: the wiki is not a route of the app. A small script in the page puts the slash back if it is opened without it.
+
+## Publish it elsewhere
 
 1. Build the site: `python tools/build_wiki.py` (without `--draft`, so a missing picture stops you).
 2. Upload the **contents** of `build/wiki-site` to the web host, for example into the folder that serves `https://www.bimcamel.com/plugins/dyncamelo/`. The site has no `site_url` and every link is relative, so it works in any folder.

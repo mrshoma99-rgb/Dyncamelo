@@ -36,6 +36,19 @@
   {% endif %}
 {% endblock %}
 
+{#- Opened as ".../wiki" (no closing slash) a web server may hand out the first page without redirecting, and every relative link on
+    it then resolves one folder too high. Put the slash back. A file URL and a page that ends in .html are left alone. -#}
+{% block extrahead %}
+  <script>
+    (function () {
+      var p = location.pathname;
+      if (location.protocol !== "file:" && !/\/$|\.html?$/.test(p)) {
+        location.replace(p + "/" + location.search + location.hash);
+      }
+    })();
+  </script>
+{% endblock %}
+
 {% block announce %}
   Dyncamelo is free for personal use
   (<a href="{{ config.extra.github_url }}" target="_blank" rel="noopener">GitHub</a>
