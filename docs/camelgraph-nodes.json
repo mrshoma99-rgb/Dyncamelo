@@ -14559,7 +14559,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddCloud@object,System.Collections.Generic.IList<object>,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list.",
+   "description": "EXPERIMENTAL: draws a revision-cloud redline through the given markup-space points (undocumented Navisworks API). Accepts [x,y] pairs or a flat x1,y1,x2,y2,… list. Wire a list of viewpoints and every one gets the cloud (the points input stays one outline).",
    "tags": [
     "markup",
     "redline",
@@ -14572,7 +14572,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "points",
@@ -14612,7 +14612,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddNumberTag@object,int,double,double,double,string,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a circled number on a saved viewpoint and optionally attaches a comment — a tag substitute (real Find-Tags tags have no public API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the tag.",
    "tags": [
     "markup",
     "redline",
@@ -14626,7 +14626,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "number",
@@ -14688,7 +14688,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddShape@object,string,double,double,double,double,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a line, arrow or ellipse redline on a saved viewpoint (undocumented Navisworks API). Markup-space coordinates; calibrate with Markup.List. Wire a list of viewpoints and every one gets the shape.",
    "tags": [
     "markup",
     "redline",
@@ -14704,7 +14704,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "shape",
@@ -14764,7 +14764,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.AddText@object,string,double,double,object,int,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List.",
+   "description": "EXPERIMENTAL: draws a text redline on a saved viewpoint (undocumented Navisworks API). Coordinates are markup space — (0,0) is the view centre; calibrate with Markup.List. Wire a list of viewpoints and every one gets the text.",
    "tags": [
     "markup",
     "redline",
@@ -14778,7 +14778,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "text",
@@ -14828,7 +14828,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.Clear@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API).",
+   "description": "EXPERIMENTAL: removes every redline markup from a saved viewpoint (undocumented Navisworks API). Wire a list of viewpoints and every one is cleared.",
    "tags": [
     "markup",
     "redline",
@@ -14841,7 +14841,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "document",
@@ -14864,7 +14864,7 @@
    "id": "CamelGraph.Navisworks.RedlineNodes.List@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Markup",
-   "description": "EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes.",
+   "description": "EXPERIMENTAL: lists the redline markups on a saved viewpoint — types, texts and anchor positions. Draw one markup by hand and read it here to learn the coordinate scale for the Add nodes. Wire a list of viewpoints and you get one result per viewpoint.",
    "tags": [
     "markup",
     "redline",
@@ -14878,7 +14878,7 @@
     {
      "name": "viewpoint",
      "type": "any",
-     "description": "The saved viewpoint (or its name)."
+     "description": "The saved viewpoint (or its name). Wire a list of viewpoints (or names) and the node runs once for each."
     },
     {
      "name": "document",
@@ -14966,7 +14966,7 @@
    "id": "CamelGraph.Navisworks.ModelOpsNodes.Remove@object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Model",
-   "description": "Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses the removal. Cached model items from earlier runs are invalidated.",
+   "description": "Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). Wire a LIST of models, indices or file names to remove several in one go: they are all looked up in the document as it is now and removed from the last to the first, so the indices [0, 1] remove the first two models, not the first and third. No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses a removal. Cached model items from earlier runs are invalidated.",
    "tags": [
     "model",
     "remove",
@@ -14980,7 +14980,7 @@
     {
      "name": "model",
      "type": "any",
-     "description": "The model to remove: a Model (from Document.Models), its 0-based index, or its file name."
+     "description": "The model to remove: a Model (from Document.Models), its 0-based index, or its file name. A list removes all of them in one go."
     },
     {
      "name": "document",
@@ -14993,7 +14993,7 @@
     {
      "name": "removed",
      "type": "boolean",
-     "description": "True when the model was removed; false when Navisworks refused (e.g. the last remaining model)."
+     "description": "True when every wanted model was removed; false when Navisworks refused one (e.g. the last remaining model)."
     }
    ],
    "returns": ""
@@ -17943,7 +17943,7 @@
    "id": "CamelGraph.Navisworks.TransformExtraNodes.MoveTo@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there.",
+   "description": "Moves model items so the centre of their combined bounding box lands on a target point — place a group by where it should be, not by how far to push it. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-running with the same target is a no-op once the items are there. One target per run: a list of targets moves the same items to each in turn and the last one stays (the node warns). Items that sit below another listed item are left out, because moving a container already moves everything under it.",
    "tags": [
     "item",
     "move",
@@ -17959,13 +17959,13 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to move (they keep their layout relative to each other).",
+     "description": "The model items to move (they keep their layout relative to each other). An item with another listed item above it is left out (moving a container moves everything below it).",
      "multiInput": true
     },
     {
      "name": "target",
      "type": "any",
-     "description": "Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units."
+     "description": "Where the centre of the items' combined bounding box should end up (a Point or a list of three numbers), in document units. One target per run: a list of targets moves the same items to each in turn and the last one stays."
     },
     {
      "name": "document",
@@ -18030,10 +18030,10 @@
   },
   {
    "name": "ModelItem.RotateAboutAxis",
-   "id": "CamelGraph.Navisworks.TransformNodes.RotateAboutAxis@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,object,double,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformNodes.RotateAboutAxis@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,object,double,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Rotates model items by an angle (degrees) about an axis through a point. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate.",
+   "description": "Rotates model items by an angle (degrees) about an axis through a point. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate; in Advanced, switch accumulate off to turn the items exactly this much from where the model had them, so re-running does not pile up. One angle per run: a list of angles against the whole item list turns the same items once per angle and the turns add up ([10, 20] turns them 30 degrees in total, and the node warns). To give every item its own angle, set List Levels L1 on items and on degrees and wire one angle per item. Items that sit below another listed item are left out, because turning a container already turns everything under it.",
    "tags": [
     "item",
     "rotate",
@@ -18047,7 +18047,7 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to rotate.",
+     "description": "The model items to rotate. An item with another listed item above it is left out (turning a container turns everything below it).",
      "multiInput": true
     },
     {
@@ -18063,7 +18063,13 @@
     {
      "name": "degrees",
      "type": "number",
-     "description": "The rotation angle in degrees (right-hand rule around the axis)."
+     "description": "The rotation angle in degrees (right-hand rule around the axis). One angle per run: to turn every item by its own angle, set List Levels L1 on both items and degrees and wire one angle per item."
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this turn to whatever override the items already have, so every run turns them again. False replaces their override, so the items end up turned exactly this much from where the model had them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -18083,10 +18089,10 @@
   },
   {
    "name": "ModelItem.Scale",
-   "id": "CamelGraph.Navisworks.TransformExtraNodes.Scale@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformExtraNodes.Scale@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,double,object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again). One override per item, so allow a moment on large selections.",
+   "description": "Scales model items uniformly about a point — default: the centre of the items' combined bounding box, so the group grows or shrinks in place and keeps its internal layout. A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate (each run scales again); in Advanced, switch accumulate off to scale from where the model had the items, so re-running does not pile up. One factor per run: a list of factors against the whole item list scales the same items once per factor and the factors multiply ([2, 3] is 6 in total; the node warns). Items that sit below another listed item are left out, because scaling a container already scales everything under it. One override per item, so allow a moment on large selections.",
    "tags": [
     "item",
     "scale",
@@ -18102,19 +18108,25 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to scale. Wire the items themselves, not a container AND its children.",
+     "description": "The model items to scale. An item with another listed item above it is left out (scaling a container scales everything below it).",
      "multiInput": true
     },
     {
      "name": "factor",
      "type": "number",
-     "description": "The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive."
+     "description": "The scale factor: 2 doubles the size, 0.5 halves it, 1 changes nothing. Must be positive. One factor per run: a list of factors scales the same items once per factor and the factors multiply ([2, 3] scales by 6 in total)."
     },
     {
      "name": "about",
      "type": "any",
      "description": "The fixed point of the scaling (a Point or a list of three numbers); leave unwired to scale about the centre of the items' combined bounding box.",
      "default": "null"
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this scaling to whatever override the items already have, so every run scales them again. False replaces their override, so the items end up exactly this much larger or smaller than the model has them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",
@@ -18137,7 +18149,7 @@
    "id": "CamelGraph.Navisworks.TransformNodes.SetTransform@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent.",
+   "description": "Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) — mirror-place or scale-in-place for power users. Unlike Translate/RotateAboutAxis this REPLACES any earlier override; re-runs are idempotent. One matrix per run: several matrices against the whole item list would replace each other and only the last stays.",
    "tags": [
     "item",
     "transform",
@@ -18177,10 +18189,10 @@
   },
   {
    "name": "ModelItem.Translate",
-   "id": "CamelGraph.Navisworks.TransformNodes.Translate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,Autodesk.Navisworks.Api.Document",
+   "id": "CamelGraph.Navisworks.TransformNodes.Translate@System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>,object,bool,Autodesk.Navisworks.Api.Document",
    "assembly": "CamelGraph.Navisworks",
    "category": "Navisworks.Transform",
-   "description": "Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again.",
+   "description": "Moves model items by a vector, in document units (chain Units.Convert for meters/feet). A permanent override: undoable, saved in the NWF, removed by ModelItem.ResetTransform. Re-runs accumulate — each run moves the items again; in Advanced, switch accumulate off to put the items exactly this far from where the model had them, so re-running (or tuning the vector with Auto-run on) does not pile up. One vector per run: to give every item its own vector set List Levels L1 on items and on vector and wire one vector per item; a list of vectors against the whole item list moves the same items once per vector and the moves add up (the node warns). Items that sit below another listed item are left out, because moving a container already moves everything under it. A container has no override of its own to read, so each run on a container starts from where the model had it; use Selection.Resolve with level Geometry first if re-runs should add up.",
    "tags": [
     "item",
     "translate",
@@ -18193,13 +18205,19 @@
     {
      "name": "items",
      "type": "ModelItem[]",
-     "description": "The model items to move.",
+     "description": "The model items to move. An item with another listed item above it is left out (moving a container moves everything below it).",
      "multiInput": true
     },
     {
      "name": "vector",
      "type": "any",
-     "description": "The offset, in document units: a Vector (Vector.ByCoordinates) or a list of three numbers."
+     "description": "The offset, in document units: a Vector (Vector.ByCoordinates) or a list of three numbers. One vector per run: to move every item by its own vector, set List Levels L1 on both items and vector."
+    },
+    {
+     "name": "accumulate",
+     "type": "boolean",
+     "description": "True (default) adds this move to whatever override the items already have, so every run moves them again. False replaces their override, so the items end up exactly this far from where the model put them and re-running does not pile up.",
+     "default": "true"
     },
     {
      "name": "document",

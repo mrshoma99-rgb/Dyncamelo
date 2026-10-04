@@ -160,6 +160,156 @@ public class NavisworksModelAuditTests
         Assert.Contains("List.Clean drops it", Def("ModelItem.BoundingBox").Description);
     }
 
+    // ================================================================= NVM-10, NVM-11, NVM-13: lists beside a list of items
+
+    private const string Item = "System.Collections.Generic.IEnumerable<Autodesk.Navisworks.Api.ModelItem>";
+    private const string Doc = "Autodesk.Navisworks.Api.Document";
+
+    /// <summary>The graph file of an older version names the node by its old id: it must still open as the current node.</summary>
+    private static void AssertOldIdOpensAs(string nodeName, string oldId)
+    {
+        var definition = Def(nodeName);
+        Assert.NotEqual(definition.Id, oldId);
+        Assert.True(Registry.TryGetDefinition(oldId, out var found), "the old id of " + nodeName + " no longer resolves");
+        Assert.Equal(definition.Id, found!.Id);
+
+        var graph = new GraphModel();
+        graph.AddNode(new ZeroTouchNodeModel(definition));
+        var serializer = new GraphSerializer(Registry);
+        var json = serializer.Serialize(graph).Replace(definition.Id, oldId);
+        Assert.Contains(oldId, json);
+
+        var loaded = serializer.Deserialize(json);
+
+        Assert.Empty(serializer.LoadWarnings);
+        var node = Assert.IsType<ZeroTouchNodeModel>(Assert.Single(loaded.Nodes));
+        Assert.Equal(definition.Id, node.Definition.Id);
+        Assert.Equal(nodeName, node.Name);
+    }
+
+    [Fact]
+    public void TranslateRotateAndScaleStillOpenFromTheirOldIds()
+    {
+        AssertOldIdOpensAs("ModelItem.Translate", "CamelGraph.Navisworks.TransformNodes.Translate@" + Item + ",object," + Doc);
+        AssertOldIdOpensAs("ModelItem.RotateAboutAxis", "CamelGraph.Navisworks.TransformNodes.RotateAboutAxis@" + Item + ",object,object,double," + Doc);
+        AssertOldIdOpensAs("ModelItem.Scale", "CamelGraph.Navisworks.TransformExtraNodes.Scale@" + Item + ",double,object," + Doc);
+    }
+
+    [Theory]
+    [InlineData("ModelItem.Translate")]
+    [InlineData("ModelItem.RotateAboutAxis")]
+    [InlineData("ModelItem.Scale")]
+    public void TheAccumulateOptionIsOnByDefaultAndSitsInTheAdvancedPanel(string node)
+    {
+        var accumulate = Input(node, "accumulate");
+
+        Assert.True(accumulate.HasDefault);
+        Assert.Equal(true, accumulate.DefaultValue);
+        Assert.Equal("Advanced", accumulate.Panel);
+        Assert.Equal(typeof(bool), accumulate.Type);
+        Assert.Equal("document", Def(node).Inputs.Last().Name);
+    }
+
+    [Theory]
+    [InlineData("Translate")]
+    [InlineData("RotateAboutAxis")]
+    [InlineData("Scale")]
+    [InlineData("MoveTo")]
+    public void TheTransformNodesLeaveOutItemsThatAListedContainerAlreadyMoves(string method)
+    {
+        var text = FileText(method == "Scale" || method == "MoveTo" ? "TransformExtraNodes.cs" : "TransformNodes.cs");
+        var body = Body(text, "public static List<ModelItem> " + method + "(");
+
+        Assert.Contains("TransformHelpers.WithoutListedDescendants(", body);
+        Assert.Contains("TransformHelpers.WarnIfRunOncePerValue(", body);
+    }
+
+    [Fact]
+    public void WithAccumulateOffTheDeltaReplacesTheOverrideInOneCall()
+    {
+        var body = Body(FileText("TransformNodes.cs"), "internal static void ApplyDelta(");
+
+        Assert.Contains("if (!accumulate)", body);
+        Assert.Contains("OverridePermanentTransform(items, delta, false)", body);
+        Assert.Contains("ComposeWithOverride(item, delta)", body);
+    }
+
+    [Theory]
+    [InlineData("ModelItem.Translate")]
+    [InlineData("ModelItem.RotateAboutAxis")]
+    [InlineData("ModelItem.SetTransform")]
+    [InlineData("ModelItem.ResetTransform")]
+    [InlineData("ModelItem.Scale")]
+    [InlineData("ModelItem.MoveTo")]
+    [InlineData("Model.Remove")]
+    public void NodesThatEditTheModelSayWhetherTheyDo(string node)
+    {
+        var effects = Method(node).Attribute("NodeEffects");
+
+        Assert.NotNull(effects);
+        Assert.Contains("ChangesModel", effects!.Positional[0]);
+    }
+
+    [Fact]
+    public void TheTransformDescriptionsTellHowToGiveEachItemItsOwnValue()
+    {
+        foreach (var node in new[] { "ModelItem.Translate", "ModelItem.RotateAboutAxis" })
+        {
+            var description = Def(node).Description;
+            Assert.Contains("List Levels L1", description);
+            Assert.Contains("add up", description);
+        }
+
+        Assert.Contains("[2, 3] is 6 in total", Def("ModelItem.Scale").Description);
+        Assert.Contains("the last one stays", Def("ModelItem.MoveTo").Description);
+    }
+
+    [Theory]
+    [InlineData("Markup.AddText")]
+    [InlineData("Markup.AddShape")]
+    [InlineData("Markup.AddCloud")]
+    [InlineData("Markup.AddNumberTag")]
+    [InlineData("Markup.List")]
+    [InlineData("Markup.Clear")]
+    [InlineData("Markup.AddLine")]
+    [InlineData("Markup.AddArrow")]
+    [InlineData("Markup.AddEllipse")]
+    public void AListOfViewpointsRunsTheMarkupNodeOncePerViewpoint(string node)
+    {
+        Assert.NotNull(Parameter(node, "viewpoint").Attribute("ScalarInput"));
+    }
+
+    [Fact]
+    public void ModelRemoveTakesAListAndResolvesItAgainstTheModelsAsTheyAreNow()
+    {
+        var text = FileText("ModelOpsNodes.cs");
+        var body = Body(text, "public static bool Remove(");
+
+        // Every entry is turned into a position first, then the positions go from the highest down.
+        Assert.True(body.IndexOf("ResolveModelIndex(doc, entry)", StringComparison.Ordinal) < body.IndexOf("TryRemoveFile", StringComparison.Ordinal));
+        Assert.Contains("ModelRemoval.RemovalOrder(wanted)", body);
+        Assert.Null(Parameter("Model.Remove", "model").Attribute("ScalarInput"));
+        Assert.Contains("[0, 1] remove the first two models", Def("Model.Remove").Description);
+    }
+
+    [Theory]
+    [InlineData("ToPoint3D", "NavisValues.cs", "point")]
+    public void ASocketThatTakesOnePointExplainsAListOfPointsInsteadOfFailingOnAConversion(string method, string file, string thing)
+    {
+        var text = FileText(Path.Combine("Internal", file));
+        var body = Body(text, "internal static Point3D " + method + "(");
+
+        Assert.Contains("SeveralValues.HoldsSeveral(list)", body);
+        Assert.Contains("SeveralValues.Describe(\"" + thing + "\", list)", body);
+    }
+
+    [Fact]
+    public void TheVectorAndMatrixSocketsExplainAListOfValuesToo()
+    {
+        Assert.Contains("SeveralValues.Describe(\"vector\", list)", FileText("TransformNodes.cs"));
+        Assert.Contains("SeveralValues.Describe(\"matrix\", list)", FileText(Path.Combine("Internal", "TransformHelpers.cs")));
+    }
+
     // ----------------------------------------------------------------- helpers
 
     /// <summary>The text of a method from the line with its signature to its closing brace.</summary>

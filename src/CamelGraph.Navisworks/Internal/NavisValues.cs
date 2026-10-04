@@ -296,6 +296,11 @@ internal static class NavisValues
             case CamelGraphPoint camelGraphPoint:
                 return new Point3D(camelGraphPoint.X, camelGraphPoint.Y, camelGraphPoint.Z);
             case IList list when !(value is string):
+                if (SeveralValues.HoldsSeveral(list))
+                {
+                    throw new ArgumentException(SeveralValues.Describe("point", list));
+                }
+
                 if (list.Count < 3)
                 {
                     throw new ArgumentException("A point list needs three numeric components (x, y, z).");

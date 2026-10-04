@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks;
 
@@ -17,18 +20,58 @@ namespace CamelGraph.Navisworks;
 public static class ModelOpsNodes
 {
     /// <summary>Removes a whole appended source model from the document.</summary>
-    /// <param name="model">The model to remove: a Model (from Document.Models), its 0-based index, or its file name.</param>
+    /// <param name="model">The model to remove: a Model (from Document.Models), its 0-based index, or its file name. A list removes all of them in one go.</param>
     /// <param name="document">The document (defaults to the active document).</param>
-    /// <returns>True when the model was removed; false when Navisworks refused (e.g. the last remaining model).</returns>
+    /// <returns>True when every wanted model was removed; false when Navisworks refused one (e.g. the last remaining model).</returns>
     [NodeName("Model.Remove")]
-    [NodeDescription("Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses the removal. Cached model items from earlier runs are invalidated.")]
+    [NodeEffects(CamelGraph.Core.Graph.NodeEffects.ChangesModel)]
+    [NodeDescription("Removes a WHOLE appended source model from the document (accepts a Model, a 0-based index, or a file name). Wire a LIST of models, indices or file names to remove several in one go: they are all looked up in the document as it is now and removed from the last to the first, so the indices [0, 1] remove the first two models, not the first and third. No API deletes individual elements — hide them and publish an NWD instead. Returns false when Navisworks refuses a removal. Cached model items from earlier runs are invalidated.")]
     [NodeSearchTags("model", "remove", "delete", "file", "appended", "detach", "unload")]
     [return: NodeName("removed")]
     public static bool Remove(object model, Document? document = null)
     {
         var doc = NavisworksContext.ResolveDocument(document);
-        var index = ResolveModelIndex(doc, model);
-        return doc.TryRemoveFile(index);
+
+        // One model, or a list of them. Every entry is turned into a position in the document as it is BEFORE anything is
+        // removed; removing one renumbers the models after it.
+        var wanted = new List<int>();
+        if (model is IList list && !(model is string))
+        {
+            if (list.Count == 0)
+            {
+                NodeWarnings.Add("The list of models to remove is empty, so nothing was removed.");
+                return false;
+            }
+
+            foreach (var entry in list)
+            {
+                wanted.Add(ResolveModelIndex(doc, entry));
+            }
+        }
+        else
+        {
+            wanted.Add(ResolveModelIndex(doc, model));
+        }
+
+        var removedAll = true;
+        var refused = 0;
+        var order = ModelRemoval.RemovalOrder(wanted);
+        foreach (var index in order)
+        {
+            if (!doc.TryRemoveFile(index))
+            {
+                removedAll = false;
+                refused++;
+            }
+        }
+
+        if (refused > 0 && order.Count > 1)
+        {
+            NodeWarnings.Add("Navisworks refused to remove " + refused.ToString(CultureInfo.InvariantCulture) + " of " +
+                order.Count.ToString(CultureInfo.InvariantCulture) + " models (it keeps the last remaining model).");
+        }
+
+        return removedAll;
     }
 
     // ------------------------------------------------------------- Helpers

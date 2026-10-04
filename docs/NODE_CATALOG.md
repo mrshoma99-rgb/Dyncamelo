@@ -686,10 +686,10 @@
 | `ModelItem.GetTransform` | item | origin, matrix, hasOverride | Reads an item's current (active) transform: origin = its translation (a practical base point), matrix = 16 numbers row-major (feed ModelItem.SetTransform to round-trip),… |
 | `ModelItem.MoveTo` | items, target, document? | items | Moves model items so the centre of their combined bounding box lands on a target point |
 | `ModelItem.ResetTransform` | items?, resetAll?, document? | items | Removes permanent transform overrides, restoring items to their original position |
-| `ModelItem.RotateAboutAxis` | items, origin, axis, degrees, document? | items | Rotates model items by an angle (degrees) about an axis through a point |
-| `ModelItem.Scale` | items, factor, about?, document? | items | Scales model items uniformly about a point |
+| `ModelItem.RotateAboutAxis` | items, origin, axis, degrees, accumulate?, document? | items | Rotates model items by an angle (degrees) about an axis through a point |
+| `ModelItem.Scale` | items, factor, about?, accumulate?, document? | items | Scales model items uniformly about a point |
 | `ModelItem.SetTransform` | items, matrix, document? | items | Sets the permanent transform override of model items to an absolute 4×4 matrix (16 numbers, row-major, translation at indices 3/7/11) |
-| `ModelItem.Translate` | items, vector, document? | items | Moves model items by a vector, in document units (chain Units.Convert for meters/feet) |
+| `ModelItem.Translate` | items, vector, accumulate?, document? | items | Moves model items by a vector, in document units (chain Units.Convert for meters/feet) |
 
 ## Navisworks.Units
 

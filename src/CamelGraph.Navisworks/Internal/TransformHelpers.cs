@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Navisworks.Api;
+using CamelGraph.Core.Execution;
+using CamelGraph.Nodes.Portable;
 
 namespace CamelGraph.Navisworks.Internal;
 
@@ -156,6 +158,53 @@ internal static class TransformHelpers
         return Transform3D.Multiply(delta, CurrentOverride(item));
     }
 
+    // ------------------------------------------------------------ Item lists
+
+    /// <summary>
+    /// The items the transform really has to touch: an item with another listed item above it is left out (a transform on a
+    /// container already moves everything below it, so the item would move twice), and so is an item listed twice. Says so
+    /// with a node warning.
+    /// </summary>
+    /// <param name="items">The wired items.</param>
+    /// <param name="verb">What the node does to them ("moved", "turned", "scaled").</param>
+    internal static List<ModelItem> WithoutListedDescendants(List<ModelItem> items, string verb)
+    {
+        var kept = ListedAncestors.DropDescendantsAndRepeats(
+            items, item => item.Ancestors, ModelItemIdentityComparer.Instance, out var dropped);
+        if (dropped > 0)
+        {
+            NodeWarnings.Add(
+                dropped.ToString(CultureInfo.InvariantCulture) + " of " + items.Count.ToString(CultureInfo.InvariantCulture) +
+                " items were left out because the list already holds an item above them (or the same item twice); a container " +
+                "that is " + verb + " takes everything below it along, so those items would have been " + verb + " twice.");
+        }
+
+        return kept;
+    }
+
+    /// <summary>
+    /// Warns when the node is one run of a list of runs and each run was handed several items: if those are the same items,
+    /// the runs act on them one after the other.
+    /// </summary>
+    /// <param name="itemCount">How many items this run received.</param>
+    /// <param name="verb">What the node does ("moves", "turns", "scales").</param>
+    /// <param name="adds">True when the runs add up (accumulate on), false when each run replaces the one before.</param>
+    internal static void WarnIfRunOncePerValue(int itemCount, string verb, bool adds)
+    {
+        if (!NodeWarnings.IsLaced || itemCount < 2)
+        {
+            return;
+        }
+
+        NodeWarnings.Add(
+            "This node ran once per value of a list and each run got " + itemCount.ToString(CultureInfo.InvariantCulture) + " items. " +
+            "When those are the same items, " +
+            (adds
+                ? "every run " + verb + " them again, so the changes add up."
+                : "every run replaces the one before, so only the last value stays.") +
+            " To give each item its own value, right-click the items input, choose List Levels and set L1, then wire one value per item.");
+    }
+
     // ------------------------------------------------------------ Matrices
 
     /// <summary>
@@ -173,7 +222,8 @@ internal static class TransformHelpers
         {
             throw new ArgumentException(
                 "A transform matrix needs exactly 16 numbers (row-major 4×4); got " +
-                matrix.Count.ToString(CultureInfo.InvariantCulture) + ".", nameof(matrix));
+                matrix.Count.ToString(CultureInfo.InvariantCulture) + ". If several matrices were wired in one list, " +
+                "right-click the input, choose List Levels and set L2 to run the node once for each.", nameof(matrix));
         }
 
         if (Math.Abs(matrix[12]) > AffineTolerance ||
@@ -207,6 +257,11 @@ internal static class TransformHelpers
             case Transform3D transform:
                 return transform;
             case IList list when !(value is string):
+                if (SeveralValues.HoldsSeveralMatrices(list))
+                {
+                    throw new ArgumentException(SeveralValues.Describe("matrix", list));
+                }
+
                 return FromRowMajorMatrix(FlattenNumbers(list));
             default:
                 throw new ArgumentException(
