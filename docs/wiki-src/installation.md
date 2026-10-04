@@ -42,6 +42,7 @@ Pick one. Tabs A to D are the four ways to put the bundle in place.
     Details:
 
     * If a version is already installed, the installer says "Update install (v… found)" and replaces it ([Updating](updating.md)).
+    * If you still have Dyncamelo (the name up to version 0.48) installed, the button says "Install (replaces Dyncamelo v…)" and the installer removes the old install first, so you do not end up with two plug-ins ([Updating from Dyncamelo](updating.md#updating-from-dyncamelo-version-048-or-earlier)).
     * For a silent install, for example from a deployment tool: `CamelGraphSetup.exe /silent`.
     * The files the installer writes carry no "downloaded from the internet" mark, so the `PLUGIN_LOAD_02` failure described below cannot happen.
     * The installer is **not code-signed** unless the publisher set a certificate up, so Windows SmartScreen may show a warning. Choose **More info**, then **Run anyway**. To check what you downloaded, compare its checksum with the `.sha256` file of the release:
@@ -56,7 +57,7 @@ Pick one. Tabs A to D are the four ways to put the bundle in place.
     2. Run `install-camelgraph.bat`. It copies `CamelGraph.bundle` into `%APPDATA%\Autodesk\ApplicationPlugins\` and removes the "downloaded file" mark from every file it copied.
     3. Start Navisworks.
 
-    `install-camelgraph.bat uninstall` removes it again ([Uninstalling](uninstall.md)).
+    The batch file also removes a Dyncamelo (version 0.48 or earlier) install if it finds one. `install-camelgraph.bat uninstall` removes CamelGraph again ([Uninstalling](uninstall.md)).
 
 === "C: Copy the bundle by hand"
 
