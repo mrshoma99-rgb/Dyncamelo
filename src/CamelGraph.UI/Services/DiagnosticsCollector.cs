@@ -58,6 +58,11 @@ public static class DiagnosticsCollector
             info.LoadedLibraries.Add(line);
         }
 
+        foreach (var line in NodePackLines())
+        {
+            info.NodePacks.Add(line);
+        }
+
         foreach (var line in EditorLines(editor))
         {
             info.Editor.Add(line);
@@ -165,6 +170,15 @@ public static class DiagnosticsCollector
         }
 
         return found.OrderBy(f => f, StringComparer.OrdinalIgnoreCase).Take(80);
+    }
+
+    // Where packs are looked for and what became of each DLL. Paths are redacted with the rest of the report.
+    private static IEnumerable<string> NodePackLines()
+    {
+        var report = CamelGraph.Core.Loader.NodePacks.Last;
+        var lines = new List<string> { "Looked in: " + CamelGraph.Core.Loader.NodePacks.UserFolder + " (your packs) and the Packages folder beside the plug-in" };
+        lines.AddRange(report.Results.Count == 0 ? new[] { "  no pack found" } : report.Lines().Select(line => "  " + line));
+        return lines;
     }
 
     private static IEnumerable<string> LoadedLibraries()

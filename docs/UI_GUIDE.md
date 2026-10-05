@@ -246,6 +246,7 @@ Default shortcuts. **Canvas** commands only act when the canvas has the keyboard
 | Keyboard & Mouse Shortcuts | `F1` | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |
+| Node Packs… | — | Canvas |
 | Privacy Policy | — | Canvas |
 
 ## Mouse and gestures

@@ -154,6 +154,7 @@ See [Node groups](node-groups.md).
 | Keyboard & Mouse Shortcuts | ++f1++ | Everywhere |
 | Copy Diagnostics | — | Canvas |
 | Run Self-Test… | — | Canvas |
+| Node Packs… | — | Canvas |
 | Privacy Policy | — | Canvas |
 
 ## Mouse and gestures

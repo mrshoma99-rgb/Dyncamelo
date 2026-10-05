@@ -253,43 +253,33 @@ internal static class CamelGraphHost
     }
 
     /// <summary>
-    /// Scans the "Packages" folder next to the plugin DLL for third-party
-    /// zero-touch node packs. A pack that fails to load is skipped; it never
-    /// prevents the editor from starting.
+    /// Loads the third-party zero-touch node packs: first those in the per-user folder (%APPDATA%\CamelGraph\Packages, which an update
+    /// leaves alone), then those in the "Packages" folder next to the plugin DLL. A pack that fails to load is recorded in
+    /// <see cref="NodePacks.Last"/> and skipped; it never prevents the editor from starting.
     /// </summary>
     private static void LoadPackages(NodeRegistry registry)
     {
-        string packagesDirectory;
+        string? pluginDirectory = null;
         try
         {
-            var pluginDirectory = Path.GetDirectoryName(typeof(CamelGraphHost).Assembly.Location);
-            if (pluginDirectory == null)
-            {
-                return;
-            }
-
-            packagesDirectory = Path.Combine(pluginDirectory, "Packages");
-            if (!Directory.Exists(packagesDirectory))
-            {
-                return;
-            }
+            pluginDirectory = Path.GetDirectoryName(typeof(CamelGraphHost).Assembly.Location);
         }
         catch (Exception)
         {
-            return;
+            // Only the per-user folder is searched then.
         }
 
-        foreach (var dllPath in Directory.GetFiles(packagesDirectory, "*.dll", SearchOption.AllDirectories))
+        try
         {
-            try
+            NodePacks.Last = NodePacks.Load(registry, NodePacks.Folders(pluginDirectory), Assembly.LoadFrom);
+            foreach (var line in NodePacks.Last.Lines())
             {
-                var definitions = registry.RegisterAssembly(Assembly.LoadFrom(dllPath));
-                Debug.WriteLine("CamelGraph: loaded " + definitions.Count + " node(s) from " + dllPath);
+                Debug.WriteLine("CamelGraph: node pack " + line);
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("CamelGraph: skipped package '" + dllPath + "': " + ex.Message);
-            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine("CamelGraph: node packs were not scanned: " + ex.Message);
         }
     }
 }

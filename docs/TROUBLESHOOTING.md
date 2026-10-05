@@ -13,6 +13,7 @@ Everything below comes from the CamelGraph source and docs. Where a behaviour ha
 * [The editor says "Something went wrong"](#the-editor-says-something-went-wrong)
 * [A node is red or amber](#a-node-is-red-or-amber)
 * [A graph opens with a warning, or with missing nodes](#a-graph-opens-with-a-warning-or-with-missing-nodes)
+* [My node pack does not show up](#my-node-pack-does-not-show-up)
 * [Nothing happens when I press Run](#nothing-happens-when-i-press-run)
 * [A search returns nothing, or the magnifier next to a tab or property shows no names](#a-search-returns-nothing-or-the-magnifier-next-to-a-tab-or-property-shows-no-names)
 * [The start screen is missing](#the-start-screen-is-missing)
@@ -100,6 +101,19 @@ More in the [editor guide](UI_GUIDE.md#finding-your-way).
 
 * "The file requires .dyc reader version N but this application supports version M": update CamelGraph. (A file that contains node groups is refused by older versions rather than opened without them.)
 * "The file is not valid JSON" or "not a CamelGraph .dyc document": the file is damaged or is not a graph.
+
+## My node pack does not show up
+
+**Cause.** Packs are looked for once, when the editor or the Script Player first opens in a Navisworks session, in `%APPDATA%\CamelGraph\Packages` (and in a `Packages` folder inside the CamelGraph bundle, which an update deletes). A pack that is not there, was added after Navisworks started, or could not be loaded does not appear.
+
+**Fix.**
+
+1. Choose **Help ▸ Node Packs…**. It shows the folder, how many packs were loaded when Navisworks started, and every DLL it found with the reason if one was not loaded. Answer *Yes* to open the folder.
+2. Put the pack (its `.dll` and the files it needs, in a folder of its own) in that folder and **restart Navisworks**. A loaded DLL cannot be replaced while Navisworks runs.
+3. "NOT LOADED. BadImageFormatException" means the DLL was built for a different platform or .NET; "FileNotFoundException" or "FileLoadException" means a file the pack needs is missing from its folder. "not used" means the file is a copy of a library CamelGraph or Navisworks already has (`CamelGraph.*`, `Autodesk.*`, `Newtonsoft.Json`, `System.*`) or has the same name as a pack found earlier; leave such copies out of the pack folder.
+4. **Help ▸ Copy Diagnostics** has a "Node packs" section with the same list for a bug report.
+
+A pack's nodes are in the library folder its author chose; search for a node name to find it.
 
 ## Nothing happens when I press Run
 

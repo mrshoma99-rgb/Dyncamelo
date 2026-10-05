@@ -30,6 +30,9 @@ public sealed class DiagnosticsInfo
     /// <summary>Lines about the libraries CamelGraph shares with other add-ins that are loaded (name, version, where from).</summary>
     public IList<string> LoadedLibraries { get; } = new List<string>();
 
+    /// <summary>Lines about the node packs (other people's or your own nodes): where they are looked for, what loaded, what did not and why.</summary>
+    public IList<string> NodePacks { get; } = new List<string>();
+
     /// <summary>Lines about the editor: preferences that change behaviour, node library size, the open graph's size.</summary>
     public IList<string> Editor { get; } = new List<string>();
 
@@ -69,6 +72,7 @@ public static class DiagnosticsReport
 
         Section(text, "Other Autodesk plug-in bundles installed (names only)", info.InstalledBundles, "none found");
         Section(text, "Shared libraries loaded (a copy from another add-in is the usual cause of odd failures)", info.LoadedLibraries, "none of the shared libraries is loaded yet");
+        Section(text, "Node packs", info.NodePacks, "none installed");
         Section(text, "Editor", info.Editor, "not available");
 
         text.AppendLine();

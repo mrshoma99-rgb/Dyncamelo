@@ -157,11 +157,16 @@ public class LibraryCardUiTests
 
             foreach (var button in new[] { expand, collapse })
             {
-                Assert.InRange(button.ActualWidth, 26d, 30d);
+                // Small, not the 28 px of the other round buttons: a + and a − in a ring that is no taller than a line of the list.
+                Assert.InRange(button.ActualWidth, 18d, 22d);
                 Assert.Equal(button.ActualWidth, button.ActualHeight);
                 button.ApplyTemplate();
                 Assert.IsType<System.Windows.Shapes.Ellipse>(button.Template.FindName("Chrome", button));
             }
+
+            // A plain plus expands and a plain minus collapses (no arrows).
+            Assert.Same(host.Control.FindResource("Dyc.Icon.Plus"), ((System.Windows.Shapes.Path)expand.Content).Data);
+            Assert.Same(host.Control.FindResource("Dyc.Icon.Minus"), ((System.Windows.Shapes.Path)collapse.Content).Data);
 
             Assert.Equal("Expand all categories", expand.ToolTip);
             Assert.Equal("Collapse all categories", collapse.ToolTip);

@@ -162,6 +162,7 @@ public static class CommandCatalog
         new CommandInfo("help.keys", "Keyboard & Mouse Shortcuts", "Help", "F1", CommandScope.Global, keywords: "help keys shortcuts gestures cheat sheet"),
         new CommandInfo("help.diagnostics", "Copy Diagnostics", "Help", null, keywords: "report problem bug issue support version log errors paste"),
         new CommandInfo("help.selftest", "Run Self-Test…", "Help", null, keywords: "check test verify nodes work navisworks health"),
+        new CommandInfo("help.nodepacks", "Node Packs…", "Help", null, keywords: "own custom nodes dll pack plugin extend install load folder add"),
         new CommandInfo("help.privacy", "Privacy Policy", "Help", null, keywords: "data telemetry update check network collect personal gdpr"),
         new CommandInfo("graph.addnode", "Add Node…", "Graph", "Space", keywords: "search quick library"),
     };

@@ -2,7 +2,7 @@
 
 CamelGraph is designed so that adding a node is a five-minute job: **a public static C# method with a couple of attributes is a node.** This guide walks through building a complete node pack, from an empty project to nodes showing up in the editor, and then covers the advanced path — interactive `NodeModel` nodes with custom WPF UI.
 
-> Packs are loaded from a `Packages` folder next to `CamelGraph.App.dll`, the first time the editor or the Script Player opens in a session. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
+> Packs are loaded from `%APPDATA%\CamelGraph\Packages` (and, for packs installed the old way, from a `Packages` folder next to `CamelGraph.App.dll`) the first time the editor or the Script Player opens in a Navisworks session, so **restart Navisworks after adding or changing a pack**. **Help ▸ Node Packs…** shows the folder, what loaded and what did not, and opens the folder. A pack is code that runs inside Navisworks with your rights, so install packs only from authors you trust.
 
 ## Contents
 
@@ -23,14 +23,17 @@ CamelGraph is designed so that adding a node is a five-minute job: **a public st
 
 At startup, CamelGraph's zero-touch loader (in `CamelGraph.Core`) reflects over node assemblies and registers every `public static` method of every public class (generic methods, property accessors and methods marked `[IsVisibleInLibrary(false)]` are skipped). `[NodeName]` sets the display name; without it the node is called `Class.Method`. Each parameter becomes an input port; the return value becomes the output port (or several, with `[MultiReturn]`). The built-in libraries (`CamelGraph.Nodes`, `CamelGraph.Navisworks`) are loaded this way — your pack uses exactly the same mechanism, so anything the built-in nodes can do, yours can too.
 
-The loader also scans the `Packages` folder next to `CamelGraph.App.dll` (subfolders included):
+The loader also scans two folders for node packs (subfolders included), in this order:
 
 ```
-%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\<year>\Packages\<YourPackName>\
+%APPDATA%\CamelGraph\Packages\<YourPackName>\                                  your packs: kept when CamelGraph is updated or removed
+%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\<year>\Packages\...    the old place: the installer deletes it on every update
     YourPack.dll            (plus any private dependencies)
 ```
 
-Each pack folder is loaded in isolation: a pack that fails to load is reported in the editor and skipped — it can never take down CamelGraph or Navisworks.
+Put your packs in the first folder. It lives with your settings, so installing a new version of CamelGraph does not touch it, and one copy serves Navisworks 2024, 2025 and 2026. A pack that needs a different build for each Navisworks year goes in the `Packages` folder of that year's folder inside the bundle instead; the installer replaces the whole bundle on an update, so copy it there again afterwards. If the same file name is in both places, the one in `%APPDATA%` is used.
+
+The scan happens once, when the editor or the Script Player first opens in a Navisworks session. A pack that is added or changed later shows up after you restart Navisworks (a loaded DLL cannot be replaced while Navisworks runs). Each DLL is loaded in isolation: one that fails is skipped and listed with its reason, and it can never take down CamelGraph or Navisworks. **Help ▸ Node Packs…** shows the folder, what was loaded and what was not, and offers to open the folder; **Help ▸ Copy Diagnostics** lists the same in its "Node packs" section. Copies of CamelGraph's and Navisworks' own libraries (`CamelGraph.*`, `Autodesk.*`, `Newtonsoft.Json`, `Nodify`, `System.*`) are ignored if they end up in a pack folder.
 
 ## 2. Tutorial: a zero-touch node pack
 
@@ -105,13 +108,13 @@ public void BarWeight_D16_1m_IsAboutOnePoint58Kg()
 
 ### Step 4 — install it
 
-Copy the build output to the Packages folder and restart the editor (or use the library's refresh action):
+Choose **Help ▸ Node Packs…** in the editor and answer *Yes* to open your packs folder (it is made if it does not exist yet), or open it yourself: `%APPDATA%\CamelGraph\Packages`. Copy the build output into a folder of its own there, then **restart Navisworks**:
 
 ```
-%APPDATA%\Autodesk\ApplicationPlugins\CamelGraph.bundle\2024\Packages\RebarToolkit\RebarToolkit.dll
+%APPDATA%\CamelGraph\Packages\RebarToolkit\RebarToolkit.dll
 ```
 
-Your nodes appear under *RebarToolkit → Rebar* in the node browser, with your descriptions as tooltips. Done.
+Your nodes appear under *RebarToolkit → Rebar* in the node browser, with your descriptions as tooltips. Done. If they do not, **Help ▸ Node Packs…** lists every DLL it found and why one was not loaded (a DLL built for another .NET, a missing dependency, a copy of a library CamelGraph already has).
 
 ## 3. Ports, defaults, and multiple outputs
 

@@ -46,9 +46,10 @@ Uninstalling removes the program and the Apps entry. It deliberately **leaves yo
 |---|---|---|
 | Your graphs | wherever you saved them | Your `.dyc` files. |
 | Your scripts folder | `Documents\CamelGraph\Scripts` | What the Script Player lists. |
+| Your node packs | `%APPDATA%\CamelGraph\Packages` | The packs of other people's or your own nodes ([Writing your own nodes](extending.md)). |
 | Settings and logs | `%APPDATA%\CamelGraph` | `ui-settings.json` (preferences, shortcuts, recent files, favourite nodes, values typed into scripts), `errors.log`, `update-check.txt` and the `recovery` folder of autosaved graphs. |
 
-For a completely clean start, delete the `%APPDATA%\CamelGraph` folder yourself (paste that into the Windows Explorer address bar). CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
+For a completely clean start, delete the `%APPDATA%\CamelGraph` folder yourself (paste that into the Windows Explorer address bar). That also removes your node packs, so keep a copy of any you want. CamelGraph keeps nothing on any server, so there is nothing to delete elsewhere ([Privacy and safety](privacy-and-safety.md)).
 
 ## Check that it is gone
 
