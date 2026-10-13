@@ -15,16 +15,7 @@
 [![Navisworks 2024 | 2025 | 2026](https://img.shields.io/badge/Navisworks-2024%20%7C%202025%20%7C%202026-blue)](#requirements)
 [![Releases: source code](https://img.shields.io/badge/releases-source%20code-1f6feb)](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest)
 
-> ## Part of CamelWorks
-> CamelGraph ships inside **[CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin)**,
-> which installs it alongside the coordination, data and delivery apps and the
-> [BIMCamel IFC exporter](https://github.com/mrshoma99-rgb/bimcamel-ifc-exporter) — one installer,
-> one **BIMCamel** ribbon tab. CamelWorks' *Automate ▸ Graphs* tab runs a `.dyc` graph against the
-> open document without opening this editor, and opens this editor when one needs changing.
->
-> **Install [CamelWorks](https://github.com/mrshoma99-rgb/Camelworks-navisworks-plugin/releases/latest)
-> to get all three.** CamelGraph on its own, from this repository's releases, works exactly as it
-> always has — the bundles sit side by side.
+
 
 > ## Two ways to get it: free for personal use, the Autodesk App Store for professional use
 > * **Personal use is free.** Download the installer from the [GitHub releases](https://github.com/mrshoma99-rgb/dyncamelo/releases/latest) or from [bimcamel.com](https://www.bimcamel.com/plugins/dyncamelo). It covers learning, hobby projects and research, and charities, schools, universities, public research bodies and government institutions, under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**. These copies are marked *Personal use* in the installer, the About window and the start screen.
