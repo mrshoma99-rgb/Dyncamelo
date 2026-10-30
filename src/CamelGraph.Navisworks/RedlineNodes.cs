@@ -371,7 +371,7 @@ public static class RedlineNodes
         {
             // Read-only stored instance: deep-copy, edit the copy, swap it in.
             var parent = (GroupItem?)stored.Parent ?? root;
-            int index = SavedItemTreeHelpers.IndexByIdentity(parent.Children, stored);
+            int index = SavedItemTreeHelpers.IndexByIdentityOrName(parent.Children, stored);
             if (index < 0)
             {
                 throw new InvalidOperationException(
