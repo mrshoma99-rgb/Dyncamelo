@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Autodesk.Navisworks.Api;
 using Autodesk.Navisworks.Api.Interop;
+using CamelGraph.Core.Execution;
 using CamelGraph.Core.Loader;
 using CamelGraph.Navisworks.Internal;
 
@@ -346,21 +347,31 @@ public static class RedlineNodes
     // ----- internals -----------------------------------------------------------
 
     /// <summary>
-    /// Runs an edit against the stored viewpoint's redline list. Tries the
-    /// in-place <c>EditRedlines()</c> first (the API's sanctioned edit path);
-    /// if the stored instance refuses (read-only wrapper), falls back to
-    /// copy → edit → ReplaceWithCopy at the same tree position.
+    /// Runs an edit against the stored viewpoint's redline list and checks that Navisworks kept it. Tries the in-place
+    /// <c>EditRedlines()</c> first (the API's sanctioned edit path); when the stored instance refuses (read-only wrapper), or
+    /// accepts the edit without keeping it (the viewpoint then still has the markups it had before), falls back to
+    /// copy → edit → ReplaceWithCopy at the same tree position. A copy that still shows no new markup adds a node warning,
+    /// so a markup that did not land is never silent.
     /// </summary>
     private static SavedViewpoint EditRedlines(object viewpoint, Document? document, Action<LcOpRedlineList> edit)
     {
         var doc = NavisworksContext.ResolveDocument(document);
         var root = doc.SavedViewpoints.RootItem;
         var stored = SavedItemTreeHelpers.ResolveStored<SavedViewpoint>(root, viewpoint, "saved viewpoint");
+        var name = stored.DisplayName;
+        int before = CountRedlines(stored);
 
         try
         {
             edit(stored.EditRedlines());
-            return stored;
+            var kept = SavedItemTreeHelpers.FindStoredEquivalent(root, stored) ?? stored;
+            int after = CountRedlines(kept);
+            if (before < 0 || after < 0 || after > before)
+            {
+                return kept;
+            }
+
+            // Accepted but not kept: do it again on a copy, which is swapped in below.
         }
         catch (Exception ex) when (
             ex is InvalidOperationException ||
@@ -370,27 +381,56 @@ public static class RedlineNodes
             ex is System.Runtime.InteropServices.SEHException)
         {
             // Read-only stored instance: deep-copy, edit the copy, swap it in.
-            var parent = (GroupItem?)stored.Parent ?? root;
-            int index = SavedItemTreeHelpers.IndexByIdentityOrName(parent.Children, stored);
-            if (index < 0)
-            {
-                throw new InvalidOperationException(
-                    "Could not locate the viewpoint '" + stored.DisplayName + "' in the tree to update its markups.");
-            }
+        }
 
-            var copy = (SavedViewpoint)stored.CreateCopy();
-            edit(copy.EditRedlines());
-            if (ReferenceEquals(parent, root))
-            {
-                doc.SavedViewpoints.ReplaceWithCopy(index, copy);
-            }
-            else
-            {
-                doc.SavedViewpoints.ReplaceWithCopy(parent, index, copy);
-            }
+        stored = SavedItemTreeHelpers.FindStoredEquivalent(root, stored) ?? stored;
+        var parent = (GroupItem?)stored.Parent ?? root;
+        int index = SavedItemTreeHelpers.IndexByIdentityOrName(parent.Children, stored);
+        if (index < 0)
+        {
+            throw new InvalidOperationException(
+                "Could not locate the viewpoint '" + name + "' in the tree to update its markups.");
+        }
 
-            var replaced = SavedItemTreeHelpers.FindStoredEquivalent(root, copy);
-            return replaced ?? copy;
+        var copy = (SavedViewpoint)stored.CreateCopy();
+        edit(copy.EditRedlines());
+        if (ReferenceEquals(parent, root))
+        {
+            doc.SavedViewpoints.ReplaceWithCopy(index, copy);
+        }
+        else
+        {
+            doc.SavedViewpoints.ReplaceWithCopy(parent, index, copy);
+        }
+
+        var replaced = SavedItemTreeHelpers.FindStoredEquivalent(root, copy) ?? copy;
+        int now = CountRedlines(replaced);
+        if (before >= 0 && now >= 0 && now <= before)
+        {
+            NodeWarnings.Add(
+                "Navisworks did not report a new markup on the viewpoint '" + name + "' after writing it (it still shows " +
+                now.ToString(System.Globalization.CultureInfo.InvariantCulture) + "). Open it and check; Markup.List shows what it holds.");
+        }
+
+        return replaced;
+    }
+
+    /// <summary>How many redlines a stored viewpoint holds, or -1 when Navisworks will not say.</summary>
+    private static int CountRedlines(SavedViewpoint viewpoint)
+    {
+        try
+        {
+            var redlines = viewpoint.Redlines;
+            return redlines != null ? redlines.Size() : 0;
+        }
+        catch (Exception ex) when (
+            ex is InvalidOperationException ||
+            ex is NotSupportedException ||
+            ex is ObjectDisposedException ||
+            ex is System.Runtime.InteropServices.COMException ||
+            ex is System.Runtime.InteropServices.SEHException)
+        {
+            return -1;
         }
     }
 
