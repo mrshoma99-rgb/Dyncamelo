@@ -2,9 +2,17 @@
 
 All notable changes to CamelGraph (called Dyncamelo up to version 0.48) are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (0.x versions were still changing quickly).
 
-Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.51.1](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
+Each release is published on the [Releases](https://github.com/mrshoma99-rgb/dyncamelo/releases) page. The longer release notes live in `docs/`: [0.51.2](dist/RELEASE_NOTES.md), [0.46.0](docs/WHATS_NEW_0.46.0.md), [0.45.1](docs/WHATS_NEW_0.45.1.md), [0.45](docs/WHATS_NEW_0.45.md), [0.12 to 0.23](docs/WHATS_NEW_0.23.md), [0.4](docs/WHATS_NEW_0.4.md), [0.3](docs/WHATS_NEW_0.3.md) and [0.2](docs/WHATS_NEW_0.2.md).
 
 How this file was made: from those notes, from the git tags (they stop at v0.34.0 in this repository) and from the "Release vX" commits for 0.35.0 to 0.45.1. Patch releases are folded into their minor version. Dates are commit dates. Versions before 0.9 are covered only where a `docs/WHATS_NEW_*.md` file exists.
+
+## 0.51.2 - 2026-10-30
+
+A small fix release. These downloads (GitHub, bimcamel.com) are the free personal-use edition; a copy for professional use is coming soon to the Autodesk App Store.
+
+### Fixed
+* **`Markup.AddShape` and `Markup.AddText` could leave no markup on some viewpoints, with no error.** On viewpoints saved by a graph, some got their circle and text and others got neither, and the nodes showed no error or warning. The in-place edit was accepted without being kept. The nodes now check that the viewpoint holds more markups afterwards; when it does not, the edit is redone on a copy that is swapped in at the same position (the route that worked for the others), and a copy that still shows no new markup adds a node warning that names the viewpoint, so a markup that did not land is no longer silent.
+* The markup nodes are still EXPERIMENTAL and their coordinate scale has not been checked in a real Navisworks. Nothing in this release was tried inside Navisworks.
 
 ## 0.51.1 - 2026-10-30
 
