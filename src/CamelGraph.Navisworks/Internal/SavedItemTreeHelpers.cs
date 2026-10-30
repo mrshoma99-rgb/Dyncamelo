@@ -340,6 +340,45 @@ internal static class SavedItemTreeHelpers
     }
 
     /// <summary>
+    /// <see cref="IndexByIdentity"/>, then, when Navisworks hands out fresh wrapper objects and the item has no Guid (a saved viewpoint
+    /// made by a graph), the one child of the same type whose display name matches. -1 when there is none, or when the name is shared
+    /// by several children (a wrong pick would edit the wrong item).
+    /// </summary>
+    internal static int IndexByIdentityOrName(SavedItemCollection children, SavedItem item)
+    {
+        int byIdentity = IndexByIdentity(children, item);
+        if (byIdentity >= 0)
+        {
+            return byIdentity;
+        }
+
+        var name = item.DisplayName;
+        if (string.IsNullOrEmpty(name))
+        {
+            return -1;
+        }
+
+        int found = -1;
+        int index = 0;
+        foreach (var child in children)
+        {
+            if (child.GetType() == item.GetType() && string.Equals(child.DisplayName, name, StringComparison.Ordinal))
+            {
+                if (found >= 0)
+                {
+                    return -1;
+                }
+
+                found = index;
+            }
+
+            index++;
+        }
+
+        return found;
+    }
+
+    /// <summary>
     /// Collects every <typeparamref name="T"/> in a saved-item tree, descending
     /// into ALL group items (including matches, so nested folders are seen) but
     /// treating saved viewpoint animations as leaves (their children are
